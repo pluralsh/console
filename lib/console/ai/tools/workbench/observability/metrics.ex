@@ -3,7 +3,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{MetricsQueryInput, MetricsQueryOutput}
+  alias Toolquery.{MetricsQueryInput, MetricsQueryOutput, MetricPoint}
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
@@ -32,7 +32,18 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input),
-      do: Protobuf.JSON.encode(output)
+         {:ok, content} <- Protobuf.JSON.encode(output) do
+      {:ok, %{content: content, metrics: Enum.map(output.metrics, &mapify/1)}}
+    end
+  end
+
+  defp mapify(%MetricPoint{} = metric) do
+    %{
+      timestamp: TimeRange.to_datetime(metric.timestamp),
+      name: metric.name,
+      value: metric.value,
+      labels: Map.new(metric.labels, &{&1.key, &1.value}),
+    }
   end
 
   defp input(%__MODULE__{tool: tool, query: q, step: s, time_range: tr}) do

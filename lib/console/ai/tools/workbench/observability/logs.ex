@@ -3,7 +3,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Console.AI.Tools.Workbench.Observability.{TimeRange, Metrics}
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet}
+  alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet, LogEntry}
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
@@ -43,7 +43,17 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input),
-      do: Protobuf.JSON.encode(output)
+         {:ok, content} <- Protobuf.JSON.encode(output) do
+      {:ok, %{content: content, logs: Enum.map(output.logs, &to_log/1)}}
+    end
+  end
+
+  defp to_log(%LogEntry{} = log) do
+    %{
+      timestamp: TimeRange.to_datetime(log.timestamp),
+      message: log.message,
+      labels: Map.new(log.labels, &{&1.key, &1.value}),
+    }
   end
 
   defp input(%__MODULE__{tool: tool, query: q, limit: l, time_range: tr, facets: fs}) do

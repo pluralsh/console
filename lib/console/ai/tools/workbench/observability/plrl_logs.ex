@@ -1,7 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
   use Console.AI.Tools.Workbench.Base
   import Piazza.Ecto.Schema
-  alias Console.Logs.{Query, Provider, Time}
+  alias Console.Logs.{Query, Provider, Time, Line}
 
   embedded_schema do
     field :user,       :map, virtual: true
@@ -41,9 +41,18 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
   def implement(_, %__MODULE__{user: user} = logs) do
     query = logs_query(logs)
     with {:ok, query} <- Query.accessible(query, user),
-         {:ok, logs} <- Provider.query(query) do
-      Jason.encode(logs)
+         {:ok, logs} <- Provider.query(query),
+         {:ok, content} <- Jason.encode(logs) do
+      {:ok, %{content: content, logs: Enum.map(logs, &to_log/1)}}
     end
+  end
+
+  defp to_log(%Line{} = line) do
+    %{
+      timestamp: line.timestamp,
+      message: line.log,
+      labels: Map.new(line.facets, &{&1.key, &1.value}),
+    }
   end
 
   def logs_query(%{query: q, limit: l, facets: f, time_range: tr}) do

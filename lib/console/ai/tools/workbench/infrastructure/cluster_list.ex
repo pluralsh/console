@@ -7,13 +7,20 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   embedded_schema do
     field :user, :map, virtual: true
     field :q, :string
+    field :distro, Console.Schema.Cluster.Distro
+
+    embeds_many :tags, Tag, on_replace: :delete do
+      field :name, :string
+      field :value, :string
+    end
   end
 
-  @valid ~w(q)a
+  @valid ~w(q distro)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:tags, with: &tag_changeset/2)
   end
 
   @json_schema Console.priv_file!("tools/workbench/infrastructure/cluster_list.json") |> Jason.decode!()
@@ -22,9 +29,11 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   def name(_), do: "plrl_clusters"
   def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle for full details."
 
-  def implement(_, %__MODULE__{user: %User{} = user, q: q}) do
+  def implement(_, %__MODULE__{user: %User{} = user, q: q, distro: distro, tags: tags}) do
     Cluster.ordered()
     |> Cluster.for_user(user)
+    |> maybe_distro(distro)
+    |> maybe_tags(tags)
     |> Cluster.preloaded([:tags, :project])
     |> maybe_search(q)
     |> Repo.all()
@@ -34,6 +43,12 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   defp maybe_search(query, q) when is_binary(q) and q != "", do: Cluster.search(query, q)
   defp maybe_search(query, _), do: query
+
+  defp maybe_distro(query, nil), do: query
+  defp maybe_distro(query, distro), do: Cluster.for_distro(query, distro)
+
+  defp maybe_tags(query, [_ | _ ] = tags), do: Cluster.for_tags(query, tags)
+  defp maybe_tags(query, _), do: query
 
   defp cluster_brief(%Cluster{} = c) do
     %{
@@ -68,5 +83,11 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   defp extended_support_brief(%{extended: _, extended_from: _} = info) do
     %{extended: info.extended, extended_from: info.extended_from}
+  end
+
+  defp tag_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:name, :value])
+    |> validate_required([:name, :value])
   end
 end
