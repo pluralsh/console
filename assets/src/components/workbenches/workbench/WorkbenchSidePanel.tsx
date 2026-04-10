@@ -1,4 +1,4 @@
-import { Button, Flex, IconFrame, PlusIcon } from '@pluralsh/design-system'
+import { AddIcon, Button, Flex, IconFrame } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import minBy from 'lodash/minBy'
@@ -72,7 +72,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             <IconFrame
               clickable
               size="small"
-              icon={<PlusIcon />}
+              icon={<AddIcon />}
               tooltip="Add cron schedule"
               onClick={() =>
                 navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
@@ -97,7 +97,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
         ) : (
           <Button
             small
-            startIcon={<PlusIcon />}
+            startIcon={<AddIcon />}
             tertiary
             onClick={() =>
               navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
@@ -114,7 +114,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             <IconFrame
               clickable
               size="small"
-              icon={<PlusIcon />}
+              icon={<AddIcon />}
               tooltip="Add webhook"
               onClick={() =>
                 navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
@@ -156,7 +156,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
         ) : (
           <Button
             small
-            startIcon={<PlusIcon />}
+            startIcon={<AddIcon />}
             tertiary
             onClick={() =>
               navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
