@@ -311,6 +311,10 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Loki: REST client to `/loki/api/v1/query_range`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
 - Tempo: REST client to `/api/search` and `/api/traces/{traceID}`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
 - Dynatrace: REST client to `/platform/storage/query/v1/query:execute` and `/platform/storage/query/v1/query:poll` (Grail DQL), bearer token auth.
+- CloudWatch: AWS SDK for Go v2.
+  - Logs: CloudWatch Logs Insights `StartQuery` + `GetQueryResults`.
+  - Metrics: CloudWatch `GetMetricData` (query expression).
+  - Metrics search: CloudWatch `ListMetrics` with bounded pagination and local filtering.
 
 ## Service Definition
 
@@ -328,13 +332,15 @@ service ToolQuery {
 ```protobuf
 message ElasticConnection {
   string url = 1;
-  string apiKey = 2;
+  string username = 2;
+  string password = 3;
+  string index = 4;
 }
 
 message DatadogConnection {
   optional string site = 1;
   string apiKey = 2;
-  string appKey = 3;
+  optional string appKey = 3;
 }
 
 message PrometheusConnection {
@@ -342,32 +348,58 @@ message PrometheusConnection {
   optional string token = 2;
   optional string username = 3;
   optional string password = 4;
+  optional string tenant_id = 5;
 }
 
 message LokiConnection {
   string url = 1;
-  string token = 3;
-  optional string tenant_id = 4;
+  optional string token = 2;
+  optional string tenant_id = 3;
+  optional string username = 4;
+  optional string password = 5;
 }
 
 message TempoConnection {
   string url = 1;
-  string token = 2;
+  optional string token = 2;
   optional string tenant_id = 3;
+  optional string username = 4;
+  optional string password = 5;
+}
+
+message SplunkConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
 }
 
 message DynatraceConnection {
   string url = 1;
   string platformToken = 2;
 }
+
+message CloudwatchConnection {
+  string region = 1;
+  repeated string log_group_names = 2;
+  optional string access_key_id = 3;
+  optional string secret_access_key = 4;
+  optional string role_arn = 5;
+  optional string external_id = 6;
+  optional string role_session_name = 7;
+}
 ```
 
 Implementation notes:
 
-- Datadog requires both `apiKey` and `appKey`. `site` is optional.
-- Elasticsearch validates that `apiKey` is set.
+- Datadog requires `apiKey`. `appKey` and `site` are optional.
+- Elasticsearch requires `url`, `username`, `password`, and `index`.
 - Prometheus requires `url`; bearer token or basic auth are optional.
 - Loki and Tempo pass the token as a bearer token when set, and include `tenant_id` as `X-Scope-OrgID` when provided.
+- Splunk requires `url` plus either bearer token or basic auth username/password.
+- CloudWatch requires `region`. Optional auth fields support static credentials and/or assume-role.
+  - If static credentials are omitted, default AWS credential chain is used (including pod identity).
+  - For logs queries, either `log_group_names` must be configured or the query must include a `SOURCE` command.
 
 ## Common Models
 
@@ -379,7 +411,9 @@ message ToolConnection {
     PrometheusConnection prometheus = 3;
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
+    SplunkConnection splunk = 6;
     DynatraceConnection dynatrace = 7;
+    CloudwatchConnection cloudwatch = 8;
   }
 }
 
@@ -638,6 +672,50 @@ grpcurl -d '{
 }
 ```
 
+### CloudWatch
+
+CloudWatch metrics query uses `GetMetricData` and expects `query` to be a CloudWatch metric math expression.
+`range` defines the time window and `step` maps to CloudWatch period seconds.
+
+`log_group_names` is only used by CloudWatch logs queries. It is ignored for metrics and metrics search.
+
+#### Example request (default AWS credential chain / pod identity)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1"
+    }
+  },
+  "query": "SEARCH(\"{AWS/EC2,InstanceId} MetricName=\\\"CPUUtilization\\\"\", \"Average\", 300)",
+  "range": {
+    "start": "2026-02-20T10:00:00Z",
+    "end": "2026-02-20T11:00:00Z"
+  },
+  "step": "300s"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+#### Example request (assume-role)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1",
+      "role_arn": "arn:aws:iam::123456789012:role/observability-readonly"
+    }
+  },
+  "query": "SEARCH(\"{AWS/EKS,ClusterName} MetricName=\\\"cluster_failed_request_count\\\"\", \"Sum\", 60)",
+  "range": {
+    "start": "2026-02-20T10:00:00Z",
+    "end": "2026-02-20T11:00:00Z"
+  },
+  "step": "60s"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
 ## Metrics Search
 
 `MetricsSearch` returns metric names only.
@@ -732,6 +810,39 @@ grpcurl -d '{
 }
 ```
 
+### CloudWatch
+
+CloudWatch metrics search is implemented via `ListMetrics`, with conservative API usage:
+- scans at most 6 pages per request,
+- applies `RecentlyActive=PT3H` to reduce API load,
+- stops early as soon as requested `limit` is reached,
+- deduplicates results and returns names as `<namespace>/<metric>`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1"
+    }
+  },
+  "query": "cpu",
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "AWS/EC2/CPUUtilization" },
+    { "name": "AWS/EKS/cluster_failed_request_count" }
+  ]
+}
+```
+
 ## Logs
 
 #### Request
@@ -804,6 +915,50 @@ grpcurl -d '{
     }
   ]
 }
+```
+
+### CloudWatch Logs
+
+CloudWatch logs use Logs Insights (`StartQuery` + `GetQueryResults`).
+You can target log groups in two ways:
+- set `connection.cloudwatch.log_group_names` and keep `query` focused on filtering/projection, or
+- omit `log_group_names` and include `SOURCE` in the query text.
+
+#### Example request (with `log_group_names` in provider config)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1",
+      "log_group_names": ["/aws/eks/prod/app"]
+    }
+  },
+  "query": "fields @timestamp, @message | sort @timestamp desc",
+  "range": {
+    "start": "2026-02-20T00:00:00Z",
+    "end": "2026-02-20T21:00:00Z"
+  },
+  "limit": 20
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
+```
+
+#### Example request (without `log_group_names`, using `SOURCE` in query)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1"
+    }
+  },
+  "query": "SOURCE logGroups(namePrefix: [\"/aws/eks/prod/app\"]) | fields @timestamp, @message | filter @message like /error|exception/ | sort @timestamp desc",
+  "range": {
+    "start": "2026-02-20T00:00:00Z",
+    "end": "2026-02-20T21:00:00Z"
+  },
+  "limit": 20
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
 ```
 
 ### Elasticsearch

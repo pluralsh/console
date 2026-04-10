@@ -2143,6 +2143,7 @@ enum WorkbenchToolType {
   ATLASSIAN
   SPLUNK
   DYNATRACE
+  CLOUDWATCH
 }
 
 enum WorkbenchToolCategory {
@@ -2359,6 +2360,9 @@ input WorkbenchToolConfigurationAttributes {
   "dynatrace connection (metrics, logs, traces)"
   dynatrace: WorkbenchToolDynatraceConnectionAttributes
 
+  "cloudwatch connection (metrics, logs)"
+  cloudwatch: WorkbenchToolCloudwatchConnectionAttributes
+
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
@@ -2462,6 +2466,29 @@ input WorkbenchToolDynatraceConnectionAttributes {
 
   "dynatrace platform token"
   platformToken: String!
+}
+
+input WorkbenchToolCloudwatchConnectionAttributes {
+  "aws region (e.g. us-east-1)"
+  region: String!
+
+  "optional default log groups for CloudWatch Logs Insights"
+  logGroupNames: [String]
+
+  "optional static AWS access key id"
+  accessKeyId: String
+
+  "optional static AWS secret access key"
+  secretAccessKey: String
+
+  "optional IAM role ARN to assume"
+  roleArn: String
+
+  "optional external id for assume role"
+  externalId: String
+
+  "optional role session name for assume role"
+  roleSessionName: String
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -2899,6 +2926,9 @@ type WorkbenchToolConfiguration {
   "dynatrace connection (no secrets)"
   dynatrace: WorkbenchToolDynatraceConnection
 
+  "cloudwatch connection (no secrets)"
+  cloudwatch: WorkbenchToolCloudwatchConnection
+
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
@@ -2966,6 +2996,20 @@ type WorkbenchToolDatadogConnection {
 type WorkbenchToolDynatraceConnection {
   "dynatrace base url (credentials never exposed)"
   url: String
+}
+
+type WorkbenchToolCloudwatchConnection {
+  "aws region"
+  region: String
+
+  "default log groups for logs insights queries"
+  logGroupNames: [String]
+
+  "assumed role ARN when configured"
+  roleArn: String
+
+  "assume-role session name"
+  roleSessionName: String
 }
 
 type WorkbenchToolLinearConnection {

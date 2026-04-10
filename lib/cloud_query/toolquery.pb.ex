@@ -75,6 +75,20 @@ defmodule Toolquery.DynatraceConnection do
   field :platformToken, 2, type: :string
 end
 
+defmodule Toolquery.CloudwatchConnection do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :region, 1, type: :string
+  field :log_group_names, 2, repeated: true, type: :string, json_name: "logGroupNames"
+  field :access_key_id, 3, proto3_optional: true, type: :string, json_name: "accessKeyId"
+  field :secret_access_key, 4, proto3_optional: true, type: :string, json_name: "secretAccessKey"
+  field :role_arn, 5, proto3_optional: true, type: :string, json_name: "roleArn"
+  field :external_id, 6, proto3_optional: true, type: :string, json_name: "externalId"
+  field :role_session_name, 7, proto3_optional: true, type: :string, json_name: "roleSessionName"
+end
+
 defmodule Toolquery.ToolConnection do
   @moduledoc false
 
@@ -89,6 +103,7 @@ defmodule Toolquery.ToolConnection do
   field :tempo, 5, type: Toolquery.TempoConnection, oneof: 0
   field :splunk, 6, type: Toolquery.SplunkConnection, oneof: 0
   field :dynatrace, 7, type: Toolquery.DynatraceConnection, oneof: 0
+  field :cloudwatch, 8, type: Toolquery.CloudwatchConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do

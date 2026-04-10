@@ -81,6 +81,10 @@ export function WorkbenchToolFormFields({
       return render(type, LinearFormFields)
     case WorkbenchToolType.Splunk:
       return render(type, SplunkFormFields)
+    case WorkbenchToolType.Cloudwatch:
+      return render(type, CloudwatchFormFields)
+    case WorkbenchToolType.Dynatrace:
+      return render(type, DynatraceFormFields)
   }
 }
 
@@ -387,6 +391,98 @@ function SplunkFormFields({
         revealer
         value={c.token ?? ''}
         onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
+function CloudwatchFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Cloudwatch>) {
+  return (
+    <>
+      <InputField
+        label="Region"
+        required
+        placeholder="us-east-1"
+        value={c.region ?? ''}
+        onChange={(e) => set({ ...c, region: e.target.value })}
+      />
+      <InputField
+        label="Role ARN"
+        placeholder="arn:aws:iam::123456789012:role/my-role"
+        value={c.roleArn ?? ''}
+        onChange={(e) => set({ ...c, roleArn: e.target.value || undefined })}
+      />
+      <InputField
+        label="Role session name"
+        placeholder="plural-workbench"
+        value={c.roleSessionName ?? ''}
+        onChange={(e) =>
+          set({ ...c, roleSessionName: e.target.value || undefined })
+        }
+      />
+      <InputField
+        label="External ID"
+        placeholder="Optional assume-role external id"
+        value={c.externalId ?? ''}
+        onChange={(e) => set({ ...c, externalId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access key ID"
+        value={c.accessKeyId ?? ''}
+        onChange={(e) =>
+          set({ ...c, accessKeyId: e.target.value || undefined })
+        }
+      />
+      <InputField
+        label="Secret access key"
+        revealer
+        value={c.secretAccessKey ?? ''}
+        onChange={(e) =>
+          set({ ...c, secretAccessKey: e.target.value || undefined })
+        }
+      />
+      <InputField
+        multiline
+        label="Default log groups"
+        hint="One log group name per line"
+        initialValue={(c.logGroupNames ?? []).filter(isNonNullable).join('\n')}
+        setValue={(value) =>
+          set({
+            ...c,
+            logGroupNames:
+              value
+                ?.split('\n')
+                .map((v) => v.trim())
+                .filter(Boolean) ?? [],
+          })
+        }
+      />
+    </>
+  )
+}
+
+function DynatraceFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Dynatrace>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="https://{tenant}.live.dynatrace.com"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Platform token"
+        required
+        revealer
+        value={c.platformToken ?? ''}
+        onChange={(e) => set({ ...c, platformToken: e.target.value })}
       />
     </>
   )

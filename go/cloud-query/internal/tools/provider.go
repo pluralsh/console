@@ -25,6 +25,8 @@ func newMetricsProvider(conn *toolquery.ToolConnection) MetricsProvider {
 		return NewDatadogProvider(provider.Datadog)
 	case *toolquery.ToolConnection_Dynatrace:
 		return NewDynatraceProvider(provider.Dynatrace)
+	case *toolquery.ToolConnection_Cloudwatch:
+		return NewCloudwatchProvider(provider.Cloudwatch)
 	default:
 		return nil
 	}
@@ -46,6 +48,8 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 		return NewDynatraceProvider(provider.Dynatrace), nil
 	case *toolquery.ToolConnection_Splunk:
 		return NewSplunkProvider(provider.Splunk), nil
+	case *toolquery.ToolConnection_Cloudwatch:
+		return NewCloudwatchProvider(provider.Cloudwatch), nil
 	default:
 		return nil, nil
 	}

@@ -184,6 +184,25 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { url, username } = config?.splunk ?? {}
     return { splunk: { url: url ?? '', username } }
   },
+  [WorkbenchToolType.Cloudwatch]: (config) => {
+    const { region, logGroupNames, roleArn, roleSessionName } =
+      config?.cloudwatch ?? {}
+    return {
+      cloudwatch: {
+        region: region ?? '',
+        logGroupNames: logGroupNames?.filter(isNonNullable),
+        roleArn: roleArn ?? undefined,
+        roleSessionName: roleSessionName ?? undefined,
+        accessKeyId: undefined,
+        secretAccessKey: undefined,
+        externalId: undefined,
+      },
+    }
+  },
+  [WorkbenchToolType.Dynatrace]: (config) => {
+    const { url } = config?.dynatrace ?? {}
+    return { dynatrace: { url: url ?? '', platformToken: '' } }
+  },
   [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
 }
 

@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Conversion do
     TempoConnection,
     ElasticConnection,
     DynatraceConnection,
+    CloudwatchConnection,
   }
 
   @spec to_proto(WorkbenchTool.t()) :: {:ok, %ToolConnection{}} | {:error, String.t()}
@@ -85,6 +86,20 @@ defmodule Console.AI.Workbench.Conversion do
       connection: {:dynatrace, %DynatraceConnection{
         url: dynatrace.url,
         platformToken: dynatrace.platform_token,
+      }}
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :cloudwatch, configuration: %{cloudwatch: %{} = cloudwatch}}) do
+    {:ok, %ToolConnection{
+      connection: {:cloudwatch, %CloudwatchConnection{
+        region: cloudwatch.region,
+        log_group_names: cloudwatch.log_group_names || [],
+        access_key_id: cloudwatch.access_key_id,
+        secret_access_key: cloudwatch.secret_access_key,
+        role_arn: cloudwatch.role_arn,
+        external_id: cloudwatch.external_id,
+        role_session_name: cloudwatch.role_session_name,
       }}
     }}
   end

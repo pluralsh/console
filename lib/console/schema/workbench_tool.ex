@@ -4,7 +4,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -78,6 +78,16 @@ defmodule Console.Schema.WorkbenchTool do
       embeds_one :dynatrace, DynatraceConnection, on_replace: :update do
         field :url,            :string
         field :platform_token, EncryptedString
+      end
+
+      embeds_one :cloudwatch, CloudwatchConnection, on_replace: :update do
+        field :region,            :string
+        field :log_group_names,   {:array, :string}
+        field :access_key_id,     EncryptedString
+        field :secret_access_key, EncryptedString
+        field :role_arn,          :string
+        field :external_id,       EncryptedString
+        field :role_session_name, :string
       end
 
       embeds_one :http, HttpConfiguration, on_replace: :update do
@@ -181,6 +191,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:http), do: [:integration]
   defp categories(:datadog), do: [:metrics, :logs]
   defp categories(:dynatrace), do: [:metrics, :logs, :traces]
+  defp categories(:cloudwatch), do: [:metrics, :logs]
   defp categories(:newrelic), do: [:metrics, :logs]
   defp categories(:splunk), do: [:logs]
   defp categories(:prometheus), do: [:metrics]
@@ -203,6 +214,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:dynatrace, with: &dynatrace_configuration_changeset/2)
+    |> cast_embed(:cloudwatch, with: &cloudwatch_configuration_changeset/2)
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
@@ -238,6 +250,23 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url platform_token)a)
     |> validate_required([:url, :platform_token])
+  end
+
+  defp cloudwatch_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(region log_group_names access_key_id secret_access_key role_arn external_id role_session_name)a)
+    |> then(fn cs ->
+      case {get_field(cs, :access_key_id), get_field(cs, :secret_access_key)} do
+        {"", _} -> add_error(cs, :access_key_id, "must be set with secret_access_key")
+        {_, ""} -> add_error(cs, :secret_access_key, "must be set with access_key_id")
+        {nil, nil} -> cs
+        {id, secret} when is_binary(id) and id != "" and is_binary(secret) and secret != "" -> cs
+        {nil, _} -> add_error(cs, :access_key_id, "must be set with secret_access_key")
+        {_, nil} -> add_error(cs, :secret_access_key, "must be set with access_key_id")
+        _ -> cs
+      end
+    end)
+    |> validate_required([:region])
   end
 
   defp splunk_configuration_changeset(model, attrs) do

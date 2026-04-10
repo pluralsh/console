@@ -28,6 +28,8 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Splunk,
+  WorkbenchToolType.Dynatrace,
+  WorkbenchToolType.Cloudwatch,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -47,6 +49,8 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Atlassian]: 'atlassian',
   [WorkbenchToolType.Splunk]: 'splunk',
+  [WorkbenchToolType.Dynatrace]: 'dynatrace',
+  [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -76,6 +80,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Sentry]: 'Sentry',
   [WorkbenchToolType.Splunk]: 'Splunk',
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
+  [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
 }
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
@@ -101,6 +106,10 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Logs,
     WorkbenchToolCategory.Traces,
   ],
+  [WorkbenchToolType.Cloudwatch]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+  ],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
@@ -122,6 +131,9 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Http]:
     'Call arbitrary HTTP endpoints- useful for custom integrations.',
   [WorkbenchToolType.Splunk]: 'Query logs and search data in Splunk.',
+  [WorkbenchToolType.Dynatrace]:
+    'Query metrics, logs, and traces from Dynatrace.',
+  [WorkbenchToolType.Cloudwatch]: 'Query metrics and logs from CloudWatch.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -174,4 +186,6 @@ const toolToIcon: Record<
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
+  [WorkbenchToolType.Dynatrace]: ToolsIcon,
+  [WorkbenchToolType.Cloudwatch]: ToolsIcon,
 }

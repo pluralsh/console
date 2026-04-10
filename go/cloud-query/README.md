@@ -76,8 +76,10 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | Datadog | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional) |
 | Elasticsearch | No | Yes | No | Elasticsearch typed client v9 Search API (API key required) |
 | Loki | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`) |
+| Splunk | No | Yes | No | Splunk export search API (token or basic auth) |
 | Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`) |
 | Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required) |
+| CloudWatch | Yes | Yes | No | AWS SDK v2 (`GetMetricData`, Logs Insights `StartQuery`/`GetQueryResults`) with optional assume-role |
 
 ### Tool Provider Credentials and Permissions
 
@@ -92,10 +94,21 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 - `Datadog`:
   - Requires `apiKey` and `appKey` for ToolQuery operations.
 - `Elasticsearch`:
-  - Requires an API key with read access to queried indices.
+  - Requires URL + username/password + index.
 - `Prometheus` / `Loki` / `Tempo`:
   - Use bearer token and/or basic auth credentials when required by your backend.
   - If multi-tenant, also configure `tenant_id` (`X-Scope-OrgID`).
+- `Splunk`:
+  - Use bearer token or username/password.
+- `CloudWatch`:
+  - `region` is required.
+  - Supports optional static AWS credentials, optional `assume role` (`role_arn`), and default AWS credential chain fallback (including pod identity).
+  - For logs queries, configure `log_group_names` or use `SOURCE` in the query string.
+  - `log_group_names` applies to `Logs` only (not `Metrics` / `MetricsSearch`).
+  - Examples:
+    - Logs with provider log groups: set `"log_group_names": ["/aws/eks/prod/app"]` and use query like `"fields @timestamp, @message | sort @timestamp desc"`.
+    - Logs without provider log groups: omit `log_group_names` and use query like `"SOURCE logGroups(namePrefix: [\"/aws/eks/prod/app\"]) | fields @timestamp, @message | sort @timestamp desc"`.
+    - Metrics: use CloudWatch metric math expression, for example `SEARCH("{AWS/EC2,InstanceId} MetricName=\"CPUUtilization\"", "Average", 300)`.
 
 For provider-specific request payloads, query formats, and examples, see the [API Reference Documentation](docs/api-reference.md).
 
