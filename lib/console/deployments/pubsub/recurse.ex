@@ -311,10 +311,12 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
   require EEx
 
   def process(%@for{item: %Issue{workbench_id: wid, id: id, status: :open} = issue}) when is_binary(wid) do
-    Workbenches.create_workbench_job(%{
-      prompt: prompt(issue: issue),
-      issue_id: id,
-    }, wid, bot())
+    Console.debounce({:issue_created, wid, id}, fn ->
+      Workbenches.create_workbench_job(%{
+        prompt: prompt(issue: issue),
+        issue_id: id,
+      }, wid, bot())
+    end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok
 

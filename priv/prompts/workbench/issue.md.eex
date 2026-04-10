@@ -23,5 +23,5 @@ Fixes {LINEAR_ISSUE_NUMBER}
 
 to the pull request description for any pull requests created and replacing the correct issue number from the linear issue url.
 
-*it must have that exact `Fixes {LINEAR_ISSUE_NUMBER}` format, no variations allowed*
+*it must have that exact `Fixes {LINEAR_ISSUE_NUMBER}` format or Linear's branch name format, no variations allowed*
 <% end %>
