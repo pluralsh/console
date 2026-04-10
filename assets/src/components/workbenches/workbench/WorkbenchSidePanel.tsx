@@ -1,23 +1,19 @@
 import { AddIcon, Button, Flex, IconFrame } from '@pluralsh/design-system'
-import { Body2P } from 'components/utils/typography/Text'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
-import minBy from 'lodash/minBy'
+import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { dayjsExtended as dayjs } from 'utils/datetime'
-import { formatPreviewTimestamp } from './crons/utils'
-import { getWebhookIcon } from './webhooks/utils'
+import { useNavigate } from 'react-router-dom'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
   getWorkbenchCronScheduleCreateAbsPath,
   getWorkbenchWebhookTriggerCreateAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import { useNavigate } from 'react-router-dom'
-import { isEmpty } from 'lodash'
+import { getWebhookIcon } from './webhooks/utils'
+import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
 
 export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
-  const theme = useTheme()
   const navigate = useNavigate()
 
   const { data } = useWorkbenchTriggersSummaryQuery({
@@ -33,78 +29,12 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
     [workbench]
   )
 
-  // TODO: Do it on the server-side to avoid bug when there is more than one page of crons.
-  const nextCron = useMemo(
-    () =>
-      minBy(crons, (cron) => {
-        const nextRunAt = cron.nextRunAt ? Date.parse(cron.nextRunAt) : NaN
-
-        return Number.isFinite(nextRunAt) ? nextRunAt : Number.POSITIVE_INFINITY
-      }) ?? null,
-    [crons]
-  )
-  const nextRunTime = useMemo(() => {
-    if (!nextCron?.nextRunAt) return null
-
-    const parsed = dayjs(nextCron.nextRunAt)
-    if (!parsed.isValid()) return nextCron.nextRunAt
-
-    return parsed.utc().format('YYYY-MM-DD HH:mm:ss [UTC]')
-  }, [nextCron])
-
-  const nextRunTimeParts = useMemo(
-    () => (nextRunTime ? formatPreviewTimestamp(nextRunTime) : null),
-    [nextRunTime]
-  )
-
   const hasCrons = !isEmpty(crons)
   const hasWebhooks = !isEmpty(webhooks)
 
   return (
     <WrapperSC>
       <SectionSC $first>
-        <HeaderSC>
-          <span>Cron schedules</span>
-          {hasCrons && (
-            <IconFrame
-              clickable
-              size="small"
-              icon={<AddIcon />}
-              tooltip="Add cron schedule"
-              onClick={() =>
-                navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
-              }
-            />
-          )}
-        </HeaderSC>
-        {nextCron && nextRunTimeParts ? (
-          <Body2P css={{ lineHeight: '20px' }}>
-            <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
-            {nextRunTimeParts.datePart}{' '}
-            <span css={{ color: theme.colors['code-block-purple'] }}>
-              {nextRunTimeParts.hourPart}
-            </span>{' '}
-            {nextRunTimeParts.zonePart}
-          </Body2P>
-        ) : nextCron && nextRunTime ? (
-          <Body2P css={{ lineHeight: '20px' }}>
-            <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
-            {nextRunTime}
-          </Body2P>
-        ) : (
-          <Button
-            small
-            startIcon={<AddIcon />}
-            tertiary
-            onClick={() =>
-              navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
-            }
-          >
-            Add cron schedule
-          </Button>
-        )}
-      </SectionSC>
-      <SectionSC>
         <HeaderSC>
           <span>Webhooks</span>
           {hasWebhooks && (
@@ -154,6 +84,48 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             }
           >
             Add webhook
+          </Button>
+        )}
+      </SectionSC>
+      <SectionSC>
+        <HeaderSC>
+          <span>Cron schedules</span>
+          {hasCrons && (
+            <IconFrame
+              clickable
+              size="small"
+              icon={<AddIcon />}
+              tooltip="Add cron schedule"
+              onClick={() =>
+                navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
+              }
+            />
+          )}
+        </HeaderSC>
+        {hasCrons ? (
+          <Flex
+            gap="medium"
+            flexWrap="nowrap"
+            width="100%"
+            direction="column"
+          >
+            {crons.map((cron) => (
+              <WorkbenchSidePanelCron
+                key={cron.id}
+                cron={cron}
+              />
+            ))}
+          </Flex>
+        ) : (
+          <Button
+            small
+            startIcon={<AddIcon />}
+            tertiary
+            onClick={() =>
+              navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
+            }
+          >
+            Add cron schedule
           </Button>
         )}
       </SectionSC>

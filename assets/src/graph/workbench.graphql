@@ -449,6 +449,7 @@ query WorkbenchTriggersSummary($id: ID!) {
         node {
           id
           crontab
+          prompt
           nextRunAt
         }
       }
