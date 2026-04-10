@@ -60,12 +60,7 @@ export function WorkbenchJobActivity({
   const isRunning = isActivityRunning(activity.status)
 
   if (activity.type === WorkbenchJobActivityType.Conclusion)
-    return (
-      <WorkbenchJobActivityResult
-        activity={activity}
-        addMargin={true}
-      />
-    )
+    return <WorkbenchJobActivityResult activity={activity} />
   if (activity.type === WorkbenchJobActivityType.User)
     return <UserActivityResult activity={activity} />
 
@@ -134,10 +129,8 @@ export function WorkbenchJobActivity({
 
 function WorkbenchJobActivityResult({
   activity,
-  addMargin = false,
 }: {
   activity: WorkbenchJobActivityFragment
-  addMargin?: boolean
 }) {
   const { type, result, agentRun } = activity
   switch (type) {
@@ -148,8 +141,6 @@ function WorkbenchJobActivityResult({
         <Flex
           direction="column"
           gap="medium"
-          marginTop={addMargin ? 'small' : undefined}
-          marginBottom={addMargin ? 'small' : undefined}
         >
           {result?.error && <GqlError error={result.error} />}
           <SimplifiedMarkdown text={result?.output ?? ''} />

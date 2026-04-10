@@ -89,12 +89,10 @@ export function UserActivityResult({
 }: {
   activity: WorkbenchJobActivityFragment
 }) {
+  const { spacing } = useTheme()
   const { prompt } = activity
   return (
-    <PromptCardSC
-      marginBottom="medium"
-      marginTop="medium"
-    >
+    <PromptCardSC margin={`${spacing.small}px 0`}>
       <SimplifiedMarkdown text={prompt ?? ''} />
     </PromptCardSC>
   )

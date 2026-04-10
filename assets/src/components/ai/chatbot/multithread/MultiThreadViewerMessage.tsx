@@ -261,6 +261,7 @@ const TableWrapperSC = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.medium,
   overflowX: 'auto',
   maxWidth: '100%',
+  minHeight: 'fit-content',
 }))
 
 const TableSC = styled.table(() => ({

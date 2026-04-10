@@ -206,6 +206,7 @@ const MdTableWrapper = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.medium,
   overflowX: 'auto',
   maxWidth: '100%',
+  minHeight: 'fit-content',
 }))
 
 const MdTable = styled.table((_p) => ({
