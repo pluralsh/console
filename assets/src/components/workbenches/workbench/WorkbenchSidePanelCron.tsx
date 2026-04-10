@@ -1,24 +1,17 @@
+import styled from 'styled-components'
 import { ClockIcon, Flex, IconFrame } from '@pluralsh/design-system'
 import { WorkbenchCronFragment } from 'generated/graphql'
 import { useState } from 'react'
-import { useTheme } from 'styled-components'
 
 export function WorkbenchSidePanelCron({
   cron,
 }: {
   cron: WorkbenchCronFragment
 }) {
-  const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.xsmall,
-      }}
-    >
+    <WrapperSC>
       <Flex
         align="center"
         gap="xsmall"
@@ -27,52 +20,53 @@ export function WorkbenchSidePanelCron({
           icon={<ClockIcon />}
           size="xsmall"
         />
-        <span
-          css={{
-            ...theme.partials.text.caption,
-            fontFamily: 'monospace',
-          }}
-        >
-          {cron.crontab}
-        </span>
+        <CrontabSC>{cron.crontab}</CrontabSC>
       </Flex>
       {cron.prompt && (
         <div>
-          <p
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-xlight'],
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-
-              ...(expanded
-                ? { WebkitLineClamp: 'unset', display: 'block' }
-                : { WebkitLineClamp: 3 }),
-            }}
-          >
-            {cron.prompt}
-          </p>
+          <PromptSC $expanded={expanded}>{cron.prompt}</PromptSC>
           {cron.prompt.split('\n').length > 3 || cron.prompt.length > 150 ? (
-            <button
-              onClick={() => setExpanded((prev) => !prev)}
-              css={{
-                ...theme.partials.reset.button,
-                ...theme.partials.text.caption,
-                color: theme.colors['text-input-disabled'],
-                marginTop: theme.spacing.xxsmall,
-                padding: 0,
-
-                '&:hover': {
-                  color: theme.colors['text-xlight'],
-                },
-              }}
-            >
+            <ToggleSC onClick={() => setExpanded((prev) => !prev)}>
               {expanded ? 'Read less' : 'Read more'}
-            </button>
+            </ToggleSC>
           ) : null}
         </div>
       )}
-    </div>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+}))
+
+const CrontabSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  fontFamily: 'monospace',
+}))
+
+const PromptSC = styled.p<{ $expanded: boolean }>(({ theme, $expanded }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: '-webkit-box',
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+
+  ...($expanded
+    ? { WebkitLineClamp: 'unset', display: 'block' }
+    : { WebkitLineClamp: 3 }),
+}))
+
+const ToggleSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  color: theme.colors['text-input-disabled'],
+  marginTop: theme.spacing.xsmall,
+  padding: 0,
+
+  '&:hover': {
+    color: theme.colors['text-xlight'],
+  },
+}))

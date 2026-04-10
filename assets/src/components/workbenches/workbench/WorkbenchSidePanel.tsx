@@ -3,7 +3,7 @@ import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
@@ -14,6 +14,7 @@ import { getWebhookIcon } from './webhooks/utils'
 import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
 
 export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
+  const theme = useTheme()
   const navigate = useNavigate()
 
   const { data } = useWorkbenchTriggersSummaryQuery({
@@ -51,26 +52,22 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
         </HeaderSC>
         {hasWebhooks ? (
           <Flex
-            gap="small"
-            flexWrap="nowrap"
-            width="100%"
+            gap="xxsmall"
             direction="column"
           >
             {webhooks.map((webhook) => (
               <Flex
                 key={webhook.id}
-                gap="xxsmall"
+                gap="xsmall"
                 align="center"
-                css={{
-                  maxWidth: 120,
-                  flex: '0 1 auto',
-                }}
               >
                 <IconFrame
                   icon={getWebhookIcon(webhook)}
                   size="xsmall"
                 />
-                <span css={{ ...TRUNCATE }}>{webhook.name}</span>
+                <span css={{ ...TRUNCATE, color: theme.colors['text-light'] }}>
+                  {webhook.name}
+                </span>
               </Flex>
             ))}
           </Flex>
