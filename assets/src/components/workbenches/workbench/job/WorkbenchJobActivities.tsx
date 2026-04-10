@@ -3,6 +3,7 @@ import {
   useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
   useWorkbenchJobActivityDeltaSubscription,
+  useWorkbenchJobProgressSubscription,
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
@@ -56,6 +57,13 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     () => activities.filter((a) => !closedIds?.has(a.id)).map((a) => a.id),
     [activities, closedIds]
   )
+
+  useWorkbenchJobProgressSubscription({
+    variables: { jobId },
+    onData: ({ data: { data } }) => {
+      console.log('progress', data)
+    },
+  })
 
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId },
