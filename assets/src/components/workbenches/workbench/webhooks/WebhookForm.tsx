@@ -1,5 +1,6 @@
 import {
   Button,
+  Codeline,
   Flex,
   FormField,
   Input2,
@@ -17,7 +18,9 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
+  IssueWebhook,
   IssueWebhookProvider,
+  ObservabilityWebhook,
   ObservabilityWebhookType,
   useCreateIssueWebhookMutation,
   useUpsertObservabilityWebhookMutation,
@@ -41,6 +44,7 @@ import { WebhookTriggerFormState } from './WebhookTriggerForm'
 import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 import { getIssueWebhookProviderIcon } from './utils'
 import { useWebhookSetupGuidePanel } from './WebhookSetupGuidePanel'
+import { Body2P } from 'components/utils/typography/Text'
 
 type CreateWebhookType = 'observability' | 'issue'
 
@@ -51,7 +55,6 @@ type CreateWebhookFormState = {
   observabilitySecret: string
   issueProvider: Nullable<IssueWebhookProvider>
   issueName: string
-  issueUrl: string
   issueSecret: string
 }
 
@@ -128,7 +131,6 @@ function getInitialCreateWebhookFormState(): CreateWebhookFormState {
     observabilitySecret: '',
     issueProvider: null,
     issueName: '',
-    issueUrl: '',
     issueSecret: '',
   }
 }
@@ -333,6 +335,8 @@ function CreateWebhookForm({
   const [formState, setFormState] = useState<CreateWebhookFormState>(
     getInitialCreateWebhookFormState
   )
+  const [newWebHook, setNewWebHook] =
+    useState<Nullable<IssueWebhook | ObservabilityWebhook>>(null)
 
   const [upsertObservabilityWebhook, upsertObservabilityWebhookState] =
     useUpsertObservabilityWebhookMutation()
@@ -353,7 +357,6 @@ function CreateWebhookForm({
   const canCreateIssueWebhook =
     !!formState.issueProvider &&
     !!formState.issueName.trim() &&
-    !!formState.issueUrl.trim() &&
     !!formState.issueSecret.trim()
 
   const canCreateWebhook =
@@ -393,6 +396,7 @@ function CreateWebhookForm({
       const createdWebhook = response.data?.upsertObservabilityWebhook
       if (!createdWebhook) return
 
+      setNewWebHook(createdWebhook)
       onCreated(`obs:${createdWebhook.id}`)
       popToast({
         name: createdWebhook.name,
@@ -408,7 +412,6 @@ function CreateWebhookForm({
         attributes: {
           provider: formState.issueProvider!,
           name: formState.issueName.trim(),
-          url: formState.issueUrl.trim(),
           secret: formState.issueSecret.trim(),
         },
       },
@@ -419,6 +422,7 @@ function CreateWebhookForm({
     const createdWebhook = response.data?.createIssueWebhook
     if (!createdWebhook) return
 
+    setNewWebHook(createdWebhook)
     onCreated(`issue:${createdWebhook.id}`)
     popToast({
       name: createdWebhook.name,
@@ -433,6 +437,20 @@ function CreateWebhookForm({
       gap="medium"
     >
       {error && <GqlError error={error} />}
+      {newWebHook && !error && (
+        <>
+          <Body2P>
+            {`Add a new webhook in your ${formState.webhookType === 'observability' ? 'observability provider' : 'ticketing provider'} with the
+            following url and validation secret`}
+          </Body2P>
+          <FormField label="Webhook URL">
+            <Codeline>{newWebHook.url}</Codeline>
+          </FormField>
+          <FormField label="Secret">
+            <Codeline>{formState.observabilitySecret}</Codeline>
+          </FormField>
+        </>
+      )}
       <FormField
         label="Type of webhook"
         required
@@ -554,20 +572,6 @@ function CreateWebhookForm({
                 setFormState((prev) => ({
                   ...prev,
                   issueName: e.target.value,
-                }))
-              }
-            />
-          </FormField>
-          <FormField
-            label="URL"
-            required
-          >
-            <Input2
-              value={formState.issueUrl}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  issueUrl: e.target.value,
                 }))
               }
             />

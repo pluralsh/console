@@ -6,7 +6,6 @@ defmodule Console.Schema.IssueWebhook do
   schema "issue_webhooks" do
     field :provider,    Provider
     field :external_id, :string
-    field :url,         :string
     field :name,        :string
     field :secret,      Piazza.Ecto.EncryptedString
 
@@ -20,13 +19,13 @@ defmodule Console.Schema.IssueWebhook do
     from(w in query, order_by: ^order)
   end
 
-  @valid ~w(provider url name secret)a
+  @valid ~w(provider name secret)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> put_new_change(:external_id, &gen_external_id/0)
-    |> validate_required([:provider, :url, :name, :secret])
+    |> validate_required([:provider, :name, :secret])
     |> unique_constraint(:url)
     |> unique_constraint(:name)
     |> unique_constraint(:external_id)

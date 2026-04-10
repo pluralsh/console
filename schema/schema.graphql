@@ -1605,7 +1605,6 @@ type ChatProviderConnectionConnection {
 "input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
 input IssueWebhookAttributes {
   provider: IssueWebhookProvider
-  url: String
   name: String
   secret: String
 }

@@ -1296,7 +1296,6 @@ defmodule Console.Factory do
   def issue_webhook_factory do
     %Schema.IssueWebhook{
       provider: 0,
-      url: sequence(:issue_webhook_url, & "https://issues.example.com/hook-#{&1}"),
       name: sequence(:issue_webhook, & "issue-wh-#{&1}"),
       secret: "test-secret-#{Ecto.UUID.generate()}",
       external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),

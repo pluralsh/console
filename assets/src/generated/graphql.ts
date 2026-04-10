@@ -5145,7 +5145,6 @@ export type IssueWebhookAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   provider?: InputMaybe<IssueWebhookProvider>;
   secret?: InputMaybe<Scalars['String']['input']>;
-  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type IssueWebhookConnection = {

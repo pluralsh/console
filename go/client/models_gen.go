@@ -4202,7 +4202,6 @@ type IssueWebhook struct {
 // input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required.
 type IssueWebhookAttributes struct {
 	Provider *IssueWebhookProvider `json:"provider,omitempty"`
-	URL      *string               `json:"url,omitempty"`
 	Name     *string               `json:"name,omitempty"`
 	Secret   *string               `json:"secret,omitempty"`
 }

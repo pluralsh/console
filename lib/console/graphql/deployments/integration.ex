@@ -47,7 +47,6 @@ defmodule Console.GraphQl.Deployments.Integration do
   @desc "input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
   input_object :issue_webhook_attributes do
     field :provider, :issue_webhook_provider
-    field :url,      :string
     field :name,     :string
     field :secret,   :string
   end
