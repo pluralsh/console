@@ -89,10 +89,9 @@ export function UserActivityResult({
 }: {
   activity: WorkbenchJobActivityFragment
 }) {
-  const { spacing } = useTheme()
   const { prompt } = activity
   return (
-    <PromptCardSC margin={`${spacing.small}px 0`}>
+    <PromptCardSC>
       <SimplifiedMarkdown text={prompt ?? ''} />
     </PromptCardSC>
   )
@@ -102,7 +101,8 @@ const PromptCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   width: 'fit-content',
   marginLeft: 'auto',
-  marginBottom: theme.spacing.medium,
+  marginTop: theme.spacing.small,
+  marginBottom: theme.spacing.small,
 }))
 
 export function JobActivityLogs({
