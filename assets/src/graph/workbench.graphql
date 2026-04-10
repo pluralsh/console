@@ -110,6 +110,9 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
   content
   toolName
   toolArgs
+  activity {
+    id
+  }
 }
 
 fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
@@ -204,6 +207,11 @@ fragment WorkbenchJobProgress on WorkbenchJobProgress {
   tool
   text
   arguments
+}
+
+fragment WorkbenchTextStream on WorkbenchTextStream {
+  activityId
+  text
 }
 
 fragment WorkbenchCron on WorkbenchCron {
@@ -544,9 +552,18 @@ subscription WorkbenchJobActivityDelta($jobId: ID!) {
   }
 }
 
-subscription WorkbenchJobProgress($jobId: ID!) {
-  workbenchJobProgress(jobId: $jobId) {
-    ...WorkbenchJobProgress
+subscription WorkbenchJobThoughtDelta($jobId: ID!) {
+  workbenchJobThoughtDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobThought
+    }
+  }
+}
+
+subscription WorkbenchTextStream($jobId: ID!) {
+  workbenchTextStream(jobId: $jobId) {
+    ...WorkbenchTextStream
   }
 }
 

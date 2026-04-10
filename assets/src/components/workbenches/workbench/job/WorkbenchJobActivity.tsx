@@ -17,21 +17,25 @@ import {
   UnknownIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
+import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunFixButton'
 import {
   ClickableLabelSC,
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body2P, CaptionP, OverlineH3 } from 'components/utils/typography/Text'
+import { CaptionP, OverlineH3 } from 'components/utils/typography/Text'
 import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
-  WorkbenchJobProgressFragment,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { ComponentType, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -41,20 +45,15 @@ import {
   MemoActivityResult,
   UserActivityResult,
 } from './WorkbenchJobActivityResults'
-import { GqlError } from 'components/utils/Alert'
-import { isEmpty } from 'lodash'
-import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunFixButton'
-import { Link } from 'react-router-dom'
-import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 
 export function WorkbenchJobActivity({
   isOpen,
   activity,
-  progress,
+  textStream,
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
-  progress: WorkbenchJobProgressFragment[]
+  textStream: Nullable<string>
 }) {
   const { spacing } = useTheme()
   const isRunning = isActivityRunning(activity.status)
@@ -111,16 +110,21 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {/* TODO */}
-        {progress.map((p, i) => (
-          <Body2P key={i}>{p.text}</Body2P>
-        ))}
         {activity.prompt && activity.type !== WorkbenchJobActivityType.Memo && (
           <JobActivityPrompt prompt={activity.prompt} />
         )}
         <WorkbenchJobActivityThoughts
           thoughts={activity.thoughts?.filter(isNonNullable) ?? []}
         />
+        {textStream && (
+          <Flex
+            direction="column"
+            maxHeight={120}
+            overflow="auto"
+          >
+            <SimplifiedMarkdown text={textStream} />
+          </Flex>
+        )}
         <WorkbenchJobActivityResult activity={activity} />
       </Flex>
     </AccordionItem>

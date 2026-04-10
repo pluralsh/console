@@ -2,10 +2,6 @@ import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
 import {
   useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
-  useWorkbenchJobActivityDeltaSubscription,
-  useWorkbenchJobProgressSubscription,
-  WorkbenchJobActivitiesDocument,
-  WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
@@ -13,7 +9,6 @@ import {
 } from 'generated/graphql'
 import { useMemo, useRef, useState } from 'react'
 
-import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   ChatInputSimple,
   ChatInputSimpleRef,
@@ -22,24 +17,17 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
 import styled from 'styled-components'
-import {
-  appendConnectionToEnd,
-  mapExistingNodes,
-  updateCache,
-} from 'utils/graphql'
+import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchJobActivity } from './WorkbenchJobActivity'
+import {
+  appendActivityToCache,
+  useWorkbenchJobStreams,
+} from './useWorkbenchJobStreams'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 export const ACTIVITY_GAP = 'medium' as const
 
-function isActivityTerminal(status: WorkbenchJobActivityStatus | undefined) {
-  return (
-    status === WorkbenchJobActivityStatus.Successful ||
-    status === WorkbenchJobActivityStatus.Failed
-  )
-}
-
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
-  const client = useApolloClient()
   const [newMessage, setNewMessage] = useState('')
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
@@ -58,30 +46,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     [activities, closedIds]
   )
 
-  useWorkbenchJobProgressSubscription({
-    variables: { jobId },
-    onData: ({ data: { data } }) => {
-      console.log('progress', data)
-    },
-  })
-
-  useWorkbenchJobActivityDeltaSubscription({
-    variables: { jobId },
-    onData: ({ data: { data } }) => {
-      const id = data?.workbenchJobActivityDelta?.payload?.id
-      if (
-        id &&
-        isActivityTerminal(data?.workbenchJobActivityDelta?.payload?.status)
-      )
-        setClosedIds(new Set(closedIds ? closedIds.add(id) : new Set([id])))
-
-      appendActivityToCache(
-        client.cache,
-        jobId,
-        data?.workbenchJobActivityDelta?.payload
-      )
-    },
-  })
+  const textStreamMap = useWorkbenchJobStreams(jobId, setClosedIds)
 
   const [
     createMessage,
@@ -140,11 +105,16 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
                 <Markdown text={job?.prompt ?? ''} />
               </JobPromptCardSC>
             }
+            bottomContent={
+              textStreamMap['none'] && (
+                <SimplifiedMarkdown text={textStreamMap['none']} />
+              )
+            }
             renderer={({ rowData }) => (
               <WorkbenchJobActivity
                 isOpen={openIds.includes(rowData.id)}
                 activity={rowData}
-                progress={[]} // TODO
+                textStream={textStreamMap[rowData.id] ?? ''}
               />
             )}
           />
@@ -174,7 +144,7 @@ const ActivitiesAccordionSC = styled(Accordion)({
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.medium,
+  borderRadius: theme.borderRadiuses.large,
   padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
   background: theme.colors['fill-zero'],
   flex: 1,
@@ -215,20 +185,8 @@ const defaultClosedIds = (
   )
 }
 
-const appendActivityToCache = (
-  cache: ApolloCache<object>,
-  jobId: string,
-  activity: Nullable<WorkbenchJobActivityFragment>
+export const isActivityTerminal = (
+  status: Nullable<WorkbenchJobActivityStatus>
 ) =>
-  updateCache<WorkbenchJobActivitiesQuery>(cache, {
-    query: WorkbenchJobActivitiesDocument,
-    variables: { id: jobId },
-    update: (prev) => ({
-      ...prev,
-      workbenchJob: appendConnectionToEnd(
-        prev.workbenchJob,
-        activity,
-        'activities'
-      ),
-    }),
-  })
+  status === WorkbenchJobActivityStatus.Successful ||
+  status === WorkbenchJobActivityStatus.Failed
