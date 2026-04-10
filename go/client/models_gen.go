@@ -9741,6 +9741,11 @@ type WorkbenchJobThoughtAttributes struct {
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
+type WorkbenchJobThoughtDelta struct {
+	Delta   *Delta               `json:"delta,omitempty"`
+	Payload *WorkbenchJobThought `json:"payload,omitempty"`
+}
+
 type WorkbenchJobUpdateAttributes struct {
 	// the result for this job
 	Result *WorkbenchResultAttributes `json:"result,omitempty"`

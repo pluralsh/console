@@ -11952,6 +11952,7 @@ export type RootSubscriptionType = {
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
+  workbenchJobThoughtDelta?: Maybe<WorkbenchJobThoughtDelta>;
   workbenchTextStream?: Maybe<WorkbenchTextStream>;
 };
 
@@ -12000,6 +12001,11 @@ export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
 
 
 export type RootSubscriptionTypeWorkbenchJobProgressArgs = {
+  jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchJobThoughtDeltaArgs = {
   jobId: Scalars['ID']['input'];
 };
 
@@ -15153,6 +15159,12 @@ export type WorkbenchJobThoughtAttributes = {
   logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   /** metrics for the thought */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+};
+
+export type WorkbenchJobThoughtDelta = {
+  __typename?: 'WorkbenchJobThoughtDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<WorkbenchJobThought>;
 };
 
 export type WorkbenchJobUpdateAttributes = {

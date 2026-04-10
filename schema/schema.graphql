@@ -1463,6 +1463,8 @@ type RootSubscriptionType {
 
   workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
 
+  workbenchJobThoughtDelta(jobId: ID!): WorkbenchJobThoughtDelta
+
   workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
 
   workbenchTextStream(jobId: ID!): WorkbenchTextStream
@@ -3200,6 +3202,11 @@ type WorkbenchJobDelta {
 type WorkbenchJobActivityDelta {
   delta: Delta
   payload: WorkbenchJobActivity
+}
+
+type WorkbenchJobThoughtDelta {
+  delta: Delta
+  payload: WorkbenchJobThought
 }
 
 enum SentinelCheckType {
