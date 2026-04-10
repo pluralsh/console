@@ -37,13 +37,18 @@ defmodule Console.AI.Workbench.Subagents.Base do
     )
   end
 
-  def callback(%{id: id, workbench_job_id: workbench_job_id}, {kind, content})
+  def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id}, {kind, content})
     when kind in [:content, :assistant] and is_binary(content),
-    do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{workbench_job_id}:progress")
-  def callback(%{id: id, workbench_job_id: workbench_job_id}, {:tool, content, %{name: name, arguments: args} = tool})
+    do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
+  def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id}, {:tool, content, %{name: name, arguments: args} = tool})
     when is_binary(content) do
     save_thought(id, content, tool)
-    publish_absinthe(%{activity_id: id, tool: name, arguments: args, text: content}, workbench_job_progress: "workbench_jobs:#{workbench_job_id}:progress")
+    publish_absinthe(%{
+      activity_id: id,
+      tool: name,
+      arguments: args,
+      text: content
+    }, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
   end
   def callback(_, _), do: :ok
 

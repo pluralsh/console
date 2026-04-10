@@ -11,7 +11,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
     job = Repo.preload(job, [:result])
 
     tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: @system, acc: %{}, callback: &callback(%{id: nil, workbench_job_id: job.id}, &1))
+    |> MemoryEngine.new(20, system_prompt: @system, acc: %{})
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
