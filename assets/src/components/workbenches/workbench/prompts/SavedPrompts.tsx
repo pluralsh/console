@@ -1,4 +1,5 @@
 import {
+  ArrowUpIcon,
   Button,
   Card,
   EmptyState,
@@ -16,6 +17,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P } from 'components/utils/typography/Text'
 import {
+  useCreateWorkbenchJobMutation,
   useWorkbenchPromptsQuery,
   useWorkbenchQuery,
   WorkbenchPromptFragment,
@@ -24,6 +26,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  getWorkbenchJobAbsPath,
   getWorkbenchSavedPromptCreateAbsPath,
   getWorkbenchSavedPromptEditAbsPath,
   WORKBENCH_PARAM_ID,
@@ -39,6 +42,17 @@ export function SavedPrompts() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [deletingPrompt, setDeletingPrompt] =
     useState<Nullable<WorkbenchPromptFragment>>(null)
+
+  const [
+    createWorkbenchJob,
+    { loading: createJobLoading, error: createJobError },
+  ] = useCreateWorkbenchJobMutation({
+    onCompleted: ({ createWorkbenchJob }) =>
+      createWorkbenchJob?.id &&
+      navigate(
+        getWorkbenchJobAbsPath({ workbenchId, jobId: createWorkbenchJob.id })
+      ),
+  })
 
   const {
     data: workbenchData,
@@ -74,6 +88,16 @@ export function SavedPrompts() {
   const columns = useMemo(
     () =>
       getColumns({
+        onRun: (savedPrompt) => {
+          const prompt = savedPrompt.prompt?.trim()
+
+          if (!prompt) return
+
+          void createWorkbenchJob({
+            variables: { workbenchId, attributes: { prompt } },
+          })
+        },
+        runLoading: createJobLoading,
         onEdit: (savedPrompt) =>
           navigate(
             getWorkbenchSavedPromptEditAbsPath({
@@ -83,10 +107,12 @@ export function SavedPrompts() {
           ),
         onDelete: (savedPrompt) => setDeletingPrompt(savedPrompt),
       }),
-    [navigate, workbenchId]
+    [createJobLoading, createWorkbenchJob, navigate, workbenchId]
   )
 
   if (workbenchError) return <GqlError error={workbenchError} />
+
+  if (createJobError) return <GqlError error={createJobError} />
 
   if (error) return <GqlError error={error} />
 
@@ -186,9 +212,13 @@ export function SavedPrompts() {
 
 const columnHelper = createColumnHelper<WorkbenchPromptFragment>()
 function getColumns({
+  onRun,
+  runLoading,
   onEdit,
   onDelete,
 }: {
+  onRun: (savedPrompt: WorkbenchPromptFragment) => void
+  runLoading: boolean
   onEdit: (savedPrompt: WorkbenchPromptFragment) => void
   onDelete: (savedPrompt: WorkbenchPromptFragment) => void
 }) {
@@ -209,13 +239,19 @@ function getColumns({
     }),
     columnHelper.display({
       id: 'actions',
-      meta: { gridTemplate: '100px' },
+      meta: { gridTemplate: '140px' },
       cell: ({ row }) => (
         <Flex
           align="center"
           justify="flex-end"
           gap="xsmall"
         >
+          <IconFrame
+            clickable={!!row.original.prompt?.trim() && !runLoading}
+            tooltip="Run saved prompt"
+            icon={<ArrowUpIcon />}
+            onClick={() => onRun(row.original)}
+          />
           <IconFrame
             clickable
             tooltip="Edit saved prompt"
