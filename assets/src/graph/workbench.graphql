@@ -444,6 +444,11 @@ query WorkbenchTriggersSummary($id: ID!) {
     id
     name
     description
+    tools {
+      id
+      name
+      tool
+    }
     crons(first: 30) {
       edges {
         node {
