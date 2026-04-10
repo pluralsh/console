@@ -42,7 +42,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
       timestamp: TimeRange.to_datetime(metric.timestamp),
       name: metric.name,
       value: metric.value,
-      labels: Map.new(metric.labels, &{&1.key, &1.value}),
+      labels: metric.labels,
     }
   end
 

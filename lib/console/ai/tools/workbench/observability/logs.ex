@@ -52,7 +52,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     %{
       timestamp: TimeRange.to_datetime(log.timestamp),
       message: log.message,
-      labels: Map.new(log.labels, &{&1.key, &1.value}),
+      labels: log.labels,
     }
   end
 
