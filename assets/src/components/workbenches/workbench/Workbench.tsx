@@ -38,6 +38,7 @@ import {
   WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
+import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 
 const directory = [
   { label: 'Jobs', path: '' },
@@ -112,81 +113,87 @@ export function Workbench() {
     )
 
   return (
-    <WrapperSC>
-      <SubTabs
-        directory={directory}
-        activeFn={(path) => path === tab}
-      />
-      <StretchedFlex>
-        <StackedText
-          loading={isLoading}
-          first={workbench?.name}
-          firstPartialType="subtitle2"
-          firstColor="text"
-          second={workbench?.description}
-          secondPartialType="body2"
-          secondColor="text-xlight"
-          gap="xxsmall"
+    <Flex
+      direction="row"
+      gap="large"
+    >
+      <WorkbenchSidePanel workbenchId={id} />
+      <WrapperSC>
+        <SubTabs
+          directory={directory}
+          activeFn={(path) => path === tab}
         />
-        <Flex gap="small">
-          <Button
-            small
-            secondary
-            as={Link}
-            to={WORKBENCHES_EDIT_REL_PATH}
-          >
-            Edit
-          </Button>
-          <Button
-            small
-            secondary
-            as={Link}
-            to={WORKBENCHES_CRON_SCHEDULES_REL_PATH}
-          >
-            Crons
-          </Button>
-          <Button
-            small
-            secondary
-            as={Link}
-            to={WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}
-          >
-            Webhooks
-          </Button>
-          <MoreMenu
-            disabled={!workbench}
-            triggerProps={{ iconFrameType: 'secondary' }}
-            onSelectionChange={() => setDeleteModalOpen(true)}
-          >
-            <ListBoxItem
-              key="delete"
-              destructive
-              leftContent={<TrashCanIcon color="icon-danger" />}
-              label="Delete workbench"
-            />
-          </MoreMenu>
-        </Flex>
-      </StretchedFlex>
-      <Outlet context={{ workbenchId: id, isLoading }} />
-      <Confirm
-        open={deleteModalOpen}
-        close={() => setDeleteModalOpen(false)}
-        destructive
-        label="Delete workbench"
-        loading={deleteLoading}
-        error={deleteError}
-        submit={() => deleteWorkbench({ variables: { id } })}
-        title="Delete workbench"
-        confirmationEnabled
-        confirmationText="delete workbench"
-        text={
-          <span>
-            Are you sure you want to delete{' '}
-            <strong>{workbench?.name ?? 'this workbench'}</strong>?
-          </span>
-        }
-      />
-    </WrapperSC>
+        <StretchedFlex>
+          <StackedText
+            loading={isLoading}
+            first={workbench?.name}
+            firstPartialType="subtitle2"
+            firstColor="text"
+            second={workbench?.description}
+            secondPartialType="body2"
+            secondColor="text-xlight"
+            gap="xxsmall"
+          />
+          <Flex gap="small">
+            <Button
+              small
+              secondary
+              as={Link}
+              to={WORKBENCHES_EDIT_REL_PATH}
+            >
+              Edit
+            </Button>
+            <Button
+              small
+              secondary
+              as={Link}
+              to={WORKBENCHES_CRON_SCHEDULES_REL_PATH}
+            >
+              Crons
+            </Button>
+            <Button
+              small
+              secondary
+              as={Link}
+              to={WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}
+            >
+              Webhooks
+            </Button>
+            <MoreMenu
+              disabled={!workbench}
+              triggerProps={{ iconFrameType: 'secondary' }}
+              onSelectionChange={() => setDeleteModalOpen(true)}
+            >
+              <ListBoxItem
+                key="delete"
+                destructive
+                leftContent={<TrashCanIcon color="icon-danger" />}
+                label="Delete workbench"
+              />
+            </MoreMenu>
+          </Flex>
+        </StretchedFlex>
+        <Outlet context={{ workbenchId: id, isLoading }} />
+        <Confirm
+          open={deleteModalOpen}
+          close={() => setDeleteModalOpen(false)}
+          destructive
+          label="Delete workbench"
+          loading={deleteLoading}
+          error={deleteError}
+          submit={() => deleteWorkbench({ variables: { id } })}
+          title="Delete workbench"
+          confirmationEnabled
+          confirmationText="delete workbench"
+          text={
+            <span>
+              Are you sure you want to delete{' '}
+              <strong>{workbench?.name ?? 'this workbench'}</strong>?
+            </span>
+          }
+        />
+      </WrapperSC>
+    </Flex>
   )
 }
 

@@ -1,9 +1,9 @@
-import { Card, Flex, IconFrame, Prop } from '@pluralsh/design-system'
+import { Flex, IconFrame } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import minBy from 'lodash/minBy'
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime'
 import { formatPreviewTimestamp } from './crons/utils'
 import {
@@ -14,7 +14,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import { isEmpty } from 'lodash'
 
-export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
+export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
   const theme = useTheme()
 
   const { data } = useWorkbenchTriggersSummaryQuery({
@@ -57,21 +57,10 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
   if (!nextCron && webhooks.length === 0) return null
 
   return (
-    <Card
-      css={{
-        backgroundColor: 'transparent',
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: theme.spacing.large,
-        padding: theme.spacing.medium,
-      }}
-    >
+    <WrapperSC>
       {nextCron && (
-        <Prop
-          title="Cron schedule"
-          margin={0}
-        >
+        <SectionSC $first>
+          <HeaderSC>Cron schedules</HeaderSC>
           {nextRunTimeParts ? (
             <Body2P css={{ lineHeight: '20px' }}>
               <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
@@ -87,17 +76,16 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
               {nextRunTime}
             </Body2P>
           ) : null}
-        </Prop>
+        </SectionSC>
       )}
       {!isEmpty(webhooks) && (
-        <Prop
-          title="Webhooks"
-          margin={0}
-        >
+        <SectionSC>
+          <HeaderSC>Webhooks</HeaderSC>
           <Flex
             gap="small"
             flexWrap="nowrap"
             width="100%"
+            direction="column"
           >
             {webhooks.map((webhook) => (
               <Flex
@@ -123,8 +111,36 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
               </Flex>
             ))}
           </Flex>
-        </Prop>
+        </SectionSC>
       )}
-    </Card>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-one'],
+  borderRight: theme.borders['fill-one'],
+  display: 'flex',
+  flexDirection: 'column',
+  flexGrow: 1,
+  gap: theme.spacing.large,
+  minWidth: 250,
+  maxWidth: 250,
+  padding: theme.spacing.medium,
+}))
+
+const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+
+  ...(!$first && {
+    borderTop: theme.borders['fill-one'],
+    paddingTop: theme.spacing.medium,
+  }),
+}))
+
+const HeaderSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+}))
