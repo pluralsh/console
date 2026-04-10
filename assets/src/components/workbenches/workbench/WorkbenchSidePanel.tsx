@@ -17,6 +17,7 @@ import {
   getWorkbenchWebhookTriggerCreateAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import { useNavigate } from 'react-router-dom'
+import { isEmpty } from 'lodash'
 
 export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
   const theme = useTheme()
@@ -59,8 +60,8 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
     [nextRunTime]
   )
 
-  const hasCrons = crons.length > 0
-  const hasWebhooks = webhooks.length > 0
+  const hasCrons = !isEmpty(crons)
+  const hasWebhooks = !isEmpty(webhooks)
 
   return (
     <WrapperSC>
@@ -96,6 +97,8 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
         ) : (
           <Button
             small
+            startIcon={<PlusIcon />}
+            tertiary
             onClick={() =>
               navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
             }
@@ -153,6 +156,8 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
         ) : (
           <Button
             small
+            startIcon={<PlusIcon />}
+            tertiary
             onClick={() =>
               navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
             }
