@@ -41,41 +41,43 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
 
   return (
     <WrapperSC>
-      <SectionSC $first>
-        <HeaderSC>
-          <span>Tools</span>
-        </HeaderSC>
-        {hasTools ? (
-          <Flex
-            gap="xxsmall"
-            direction="column"
-          >
-            {tools.map((tool) => (
-              <Flex
-                key={tool.id}
-                gap="xsmall"
-                align="center"
-              >
-                <ItemIconContainerSC>
-                  <IconFrame
-                    icon={<WorkbenchToolIcon type={tool.tool} />}
-                    size="xsmall"
-                  />
-                </ItemIconContainerSC>
-                <ItemNameSC>{tool.name}</ItemNameSC>
-              </Flex>
-            ))}
-          </Flex>
-        ) : null}
-      </SectionSC>
-      <SectionSC>
+      {hasTools && (
+        <SectionSC $first>
+          <HeaderSC>
+            <span>Tools</span>
+          </HeaderSC>
+          {hasTools ? (
+            <Flex
+              gap="xxsmall"
+              direction="column"
+            >
+              {tools.map((tool) => (
+                <Flex
+                  key={tool.id}
+                  gap="xsmall"
+                  align="center"
+                >
+                  <ItemIconContainerSC>
+                    <IconFrame
+                      icon={<WorkbenchToolIcon type={tool.tool} />}
+                      size="xsmall"
+                    />
+                  </ItemIconContainerSC>
+                  <ItemNameSC>{tool.name}</ItemNameSC>
+                </Flex>
+              ))}
+            </Flex>
+          ) : null}
+        </SectionSC>
+      )}
+      <SectionSC $first={!hasTools}>
         <HeaderSC>
           <span>Webhooks</span>
           {hasWebhooks && (
             <IconFrame
               clickable
               size="small"
-              icon={<AddIcon />}
+              icon={<AddIcon size={12} />}
               tooltip="Add webhook"
               onClick={() =>
                 navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
@@ -105,16 +107,16 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             ))}
           </Flex>
         ) : (
-          <Button
+          <ButtonSC
             small
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon size={12} />}
             tertiary
             onClick={() =>
               navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
             }
           >
             Add webhook
-          </Button>
+          </ButtonSC>
         )}
       </SectionSC>
       <SectionSC>
@@ -124,7 +126,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             <IconFrame
               clickable
               size="small"
-              icon={<AddIcon />}
+              icon={<AddIcon size={12} />}
               tooltip="Add cron schedule"
               onClick={() =>
                 navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
@@ -147,16 +149,16 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             ))}
           </Flex>
         ) : (
-          <Button
+          <ButtonSC
             small
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon size={12} />}
             tertiary
             onClick={() =>
               navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
             }
           >
             Add cron schedule
-          </Button>
+          </ButtonSC>
         )}
       </SectionSC>
     </WrapperSC>
@@ -195,6 +197,20 @@ const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+}))
+
+const ButtonSC = styled(Button)(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  alignSelf: 'start',
+  color: theme.colors['text-xlight'],
+  padding: 0,
+
+  '&:hover': {
+    ...theme.partials.reset.button,
+    ...theme.partials.text.caption,
+    color: theme.colors['text-light'],
+  },
 }))
 
 const ItemIconContainerSC = styled.div({
