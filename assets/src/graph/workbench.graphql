@@ -603,6 +603,17 @@ mutation CreateWorkbenchMessage(
   }
 }
 
+mutation CreateWorkbenchPrompt(
+  $workbenchId: ID!
+  $attributes: WorkbenchPromptAttributes!
+) {
+  createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    prompt
+    insertedAt
+  }
+}
+
 mutation CreateWorkbenchCron(
   $workbenchId: ID!
   $attributes: WorkbenchCronAttributes!
