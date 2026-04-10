@@ -3,7 +3,7 @@ import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
@@ -14,7 +14,6 @@ import { getWebhookIcon } from './webhooks/utils'
 import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
 
 export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
-  const theme = useTheme()
   const navigate = useNavigate()
 
   const { data } = useWorkbenchTriggersSummaryQuery({
@@ -61,13 +60,13 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
                 gap="xsmall"
                 align="center"
               >
-                <IconFrame
-                  icon={getWebhookIcon(webhook)}
-                  size="xsmall"
-                />
-                <span css={{ ...TRUNCATE, color: theme.colors['text-light'] }}>
-                  {webhook.name}
-                </span>
+                <WebhookIconContainerSC>
+                  <IconFrame
+                    icon={getWebhookIcon(webhook)}
+                    size="xsmall"
+                  />
+                </WebhookIconContainerSC>
+                <WebhookNameSC>{webhook.name}</WebhookNameSC>
               </Flex>
             ))}
           </Flex>
@@ -162,4 +161,17 @@ const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+}))
+
+const WebhookIconContainerSC = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 20,
+  height: 20,
+})
+
+const WebhookNameSC = styled.span(({ theme }) => ({
+  ...TRUNCATE,
+  color: theme.colors['text-light'],
 }))
