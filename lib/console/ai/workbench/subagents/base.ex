@@ -26,15 +26,15 @@ defmodule Console.AI.Workbench.Subagents.Base do
 
   def stream_callbacks(%WorkbenchJob{id: id}) do
     Stream.stream_callbacks(
-      on_result: &callback(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
-      on_thinking: &callback(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream")
+      on_result: &publish_absinthe(%{text: IO.inspect(&1, label: "ai result")}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
+      on_thinking: &publish_absinthe(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream")
     )
   end
 
   def stream_callbacks(%WorkbenchJobActivity{workbench_job_id: jid, id: id}) do
     Stream.stream_callbacks(
-      on_result: &callback(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream"),
-      on_thinking: &callback(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream")
+      on_result: &publish_absinthe(%{text: IO.inspect(&1, label: "ai activity result"), activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream"),
+      on_thinking: &publish_absinthe(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream")
     )
   end
 
