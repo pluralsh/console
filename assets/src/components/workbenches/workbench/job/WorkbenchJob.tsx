@@ -1,4 +1,9 @@
-import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Button,
+  EmptyState,
+  SidePanelOpenIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
@@ -6,7 +11,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useWorkbenchJobQuery } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo } from 'react'
+import { useEffect, useEffectEvent, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -15,16 +20,17 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
-import { WorkbenchJobPrs } from './WorkbenchJobPrs'
-import { WorkbenchJobResult } from './WorkbenchJobResult'
-import { WorkbenchJobTodos } from './WorkbenchJobTodos'
-import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
-import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
+import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
+  const { isOpen, setOpen } = useWorkbenchJobPanel()
+
+  const onMount = useEffectEvent(() => setOpen(true))
+  useEffect(() => {
+    onMount()
+  }, [])
 
   const {
     data,
@@ -71,73 +77,62 @@ export function WorkbenchJob() {
     )
 
   return (
-    <>
-      {job?.error && (
-        <GqlError
-          header="Workbench job reported an error"
-          error={job?.error}
-          margin="large"
-          css={{ marginBottom: 0 }}
-        />
-      )}
+    <StretchedFlex
+      gap="small"
+      height="100%"
+    >
       <WrapperSC>
-        <Flex
-          direction="column"
-          gap="large"
-          minWidth={560}
-          flex={7}
-        >
-          <StretchedFlex gap="xlarge">
-            <StackedText
-              truncate
-              loading={isLoading}
-              first={job?.workbench?.name}
-              firstColor="text"
-              firstPartialType="subtitle2"
-              second={job?.prompt}
-              secondColor="text-xlight"
-              secondPartialType="body2"
-            />
-            <RunStatusChip
-              loading={isLoading}
-              status={job?.status}
-            />
-          </StretchedFlex>
-          <WorkbenchJobActivities jobId={jobId} />
-        </Flex>
-        <Flex
-          direction="column"
-          gap="medium"
-          minWidth={500}
-          flex={!!job?.result?.conclusion ? 8 : 3}
-          height="100%"
-          overflow="auto"
-        >
-          <WorkbenchJobPrs
-            prs={job?.pullRequests?.filter(isNonNullable) ?? []}
+        {job?.error && (
+          <GqlError
+            header="Workbench job reported an error"
+            error={job?.error}
+            margin="large"
+            css={{ marginBottom: 0 }}
           />
-          <WorkbenchJobTriggerAlert alert={job?.alert} />
-          <WorkbenchJobTriggerIssue issue={job?.issue} />
-          <WorkbenchJobResult
+        )}
+
+        <StretchedFlex gap="xlarge">
+          <StackedText
+            truncate
             loading={isLoading}
-            result={job?.result}
+            first={job?.workbench?.name}
+            firstColor="text"
+            firstPartialType="subtitle2"
+            second={job?.prompt}
+            secondColor="text-xlight"
+            secondPartialType="body2"
           />
-          <WorkbenchJobTodos
+          <RunStatusChip
             loading={isLoading}
-            result={job?.result}
+            status={job?.status}
           />
-        </Flex>
+        </StretchedFlex>
+        <WorkbenchJobActivities jobId={jobId} />
       </WrapperSC>
-    </>
+      {!isOpen && (
+        <PanelOpenBtnSC
+          tertiary
+          onClick={() => setOpen(true)}
+        >
+          <SidePanelOpenIcon />
+        </PanelOpenBtnSC>
+      )}
+    </StretchedFlex>
   )
 }
 
+const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
+  height: '100%',
+  borderLeft: theme.borders.default,
+}))
+
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flexDirection: 'column',
   gap: theme.spacing.large,
   height: '100%',
   width: '100%',
-  overflow: 'auto',
+  minWidth: 0,
   maxWidth: theme.breakpoints.desktopLarge,
   padding: theme.spacing.large,
 }))

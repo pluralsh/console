@@ -23,7 +23,7 @@ import {
   WorkbenchJobActivityMetricFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, truncate } from 'lodash'
-import { useMemo, useState } from 'react'
+import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { DiffMethod } from 'react-diff-viewer'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
@@ -125,9 +125,12 @@ export function JobActivityLogs({
 
 export function JobActivityMetrics({
   metrics,
+  lineProps,
+  ...props
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
-}) {
+  lineProps?: Partial<ComponentPropsWithRef<typeof ResponsiveLine>>
+} & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
@@ -145,7 +148,7 @@ export function JobActivityMetrics({
   if (isEmpty(metrics)) return null
 
   return (
-    <MetricsChartSC>
+    <MetricsChartSC {...props}>
       <ResponsiveLine
         theme={graphTheme}
         data={graphData}
@@ -153,13 +156,13 @@ export function JobActivityMetrics({
         colors={COLORS}
         margin={{ top: 10, right: 20, bottom: 30, left: 30 }}
         xScale={{ type: 'time', format: 'native' }}
-        yScale={{ type: 'linear', min: 0, max: 'auto' }}
+        yScale={{ type: 'linear' }}
         xFormat={dateFormat}
         curve="monotoneX"
         lineWidth={1}
-        enablePoints={false}
         useMesh
         axisBottom={{ format: '%H:%M:%S', tickRotation: 10 }}
+        {...lineProps}
       />
     </MetricsChartSC>
   )

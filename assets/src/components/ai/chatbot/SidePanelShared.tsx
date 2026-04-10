@@ -24,6 +24,17 @@ const SidePanelWrapperSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-accent'],
 }))
 
+export const PanelHeaderSC = styled.div(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  minHeight: SIDE_PANEL_HEADER_HEIGHT,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  borderBottom: theme.borders.default,
+  flexShrink: 0,
+}))
+
 export const ResizeGripSC = styled.div(({ theme }) => ({
   borderLeft: theme.borders.default,
   height: 40,

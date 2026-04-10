@@ -1,72 +1,65 @@
 import {
-  Accordion,
-  AccordionItem,
   ArrowTopRightIcon,
-  Flex,
+  Card,
   IconFrame,
   prettifyRepoUrl,
   PrOpenIcon,
 } from '@pluralsh/design-system'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { PullRequestBasicFragment } from 'generated/graphql'
-import { isEmpty } from 'lodash'
 
-import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 
 export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
-  if (isEmpty(prs)) return null
   return (
-    <Accordion
-      type="single"
-      defaultValue="prs"
-      css={{ background: 'none' }}
-    >
-      <AccordionItem
-        value="prs"
-        trigger={
-          <StackedText
-            icon={
-              <IconFrame
-                circle
-                type="secondary"
-                icon={<PrOpenIcon />}
-              />
-            }
-            first={<Body2BoldP>Generated pull requests</Body2BoldP>}
+    <>
+      <StackedText
+        icon={
+          <IconFrame
+            circle
+            type="secondary"
+            icon={<PrOpenIcon />}
           />
         }
-      >
-        <Flex
-          direction="column"
-          gap="medium"
+        first={<Body2BoldP>Generated pull requests</Body2BoldP>}
+      />
+      {prs.map((pr) => (
+        <WrapperCardSC
+          key={pr.id}
+          fillLevel={0}
+          clickable
+          forwardedAs="a"
+          href={pr.url}
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          {prs.map((pr) => (
-            <StretchedFlex
-              key={pr.id}
-              gap="large"
-            >
-              <StackedText
-                truncate
-                first={prettifyRepoUrl(pr.url, true)}
-                firstPartialType="body2"
-                firstColor="text"
-                second={pr.title}
-              />
-              <IconFrame
-                clickable
-                as={Link}
-                to={pr.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                size="small"
-                icon={<ArrowTopRightIcon color="icon-light" />}
-              />
-            </StretchedFlex>
-          ))}
-        </Flex>
-      </AccordionItem>
-    </Accordion>
+          <StackedText
+            truncate
+            first={
+              <span id={`link-${pr.id}`}>{prettifyRepoUrl(pr.url, true)}</span>
+            }
+            firstPartialType="body2"
+            firstColor="text"
+            second={pr.title}
+          />
+          <IconFrame
+            size="small"
+            tooltip="View PR"
+            icon={<ArrowTopRightIcon color="icon-light" />}
+          />
+        </WrapperCardSC>
+      ))}
+    </>
   )
 }
+
+const WrapperCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: theme.spacing.large,
+  padding: theme.spacing.medium,
+  textDecoration: 'none',
+  '&:hover span[id^="link-"]': { textDecoration: 'underline' },
+}))

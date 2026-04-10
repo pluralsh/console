@@ -135,6 +135,7 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
   conclusion
+  topology
   todos {
     ...WorkbenchJobResultTodo
   }

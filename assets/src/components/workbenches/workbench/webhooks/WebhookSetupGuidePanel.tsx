@@ -8,7 +8,7 @@ import {
   SidePanelOpenIcon,
 } from '@pluralsh/design-system'
 import {
-  SIDE_PANEL_HEADER_HEIGHT,
+  PanelHeaderSC,
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
 import {
@@ -23,7 +23,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import styled from 'styled-components'
 
 const DEFAULT_TITLE = 'Setup guide'
 const SIDE_PANEL_TYPE: SidePanel = 'webhook-setup-guide'
@@ -187,15 +186,3 @@ export function WebhookSetupGuidePanelContent() {
     </SidePanelContent>
   )
 }
-
-const PanelHeaderSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.overline,
-  color: theme.colors['text-xlight'],
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  minHeight: SIDE_PANEL_HEADER_HEIGHT,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  borderBottom: theme.borders.default,
-  flexShrink: 0,
-}))
