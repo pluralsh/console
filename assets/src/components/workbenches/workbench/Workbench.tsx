@@ -1,11 +1,13 @@
 import {
   Button,
   EmptyState,
+  EventScheduleIcon,
   Flex,
   ListBoxItem,
   ReturnIcon,
   TrashCanIcon,
   useSetBreadcrumbs,
+  WebhooksIcon,
 } from '@pluralsh/design-system'
 import { SubTabs } from 'components/utils/SubTabs'
 import { GqlError } from 'components/utils/Alert'
@@ -13,13 +15,12 @@ import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { StackedText } from 'components/utils/table/StackedText'
 import {
   useDeleteWorkbenchMutation,
   useWorkbenchQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { Key, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -37,11 +38,14 @@ import {
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
+import { Subtitle2H1 } from 'components/utils/typography/Text'
+import { TRUNCATE } from 'components/utils/truncate'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 const directory = [
-  { label: 'Jobs', path: '' },
+  { label: 'Run jobs', path: '' },
   { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
   { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
 ]
@@ -60,7 +64,15 @@ export type WorkbenchOutletContext = {
   isLoading: boolean
 }
 
+export enum WorkbenchMoreMenuKey {
+  Cron = 'cron',
+  Webhook = 'webhook',
+  SavedPrompts = 'saved-prompts',
+  Delete = 'delete',
+}
+
 export function Workbench() {
+  const theme = useTheme()
   const id = useParams()[WORKBENCH_PARAM_ID]
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
@@ -68,6 +80,24 @@ export function Workbench() {
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+
+  const handleMoreMenuSelection = (selectedKey: Key) => {
+    switch (selectedKey) {
+      case WorkbenchMoreMenuKey.Cron:
+        navigate(WORKBENCHES_CRON_SCHEDULES_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.Webhook:
+        navigate(WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.SavedPrompts:
+        return
+      case WorkbenchMoreMenuKey.Delete:
+        setDeleteModalOpen(true)
+        return
+      default:
+        return
+    }
+  }
 
   const { data, loading, error } = useWorkbenchQuery({ variables: { id } })
   const isLoading = !data && loading
@@ -129,16 +159,19 @@ export function Workbench() {
           activeFn={(path) => path === tab}
         />
         <StretchedFlex>
-          <StackedText
-            loading={isLoading}
-            first={workbench?.name}
-            firstPartialType="subtitle2"
-            firstColor="text"
-            second={workbench?.description}
-            secondPartialType="body2"
-            secondColor="text-xlight"
-            gap="xxsmall"
-          />
+          {isLoading ? (
+            <RectangleSkeleton
+              $height={18}
+              $width="75%"
+            />
+          ) : (
+            <Subtitle2H1
+              $color="text-xlight"
+              css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
+            >
+              {workbench?.description}
+            </Subtitle2H1>
+          )}
           <Flex gap="small">
             <Button
               small
@@ -146,31 +179,30 @@ export function Workbench() {
               as={Link}
               to={WORKBENCHES_EDIT_REL_PATH}
             >
-              Edit
-            </Button>
-            <Button
-              small
-              secondary
-              as={Link}
-              to={WORKBENCHES_CRON_SCHEDULES_REL_PATH}
-            >
-              Crons
-            </Button>
-            <Button
-              small
-              secondary
-              as={Link}
-              to={WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}
-            >
-              Webhooks
+              Edit workbench
             </Button>
             <MoreMenu
               disabled={!workbench}
               triggerProps={{ iconFrameType: 'secondary' }}
-              onSelectionChange={() => setDeleteModalOpen(true)}
+              onSelectionChange={handleMoreMenuSelection}
             >
               <ListBoxItem
-                key="delete"
+                key={WorkbenchMoreMenuKey.Cron}
+                leftContent={<EventScheduleIcon />}
+                label="Cron schedules"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Webhook}
+                leftContent={<WebhooksIcon />}
+                label="Webhook triggers"
+              />
+              {/* <ListBoxItem
+                key={WorkbenchMoreMenuKey.SavedPrompts}
+                leftContent={<BookmarkIcon />}
+                label="Saved prompts"
+              /> */}
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Delete}
                 destructive
                 leftContent={<TrashCanIcon color="icon-danger" />}
                 label="Delete workbench"

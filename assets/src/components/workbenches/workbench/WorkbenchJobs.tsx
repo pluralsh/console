@@ -1,9 +1,9 @@
 import { Divider, Flex } from '@pluralsh/design-system'
-import { StackedText } from 'components/utils/table/StackedText'
 import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
 import { WorkbenchJobsTable } from './WorkbenchJobsTable'
 import { useOutletContext } from 'react-router-dom'
 import { WorkbenchOutletContext } from './Workbench'
+import { Body2BoldP } from 'components/utils/typography/Text'
 
 export function WorkbenchJobs() {
   const { workbenchId, isLoading } = useOutletContext<WorkbenchOutletContext>()
@@ -20,14 +20,7 @@ export function WorkbenchJobs() {
         workbenchLoading={isLoading}
       />
       <Divider backgroundColor="border" />
-      <StackedText
-        first="Workbench jobs"
-        firstPartialType="body2Bold"
-        firstColor="text"
-        second="Current and previous jobs"
-        secondPartialType="body2"
-        secondColor="text-light"
-      />
+      <Body2BoldP>Workbench job history</Body2BoldP>
       <WorkbenchJobsTable workbenchId={workbenchId} />
     </Flex>
   )
