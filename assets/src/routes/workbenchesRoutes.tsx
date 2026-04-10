@@ -10,6 +10,8 @@ import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssue
 import { WorkbenchJobs } from 'components/workbenches/workbench/WorkbenchJobs'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
+import { SavedPrompts } from 'components/workbenches/workbench/prompts/SavedPrompts'
+import { SavedPromptForm } from 'components/workbenches/workbench/prompts/SavedPromptForm'
 import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/WebhookTriggers'
 import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
 import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
@@ -28,6 +30,8 @@ import {
   WORKBENCHES_TOOLS_REL_PATH,
   WORKBENCHES_CRON_PARAM_ID,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_SAVED_PROMPTS_REL_PATH,
+  WORKBENCHES_SAVED_PROMPT_PARAM_ID,
   WORKBENCHES_WEBHOOK_PARAM_ID,
   WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
@@ -88,6 +92,18 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
     element={<CronScheduleForm mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}`}
+    element={<SavedPrompts />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    element={<SavedPromptForm mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}/:${WORKBENCHES_SAVED_PROMPT_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
+    element={<SavedPromptForm mode="edit" />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}/:${WORKBENCHES_CRON_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}

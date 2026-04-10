@@ -1,4 +1,5 @@
 import {
+  BookmarkIcon,
   Button,
   EmptyState,
   EventScheduleIcon,
@@ -34,6 +35,7 @@ import {
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_SAVED_PROMPTS_REL_PATH,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
@@ -90,6 +92,7 @@ export function Workbench() {
         navigate(WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH)
         return
       case WorkbenchMoreMenuKey.SavedPrompts:
+        navigate(WORKBENCHES_SAVED_PROMPTS_REL_PATH)
         return
       case WorkbenchMoreMenuKey.Delete:
         setDeleteModalOpen(true)
@@ -185,11 +188,11 @@ export function Workbench() {
               leftContent={<WebhooksIcon />}
               label="Webhook triggers"
             />
-            {/* <ListBoxItem
-                key={WorkbenchMoreMenuKey.SavedPrompts}
-                leftContent={<BookmarkIcon />}
-                label="Saved prompts"
-              /> */}
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.SavedPrompts}
+              leftContent={<BookmarkIcon />}
+              label="Saved prompts"
+            />
             <ListBoxItem
               key={WorkbenchMoreMenuKey.Delete}
               destructive

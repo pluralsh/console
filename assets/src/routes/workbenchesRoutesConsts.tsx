@@ -3,10 +3,12 @@ export const WORKBENCHES_ABS_PATH = '/workbenches'
 export const WORKBENCHES_TOOLS_PARAM_ID = 'toolId'
 export const WORKBENCH_PARAM_ID = 'workbenchId'
 export const WORKBENCHES_CRON_PARAM_ID = 'cronId'
+export const WORKBENCHES_SAVED_PROMPT_PARAM_ID = 'savedPromptId'
 export const WORKBENCHES_WEBHOOK_PARAM_ID = 'webhookId'
 export const WORKBENCHES_CREATE_REL_PATH = 'create'
 export const WORKBENCHES_EDIT_REL_PATH = 'edit'
 export const WORKBENCHES_CRON_SCHEDULES_REL_PATH = 'cron-schedules'
+export const WORKBENCHES_SAVED_PROMPTS_REL_PATH = 'saved-prompts'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH = 'webhook-triggers'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH =
   'create-webhook'
@@ -42,6 +44,24 @@ export const getWorkbenchCronScheduleEditAbsPath = ({
   cronId: Nullable<string>
 }) =>
   `${getWorkbenchCronSchedulesAbsPath(workbenchId)}/${cronId ?? ''}/${WORKBENCHES_EDIT_REL_PATH}`
+
+export const getWorkbenchSavedPromptsAbsPath = (
+  workbenchId: Nullable<string>
+) => `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}`
+
+export const getWorkbenchSavedPromptCreateAbsPath = (
+  workbenchId: Nullable<string>
+) =>
+  `${getWorkbenchSavedPromptsAbsPath(workbenchId)}/${WORKBENCHES_CREATE_REL_PATH}`
+
+export const getWorkbenchSavedPromptEditAbsPath = ({
+  workbenchId,
+  savedPromptId,
+}: {
+  workbenchId: Nullable<string>
+  savedPromptId: Nullable<string>
+}) =>
+  `${getWorkbenchSavedPromptsAbsPath(workbenchId)}/${savedPromptId ?? ''}/${WORKBENCHES_EDIT_REL_PATH}`
 
 export const getWorkbenchWebhookTriggersAbsPath = (
   workbenchId: Nullable<string>
