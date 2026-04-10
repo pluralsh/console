@@ -13,7 +13,8 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchPrompt,
     WorkbenchSkill,
     WorkbenchWebhook,
-    WorkbenchJobActivityAgentRun
+    WorkbenchJobActivityAgentRun,
+    WorkbenchJobThought
   }
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -578,9 +579,11 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
   defp notify(pass, _, _), do: pass
 
-  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
+  def notify({:ok, %WorkbenchJobThought{} = thought}, :create),
+    do: handle_notify(PubSub.WorkbenchJobThoughtCreated, thought)
+  def notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity)
-  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
+  def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
     do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
-  defp notify(pass, _), do: pass
+  def notify(pass, _), do: pass
 end

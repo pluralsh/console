@@ -2,6 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
   alias Console.AI.Stream
+  alias Console.Deployments.Workbenches
   alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity}
   require Logger
 
@@ -40,9 +41,9 @@ defmodule Console.AI.Workbench.Subagents.Base do
   def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id}, {kind, content})
     when kind in [:content, :assistant] and is_binary(content),
     do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
-  def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id}, {:tool, content, %{name: name, arguments: args} = tool})
+  def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id} = activity, {:tool, content, %{name: name, arguments: args} = tool})
     when is_binary(content) do
-    save_thought(id, content, tool)
+    save_thought(activity, content, tool)
     publish_absinthe(%{
       activity_id: id,
       tool: name,
@@ -77,9 +78,11 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> poll_run(iter + 1)
   end
 
-  def save_thought(activity_id, content, %{name: name, arguments: args, attributes: %{} = attributes})
-      when is_binary(content) and is_binary(activity_id) do
-    %WorkbenchJobThought{activity_id: activity_id}
+  def save_thought(
+    %WorkbenchJobActivity{id: activity_id} = activity, content,
+    %{name: name, arguments: args, attributes: %{} = attributes}
+  ) when is_binary(content) and is_binary(activity_id) do
+    %WorkbenchJobThought{activity_id: activity_id, activity: activity}
     |> WorkbenchJobThought.changeset(%{
       content: content,
       attributes: attributes,
@@ -87,6 +90,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
       tool_args: args
     })
     |> Repo.insert()
+    |> Workbenches.notify(:create)
   end
   def save_thought(_, _, _), do: :ok
 

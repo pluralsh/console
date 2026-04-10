@@ -51,6 +51,10 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobActivityUpdated do
   def deliver(%{item: activity}), do: {activity, :update}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobThoughtCreated do
+  def deliver(%{item: thought}), do: {thought, :create}
+end
+
 # defimpl Console.PubSub.Rtc, for: [
 #   Console.PubSub.ServiceCreated,
 #   Console.PubSub.ServiceDeleted,
