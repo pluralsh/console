@@ -1,4 +1,4 @@
-import { Flex, IconFrame } from '@pluralsh/design-system'
+import { Button, Flex, IconFrame, PlusIcon } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import minBy from 'lodash/minBy'
@@ -12,10 +12,15 @@ import {
 } from './webhooks/utils'
 import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
-import { isEmpty } from 'lodash'
+import {
+  getWorkbenchCronScheduleCreateAbsPath,
+  getWorkbenchWebhookTriggerCreateAbsPath,
+} from 'routes/workbenchesRoutesConsts'
+import { useNavigate } from 'react-router-dom'
 
 export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
   const theme = useTheme()
+  const navigate = useNavigate()
 
   const { data } = useWorkbenchTriggersSummaryQuery({
     variables: { id: workbenchId },
@@ -54,33 +59,67 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
     [nextRunTime]
   )
 
-  if (!nextCron && webhooks.length === 0) return null
+  const hasCrons = crons.length > 0
+  const hasWebhooks = webhooks.length > 0
 
   return (
     <WrapperSC>
-      {nextCron && (
-        <SectionSC $first>
-          <HeaderSC>Cron schedules</HeaderSC>
-          {nextRunTimeParts ? (
-            <Body2P css={{ lineHeight: '20px' }}>
-              <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
-              {nextRunTimeParts.datePart}{' '}
-              <span css={{ color: theme.colors['code-block-purple'] }}>
-                {nextRunTimeParts.hourPart}
-              </span>{' '}
-              {nextRunTimeParts.zonePart}
-            </Body2P>
-          ) : nextRunTime ? (
-            <Body2P css={{ lineHeight: '20px' }}>
-              <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
-              {nextRunTime}
-            </Body2P>
-          ) : null}
-        </SectionSC>
-      )}
-      {!isEmpty(webhooks) && (
-        <SectionSC>
-          <HeaderSC>Webhooks</HeaderSC>
+      <SectionSC $first>
+        <HeaderSC>
+          <span>Cron schedules</span>
+          {hasCrons && (
+            <IconFrame
+              clickable
+              size="small"
+              icon={<PlusIcon />}
+              tooltip="Add cron schedule"
+              onClick={() =>
+                navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
+              }
+            />
+          )}
+        </HeaderSC>
+        {nextCron && nextRunTimeParts ? (
+          <Body2P css={{ lineHeight: '20px' }}>
+            <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
+            {nextRunTimeParts.datePart}{' '}
+            <span css={{ color: theme.colors['code-block-purple'] }}>
+              {nextRunTimeParts.hourPart}
+            </span>{' '}
+            {nextRunTimeParts.zonePart}
+          </Body2P>
+        ) : nextCron && nextRunTime ? (
+          <Body2P css={{ lineHeight: '20px' }}>
+            <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
+            {nextRunTime}
+          </Body2P>
+        ) : (
+          <Button
+            small
+            onClick={() =>
+              navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
+            }
+          >
+            Add cron schedule
+          </Button>
+        )}
+      </SectionSC>
+      <SectionSC>
+        <HeaderSC>
+          <span>Webhooks</span>
+          {hasWebhooks && (
+            <IconFrame
+              clickable
+              size="small"
+              icon={<PlusIcon />}
+              tooltip="Add webhook"
+              onClick={() =>
+                navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
+              }
+            />
+          )}
+        </HeaderSC>
+        {hasWebhooks ? (
           <Flex
             gap="small"
             flexWrap="nowrap"
@@ -111,8 +150,17 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
               </Flex>
             ))}
           </Flex>
-        </SectionSC>
-      )}
+        ) : (
+          <Button
+            small
+            onClick={() =>
+              navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
+            }
+          >
+            Add webhook
+          </Button>
+        )}
+      </SectionSC>
     </WrapperSC>
   )
 }
@@ -140,7 +188,10 @@ const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
   }),
 }))
 
-const HeaderSC = styled.p(({ theme }) => ({
+const HeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
 }))
