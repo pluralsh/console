@@ -50,13 +50,10 @@ const CrontabSC = styled.span(({ theme }) => ({
 const PromptSC = styled.p<{ $expanded: boolean }>(({ theme, $expanded }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
-  display: '-webkit-box',
+  display: $expanded ? 'block' : '-webkit-box',
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
-
-  ...($expanded
-    ? { WebkitLineClamp: 'unset', display: 'block' }
-    : { WebkitLineClamp: 3 }),
+  WebkitLineClamp: $expanded ? 'unset' : 3,
 }))
 
 const ToggleSC = styled.button(({ theme }) => ({

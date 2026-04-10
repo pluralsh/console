@@ -13,8 +13,6 @@ export function getToolIcon(toolType: Nullable<WorkbenchToolType>) {
       return <DatadogLogoIcon fullColor />
     case WorkbenchToolType.Prometheus:
       return <GrafanaLogoIcon fullColor />
-    case WorkbenchToolType.Grafana:
-      return <GrafanaLogoIcon fullColor />
     case WorkbenchToolType.Sentry:
       return <SentryLogoIcon />
     case WorkbenchToolType.Http:
