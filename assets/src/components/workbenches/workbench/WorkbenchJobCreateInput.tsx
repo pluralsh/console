@@ -12,6 +12,7 @@ import {
   ChatOptionPill,
 } from 'components/ai/chatbot/input/ChatInput'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
+import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -22,7 +23,7 @@ import {
 } from 'generated/graphql'
 import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
 import type { ComponentProps, RefObject } from 'react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
@@ -46,6 +47,7 @@ export function WorkbenchJobCreateInput({
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
+  const inputWrapperRef = useRef<HTMLDivElement>(null)
   const [prompt, setPrompt] = useState('')
   const [savedPromptsOpen, setSavedPromptsOpen] = useState(false)
 
@@ -62,6 +64,11 @@ export function WorkbenchJobCreateInput({
 
   const [savePrompt, { loading: savePromptLoading }] =
     useCreateWorkbenchPromptMutation()
+
+  useOutsideClick(inputWrapperRef, () => {
+    if (!savedPromptsOpen) return
+    setSavedPromptsOpen(false)
+  })
 
   const handleSubmitPrompt = (nextPrompt = prompt) => {
     const trimmedPrompt = nextPrompt.trim()
@@ -107,7 +114,7 @@ export function WorkbenchJobCreateInput({
   return (
     <>
       {error && <GqlError error={error} />}
-      <InputWrapperSC>
+      <InputWrapperSC ref={inputWrapperRef}>
         <ChatInputSimple
           ref={inputRef}
           placeholder="What would you like to investigate?"
