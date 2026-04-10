@@ -91,7 +91,10 @@ export function UserActivityResult({
 }) {
   const { prompt } = activity
   return (
-    <PromptCardSC>
+    <PromptCardSC
+      marginBottom="medium"
+      marginTop="medium"
+    >
       <SimplifiedMarkdown text={prompt ?? ''} />
     </PromptCardSC>
   )

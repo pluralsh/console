@@ -12,7 +12,7 @@
         },
         "prompt": {
             "type": "string", 
-            "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository."
+            "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository.  Commonmark Markdown formatting is encouraged to convey structure and semantic importance."
         }
     },
     "required": ["mode", "repository", "prompt"]
