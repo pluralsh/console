@@ -11,6 +11,7 @@ import {
   getWorkbenchWebhookTriggerCreateAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import { getWebhookIcon } from './webhooks/utils'
+import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
 import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
 
 export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
@@ -23,18 +24,51 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
   })
 
   const workbench = data?.workbench
+  const tools = useMemo(
+    () =>
+      (workbench?.tools ?? []).filter((t): t is NonNullable<typeof t> => !!t),
+    [workbench]
+  )
   const crons = useMemo(() => mapExistingNodes(workbench?.crons), [workbench])
   const webhooks = useMemo(
     () => mapExistingNodes(workbench?.webhooks),
     [workbench]
   )
 
+  const hasTools = !isEmpty(tools)
   const hasCrons = !isEmpty(crons)
   const hasWebhooks = !isEmpty(webhooks)
 
   return (
     <WrapperSC>
       <SectionSC $first>
+        <HeaderSC>
+          <span>Tools</span>
+        </HeaderSC>
+        {hasTools ? (
+          <Flex
+            gap="xxsmall"
+            direction="column"
+          >
+            {tools.map((tool) => (
+              <Flex
+                key={tool.id}
+                gap="xsmall"
+                align="center"
+              >
+                <ItemIconContainerSC>
+                  <IconFrame
+                    icon={<WorkbenchToolIcon type={tool.tool} />}
+                    size="xsmall"
+                  />
+                </ItemIconContainerSC>
+                <ItemNameSC>{tool.name}</ItemNameSC>
+              </Flex>
+            ))}
+          </Flex>
+        ) : null}
+      </SectionSC>
+      <SectionSC>
         <HeaderSC>
           <span>Webhooks</span>
           {hasWebhooks && (
@@ -60,13 +94,13 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
                 gap="xsmall"
                 align="center"
               >
-                <WebhookIconContainerSC>
+                <ItemIconContainerSC>
                   <IconFrame
                     icon={getWebhookIcon(webhook)}
                     size="xsmall"
                   />
-                </WebhookIconContainerSC>
-                <WebhookNameSC>{webhook.name}</WebhookNameSC>
+                </ItemIconContainerSC>
+                <ItemNameSC>{webhook.name}</ItemNameSC>
               </Flex>
             ))}
           </Flex>
@@ -163,7 +197,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
 }))
 
-const WebhookIconContainerSC = styled.div({
+const ItemIconContainerSC = styled.div({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -171,7 +205,7 @@ const WebhookIconContainerSC = styled.div({
   height: 20,
 })
 
-const WebhookNameSC = styled.span(({ theme }) => ({
+const ItemNameSC = styled.span(({ theme }) => ({
   ...TRUNCATE,
   color: theme.colors['text-light'],
 }))
