@@ -177,8 +177,11 @@ const WrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   flexGrow: 1,
   gap: theme.spacing.large,
+  minHeight: 0,
   minWidth: 250,
   maxWidth: 250,
+  overflowX: 'hidden',
+  overflowY: 'auto',
   padding: theme.spacing.medium,
 }))
 
