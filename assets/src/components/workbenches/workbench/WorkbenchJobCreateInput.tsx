@@ -28,8 +28,10 @@ import {
   getWorkbenchJobAbsPath,
   getWorkbenchSavedPromptsAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { Body2P } from '../../utils/typography/Text.tsx'
 
 const MAX_WIDTH = 924
 const SAVED_PROMPTS_LIMIT = 6
@@ -146,7 +148,6 @@ export function WorkbenchJobCreateInput({
         <WorkbenchSavedPromptsOverlay
           open={savedPromptsOpen}
           workbenchId={workbenchId}
-          loading={loading}
           onSelectPrompt={handleSubmitPrompt}
           onShowAll={() => {
             setSavedPromptsOpen(false)
@@ -161,13 +162,11 @@ export function WorkbenchJobCreateInput({
 function WorkbenchSavedPromptsOverlay({
   open,
   workbenchId,
-  loading,
   onSelectPrompt,
   onShowAll,
 }: {
   open: boolean
   workbenchId: string
-  loading: boolean
   onSelectPrompt: (prompt: string) => void
   onShowAll: () => void
 }) {
@@ -178,7 +177,7 @@ function WorkbenchSavedPromptsOverlay({
   } = useWorkbenchPromptsQuery({
     variables: {
       id: workbenchId,
-      first: SAVED_PROMPTS_LIMIT + 1,
+      first: SAVED_PROMPTS_LIMIT,
     },
     skip: !open || !workbenchId,
     fetchPolicy: 'cache-and-network',
@@ -189,9 +188,7 @@ function WorkbenchSavedPromptsOverlay({
     [data]
   )
   const visiblePrompts = prompts.slice(0, SAVED_PROMPTS_LIMIT)
-  const hasMorePrompts =
-    !!data?.workbench?.prompts?.pageInfo.hasNextPage ||
-    prompts.length > SAVED_PROMPTS_LIMIT
+  const hasMorePrompts = !!data?.workbench?.prompts?.pageInfo.hasNextPage
 
   if (!open) return null
 
@@ -209,7 +206,6 @@ function WorkbenchSavedPromptsOverlay({
             <SavedPromptsChip
               key={savedPrompt.id}
               label={savedPrompt.prompt ?? ''}
-              loading={loading}
               fillLevel={2}
               rightContent={
                 <ArrowUpIcon
@@ -220,7 +216,7 @@ function WorkbenchSavedPromptsOverlay({
               onClick={() => onSelectPrompt(savedPrompt.prompt ?? '')}
             />
           ))}
-          {visiblePrompts.length === 0 && (
+          {isEmpty(visiblePrompts) && (
             <EmptyPromptsTextSC>No saved prompts yet.</EmptyPromptsTextSC>
           )}
           {hasMorePrompts && (
@@ -238,33 +234,28 @@ function WorkbenchSavedPromptsOverlay({
 
 function SavedPromptsChip({
   label,
-  loading,
   fillLevel,
   rightContent,
   onClick,
 }: {
   label: string
-  loading?: boolean
   fillLevel?: ComponentProps<typeof Chip>['fillLevel']
   rightContent?: ComponentProps<typeof Chip>['rightContent']
   onClick: () => void
 }) {
-  const theme = useTheme()
-
   return (
     <Chip
       size="large"
       fillLevel={fillLevel}
-      clickable={!loading}
+      clickable
       onClick={onClick}
       css={{
         borderRadius: 16,
         width: 'fit-content',
-        opacity: loading ? 0.6 : 1,
         whiteSpace: 'pre-wrap',
       }}
     >
-      <span css={{ ...theme.partials.text.body2 }}>{label}</span>
+      <Body2P>{label}</Body2P>
       {rightContent}
     </Chip>
   )
