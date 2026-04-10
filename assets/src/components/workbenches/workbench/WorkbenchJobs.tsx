@@ -13,7 +13,6 @@ export function WorkbenchJobs() {
       direction="column"
       gap="large"
       minHeight={700}
-      paddingBottom={32}
     >
       <WorkbenchJobCreateInput
         workbenchId={workbenchId}

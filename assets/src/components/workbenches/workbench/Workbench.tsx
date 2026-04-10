@@ -148,7 +148,6 @@ export function Workbench() {
   return (
     <Flex
       direction="row"
-      gap="large"
       css={{
         height: '100%',
         minHeight: 0,
