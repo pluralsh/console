@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
 
   def implement(_, %__MODULE__{user: %User{} = user, service_id: id}) do
     Services.get_service(id)
-    |> Repo.preload([:repository, :cluster, :errors])
+    |> Repo.preload([:repository, :cluster, :errors, owner: :parent, parent: [:cluster]])
     |> Policies.allow(user, :read)
     |> case do
       {:ok, svc} -> {:ok, service_prompt(service: svc)}

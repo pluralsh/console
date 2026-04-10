@@ -53,5 +53,6 @@ You are producing output for a human user, and should expect them to want to rea
 Beyond simply answering all the questions you were asked, a few things to keep in mind:
 
 1. If you're passing a result that will ultimately be used for generation of a pull request, be sure to query and highlight owning gitops structure if a needed infrastructure config change is required.  Otherwise the coding agent will not be able to make the change safely.
+2. You will not understand the gitops structure fully until you understand it's parent repository (it might be traversed from a sequence of parent services).  This can often be efficiently found by leveraging the `service_files` or stack_files` tools.
 2. Generally analysis of an application level issue will not be solvable in GitOps, so no need to pass that information to the coding agent.
 3. If the system you're describing is a hybrid between kubernetes and cloud infrastructure, be sure to utilize the tools you have to query both and merge the analyses together.

@@ -23,6 +23,18 @@ Here are the details for the Plural service **<%= @service.name %>** (namespace:
 }, pretty: true) %>
 ```
 
+<%= if @service.parent do %>
+This service is created as a ServiceDeployment resource in a parent service with the following attributes:
+
+```json
+<%= Jason.encode!(%{
+  id: @service.parent.id,
+  name: @service.parent.name,
+  cluster: @service.parent.cluster.handle
+}, pretty: true) %>
+```
+<% end %>
+
 <%= if @service.repository do %>
 # Repository
 
@@ -64,4 +76,22 @@ Here are the details for the Plural service **<%= @service.name %>** (namespace:
   envsubst: @service.kustomize.envsubst
 }, pretty: true) %>
 ```
+<% end %>
+
+<%= if @service.owner do %>
+# Owning Global Service
+
+This service is owned by a GlobalService resource, which itself has this basic structure:
+
+```json
+<%= Jason.encode!(%{
+  parent_service: @service.owner.parent && %{id: @service.owner.parent.id, name: @service.owner.parent.name, cluster: @service.owner.parent.cluster.handle},
+  name: @service.owner.name,
+  distro: @service.owner.distro,
+  mgmt: @service.owner.mgmt,
+  tags: Enum.map(@service.owner.tags, & %{name: &1.name, value: &1.value})
+}, pretty: true) %>
+```
+
+If it has a parent, you can inspect that service itself to see how its GitOps configuration is managed.
 <% end %>
