@@ -844,7 +844,7 @@ type RootMutationType {
 
   deletePinnedCustomResource(id: ID!): PinnedCustomResource
 
-  addClusterAuditLog(audit: ClusterAuditAttributes!): Boolean
+  addClusterAuditLog(audit: ClusterAuditAttributes, audits: [ClusterAuditAttributes]): Boolean
 
   applyScalingRecommendation(
     "the id of the scaling recommendation to fix"

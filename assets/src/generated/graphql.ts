@@ -8886,7 +8886,8 @@ export type RootMutationTypeAddChatContextArgs = {
 
 
 export type RootMutationTypeAddClusterAuditLogArgs = {
-  audit: ClusterAuditAttributes;
+  audit?: InputMaybe<ClusterAuditAttributes>;
+  audits?: InputMaybe<Array<InputMaybe<ClusterAuditAttributes>>>;
 };
 
 
