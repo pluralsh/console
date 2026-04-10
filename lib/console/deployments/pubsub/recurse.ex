@@ -310,7 +310,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
   alias Console.Services.Users
   require EEx
 
-  def process(%@for{item: %Issue{workbench_id: wid, id: id} = issue}) when is_binary(wid) do
+  def process(%@for{item: %Issue{workbench_id: wid, id: id, status: :open} = issue}) when is_binary(wid) do
     Workbenches.create_workbench_job(%{
       prompt: prompt(issue: issue),
       issue_id: id,
