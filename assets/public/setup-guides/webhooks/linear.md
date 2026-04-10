@@ -1,45 +1,58 @@
-# Linear Webhook Setup for Plural
+# Linear webhook setup for Plural
 
-Generate markdown documentation for creating a webhook in Linear against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, new tickets, and issue status updates.
+Plural receives Linear events at a dedicated HTTPS URL and verifies each request using the same **signing secret** Linear uses for the `Linear-Signature` header (HMAC-SHA256 over the raw body). The secret must match exactly in both products. For background, see [Linear: Webhooks](https://linear.app/developers/webhooks) and [Securing webhooks](https://linear.app/developers/webhooks#securing-webhooks).
 
-## 1. Create the webhook in Plural
+Recommended order: create the webhook in Linear first with a **placeholder** URL so Linear generates a signing secret, create the Plural webhook with that secret, then point Linear at Plural’s real URL.
 
-In Plural, create webhook:
+## 1. Create the webhook in Linear (placeholder URL) and copy the signing secret
 
-- Type: Ticketing
-- Provider: LINEAR
-- URL: Plural endpoint URL
-- Secret: shared secret for request verification
+**Who can do this:** Only [workspace admins](https://linear.app/developers/webhooks) (or an OAuth app with `admin` scope) can create or read webhooks.
 
-## 2. Register URL and secret in Linear
+**Navigation:**
 
-In Linear workspace settings under API/Webhooks:
+1. Open Linear and go to **Settings**.  
+2. Open **API** ([linear.app/settings/api](https://linear.app/settings/api)).  
+3. In the webhooks section, choose **New webhook**.  
+4. Set **URL** to any **temporary placeholder** you control or a dummy HTTPS URL (for example a request bin or `https://example.com`—you will replace this in step 3). Linear requires a URL to create the webhook; deliveries to the placeholder may fail until you update the URL.  
+5. Set a **Label** and choose scope: **all public teams** or a **single team**.  
+6. Subscribe to the **resource types** you need. For ticketing automation in Plural, enable at least **Issue**; add **Comment**, **Issue labels**, **Project**, or others if your workflows need them.  
+7. Save the webhook.
 
-- Webhook URL: paste Plural URL
-- Secret/signing key: paste same secret from Plural
+**Copy the signing secret:**
 
-If Linear signs payloads, make sure Plural validates against this exact secret.
+1. Open that webhook’s **detail** page in Linear.  
+2. Copy the **signing secret** shown there (Linear uses it for `Linear-Signature` on each delivery). Store it securely.
 
-## 3. Configure event subscriptions
+## 2. Create the webhook in Plural with that signing secret
 
-Enable the events that should drive Plural automation:
+In the Plural workbench **Create webhook** flow:
 
-- Issue created (new tickets)
-- Issue updated
-- Priority changed
-- State changed (triaged/in progress/done)
+1. **Type of webhook**: Ticketing  
+2. **Provider type**: LINEAR  
+3. **Name**: A label you will recognize (for example `Linear production`).  
+4. **Secret**: Paste the **signing secret** you copied from Linear in step 1. It must match exactly—Plural verifies Linear’s HMAC with this value.
 
-Use team-based filters if only certain teams should send webhook data.
+Click **Create new webhook**. Plural then shows:
 
-## 4. Verify integration
+- **Webhook URL** — your real endpoint; copy it for step 3.  
+- **Secret** — confirmation of what you entered (same as Linear’s signing secret).
 
-Create a test issue and transition its state. In Plural verify:
+Use **Attach Your Webhook** when you are ready to continue in the trigger flow.
 
-- request accepted
-- event recorded
-- downstream automation or trigger evaluation runs correctly
+## 3. Update the Linear webhook to use Plural’s URL
+
+1. Return to Linear **Settings** → **API** and open the webhook you created in step 1.  
+2. **Edit** the webhook **URL** and replace the placeholder with the **Webhook URL** from Plural (step 2).  
+3. Save. Linear will send deliveries to Plural; signatures will verify because the signing secret already matches.
+
+## 4. Verify end-to-end
+
+1. Create or update an issue (or change state) in a team covered by the webhook.  
+2. In Plural, confirm the request is accepted and events appear as expected for your triggers.  
+3. If deliveries fail, confirm the endpoint returns **HTTP 200** within Linear’s timeout, and that **no** proxy rewrites the body (signature verification uses the **raw** body).
 
 ## 5. Maintenance
 
-- keep webhook ownership documented in your runbook
-- rotate secrets on schedule
+- Document owners and rotation in your runbook.  
+- Rotating the secret in Linear requires updating the same value in Plural (or recreating both sides in a coordinated way).  
+- Failed deliveries may be retried and persistent failures can disable the webhook in Linear until you re-enable it manually.

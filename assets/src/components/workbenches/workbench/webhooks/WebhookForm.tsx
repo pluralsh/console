@@ -397,7 +397,6 @@ function CreateWebhookForm({
       if (!createdWebhook) return
 
       setNewWebHook(createdWebhook)
-      onCreated(`obs:${createdWebhook.id}`)
       popToast({
         name: createdWebhook.name,
         action: 'created',
@@ -423,7 +422,6 @@ function CreateWebhookForm({
     if (!createdWebhook) return
 
     setNewWebHook(createdWebhook)
-    onCreated(`issue:${createdWebhook.id}`)
     popToast({
       name: createdWebhook.name,
       action: 'created',
@@ -447,8 +445,23 @@ function CreateWebhookForm({
             <Codeline>{newWebHook.url}</Codeline>
           </FormField>
           <FormField label="Secret">
-            <Codeline>{formState.observabilitySecret}</Codeline>
+            <Codeline>
+              {formState.webhookType === 'observability'
+                ? formState.observabilitySecret
+                : formState.issueSecret}
+            </Codeline>
           </FormField>
+          <Button
+            startIcon={returnPathIsList ? <ReturnIcon /> : undefined}
+            onClick={() =>
+              onCreated(
+                `${formState.webhookType === 'observability' ? 'obs' : 'issue'}:${newWebHook.id}`
+              )
+            }
+            disabled={isSaving}
+          >
+            Attach Your Webhook
+          </Button>
         </>
       )}
       <FormField
