@@ -154,15 +154,55 @@ export function Workbench() {
     >
       <WorkbenchSidePanel workbenchId={id} />
       <WrapperSC>
-        <SubTabs
-          directory={directory}
-          activeFn={(path) => path === tab}
-        />
+        <Flex
+          align="center"
+          gap="small"
+        >
+          <SubTabs
+            directory={directory}
+            activeFn={(path) => path === tab}
+          />
+          <Flex grow={1} />
+          <Button
+            secondary
+            as={Link}
+            to={WORKBENCHES_EDIT_REL_PATH}
+          >
+            Edit workbench
+          </Button>
+          <MoreMenu
+            disabled={!workbench}
+            triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
+            onSelectionChange={handleMoreMenuSelection}
+          >
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.Cron}
+              leftContent={<EventScheduleIcon />}
+              label="Cron schedules"
+            />
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.Webhook}
+              leftContent={<WebhooksIcon />}
+              label="Webhook triggers"
+            />
+            {/* <ListBoxItem
+                key={WorkbenchMoreMenuKey.SavedPrompts}
+                leftContent={<BookmarkIcon />}
+                label="Saved prompts"
+              /> */}
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.Delete}
+              destructive
+              leftContent={<TrashCanIcon color="icon-danger" />}
+              label="Delete workbench"
+            />
+          </MoreMenu>
+        </Flex>
         <StretchedFlex>
           {isLoading ? (
             <RectangleSkeleton
               $height={18}
-              $width="75%"
+              $width="100%"
             />
           ) : (
             <Subtitle2H1
@@ -172,43 +212,6 @@ export function Workbench() {
               {workbench?.description}
             </Subtitle2H1>
           )}
-          <Flex gap="small">
-            <Button
-              small
-              secondary
-              as={Link}
-              to={WORKBENCHES_EDIT_REL_PATH}
-            >
-              Edit workbench
-            </Button>
-            <MoreMenu
-              disabled={!workbench}
-              triggerProps={{ iconFrameType: 'secondary' }}
-              onSelectionChange={handleMoreMenuSelection}
-            >
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Cron}
-                leftContent={<EventScheduleIcon />}
-                label="Cron schedules"
-              />
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Webhook}
-                leftContent={<WebhooksIcon />}
-                label="Webhook triggers"
-              />
-              {/* <ListBoxItem
-                key={WorkbenchMoreMenuKey.SavedPrompts}
-                leftContent={<BookmarkIcon />}
-                label="Saved prompts"
-              /> */}
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Delete}
-                destructive
-                leftContent={<TrashCanIcon color="icon-danger" />}
-                label="Delete workbench"
-              />
-            </MoreMenu>
-          </Flex>
         </StretchedFlex>
         <Outlet context={{ workbenchId: id, isLoading }} />
         <Confirm
