@@ -1842,6 +1842,11 @@
          "name": "WorkbenchCrons",
          "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
+      "sha256:9be62bb395412a2b86b183c0641be0cdc868b59de54c7505d99a2060051d22f9": {
+         "type": "query",
+         "name": "WorkbenchPrompts",
+         "body": "query WorkbenchPrompts($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    prompts(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchPrompt\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchPrompt on WorkbenchPrompt {\n  id\n  prompt\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:bcba0a44bd2f5f8a72dc39040309db02eb30ec54770e42aaa7a8b923408a8002": {
          "type": "query",
          "name": "WorkbenchWebhooks",
@@ -1941,6 +1946,16 @@
          "type": "mutation",
          "name": "CreateWorkbenchPrompt",
          "body": "mutation CreateWorkbenchPrompt($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {\n  createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    prompt\n    insertedAt\n    __typename\n  }\n}"
+      },
+      "sha256:616b027d88592cf5d77caf2b7716fdb3238a55050635f9a2e7851f7fa980ce9d": {
+         "type": "mutation",
+         "name": "UpdateWorkbenchPrompt",
+         "body": "mutation UpdateWorkbenchPrompt($id: ID!, $attributes: WorkbenchPromptAttributes!) {\n  updateWorkbenchPrompt(id: $id, attributes: $attributes) {\n    ...WorkbenchPrompt\n    __typename\n  }\n}\n\nfragment WorkbenchPrompt on WorkbenchPrompt {\n  id\n  prompt\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
+      "sha256:3c0ac402ead502e6327e401ff0af307bebb773f31d0fbdd941bf6dd843c46f92": {
+         "type": "mutation",
+         "name": "DeleteWorkbenchPrompt",
+         "body": "mutation DeleteWorkbenchPrompt($id: ID!) {\n  deleteWorkbenchPrompt(id: $id) {\n    id\n    __typename\n  }\n}"
       },
       "sha256:2e157582bb9af080a192cfa5fd5962df5587a249d527069b907fc433cf3a9946": {
          "type": "mutation",

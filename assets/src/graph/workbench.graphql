@@ -216,6 +216,13 @@ fragment WorkbenchCron on WorkbenchCron {
   updatedAt
 }
 
+fragment WorkbenchPrompt on WorkbenchPrompt {
+  id
+  prompt
+  insertedAt
+  updatedAt
+}
+
 fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
@@ -395,6 +402,22 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchPrompts($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    prompts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchPrompt
         }
       }
     }
@@ -611,6 +634,21 @@ mutation CreateWorkbenchPrompt(
     id
     prompt
     insertedAt
+  }
+}
+
+mutation UpdateWorkbenchPrompt(
+  $id: ID!
+  $attributes: WorkbenchPromptAttributes!
+) {
+  updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+    ...WorkbenchPrompt
+  }
+}
+
+mutation DeleteWorkbenchPrompt($id: ID!) {
+  deleteWorkbenchPrompt(id: $id) {
+    id
   }
 }
 
