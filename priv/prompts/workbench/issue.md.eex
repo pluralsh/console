@@ -13,3 +13,13 @@ For reference, this is the webhook result from the original <%= @issue.provider 
 <%= Jason.encode!(@issue.payload) %>
 ```
 <% end %>
+
+<%= if @issue.provider == :linear do %>
+Linear provides a convenient way to link pull requests to linear issues.  Be sure to tell any coding agent to add:
+
+```
+Fixes {LINEAR_ISSUE_NUMBER}
+```
+
+to the pull request description for any pull requests created and replacing the correct issue number from the linear issue url.
+<% end %>
