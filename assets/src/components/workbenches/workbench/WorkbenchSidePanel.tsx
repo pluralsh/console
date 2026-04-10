@@ -6,10 +6,7 @@ import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime'
 import { formatPreviewTimestamp } from './crons/utils'
-import {
-  getIssueWebhookProviderIcon,
-  getObservabilityWebhookTypeIcon,
-} from './webhooks/utils'
+import { getWebhookIcon } from './webhooks/utils'
 import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
@@ -140,13 +137,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
                 }}
               >
                 <IconFrame
-                  icon={
-                    webhook.issueWebhook
-                      ? getIssueWebhookProviderIcon(
-                          webhook.issueWebhook.provider
-                        )
-                      : getObservabilityWebhookTypeIcon(webhook.webhook?.type)
-                  }
+                  icon={getWebhookIcon(webhook)}
                   size="xsmall"
                 />
                 <span css={{ ...TRUNCATE }}>{webhook.name}</span>

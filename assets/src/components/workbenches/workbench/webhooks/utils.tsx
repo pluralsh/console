@@ -68,3 +68,10 @@ export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
       return <WebhooksIcon />
   }
 }
+
+export function getWebhookIcon(webhook: WorkbenchWebhookFragment) {
+  if (webhook.issueWebhook) {
+    return getIssueWebhookProviderIcon(webhook.issueWebhook.provider)
+  }
+  return getObservabilityWebhookTypeIcon(webhook.webhook?.type)
+}

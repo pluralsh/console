@@ -236,6 +236,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
     id
     name
     url
+    provider
   }
 }
 
@@ -461,10 +462,12 @@ query WorkbenchTriggersSummary($id: ID!) {
             id
             name
             type
+            url
           }
           issueWebhook {
             id
             name
+            url
             provider
           }
         }
