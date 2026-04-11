@@ -661,7 +661,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
           body: "The API returns 500 on invalid input"
         )
 
-      event = %PubSub.IssueCreated{item: %{issue | state_changed: true}}
+      event = %PubSub.IssueCreated{item: %{issue | status_changed: true}}
       {:ok, job} = Recurse.handle_event(event)
 
       assert job.workbench_id == workbench.id
@@ -684,7 +684,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
           body: "The API returns 500 on invalid input"
         )
 
-      event = %PubSub.IssueUpdated{item: %{issue | state_changed: true}}
+      event = %PubSub.IssueUpdated{item: %{issue | status_changed: true}}
       {:ok, job} = Recurse.handle_event(event)
 
       assert job.workbench_id == workbench.id
