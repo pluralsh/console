@@ -17,7 +17,7 @@ defmodule Console.AI.Provider.Base do
   def generate_text(messages, model, %Stream{} = s, opts) do
     with {:ok, model} <- model(model),
          {:ok, stream} <- stream_retrier(model, messages, opts),
-         {:ok, result} <- StreamResponse.process_stream(stream, Stream.stream_options(IO.inspect(s, label: "stream options"))) do
+         {:ok, result} <- StreamResponse.process_stream(stream, Stream.stream_options(s) |> IO.inspect(label: "stream options")) do
       Stream.offset(1)
       {:ok, result}
     end
