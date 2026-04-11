@@ -15669,6 +15669,8 @@ export type WorkbenchWebhook = {
   matches?: Maybe<WorkbenchWebhookMatches>;
   /** name of this webhook trigger */
   name?: Maybe<Scalars['String']['output']>;
+  /** optional prompt text applied when this webhook matches */
+  prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the observability webhook that receives events */
   webhook?: Maybe<ObservabilityWebhook>;
@@ -15683,6 +15685,8 @@ export type WorkbenchWebhookAttributes = {
   matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
   /** unique name for this webhook on the workbench (required for create) */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** optional prompt text applied when this webhook matches */
+  prompt?: InputMaybe<Scalars['String']['input']>;
   /** observability webhook to receive events (either webhook_id or issue_webhook_id required) */
   webhookId?: InputMaybe<Scalars['ID']['input']>;
 };

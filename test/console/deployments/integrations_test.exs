@@ -126,6 +126,7 @@ defmodule Console.Deployments.IntegrationsTest do
       assert issue.body == "Users cannot log in on mobile"
       assert issue.payload == linear_issue
       assert issue.workbench_id == wh.workbench.id
+      assert issue.webhook.id == wh.id
 
       assert_receive {:event, %PubSub.IssueCreated{item: ^issue}}
     end

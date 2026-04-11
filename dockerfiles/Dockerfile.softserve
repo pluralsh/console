@@ -28,7 +28,7 @@ RUN apk add openssh-client
 # Reason that we manually install soft-serve instead of using the soft-serve docker image is that
 # the soft-serve image starts the server without allowing us to set admin ssh keys, thus preventing
 # us from importing repos
-RUN go install github.com/pluralsh/soft-serve/cmd/soft@999f18950bd691afb1691d10a66a5134f5afcb7c
+RUN go install github.com/pluralsh/soft-serve/cmd/soft@latest
 RUN mv /go/bin/soft /usr/bin/
 
 # soft-serve data folder
@@ -38,11 +38,10 @@ RUN mkdir -p /data
 COPY bin/softserve_setup.sh .
 RUN chmod 777 softserve_setup.sh
 RUN sh softserve_setup.sh
-ENTRYPOINT [ "soft", "serve" ]
 
 # soft-serve server which will actually run indefinitely
 # we want to copy the /data folder from the builder image since that contains all the files used by soft-serve
-FROM golang:1.26.2-alpine AS server
+FROM alpine:3.23 AS server
 
 EXPOSE 23231
 EXPOSE 23232
@@ -54,17 +53,16 @@ RUN apk update --no-cache
 # Upgrade OpenSSL packages to fix CVE-2025-1670 (NULL pointer dereference in CMS EnvelopedData processing)
 RUN apk add --no-cache "libssl3>=3.5.6-r0" "libcrypto3>=3.5.6-r0"
 # Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
-RUN apk upgrade --no-cache libexpat
-# Upgrade zlib to fix buffer overflow vulnerability in untgz utility (CVE in zlib <= 1.3.1)
-RUN apk upgrade --no-cache zlib
+RUN apk upgrade --no-cache libexpat musl musl-utils zlib
 RUN apk add git
 
 COPY --from=builder /usr/bin/soft /usr/bin/
+COPY --from=builder /data /data
 COPY --from=builder /go/data /go/data
 
 RUN addgroup -g 65543 softserve
 RUN adduser -u 65543 -G softserve -D softserve
-RUN chown -R softserve:softserve /go/data
+RUN chown -R softserve:softserve /go/data && chown -R softserve:softserve /data
 USER softserve
 
 ENTRYPOINT [ "soft", "serve" ]

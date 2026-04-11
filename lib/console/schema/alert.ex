@@ -31,6 +31,7 @@ defmodule Console.Schema.Alert do
     field :annotations, :map
     field :payload,     :map
     field :url,         :string
+    field :webhook,        :map, virtual: true
 
     field :ai_poll_at, :utc_datetime_usec
 
@@ -162,6 +163,7 @@ defmodule Console.Schema.Alert do
     monitor_id
     workbench_id
     ai_poll_at
+    webhook
   )a
 
   def changeset(model, attrs) do

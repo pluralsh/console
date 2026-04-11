@@ -14,6 +14,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+
 jobs:
   publish-softserve-docker:
     name: Build and push softserve

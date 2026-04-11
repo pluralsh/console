@@ -14,6 +14,7 @@ defmodule Console.Schema.Issue do
     field :body,           :string
     field :payload,        :map
     field :status_changed, :boolean, virtual: true, default: false
+    field :webhook,        :map, virtual: true
 
     belongs_to :workbench,  Workbench
     belongs_to :flow,       Flow
@@ -49,7 +50,7 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.status == ^status)
   end
 
-  @valid ~w(provider status external_id url title body payload workbench_id flow_id)a
+  @valid ~w(provider status external_id url title body payload workbench_id flow_id webhook)a
 
   def changeset(model, attrs \\ %{}) do
     model

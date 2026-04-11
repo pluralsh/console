@@ -1,11 +1,11 @@
 We've found the following alert from <%= @alert.type %>, please investigate it's root cause and provide any supporting evidence to explain why it is happening.
 
-# <%= @alert.title %>
+## <%= @alert.title %>
 
 <%= @alert.message %>
 
 <%= if is_list(@alert.tags) do %>
-# Tags
+### Tags
 <%= Enum.map(@alert.tags, & "- #{&1.name}: #{&1.value}") |> Enum.join("\n") %>
 <% end %>
 <%= if is_map(@alert.stacktrace) do %>
@@ -17,12 +17,22 @@ There's also an associated stacktrace, which I'll provide in JSON format:
 <% end %>
 
 <%= if @alert.payload do %>
-# Payload
+## Payload
 
 For reference, this is the webhook result from the original <%= @alert.type %> webhook:
 
 ```json
 <%= Jason.encode!(@alert.payload) %>
+```
+<% end %>
+
+<%= if @alert.webhook && @alert.webhook.prompt do %>
+## User Notes
+
+The user has provided the following notes attached to this alert webhook receiver, which could be useful for your investigation as well:
+
+```
+<%= @alert.webhook.prompt %>
 ```
 <% end %>
 

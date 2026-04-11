@@ -10178,6 +10178,8 @@ type WorkbenchWebhook struct {
 	ID string `json:"id"`
 	// name of this webhook trigger
 	Name *string `json:"name,omitempty"`
+	// optional prompt text applied when this webhook matches
+	Prompt *string `json:"prompt,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
 	// the workbench this webhook belongs to
@@ -10199,6 +10201,8 @@ type WorkbenchWebhookAttributes struct {
 	IssueWebhookID *string `json:"issueWebhookId,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
+	// optional prompt text applied when this webhook matches
+	Prompt *string `json:"prompt,omitempty"`
 }
 
 type WorkbenchWebhookConnection struct {

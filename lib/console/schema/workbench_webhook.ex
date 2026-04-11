@@ -4,6 +4,7 @@ defmodule Console.Schema.WorkbenchWebhook do
 
   schema "workbench_webhooks" do
     field :name,    :string
+    field :prompt,  :string
 
     embeds_one :matches, Matches, on_replace: :update do
       field :regex,            :string
@@ -46,7 +47,7 @@ defmodule Console.Schema.WorkbenchWebhook do
     from(w in query, where: w.issue_webhook_id == ^issue_webhook_id)
   end
 
-  @valid ~w(name webhook_id issue_webhook_id workbench_id)a
+  @valid ~w(name webhook_id issue_webhook_id workbench_id prompt)a
 
   def changeset(model, attrs \\ %{}) do
     model
