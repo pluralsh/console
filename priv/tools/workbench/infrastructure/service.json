@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "service_id": {
+            "type": "string",
+            "description": "UUID of the Plural service (from plrl_cluster_services or the API)"
+        }
+    },
+    "required": ["service_id"]
+}

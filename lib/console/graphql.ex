@@ -51,7 +51,7 @@ defmodule Console.GraphQl do
   end
 
   def plugins do
-    [Absinthe.Middleware.Dataloader] ++ Absinthe.Plugin.defaults()
+    [Absinthe.Middleware.Dataloader, Console.GraphQl.Introspection] ++ Absinthe.Plugin.defaults()
   end
 
   def middleware(middleware, _field, %{identifier: type}) when type in [:query, :mutation] do

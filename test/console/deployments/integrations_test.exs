@@ -36,13 +36,12 @@ defmodule Console.Deployments.IntegrationsTest do
 
       {:ok, webhook} = Integrations.create_issue_webhook(%{
         provider: :linear,
-        url: "https://issues.example.com/webhook",
         name: "test-issue-webhook",
         secret: "webhook-secret"
       }, admin)
 
       assert webhook.name == "test-issue-webhook"
-      assert webhook.url == "https://issues.example.com/webhook"
+      assert Console.Schema.IssueWebhook.url(webhook)
       assert webhook.provider == :linear
       assert_receive {:event, %PubSub.IssueWebhookCreated{item: ^webhook}}
     end

@@ -1,5 +1,6 @@
 defmodule Console.Pipelines.AI.Workbench.Pipeline do
   use Console.Pipelines.Consumer
+  alias Console.Deployments.Workbenches
   alias Console.AI.Workbench.Engine
   require Logger
 
@@ -14,7 +15,8 @@ defmodule Console.Pipelines.AI.Workbench.Pipeline do
   end
 
   defp exec_job(job) do
-    with {:ok, engine} <- Engine.new(job),
+    with {:ok, job} <- Workbenches.heartbeat(job),
+         {:ok, engine} <- Engine.new(job),
       do: Engine.run(engine)
   end
 end

@@ -28,6 +28,8 @@ defmodule Console.Schema.AgentRun do
     field :branch,           :string
     field :error,            :binary
 
+    field :tool, :map, virtual: true
+
     embeds_one :pod_reference, NamespacedName, on_replace: :update
 
     embeds_many :todos, Todo, on_replace: :delete do

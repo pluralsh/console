@@ -114,6 +114,16 @@ fragment WorkbenchTool on WorkbenchTool {
   }
 }
 
+fragment WorkbenchJobThought on WorkbenchJobThought {
+  id
+  content
+  toolName
+  toolArgs
+  activity {
+    id
+  }
+}
+
 fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
   name
   description
@@ -137,6 +147,7 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
   conclusion
+  topology
   todos {
     ...WorkbenchJobResultTodo
   }
@@ -162,8 +173,12 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  thoughts {
+    ...WorkbenchJobThought
+  }
   result {
     output
+    error
     jobUpdate {
       diff
       workingTheory
@@ -192,10 +207,7 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
     }
   }
   agentRun {
-    id
-    pullRequests {
-      ...PullRequestBasic
-    }
+    ...AgentRun
   }
 }
 
@@ -206,12 +218,24 @@ fragment WorkbenchJobProgress on WorkbenchJobProgress {
   arguments
 }
 
+fragment WorkbenchTextStream on WorkbenchTextStream {
+  activityId
+  text
+}
+
 fragment WorkbenchCron on WorkbenchCron {
   id
   crontab
   prompt
   lastRunAt
   nextRunAt
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchPrompt on WorkbenchPrompt {
+  id
+  prompt
   insertedAt
   updatedAt
 }
@@ -236,6 +260,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
     id
     name
     url
+    provider
   }
 }
 
@@ -250,13 +275,10 @@ fragment WorkbenchIssue on Issue {
   updatedAt
   workbench {
     id
-    runs(first: 1) {
-      edges {
-        node {
-          id
-        }
-      }
-    }
+  }
+  workbenchJob {
+    id
+    status
   }
 }
 
@@ -282,6 +304,9 @@ fragment WorkbenchJob on WorkbenchJob {
   }
   result {
     ...WorkbenchJobResult
+  }
+  pullRequests {
+    ...PullRequestBasic
   }
 }
 
@@ -362,6 +387,28 @@ query WorkbenchesIssues($first: Int = 100, $after: String) {
   }
 }
 
+query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    issues(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+
+mutation GetWorkbenchCron($id: ID!) {
+  workbenchCron(id: $id) {
+    ...WorkbenchCron
+  }
+}
+
 query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
@@ -372,6 +419,22 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchPrompts($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    prompts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchPrompt
         }
       }
     }
@@ -394,22 +457,65 @@ query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+mutation GetWorkbenchWebhook($id: ID!) {
+  getWorkbenchWebhook(id: $id) {
+    ...WorkbenchWebhook
+  }
+}
+
+query IssueWebhooks($first: Int, $after: String) {
+  issueWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        id
+        name
+        provider
+        url
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
 query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
     id
     name
     description
-    crons(first: 1) {
+    tools {
+      id
+      name
+      tool
+    }
+    crons(first: 30) {
       edges {
         node {
           id
+          crontab
+          prompt
+          nextRunAt
         }
       }
     }
-    webhooks(first: 1) {
+    webhooks(first: 30) {
       edges {
         node {
           id
+          name
+          webhook {
+            id
+            name
+            type
+            url
+          }
+          issueWebhook {
+            id
+            name
+            url
+            provider
+          }
         }
       }
     }
@@ -425,6 +531,7 @@ query WorkbenchJob($id: ID!) {
 query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
+    status
     prompt
     activities(first: 100) {
       edges {
@@ -454,9 +561,18 @@ subscription WorkbenchJobActivityDelta($jobId: ID!) {
   }
 }
 
-subscription WorkbenchJobProgress($jobId: ID!) {
-  workbenchJobProgress(jobId: $jobId) {
-    ...WorkbenchJobProgress
+subscription WorkbenchJobThoughtDelta($jobId: ID!) {
+  workbenchJobThoughtDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobThought
+    }
+  }
+}
+
+subscription WorkbenchTextStream($jobId: ID!) {
+  workbenchTextStream(jobId: $jobId) {
+    ...WorkbenchTextStream
   }
 }
 
@@ -527,6 +643,41 @@ mutation CreateWorkbenchJob(
   }
 }
 
+mutation CreateWorkbenchMessage(
+  $jobId: ID!
+  $attributes: WorkbenchMessageAttributes!
+) {
+  createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
+    ...WorkbenchJobActivity
+  }
+}
+
+mutation CreateWorkbenchPrompt(
+  $workbenchId: ID!
+  $attributes: WorkbenchPromptAttributes!
+) {
+  createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    prompt
+    insertedAt
+  }
+}
+
+mutation UpdateWorkbenchPrompt(
+  $id: ID!
+  $attributes: WorkbenchPromptAttributes!
+) {
+  updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+    ...WorkbenchPrompt
+  }
+}
+
+mutation DeleteWorkbenchPrompt($id: ID!) {
+  deleteWorkbenchPrompt(id: $id) {
+    id
+  }
+}
+
 mutation CreateWorkbenchCron(
   $workbenchId: ID!
   $attributes: WorkbenchCronAttributes!
@@ -570,5 +721,14 @@ mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
     id
     name
+  }
+}
+
+mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
+  createIssueWebhook(attributes: $attributes) {
+    id
+    name
+    provider
+    url
   }
 }

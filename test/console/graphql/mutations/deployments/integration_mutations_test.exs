@@ -45,14 +45,13 @@ defmodule Console.GraphQl.Deployments.IntegrationMutationsTest do
         }
       """, %{"attrs" => %{
         "provider" => "LINEAR",
-        "url" => "https://linear.app/hook/example",
         "name" => "my-issue-webhook",
         "secret" => "webhook-secret"
       }}, %{current_user: admin_user()})
 
       assert webhook["name"] == "my-issue-webhook"
       assert webhook["provider"] == "LINEAR"
-      assert webhook["url"] =~ "/v1/webhooks/issues/"
+      assert is_binary(webhook["url"])
     end
   end
 

@@ -31,6 +31,10 @@ defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
   end
   def to_proto(_), do: nil
 
+  def to_datetime(%Google.Protobuf.Timestamp{} = timestamp),
+    do: Google.Protobuf.to_datetime(timestamp)
+  def to_datetime(_), do: nil
+
   defp to_proto_timestamp(%DateTime{} = datetime),
     do: Google.Protobuf.from_datetime(datetime)
   defp to_proto_timestamp(_), do: nil

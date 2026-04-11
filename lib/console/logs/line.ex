@@ -1,6 +1,7 @@
 defmodule Console.Logs.Line do
   @type t :: %__MODULE__{facets: [%{key: binary, value: binary}]}
 
+  @derive Jason.Encoder
   defstruct [:timestamp, :log, :facets]
 
   def new(map) do

@@ -1,36 +1,56 @@
 import {
+  BookmarkIcon,
   Button,
-  Divider,
   EmptyState,
+  EventScheduleIcon,
   Flex,
   ListBoxItem,
   ReturnIcon,
   TrashCanIcon,
   useSetBreadcrumbs,
+  WebhooksIcon,
 } from '@pluralsh/design-system'
+import { SubTabs } from 'components/utils/SubTabs'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { StackedText } from 'components/utils/table/StackedText'
 import {
   useDeleteWorkbenchMutation,
   useWorkbenchQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Key, useMemo, useState } from 'react'
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EDIT_REL_PATH,
-  WORKBENCHES_TRIGGERS_REL_PATH,
+  WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_SAVED_PROMPTS_REL_PATH,
+  WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
+  WORKBENCHES_ALERTS_REL_PATH,
+  WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
-import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
-import { WorkbenchJobsTable } from './WorkbenchJobsTable'
+import styled, { useTheme } from 'styled-components'
+import { WorkbenchSidePanel } from './WorkbenchSidePanel'
+import { Subtitle2H1 } from 'components/utils/typography/Text'
+import { TRUNCATE } from 'components/utils/truncate'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+
+const directory = [
+  { label: 'Run jobs', path: '' },
+  { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
+  { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
+]
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
@@ -41,11 +61,46 @@ export const getWorkbenchBreadcrumbs = (
     : []),
 ]
 
+export type WorkbenchOutletContext = {
+  workbenchId: string
+  isLoading: boolean
+}
+
+export enum WorkbenchMoreMenuKey {
+  Cron = 'cron',
+  Webhook = 'webhook',
+  SavedPrompts = 'saved-prompts',
+  Delete = 'delete',
+}
+
 export function Workbench() {
+  const theme = useTheme()
   const id = useParams()[WORKBENCH_PARAM_ID]
+  const { tab = '' } =
+    useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
+      ?.params ?? {}
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+
+  const handleMoreMenuSelection = (selectedKey: Key) => {
+    switch (selectedKey) {
+      case WorkbenchMoreMenuKey.Cron:
+        navigate(WORKBENCHES_CRON_SCHEDULES_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.Webhook:
+        navigate(WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.SavedPrompts:
+        navigate(WORKBENCHES_SAVED_PROMPTS_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.Delete:
+        setDeleteModalOpen(true)
+        return
+      default:
+        return
+    }
+  }
 
   const { data, loading, error } = useWorkbenchQuery({ variables: { id } })
   const isLoading = !data && loading
@@ -91,89 +146,106 @@ export function Workbench() {
     )
 
   return (
-    <WrapperSC>
-      <StretchedFlex>
-        <StackedText
-          loading={isLoading}
-          first={workbench?.name}
-          firstPartialType="subtitle2"
-          firstColor="text"
-          second={workbench?.description}
-          secondPartialType="body2"
-          secondColor="text-xlight"
-          gap="xxsmall"
-        />
-        <Flex gap="small">
+    <Flex
+      direction="row"
+      css={{
+        height: '100%',
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
+    >
+      <WorkbenchSidePanel workbenchId={id} />
+      <WrapperSC>
+        <Flex
+          align="center"
+          gap="small"
+        >
+          <SubTabs
+            directory={directory}
+            activeFn={(path) => path === tab}
+          />
+          <Flex grow={1} />
           <Button
-            small
             secondary
             as={Link}
             to={WORKBENCHES_EDIT_REL_PATH}
           >
             Edit workbench
           </Button>
-          <Button
-            small
-            secondary
-            as={Link}
-            to={WORKBENCHES_TRIGGERS_REL_PATH}
-          >
-            Triggers
-          </Button>
           <MoreMenu
             disabled={!workbench}
-            triggerProps={{ iconFrameType: 'secondary' }}
-            onSelectionChange={() => setDeleteModalOpen(true)}
+            triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
+            onSelectionChange={handleMoreMenuSelection}
           >
             <ListBoxItem
-              key="delete"
+              key={WorkbenchMoreMenuKey.Cron}
+              leftContent={<EventScheduleIcon />}
+              label="Cron schedules"
+            />
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.Webhook}
+              leftContent={<WebhooksIcon />}
+              label="Webhook triggers"
+            />
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.SavedPrompts}
+              leftContent={<BookmarkIcon />}
+              label="Saved prompts"
+            />
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.Delete}
               destructive
               leftContent={<TrashCanIcon color="icon-danger" />}
               label="Delete workbench"
             />
           </MoreMenu>
         </Flex>
-      </StretchedFlex>
-      <WorkbenchJobCreateInput
-        workbenchId={id}
-        workbenchLoading={isLoading}
-      />
-      <Divider backgroundColor="border" />
-      <StackedText
-        first="Workbench jobs"
-        firstPartialType="body2Bold"
-        firstColor="text"
-        second="Current and previous jobs"
-        secondPartialType="body2"
-        secondColor="text-light"
-      />
-      <WorkbenchJobsTable workbenchId={id} />
-      <Confirm
-        open={deleteModalOpen}
-        close={() => setDeleteModalOpen(false)}
-        destructive
-        label="Delete workbench"
-        loading={deleteLoading}
-        error={deleteError}
-        submit={() => deleteWorkbench({ variables: { id } })}
-        title="Delete workbench"
-        confirmationEnabled
-        confirmationText="delete workbench"
-        text={
-          <span>
-            Are you sure you want to delete{' '}
-            <strong>{workbench?.name ?? 'this workbench'}</strong>?
-          </span>
-        }
-      />
-    </WrapperSC>
+        <StretchedFlex>
+          {isLoading ? (
+            <RectangleSkeleton
+              $height={18}
+              $width="100%"
+            />
+          ) : (
+            <Subtitle2H1
+              $color="text-xlight"
+              css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
+            >
+              {workbench?.description}
+            </Subtitle2H1>
+          )}
+        </StretchedFlex>
+        <Outlet context={{ workbenchId: id, isLoading }} />
+        <Confirm
+          open={deleteModalOpen}
+          close={() => setDeleteModalOpen(false)}
+          destructive
+          label="Delete workbench"
+          loading={deleteLoading}
+          error={deleteError}
+          submit={() => deleteWorkbench({ variables: { id } })}
+          title="Delete workbench"
+          confirmationEnabled
+          confirmationText="delete workbench"
+          text={
+            <span>
+              Are you sure you want to delete{' '}
+              <strong>{workbench?.name ?? 'this workbench'}</strong>?
+            </span>
+          }
+        />
+      </WrapperSC>
+    </Flex>
   )
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   gap: theme.spacing.large,
-  padding: theme.spacing.large,
   minHeight: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+  padding: theme.spacing.large,
 }))

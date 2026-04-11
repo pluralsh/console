@@ -21,4 +21,5 @@ defmodule Console.AI.Tools.Workbench.FetchNotes do
     Console.mapify(result)
     |> Jason.encode()
   end
+  def implement(_, _), do: {:ok, "no notes set up yet"}
 end

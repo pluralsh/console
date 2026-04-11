@@ -82,7 +82,7 @@ export function WorkbenchesList() {
 
 function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
   const { spacing } = useTheme()
-  const { id, name, description, tools: t, repository } = workbench
+  const { id, name, description, tools: t } = workbench
   const tools = t?.filter(isNonNullable) ?? []
   return (
     <CardSC
@@ -94,7 +94,6 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
         first={name}
         firstPartialType="body2Bold"
         firstColor="text"
-        second={repository?.httpsPath}
       />
       <Body2P
         $color="text-light"

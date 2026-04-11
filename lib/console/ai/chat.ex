@@ -412,7 +412,13 @@ defmodule Console.AI.Chat do
   Finds all MCP tools associated with a chat thread
   """
   @spec find_tools(ChatThread.t) :: {:ok, [McpTool.t]} | Console.error
-  def find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread), do: Discovery.tools(thread)
+  def find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread) do
+    case Discovery.tools(thread) do
+      {:ok, tools} -> {:ok, tools}
+      {:error, _} = err -> err
+      err -> {:error, "internal mcp error: #{inspect(err)}"}
+    end
+  end
   def find_tools(_), do: {:ok, []}
 
   @doc """

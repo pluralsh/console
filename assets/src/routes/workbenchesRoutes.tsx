@@ -5,10 +5,18 @@ import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
 import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
+import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
+import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
+import { WorkbenchJobs } from 'components/workbenches/workbench/WorkbenchJobs'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
-import { WorkbenchScheduleTrigger } from 'components/workbenches/workbench/triggers/WorkbenchScheduleTrigger'
-import { WorkbenchWebhookTrigger } from 'components/workbenches/workbench/triggers/WorkbenchWebhookTrigger'
-import { Navigate, Route } from 'react-router-dom'
+import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
+import { SavedPrompts } from 'components/workbenches/workbench/prompts/SavedPrompts'
+import { SavedPromptForm } from 'components/workbenches/workbench/prompts/SavedPromptForm'
+import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/WebhookTriggers'
+import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
+import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
+import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
+import { Route } from 'react-router-dom'
 import {
   WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
@@ -20,12 +28,15 @@ import {
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
   WORKBENCHES_TOOLS_REL_PATH,
-  WORKBENCHES_TRIGGERS_REL_PATH,
-  WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
-  WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
+  WORKBENCHES_CRON_PARAM_ID,
+  WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_SAVED_PROMPTS_REL_PATH,
+  WORKBENCHES_SAVED_PROMPT_PARAM_ID,
+  WORKBENCHES_WEBHOOK_PARAM_ID,
+  WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH,
+  WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
 } from './workbenchesRoutesConsts'
 import { WorkbenchJob } from 'components/workbenches/workbench/job/WorkbenchJob'
-import { WorkbenchTriggers } from '../components/workbenches/workbench/triggers/WorkbenchTriggers.tsx'
 
 export const workbenchesRoutes = [
   <Route
@@ -56,33 +67,64 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}`}
     element={<Workbench />}
-  />,
+  >
+    <Route
+      index
+      element={<WorkbenchJobs />}
+    />
+    <Route
+      path={WORKBENCHES_ISSUES_REL_PATH}
+      element={<WorkbenchIssues />}
+    />
+    <Route
+      path={WORKBENCHES_ALERTS_REL_PATH}
+      element={<WorkbenchAlerts />}
+    />
+  </Route>,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<WorkbenchCreateOrEdit mode="edit" />}
   />,
   <Route
-    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_TRIGGERS_REL_PATH}`}
-    element={<WorkbenchTriggers />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          to={WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH}
-          replace
-        />
-      }
-    />
-    <Route
-      path={WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH}
-      element={<WorkbenchScheduleTrigger />}
-    />
-    <Route
-      path={WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH}
-      element={<WorkbenchWebhookTrigger />}
-    />
-  </Route>,
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}`}
+    element={<CronSchedules />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    element={<CronScheduleForm mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}`}
+    element={<SavedPrompts />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    element={<SavedPromptForm mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}/:${WORKBENCHES_SAVED_PROMPT_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
+    element={<SavedPromptForm mode="edit" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}/:${WORKBENCHES_CRON_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
+    element={<CronScheduleForm mode="edit" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}`}
+    element={<WebhookTriggers />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    element={<WebhookTriggerForm mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/${WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH}`}
+    element={<WebhookForm />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/:${WORKBENCHES_WEBHOOK_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
+    element={<WebhookTriggerForm mode="edit" />}
+  />,
   <Route
     path={`${WORKBENCHES_TOOLS_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
     element={<WorkbenchToolCreateOrEdit mode="create" />}

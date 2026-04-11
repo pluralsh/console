@@ -367,7 +367,7 @@ defmodule Console.Deployments.CronTest do
       remove = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -15))
       keep = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -1))
 
-      {2, _} = Cron.prune_workbench_jobs()
+      :ok = Cron.prune_workbench_jobs()
 
       for job <- remove, do: refute refetch(job)
       for job <- keep, do: assert refetch(job)

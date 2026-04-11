@@ -21,7 +21,8 @@ defmodule Console.Deployments.Policies do
     BootstrapToken,
     AgentRuntime,
     AgentRun,
-    SentinelRunJob
+    SentinelRunJob,
+    WorkbenchJob
   }
 
   def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
@@ -50,6 +51,8 @@ defmodule Console.Deployments.Policies do
       do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
 
 
+  def can?(%User{id: id}, %WorkbenchJob{user_id: id}, :edit), do: :pass
+  def can?(%User{} = user, %WorkbenchJob{} = job, :edit), do: can?(user, job, :write)
   def can?(%Cluster{id: id}, %SentinelRunJob{cluster_id: id}, _), do: :pass
   def can?(%Cluster{id: id}, %AgentRuntime{cluster_id: id}, _), do: :pass
 

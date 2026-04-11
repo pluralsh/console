@@ -1,0 +1,97 @@
+Here are the details for the Plural service **<%= @service.name %>** (namespace: `<%= @service.namespace %>`):
+
+# Identity
+
+```json
+<%= Jason.encode!(%{
+  id: @service.id,
+  name: @service.name,
+  namespace: @service.namespace,
+  status: @service.status,
+  protect: @service.protect,
+  errors: Enum.map(@service.errors, & %{message: &1.message})
+}, pretty: true) %>
+```
+
+# Cluster
+
+```json
+<%= Jason.encode!(%{
+  id: @service.cluster.id,
+  handle: @service.cluster.handle,
+  name: @service.cluster.name
+}, pretty: true) %>
+```
+
+<%= if @service.parent do %>
+This service is created as a ServiceDeployment resource in a parent service with the following attributes:
+
+```json
+<%= Jason.encode!(%{
+  id: @service.parent.id,
+  name: @service.parent.name,
+  cluster: @service.parent.cluster.handle
+}, pretty: true) %>
+```
+<% end %>
+
+<%= if @service.repository do %>
+# Repository
+
+```json
+<%= Jason.encode!(%{url: @service.repository.url}, pretty: true) %>
+```
+<% end %>
+
+<%= if @service.git && @service.git.ref do %>
+## Git Location
+
+```json
+<%= Jason.encode!(Map.from_struct(@service.git) |> Map.take([:ref, :folder, :files]), pretty: true) %>
+```
+<% end %>
+
+<%= if @service.helm do %>
+## Helm
+
+```json
+<%= Console.drop_nils(%{
+  chart: @service.helm.chart,
+  version: @service.helm.version,
+  release: @service.helm.release,
+  values_files: @service.helm.values_files,
+  values: @service.helm.values,
+  url: @service.helm.url
+}) |> Jason.encode!(pretty: true) %>
+```
+<% end %>
+
+<%= if @service.kustomize do %>
+## Kustomize Configuration
+
+```json
+<%= Jason.encode!(%{
+  path: @service.kustomize.path,
+  enable_helm: @service.kustomize.enable_helm,
+  envsubst: @service.kustomize.envsubst
+}, pretty: true) %>
+```
+<% end %>
+
+<%= if @service.owner do %>
+# Owning Global Service
+
+This service is owned by a GlobalService resource, which itself has this basic structure:
+
+```json
+<%= Jason.encode!(%{
+  parent_service: @service.owner.parent && %{id: @service.owner.parent.id, name: @service.owner.parent.name, cluster: @service.owner.parent.cluster.handle},
+  name: @service.owner.name,
+  distro: @service.owner.distro,
+  mgmt: @service.owner.mgmt,
+  tags: Enum.map(@service.owner.tags, & %{name: &1.name, value: &1.value})
+}, pretty: true) %>
+```
+
+If it has a parent, you can inspect that service itself to see how its GitOps configuration is managed.
+<% end %>

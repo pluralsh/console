@@ -22,7 +22,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { Body2BoldP } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunMode,
@@ -37,6 +37,8 @@ import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { AgentRunRepoSelector } from './AgentRunRepoSelector'
+import { TRUNCATE } from 'components/utils/truncate'
+import { formatDateTime } from 'utils/datetime'
 
 export function AgentRunFixButton({
   headerTitle,
@@ -209,14 +211,15 @@ function AgentRunForm({
 }
 
 export function AgentRunInfoCard({
-  agentRun: { id, status },
+  agentRun,
   showLinkButton = false,
   ...props
 }: {
-  agentRun: AgentRunFragment
+  agentRun: Nullable<AgentRunFragment>
   showLinkButton?: boolean
 } & CardProps) {
   const { colors } = useTheme()
+  const { id = '', status, prompt, insertedAt, updatedAt } = agentRun ?? {}
   const isRunning =
     status === AgentRunStatus.Running || status === AgentRunStatus.Pending
   const { data } = useAgentRunTinyQuery({
@@ -225,37 +228,69 @@ export function AgentRunInfoCard({
     fetchPolicy: 'cache-and-network',
     pollInterval: 5000,
   })
+  if (!agentRun) return null
   return (
     <AgentRunStatusBoxSC {...props}>
-      <Flex
-        align="center"
-        gap="small"
-        flex={1}
-      >
-        <DiscoverIcon
-          size={16}
-          color={colors['icon-default']}
+      <Flex gap="small">
+        <StackedText
+          first={
+            <Body2BoldP $shimmer={isRunning}>
+              {status === AgentRunStatus.Successful
+                ? 'Run complete'
+                : 'Started agent run'}
+            </Body2BoldP>
+          }
+          icon={
+            <IconFrame
+              circle
+              type="secondary"
+              icon={
+                <DiscoverIcon
+                  size={16}
+                  color={colors['icon-default']}
+                />
+              }
+            />
+          }
         />
-        <Body2BoldP $shimmer={isRunning}>
-          {status === AgentRunStatus.Successful
-            ? 'Run complete'
-            : 'Started agent run'}
-        </Body2BoldP>
+        <RunStatusChip
+          status={data?.agentRun?.status ?? status}
+          fillLevel={2}
+          css={{ marginLeft: 'auto' }}
+        />
+        {showLinkButton && (
+          <Button
+            small
+            as={Link}
+            to={getAgentRunAbsPath({ agentRunId: id })}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            View details
+          </Button>
+        )}
       </Flex>
-      <RunStatusChip
-        status={data?.agentRun?.status ?? status}
-        fillLevel={2}
-      />
-      {showLinkButton && (
-        <Button
-          small
-          as={Link}
-          to={getAgentRunAbsPath({ agentRunId: id })}
-          endIcon={<ArrowTopRightIcon />}
-        >
-          View details
-        </Button>
-      )}
+      <CaptionP
+        $color="text-xlight"
+        css={TRUNCATE}
+      >
+        {prompt}
+      </CaptionP>
+      <StretchedFlex>
+        <CaptionP $color="text-xlight">
+          Start time{' '}
+          <span css={{ color: colors['text-light'] }}>
+            {formatDateTime(insertedAt)}
+          </span>
+        </CaptionP>
+        {!isRunning && (
+          <CaptionP $color="text-xlight">
+            End time{' '}
+            <span css={{ color: colors['text-light'] }}>
+              {formatDateTime(updatedAt)}
+            </span>
+          </CaptionP>
+        )}
+      </StretchedFlex>
     </AgentRunStatusBoxSC>
   )
 }
@@ -279,8 +314,8 @@ export const PromptInputBoxSC = styled(Card)(({ theme }) => ({
 
 const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
   display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
   justifyContent: 'space-between',
   padding: theme.spacing.medium,
   width: '100%',

@@ -22,12 +22,15 @@ import {
 } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
+  ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   Dispatch,
   FormEvent,
   ReactNode,
+  RefObject,
   SetStateAction,
   useCallback,
+  useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
@@ -213,7 +216,12 @@ export function ChatInput({
   )
 }
 
+export type ChatInputSimpleRef = {
+  resetInput?: () => void
+} & HTMLElement
+
 export function ChatInputSimple({
+  ref,
   onSubmit,
   allowSubmit = true,
   loading = false,
@@ -223,17 +231,26 @@ export function ChatInputSimple({
   wrapperStyles,
   ...props
 }: {
+  ref?: RefObject<Nullable<ChatInputSimpleRef>>
   onSubmit: () => void
   allowSubmit?: boolean
   loading?: boolean
   bgColor?: SemanticColorKey
   options?: ReactNode
   wrapperStyles?: StyledObject
-} & Omit<ComponentPropsWithRef<typeof EditableDiv>, 'onEnter'>) {
+} & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
-
+  const divRef = useRef<HTMLDivElement>(null)
+  const [divKey, setDivKey] = useState(0)
   const handleSubmit = () => allowSubmit && onSubmit()
-
+  useImperativeHandle(
+    ref,
+    () =>
+      Object.assign(divRef.current ?? ({} as HTMLElement), {
+        resetInput: () => setDivKey((prev) => prev + 1),
+      }),
+    []
+  )
   return (
     <EditableContentWrapperSC
       $agent={false}
@@ -241,6 +258,8 @@ export function ChatInputSimple({
       css={{ position: 'relative', minHeight: 130, ...wrapperStyles }}
     >
       <EditableDiv
+        key={divKey}
+        ref={divRef}
         {...props}
         onEnter={handleSubmit}
         disabled={loading || disabled}

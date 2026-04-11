@@ -3,12 +3,16 @@ defmodule Console.AI.Workbench.Skill do
 end
 
 defmodule Console.AI.Workbench.Skills do
-  alias Console.Schema.{Workbench, GitRepository}
+  alias Console.Schema.{Workbench, GitRepository, WorkbenchSkill}
   alias Console.Deployments.Git
   alias Console.AI.Workbench.Skill
 
   @spec skills(Workbench.t) :: {:ok, [Skill.t]} | Console.error
-  def skills(%Workbench{repository: %GitRepository{} = repository, skills: %Workbench.Skills{ref: ref, files: [_ | _] = files}}) do
+  def skills(%Workbench{
+    repository: %GitRepository{} = repository,
+    skills: %Workbench.Skills{ref: ref, files: [_ | _] = files},
+    workbench_skills: db_skills
+  }) do
     with {:ok, contents} <- Git.fetch(repository, ref) do
       Enum.filter(contents, fn {k, _} -> k in files end)
       |> Enum.reduce_while([], fn {file, skill}, acc ->
@@ -18,12 +22,21 @@ defmodule Console.AI.Workbench.Skills do
         end
       end)
       |> case do
-        skills when is_list(skills) -> {:ok, skills}
+        skills when is_list(skills) ->
+          Enum.concat(skills, convert_db_skills(db_skills))
+          |> then(&{:ok, &1})
         {:error, _} = err -> err
       end
     end
   end
-  def skills(_), do: {:ok, []}
+  def skills(%Workbench{workbench_skills: db_skills}), do: {:ok, convert_db_skills(db_skills)}
+
+  defp convert_db_skills(db_skills) when is_list(db_skills) do
+    Enum.map(db_skills, fn %WorkbenchSkill{name: name, description: description, contents: contents} ->
+      %Skill{name: name, description: description, contents: contents}
+    end)
+  end
+  defp convert_db_skills(_), do: []
 
   @regex ~r/---(.*)---(.*)/s
 

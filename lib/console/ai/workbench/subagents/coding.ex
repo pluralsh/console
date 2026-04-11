@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Coding do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun, PullRequest}
-  alias Console.AI.Tools.Workbench.{Skills, Skill, CodingAgent}
+  alias Console.AI.Tools.Workbench.{Skills, Skill, CodingAgent, Result}
   alias Console.Deployments.Workbenches
   alias Console.AI.Workbench.Environment
 
@@ -13,34 +13,40 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     |> MemoryEngine.reduce([{:user, prompt}], &reducer(activity, &1, &2))
     |> case do
       {:ok, attrs} -> attrs
-      {:error, error} -> %{status: :failed, error: "error running infrastructure subagent: #{inspect(error)}"}
+      {:error, error} -> %{status: :failed, result: %{error: "error running infrastructure subagent: #{inspect(error)}"}}
     end
   end
 
   defp reducer(activity, messages, _) do
-    case Enum.find(messages, &match?(%AgentRun{}, &1)) do
-      %AgentRun{} = run -> {:halt, persist_and_poll_run(activity,run)}
+    case Enum.find(messages, &stop_msg/1) do
+      %AgentRun{} = run -> {:message, persist_and_poll_run(activity, run)}
+      %Result{output: output} -> {:halt, %{status: :successful, result: %{output: output}}}
       _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 
+  defp stop_msg(%AgentRun{}), do: true
+  defp stop_msg(%Result{}), do: true
+  defp stop_msg(_), do: false
+
   defp persist_and_poll_run(activity, %AgentRun{id: id} = run) do
-    Workbenches.update_job_activity(%{
-      status: :running,
-      agent_run_id: id
-    }, activity)
+    Workbenches.associate_agent_run(activity, id)
 
     case poll_run(run) do
-      {:timeout, _} -> %{status: :failed, error: "agent run #{id} timed out"}
-      {:failed, %AgentRun{error: error}} -> %{status: :failed, error: "Agent run failed: #{error}"}
+      {:timeout, _} -> {:user, "agent run #{id} timed out"}
+      {:failed, %AgentRun{error: error}} -> {:user, "Agent run failed: #{error}"}
       {:success, %AgentRun{mode: :write, pull_requests: [_ | _] = prs}} ->
         mark_prs(prs, activity)
-        %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(analysis: nil, pull_requests: prs))}}
+        tool_msg(analysis_prompt(analysis: nil, pull_requests: prs), run)
       {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
-        %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(pull_requests: nil, analysis: analysis))}}
-      {:success, _} -> %{status: :successful, agent_run_id: id, result: %{output: "Agent run completed successfully"}}
+        tool_msg(analysis_prompt(pull_requests: nil, analysis: analysis), run)
+      {:success, _} -> {:user, "Agent run completed successfully, but no output was generated"}
     end
   end
+
+  defp tool_msg(content, %AgentRun{tool: %Console.AI.Tool{id: id, name: name, arguments: args}}),
+    do: {:tool, content, %{call_id: id, name: name, arguments: args}}
+  defp tool_msg(content, _), do: {:user, content}
 
   defp mark_prs(prs, %WorkbenchJobActivity{workbench_job_id: id}) do
     Enum.map(prs, & &1.id)
@@ -48,11 +54,12 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     |> Repo.update_all(set: [workbench_job_id: id])
   end
 
-  defp tools(%Environment{skills: skills}) do
+  defp tools(%Environment{skills: skills, job: job}) do
     [
-      CodingAgent,
+      %CodingAgent{workbench: job.workbench},
       %Skills{skills: skills},
       %Skill{skills: skills},
+      Result
     ]
   end
 

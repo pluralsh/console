@@ -8,6 +8,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :linear} = webhook, %{"type" => "Issue", "data" => payload}) do
     build_attributes(Linear, payload)
     |> Map.put(:provider, :linear)
+    |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
   end
@@ -15,6 +16,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :jira} = webhook, %{"issue" => _} = payload) do
     build_attributes(Jira, payload)
     |> Map.put(:provider, :jira)
+    |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
   end
@@ -22,6 +24,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :asana} = webhook, %{"task" => _} = payload) do
     build_attributes(Asana, payload)
     |> Map.put(:provider, :asana)
+    |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
   end
@@ -29,6 +32,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :asana} = webhook, %{"events" => [_ | _]} = payload) do
     build_attributes(Asana, payload)
     |> Map.put(:provider, :asana)
+    |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
   end
@@ -36,6 +40,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :github} = webhook, %{"issue" => _} = payload) do
     build_attributes(Github, payload)
     |> Map.put(:provider, :github)
+    |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
   end
@@ -43,6 +48,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :gitlab} = webhook, %{"object_attributes" => _, "object_kind" => "issue"} = payload) do
     build_attributes(Gitlab, payload)
     |> Map.put(:provider, :gitlab)
+    |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
   end
@@ -78,4 +84,7 @@ defmodule Console.Deployments.Issues.Webhook do
       end
     end)
   end
+
+  defp with_payload(attrs, payload) when is_map(attrs) and is_map(payload),
+    do: Map.put(attrs, :payload, payload)
 end

@@ -2,7 +2,7 @@ defmodule Console.AI.Stream do
   alias Console.Schema.User
   alias ConsoleWeb.AIChannel
 
-  defstruct [:topic, role: :assistant, offset: 0, msg: 0, index: 0, subagent: false]
+  defstruct [:topic, stream_callbacks: [], role: :assistant, offset: 0, msg: 0, index: 0, subagent: false]
 
   @stream {__MODULE__, :ai, :stream}
   @tool {__MODULE__, :ai, :tool}
@@ -22,6 +22,10 @@ defmodule Console.AI.Stream do
     end
   end
 
+  def stream_callbacks(callbacks) do
+    Process.put(@stream, %__MODULE__{stream_callbacks: callbacks})
+  end
+
   def stream(role) do
     case Process.get(@stream) do
       %__MODULE__{} = s -> %{s | role: role}
@@ -37,6 +41,10 @@ defmodule Console.AI.Stream do
       _ -> :ok
     end
   end
+
+  def stream_options(%__MODULE__{stream_callbacks: [_ | _] = callbacks}),
+    do: callbacks
+  def stream_options(_), do: [on_result: &publish/1]
 
   def publish(c) do
     case stream() do

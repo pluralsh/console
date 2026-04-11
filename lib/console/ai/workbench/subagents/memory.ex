@@ -12,7 +12,7 @@ defmodule Console.AI.Workbench.Subagents.Memory do
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
-      {:error, error} -> %{status: :failed, error: "error running memory subagent: #{inspect(error)}"}
+      {:error, error} -> %{status: :failed, result: %{error: "error running memory subagent: #{inspect(error)}"}}
     end
   end
 

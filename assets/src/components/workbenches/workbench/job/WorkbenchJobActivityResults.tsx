@@ -1,11 +1,16 @@
 import { ResponsiveLine } from '@nivo/line'
 import {
   Button,
+  Card,
   FileDiffIcon,
   Flex,
   IconFrame,
   Modal,
 } from '@pluralsh/design-system'
+import {
+  SimpleAccordion,
+  SimplifiedMarkdown,
+} from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
@@ -17,10 +22,10 @@ import {
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
 } from 'generated/graphql'
-import { groupBy, isEmpty, isNil } from 'lodash'
-import { useMemo, useState } from 'react'
+import { groupBy, isEmpty, isNil, truncate } from 'lodash'
+import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { DiffMethod } from 'react-diff-viewer'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
@@ -28,10 +33,11 @@ import { getOldContentFromTextDiff } from 'utils/textDiff'
 type ActivityResult = NonNullable<WorkbenchJobActivityFragment['result']>
 
 export function MemoActivityResult({
-  result: { jobUpdate, output },
+  result,
 }: {
-  result: ActivityResult
+  result: Nullable<ActivityResult>
 }) {
+  const { jobUpdate, output } = result ?? {}
   const [showDiff, setShowDiff] = useState(false)
 
   const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''
@@ -78,6 +84,27 @@ export function MemoActivityResult({
   )
 }
 
+export function UserActivityResult({
+  activity,
+}: {
+  activity: WorkbenchJobActivityFragment
+}) {
+  const { prompt } = activity
+  return (
+    <PromptCardSC>
+      <SimplifiedMarkdown text={prompt ?? ''} />
+    </PromptCardSC>
+  )
+}
+
+const PromptCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.medium,
+  width: 'fit-content',
+  marginLeft: 'auto',
+  marginTop: theme.spacing.small,
+  marginBottom: theme.spacing.small,
+}))
+
 export function JobActivityLogs({
   logs,
 }: {
@@ -99,9 +126,12 @@ export function JobActivityLogs({
 
 export function JobActivityMetrics({
   metrics,
+  lineProps,
+  ...props
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
-}) {
+  lineProps?: Partial<ComponentPropsWithRef<typeof ResponsiveLine>>
+} & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
@@ -119,7 +149,7 @@ export function JobActivityMetrics({
   if (isEmpty(metrics)) return null
 
   return (
-    <MetricsChartSC>
+    <MetricsChartSC {...props}>
       <ResponsiveLine
         theme={graphTheme}
         data={graphData}
@@ -127,15 +157,34 @@ export function JobActivityMetrics({
         colors={COLORS}
         margin={{ top: 10, right: 20, bottom: 30, left: 30 }}
         xScale={{ type: 'time', format: 'native' }}
-        yScale={{ type: 'linear', min: 0, max: 'auto' }}
+        yScale={{ type: 'linear' }}
         xFormat={dateFormat}
         curve="monotoneX"
         lineWidth={1}
-        enablePoints={false}
         useMesh
         axisBottom={{ format: '%H:%M:%S', tickRotation: 10 }}
+        {...lineProps}
       />
     </MetricsChartSC>
+  )
+}
+
+export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
+  const { spacing } = useTheme()
+  if (!prompt) return null
+  return (
+    <SimpleAccordion
+      label={
+        <span>
+          <strong>Prompt: </strong>
+          {truncate(prompt, { length: 40 })}
+        </span>
+      }
+    >
+      <Card css={{ padding: spacing.medium, background: 'none' }}>
+        <SimplifiedMarkdown text={prompt} />
+      </Card>
+    </SimpleAccordion>
   )
 }
 

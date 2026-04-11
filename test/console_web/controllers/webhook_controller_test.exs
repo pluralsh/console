@@ -19,6 +19,27 @@ defmodule ConsoleWeb.WebhookControllerTest do
   end
 
   describe "#scm/2" do
+    test "it returns 403 for azure devops webhook without valid basic auth", %{conn: conn} do
+      hook = insert(:scm_webhook, type: :azure_devops)
+      payload = Jason.encode!(%{})
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/azure_devops/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it returns 200 for azure devops webhook with valid basic auth", %{conn: conn} do
+      hook = insert(:scm_webhook, type: :azure_devops)
+      payload = Jason.encode!(%{})
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.hmac))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/azure_devops/#{hook.external_id}", payload)
+      |> response(200)
+    end
+
     test "it can handle group memberships", %{conn: conn} do
       hook = insert(:scm_webhook, type: :github)
       group = insert(:group, name: "some-org:some-group")

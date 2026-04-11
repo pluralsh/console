@@ -21,19 +21,22 @@ import { SelectedProjectProvider } from '../contexts/ProjectsContext'
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
 import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgentSessions'
-import { AIContextProvider, useChatbot } from 'components/ai/AIContext'
-import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
+import { useChatbot } from 'components/ai/AIContext'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
+import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
+import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
+import { SentryInitializer } from '../SentryInitializer'
 import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
 import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
-import { SentryInitializer } from '../SentryInitializer'
-import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
-import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
+import {
+  TopLevelSidePanel,
+  TopLevelSidePanelProviders,
+} from './TopLevelSidePanel'
 
 export default function Console() {
   return (
@@ -50,7 +53,7 @@ export default function Console() {
                         <AccessTokenProvider>
                           <DeploymentSettingsProvider>
                             <SidebarProvider>
-                              <AIContextProvider>
+                              <TopLevelSidePanelProviders>
                                 <FeatureFlagProvider>
                                   <CommandPaletteProvider>
                                     <SimpleToastProvider>
@@ -58,7 +61,7 @@ export default function Console() {
                                     </SimpleToastProvider>
                                   </CommandPaletteProvider>
                                 </FeatureFlagProvider>
-                              </AIContextProvider>
+                              </TopLevelSidePanelProviders>
                             </SidebarProvider>
                           </DeploymentSettingsProvider>
                         </AccessTokenProvider>
@@ -127,7 +130,7 @@ function ConsoleContent() {
           </Flex>
         </Flex>
       </Flex>
-      <ChatbotPanel />
+      <TopLevelSidePanel />
     </Flex>
   )
 }

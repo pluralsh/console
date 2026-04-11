@@ -14,6 +14,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, :string, description: "the prompt for this job"
   end
 
+  input_object :workbench_job_update_attributes do
+    field :result, :workbench_result_attributes, description: "the result for this job"
+  end
+
+  input_object :workbench_result_attributes do
+    field :topology, non_null(:string),
+      description: "mermaid diagram text for the job result topology (only field clients may set via this mutation)"
+  end
+
   input_object :workbench_attributes do
     field :name,              non_null(:string), description: "the name of the workbench (must be unique)"
     field :description,       :string, description: "the description of the workbench"
@@ -62,6 +71,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_cron_attributes do
     field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
+  end
+
+  input_object :workbench_prompt_attributes do
+    field :prompt, non_null(:string), description: "the saved prompt text"
+  end
+
+  input_object :workbench_skill_attributes do
+    field :name,        non_null(:string), description: "the saved skill name"
+    field :description, :string, description: "the saved skill description"
+    field :contents,    non_null(:string), description: "the saved skill contents"
   end
 
   input_object :workbench_webhook_matches_attributes do
@@ -203,11 +222,22 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
     connection field :runs, node_type: :workbench_job do
+      arg :alert, :boolean, description: "show runs spawned from alerts"
+      arg :issue, :boolean, description: "show runs spawned from issues"
+
       resolve &Deployments.list_workbench_runs/3
     end
 
     connection field :crons, node_type: :workbench_cron do
       resolve &Deployments.list_workbench_crons/3
+    end
+
+    connection field :prompts, node_type: :workbench_prompt do
+      resolve &Deployments.list_workbench_prompts/3
+    end
+
+    connection field :workbench_skills, node_type: :workbench_skill do
+      resolve &Deployments.list_workbench_skills/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
@@ -258,6 +288,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
+    field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
 
     timestamps()
   end
@@ -365,6 +396,26 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :last_run_at, :datetime, description: "when the cron last ran"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this cron belongs to"
+
+    timestamps()
+  end
+
+  object :workbench_prompt do
+    field :id,     non_null(:string), description: "the id of the saved prompt"
+    field :prompt, :string, description: "the saved prompt text"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this prompt belongs to"
+
+    timestamps()
+  end
+
+  object :workbench_skill do
+    field :id,          non_null(:string), description: "the id of the saved skill"
+    field :name,        :string, description: "the saved skill name"
+    field :description, :string, description: "the saved skill description"
+    field :contents,    :string, description: "the saved skill contents"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this skill belongs to"
 
     timestamps()
   end
@@ -488,16 +539,24 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :arguments,   :map
   end
 
+  object :workbench_text_stream do
+    field :activity_id, :id
+    field :text,        :string
+  end
+
   connection node_type: :workbench
   connection node_type: :workbench_tool
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
   connection node_type: :workbench_cron
+  connection node_type: :workbench_prompt
+  connection node_type: :workbench_skill
   connection node_type: :workbench_webhook
 
   delta :workbench_job
   delta :workbench_job_activity
+  delta :workbench_job_thought
 
   object :workbench_queries do
     field :workbench, :workbench do
@@ -554,6 +613,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.workbench_job/2
     end
 
+    field :workbench_job_activity, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_job_activity/2
+    end
+
     connection field :workbench_alerts, node_type: :alert do
       middleware Authenticated
       middleware Scope,
@@ -571,6 +640,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
       resolve &Deployments.all_workbench_issues/2
     end
+
   end
 
   object :workbench_mutations do
@@ -668,6 +738,87 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.delete_workbench_cron/2
     end
 
+    @desc "Fetches a workbench cron by id. Requires read access to the workbench."
+    field :workbench_cron, :workbench_cron do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_cron/2
+    end
+
+    @desc "Creates a saved prompt for a workbench. Requires read access to the workbench."
+    field :create_workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to save a prompt for"
+      arg :attributes, non_null(:workbench_prompt_attributes)
+
+      resolve &Deployments.create_workbench_prompt/2
+    end
+
+    @desc "Updates a saved workbench prompt. Requires read access to the workbench."
+    field :update_workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_prompt_attributes)
+
+      resolve &Deployments.update_workbench_prompt/2
+    end
+
+    @desc "Deletes a saved workbench prompt. Requires read access to the workbench."
+    field :delete_workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_prompt/2
+    end
+
+    @desc "Creates a saved skill for a workbench. Requires write access to the workbench."
+    field :create_workbench_skill, :workbench_skill do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to save a skill for"
+      arg :attributes, non_null(:workbench_skill_attributes)
+
+      resolve &Deployments.create_workbench_skill/2
+    end
+
+    @desc "Updates a saved workbench skill. Requires write access to the workbench."
+    field :update_workbench_skill, :workbench_skill do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_skill_attributes)
+
+      resolve &Deployments.update_workbench_skill/2
+    end
+
+    @desc "Deletes a saved workbench skill. Requires write access to the workbench."
+    field :delete_workbench_skill, :workbench_skill do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_skill/2
+    end
+
     field :create_workbench_webhook, :workbench_webhook do
       middleware Authenticated
       middleware Scope,
@@ -677,6 +828,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes, non_null(:workbench_webhook_attributes)
 
       resolve &Deployments.create_workbench_webhook/2
+    end
+
+    @desc "Fetches a workbench webhook by id. Requires read access to the workbench."
+    field :get_workbench_webhook, :workbench_webhook do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.get_workbench_webhook/2
     end
 
     field :update_workbench_webhook, :workbench_webhook do
@@ -705,7 +867,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :workbench_id, non_null(:id), description: "the workbench to create a job for"
       arg :attributes,   non_null(:workbench_job_attributes), description: "job attributes (e.g. prompt)"
 
@@ -716,11 +878,35 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :job_id, non_null(:id), description: "the job to create a message for"
       arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
 
       resolve &Deployments.create_workbench_message/2
+    end
+
+    @desc "Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update."
+    field :update_workbench_job, :workbench_job do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :job_id,     non_null(:id), description: "the workbench job to update"
+      arg :attributes, non_null(:workbench_job_update_attributes),
+        description: "attributes to update on the job (only the result topology is accepted)"
+
+      resolve &Deployments.update_workbench_job/2
+    end
+
+    @desc "Cancels a workbench job. Allowed for the job owner or users with write access to the workbench."
+    field :cancel_workbench_job, :workbench_job do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :job_id, non_null(:id), description: "the workbench job to cancel"
+
+      resolve &Deployments.cancel_workbench_job/2
     end
   end
 
@@ -743,12 +929,30 @@ defmodule Console.GraphQl.Deployments.Workbench do
       end
     end
 
+    field :workbench_job_thought_delta, :workbench_job_thought_delta do
+      arg :job_id, non_null(:id)
+
+      config fn %{job_id: job_id}, ctx ->
+        with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{job_id}:thoughts"}
+      end
+    end
+
     field :workbench_job_progress, :workbench_job_progress do
       arg :job_id, non_null(:id)
 
       config fn %{job_id: job_id}, ctx ->
         with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
           do: {:ok, topic: "workbench_jobs:#{job_id}:progress"}
+      end
+    end
+
+    field :workbench_text_stream, :workbench_text_stream do
+      arg :job_id, non_null(:id)
+
+      config fn %{job_id: job_id}, ctx ->
+        with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{job_id}:text_stream"}
       end
     end
   end

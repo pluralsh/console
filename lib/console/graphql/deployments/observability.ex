@@ -308,6 +308,9 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :annotations, :map,
       description: "Arbitrary key/value annotations attached to this alert"
 
+    field :payload, :map,
+      description: "Raw webhook payload received for this alert"
+
     field :url, :string,
       description: "Link back to the originating dashboard or alert view in the provider"
 

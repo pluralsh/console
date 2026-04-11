@@ -2,33 +2,32 @@ import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StrongSC } from 'components/utils/typography/Text'
 import {
-  useDeleteWorkbenchCronMutation,
-  WorkbenchCronFragment,
+  useDeleteWorkbenchPromptMutation,
+  WorkbenchPromptFragment,
 } from 'generated/graphql'
-import { SCHEDULE_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 import { truncate } from 'lodash'
 
-export function WorkbenchScheduleDeleteModal({
+export function SavedPromptDeleteModal({
   open,
-  cron,
+  savedPrompt,
   onClose,
 }: {
   open: boolean
-  cron: Nullable<WorkbenchCronFragment>
+  savedPrompt: Nullable<WorkbenchPromptFragment>
   onClose: () => void
 }) {
   const { popToast } = useSimpleToast()
-  const [mutation, { loading, error }] = useDeleteWorkbenchCronMutation({
-    variables: { id: cron?.id ?? '' },
+  const [mutation, { loading, error }] = useDeleteWorkbenchPromptMutation({
+    variables: { id: savedPrompt?.id ?? '' },
     onCompleted: () => {
       popToast({
-        name: cron?.prompt ?? '',
+        name: savedPrompt?.prompt ?? '',
         action: 'deleted',
         color: 'icon-danger',
       })
       onClose()
     },
-    refetchQueries: SCHEDULE_TRIGGER_REFETCH_QUERIES,
+    refetchQueries: ['WorkbenchPrompts'],
     awaitRefetchQueries: true,
   })
 
@@ -37,16 +36,16 @@ export function WorkbenchScheduleDeleteModal({
       open={open}
       close={onClose}
       destructive
-      label="Delete schedule"
+      label="Delete saved prompt"
       loading={loading}
       error={error}
       submit={() => mutation()}
-      title="Delete schedule"
+      title="Delete saved prompt"
       text={
         <span>
-          Are you sure you want to delete schedule{' '}
+          Are you sure you want to delete saved prompt{' '}
           <StrongSC $color="text-danger">
-            {truncate(cron?.prompt ?? '', { length: 30 })}
+            {truncate(savedPrompt?.prompt ?? '', { length: 30 })}
           </StrongSC>
           ?
         </span>

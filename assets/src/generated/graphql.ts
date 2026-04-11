@@ -947,6 +947,8 @@ export type Alert = {
   insight?: Maybe<AiInsight>;
   /** Detailed message or summary supplied by the provider */
   message?: Maybe<Scalars['String']['output']>;
+  /** Raw webhook payload received for this alert */
+  payload?: Maybe<Scalars['Map']['output']>;
   /** The project this alert was associated with */
   project?: Maybe<Project>;
   /** The human‑authored resolution for this alert, if one exists */
@@ -5090,6 +5092,8 @@ export type Issue = {
   /** the unique identifier of the issue */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** raw webhook payload received for this issue */
+  payload?: Maybe<Scalars['Map']['output']>;
   /** the provider (e.g., Linear, GitHub) that originated this issue */
   provider: IssueWebhookProvider;
   /** the current status of the issue (e.g., open, in progress, completed, cancelled) */
@@ -5141,7 +5145,6 @@ export type IssueWebhookAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   provider?: InputMaybe<IssueWebhookProvider>;
   secret?: InputMaybe<Scalars['String']['input']>;
-  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type IssueWebhookConnection = {
@@ -8563,6 +8566,8 @@ export type RootMutationType = {
   cancelAgentRun?: Maybe<AgentRun>;
   /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
   cancelChat?: Maybe<Chat>;
+  /** Cancels a workbench job. Allowed for the job owner or users with write access to the workbench. */
+  cancelWorkbenchJob?: Maybe<WorkbenchJob>;
   /** saves a set of messages and generates a new one transactionally */
   chat?: Maybe<Chat>;
   /** Wipes your current chat history blank */
@@ -8637,6 +8642,10 @@ export type RootMutationType = {
   /** Creates a new workbench job. Requires read access to the workbench. */
   createWorkbenchJob?: Maybe<WorkbenchJob>;
   createWorkbenchMessage?: Maybe<WorkbenchJobActivity>;
+  /** Creates a saved prompt for a workbench. Requires read access to the workbench. */
+  createWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
+  /** Creates a saved skill for a workbench. Requires write access to the workbench. */
+  createWorkbenchSkill?: Maybe<WorkbenchSkill>;
   createWorkbenchTool?: Maybe<WorkbenchTool>;
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -8700,6 +8709,10 @@ export type RootMutationType = {
   deleteVirtualCluster?: Maybe<Cluster>;
   deleteWorkbench?: Maybe<Workbench>;
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Deletes a saved workbench prompt. Requires read access to the workbench. */
+  deleteWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
+  /** Deletes a saved workbench skill. Requires write access to the workbench. */
+  deleteWorkbenchSkill?: Maybe<WorkbenchSkill>;
   deleteWorkbenchTool?: Maybe<WorkbenchTool>;
   deleteWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   delinkBackups?: Maybe<Cluster>;
@@ -8714,6 +8727,8 @@ export type RootMutationType = {
   fixResearchDiagram?: Maybe<InfraResearch>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
+  /** Fetches a workbench webhook by id. Requires read access to the workbench. */
+  getWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   /** Chat mutation that can also execute MCP servers in line with the overall completion */
   hybridChat?: Maybe<Array<Maybe<Chat>>>;
   impersonateServiceAccount?: Maybe<User>;
@@ -8822,6 +8837,12 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   updateWorkbench?: Maybe<Workbench>;
   updateWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update. */
+  updateWorkbenchJob?: Maybe<WorkbenchJob>;
+  /** Updates a saved workbench prompt. Requires read access to the workbench. */
+  updateWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
+  /** Updates a saved workbench skill. Requires write access to the workbench. */
+  updateWorkbenchSkill?: Maybe<WorkbenchSkill>;
   updateWorkbenchTool?: Maybe<WorkbenchTool>;
   updateWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   upsertAgentRuntime?: Maybe<AgentRuntime>;
@@ -8846,6 +8867,8 @@ export type RootMutationType = {
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
+  /** Fetches a workbench cron by id. Requires read access to the workbench. */
+  workbenchCron?: Maybe<WorkbenchCron>;
 };
 
 
@@ -8862,7 +8885,8 @@ export type RootMutationTypeAddChatContextArgs = {
 
 
 export type RootMutationTypeAddClusterAuditLogArgs = {
-  audit: ClusterAuditAttributes;
+  audit?: InputMaybe<ClusterAuditAttributes>;
+  audits?: InputMaybe<Array<InputMaybe<ClusterAuditAttributes>>>;
 };
 
 
@@ -8906,6 +8930,11 @@ export type RootMutationTypeCancelAgentRunArgs = {
 
 export type RootMutationTypeCancelChatArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelWorkbenchJobArgs = {
+  jobId: Scalars['ID']['input'];
 };
 
 
@@ -9251,6 +9280,18 @@ export type RootMutationTypeCreateWorkbenchMessageArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchPromptArgs = {
+  attributes: WorkbenchPromptAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateWorkbenchSkillArgs = {
+  attributes: WorkbenchSkillAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchToolArgs = {
   attributes?: InputMaybe<WorkbenchToolAttributes>;
 };
@@ -9559,6 +9600,16 @@ export type RootMutationTypeDeleteWorkbenchCronArgs = {
 };
 
 
+export type RootMutationTypeDeleteWorkbenchPromptArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchSkillArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteWorkbenchToolArgs = {
   id: Scalars['ID']['input'];
 };
@@ -9598,6 +9649,11 @@ export type RootMutationTypeFixResearchDiagramArgs = {
 export type RootMutationTypeForceGateArgs = {
   id: Scalars['ID']['input'];
   state?: InputMaybe<GateState>;
+};
+
+
+export type RootMutationTypeGetWorkbenchWebhookArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -10104,6 +10160,24 @@ export type RootMutationTypeUpdateWorkbenchCronArgs = {
 };
 
 
+export type RootMutationTypeUpdateWorkbenchJobArgs = {
+  attributes: WorkbenchJobUpdateAttributes;
+  jobId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchPromptArgs = {
+  attributes: WorkbenchPromptAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchSkillArgs = {
+  attributes: WorkbenchSkillAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateWorkbenchToolArgs = {
   attributes?: InputMaybe<WorkbenchToolAttributes>;
   id: Scalars['ID']['input'];
@@ -10220,6 +10294,11 @@ export type RootMutationTypeUpsertVirtualClusterArgs = {
 
 export type RootMutationTypeUpsertVulnerabilitiesArgs = {
   vulnerabilities?: InputMaybe<Array<InputMaybe<VulnerabilityReportAttributes>>>;
+};
+
+
+export type RootMutationTypeWorkbenchCronArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type RootQueryType = {
@@ -10455,6 +10534,7 @@ export type RootQueryType = {
   workbenchAlerts?: Maybe<AlertConnection>;
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
+  workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
   workbenches?: Maybe<WorkbenchConnection>;
@@ -11834,6 +11914,11 @@ export type RootQueryTypeWorkbenchJobArgs = {
 };
 
 
+export type RootQueryTypeWorkbenchJobActivityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeWorkbenchToolArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -11873,6 +11958,8 @@ export type RootSubscriptionType = {
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
+  workbenchJobThoughtDelta?: Maybe<WorkbenchJobThoughtDelta>;
+  workbenchTextStream?: Maybe<WorkbenchTextStream>;
 };
 
 
@@ -11920,6 +12007,16 @@ export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
 
 
 export type RootSubscriptionTypeWorkbenchJobProgressArgs = {
+  jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchJobThoughtDeltaArgs = {
+  jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchTextStreamArgs = {
   jobId: Scalars['ID']['input'];
 };
 
@@ -14628,6 +14725,7 @@ export type Workbench = {
   name: Scalars['String']['output'];
   /** the project of this workbench */
   project?: Maybe<Project>;
+  prompts?: Maybe<WorkbenchPromptConnection>;
   /** read policy for this service */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository for this workbench */
@@ -14641,6 +14739,7 @@ export type Workbench = {
   tools?: Maybe<Array<Maybe<WorkbenchTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   webhooks?: Maybe<WorkbenchWebhookConnection>;
+  workbenchSkills?: Maybe<WorkbenchSkillConnection>;
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -14670,7 +14769,7 @@ export type WorkbenchIssuesArgs = {
 };
 
 
-export type WorkbenchRunsArgs = {
+export type WorkbenchPromptsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -14678,7 +14777,25 @@ export type WorkbenchRunsArgs = {
 };
 
 
+export type WorkbenchRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  alert?: InputMaybe<Scalars['Boolean']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  issue?: InputMaybe<Scalars['Boolean']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type WorkbenchWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchWorkbenchSkillsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -14855,6 +14972,8 @@ export type WorkbenchJobActivity = {
   __typename?: 'WorkbenchJobActivity';
   /** the agent run that executed this activity */
   agentRun?: Maybe<AgentRun>;
+  /** all agent runs associated with this activity (sideloadable) */
+  agentRuns?: Maybe<Array<Maybe<AgentRun>>>;
   /** the id of the activity */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -14937,6 +15056,7 @@ export enum WorkbenchJobActivityStatus {
 
 export enum WorkbenchJobActivityType {
   Coding = 'CODING',
+  Conclusion = 'CONCLUSION',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Memo = 'MEMO',
@@ -15047,6 +15167,17 @@ export type WorkbenchJobThoughtAttributes = {
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
 };
 
+export type WorkbenchJobThoughtDelta = {
+  __typename?: 'WorkbenchJobThoughtDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<WorkbenchJobThought>;
+};
+
+export type WorkbenchJobUpdateAttributes = {
+  /** the result for this job */
+  result?: InputMaybe<WorkbenchResultAttributes>;
+};
+
 export type WorkbenchMessageAttributes = {
   /** the prompt for the message */
   prompt: Scalars['String']['input'];
@@ -15067,6 +15198,77 @@ export type WorkbenchObservabilityAttributes = {
   metrics?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type WorkbenchPrompt = {
+  __typename?: 'WorkbenchPrompt';
+  /** the id of the saved prompt */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the saved prompt text */
+  prompt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench this prompt belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchPromptAttributes = {
+  /** the saved prompt text */
+  prompt: Scalars['String']['input'];
+};
+
+export type WorkbenchPromptConnection = {
+  __typename?: 'WorkbenchPromptConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchPromptEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchPromptEdge = {
+  __typename?: 'WorkbenchPromptEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchPrompt>;
+};
+
+export type WorkbenchResultAttributes = {
+  /** mermaid diagram text for the job result topology (only field clients may set via this mutation) */
+  topology: Scalars['String']['input'];
+};
+
+export type WorkbenchSkill = {
+  __typename?: 'WorkbenchSkill';
+  /** the saved skill contents */
+  contents?: Maybe<Scalars['String']['output']>;
+  /** the saved skill description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the id of the saved skill */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the saved skill name */
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench this skill belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchSkillAttributes = {
+  /** the saved skill contents */
+  contents: Scalars['String']['input'];
+  /** the saved skill description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the saved skill name */
+  name: Scalars['String']['input'];
+};
+
+export type WorkbenchSkillConnection = {
+  __typename?: 'WorkbenchSkillConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchSkillEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchSkillEdge = {
+  __typename?: 'WorkbenchSkillEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchSkill>;
+};
+
 export type WorkbenchSkills = {
   __typename?: 'WorkbenchSkills';
   /** files to include */
@@ -15080,6 +15282,12 @@ export type WorkbenchSkillsAttributes = {
   files?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** git reference for skills */
   ref?: InputMaybe<GitRefAttributes>;
+};
+
+export type WorkbenchTextStream = {
+  __typename?: 'WorkbenchTextStream';
+  activityId?: Maybe<Scalars['ID']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
 };
 
 export type WorkbenchTool = {
@@ -15533,9 +15741,9 @@ export type YamlOverlayAttributes = {
   yaml: Scalars['String']['input'];
 };
 
-export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null };
+export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null };
 
-export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null };
+export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null };
 
 export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -15555,9 +15763,9 @@ export type AgentMessageCostFragment = { __typename?: 'AgentMessageCost', total:
 
 export type AgentMessageDeltaFragment = { __typename?: 'AgentMessageDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null };
 
-export type ClusterUpgradeStepFragment = { __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+export type ClusterUpgradeStepFragment = { __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
-export type ClusterUpgradeFragment = { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null };
+export type ClusterUpgradeFragment = { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null };
 
 export type AgentRunsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -15566,21 +15774,21 @@ export type AgentRunsQueryVariables = Exact<{
 }>;
 
 
-export type AgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null } | null };
+export type AgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null } | null };
 
 export type AgentRunTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type AgentRunTinyQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+export type AgentRunTinyQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
 export type AgentRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
 export type AgentRunPodQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -15635,14 +15843,14 @@ export type CreateAgentRunMutationVariables = Exact<{
 }>;
 
 
-export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
 export type CancelAgentRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type CancelAgentRunMutation = { __typename?: 'RootMutationType', cancelAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+export type CancelAgentRunMutation = { __typename?: 'RootMutationType', cancelAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
 export type UpsertAgentRuntimeMutationVariables = Exact<{
   attributes: AgentRuntimeAttributes;
@@ -15657,7 +15865,7 @@ export type ShareAgentRunMutationVariables = Exact<{
 }>;
 
 
-export type ShareAgentRunMutation = { __typename?: 'RootMutationType', shareAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+export type ShareAgentRunMutation = { __typename?: 'RootMutationType', shareAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
 export type CreateClusterUpgradeMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -15665,7 +15873,7 @@ export type CreateClusterUpgradeMutationVariables = Exact<{
 }>;
 
 
-export type CreateClusterUpgradeMutation = { __typename?: 'RootMutationType', createClusterUpgrade?: { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null } | null };
+export type CreateClusterUpgradeMutation = { __typename?: 'RootMutationType', createClusterUpgrade?: { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null } | null };
 
 export type AgentRunChatSubscriptionVariables = Exact<{
   runId: Scalars['ID']['input'];
@@ -15679,15 +15887,15 @@ export type AgentRunDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null };
+export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null };
 
-export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
+export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
 
 export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null, research?: { __typename?: 'InfraResearch', id: string, prompt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
 
 export type ChatThreadDetailsFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, tools?: Array<{ __typename?: 'McpServerTool', tool?: { __typename?: 'McpTool', name: string, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, server?: { __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null } | null> | null, settings?: { __typename?: 'ChatThreadSettings', memory?: boolean | null } | null, flow?: { __typename?: 'Flow', id: string, name: string, icon?: string | null } | null, session?: { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, planConfirmed?: boolean | null, thread?: { __typename?: 'ChatThread', id: string, summary: string, insertedAt?: string | null, lastMessageAt?: string | null } | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null, research?: { __typename?: 'InfraResearch', id: string, prompt?: string | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
 
-export type ChatThreadMessagesFragment = { __typename?: 'ChatThread', id: string, chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null };
+export type ChatThreadMessagesFragment = { __typename?: 'ChatThread', id: string, chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null };
 
 export type ChatThreadSettingsFragment = { __typename?: 'ChatThreadSettings', memory?: boolean | null };
 
@@ -15736,7 +15944,7 @@ export type ChatThreadMessagesQueryVariables = Exact<{
 }>;
 
 
-export type ChatThreadMessagesQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null } | null };
+export type ChatThreadMessagesQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type AgentSessionsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -15765,28 +15973,28 @@ export type HybridChatMutationVariables = Exact<{
 }>;
 
 
-export type HybridChatMutation = { __typename?: 'RootMutationType', hybridChat?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+export type HybridChatMutation = { __typename?: 'RootMutationType', hybridChat?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
 export type ConfirmChatMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ConfirmChatMutation = { __typename?: 'RootMutationType', confirmChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
+export type ConfirmChatMutation = { __typename?: 'RootMutationType', confirmChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
 
 export type ConfirmChatPlanMutationVariables = Exact<{
   threadId: Scalars['ID']['input'];
 }>;
 
 
-export type ConfirmChatPlanMutation = { __typename?: 'RootMutationType', confirmPlan?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+export type ConfirmChatPlanMutation = { __typename?: 'RootMutationType', confirmPlan?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
 export type DeleteChatMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
+export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null };
 
 export type CreateChatThreadMutationVariables = Exact<{
   attributes: ChatThreadAttributes;
@@ -15825,7 +16033,7 @@ export type AddChatContextMutationVariables = Exact<{
 }>;
 
 
-export type AddChatContextMutation = { __typename?: 'RootMutationType', addChatContext?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
+export type AddChatContextMutation = { __typename?: 'RootMutationType', addChatContext?: Array<{ __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null } | null> | null };
 
 export type CreateAgentSessionMutationVariables = Exact<{
   attributes: AgentSessionAttributes;
@@ -16112,11 +16320,11 @@ export type RunSentinelMutationVariables = Exact<{
 
 export type RunSentinelMutation = { __typename?: 'RootMutationType', runSentinel?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null } | null };
 
-export type AlertFragment = { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null };
+export type AlertFragment = { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
 export type AlertResolutionFragment = { __typename?: 'AlertResolution', resolution: string };
 
-export type AlertConnectionFragment = { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } };
+export type AlertConnectionFragment = { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } };
 
 export type ClusterAlertsQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -16127,7 +16335,7 @@ export type ClusterAlertsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterAlertsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type ClusterAlertsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type ServiceAlertsQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -16138,7 +16346,7 @@ export type ServiceAlertsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceAlertsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type ServiceAlertsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type UpsertAlertResolutionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17618,7 +17826,7 @@ export type FlowAlertsQueryVariables = Exact<{
 }>;
 
 
-export type FlowAlertsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
+export type FlowAlertsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
 export type FlowPrsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17761,7 +17969,7 @@ export type CloudAddonUpgradeFragment = { __typename?: 'CloudAddonUpgrade', addo
 
 export type ClusterWithUpgradeFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, upgradePlanSummary?: { __typename?: 'UpgradePlanSummary', blockingAddons?: Array<{ __typename?: 'RuntimeAddonUpgrade', callout?: string | null, addon?: { __typename?: 'RuntimeAddon', name: string, icon?: string | null } | null, current?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null } | null, fix?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null, summary?: { __typename?: 'AddonVersionSummary', breakingChanges?: Array<string | null> | null, chartUpdates?: Array<string | null> | null, features?: Array<string | null> | null, helmChanges?: string | null } | null } | null } | null> | null, blockingCloudAddons?: Array<{ __typename?: 'CloudAddonUpgrade', addon?: { __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null, current?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null, fix?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null } | null> | null } | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
 
-export type ClusterOverviewDetailsFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, disableAi?: boolean | null, currentUpgrade?: { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null } | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, extendedSupport?: { __typename?: 'ExtendedSupportInfo', extended?: boolean | null, extendedFrom?: string | null } | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, upgradePlanSummary?: { __typename?: 'UpgradePlanSummary', blockingAddons?: Array<{ __typename?: 'RuntimeAddonUpgrade', callout?: string | null, addon?: { __typename?: 'RuntimeAddon', name: string, icon?: string | null } | null, current?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null } | null, fix?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null, summary?: { __typename?: 'AddonVersionSummary', breakingChanges?: Array<string | null> | null, chartUpdates?: Array<string | null> | null, features?: Array<string | null> | null, helmChanges?: string | null } | null } | null } | null> | null, blockingCloudAddons?: Array<{ __typename?: 'CloudAddonUpgrade', addon?: { __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null, current?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null, fix?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null } | null> | null } | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
+export type ClusterOverviewDetailsFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, disableAi?: boolean | null, currentUpgrade?: { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null } | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, extendedSupport?: { __typename?: 'ExtendedSupportInfo', extended?: boolean | null, extendedFrom?: string | null } | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, upgradePlanSummary?: { __typename?: 'UpgradePlanSummary', blockingAddons?: Array<{ __typename?: 'RuntimeAddonUpgrade', callout?: string | null, addon?: { __typename?: 'RuntimeAddon', name: string, icon?: string | null } | null, current?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null } | null, fix?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null, summary?: { __typename?: 'AddonVersionSummary', breakingChanges?: Array<string | null> | null, chartUpdates?: Array<string | null> | null, features?: Array<string | null> | null, helmChanges?: string | null } | null } | null } | null> | null, blockingCloudAddons?: Array<{ __typename?: 'CloudAddonUpgrade', addon?: { __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null, current?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null, fix?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null } | null> | null } | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null };
 
 export type ClusterHealthScoreFragment = { __typename?: 'Cluster', id: string, name: string, healthScore?: number | null };
 
@@ -17775,7 +17983,7 @@ export type ClusterOverviewDetailsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterOverviewDetailsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, disableAi?: boolean | null, currentUpgrade?: { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null } | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, extendedSupport?: { __typename?: 'ExtendedSupportInfo', extended?: boolean | null, extendedFrom?: string | null } | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, upgradePlanSummary?: { __typename?: 'UpgradePlanSummary', blockingAddons?: Array<{ __typename?: 'RuntimeAddonUpgrade', callout?: string | null, addon?: { __typename?: 'RuntimeAddon', name: string, icon?: string | null } | null, current?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null } | null, fix?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null, summary?: { __typename?: 'AddonVersionSummary', breakingChanges?: Array<string | null> | null, chartUpdates?: Array<string | null> | null, features?: Array<string | null> | null, helmChanges?: string | null } | null } | null } | null> | null, blockingCloudAddons?: Array<{ __typename?: 'CloudAddonUpgrade', addon?: { __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null, current?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null, fix?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null } | null> | null } | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null } | null, kubernetesChangelog?: { __typename?: 'KubernetesChangelog', version?: string | null, apiUpdates?: Array<string | null> | null, bugFixes?: Array<string | null> | null, breakingChanges?: Array<string | null> | null, deprecations?: Array<string | null> | null, features?: Array<string | null> | null, majorChanges?: Array<string | null> | null, removals?: Array<string | null> | null } | null };
+export type ClusterOverviewDetailsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, healthy?: boolean | null, healthScore?: number | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, nodeCount?: number | null, namespaceCount?: number | null, availabilityZones?: Array<string | null> | null, podCount?: number | null, memoryUtil?: number | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, disableAi?: boolean | null, currentUpgrade?: { __typename?: 'ClusterUpgrade', id: string, status: ClusterUpgradeStatus, version?: string | null, steps?: Array<{ __typename?: 'ClusterUpgradeStep', id: string, name: string, prompt: string, status: ClusterUpgradeStatus, type: ClusterUpgradeStepType, error?: string | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, runtime?: { __typename?: 'AgentRuntime', type: AgentRuntimeType, name: string } | null } | null, nodeStatistics?: Array<{ __typename?: 'NodeStatistic', id: string, name: string, pendingPods?: number | null, health?: NodeStatisticHealth | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null, kubeletSkew?: boolean | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, extendedSupport?: { __typename?: 'ExtendedSupportInfo', extended?: boolean | null, extendedFrom?: string | null } | null, deprecatedCustomResources?: Array<{ __typename?: 'DeprecatedCustomResource', name?: string | null, group: string, kind: string, namespace?: string | null, version: string, nextVersion: string } | null> | null, upgradePlanSummary?: { __typename?: 'UpgradePlanSummary', blockingAddons?: Array<{ __typename?: 'RuntimeAddonUpgrade', callout?: string | null, addon?: { __typename?: 'RuntimeAddon', name: string, icon?: string | null } | null, current?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null } | null, fix?: { __typename?: 'AddonVersion', version?: string | null, chartVersion?: string | null, images?: Array<string | null> | null, releaseUrl?: string | null, summary?: { __typename?: 'AddonVersionSummary', breakingChanges?: Array<string | null> | null, chartUpdates?: Array<string | null> | null, features?: Array<string | null> | null, helmChanges?: string | null } | null } | null } | null> | null, blockingCloudAddons?: Array<{ __typename?: 'CloudAddonUpgrade', addon?: { __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null, current?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null, fix?: { __typename?: 'CloudAddonVersionInformation', version?: string | null } | null } | null> | null } | null, insightComponents?: Array<{ __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, upgradeInsights?: Array<{ __typename?: 'UpgradeInsight', id: string, name: string, description?: string | null, refreshedAt?: string | null, transitionedAt?: string | null, version?: string | null, status?: UpgradeInsightStatus | null, details?: Array<{ __typename?: 'UpgradeInsightDetail', id: string, removedIn?: string | null, replacedIn?: string | null, replacement?: string | null, status?: UpgradeInsightStatus | null, used?: string | null, clientInfo?: Array<{ __typename?: 'InsightClientInfo', userAgent?: string | null, count?: string | null, lastRequestAt?: string | null } | null> | null } | null> | null } | null> | null, cloudAddons?: Array<{ __typename?: 'CloudAddon', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, distro: ClusterDistro, version: string, info?: { __typename?: 'CloudAddonInformation', name?: string | null, publisher?: string | null, versions?: Array<{ __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null> | null } | null, versionInfo?: { __typename?: 'CloudAddonVersionInformation', version?: string | null, compatibilities?: Array<string | null> | null, blocking?: boolean | null } | null } | null> | null } | null, kubernetesChangelog?: { __typename?: 'KubernetesChangelog', version?: string | null, apiUpdates?: Array<string | null> | null, bugFixes?: Array<string | null> | null, breakingChanges?: Array<string | null> | null, deprecations?: Array<string | null> | null, features?: Array<string | null> | null, majorChanges?: Array<string | null> | null, removals?: Array<string | null> | null } | null };
 
 export type UpgradeStatisticsQueryVariables = Exact<{
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -19052,27 +19260,33 @@ export type WorkbenchToolTinyFragment = { __typename?: 'WorkbenchTool', id: stri
 
 export type WorkbenchToolFragment = { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null };
 
+export type WorkbenchJobThoughtFragment = { __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null };
+
 export type WorkbenchJobResultTodoFragment = { __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null };
 
 export type WorkbenchJobActivityMetricFragment = { __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null };
 
 export type WorkbenchJobActivityLogFragment = { __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null };
 
-export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
+export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null };
 
-export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
+export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
 export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress', activityId: string, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null };
 
+export type WorkbenchTextStreamFragment = { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null };
+
 export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
-export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null };
+export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
-export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string } | null } | null> | null } | null } | null };
+export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null };
 
-export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
+export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
+
+export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
 
 export type WorkbenchesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -19089,7 +19303,7 @@ export type WorkbenchesAlertsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchesAlertsQuery = { __typename?: 'RootQueryType', workbenchAlerts?: { __typename?: 'AlertConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null } | null };
+export type WorkbenchesAlertsQuery = { __typename?: 'RootQueryType', workbenchAlerts?: { __typename?: 'AlertConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null };
 
 export type WorkbenchQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -19115,7 +19329,7 @@ export type WorkbenchAlertsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchAlertsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, alerts?: { __typename?: 'AlertConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null } | null } | null };
+export type WorkbenchAlertsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, alerts?: { __typename?: 'AlertConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchesIssuesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -19123,7 +19337,23 @@ export type WorkbenchesIssuesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIssues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string } | null } | null> | null } | null } | null } | null } | null> | null } | null };
+export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIssues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null };
+
+export type WorkbenchIssuesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchIssuesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null } | null };
+
+export type GetWorkbenchCronMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWorkbenchCronMutation = { __typename?: 'RootMutationType', workbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type WorkbenchCronsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19134,6 +19364,15 @@ export type WorkbenchCronsQueryVariables = Exact<{
 
 export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
+export type WorkbenchPromptsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchPromptsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, prompts?: { __typename?: 'WorkbenchPromptConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchPromptEdge', node?: { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+
 export type WorkbenchWebhooksQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -19141,49 +19380,71 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null } | null> | null } | null } | null };
+export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+
+export type GetWorkbenchWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+
+export type IssueWebhooksQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type IssueWebhooksQuery = { __typename?: 'RootQueryType', issueWebhooks?: { __typename?: 'IssueWebhookConnection', edges?: Array<{ __typename?: 'IssueWebhookEdge', node?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type WorkbenchTriggersSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string } | null } | null> | null } | null } | null };
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
+export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
 
 export type WorkbenchJobActivitiesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null } | null };
+export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null };
 
 export type WorkbenchJobActivityDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchJobActivityDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobActivityDelta?: { __typename?: 'WorkbenchJobActivityDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null };
+export type WorkbenchJobActivityDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobActivityDelta?: { __typename?: 'WorkbenchJobActivityDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null } | null };
 
-export type WorkbenchJobProgressSubscriptionVariables = Exact<{
+export type WorkbenchJobThoughtDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchJobProgressSubscription = { __typename?: 'RootSubscriptionType', workbenchJobProgress?: { __typename?: 'WorkbenchJobProgress', activityId: string, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null } | null };
+export type WorkbenchJobThoughtDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobThoughtDelta?: { __typename?: 'WorkbenchJobThoughtDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null } | null };
+
+export type WorkbenchTextStreamSubscriptionVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchTextStreamSubscription = { __typename?: 'RootSubscriptionType', workbenchTextStream?: { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null } | null };
 
 export type WorkbenchToolsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -19254,6 +19515,37 @@ export type CreateWorkbenchJobMutationVariables = Exact<{
 
 export type CreateWorkbenchJobMutation = { __typename?: 'RootMutationType', createWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null } | null };
 
+export type CreateWorkbenchMessageMutationVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+  attributes: WorkbenchMessageAttributes;
+}>;
+
+
+export type CreateWorkbenchMessageMutation = { __typename?: 'RootMutationType', createWorkbenchMessage?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null };
+
+export type CreateWorkbenchPromptMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  attributes: WorkbenchPromptAttributes;
+}>;
+
+
+export type CreateWorkbenchPromptMutation = { __typename?: 'RootMutationType', createWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null } | null };
+
+export type UpdateWorkbenchPromptMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchPromptAttributes;
+}>;
+
+
+export type UpdateWorkbenchPromptMutation = { __typename?: 'RootMutationType', updateWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteWorkbenchPromptMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWorkbenchPromptMutation = { __typename?: 'RootMutationType', deleteWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string } | null };
+
 export type CreateWorkbenchCronMutationVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
   attributes: WorkbenchCronAttributes;
@@ -19283,7 +19575,7 @@ export type CreateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
+export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
 
 export type UpdateWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19291,7 +19583,7 @@ export type UpdateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
+export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
 
 export type DeleteWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19300,118 +19592,13 @@ export type DeleteWorkbenchWebhookMutationVariables = Exact<{
 
 export type DeleteWorkbenchWebhookMutation = { __typename?: 'RootMutationType', deleteWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null } | null };
 
-export const PullRequestBasicFragmentDoc = gql`
-    fragment PullRequestBasic on PullRequest {
-  id
-  url
-  title
-  creator
-  status
-  insertedAt
-  updatedAt
-}
-    `;
-export const AgentRunTinyFragmentDoc = gql`
-    fragment AgentRunTiny on AgentRun {
-  id
-  status
-  mode
-  prompt
-  shared
-  error
-  runtime {
-    id
-    name
-    type
-  }
-  repository
-  branch
-  pullRequests {
-    ...PullRequestBasic
-  }
-  podReference {
-    name
-    namespace
-  }
-}
-    ${PullRequestBasicFragmentDoc}`;
-export const AgentMessageCostFragmentDoc = gql`
-    fragment AgentMessageCost on AgentMessageCost {
-  total
-  tokens {
-    input
-    output
-    reasoning
-  }
-}
-    `;
-export const AgentMessageMetadataFragmentDoc = gql`
-    fragment AgentMessageMetadata on AgentMessageMetadata {
-  reasoning {
-    text
-    start
-    end
-  }
-  file {
-    name
-    text
-    start
-    end
-  }
-  tool {
-    name
-    state
-    input
-    output
-  }
-}
-    `;
-export const AgentMessageFragmentDoc = gql`
-    fragment AgentMessage on AgentMessage {
-  id
-  seq
-  role
-  message
-  cost {
-    ...AgentMessageCost
-  }
-  metadata {
-    ...AgentMessageMetadata
-  }
-}
-    ${AgentMessageCostFragmentDoc}
-${AgentMessageMetadataFragmentDoc}`;
-export const AgentTodoFragmentDoc = gql`
-    fragment AgentTodo on AgentTodo {
-  title
-  description
-  done
-}
-    `;
-export const AgentAnalysisFragmentDoc = gql`
-    fragment AgentAnalysis on AgentAnalysis {
-  summary
-  analysis
-  bullets
-}
-    `;
-export const AgentRunFragmentDoc = gql`
-    fragment AgentRun on AgentRun {
-  ...AgentRunTiny
-  messages {
-    ...AgentMessage
-  }
-  todos {
-    ...AgentTodo
-  }
-  analysis {
-    ...AgentAnalysis
-  }
-}
-    ${AgentRunTinyFragmentDoc}
-${AgentMessageFragmentDoc}
-${AgentTodoFragmentDoc}
-${AgentAnalysisFragmentDoc}`;
+export type CreateIssueWebhookMutationVariables = Exact<{
+  attributes: IssueWebhookAttributes;
+}>;
+
+
+export type CreateIssueWebhookMutation = { __typename?: 'RootMutationType', createIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null };
+
 export const ClusterMinimalFragmentDoc = gql`
     fragment ClusterMinimal on Cluster {
   id
@@ -19479,6 +19666,52 @@ export const AgentRunRepositoryFragmentDoc = gql`
   lastUsedAt
 }
     `;
+export const AgentMessageCostFragmentDoc = gql`
+    fragment AgentMessageCost on AgentMessageCost {
+  total
+  tokens {
+    input
+    output
+    reasoning
+  }
+}
+    `;
+export const AgentMessageMetadataFragmentDoc = gql`
+    fragment AgentMessageMetadata on AgentMessageMetadata {
+  reasoning {
+    text
+    start
+    end
+  }
+  file {
+    name
+    text
+    start
+    end
+  }
+  tool {
+    name
+    state
+    input
+    output
+  }
+}
+    `;
+export const AgentMessageFragmentDoc = gql`
+    fragment AgentMessage on AgentMessage {
+  id
+  seq
+  role
+  message
+  cost {
+    ...AgentMessageCost
+  }
+  metadata {
+    ...AgentMessageMetadata
+  }
+}
+    ${AgentMessageCostFragmentDoc}
+${AgentMessageMetadataFragmentDoc}`;
 export const AgentMessageDeltaFragmentDoc = gql`
     fragment AgentMessageDelta on AgentMessageDelta {
   delta
@@ -19783,6 +20016,17 @@ export const PageInfoFragmentDoc = gql`
   startCursor
 }
     `;
+export const PullRequestBasicFragmentDoc = gql`
+    fragment PullRequestBasic on PullRequest {
+  id
+  url
+  title
+  creator
+  status
+  insertedAt
+  updatedAt
+}
+    `;
 export const ClusterBasicFragmentDoc = gql`
     fragment ClusterBasic on Cluster {
   ...ClusterTiny
@@ -19892,6 +20136,32 @@ ${ScmConnectionFragmentDoc}
 ${PolicyBindingFragmentDoc}
 ${PrConfigurationFragmentDoc}
 ${PrConfirmationFragmentDoc}`;
+export const AgentRunTinyFragmentDoc = gql`
+    fragment AgentRunTiny on AgentRun {
+  id
+  status
+  mode
+  prompt
+  shared
+  error
+  runtime {
+    id
+    name
+    type
+  }
+  repository
+  branch
+  pullRequests {
+    ...PullRequestBasic
+  }
+  podReference {
+    name
+    namespace
+  }
+  insertedAt
+  updatedAt
+}
+    ${PullRequestBasicFragmentDoc}`;
 export const ChatFragmentDoc = gql`
     fragment Chat on Chat {
   id
@@ -20412,6 +20682,13 @@ export const AlertFragmentDoc = gql`
   }
   resolution {
     ...AlertResolution
+  }
+  workbench {
+    id
+  }
+  workbenchJob {
+    id
+    status
   }
   updatedAt
 }
@@ -24107,6 +24384,17 @@ export const WorkbenchFragmentDoc = gql`
     ${WorkbenchTinyFragmentDoc}
 ${WorkbenchToolFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const WorkbenchJobThoughtFragmentDoc = gql`
+    fragment WorkbenchJobThought on WorkbenchJobThought {
+  id
+  content
+  toolName
+  toolArgs
+  activity {
+    id
+  }
+}
+    `;
 export const WorkbenchJobActivityLogFragmentDoc = gql`
     fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
   timestamp
@@ -24122,6 +24410,37 @@ export const WorkbenchJobActivityMetricFragmentDoc = gql`
   labels
 }
     `;
+export const AgentTodoFragmentDoc = gql`
+    fragment AgentTodo on AgentTodo {
+  title
+  description
+  done
+}
+    `;
+export const AgentAnalysisFragmentDoc = gql`
+    fragment AgentAnalysis on AgentAnalysis {
+  summary
+  analysis
+  bullets
+}
+    `;
+export const AgentRunFragmentDoc = gql`
+    fragment AgentRun on AgentRun {
+  ...AgentRunTiny
+  messages {
+    ...AgentMessage
+  }
+  todos {
+    ...AgentTodo
+  }
+  analysis {
+    ...AgentAnalysis
+  }
+}
+    ${AgentRunTinyFragmentDoc}
+${AgentMessageFragmentDoc}
+${AgentTodoFragmentDoc}
+${AgentAnalysisFragmentDoc}`;
 export const WorkbenchJobActivityFragmentDoc = gql`
     fragment WorkbenchJobActivity on WorkbenchJobActivity {
   id
@@ -24129,8 +24448,12 @@ export const WorkbenchJobActivityFragmentDoc = gql`
   status
   prompt
   insertedAt
+  thoughts {
+    ...WorkbenchJobThought
+  }
   result {
     output
+    error
     jobUpdate {
       diff
       workingTheory
@@ -24159,21 +24482,25 @@ export const WorkbenchJobActivityFragmentDoc = gql`
     }
   }
   agentRun {
-    id
-    pullRequests {
-      ...PullRequestBasic
-    }
+    ...AgentRun
   }
 }
-    ${WorkbenchJobActivityLogFragmentDoc}
+    ${WorkbenchJobThoughtFragmentDoc}
+${WorkbenchJobActivityLogFragmentDoc}
 ${WorkbenchJobActivityMetricFragmentDoc}
-${PullRequestBasicFragmentDoc}`;
+${AgentRunFragmentDoc}`;
 export const WorkbenchJobProgressFragmentDoc = gql`
     fragment WorkbenchJobProgress on WorkbenchJobProgress {
   activityId
   tool
   text
   arguments
+}
+    `;
+export const WorkbenchTextStreamFragmentDoc = gql`
+    fragment WorkbenchTextStream on WorkbenchTextStream {
+  activityId
+  text
 }
     `;
 export const WorkbenchCronFragmentDoc = gql`
@@ -24183,6 +24510,14 @@ export const WorkbenchCronFragmentDoc = gql`
   prompt
   lastRunAt
   nextRunAt
+  insertedAt
+  updatedAt
+}
+    `;
+export const WorkbenchPromptFragmentDoc = gql`
+    fragment WorkbenchPrompt on WorkbenchPrompt {
+  id
+  prompt
   insertedAt
   updatedAt
 }
@@ -24208,6 +24543,7 @@ export const WorkbenchWebhookFragmentDoc = gql`
     id
     name
     url
+    provider
   }
 }
     `;
@@ -24223,13 +24559,10 @@ export const WorkbenchIssueFragmentDoc = gql`
   updatedAt
   workbench {
     id
-    runs(first: 1) {
-      edges {
-        node {
-          id
-        }
-      }
-    }
+  }
+  workbenchJob {
+    id
+    status
   }
 }
     `;
@@ -24255,6 +24588,7 @@ export const WorkbenchJobResultFragmentDoc = gql`
   id
   workingTheory
   conclusion
+  topology
   todos {
     ...WorkbenchJobResultTodo
   }
@@ -24290,10 +24624,14 @@ export const WorkbenchJobFragmentDoc = gql`
   result {
     ...WorkbenchJobResult
   }
+  pullRequests {
+    ...PullRequestBasic
+  }
 }
     ${WorkbenchJobTinyFragmentDoc}
 ${AlertFragmentDoc}
-${WorkbenchJobResultFragmentDoc}`;
+${WorkbenchJobResultFragmentDoc}
+${PullRequestBasicFragmentDoc}`;
 export const AgentRunsDocument = gql`
     query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
   agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {
@@ -40121,6 +40459,95 @@ export type WorkbenchesIssuesQueryHookResult = ReturnType<typeof useWorkbenchesI
 export type WorkbenchesIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenchesIssuesLazyQuery>;
 export type WorkbenchesIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesIssuesSuspenseQuery>;
 export type WorkbenchesIssuesQueryResult = Apollo.QueryResult<WorkbenchesIssuesQuery, WorkbenchesIssuesQueryVariables>;
+export const WorkbenchIssuesDocument = gql`
+    query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    issues(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchIssueFragmentDoc}`;
+
+/**
+ * __useWorkbenchIssuesQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchIssuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchIssuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchIssuesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchIssuesQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables> & ({ variables: WorkbenchIssuesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>(WorkbenchIssuesDocument, options);
+      }
+export function useWorkbenchIssuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>(WorkbenchIssuesDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchIssuesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>;
+export function useWorkbenchIssuesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchIssuesQuery | undefined, WorkbenchIssuesQueryVariables>;
+export function useWorkbenchIssuesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>(WorkbenchIssuesDocument, options);
+        }
+export type WorkbenchIssuesQueryHookResult = ReturnType<typeof useWorkbenchIssuesQuery>;
+export type WorkbenchIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenchIssuesLazyQuery>;
+export type WorkbenchIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchIssuesSuspenseQuery>;
+export type WorkbenchIssuesQueryResult = Apollo.QueryResult<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>;
+export const GetWorkbenchCronDocument = gql`
+    mutation GetWorkbenchCron($id: ID!) {
+  workbenchCron(id: $id) {
+    ...WorkbenchCron
+  }
+}
+    ${WorkbenchCronFragmentDoc}`;
+export type GetWorkbenchCronMutationFn = Apollo.MutationFunction<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>;
+
+/**
+ * __useGetWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useGetWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGetWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [getWorkbenchCronMutation, { data, loading, error }] = useGetWorkbenchCronMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>(GetWorkbenchCronDocument, options);
+      }
+export type GetWorkbenchCronMutationHookResult = ReturnType<typeof useGetWorkbenchCronMutation>;
+export type GetWorkbenchCronMutationResult = Apollo.MutationResult<GetWorkbenchCronMutation>;
+export type GetWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>;
 export const WorkbenchCronsDocument = gql`
     query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
@@ -40177,6 +40604,62 @@ export type WorkbenchCronsQueryHookResult = ReturnType<typeof useWorkbenchCronsQ
 export type WorkbenchCronsLazyQueryHookResult = ReturnType<typeof useWorkbenchCronsLazyQuery>;
 export type WorkbenchCronsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchCronsSuspenseQuery>;
 export type WorkbenchCronsQueryResult = Apollo.QueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
+export const WorkbenchPromptsDocument = gql`
+    query WorkbenchPrompts($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    prompts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchPrompt
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchPromptFragmentDoc}`;
+
+/**
+ * __useWorkbenchPromptsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchPromptsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchPromptsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchPromptsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchPromptsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables> & ({ variables: WorkbenchPromptsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>(WorkbenchPromptsDocument, options);
+      }
+export function useWorkbenchPromptsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>(WorkbenchPromptsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchPromptsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>;
+export function useWorkbenchPromptsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchPromptsQuery | undefined, WorkbenchPromptsQueryVariables>;
+export function useWorkbenchPromptsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>(WorkbenchPromptsDocument, options);
+        }
+export type WorkbenchPromptsQueryHookResult = ReturnType<typeof useWorkbenchPromptsQuery>;
+export type WorkbenchPromptsLazyQueryHookResult = ReturnType<typeof useWorkbenchPromptsLazyQuery>;
+export type WorkbenchPromptsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchPromptsSuspenseQuery>;
+export type WorkbenchPromptsQueryResult = Apollo.QueryResult<WorkbenchPromptsQuery, WorkbenchPromptsQueryVariables>;
 export const WorkbenchWebhooksDocument = gql`
     query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
@@ -40233,23 +40716,131 @@ export type WorkbenchWebhooksQueryHookResult = ReturnType<typeof useWorkbenchWeb
 export type WorkbenchWebhooksLazyQueryHookResult = ReturnType<typeof useWorkbenchWebhooksLazyQuery>;
 export type WorkbenchWebhooksSuspenseQueryHookResult = ReturnType<typeof useWorkbenchWebhooksSuspenseQuery>;
 export type WorkbenchWebhooksQueryResult = Apollo.QueryResult<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>;
+export const GetWorkbenchWebhookDocument = gql`
+    mutation GetWorkbenchWebhook($id: ID!) {
+  getWorkbenchWebhook(id: $id) {
+    ...WorkbenchWebhook
+  }
+}
+    ${WorkbenchWebhookFragmentDoc}`;
+export type GetWorkbenchWebhookMutationFn = Apollo.MutationFunction<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>;
+
+/**
+ * __useGetWorkbenchWebhookMutation__
+ *
+ * To run a mutation, you first call `useGetWorkbenchWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGetWorkbenchWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [getWorkbenchWebhookMutation, { data, loading, error }] = useGetWorkbenchWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetWorkbenchWebhookMutation(baseOptions?: Apollo.MutationHookOptions<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>(GetWorkbenchWebhookDocument, options);
+      }
+export type GetWorkbenchWebhookMutationHookResult = ReturnType<typeof useGetWorkbenchWebhookMutation>;
+export type GetWorkbenchWebhookMutationResult = Apollo.MutationResult<GetWorkbenchWebhookMutation>;
+export type GetWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>;
+export const IssueWebhooksDocument = gql`
+    query IssueWebhooks($first: Int, $after: String) {
+  issueWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        id
+        name
+        provider
+        url
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useIssueWebhooksQuery__
+ *
+ * To run a query within a React component, call `useIssueWebhooksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIssueWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIssueWebhooksQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useIssueWebhooksQuery(baseOptions?: Apollo.QueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IssueWebhooksQuery, IssueWebhooksQueryVariables>(IssueWebhooksDocument, options);
+      }
+export function useIssueWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IssueWebhooksQuery, IssueWebhooksQueryVariables>(IssueWebhooksDocument, options);
+        }
+// @ts-ignore
+export function useIssueWebhooksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhooksQuery, IssueWebhooksQueryVariables>;
+export function useIssueWebhooksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhooksQuery | undefined, IssueWebhooksQueryVariables>;
+export function useIssueWebhooksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IssueWebhooksQuery, IssueWebhooksQueryVariables>(IssueWebhooksDocument, options);
+        }
+export type IssueWebhooksQueryHookResult = ReturnType<typeof useIssueWebhooksQuery>;
+export type IssueWebhooksLazyQueryHookResult = ReturnType<typeof useIssueWebhooksLazyQuery>;
+export type IssueWebhooksSuspenseQueryHookResult = ReturnType<typeof useIssueWebhooksSuspenseQuery>;
+export type IssueWebhooksQueryResult = Apollo.QueryResult<IssueWebhooksQuery, IssueWebhooksQueryVariables>;
 export const WorkbenchTriggersSummaryDocument = gql`
     query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
     id
     name
     description
-    crons(first: 1) {
+    tools {
+      id
+      name
+      tool
+    }
+    crons(first: 30) {
       edges {
         node {
           id
+          crontab
+          prompt
+          nextRunAt
         }
       }
     }
-    webhooks(first: 1) {
+    webhooks(first: 30) {
       edges {
         node {
           id
+          name
+          webhook {
+            id
+            name
+            type
+            url
+          }
+          issueWebhook {
+            id
+            name
+            url
+            provider
+          }
         }
       }
     }
@@ -40339,6 +40930,7 @@ export const WorkbenchJobActivitiesDocument = gql`
     query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
+    status
     prompt
     activities(first: 100) {
       edges {
@@ -40452,36 +41044,69 @@ export function useWorkbenchJobActivityDeltaSubscription(baseOptions: Apollo.Sub
       }
 export type WorkbenchJobActivityDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchJobActivityDeltaSubscription>;
 export type WorkbenchJobActivityDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobActivityDeltaSubscription>;
-export const WorkbenchJobProgressDocument = gql`
-    subscription WorkbenchJobProgress($jobId: ID!) {
-  workbenchJobProgress(jobId: $jobId) {
-    ...WorkbenchJobProgress
+export const WorkbenchJobThoughtDeltaDocument = gql`
+    subscription WorkbenchJobThoughtDelta($jobId: ID!) {
+  workbenchJobThoughtDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobThought
+    }
   }
 }
-    ${WorkbenchJobProgressFragmentDoc}`;
+    ${WorkbenchJobThoughtFragmentDoc}`;
 
 /**
- * __useWorkbenchJobProgressSubscription__
+ * __useWorkbenchJobThoughtDeltaSubscription__
  *
- * To run a query within a React component, call `useWorkbenchJobProgressSubscription` and pass it any options that fit your needs.
- * When your component renders, `useWorkbenchJobProgressSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useWorkbenchJobThoughtDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobThoughtDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useWorkbenchJobProgressSubscription({
+ * const { data, loading, error } = useWorkbenchJobThoughtDeltaSubscription({
  *   variables: {
  *      jobId: // value for 'jobId'
  *   },
  * });
  */
-export function useWorkbenchJobProgressSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobProgressSubscription, WorkbenchJobProgressSubscriptionVariables> & ({ variables: WorkbenchJobProgressSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useWorkbenchJobThoughtDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobThoughtDeltaSubscription, WorkbenchJobThoughtDeltaSubscriptionVariables> & ({ variables: WorkbenchJobThoughtDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<WorkbenchJobProgressSubscription, WorkbenchJobProgressSubscriptionVariables>(WorkbenchJobProgressDocument, options);
+        return Apollo.useSubscription<WorkbenchJobThoughtDeltaSubscription, WorkbenchJobThoughtDeltaSubscriptionVariables>(WorkbenchJobThoughtDeltaDocument, options);
       }
-export type WorkbenchJobProgressSubscriptionHookResult = ReturnType<typeof useWorkbenchJobProgressSubscription>;
-export type WorkbenchJobProgressSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobProgressSubscription>;
+export type WorkbenchJobThoughtDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchJobThoughtDeltaSubscription>;
+export type WorkbenchJobThoughtDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobThoughtDeltaSubscription>;
+export const WorkbenchTextStreamDocument = gql`
+    subscription WorkbenchTextStream($jobId: ID!) {
+  workbenchTextStream(jobId: $jobId) {
+    ...WorkbenchTextStream
+  }
+}
+    ${WorkbenchTextStreamFragmentDoc}`;
+
+/**
+ * __useWorkbenchTextStreamSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchTextStreamSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchTextStreamSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchTextStreamSubscription({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useWorkbenchTextStreamSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchTextStreamSubscription, WorkbenchTextStreamSubscriptionVariables> & ({ variables: WorkbenchTextStreamSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchTextStreamSubscription, WorkbenchTextStreamSubscriptionVariables>(WorkbenchTextStreamDocument, options);
+      }
+export type WorkbenchTextStreamSubscriptionHookResult = ReturnType<typeof useWorkbenchTextStreamSubscription>;
+export type WorkbenchTextStreamSubscriptionResult = Apollo.SubscriptionResult<WorkbenchTextStreamSubscription>;
 export const WorkbenchToolsDocument = gql`
     query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
   workbenchTools(first: $first, after: $after, q: $q) {
@@ -40816,6 +41441,143 @@ export function useCreateWorkbenchJobMutation(baseOptions?: Apollo.MutationHookO
 export type CreateWorkbenchJobMutationHookResult = ReturnType<typeof useCreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationResult = Apollo.MutationResult<CreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchJobMutation, CreateWorkbenchJobMutationVariables>;
+export const CreateWorkbenchMessageDocument = gql`
+    mutation CreateWorkbenchMessage($jobId: ID!, $attributes: WorkbenchMessageAttributes!) {
+  createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
+    ...WorkbenchJobActivity
+  }
+}
+    ${WorkbenchJobActivityFragmentDoc}`;
+export type CreateWorkbenchMessageMutationFn = Apollo.MutationFunction<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>;
+
+/**
+ * __useCreateWorkbenchMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchMessageMutation, { data, loading, error }] = useCreateWorkbenchMessageMutation({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchMessageMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>(CreateWorkbenchMessageDocument, options);
+      }
+export type CreateWorkbenchMessageMutationHookResult = ReturnType<typeof useCreateWorkbenchMessageMutation>;
+export type CreateWorkbenchMessageMutationResult = Apollo.MutationResult<CreateWorkbenchMessageMutation>;
+export type CreateWorkbenchMessageMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>;
+export const CreateWorkbenchPromptDocument = gql`
+    mutation CreateWorkbenchPrompt($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
+  createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    prompt
+    insertedAt
+  }
+}
+    `;
+export type CreateWorkbenchPromptMutationFn = Apollo.MutationFunction<CreateWorkbenchPromptMutation, CreateWorkbenchPromptMutationVariables>;
+
+/**
+ * __useCreateWorkbenchPromptMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchPromptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchPromptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchPromptMutation, { data, loading, error }] = useCreateWorkbenchPromptMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchPromptMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchPromptMutation, CreateWorkbenchPromptMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchPromptMutation, CreateWorkbenchPromptMutationVariables>(CreateWorkbenchPromptDocument, options);
+      }
+export type CreateWorkbenchPromptMutationHookResult = ReturnType<typeof useCreateWorkbenchPromptMutation>;
+export type CreateWorkbenchPromptMutationResult = Apollo.MutationResult<CreateWorkbenchPromptMutation>;
+export type CreateWorkbenchPromptMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchPromptMutation, CreateWorkbenchPromptMutationVariables>;
+export const UpdateWorkbenchPromptDocument = gql`
+    mutation UpdateWorkbenchPrompt($id: ID!, $attributes: WorkbenchPromptAttributes!) {
+  updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+    ...WorkbenchPrompt
+  }
+}
+    ${WorkbenchPromptFragmentDoc}`;
+export type UpdateWorkbenchPromptMutationFn = Apollo.MutationFunction<UpdateWorkbenchPromptMutation, UpdateWorkbenchPromptMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchPromptMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchPromptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchPromptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchPromptMutation, { data, loading, error }] = useUpdateWorkbenchPromptMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchPromptMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchPromptMutation, UpdateWorkbenchPromptMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchPromptMutation, UpdateWorkbenchPromptMutationVariables>(UpdateWorkbenchPromptDocument, options);
+      }
+export type UpdateWorkbenchPromptMutationHookResult = ReturnType<typeof useUpdateWorkbenchPromptMutation>;
+export type UpdateWorkbenchPromptMutationResult = Apollo.MutationResult<UpdateWorkbenchPromptMutation>;
+export type UpdateWorkbenchPromptMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchPromptMutation, UpdateWorkbenchPromptMutationVariables>;
+export const DeleteWorkbenchPromptDocument = gql`
+    mutation DeleteWorkbenchPrompt($id: ID!) {
+  deleteWorkbenchPrompt(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteWorkbenchPromptMutationFn = Apollo.MutationFunction<DeleteWorkbenchPromptMutation, DeleteWorkbenchPromptMutationVariables>;
+
+/**
+ * __useDeleteWorkbenchPromptMutation__
+ *
+ * To run a mutation, you first call `useDeleteWorkbenchPromptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWorkbenchPromptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWorkbenchPromptMutation, { data, loading, error }] = useDeleteWorkbenchPromptMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWorkbenchPromptMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWorkbenchPromptMutation, DeleteWorkbenchPromptMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWorkbenchPromptMutation, DeleteWorkbenchPromptMutationVariables>(DeleteWorkbenchPromptDocument, options);
+      }
+export type DeleteWorkbenchPromptMutationHookResult = ReturnType<typeof useDeleteWorkbenchPromptMutation>;
+export type DeleteWorkbenchPromptMutationResult = Apollo.MutationResult<DeleteWorkbenchPromptMutation>;
+export type DeleteWorkbenchPromptMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchPromptMutation, DeleteWorkbenchPromptMutationVariables>;
 export const CreateWorkbenchCronDocument = gql`
     mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
   createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
@@ -41019,6 +41781,42 @@ export function useDeleteWorkbenchWebhookMutation(baseOptions?: Apollo.MutationH
 export type DeleteWorkbenchWebhookMutationHookResult = ReturnType<typeof useDeleteWorkbenchWebhookMutation>;
 export type DeleteWorkbenchWebhookMutationResult = Apollo.MutationResult<DeleteWorkbenchWebhookMutation>;
 export type DeleteWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>;
+export const CreateIssueWebhookDocument = gql`
+    mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
+  createIssueWebhook(attributes: $attributes) {
+    id
+    name
+    provider
+    url
+  }
+}
+    `;
+export type CreateIssueWebhookMutationFn = Apollo.MutationFunction<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
+
+/**
+ * __useCreateIssueWebhookMutation__
+ *
+ * To run a mutation, you first call `useCreateIssueWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateIssueWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createIssueWebhookMutation, { data, loading, error }] = useCreateIssueWebhookMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateIssueWebhookMutation(baseOptions?: Apollo.MutationHookOptions<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>(CreateIssueWebhookDocument, options);
+      }
+export type CreateIssueWebhookMutationHookResult = ReturnType<typeof useCreateIssueWebhookMutation>;
+export type CreateIssueWebhookMutationResult = Apollo.MutationResult<CreateIssueWebhookMutation>;
+export type CreateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
 export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
@@ -41234,8 +42032,11 @@ export const namedOperations = {
     WorkbenchJobs: 'WorkbenchJobs',
     WorkbenchAlerts: 'WorkbenchAlerts',
     WorkbenchesIssues: 'WorkbenchesIssues',
+    WorkbenchIssues: 'WorkbenchIssues',
     WorkbenchCrons: 'WorkbenchCrons',
+    WorkbenchPrompts: 'WorkbenchPrompts',
     WorkbenchWebhooks: 'WorkbenchWebhooks',
+    IssueWebhooks: 'IssueWebhooks',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
@@ -41391,6 +42192,8 @@ export const namedOperations = {
     UpdateUser: 'UpdateUser',
     DeleteUser: 'DeleteUser',
     CreateInvite: 'CreateInvite',
+    GetWorkbenchCron: 'GetWorkbenchCron',
+    GetWorkbenchWebhook: 'GetWorkbenchWebhook',
     CreateWorkbench: 'CreateWorkbench',
     UpdateWorkbench: 'UpdateWorkbench',
     DeleteWorkbench: 'DeleteWorkbench',
@@ -41398,12 +42201,17 @@ export const namedOperations = {
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
     CreateWorkbenchJob: 'CreateWorkbenchJob',
+    CreateWorkbenchMessage: 'CreateWorkbenchMessage',
+    CreateWorkbenchPrompt: 'CreateWorkbenchPrompt',
+    UpdateWorkbenchPrompt: 'UpdateWorkbenchPrompt',
+    DeleteWorkbenchPrompt: 'DeleteWorkbenchPrompt',
     CreateWorkbenchCron: 'CreateWorkbenchCron',
     UpdateWorkbenchCron: 'UpdateWorkbenchCron',
     DeleteWorkbenchCron: 'DeleteWorkbenchCron',
     CreateWorkbenchWebhook: 'CreateWorkbenchWebhook',
     UpdateWorkbenchWebhook: 'UpdateWorkbenchWebhook',
-    DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook'
+    DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook',
+    CreateIssueWebhook: 'CreateIssueWebhook'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
@@ -41412,7 +42220,8 @@ export const namedOperations = {
     LogsDelta: 'LogsDelta',
     WorkbenchJobDelta: 'WorkbenchJobDelta',
     WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',
-    WorkbenchJobProgress: 'WorkbenchJobProgress'
+    WorkbenchJobThoughtDelta: 'WorkbenchJobThoughtDelta',
+    WorkbenchTextStream: 'WorkbenchTextStream'
   },
   Fragment: {
     AgentRunTiny: 'AgentRunTiny',
@@ -41698,6 +42507,7 @@ export const namedOperations = {
     Workbench: 'Workbench',
     WorkbenchToolTiny: 'WorkbenchToolTiny',
     WorkbenchTool: 'WorkbenchTool',
+    WorkbenchJobThought: 'WorkbenchJobThought',
     WorkbenchJobResultTodo: 'WorkbenchJobResultTodo',
     WorkbenchJobActivityMetric: 'WorkbenchJobActivityMetric',
     WorkbenchJobActivityLog: 'WorkbenchJobActivityLog',
@@ -41705,7 +42515,9 @@ export const namedOperations = {
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
+    WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCron: 'WorkbenchCron',
+    WorkbenchPrompt: 'WorkbenchPrompt',
     WorkbenchWebhook: 'WorkbenchWebhook',
     WorkbenchIssue: 'WorkbenchIssue',
     WorkbenchJob: 'WorkbenchJob'

@@ -33,6 +33,12 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
         ]}
       end)
 
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete", [
+          %Tool{name: "subagent_result", arguments: %{"output" => "some workbench result"}}
+        ]}
+      end)
+
       runtime = insert(:agent_runtime)
       workbench = insert(:workbench, agent_runtime: runtime, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
       job = insert(:workbench_job, workbench: workbench, user: admin_user())
@@ -57,7 +63,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
       assert_receive {:result, result}, :timer.seconds(10)
 
       assert result[:status] == :successful
-      assert is_binary(result[:result][:output])
+      assert result[:result][:output] == "some workbench result"
     end
   end
 end

@@ -12,6 +12,7 @@ defmodule Console.Schema.Issue do
     field :url,         :string
     field :title,       :string
     field :body,        :string
+    field :payload,     :map
 
     belongs_to :workbench,  Workbench
     belongs_to :flow,       Flow
@@ -47,7 +48,7 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.status == ^status)
   end
 
-  @valid ~w(provider status external_id url title body workbench_id flow_id)a
+  @valid ~w(provider status external_id url title body payload workbench_id flow_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

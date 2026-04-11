@@ -9,6 +9,8 @@ defmodule Console.Schema.Workbench do
     WorkbenchToolAssociation,
     WorkbenchWebhook,
     WorkbenchCron,
+    WorkbenchPrompt,
+    WorkbenchSkill,
     PolicyBinding,
     User,
     AgentRun,
@@ -62,10 +64,12 @@ defmodule Console.Schema.Workbench do
 
     has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
     has_many :tools, through: [:tool_associations, :tool]
-    has_many :jobs,     WorkbenchJob,     on_replace: :delete
-    has_many :webhooks, WorkbenchWebhook, on_replace: :delete
-    has_many :crons,    WorkbenchCron,    on_replace: :delete
-    has_many :alerts,   Alert
+    has_many :jobs,             WorkbenchJob,     on_replace: :delete
+    has_many :webhooks,         WorkbenchWebhook, on_replace: :delete
+    has_many :crons,            WorkbenchCron,    on_replace: :delete
+    has_many :prompts,          WorkbenchPrompt,  on_replace: :delete
+    has_many :workbench_skills, WorkbenchSkill, on_replace: :delete
+    has_many :alerts,           Alert
 
     timestamps()
   end
