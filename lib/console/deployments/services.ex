@@ -133,7 +133,10 @@ defmodule Console.Deployments.Services do
     |> add_sources(svc)
     |> Enum.map(fn
       {_, id, %Service.Git{} = ref} when is_binary(id) ->
-        Git.cached!(id) |> Git.Discovery.digest(ref)
+        case Git.get_repository(id) do
+          %GitRepository{} = repo -> Git.Discovery.digest(repo, ref)
+          nil -> {:error, "git repository not found"}
+        end
       {:flux, _, svc} ->
         Helm.Charts.digest(svc)
       {:helm, _, %{chart: c, version: v, url: url}} when is_binary(c) and is_binary(v) and is_binary(url) ->
