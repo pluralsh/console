@@ -26,21 +26,21 @@ defmodule Console.AI.Workbench.Subagents.Base do
 
   def stream_callbacks(%WorkbenchJob{id: id}) do
     Stream.stream_callbacks(
-      on_result: &publish_absinthe(%{text: IO.inspect(&1, label: "ai result")}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
+      on_result: &publish_absinthe(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
       on_thinking: &publish_absinthe(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream")
     )
   end
 
   def stream_callbacks(%WorkbenchJobActivity{workbench_job_id: jid, id: id}) do
     Stream.stream_callbacks(
-      on_result: &publish_absinthe(%{text: IO.inspect(&1, label: "ai activity result"), activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream"),
+      on_result: &publish_absinthe(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream"),
       on_thinking: &publish_absinthe(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream")
     )
   end
 
   def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id}, {kind, content})
     when kind in [:content, :assistant] and is_binary(content),
-    do: publish_absinthe(%{activity_id: id, text: IO.inspect(content, label: "ai activity content")}, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
+    do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
   def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id} = activity, {:tool, content, %{name: name, arguments: args} = tool})
     when is_binary(content) do
     save_thought(activity, content, tool)
@@ -51,7 +51,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
       text: content
     }, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
   end
-  def callback(result, _), do: IO.inspect(result, label: "ai result")
+  def callback(result, _), do: :ok
 
   def last_message(messages, mapper) when is_function(mapper, 1) do
     Enum.reverse(messages)
