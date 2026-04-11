@@ -6,11 +6,8 @@ We've found the following alert from <%= @alert.type %>, please investigate it's
 
 <%= if is_list(@alert.tags) do %>
 # Tags
-<%= for %{name: k, value: v} <- @alert.tags do %>
-- <%= k %>: <%= v %>
+<%= Enum.map(@alert.tags, & "- #{&1.name}: #{&1.value}") |> Enum.join("\n") %>
 <% end %>
-<% end %>
-
 <%= if is_map(@alert.stacktrace) do %>
 There's also an associated stacktrace, which I'll provide in JSON format:
 
@@ -28,3 +25,9 @@ For reference, this is the webhook result from the original <%= @alert.type %> w
 <%= Jason.encode!(@alert.payload) %>
 ```
 <% end %>
+
+An ideal root cause analysis will include:
+
+1. Observability analysis to validate the issue and determine its time frame.
+2. A code analysis, especially if it's due to a bug in application code, to determine the source fo the error.
+3. If the bug is clear, then generate a pull request to fix the issue.
