@@ -6,13 +6,14 @@ defmodule Console.Schema.Issue do
   defenum Status, open: 0, in_progress: 1, cancelled: 2, completed: 3
 
   schema "issues" do
-    field :provider,    IssueWebhook.Provider
-    field :status,      Status
-    field :external_id, :string
-    field :url,         :string
-    field :title,       :string
-    field :body,        :string
-    field :payload,     :map
+    field :provider,      IssueWebhook.Provider
+    field :status,        Status
+    field :external_id,   :string
+    field :url,           :string
+    field :title,         :string
+    field :body,          :string
+    field :payload,       :map
+    field :state_changed, :boolean, virtual: true, default: false
 
     belongs_to :workbench,  Workbench
     belongs_to :flow,       Flow
@@ -57,5 +58,6 @@ defmodule Console.Schema.Issue do
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:flow_id)
     |> validate_required([:provider, :status, :external_id, :url, :title, :body])
+    |> change_markers(state: :state_changed)
   end
 end
