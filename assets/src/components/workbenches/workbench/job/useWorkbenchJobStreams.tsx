@@ -9,7 +9,6 @@ import {
   WorkbenchJobActivityFragmentDoc,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
-import { produce } from 'immer'
 import { Dispatch, SetStateAction, useState } from 'react'
 import {
   updateCache,
@@ -17,6 +16,7 @@ import {
   appendConnectionToEnd,
 } from 'utils/graphql'
 import { isActivityTerminal } from './WorkbenchJobActivities'
+import { produce } from 'immer'
 
 // keyed by activity id, 'none' value puts it at the top level of the job
 type WorkbenchJobTextStreamMap = Record<string, string>

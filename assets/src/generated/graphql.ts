@@ -10534,6 +10534,7 @@ export type RootQueryType = {
   workbenchAlerts?: Maybe<AlertConnection>;
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
+  workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
   workbenches?: Maybe<WorkbenchConnection>;
@@ -11909,6 +11910,11 @@ export type RootQueryTypeWorkbenchIssuesArgs = {
 
 
 export type RootQueryTypeWorkbenchJobArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeWorkbenchJobActivityArgs = {
   id: Scalars['ID']['input'];
 };
 

@@ -490,6 +490,103 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
   end
 
+  describe "workbenchJobActivity" do
+    test "it can fetch a workbench job activity by id" do
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: insert(:workbench_job),
+          type: :coding,
+          status: :running,
+          prompt: "fix the bug"
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+            status
+            type
+            prompt
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["id"] == activity.id
+      assert found["status"] == "RUNNING"
+      assert found["type"] == "CODING"
+      assert found["prompt"] == "fix the bug"
+    end
+
+    test "users with read access to the workbench can fetch workbench job activities" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :plan)
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: user})
+
+      assert found["id"] == activity.id
+    end
+
+    test "users without read access cannot fetch workbench job activities" do
+      user = insert(:user)
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: user})
+    end
+
+    test "it can fetch embedded result on a workbench job activity" do
+      job = insert(:workbench_job)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :coding,
+          result: %{
+            output: "done",
+            job_update: %{diff: "a -> b", working_theory: "theory", conclusion: "ok"}
+          }
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+            result {
+              output
+              jobUpdate {
+                diff
+                workingTheory
+                conclusion
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["id"] == activity.id
+      assert found["result"]["output"] == "done"
+      assert found["result"]["jobUpdate"]["diff"] == "a -> b"
+      assert found["result"]["jobUpdate"]["workingTheory"] == "theory"
+      assert found["result"]["jobUpdate"]["conclusion"] == "ok"
+    end
+  end
+
   describe "workbench_tools" do
     test "it can fetch workbench tools" do
       tools = insert_list(3, :workbench_tool)

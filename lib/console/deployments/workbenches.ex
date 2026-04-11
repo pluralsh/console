@@ -37,6 +37,9 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench_job!(id), do: Repo.get!(WorkbenchJob, id)
   def get_workbench_job(id), do: Repo.get(WorkbenchJob, id)
 
+  def get_workbench_job_activity!(id), do: Repo.get!(WorkbenchJobActivity, id)
+  def get_workbench_job_activity(id), do: Repo.get(WorkbenchJobActivity, id)
+
   def get_workbench_by_name(name), do: Repo.get_by(Workbench, name: name)
   def get_workbench_by_name!(name), do: Repo.get_by!(Workbench, name: name)
 

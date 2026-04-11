@@ -30,7 +30,7 @@ You should always return a markdown formatted conclusion based on the investigat
 
 * the time series data that proves that conclusion
 * the log data that informs that conclusion
-* persisted time series data should include as many surrounding datapoints as possible given the source data you're using. Just saving a few points is less useful for human readers to understand the situation at play.
+* final time series data should include surrounding datapoints instead of just a few individual points.  This can be just a handful, but enough to show a sequential graph with context.
 
 If either were present in the investigation, *always* include them in your result. If neither are relevant, you can omit them.
 

@@ -594,6 +594,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.workbench_job/2
     end
 
+    field :workbench_job_activity, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_job_activity/2
+    end
+
     connection field :workbench_alerts, node_type: :alert do
       middleware Authenticated
       middleware Scope,

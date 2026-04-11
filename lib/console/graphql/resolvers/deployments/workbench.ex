@@ -39,6 +39,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> allow(actor(ctx), :read)
   end
 
+  def workbench_job_activity(%{id: id}, ctx) do
+    Workbenches.get_workbench_job_activity!(id)
+    |> allow(actor(ctx), :read)
+  end
+
   def list_workbench_runs(workbench, args, _) do
     WorkbenchJob.for_workbench(workbench.id)
     |> workbench_job_filters(args)
