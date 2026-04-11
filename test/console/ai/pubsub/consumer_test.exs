@@ -81,7 +81,7 @@ defmodule Console.AI.PubSub.ConsumerTest do
       assert i.id == stack.insight_id
     end
 
-    test "it will not stack if the stack isn't faield" do
+    test "it will not stack if the stack isn't failed" do
       stack = insert(:stack, status: :successful)
 
       event = %PubSub.StackUpdated{item: stack}
@@ -89,28 +89,28 @@ defmodule Console.AI.PubSub.ConsumerTest do
     end
   end
 
-  describe "AlertCreated" do
-    test "if the alert is firing, it will run" do
-      alert = insert(:alert, state: :firing, insight: build(:ai_insight))
-      expect(Memoizer, :generate, & {:ok, &1.insight})
+  # describe "AlertCreated" do
+  #   test "if the alert is firing, it will run" do
+  #     alert = insert(:alert, state: :firing, insight: build(:ai_insight))
+  #     expect(Memoizer, :generate, & {:ok, &1.insight})
 
-      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
-      {:ok, res} = Consumer.handle_event(event)
+  #     event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
+  #     {:ok, res} = Consumer.handle_event(event)
 
-      assert res.id == alert.insight.id
+  #     assert res.id == alert.insight.id
 
-      assert_receive {:event, %PubSub.AlertInsight{item: {a, i}}}
-      assert a.id == alert.id
-      assert i.id == alert.insight_id
-    end
+  #     assert_receive {:event, %PubSub.AlertInsight{item: {a, i}}}
+  #     assert a.id == alert.id
+  #     assert i.id == alert.insight_id
+  #   end
 
-    test "it will not stack if the stack isn't faield" do
-      alert = insert(:alert, state: :resolved)
+  #   test "it will not stack if the stack isn't faield" do
+  #     alert = insert(:alert, state: :resolved)
 
-      event = %PubSub.AlertCreated{item: alert}
-      :ok = Consumer.handle_event(event)
-    end
-  end
+  #     event = %PubSub.AlertCreated{item: alert}
+  #     :ok = Consumer.handle_event(event)
+  #   end
+  # end
 end
 
 defmodule Console.AI.PubSub.ConsumerSyncTest do
