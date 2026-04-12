@@ -6224,6 +6224,8 @@ type PolicyConstraintEdge struct {
 type PolicyEngine struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// whether to use custom policies from the repository
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
 	// the maximum allowed severity without failing the stack run
 	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
 }
@@ -6231,8 +6233,14 @@ type PolicyEngine struct {
 type PolicyEngineAttributes struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// whether to use custom policies from the repository
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
 	// the maximum allowed severity without failing the stack run
 	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
+	// optional repository to source policy configuration from
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// git reference within the policy repository or stack repository
+	Git *GitRefAttributes `json:"git,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet

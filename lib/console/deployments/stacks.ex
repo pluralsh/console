@@ -824,9 +824,34 @@ defmodule Console.Deployments.Stacks do
   """
   @spec tarstream(StackRun.t) :: {:ok, File.t} | error
   def tarstream(%StackRun{} = run) do
-    case Repo.preload(run, [:repository]) do
-      %{repository: %GitRepository{} = repo, git: git} -> Discovery.fetch(repo, git)
-      _ -> {:error, "could not resolve repository for run"}
+    with {:ok, base} <- base_tarball(run) do
+      case policy_tarball(run) do
+        {:ok, policy} -> merge_custom_policies(base, policy)
+        :ignore -> {:ok, base}
+        err -> err
+      end
+    end
+  end
+
+  defp base_tarball(%StackRun{repository: %GitRepository{} = repo, git: git}), do: Discovery.fetch(repo, git)
+  defp base_tarball(_), do: {:error, "could not resolve repository for run"}
+
+  defp policy_tarball(%StackRun{policy_engine: %Stack.PolicyEngine{
+    custom_policies: true,
+    repository_id: id,
+    git: git
+  }}) do
+    case Git.get_repository(id) do
+      %GitRepository{} = repo -> Discovery.fetch(repo, git)
+      _ -> {:error, "could not resolve repository for custom policies"}
+    end
+  end
+  defp policy_tarball(_), do: :ignore
+
+  defp merge_custom_policies(base, policy) do
+    with {:ok, policy_stream} <- Tar.tar_stream(policy) do
+      Enum.map(policy_stream, fn {k, v} -> {Path.join([".plural", "policies", k]), v} end)
+      |> then(&Tar.splice(base, &1))
     end
   end
 

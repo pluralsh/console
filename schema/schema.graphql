@@ -5722,8 +5722,17 @@ input PolicyEngineAttributes {
   "the policy engine to use with this stack"
   type: PolicyEngineType!
 
+  "whether to use custom policies from the repository"
+  customPolicies: Boolean
+
   "the maximum allowed severity without failing the stack run"
   maxSeverity: VulnSeverity
+
+  "optional repository to source policy configuration from"
+  repositoryId: ID
+
+  "git reference within the policy repository or stack repository"
+  git: GitRefAttributes
 }
 
 input StackRunAttributes {
@@ -6061,6 +6070,9 @@ type AiApprovalConfiguration {
 type PolicyEngine {
   "the policy engine to use with this stack"
   type: PolicyEngineType!
+
+  "whether to use custom policies from the repository"
+  customPolicies: Boolean
 
   "the maximum allowed severity without failing the stack run"
   maxSeverity: VulnSeverity

@@ -427,20 +427,41 @@ type PolicyEngine struct {
 	// +kubebuilder:validation:Required
 	Type console.PolicyEngineType `json:"type"`
 
+	// CustomPolicies enables loading custom policies from the configured repository.
+	// +kubebuilder:validation:Optional
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
+
 	// MaxSeverity is the maximum allowed severity without failing the stack run.
 	// One of UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL, NONE.
 	// +kubebuilder:validation:Enum=UNKNOWN;LOW;MEDIUM;HIGH;CRITICAL;NONE
 	// +kubebuilder:validation:Optional
 	MaxSeverity *console.VulnSeverity `json:"maxSeverity,omitempty"`
+
+	// RepositoryRef references a GitRepository for policy configuration.
+	// Leave unset when policies live in the stack repository, or use git.url instead of this ref.
+	// +kubebuilder:validation:Optional
+	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
+
+	// Git is the ref and folder (within the policy repository or stack repository) for policy files.
+	// If git.url is set, it resolves the repository in Console (same as the stack-level git field); ref and folder are still used for the API.
+	// +kubebuilder:validation:Optional
+	Git *GitRef `json:"git,omitempty"`
 }
 
-func (in *PolicyEngine) Attributes() *console.PolicyEngineAttributes {
+// Attributes builds console API attributes. policyRepositoryID is set when a separate policy repository was resolved via repositoryRef or git.url.
+func (in *PolicyEngine) Attributes(policyRepositoryID *string) *console.PolicyEngineAttributes {
 	if in == nil {
 		return nil
 	}
 
-	return &console.PolicyEngineAttributes{
-		Type:        in.Type,
-		MaxSeverity: in.MaxSeverity,
+	attr := &console.PolicyEngineAttributes{
+		Type:           in.Type,
+		CustomPolicies: in.CustomPolicies,
+		MaxSeverity:    in.MaxSeverity,
+		RepositoryID:   policyRepositoryID,
 	}
+	if in.Git != nil {
+		attr.Git = in.Git.Attributes()
+	}
+	return attr
 }

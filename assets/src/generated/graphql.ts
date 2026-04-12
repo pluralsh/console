@@ -7535,6 +7535,8 @@ export type PolicyConstraintEdge = {
 /** Configuration for applying policy enforcement to a stack */
 export type PolicyEngine = {
   __typename?: 'PolicyEngine';
+  /** whether to use custom policies from the repository */
+  customPolicies?: Maybe<Scalars['Boolean']['output']>;
   /** the maximum allowed severity without failing the stack run */
   maxSeverity?: Maybe<VulnSeverity>;
   /** the policy engine to use with this stack */
@@ -7542,8 +7544,14 @@ export type PolicyEngine = {
 };
 
 export type PolicyEngineAttributes = {
+  /** whether to use custom policies from the repository */
+  customPolicies?: InputMaybe<Scalars['Boolean']['input']>;
+  /** git reference within the policy repository or stack repository */
+  git?: InputMaybe<GitRefAttributes>;
   /** the maximum allowed severity without failing the stack run */
   maxSeverity?: InputMaybe<VulnSeverity>;
+  /** optional repository to source policy configuration from */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** the policy engine to use with this stack */
   type: PolicyEngineType;
 };

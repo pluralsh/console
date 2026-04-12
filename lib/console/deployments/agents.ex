@@ -329,6 +329,12 @@ defmodule Console.Deployments.Agents do
       do: {:ok, %{token: token, url: Console.graphql_endpoint()}}
   end
 
+  @doc """
+  Fetches the scm connection for an agent runtime
+  """
+  @spec scm_conection(AgentRuntime.t) :: ScmConnection.t
+  def scm_conection(%AgentRuntime{}), do: Tool.scm_connection()
+
   def scm_creds(%AgentRun{} = run, actor) do
     with {:ok, _} <- allow(run, actor, :creds),
          %ScmConnection{username: username} = conn <- Tool.scm_connection(),

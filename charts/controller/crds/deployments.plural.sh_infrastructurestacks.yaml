@@ -9724,6 +9724,36 @@ spec:
                 description: PolicyEngine is a configuration for applying policy enforcement
                   to a stack.
                 properties:
+                  customPolicies:
+                    description: CustomPolicies enables loading custom policies from
+                      the configured repository.
+                    type: boolean
+                  git:
+                    description: |-
+                      Git is the ref and folder (within the policy repository or stack repository) for policy files.
+                      If git.url is set, it resolves the repository in Console (same as the stack-level git field); ref and folder are still used for the API.
+                    properties:
+                      files:
+                        description: Optional files to add to the manifests for this
+                          service
+                        items:
+                          type: string
+                        type: array
+                      folder:
+                        description: Folder is the folder in the Git repository where
+                          the manifests are located.
+                        type: string
+                      ref:
+                        description: Ref is the Git reference (branch, tag, or commit)
+                          to use.
+                        type: string
+                      url:
+                        description: URL of the Git repository.
+                        type: string
+                    required:
+                    - folder
+                    - ref
+                    type: object
                   maxSeverity:
                     description: |-
                       MaxSeverity is the maximum allowed severity without failing the stack run.
@@ -9736,6 +9766,51 @@ spec:
                     - CRITICAL
                     - NONE
                     type: string
+                  repositoryRef:
+                    description: |-
+                      RepositoryRef references a GitRepository for policy configuration.
+                      Leave unset when policies live in the stack repository, or use git.url instead of this ref.
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: |-
+                          If referring to a piece of an object instead of an entire object, this string
+                          should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within a pod, this would take on a value like:
+                          "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]" (container with
+                          index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                          referencing a part of an object.
+                        type: string
+                      kind:
+                        description: |-
+                          Kind of the referent.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                        type: string
+                      name:
+                        description: |-
+                          Name of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                        type: string
+                      resourceVersion:
+                        description: |-
+                          Specific resourceVersion to which this reference is made, if any.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                        type: string
+                      uid:
+                        description: |-
+                          UID of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
                   type:
                     description: |-
                       Type of the policy engine to use with this stack.

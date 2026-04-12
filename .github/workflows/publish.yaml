@@ -203,7 +203,7 @@ jobs:
       - name: helm-dependencies
         run: make helm-dependencies
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           title: Release ${{github.ref_name}}
           body: Automated Pull Request to release ${{github.ref_name}}
@@ -250,7 +250,7 @@ jobs:
       - name: helm-dependencies
         run: make helm-dependencies-rapid
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           title: Release rapid ${{github.ref_name}}
           body: Automated Pull Request to release rapid channel for ${{github.ref_name}}

@@ -1678,6 +1678,7 @@ GitRef represents a reference to a Git repository.
 _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
+- [PolicyEngine](#policyengine)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
 - [PrAutomationSpec](#prautomationspec)
 - [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
@@ -3413,7 +3414,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `type` _[PolicyEngineType](#policyenginetype)_ | Type of the policy engine to use with this stack.<br />At the moment only TRIVY is supported. |  | Enum: [TRIVY] <br />Required: \{\} <br /> |
+| `customPolicies` _boolean_ | CustomPolicies enables loading custom policies from the configured repository. |  | Optional: \{\} <br /> |
 | `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run.<br />One of UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL, NONE. |  | Enum: [UNKNOWN LOW MEDIUM HIGH CRITICAL NONE] <br />Optional: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a GitRepository for policy configuration.<br />Leave unset when policies live in the stack repository, or use git.url instead of this ref. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git is the ref and folder (within the policy repository or stack repository) for policy files.<br />If git.url is set, it resolves the repository in Console (same as the stack-level git field); ref and folder are still used for the API. |  | Optional: \{\} <br /> |
 
 
 #### PrAutomation

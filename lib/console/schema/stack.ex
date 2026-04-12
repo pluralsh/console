@@ -111,17 +111,23 @@ defmodule Console.Schema.Stack do
 
   defmodule PolicyEngine do
     use Piazza.Ecto.Schema
+    alias Console.Schema.Service.Git
 
     defenum Type, trivy: 0
 
     embedded_schema do
-      field :type, Type
-      field :max_severity, Console.Schema.Vulnerability.Severity
+      field :type,            Type
+      field :custom_policies, :boolean, default: false
+      field :max_severity,    Console.Schema.Vulnerability.Severity
+      field :repository_id,   :binary_id
+
+      embeds_one :git, Git, on_replace: :update
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(type max_severity)a)
+      |> cast(attrs, ~w(type custom_policies max_severity repository_id)a)
+      |> cast_embed(:git)
       |> validate_required(~w(type)a)
     end
   end

@@ -19,7 +19,7 @@ jobs:
   #     - run: make liquid-docs
   #     - id: date
   #       run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
-  #     - uses: peter-evans/create-pull-request@v5
+  #     - uses: peter-evans/create-pull-request@v8
   #       with:
   #         title: "Upgrade deprecated apis list"
   #         body: Upgrade our deprecations table with all current data
@@ -63,7 +63,7 @@ jobs:
       run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
     
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v8
       with:
         title: Compatibility Matrix Update ${{ steps.date.outputs.DATE }}
         body: Automated Pull Request to update compatibility matrix
@@ -99,7 +99,7 @@ jobs:
       run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
     
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v8
       with:
         title: Extended-Support Matrix Update ${{ steps.date.outputs.DATE }}
         body: Automated Pull Request to update extended-support matrix
@@ -142,7 +142,7 @@ jobs:
       run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
     
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v8
       with:
         title: Compatibility Matrix Update ${{ steps.date.outputs.DATE }}
         body: Automated Pull Request to update eks addons matrix
