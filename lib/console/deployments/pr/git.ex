@@ -105,13 +105,20 @@ defmodule Console.Deployments.Pr.Git do
   def request_options(_), do: []
 
   defp _to_http(conn, "ssh://" <> rest), do: _to_http(conn, rest)
-  defp _to_http(%ScmConnection{} = conn, "git@" <> _ = url) do
+  defp _to_http(_, "https://" <> _ = url), do: url
+  defp _to_http(%ScmConnection{} = conn, url) do
+    case String.split(url, "@") do
+      [_ | rest] -> parse_ssh_url(conn, Enum.join(rest, "@"))
+      _ -> url
+    end
+  end
+
+  defp parse_ssh_url(conn, url) do
     case String.split(url, ":") do
       [_ | rest] -> Path.join(url(conn), Enum.join(rest, ""))
       _ -> url
     end
   end
-  defp _to_http(_, "https://" <> _ = url), do: url
 
   defp url(%ScmConnection{type: :bitbucket_datacenter, base_url: base_url} = conn, id)
     when is_binary(id) and is_binary(base_url) do

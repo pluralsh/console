@@ -399,7 +399,7 @@ defmodule Console.Deployments.Workbenches do
     |> add_operation(:idle, fn _ ->
       case WorkbenchJob.idle?(job) do
         true ->
-          WorkbenchJob.changeset(job, %{status: :pending})
+          WorkbenchJob.changeset(job, %{status: :pending, error: nil})
           |> Repo.update()
         false -> {:error, "job is currently active, please wait for it to complete before prompting"}
       end

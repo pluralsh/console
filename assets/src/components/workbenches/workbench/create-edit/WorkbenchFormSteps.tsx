@@ -230,7 +230,7 @@ export function WorkbenchSkillsConfigStep({
           />
           <FormField
             label="Skills file names"
-            hint="Paste file names, using a newline per name."
+            hint="Paste file names, using a newline per name.  Path is relative to the skills folder."
           >
             <EditableDivWrapperSC>
               <EditableDiv

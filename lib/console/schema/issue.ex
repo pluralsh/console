@@ -6,13 +6,15 @@ defmodule Console.Schema.Issue do
   defenum Status, open: 0, in_progress: 1, cancelled: 2, completed: 3
 
   schema "issues" do
-    field :provider,    IssueWebhook.Provider
-    field :status,      Status
-    field :external_id, :string
-    field :url,         :string
-    field :title,       :string
-    field :body,        :string
-    field :payload,     :map
+    field :provider,       IssueWebhook.Provider
+    field :status,         Status
+    field :external_id,    :string
+    field :url,            :string
+    field :title,          :string
+    field :body,           :string
+    field :payload,        :map
+    field :status_changed, :boolean, virtual: true, default: false
+    field :webhook,        :map, virtual: true
 
     belongs_to :workbench,  Workbench
     belongs_to :flow,       Flow
@@ -48,7 +50,7 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.status == ^status)
   end
 
-  @valid ~w(provider status external_id url title body payload workbench_id flow_id)a
+  @valid ~w(provider status external_id url title body payload workbench_id flow_id webhook)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -57,5 +59,7 @@ defmodule Console.Schema.Issue do
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:flow_id)
     |> validate_required([:provider, :status, :external_id, :url, :title, :body])
+    |> change_markers(status: :status_changed)
+    |> validate_one_present(~w(workbench_id flow_id)a)
   end
 end

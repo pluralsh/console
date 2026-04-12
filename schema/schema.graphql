@@ -2397,6 +2397,9 @@ input WorkbenchWebhookAttributes {
 
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatchesAttributes
+
+  "optional prompt text applied when this webhook matches"
+  prompt: String
 }
 
 input WorkbenchToolAttributes {
@@ -2997,6 +3000,9 @@ type WorkbenchWebhook {
 
   "name of this webhook trigger"
   name: String
+
+  "optional prompt text applied when this webhook matches"
+  prompt: String
 
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches
@@ -5666,6 +5672,12 @@ input TerraformConfigurationAttributes {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+
+  "whether to use OpenTofu instead of Terraform for this stack"
+  tofu: Boolean
+
+  "whether to use the OpenTofu registry for provider and module sources"
+  tofuRegistry: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -5716,8 +5728,17 @@ input PolicyEngineAttributes {
   "the policy engine to use with this stack"
   type: PolicyEngineType!
 
+  "whether to use custom policies from the repository"
+  customPolicies: Boolean
+
   "the maximum allowed severity without failing the stack run"
   maxSeverity: VulnSeverity
+
+  "optional repository to source policy configuration from"
+  repositoryId: ID
+
+  "git reference within the policy repository or stack repository"
+  git: GitRefAttributes
 }
 
 input StackRunAttributes {
@@ -6056,6 +6077,9 @@ type PolicyEngine {
   "the policy engine to use with this stack"
   type: PolicyEngineType!
 
+  "whether to use custom policies from the repository"
+  customPolicies: Boolean
+
   "the maximum allowed severity without failing the stack run"
   maxSeverity: VulnSeverity
 }
@@ -6080,6 +6104,12 @@ type TerraformConfiguration {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+
+  "whether to use OpenTofu instead of Terraform for this stack"
+  tofu: Boolean
+
+  "whether to use the OpenTofu registry for provider and module sources"
+  tofuRegistry: Boolean
 }
 
 type AnsibleConfiguration {

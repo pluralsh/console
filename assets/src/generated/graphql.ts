@@ -7535,6 +7535,8 @@ export type PolicyConstraintEdge = {
 /** Configuration for applying policy enforcement to a stack */
 export type PolicyEngine = {
   __typename?: 'PolicyEngine';
+  /** whether to use custom policies from the repository */
+  customPolicies?: Maybe<Scalars['Boolean']['output']>;
   /** the maximum allowed severity without failing the stack run */
   maxSeverity?: Maybe<VulnSeverity>;
   /** the policy engine to use with this stack */
@@ -7542,8 +7544,14 @@ export type PolicyEngine = {
 };
 
 export type PolicyEngineAttributes = {
+  /** whether to use custom policies from the repository */
+  customPolicies?: InputMaybe<Scalars['Boolean']['input']>;
+  /** git reference within the policy repository or stack repository */
+  git?: InputMaybe<GitRefAttributes>;
   /** the maximum allowed severity without failing the stack run */
   maxSeverity?: InputMaybe<VulnSeverity>;
+  /** optional repository to source policy configuration from */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** the policy engine to use with this stack */
   type: PolicyEngineType;
 };
@@ -14117,6 +14125,10 @@ export type TerraformConfiguration = {
   parallelism?: Maybe<Scalars['Int']['output']>;
   /** equivalent to the -refresh flag in terraform */
   refresh?: Maybe<Scalars['Boolean']['output']>;
+  /** whether to use OpenTofu instead of Terraform for this stack */
+  tofu?: Maybe<Scalars['Boolean']['output']>;
+  /** whether to use the OpenTofu registry for provider and module sources */
+  tofuRegistry?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type TerraformConfigurationAttributes = {
@@ -14126,6 +14138,10 @@ export type TerraformConfigurationAttributes = {
   parallelism?: InputMaybe<Scalars['Int']['input']>;
   /** equivalent to the -refresh flag in terraform */
   refresh?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether to use OpenTofu instead of Terraform for this stack */
+  tofu?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether to use the OpenTofu registry for provider and module sources */
+  tofuRegistry?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Urls for configuring terraform HTTP remote state */
@@ -15669,6 +15685,8 @@ export type WorkbenchWebhook = {
   matches?: Maybe<WorkbenchWebhookMatches>;
   /** name of this webhook trigger */
   name?: Maybe<Scalars['String']['output']>;
+  /** optional prompt text applied when this webhook matches */
+  prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the observability webhook that receives events */
   webhook?: Maybe<ObservabilityWebhook>;
@@ -15683,6 +15701,8 @@ export type WorkbenchWebhookAttributes = {
   matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
   /** unique name for this webhook on the workbench (required for create) */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** optional prompt text applied when this webhook matches */
+  prompt?: InputMaybe<Scalars['String']['input']>;
   /** observability webhook to receive events (either webhook_id or issue_webhook_id required) */
   webhookId?: InputMaybe<Scalars['ID']['input']>;
 };

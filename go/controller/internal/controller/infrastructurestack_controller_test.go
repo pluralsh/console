@@ -30,11 +30,14 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			configMapStackName         = "stack-configmap-test"
 			invalidClusterRefStackName = "invalid-cluster-ref-stack"
 			invalidRepoRefStackName    = "invalid-repo-ref-stack"
+			policyEngineStackName      = "stack-policy-engine-test"
+			policyRepoName             = "policy-repo-test"
 			clusterName                = "cluster-test"
 			repoName                   = "repo-test"
 			invalidRepoName            = "invalid-repo"
 			namespace                  = "default"
 			id                         = "123"
+			policyRepoID               = "policy-repo-console-id"
 			repoUrl                    = "https://test"
 		)
 
@@ -44,6 +47,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 		configMapStackNamespacedName := types.NamespacedName{Name: configMapStackName, Namespace: namespace}
 		invalidClusterRefTypeNamespacedName := types.NamespacedName{Name: invalidClusterRefStackName, Namespace: namespace}
 		invalidRepoRefTypeNamespacedName := types.NamespacedName{Name: invalidRepoRefStackName, Namespace: namespace}
+		policyEngineStackNamespacedName := types.NamespacedName{Name: policyEngineStackName, Namespace: namespace}
 
 		BeforeAll(func() {
 			By("creating the configuration secret")
@@ -241,6 +245,51 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				},
 			}, nil)).To(Succeed())
 
+			By("creating GitRepository for policy engine")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
+				ObjectMeta: metav1.ObjectMeta{Name: policyRepoName, Namespace: namespace},
+				Spec: v1alpha1.GitRepositorySpec{
+					Url: "https://example.com/policies.git",
+				},
+			}, func(p *v1alpha1.GitRepository) {
+				p.Status.ID = lo.ToPtr(policyRepoID)
+				p.Status.Health = v1alpha1.GitHealthPullable
+			})).To(Succeed())
+
+			By("creating stack with policy engine repository settings")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.InfrastructureStack{
+				ObjectMeta: metav1.ObjectMeta{Name: policyEngineStackName, Namespace: namespace},
+				Spec: v1alpha1.InfrastructureStackSpec{
+					Name: lo.ToPtr(policyEngineStackName),
+					Type: gqlclient.StackTypeTerraform,
+					RepositoryRef: corev1.ObjectReference{
+						Name:      repoName,
+						Namespace: namespace,
+					},
+					ClusterRef: corev1.ObjectReference{
+						Name:      clusterName,
+						Namespace: namespace,
+					},
+					Git: v1alpha1.GitRef{
+						Ref:    "main",
+						Folder: "terraform",
+					},
+					PolicyEngine: &v1alpha1.PolicyEngine{
+						Type:           gqlclient.PolicyEngineTypeTrivy,
+						CustomPolicies: lo.ToPtr(true),
+						MaxSeverity:    lo.ToPtr(gqlclient.VulnSeverityHigh),
+						RepositoryRef: &corev1.ObjectReference{
+							Name:      policyRepoName,
+							Namespace: namespace,
+						},
+						Git: &v1alpha1.GitRef{
+							Ref:    "main",
+							Folder: "policies",
+						},
+					},
+				},
+			}, nil)).To(Succeed())
+
 		})
 
 		AfterAll(func() {
@@ -297,6 +346,18 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				By("cleanup stack")
 				Expect(k8sClient.Delete(ctx, stack)).To(Succeed())
 			}
+
+			err = k8sClient.Get(ctx, policyEngineStackNamespacedName, stack)
+			if err == nil {
+				By("cleanup policy engine stack")
+				Expect(k8sClient.Delete(ctx, stack)).To(Succeed())
+			}
+
+			policyRepo := &v1alpha1.GitRepository{}
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: policyRepoName, Namespace: namespace}, policyRepo)
+			Expect(err).NotTo(HaveOccurred())
+			By("cleanup policy git repository")
+			Expect(k8sClient.Delete(ctx, policyRepo)).To(Succeed())
 		})
 
 		It("should successfully reconcile the resource InfrastructureStack", func() {
@@ -691,6 +752,44 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should pass policy engine repository and git settings to CreateStack", func() {
+			var captured gqlclient.StackAttributes
+			returnCreateStack := &gqlclient.InfrastructureStackFragment{
+				ID: lo.ToPtr(id),
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = args.Get(1).(gqlclient.StackAttributes)
+			}).Return(returnCreateStack, nil)
+
+			reconciler := &controller.InfrastructureStackReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Process(ctx, reconcile.Request{
+				NamespacedName: policyEngineStackNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(captured.PolicyEngine).NotTo(BeNil())
+			pe := captured.PolicyEngine
+			Expect(pe.Type).To(Equal(gqlclient.PolicyEngineTypeTrivy))
+			Expect(pe.CustomPolicies).NotTo(BeNil())
+			Expect(*pe.CustomPolicies).To(BeTrue())
+			Expect(pe.MaxSeverity).NotTo(BeNil())
+			Expect(*pe.MaxSeverity).To(Equal(gqlclient.VulnSeverityHigh))
+			Expect(pe.RepositoryID).NotTo(BeNil())
+			Expect(*pe.RepositoryID).To(Equal(policyRepoID))
+			Expect(pe.Git).NotTo(BeNil())
+			Expect(pe.Git.Ref).To(Equal("main"))
+			Expect(pe.Git.Folder).To(Equal("policies"))
 		})
 
 		It("should detect invalid repo ref and set conditions accordingly", func() {

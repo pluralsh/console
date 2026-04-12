@@ -19,7 +19,7 @@ export function WorkbenchJobs() {
         workbenchLoading={isLoading}
       />
       <Divider backgroundColor="border" />
-      <Body2BoldP>Workbench job history</Body2BoldP>
+      <Body2BoldP>Workbench Jobs</Body2BoldP>
       <WorkbenchJobsTable workbenchId={workbenchId} />
     </Flex>
   )

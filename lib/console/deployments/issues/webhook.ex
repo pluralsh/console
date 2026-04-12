@@ -60,7 +60,7 @@ defmodule Console.Deployments.Issues.Webhook do
     Workbenches.list_workbench_webhooks_for_issue(id)
     |> Enum.find(&WorkbenchWebhook.matches?(&1, payload))
     |> case do
-      %WorkbenchWebhook{workbench_id: wid} -> Map.put(data, :workbench_id, wid)
+      %WorkbenchWebhook{workbench_id: wid} = wh -> Map.merge(data, %{workbench_id: wid, webhook: wh})
       _ -> data
     end
   end

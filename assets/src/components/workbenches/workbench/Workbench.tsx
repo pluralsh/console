@@ -47,7 +47,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 const directory = [
-  { label: 'Run jobs', path: '' },
+  { label: 'Jobs', path: '' },
   { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
   { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
 ]

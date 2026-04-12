@@ -221,7 +221,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
                     setFormState((prev) => ({ ...prev, prompt: nextPrompt }))
                   }}
-                  placeholder="Ask the agent use an integrated tool or service on your cluster"
+                  placeholder="Provide any task for your workbench to handle.  Well-crafted tasks are concise and specific."
                 />
               </FormField>
               <Flex

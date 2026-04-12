@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Engine do
   @moduledoc """
-  The overarching orchstrator to manage workbench execution.  The general architecture is as follows:
+  The overarching orchestrator to manage workbench execution.  The general architecture is as follows:
 
   The engine first calls a plan subagent to compile a general plan of attack. From there it falls into an execution loop which:
 
@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, stream_callbacks: 1, log_error: 2]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -55,7 +55,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   def run(%__MODULE__{job: job} = engine) do
-    stream_callbacks(job)
+    # stream_callbacks(job)
     # with {:ok, job} <- SA.Plan.run(job, engine.environment) do
     #   loop(%{engine | activities: list_activities(job)})
     # end
@@ -125,7 +125,7 @@ defmodule Console.AI.Workbench.Engine do
     module = subagent_module(type)
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
-      stream_callbacks(activity)
+      # stream_callbacks(activity)
       Console.safely(fn ->
         module.run(activity, job, %{environment | activities: activities})
       end, &crash_fallback/1)

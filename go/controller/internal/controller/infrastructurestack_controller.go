@@ -129,6 +129,11 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
+	policyEngineRepositoryID, result, err := r.handlePolicyEngineRepositoryRef(ctx, stack)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, stack.SetCondition)
+	}
+
 	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, stack.SetCondition)
@@ -145,11 +150,12 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	}
 
 	attributes := dynamicAttributes{
-		clusterID:         clusterID,
-		repositoryID:      repositoryID,
-		projectID:         project.Status.ID,
-		definitionID:      stackDefinitionID,
-		observableMetrics: metrics,
+		clusterID:                clusterID,
+		repositoryID:             repositoryID,
+		policyEngineRepositoryID: policyEngineRepositoryID,
+		projectID:                project.Status.ID,
+		definitionID:             stackDefinitionID,
+		observableMetrics:        metrics,
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -299,11 +305,12 @@ func (r *InfrastructureStackReconciler) addOrRemoveFinalizer(ctx context.Context
 }
 
 type dynamicAttributes struct {
-	clusterID         string
-	repositoryID      string
-	projectID         *string
-	definitionID      *string
-	observableMetrics []console.ObservableMetricAttributes
+	clusterID                string
+	repositoryID             string
+	policyEngineRepositoryID *string
+	projectID                *string
+	definitionID             *string
+	observableMetrics        []console.ObservableMetricAttributes
 }
 
 func (r *InfrastructureStackReconciler) getStackAttributes(
@@ -330,7 +337,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		Configuration: r.stackConfigurationAttributes(stack.Spec.Configuration),
 		Approval:      stack.Spec.Approval,
 		Files:         make([]*console.StackFileAttributes, 0),
-		PolicyEngine:  stack.Spec.PolicyEngine.Attributes(),
+		PolicyEngine:  stack.Spec.PolicyEngine.Attributes(attributes.policyEngineRepositoryID),
 	}
 
 	if stack.Spec.ScmConnectionRef != nil {
@@ -467,8 +474,11 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 
 	if overrides.Terraform != nil {
 		result.Terraform = &console.TerraformConfigurationAttributes{
-			Parallelism: overrides.Terraform.Parallelism,
-			Refresh:     overrides.Terraform.Refresh,
+			Parallelism:  overrides.Terraform.Parallelism,
+			Refresh:      overrides.Terraform.Refresh,
+			ApproveEmpty: overrides.Terraform.ApproveEmpty,
+			Tofu:         overrides.Terraform.Tofu,
+			TofuRegistry: overrides.Terraform.TofuRegistry,
 		}
 	}
 
@@ -492,6 +502,8 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Parallelism:  conf.Terraform.Parallelism,
 			Refresh:      conf.Terraform.Refresh,
 			ApproveEmpty: conf.Terraform.ApproveEmpty,
+			Tofu:         conf.Terraform.Tofu,
+			TofuRegistry: conf.Terraform.TofuRegistry,
 		}
 	}
 
@@ -566,6 +578,43 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	return *repository.Status.ID, nil, nil
+}
+
+// handlePolicyEngineRepositoryRef resolves an optional Git repository for policy configuration.
+// If policyEngine.git.url is set, the ID is resolved via the Plural cache (same as stack git).
+// Otherwise, if policyEngine.repositoryRef is set, the GitRepository CR is waited on.
+func (r *InfrastructureStackReconciler) handlePolicyEngineRepositoryRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
+	pe := stack.Spec.PolicyEngine
+	if pe == nil {
+		return nil, nil, nil
+	}
+
+	if pe.Git != nil && pe.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(pe.Git.Url))
+		if err != nil {
+			return nil, nil, err
+		}
+		return id, nil, nil
+	}
+
+	if pe.RepositoryRef == nil || pe.RepositoryRef.Name == "" {
+		return nil, nil, nil
+	}
+
+	repository := &v1alpha1.GitRepository{}
+	if err := r.Get(ctx, client.ObjectKey{Name: pe.RepositoryRef.Name, Namespace: pe.RepositoryRef.Namespace}, repository); err != nil {
+		return nil, nil, err
+	}
+
+	if !repository.Status.HasID() {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("policy engine git repository is not ready")
+	}
+
+	if repository.Status.Health == v1alpha1.GitHealthFailed {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("policy engine git repository is not healthy")
+	}
+
+	return repository.Status.ID, nil, nil
 }
 
 // handleStackDefinitionRef checks if stack has a stack definition reference configured and waits for it

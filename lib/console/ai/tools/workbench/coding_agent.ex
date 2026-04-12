@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.CodingAgent do
   use Console.AI.Tools.Workbench.Base
+  import Console.Deployments.Pr.Git, only: [to_http: 2]
   alias Console.AI.Tool
   alias Console.Schema.{User, AgentRuntime, AgentRun, Workbench}
   alias Console.Deployments.Agents
@@ -30,8 +31,11 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   end
   defp validate_mode(cs, _), do: cs
 
-  # defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}),
-  #   do: validate_inclusion(cs, :repository, repos)
+  defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}) do
+    conn = Tool.agent_runtime() |> Agents.scm_conection()
+    repos = Enum.map(repos, &to_http(conn, &1))
+    validate_inclusion(cs, :repository, repos)
+  end
   defp validate_repository(cs, _), do: cs
 
   @json_schema Console.priv_file!("tools/workbench/coding_agent.json") |> Jason.decode!()

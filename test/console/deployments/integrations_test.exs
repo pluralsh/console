@@ -1,6 +1,6 @@
 defmodule Console.Deployments.IntegrationsTest do
   use Console.DataCase, async: true
-  alias Console.Deployments.Integrations
+  alias Console.Deployments.{Integrations, Issues}
   alias Console.PubSub
 
   describe "#upsert_chat_connection/2" do
@@ -101,6 +101,34 @@ defmodule Console.Deployments.IntegrationsTest do
       {:error, _} = Integrations.delete_issue_webhook(webhook.id, user)
 
       assert refetch(webhook)
+    end
+  end
+
+  describe "#upsert_issue/2" do
+    test "it can upsert an issue and properly mark state as changed" do
+      hook = insert(:issue_webhook, provider: :linear)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Fix"})
+      linear_issue = %{
+        "id" => "linear-issue-ext-123",
+        "title" => "Fix login bug",
+        "url" => "https://linear.app/team/issue/123",
+        "description" => "Users cannot log in on mobile",
+        "state" => %{"name" => "In Progress"},
+      }
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{"type" => "Issue", "data" => linear_issue})
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.status_changed
+      assert issue.status == :in_progress
+      assert issue.title == "Fix login bug"
+      assert issue.url == "https://linear.app/team/issue/123"
+      assert issue.body == "Users cannot log in on mobile"
+      assert issue.payload == linear_issue
+      assert issue.workbench_id == wh.workbench.id
+      assert issue.webhook.id == wh.id
+
+      assert_receive {:event, %PubSub.IssueCreated{item: ^issue}}
     end
   end
 end

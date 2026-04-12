@@ -6224,6 +6224,8 @@ type PolicyConstraintEdge struct {
 type PolicyEngine struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// whether to use custom policies from the repository
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
 	// the maximum allowed severity without failing the stack run
 	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
 }
@@ -6231,8 +6233,14 @@ type PolicyEngine struct {
 type PolicyEngineAttributes struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// whether to use custom policies from the repository
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
 	// the maximum allowed severity without failing the stack run
 	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
+	// optional repository to source policy configuration from
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// git reference within the policy repository or stack repository
+	Git *GitRefAttributes `json:"git,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet
@@ -8900,6 +8908,10 @@ type TerraformConfiguration struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to use OpenTofu instead of Terraform for this stack
+	Tofu *bool `json:"tofu,omitempty"`
+	// whether to use the OpenTofu registry for provider and module sources
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 type TerraformConfigurationAttributes struct {
@@ -8909,6 +8921,10 @@ type TerraformConfigurationAttributes struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to use OpenTofu instead of Terraform for this stack
+	Tofu *bool `json:"tofu,omitempty"`
+	// whether to use the OpenTofu registry for provider and module sources
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state
@@ -10178,6 +10194,8 @@ type WorkbenchWebhook struct {
 	ID string `json:"id"`
 	// name of this webhook trigger
 	Name *string `json:"name,omitempty"`
+	// optional prompt text applied when this webhook matches
+	Prompt *string `json:"prompt,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
 	// the workbench this webhook belongs to
@@ -10199,6 +10217,8 @@ type WorkbenchWebhookAttributes struct {
 	IssueWebhookID *string `json:"issueWebhookId,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
+	// optional prompt text applied when this webhook matches
+	Prompt *string `json:"prompt,omitempty"`
 }
 
 type WorkbenchWebhookConnection struct {

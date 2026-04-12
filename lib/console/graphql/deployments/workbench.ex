@@ -94,6 +94,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :webhook_id,       :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :issue_webhook_id, :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :matches,          :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
+    field :prompt,           :string, description: "optional prompt text applied when this webhook matches"
   end
 
   input_object :workbench_tool_attributes do
@@ -429,6 +430,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_webhook do
     field :id,     non_null(:string), description: "the id of the webhook"
     field :name,   :string, description: "name of this webhook trigger"
+    field :prompt, :string, description: "optional prompt text applied when this webhook matches"
     field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
