@@ -14125,6 +14125,10 @@ export type TerraformConfiguration = {
   parallelism?: Maybe<Scalars['Int']['output']>;
   /** equivalent to the -refresh flag in terraform */
   refresh?: Maybe<Scalars['Boolean']['output']>;
+  /** whether to use OpenTofu instead of Terraform for this stack */
+  tofu?: Maybe<Scalars['Boolean']['output']>;
+  /** whether to use the OpenTofu registry for provider and module sources */
+  tofuRegistry?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type TerraformConfigurationAttributes = {
@@ -14134,6 +14138,10 @@ export type TerraformConfigurationAttributes = {
   parallelism?: InputMaybe<Scalars['Int']['input']>;
   /** equivalent to the -refresh flag in terraform */
   refresh?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether to use OpenTofu instead of Terraform for this stack */
+  tofu?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether to use the OpenTofu registry for provider and module sources */
+  tofuRegistry?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Urls for configuring terraform HTTP remote state */

@@ -5142,6 +5142,8 @@ _Appears in:_
 | `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag in Terraform. |  | Optional: \{\} <br /> |
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag in Terraform. |  | Optional: \{\} <br /> |
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
+| `tofu` _boolean_ | Tofu is whether to use OpenTofu instead of Terraform for this stack. |  | Optional: \{\} <br /> |
+| `tofuRegistry` _boolean_ | TofuRegistry is whether to use the OpenTofu registry for provider and module sources. |  | Optional: \{\} <br /> |
 
 
 #### Tools

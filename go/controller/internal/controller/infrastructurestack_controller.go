@@ -474,8 +474,11 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 
 	if overrides.Terraform != nil {
 		result.Terraform = &console.TerraformConfigurationAttributes{
-			Parallelism: overrides.Terraform.Parallelism,
-			Refresh:     overrides.Terraform.Refresh,
+			Parallelism:  overrides.Terraform.Parallelism,
+			Refresh:      overrides.Terraform.Refresh,
+			ApproveEmpty: overrides.Terraform.ApproveEmpty,
+			Tofu:         overrides.Terraform.Tofu,
+			TofuRegistry: overrides.Terraform.TofuRegistry,
 		}
 	}
 
@@ -499,6 +502,8 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Parallelism:  conf.Terraform.Parallelism,
 			Refresh:      conf.Terraform.Refresh,
 			ApproveEmpty: conf.Terraform.ApproveEmpty,
+			Tofu:         conf.Terraform.Tofu,
+			TofuRegistry: conf.Terraform.TofuRegistry,
 		}
 	}
 

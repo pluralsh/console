@@ -295,6 +295,14 @@ spec:
                           Refresh is whether to refresh the state of the stack,
                           equivalent to the -refresh flag in Terraform.
                         type: boolean
+                      tofu:
+                        description: Tofu is whether to use OpenTofu instead of Terraform
+                          for this stack.
+                        type: boolean
+                      tofuRegistry:
+                        description: TofuRegistry is whether to use the OpenTofu registry
+                          for provider and module sources.
+                        type: boolean
                     type: object
                   version:
                     description: Version of the IaC tool to use.
@@ -332,6 +340,14 @@ spec:
                             description: |-
                               Refresh is whether to refresh the state of the stack,
                               equivalent to the -refresh flag in Terraform.
+                            type: boolean
+                          tofu:
+                            description: Tofu is whether to use OpenTofu instead of
+                              Terraform for this stack.
+                            type: boolean
+                          tofuRegistry:
+                            description: TofuRegistry is whether to use the OpenTofu
+                              registry for provider and module sources.
                             type: boolean
                         type: object
                     type: object

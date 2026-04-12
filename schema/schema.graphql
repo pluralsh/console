@@ -5672,6 +5672,12 @@ input TerraformConfigurationAttributes {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+
+  "whether to use OpenTofu instead of Terraform for this stack"
+  tofu: Boolean
+
+  "whether to use the OpenTofu registry for provider and module sources"
+  tofuRegistry: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -6098,6 +6104,12 @@ type TerraformConfiguration {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+
+  "whether to use OpenTofu instead of Terraform for this stack"
+  tofu: Boolean
+
+  "whether to use the OpenTofu registry for provider and module sources"
+  tofuRegistry: Boolean
 }
 
 type AnsibleConfiguration {

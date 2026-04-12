@@ -66,6 +66,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :parallelism,   :integer, description: "equivalent to the -parallelism flag in terraform"
     field :refresh,       :boolean, description: "equivalent to the -refresh flag in terraform"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+    field :tofu, :boolean, description: "whether to use OpenTofu instead of Terraform for this stack"
+    field :tofu_registry, :boolean, description: "whether to use the OpenTofu registry for provider and module sources"
   end
 
   input_object :ansible_configuration_attributes do
@@ -339,6 +341,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :parallelism,   :integer, description: "equivalent to the -parallelism flag in terraform"
     field :refresh,       :boolean, description: "equivalent to the -refresh flag in terraform"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+    field :tofu,          :boolean, description: "whether to use OpenTofu instead of Terraform for this stack"
+    field :tofu_registry, :boolean, description: "whether to use the OpenTofu registry for provider and module sources"
   end
 
   object :ansible_configuration do

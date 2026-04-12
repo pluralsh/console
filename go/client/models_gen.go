@@ -8908,6 +8908,10 @@ type TerraformConfiguration struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to use OpenTofu instead of Terraform for this stack
+	Tofu *bool `json:"tofu,omitempty"`
+	// whether to use the OpenTofu registry for provider and module sources
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 type TerraformConfigurationAttributes struct {
@@ -8917,6 +8921,10 @@ type TerraformConfigurationAttributes struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to use OpenTofu instead of Terraform for this stack
+	Tofu *bool `json:"tofu,omitempty"`
+	// whether to use the OpenTofu registry for provider and module sources
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state

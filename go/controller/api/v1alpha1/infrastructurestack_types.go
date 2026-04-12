@@ -230,6 +230,14 @@ type TerraformConfiguration struct {
 	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
 	// +kubebuilder:validation:Optional
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+
+	// Tofu is whether to use OpenTofu instead of Terraform for this stack.
+	// +kubebuilder:validation:Optional
+	Tofu *bool `json:"tofu,omitempty"`
+
+	// TofuRegistry is whether to use the OpenTofu registry for provider and module sources.
+	// +kubebuilder:validation:Optional
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 type AnsibleConfiguration struct {

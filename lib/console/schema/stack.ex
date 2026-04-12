@@ -55,6 +55,8 @@ defmodule Console.Schema.Stack do
         field :parallelism,   :integer
         field :refresh,       :boolean
         field :approve_empty, :boolean
+        field :tofu,          :boolean, default: false
+        field :tofu_registry, :boolean, default: false
       end
 
       embeds_one :ansible, Ansible, on_replace: :update do
@@ -92,7 +94,7 @@ defmodule Console.Schema.Stack do
 
     def terraform_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(parallelism refresh approve_empty)a)
+      |> cast(attrs, ~w(parallelism refresh approve_empty tofu tofu_registry)a)
     end
 
     def ansible_changeset(model, attrs) do

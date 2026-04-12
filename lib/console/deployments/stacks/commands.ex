@@ -91,28 +91,32 @@ defmodule Console.Deployments.Stacks.Commands do
   end
   defp ansible_args(_), do: ["main.yaml"]
 
-  defp terraform_commands(%Stack{}, true) do
+  defp terraform_commands(%Stack{} = s, true) do
     indexed([
-      cmd("init", "terraform", ["init", "-upgrade"], :init),
-      cmd("plan", "terraform", ["plan"], :plan),
+      cmd("init", tf_command(s), ["init", "-upgrade"], :init),
+      cmd("plan", tf_command(s), ["plan"], :plan),
     ])
   end
 
-  defp terraform_commands(%Stack{deleted_at: d}, _) when not is_nil(d) do
+  defp terraform_commands(%Stack{deleted_at: d} = s, _) when not is_nil(d) do
     indexed([
-      cmd("init", "terraform", ["init", "-upgrade"], :init),
-      cmd("plan", "terraform", ["plan", "-destroy"], :plan),
-      cmd("destroy", "terraform", ["destroy", "-auto-approve"], :destroy)
+      cmd("init", tf_command(s), ["init", "-upgrade"], :init),
+      cmd("plan", tf_command(s), ["plan", "-destroy"], :plan),
+      cmd("destroy", tf_command(s), ["destroy", "-auto-approve"], :destroy)
     ])
   end
 
-  defp terraform_commands(%Stack{}, _) do
+  defp terraform_commands(%Stack{} = s, _) do
     indexed([
-      cmd("init", "terraform", ["init", "-upgrade"], :init),
-      cmd("plan", "terraform", ["plan"], :plan),
-      cmd("apply", "terraform", ["apply", "terraform.tfplan"], :apply)
+      cmd("init", tf_command(s), ["init", "-upgrade"], :init),
+      cmd("plan", tf_command(s), ["plan"], :plan),
+      cmd("apply", tf_command(s), ["apply", "terraform.tfplan"], :apply)
     ])
   end
+
+  defp tf_command(%Stack{configuration: %{terraform: %Stack.Configuration.Terraform{tofu: true}}}),
+    do: "tofu"
+  defp tf_command(_), do: "terraform"
 
   defp cmd(name, command, args, stage) do
     %{status: :pending, name: name, cmd: command, args: args, stage: stage}
