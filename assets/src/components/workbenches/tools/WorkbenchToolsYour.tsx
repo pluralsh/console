@@ -18,7 +18,9 @@ import { isNonNullable } from 'utils/isNonNullable'
 import {
   categoryToLabel,
   TOOL_TYPE_TO_LABEL,
+  WorkbenchToolCardBody,
   WorkbenchToolIcon,
+  workbenchToolCardGridStyles,
 } from './workbenchToolsUtils'
 
 export function WorkbenchToolsYour() {
@@ -36,16 +38,17 @@ export function WorkbenchToolsYour() {
       )}
       {error && <GqlError error={error} />}
       {!data && loading ? (
-        <CardGridSkeleton count={6} />
+        <CardGridSkeleton
+          count={6}
+          styles={workbenchToolCardGridStyles(200)}
+        />
       ) : (
         !isEmpty(tools) && (
           <CardGrid
             onBottomReached={() =>
               !loading && pageInfo?.hasNextPage && fetchNextPage()
             }
-            styles={{
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-            }}
+            styles={workbenchToolCardGridStyles(200)}
           >
             {tools.map(({ id, name, tool: type, categories }) => (
               <ToolCardSC
@@ -54,32 +57,34 @@ export function WorkbenchToolsYour() {
                 forwardedAs={Link}
                 to={getWorkbenchToolEditAbsPath(id)}
               >
-                <StackedText
-                  first={name}
-                  firstPartialType="body2Bold"
-                  firstColor="text"
-                  second={TOOL_TYPE_TO_LABEL[type]}
-                  icon={
-                    <IconFrame
-                      circle
-                      type="secondary"
-                      icon={<WorkbenchToolIcon type={type} />}
-                    />
-                  }
-                />
-                <Flex
-                  gap="xsmall"
-                  wrap="wrap"
-                >
-                  {categories?.filter(isNonNullable).map((cat, i) => (
-                    <Chip
-                      key={i}
-                      size="small"
-                    >
-                      {categoryToLabel[cat]}
-                    </Chip>
-                  ))}
-                </Flex>
+                <WorkbenchToolCardBody>
+                  <StackedText
+                    first={name}
+                    firstPartialType="body2Bold"
+                    firstColor="text"
+                    second={TOOL_TYPE_TO_LABEL[type]}
+                    icon={
+                      <IconFrame
+                        circle
+                        type="secondary"
+                        icon={<WorkbenchToolIcon type={type} />}
+                      />
+                    }
+                  />
+                  <Flex
+                    gap="xsmall"
+                    wrap="wrap"
+                  >
+                    {categories?.filter(isNonNullable).map((cat, i) => (
+                      <Chip
+                        key={i}
+                        size="small"
+                      >
+                        {categoryToLabel[cat]}
+                      </Chip>
+                    ))}
+                  </Flex>
+                </WorkbenchToolCardBody>
               </ToolCardSC>
             ))}
           </CardGrid>
@@ -89,11 +94,14 @@ export function WorkbenchToolsYour() {
   )
 }
 
-const ToolCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.large,
+const ToolCardSC = styled(Card)(() => ({
+  '&&': {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: 0,
+    minWidth: 0,
+    overflow: 'visible',
+  },
   minHeight: 120,
   textDecoration: 'none',
 }))

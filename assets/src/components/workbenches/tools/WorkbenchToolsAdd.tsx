@@ -14,7 +14,12 @@ import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabW
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_CREATE_ABS_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { TOOL_TYPE_CARDS, WorkbenchToolIcon } from './workbenchToolsUtils'
+import {
+  TOOL_TYPE_CARDS,
+  WorkbenchToolCardBody,
+  WorkbenchToolIcon,
+  workbenchToolCardGridStyles,
+} from './workbenchToolsUtils'
 
 const WORKBENCH_TOOL_TYPE_PARAM = 'type'
 
@@ -28,59 +33,60 @@ export function WorkbenchToolsAdd() {
         description="Setup and integrate your observability, infra, code, and custom tools using MCP, APIs, and webhooks natively with Plural."
       />
       <Subtitle1H1>Third party integrations</Subtitle1H1>
-      <CardGrid
-        styles={{
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        }}
-      >
+      <CardGrid styles={workbenchToolCardGridStyles(280)}>
         {TOOL_TYPE_CARDS.map(({ type, description, label, categoryLabels }) => (
           <ToolCardSC key={type}>
-            <StackedText
-              first={
-                <Flex
-                  align="center"
-                  gap="medium"
-                >
-                  <IconFrame
-                    circle
-                    type="secondary"
-                    icon={<WorkbenchToolIcon type={type} />}
-                  />
-                  {label}
-                </Flex>
-              }
-              firstPartialType="subtitle1"
-              firstColor="text"
-              second={description}
-              secondPartialType="body2"
-              secondColor="text-light"
-              gap="small"
-            />
-            <Flex
-              gap="xsmall"
-              wrap="wrap"
-              flex={1}
-            >
-              {categoryLabels.map((cat) => (
-                <Chip
-                  key={cat}
-                  size="small"
-                  css={{ height: 'fit-content' }}
-                >
-                  {cat}
-                </Chip>
-              ))}
-            </Flex>
-            <Button
-              small
-              floating
-              as={Link}
-              to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${WORKBENCH_TOOL_TYPE_PARAM}=${type}`}
-              style={{ boxShadow: 'none', marginTop: spacing.xsmall }}
-              startIcon={<AddIcon />}
-            >
-              Add tool
-            </Button>
+            <WorkbenchToolCardBody>
+              <StackedText
+                first={
+                  <Flex
+                    align="center"
+                    gap="medium"
+                  >
+                    <IconFrame
+                      circle
+                      type="secondary"
+                      icon={<WorkbenchToolIcon type={type} />}
+                    />
+                    {label}
+                  </Flex>
+                }
+                firstPartialType="subtitle1"
+                firstColor="text"
+                second={description}
+                secondPartialType="body2"
+                secondColor="text-light"
+                gap="small"
+              />
+              <Flex
+                gap="xsmall"
+                wrap="wrap"
+              >
+                {categoryLabels.map((cat) => (
+                  <Chip
+                    key={cat}
+                    size="small"
+                    css={{ height: 'fit-content' }}
+                  >
+                    {cat}
+                  </Chip>
+                ))}
+              </Flex>
+              <Button
+                small
+                floating
+                as={Link}
+                to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${WORKBENCH_TOOL_TYPE_PARAM}=${type}`}
+                style={{
+                  boxShadow: 'none',
+                  marginTop: 'auto',
+                  paddingTop: spacing.xsmall,
+                }}
+                startIcon={<AddIcon />}
+              >
+                Add tool
+              </Button>
+            </WorkbenchToolCardBody>
           </ToolCardSC>
         ))}
       </CardGrid>
@@ -88,11 +94,14 @@ export function WorkbenchToolsAdd() {
   )
 }
 
-const ToolCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.large,
+const ToolCardSC = styled(Card)(() => ({
+  '&&': {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: 0,
+    minWidth: 0,
+    overflow: 'visible',
+  },
   minHeight: 120,
   textDecoration: 'none',
 }))
