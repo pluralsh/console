@@ -2,7 +2,7 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   use Console.AI.Tools.Workbench.Base
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{MetricsSearchInput, MetricsSearchOutput}
+  alias Toolquery.{MetricsSearchInput, MetricsSearchOutput, MetricsSearchOptions, AzureMetricsSearchOptions}
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
@@ -35,8 +35,15 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
       {:ok, %MetricsSearchInput{
         connection: connection,
         query: q,
-        limit: l || 200
+        limit: l || 200,
+        options: metrics_search_options(tool)
       }}
     end
   end
+
+  defp metrics_search_options(%{tool: :azure, configuration: %{azure: %{resource_id: resource_id}}})
+       when is_binary(resource_id) and resource_id != "" do
+    %MetricsSearchOptions{azure: %AzureMetricsSearchOptions{resource_id: resource_id}}
+  end
+  defp metrics_search_options(_), do: nil
 end

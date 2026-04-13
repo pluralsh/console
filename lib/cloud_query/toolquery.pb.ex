@@ -98,7 +98,6 @@ defmodule Toolquery.AzureConnection do
   field :tenant_id, 2, type: :string, json_name: "tenantId"
   field :client_id, 3, type: :string, json_name: "clientId"
   field :client_secret, 4, type: :string, json_name: "clientSecret"
-  field :resource_id, 5, type: :string, json_name: "resourceId"
 end
 
 defmodule Toolquery.ToolConnection do
@@ -137,28 +136,29 @@ defmodule Toolquery.MetricsQueryInput do
   field :query, 2, type: :string
   field :range, 3, type: Toolquery.TimeRange
   field :step, 4, proto3_optional: true, type: :string
-  field :options, 5, proto3_optional: true, type: Toolquery.Options
+  field :options, 5, proto3_optional: true, type: Toolquery.MetricsOptions
 end
 
-defmodule Toolquery.Options do
+defmodule Toolquery.MetricsOptions do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :azure, 1, proto3_optional: true, type: Toolquery.AzureOptions
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsOptions
 end
 
-defmodule Toolquery.AzureOptions do
+defmodule Toolquery.AzureMetricsOptions do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :metrics_namespace, 1, type: :string, json_name: "metricsNamespace"
-  field :aggregation, 2, proto3_optional: true, type: :string
-  field :filter, 3, proto3_optional: true, type: :string
-  field :order_by, 4, proto3_optional: true, type: :string, json_name: "orderBy"
-  field :roll_up_by, 5, proto3_optional: true, type: :string, json_name: "rollUpBy"
-  field :metrics_endpoint, 6, proto3_optional: true, type: :string, json_name: "metricsEndpoint"
+  field :resource_id, 1, type: :string, json_name: "resourceId"
+  field :metrics_namespace, 2, type: :string, json_name: "metricsNamespace"
+  field :aggregation, 3, proto3_optional: true, type: :string
+  field :filter, 4, proto3_optional: true, type: :string
+  field :order_by, 5, proto3_optional: true, type: :string, json_name: "orderBy"
+  field :roll_up_by, 6, proto3_optional: true, type: :string, json_name: "rollUpBy"
+  field :metrics_endpoint, 7, proto3_optional: true, type: :string, json_name: "metricsEndpoint"
 end
 
 defmodule Toolquery.LogsQueryFacet do
@@ -180,6 +180,23 @@ defmodule Toolquery.LogsQueryInput do
   field :range, 3, type: Toolquery.TimeRange
   field :limit, 4, proto3_optional: true, type: :int32
   field :facets, 5, repeated: true, type: Toolquery.LogsQueryFacet
+  field :options, 6, proto3_optional: true, type: Toolquery.LogsOptions
+end
+
+defmodule Toolquery.LogsOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureLogsOptions
+end
+
+defmodule Toolquery.AzureLogsOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :resource_id, 1, type: :string, json_name: "resourceId"
 end
 
 defmodule Toolquery.TracesQueryInput do
@@ -229,6 +246,23 @@ defmodule Toolquery.MetricsSearchInput do
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
   field :limit, 3, proto3_optional: true, type: :int64
+  field :options, 4, proto3_optional: true, type: Toolquery.MetricsSearchOptions
+end
+
+defmodule Toolquery.MetricsSearchOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsSearchOptions
+end
+
+defmodule Toolquery.AzureMetricsSearchOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :resource_id, 1, type: :string, json_name: "resourceId"
 end
 
 defmodule Toolquery.MetricsSearchResult do

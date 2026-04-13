@@ -112,7 +112,6 @@ defmodule Console.AI.Workbench.Conversion do
         tenant_id: azure.tenant_id,
         client_id: azure.client_id,
         client_secret: azure.client_secret,
-        resource_id: azure.resource_id,
       }}
     }}
   end

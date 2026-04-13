@@ -3,7 +3,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{MetricsQueryInput, MetricsQueryOutput}
+  alias Toolquery.{MetricsQueryInput, MetricsQueryOutput, MetricsOptions, AzureMetricsOptions}
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
@@ -42,7 +42,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
         query: q,
         step: s,
         range: TimeRange.to_proto(tr),
+        options: metrics_options(tool),
       }}
     end
   end
+
+  defp metrics_options(%{tool: :azure, configuration: %{azure: %{resource_id: resource_id}}})
+       when is_binary(resource_id) and resource_id != "" do
+    %MetricsOptions{azure: %AzureMetricsOptions{resource_id: resource_id}}
+  end
+  defp metrics_options(_), do: nil
 end

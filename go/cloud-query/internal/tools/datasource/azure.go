@@ -24,21 +24,26 @@ type AzureMetricsRequest struct {
 	Options         *azmetrics.QueryResourcesOptions
 }
 
-func (in *AzureMetricsRequest) init(input *toolquery.MetricsQueryInput, resourceID string) (*AzureMetricsRequest, error) {
+func (in *AzureMetricsRequest) init(input *toolquery.MetricsQueryInput) (*AzureMetricsRequest, error) {
 	metricNames, err := in.toMetricNames(input.GetQuery())
 	if err != nil {
 		return nil, err
 	}
 
-	azure := input.GetOptions().GetAzure()
+	options := input.GetOptions()
+	if options == nil {
+		return nil, fmt.Errorf("metrics options are required")
+	}
+	azure := options.GetAzure()
 	if azure == nil {
 		return nil, fmt.Errorf("azure metrics options are required")
 	}
-	if strings.TrimSpace(resourceID) == "" {
-		return nil, fmt.Errorf("azure connection requires resource_id")
-	}
 	if strings.TrimSpace(azure.GetMetricsNamespace()) == "" {
 		return nil, fmt.Errorf("azure metrics options require metrics_namespace")
+	}
+	resourceID := strings.TrimSpace(azure.GetResourceId())
+	if resourceID == "" {
+		return nil, fmt.Errorf("azure metrics options require resource_id")
 	}
 
 	start, end := in.toTimeRange(input.GetRange())
@@ -105,12 +110,16 @@ func (in *AzureMetricsRequest) toInterval(step string) (string, error) {
 	return step, nil
 }
 
-func NewAzureMetricsRequest(input *toolquery.MetricsQueryInput, resourceID string) (*AzureMetricsRequest, error) {
+func NewAzureMetricsRequest(input *toolquery.MetricsQueryInput) (*AzureMetricsRequest, error) {
+	resourceID := ""
+	if input != nil && input.GetOptions() != nil && input.GetOptions().GetAzure() != nil {
+		resourceID = strings.TrimSpace(input.GetOptions().GetAzure().GetResourceId())
+	}
 	return (&AzureMetricsRequest{
 		ResourceIDs: azmetrics.ResourceIDList{
 			ResourceIDs: []string{resourceID},
 		},
-	}).init(input, resourceID)
+	}).init(input)
 }
 
 type AzureMetricsResponse struct {

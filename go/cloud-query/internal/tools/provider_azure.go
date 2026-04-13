@@ -18,6 +18,9 @@ type AzureProvider struct {
 }
 
 func NewAzureProvider(conn *toolquery.AzureConnection) (*AzureProvider, error) {
+	if conn == nil {
+		return nil, fmt.Errorf("%w: azure connection is required", ErrInvalidArgument)
+	}
 	azClient, err := client.NewAzureClient(conn.GetSubscriptionId(), conn.GetTenantId(), conn.GetClientId(), conn.GetClientSecret())
 	if err != nil {
 		return nil, err
@@ -34,7 +37,7 @@ func (in *AzureProvider) Metrics(ctx context.Context, input *toolquery.MetricsQu
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
 
-	request, err := datasource.NewAzureMetricsRequest(input, in.conn.GetResourceId())
+	request, err := datasource.NewAzureMetricsRequest(input)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidArgument, err)
 	}
@@ -58,8 +61,12 @@ func (in *AzureProvider) MetricsSearch(ctx context.Context, input *toolquery.Met
 	if input == nil || len(input.GetQuery()) == 0 {
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
+	resourceID := strings.TrimSpace(input.GetOptions().GetAzure().GetResourceId())
+	if resourceID == "" {
+		return nil, fmt.Errorf("%w: azure metrics search options require resource_id", ErrInvalidArgument)
+	}
 
-	definitions, err := in.client.MetricsSearch(ctx, in.conn.GetResourceId(), nil)
+	definitions, err := in.client.MetricsSearch(ctx, resourceID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -77,12 +84,16 @@ func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInp
 	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
+	resourceID := strings.TrimSpace(input.GetOptions().GetAzure().GetResourceId())
+	if resourceID == "" {
+		return nil, fmt.Errorf("%w: azure logs options require resource_id", ErrInvalidArgument)
+	}
 
 	body := azlogs.QueryBody{
 		Query:    new(input.GetQuery()),
 		Timespan: logsTimeRange(input.GetRange()),
 	}
-	resp, err := in.client.Logs(ctx, in.conn.GetResourceId(), body, nil)
+	resp, err := in.client.Logs(ctx, resourceID, body, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,9 +116,6 @@ func (in *AzureProvider) validate() (*AzureProvider, error) {
 	}
 	if in.conn.GetClientSecret() == "" {
 		return in, fmt.Errorf("%w: client_secret is required", ErrInvalidArgument)
-	}
-	if in.conn.GetResourceId() == "" {
-		return in, fmt.Errorf("%w: resource_id is required", ErrInvalidArgument)
 	}
 	if in.client == nil {
 		return in, fmt.Errorf("%w: azure connection is required", ErrInvalidArgument)

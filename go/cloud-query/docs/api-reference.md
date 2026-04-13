@@ -400,7 +400,6 @@ message AzureConnection {
   string tenant_id = 2;
   string client_id = 3;
   string client_secret = 4;
-  string resource_id = 5;
 }
 ```
 
@@ -414,8 +413,8 @@ Implementation notes:
 - CloudWatch requires `region`. Optional auth fields support static credentials and/or assume-role.
   - If static credentials are omitted, default AWS credential chain is used (including pod identity).
   - For logs queries, either `log_group_names` must be configured or the query must include a `SOURCE` command.
-- Azure requires `subscription_id`, `tenant_id`, `client_id`, `client_secret`, and `resource_id`.
-  - Metrics and logs operations are resource-scoped and use Azure Monitor.
+- Azure requires `subscription_id`, `tenant_id`, `client_id`, and `client_secret`.
+  - Metrics and logs operations are resource-scoped and use per-request Azure options for `resource_id`.
 
 ## Common Models
 
@@ -450,20 +449,21 @@ message MetricsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional string step = 4;
-  optional Options options = 5;
+  optional MetricsOptions options = 5;
 }
 
-message Options {
-  optional AzureOptions azure = 1;
+message MetricsOptions {
+  optional AzureMetricsOptions azure = 1;
 }
 
-message AzureOptions {
-  string metrics_namespace = 1;
-  optional string aggregation = 2;
-  optional string filter = 3;
-  optional string order_by = 4;
-  optional string roll_up_by = 5;
-  optional string metrics_endpoint = 6;
+message AzureMetricsOptions {
+  string resource_id = 1;
+  string metrics_namespace = 2;
+  optional string aggregation = 3;
+  optional string filter = 4;
+  optional string order_by = 5;
+  optional string roll_up_by = 6;
+  optional string metrics_endpoint = 7;
 }
 ```
 
@@ -485,6 +485,15 @@ message MetricsSearchInput {
   ToolConnection connection = 1;
   string query = 2;
   optional int64 limit = 3;
+  optional MetricsSearchOptions options = 4;
+}
+
+message MetricsSearchOptions {
+  optional AzureMetricsSearchOptions azure = 1;
+}
+
+message AzureMetricsSearchOptions {
+  string resource_id = 1;
 }
 
 message MetricsSearchResult {
@@ -687,9 +696,8 @@ grpcurl -d '{
 ### Azure
 
 Azure metrics query uses Azure Monitor `azmetrics.QueryResources`.
-- `connection.azure.resource_id` is required and used as the target resource.
 - `query` is a comma-separated metric names list.
-- `options.azure.metrics_namespace` is required.
+- `options.azure.resource_id` and `options.azure.metrics_namespace` are required.
 - Optional `options.azure` fields: `aggregation`, `filter`, `order_by`, `roll_up_by`, `metrics_endpoint`.
 - If `options.azure.metrics_endpoint` is omitted, Cloud Query uses `https://global.metrics.monitor.azure.com`.
 
@@ -704,17 +712,17 @@ grpcurl -d '{
       "subscription_id": "<SUBSCRIPTION_ID>",
       "tenant_id": "<TENANT_ID>",
       "client_id": "<CLIENT_ID>",
-      "client_secret": "<CLIENT_SECRET>",
-      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/my-cluster"
+      "client_secret": "<CLIENT_SECRET>"
     }
   },
   "query": "apiserver_cpu_usage_percentage",
   "options": {
     "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/my-cluster",
       "metrics_endpoint": "https://eastus.metrics.monitor.azure.com",
       "metrics_namespace": "Microsoft.ContainerService/managedClusters"
     }
-  }
+  },
   "range": {
     "start": "2026-04-13T00:00:00Z",
     "end": "2026-04-13T21:00:00Z"
@@ -902,7 +910,7 @@ grpcurl -d '{
 
 ### Azure
 
-Azure metrics search is resource-scoped and lists metric definitions from Azure Monitor for `connection.azure.resource_id`.
+Azure metrics search is resource-scoped and lists metric definitions from Azure Monitor for `options.azure.resource_id`.
 `query` is a plain substring filter applied locally to metric definition names.
 
 #### Example request
@@ -914,11 +922,15 @@ grpcurl -d '{
       "subscription_id": "<SUBSCRIPTION_ID>",
       "tenant_id": "<TENANT_ID>",
       "client_id": "<CLIENT_ID>",
-      "client_secret": "<CLIENT_SECRET>",
-      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod"
+      "client_secret": "<CLIENT_SECRET>"
     }
   },
   "query": "node",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod"
+    }
+  },
   "limit": 5
 }' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
 ```
@@ -944,6 +956,16 @@ message LogsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  repeated LogsQueryFacet facets = 5;
+  optional LogsOptions options = 6;
+}
+
+message LogsOptions {
+  optional AzureLogsOptions azure = 1;
+}
+
+message AzureLogsOptions {
+  string resource_id = 1;
 }
 ```
 
@@ -964,7 +986,7 @@ message LogsQueryOutput {
 ### Azure
 
 Azure logs query uses Azure Monitor `azlogs.QueryResource`.
-- `connection.azure.resource_id` is required and used as the resource target.
+- `options.azure.resource_id` is required and used as the resource target.
 - `query` must be Azure Log Analytics syntax (KQL).
 - `range` is passed as `timespan`.
 
@@ -977,11 +999,15 @@ grpcurl -d '{
       "subscription_id": "<SUBSCRIPTION_ID>",
       "tenant_id": "<TENANT_ID>",
       "client_id": "<CLIENT_ID>",
-      "client_secret": "<CLIENT_SECRET>",
-      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/azure-cluster-workspace"
+      "client_secret": "<CLIENT_SECRET>"
     }
   },
   "query": "ContainerLog | where LogEntrySource == \"stderr\" | take 50",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/azure-cluster-workspace"
+    }
+  },
   "range": {
     "start": "2026-04-10T09:00:00Z",
     "end": "2026-04-10T11:00:00Z"

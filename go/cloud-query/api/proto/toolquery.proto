@@ -70,7 +70,6 @@ message AzureConnection {
   string tenant_id = 2;
   string client_id = 3;
   string client_secret = 4;
-  string resource_id = 5;
 }
 
 message ToolConnection {
@@ -97,20 +96,21 @@ message MetricsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional string step = 4;
-  optional Options options = 5;
+  optional MetricsOptions options = 5;
 }
 
-message Options {
-  optional AzureOptions azure = 1;
+message MetricsOptions {
+  optional AzureMetricsOptions azure = 1;
 }
 
-message AzureOptions {
-  string metrics_namespace = 1;
-  optional string aggregation = 2;
-  optional string filter = 3;
-  optional string order_by = 4;
-  optional string roll_up_by = 5;
-  optional string metrics_endpoint = 6;
+message AzureMetricsOptions {
+  string resource_id = 1;
+  string metrics_namespace = 2;
+  optional string aggregation = 3;
+  optional string filter = 4;
+  optional string order_by = 5;
+  optional string roll_up_by = 6;
+  optional string metrics_endpoint = 7;
 }
 
 message LogsQueryFacet {
@@ -124,6 +124,15 @@ message LogsQueryInput {
   TimeRange range = 3;
   optional int32 limit = 4;
   repeated LogsQueryFacet facets = 5;
+  optional LogsOptions options = 6;
+}
+
+message LogsOptions {
+  optional AzureLogsOptions azure = 1;
+}
+
+message AzureLogsOptions {
+  string resource_id = 1;
 }
 
 message TracesQueryInput {
@@ -153,6 +162,15 @@ message MetricsSearchInput {
   // Maximum number of results to return. If not set or zero, a
   // provider-specific default will be used.
   optional int64 limit = 3;
+  optional MetricsSearchOptions options = 4;
+}
+
+message MetricsSearchOptions {
+  optional AzureMetricsSearchOptions azure = 1;
+}
+
+message AzureMetricsSearchOptions {
+  string resource_id = 1;
 }
 
 message MetricsSearchResult {

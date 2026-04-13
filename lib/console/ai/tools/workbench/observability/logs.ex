@@ -3,7 +3,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet}
+  alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet, LogsOptions, AzureLogsOptions}
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
@@ -54,10 +54,17 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
         limit: l,
         facets: to_facets(fs),
         range: TimeRange.to_proto(tr),
+        options: logs_options(tool),
       }}
     end
   end
 
   defp to_facets([_ | _] = facets), do: Enum.map(facets, & %LogsQueryFacet{name: &1.name, value: &1.value})
   defp to_facets(_), do: nil
+
+  defp logs_options(%{tool: :azure, configuration: %{azure: %{resource_id: resource_id}}})
+       when is_binary(resource_id) and resource_id != "" do
+    %LogsOptions{azure: %AzureLogsOptions{resource_id: resource_id}}
+  end
+  defp logs_options(_), do: nil
 end
