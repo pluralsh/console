@@ -1,11 +1,11 @@
 apiVersion: v2
 name: console-rapid
 description: rapid channel chart for the plural console (used for testing)
-appVersion: 0.12.11
-version: 0.4.14
+appVersion: 0.12.12
+version: 0.4.15
 dependencies:
   - name: controller
-    version: 0.0.180
+    version: 0.0.181
     repository: file://../controller
     condition: controller.enabled
   - name: flux2
