@@ -242,7 +242,7 @@ type AzureLogsQueryOutput struct {
 	azlogs.QueryResourceResponse
 }
 
-func (in AzureLogsQueryOutput) ToLogsQueryOutput() *toolquery.LogsQueryOutput {
+func (in AzureLogsQueryOutput) ToLogsQueryOutput(limit int32) *toolquery.LogsQueryOutput {
 	logs := make([]*toolquery.LogEntry, 0)
 	for _, table := range in.Tables {
 		messageIdx, timestampIdx := in.inferAzureLogColumnIndexes(table.Columns)
@@ -266,7 +266,7 @@ func (in AzureLogsQueryOutput) ToLogsQueryOutput() *toolquery.LogsQueryOutput {
 			// In Azure logs queries, actual log text can be returned in fields like
 			// "LogEntry" while another column (for example resource ID) might be
 			// selected as the fallback message. Prefer known log-text label fields.
-			if candidate, key, ok := in.pickMessageFromLabels(labels); ok && (message == "" || in.looksLikeAzureResourceID(message)) {
+			if candidate, key, ok := in.messageFromLabels(labels); ok {
 				message = candidate
 				delete(labels, key)
 			}
@@ -276,6 +276,11 @@ func (in AzureLogsQueryOutput) ToLogsQueryOutput() *toolquery.LogsQueryOutput {
 				Labels:    labels,
 			})
 		}
+	}
+
+	sort.Slice(logs, func(i, j int) bool { return logs[i].Timestamp.AsTime().Before(logs[j].Timestamp.AsTime()) })
+	if limit > 0 {
+		logs = logs[:limit]
 	}
 
 	return &toolquery.LogsQueryOutput{Logs: logs}
@@ -333,13 +338,7 @@ func (in AzureLogsQueryOutput) extractAzureTimestamp(row azlogs.Row, timestampId
 	return time.Now().UTC()
 }
 
-func (in AzureLogsQueryOutput) looksLikeAzureResourceID(value string) bool {
-	v := strings.TrimSpace(value)
-	return strings.HasPrefix(v, "/subscriptions/") ||
-		(strings.Contains(v, "/resourceGroups/") && strings.Contains(v, "/providers/"))
-}
-
-func (in AzureLogsQueryOutput) pickMessageFromLabels(labels map[string]string) (message string, key string, ok bool) {
+func (in AzureLogsQueryOutput) messageFromLabels(labels map[string]string) (string, string, bool) {
 	if len(labels) == 0 {
 		return "", "", false
 	}

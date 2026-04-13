@@ -82,17 +82,12 @@ func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInp
 		Query:    new(input.GetQuery()),
 		Timespan: logsTimeRange(input.GetRange()),
 	}
-	options := &azlogs.QueryResourceOptions{
-		Options: &azlogs.QueryOptions{
-			Wait: new(int(input.GetLimit())),
-		},
-	}
-	resp, err := in.client.Logs(ctx, in.conn.GetResourceId(), body, options)
+	resp, err := in.client.Logs(ctx, in.conn.GetResourceId(), body, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return datasource.AzureLogsQueryOutput{QueryResourceResponse: resp}.ToLogsQueryOutput(), nil
+	return datasource.AzureLogsQueryOutput{QueryResourceResponse: resp}.ToLogsQueryOutput(input.GetLimit()), nil
 }
 
 func (in *AzureProvider) validate() (*AzureProvider, error) {
