@@ -279,7 +279,7 @@ func (in AzureLogsQueryOutput) ToLogsQueryOutput(limit int32) *toolquery.LogsQue
 	}
 
 	sort.Slice(logs, func(i, j int) bool { return logs[i].Timestamp.AsTime().Before(logs[j].Timestamp.AsTime()) })
-	if limit > 0 {
+	if limit > 0 && int32(len(logs)) > limit {
 		logs = logs[:limit]
 	}
 
