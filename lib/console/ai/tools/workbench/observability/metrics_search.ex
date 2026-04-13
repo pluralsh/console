@@ -9,6 +9,12 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
     field :tool, :map, virtual: true
     field :query, :string
     field :limit, :integer
+
+    embeds_one :options, Options, on_replace: :update, primary_key: false do
+      embeds_one :azure, Azure, on_replace: :update, primary_key: false do
+        field :resource_id, :string
+      end
+    end
   end
 
   @valid ~w(query limit)a
@@ -20,6 +26,7 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:options)
   end
 
 
@@ -30,20 +37,28 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
       do: Protobuf.JSON.encode(output)
   end
 
-  defp input(%__MODULE__{tool: tool, query: q, limit: l}) do
+  defp input(%__MODULE__{tool: tool, query: q, limit: l, options: options}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
       {:ok, %MetricsSearchInput{
         connection: connection,
         query: q,
         limit: l || 200,
-        options: metrics_search_options(tool)
+        options: metrics_search_options(tool, options)
       }}
     end
   end
 
-  defp metrics_search_options(%{tool: :azure, configuration: %{azure: %{resource_id: resource_id}}})
-       when is_binary(resource_id) and resource_id != "" do
-    %MetricsSearchOptions{azure: %AzureMetricsSearchOptions{resource_id: resource_id}}
+  defp metrics_search_options(%{tool: :azure}, options) do
+    query_azure = Map.get(options || %{}, :azure)
+    resource_id = blank_to_nil(Map.get(query_azure || %{}, :resource_id))
+    %MetricsSearchOptions{azure: %AzureMetricsSearchOptions{resource_id: resource_id || ""}}
   end
-  defp metrics_search_options(_), do: nil
+  defp metrics_search_options(_, _), do: nil
+
+  defp blank_to_nil(v) do
+    case String.trim(to_string(v || "")) do
+      "" -> nil
+      val -> val
+    end
+  end
 end

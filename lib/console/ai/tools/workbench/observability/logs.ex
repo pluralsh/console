@@ -11,6 +11,12 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     field :query,  :string
     field :limit,  :integer
 
+    embeds_one :options, Options, on_replace: :update, primary_key: false do
+      embeds_one :azure, Azure, on_replace: :update, primary_key: false do
+        field :resource_id, :string
+      end
+    end
+
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
       field :name,  :string
       field :value, :string
@@ -28,6 +34,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:options)
     |> cast_embed(:time_range)
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_required([:query])
@@ -56,7 +63,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     }
   end
 
-  defp input(%__MODULE__{tool: tool, query: q, limit: l, time_range: tr, facets: fs}) do
+  defp input(%__MODULE__{tool: tool, query: q, limit: l, time_range: tr, facets: fs, options: options}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
       {:ok, %LogsQueryInput{
         connection: connection,
@@ -64,7 +71,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
         limit: l,
         facets: to_facets(fs),
         range: TimeRange.to_proto(tr),
-        options: logs_options(tool),
+        options: logs_options(tool, options),
       }}
     end
   end
@@ -72,9 +79,17 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   defp to_facets([_ | _] = facets), do: Enum.map(facets, & %LogsQueryFacet{name: &1.name, value: &1.value})
   defp to_facets(_), do: nil
 
-  defp logs_options(%{tool: :azure, configuration: %{azure: %{resource_id: resource_id}}})
-       when is_binary(resource_id) and resource_id != "" do
-    %LogsOptions{azure: %AzureLogsOptions{resource_id: resource_id}}
+  defp logs_options(%{tool: :azure}, options) do
+    query_azure = Map.get(options || %{}, :azure)
+    resource_id = blank_to_nil(Map.get(query_azure || %{}, :resource_id))
+    %LogsOptions{azure: %AzureLogsOptions{resource_id: resource_id || ""}}
   end
-  defp logs_options(_), do: nil
+  defp logs_options(_, _), do: nil
+
+  defp blank_to_nil(v) do
+    case String.trim(to_string(v || "")) do
+      "" -> nil
+      val -> val
+    end
+  end
 end

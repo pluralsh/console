@@ -112,7 +112,6 @@ fragment WorkbenchTool on WorkbenchTool {
       subscriptionId
       tenantId
       clientId
-      resourceId
     }
     dynatrace {
       url

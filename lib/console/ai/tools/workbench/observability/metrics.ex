@@ -11,6 +11,18 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     field :query, :string
     field :step,  :string
 
+    embeds_one :options, Options, on_replace: :update, primary_key: false do
+      embeds_one :azure, Azure, on_replace: :update, primary_key: false do
+        field :resource_id, :string
+        field :metrics_namespace, :string
+        field :aggregation, :string
+        field :filter, :string
+        field :order_by, :string
+        field :roll_up_by, :string
+        field :metrics_endpoint, :string
+      end
+    end
+
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
@@ -23,6 +35,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:options)
     |> cast_embed(:time_range)
     |> validate_required([:query])
   end
@@ -46,23 +59,40 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     }
   end
 
-  defp input(%__MODULE__{tool: tool, query: q, step: s, time_range: tr}) do
+  defp input(%__MODULE__{tool: tool, query: q, step: s, time_range: tr, options: options}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
       {:ok, %MetricsQueryInput{
         connection: connection,
         query: q,
         step: s,
         range: TimeRange.to_proto(tr),
-        options: metrics_options(tool),
+        options: metrics_options(tool, options),
       }}
     end
   end
 
-  defp metrics_options(%{tool: :azure, configuration: %{azure: %{resource_id: resource_id}}})
-       when is_binary(resource_id) and resource_id != "" do
-    %MetricsOptions{azure: %AzureMetricsOptions{resource_id: resource_id}}
+  defp metrics_options(%{tool: :azure}, options) do
+    query_azure = Map.get(options || %{}, :azure)
+    resource_id = blank_to_nil(Map.get(query_azure || %{}, :resource_id))
+
+    %MetricsOptions{azure: %AzureMetricsOptions{
+      resource_id: resource_id || "",
+      metrics_namespace: Map.get(query_azure || %{}, :metrics_namespace) || "",
+      aggregation: Map.get(query_azure || %{}, :aggregation),
+      filter: Map.get(query_azure || %{}, :filter),
+      order_by: Map.get(query_azure || %{}, :order_by),
+      roll_up_by: Map.get(query_azure || %{}, :roll_up_by),
+      metrics_endpoint: Map.get(query_azure || %{}, :metrics_endpoint),
+    }}
   end
-  defp metrics_options(_), do: nil
+  defp metrics_options(_, _), do: nil
+
+  defp blank_to_nil(v) do
+    case String.trim(to_string(v || "")) do
+      "" -> nil
+      val -> val
+    end
+  end
 
 
   @known_providers ~w(prometheus datadog elastic loki splunk tempo dynatrace newrelic)a

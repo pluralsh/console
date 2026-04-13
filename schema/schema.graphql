@@ -2594,9 +2594,6 @@ input WorkbenchToolAzureConnectionAttributes {
 
   "azure client secret"
   clientSecret: String!
-
-  "azure resource id for metrics\/logs queries"
-  resourceId: String!
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -3192,9 +3189,6 @@ type WorkbenchToolAzureConnection {
 
   "azure client id"
   clientId: String
-
-  "azure resource id for metrics\/logs queries"
-  resourceId: String
 }
 
 type WorkbenchToolLinearConnection {

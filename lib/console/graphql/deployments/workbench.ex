@@ -185,7 +185,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id,       non_null(:string), description: "azure tenant id"
     field :client_id,       non_null(:string), description: "azure client id"
     field :client_secret,   non_null(:string), description: "azure client secret"
-    field :resource_id,     non_null(:string), description: "azure resource id for metrics/logs queries"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -524,7 +523,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :subscription_id, :string, description: "azure subscription id"
     field :tenant_id,       :string, description: "azure tenant id"
     field :client_id,       :string, description: "azure client id"
-    field :resource_id,     :string, description: "azure resource id for metrics/logs queries"
   end
 
   object :workbench_tool_linear_connection do

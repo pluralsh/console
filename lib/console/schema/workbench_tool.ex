@@ -95,7 +95,6 @@ defmodule Console.Schema.WorkbenchTool do
         field :tenant_id,       :string
         field :client_id,       :string
         field :client_secret,   EncryptedString
-        field :resource_id,     :string
       end
 
       embeds_one :http, HttpConfiguration, on_replace: :update do
@@ -281,8 +280,8 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp azure_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(subscription_id tenant_id client_id client_secret resource_id)a)
-    |> validate_required([:subscription_id, :tenant_id, :client_id, :client_secret, :resource_id])
+    |> cast(attrs, ~w(subscription_id tenant_id client_id client_secret)a)
+    |> validate_required([:subscription_id, :tenant_id, :client_id, :client_secret])
   end
 
   defp splunk_configuration_changeset(model, attrs) do
