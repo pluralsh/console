@@ -3,6 +3,7 @@ import {
   GitHubLogoIcon,
   GitLabLogoIcon,
   GrafanaLogoIcon,
+  JiraLogoIcon,
   LinearLogoIcon,
   NewrelicLogoIcon,
   PagerdutyLogoIcon,
@@ -65,6 +66,7 @@ export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
     case IssueWebhookProvider.Linear:
       return <LinearLogoIcon fullColor />
     case IssueWebhookProvider.Jira:
+      return <JiraLogoIcon fullColor />
     case IssueWebhookProvider.Asana:
     default:
       return <WebhooksIcon />

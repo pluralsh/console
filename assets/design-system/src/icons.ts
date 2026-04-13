@@ -145,6 +145,7 @@ export { default as InfrastructureIcon } from './components/icons/Infrastructure
 export { default as InstalledIcon } from './components/icons/InstalledIcon'
 export { default as InstallIcon } from './components/icons/InstallIcon'
 export { default as InvoicesIcon } from './components/icons/InvoicesIcon'
+export { default as JiraLogoIcon } from './components/icons/JiraLogoIcon'
 export { default as KeyIcon } from './components/icons/KeyIcon'
 export { default as KeyPairIcon } from './components/icons/KeyPairIcon'
 export { default as KubernetesIcon } from './components/icons/Kubernetes'
