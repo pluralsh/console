@@ -2,11 +2,14 @@ import {
   Accordion,
   AccordionItem,
   Code,
+  Flex,
   getLastStringChild,
   Modal,
 } from '@pluralsh/design-system'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
+import { truncate } from 'lodash'
 import { ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -36,15 +39,53 @@ export function SimpleToolCall({
   content,
   attributes,
   isPending,
+  customResultBody,
 }: {
-  content: ChatFragment['content']
+  content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
   isPending?: boolean
+  customResultBody?: ReactNode
 }) {
   const { colors } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
-
+  const command = `${attributes?.tool?.arguments?.['command'] ?? ''}`
+  if (toolName.toLowerCase().includes('bash')) {
+    return (
+      <SimpleAccordion
+        label={
+          <CaptionP
+            as="span"
+            $color="text-light"
+          >
+            Bash{' '}
+            <CaptionP
+              as="span"
+              $color="text-xlight"
+            >
+              {truncate(command, { length: 30 })}
+            </CaptionP>
+          </CaptionP>
+        }
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          minWidth={0}
+          width="100%"
+        >
+          <Code
+            language="bash"
+            showHeader={false}
+          >
+            {command}
+          </Code>
+          <Code showHeader={false}>{content ?? ''}</Code>
+        </Flex>
+      </SimpleAccordion>
+    )
+  }
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
@@ -58,13 +99,27 @@ export function SimpleToolCall({
       </ClickableLabelSC>
       <Modal
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false)
+          setFinishedAnimating(false)
+        }}
+        onAnimationEnd={() => setFinishedAnimating(true)}
         header={`Tool: ${toolName}`}
         size="large"
       >
         <ToolCallContent
           content={content ?? ''}
           attributes={attributes}
+          customResultBody={
+            finishedAnimating ? (
+              customResultBody
+            ) : (
+              <RectangleSkeleton
+                $height={160}
+                $width="100%"
+              />
+            )
+          }
         />
       </Modal>
     </>
@@ -197,7 +252,7 @@ export function SimpleAccordion({
     <Accordion
       type="single"
       value={defaultOpen ? 'val' : undefined}
-      css={{ background: 'none', border: 'none' }}
+      css={{ background: 'none', border: 'none', width: '100%' }}
     >
       <AccordionItem
         value="val"

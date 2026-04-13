@@ -125,7 +125,6 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
         xScale={{ type: 'time', format: 'native' }}
         yScale={{ type: 'linear', min: 0, max: 'auto' }}
         xFormat={dateFormat}
-        curve="monotoneX"
         lineWidth={1}
         enablePoints={false}
         useMesh
