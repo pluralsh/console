@@ -6,7 +6,6 @@ import {
   ListBoxItem,
   SidePanelOpenIcon,
   StopIcon,
-  TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
