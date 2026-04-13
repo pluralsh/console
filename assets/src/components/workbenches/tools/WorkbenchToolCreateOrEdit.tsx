@@ -19,6 +19,7 @@ import {
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
+  WORKBENCHES_TOOLS_YOUR_REL_PATH,
   WORKBENCHES_TOOLS_YOUR_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -34,7 +35,11 @@ import {
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
 const getBreadcrumbs = (mode: 'create' | 'edit') => [
-  ...getWorkbenchesBreadcrumbs(WORKBENCHES_TOOLS_ADD_REL_PATH),
+  ...getWorkbenchesBreadcrumbs(
+    mode === 'create'
+      ? WORKBENCHES_TOOLS_ADD_REL_PATH
+      : WORKBENCHES_TOOLS_YOUR_REL_PATH
+  ),
   { label: mode === 'create' ? 'create' : 'edit' },
 ]
 

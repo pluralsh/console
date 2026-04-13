@@ -17,7 +17,7 @@ import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/Webho
 import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
 import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
 import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
-import { Navigate, Route } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 import {
   WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
@@ -28,9 +28,7 @@ import {
   WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
-  WORKBENCHES_TOOLS_PARAM_ID,
-  WORKBENCHES_TOOLS_REL_PATH,
-  WORKBENCHES_TOOLS_YOUR_ABS_PATH,
+  WORKBENCHES_TOOLS_EDIT_ABS_PATH,
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
   WORKBENCHES_CRON_PARAM_ID,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
@@ -60,33 +58,6 @@ export const workbenchesRoutes = [
       element={<WorkbenchToolsYour />}
     />
     <Route
-      path={`${WORKBENCHES_TOOLS_REL_PATH}/${WORKBENCHES_TOOLS_ADD_REL_PATH}`}
-      element={
-        <Navigate
-          replace
-          to={WORKBENCHES_TOOLS_ADD_ABS_PATH}
-        />
-      }
-    />
-    <Route
-      path={`${WORKBENCHES_TOOLS_REL_PATH}/${WORKBENCHES_TOOLS_YOUR_REL_PATH}`}
-      element={
-        <Navigate
-          replace
-          to={WORKBENCHES_TOOLS_YOUR_ABS_PATH}
-        />
-      }
-    />
-    <Route
-      path={WORKBENCHES_TOOLS_REL_PATH}
-      element={
-        <Navigate
-          replace
-          to={WORKBENCHES_TOOLS_ADD_ABS_PATH}
-        />
-      }
-    />
-    <Route
       path={WORKBENCHES_ALERTS_REL_PATH}
       element={<WorkbenchesAlerts />}
     />
@@ -100,11 +71,11 @@ export const workbenchesRoutes = [
     element={<WorkbenchCreateOrEdit mode="create" />}
   />,
   <Route
-    path={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_TOOLS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    path={`${WORKBENCHES_TOOLS_ADD_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
     element={<WorkbenchToolCreateOrEdit mode="create" />}
   />,
   <Route
-    path={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_TOOLS_REL_PATH}/:${WORKBENCHES_TOOLS_PARAM_ID}`}
+    path={WORKBENCHES_TOOLS_EDIT_ABS_PATH}
     element={<WorkbenchToolCreateOrEdit mode="edit" />}
   />,
   <Route

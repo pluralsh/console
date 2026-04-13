@@ -11,7 +11,7 @@ import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabW
 import { useWorkbenchToolsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { Link } from 'react-router-dom'
-import { WORKBENCHES_TOOLS_ABS_PATH } from 'routes/workbenchesRoutesConsts'
+import { getWorkbenchToolEditAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -52,7 +52,7 @@ export function WorkbenchToolsYour() {
                 key={id}
                 clickable
                 forwardedAs={Link}
-                to={`${WORKBENCHES_TOOLS_ABS_PATH}/${id}`}
+                to={getWorkbenchToolEditAbsPath(id)}
               >
                 <StackedText
                   first={name}
