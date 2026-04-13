@@ -1,7 +1,13 @@
-import { AddIcon, Button, Flex, IconFrame } from '@pluralsh/design-system'
+import {
+  AddIcon,
+  Button,
+  Flex,
+  IconFrame,
+  PencilIcon,
+} from '@pluralsh/design-system'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useMemo } from 'react'
+import { PropsWithChildren, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -9,6 +15,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import {
   getWorkbenchCronScheduleCreateAbsPath,
   getWorkbenchWebhookTriggerCreateAbsPath,
+  getWorkbenchWebhookTriggerEditAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import { getWebhookIcon } from './webhooks/utils'
 import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
@@ -91,10 +98,16 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
             direction="column"
           >
             {webhooks.map((webhook) => (
-              <Flex
+              <WorkbenchSidePanelEditRow
                 key={webhook.id}
-                gap="xsmall"
-                align="center"
+                onClick={() =>
+                  navigate(
+                    getWorkbenchWebhookTriggerEditAbsPath({
+                      workbenchId,
+                      webhookId: webhook.id,
+                    })
+                  )
+                }
               >
                 <ItemIconContainerSC>
                   <IconFrame
@@ -103,7 +116,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
                   />
                 </ItemIconContainerSC>
                 <ItemNameSC>{webhook.name}</ItemNameSC>
-              </Flex>
+              </WorkbenchSidePanelEditRow>
             ))}
           </Flex>
         ) : (
@@ -145,6 +158,7 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
               <WorkbenchSidePanelCron
                 key={cron.id}
                 cron={cron}
+                workbenchId={workbenchId}
               />
             ))}
           </Flex>
@@ -224,4 +238,52 @@ const ItemIconContainerSC = styled.div({
 const ItemNameSC = styled.span(({ theme }) => ({
   ...TRUNCATE,
   color: theme.colors['text-light'],
+  flex: 1,
+  minWidth: 0,
+}))
+
+export function WorkbenchSidePanelEditRow({
+  onClick,
+  children,
+}: PropsWithChildren<{
+  onClick: () => void
+}>) {
+  return (
+    <EditRowButtonSC
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+      <Flex
+        className="icon-container"
+        alignItems="center"
+        justifyContent="center"
+        height={24}
+        width={24}
+      >
+        <PencilIcon size={12} />
+      </Flex>
+    </EditRowButtonSC>
+  )
+}
+
+const EditRowButtonSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  alignItems: 'center',
+  display: 'flex',
+  flexShrink: 0,
+  gap: theme.spacing.xsmall,
+
+  '& > .icon-container': {
+    opacity: 0,
+    transition: 'opacity 0.15s ease',
+  },
+
+  '&:hover > *': {
+    color: theme.colors.text,
+  },
+
+  '&:hover > .icon-container': {
+    opacity: 1,
+  },
 }))
