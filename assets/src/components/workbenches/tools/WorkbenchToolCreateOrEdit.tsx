@@ -16,9 +16,10 @@ import { capitalize, isEmpty } from 'lodash'
 import { useLayoutEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
-  WORKBENCHES_TOOLS_ABS_PATH,
+  WORKBENCHES_TOOLS_ADD_ABS_PATH,
+  WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
-  WORKBENCHES_TOOLS_REL_PATH,
+  WORKBENCHES_TOOLS_YOUR_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
@@ -33,7 +34,7 @@ import {
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
 const getBreadcrumbs = (mode: 'create' | 'edit') => [
-  ...getWorkbenchesBreadcrumbs(WORKBENCHES_TOOLS_REL_PATH),
+  ...getWorkbenchesBreadcrumbs(WORKBENCHES_TOOLS_ADD_REL_PATH),
   { label: mode === 'create' ? 'create' : 'edit' },
 ]
 
@@ -79,7 +80,7 @@ export function WorkbenchToolCreateOrEdit({
       onCompleted: ({ createWorkbenchTool }) => {
         const name = createWorkbenchTool?.name ?? 'Tool'
         popToast({ name, action: 'created', color: 'icon-success' })
-        navigate(WORKBENCHES_TOOLS_ABS_PATH)
+        navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)
       },
     })
   const [update, { loading: updateLoading, error: updateError }] =
@@ -142,7 +143,13 @@ export function WorkbenchToolCreateOrEdit({
             type={type}
             tool={tool}
             mutationLoading={mutationLoading}
-            onCancel={() => navigate(WORKBENCHES_TOOLS_ABS_PATH)}
+            onCancel={() =>
+              navigate(
+                mode === 'create'
+                  ? WORKBENCHES_TOOLS_ADD_ABS_PATH
+                  : WORKBENCHES_TOOLS_YOUR_ABS_PATH
+              )
+            }
             onSave={onSave}
           />
           {/* TODO */}

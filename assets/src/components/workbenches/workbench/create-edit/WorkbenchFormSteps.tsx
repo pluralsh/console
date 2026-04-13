@@ -42,7 +42,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
-import { WORKBENCHES_TOOLS_ABS_PATH } from 'routes/workbenchesRoutesConsts'
+import { WORKBENCHES_TOOLS_ADD_ABS_PATH } from 'routes/workbenchesRoutesConsts'
 import { WorkbenchFormState } from './WorkbenchCreateOrEdit'
 import {
   CardGrid,
@@ -511,7 +511,7 @@ export function WorkbenchAttachToolsStep({
         secondary
         endIcon={<ArrowTopRightIcon size={16} />}
         as={Link}
-        to={WORKBENCHES_TOOLS_ABS_PATH}
+        to={WORKBENCHES_TOOLS_ADD_ABS_PATH}
       >
         Set up tools
       </Button>
