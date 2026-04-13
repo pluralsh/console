@@ -39,6 +39,8 @@ To claim the reward, you should get in touch with us on our discord at https://d
 
 ## Development
 
+**Prerequisites**: Ensure you have Docker and Docker Compose installed for running dependencies and tests.
+
 There are three core components in this repo:
 
 * server core - written in elixir, mainly exposing a graphql api
