@@ -33,6 +33,7 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { Body2P } from '../../utils/typography/Text.tsx'
+import { TRUNCATE } from 'components/utils/truncate.ts'
 
 const MAX_WIDTH = 924
 const SAVED_PROMPTS_LIMIT = 6
@@ -259,10 +260,18 @@ function SavedPromptsChip({
       css={{
         borderRadius: 16,
         width: 'fit-content',
-        whiteSpace: 'pre-wrap',
+        maxWidth: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
+
+        '.children': {
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+        },
       }}
     >
-      <Body2P>{label}</Body2P>
+      <Body2P css={{ ...TRUNCATE }}>{label}</Body2P>
       {rightContent}
     </Chip>
   )
@@ -277,8 +286,10 @@ const OverlayLoadingSC = styled(Flex)({
 const PromptListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'flex-start',
   gap: theme.spacing.small,
   maxHeight: 320,
+  minWidth: 0,
   overflow: 'hidden auto',
 }))
 
