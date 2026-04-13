@@ -13,26 +13,31 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
   def generate(%ServiceComponent{kind: kind}) when kind in @blacklist, do: {:ok, []}
   def generate(%ServiceComponent{service: %{cluster: cluster}} = comp) do
     save_kubeconfig(cluster)
-    with {:ok, resource} <- Resource.resource(comp, cluster),
-         {:ok, events} <- Resource.events(resource),
-         {:ok, hydration, claims} <- Resource.hydrate(resource) do
-      history(
-        [{:user, """
-          The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.  It is deployed
-          on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} using Plural's GitOps tooling.
+    case Resource.resource(comp, cluster) do
+      error when not_found?(error) ->
+        {:ok, []}
+      {:ok, resource} ->
+        with {:ok, events} <- Resource.events(resource),
+             {:ok, hydration, claims} <- Resource.hydrate(resource) do
+          history(
+            [{:user, """
+              The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.  It is deployed
+              on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} using Plural's GitOps tooling.
 
-          The raw json object itself is as follows:
+              The raw json object itself is as follows:
 
-          ```json
-          #{encode(resource)}
-          ```
-          """
-        }]
-        ++ tpl_events(events)
-        ++ tpl_hydration(hydration)
-        ++ traverse_children(comp, Resource.custom?(resource)),
-        claims
-      )
+              ```json
+              #{encode(resource)}
+              ```
+              """
+            }]
+            ++ tpl_events(events)
+            ++ tpl_hydration(hydration)
+            ++ traverse_children(comp, Resource.custom?(resource)),
+            claims
+          )
+        end
+      error -> error
     end
   end
 

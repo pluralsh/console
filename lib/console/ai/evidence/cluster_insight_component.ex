@@ -11,27 +11,32 @@ defimpl Console.AI.Evidence, for: Console.Schema.ClusterInsightComponent do
   def generate(%ClusterInsightComponent{kind: kind}) when kind in @blacklist, do: {:ok, []}
   def generate(%ClusterInsightComponent{cluster: cluster} = comp) do
     save_kubeconfig(cluster)
-    with {:ok, resource} <- Resource.resource(to_svc_component(comp), cluster),
-         {:ok, events} <- Resource.events(resource),
-         {:ok, hydration, claims} <- Resource.hydrate(resource) do
-      (
-        [{:user, """
-          The kubernetes resource #{component(comp)}.  It is deployed on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} with version #{cluster.version}
+    case Resource.resource(to_svc_component(comp), cluster) do
+      error when not_found?(error) ->
+        {:ok, []}
+      {:ok, resource} ->
+        with {:ok, events} <- Resource.events(resource),
+             {:ok, hydration, claims} <- Resource.hydrate(resource) do
+          (
+            [{:user, """
+              The kubernetes resource #{component(comp)}.  It is deployed on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} with version #{cluster.version}
 
-          The raw json object itself is as follows:
+              The raw json object itself is as follows:
 
-          ```json
-          #{encode(resource)}
-          ```
-          """
-        }]
-        ++ tpl_events(events)
-        ++ tpl_hydration(hydration)
-      )
-      |> Logs.with_logging(comp)
-      |> Knowledge.with_knowledge()
-      |> Context.claims(claims)
-      |> Context.result()
+              ```json
+              #{encode(resource)}
+              ```
+              """
+            }]
+            ++ tpl_events(events)
+            ++ tpl_hydration(hydration)
+          )
+          |> Logs.with_logging(comp)
+          |> Knowledge.with_knowledge()
+          |> Context.claims(claims)
+          |> Context.result()
+        end
+      error -> error
     end
   end
 

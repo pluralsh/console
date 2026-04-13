@@ -143,6 +143,14 @@ defmodule Console.AI.Evidence.Base do
   def items_response({:ok, %{items: items}}), do: {:ok, items}
   def items_response(err), do: err
 
+  @doc """
+  Checks if an error is a Kubernetes NotFound (404) error.
+  Returns true for 404 responses, false otherwise.
+  """
+  def not_found?({:error, %HTTPoison.Response{status_code: 404}}), do: true
+  def not_found?({:error, %{status_code: 404}}), do: true
+  def not_found?(_), do: false
+
   def component(%{group: g, version: v, kind: k, namespace: n, name: na}),
     do: "#{g}/#{v} #{k}#{ns(n)} with name #{na}"
 
