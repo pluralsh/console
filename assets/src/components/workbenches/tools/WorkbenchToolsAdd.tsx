@@ -8,7 +8,6 @@ import {
 } from '@pluralsh/design-system'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { Link } from 'react-router-dom'
