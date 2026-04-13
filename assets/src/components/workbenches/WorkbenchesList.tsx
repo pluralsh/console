@@ -20,11 +20,10 @@ import { WorkbenchTinyFragment, useWorkbenchesQuery } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import { ComponentType } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchToolIcon } from './tools/workbenchToolsUtils'
-import Icon from '@mui/material/Icon'
 
 const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
@@ -83,7 +82,6 @@ export function WorkbenchesList() {
 }
 
 function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
-  const { spacing } = useTheme()
   const { id, name, description, repository, tools: t } = workbench
   const tools = t?.filter(isNonNullable) ?? []
   return (
