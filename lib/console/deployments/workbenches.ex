@@ -334,10 +334,18 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec cancel_workbench_job(binary, User.t()) :: job_resp
   def cancel_workbench_job(id, %User{} = user) do
-    get_workbench_job!(id)
-    |> WorkbenchJob.changeset(%{status: :cancelled})
-    |> allow(user, :edit)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      get_workbench_job!(id)
+      |> WorkbenchJob.changeset(%{status: :cancelled})
+      |> allow(user, :edit)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:heartbeat, fn %{job: job} ->
+      Console.AI.Workbench.Router.stop(job)
+      {:ok, job}
+    end)
+    |> execute(extract: :job)
     |> notify(:update, user)
   end
 
