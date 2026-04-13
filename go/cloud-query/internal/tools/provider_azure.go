@@ -36,7 +36,7 @@ func (in *AzureProvider) Metrics(ctx context.Context, input *toolquery.MetricsQu
 
 	request, err := datasource.NewAzureMetricsRequest(input, in.conn.GetResourceId())
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidArgument, err)
+		return nil, fmt.Errorf("%w: %w", ErrInvalidArgument, err)
 	}
 
 	resp, err := in.client.Metrics(
