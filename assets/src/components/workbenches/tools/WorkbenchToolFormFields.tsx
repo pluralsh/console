@@ -518,13 +518,6 @@ function AzureFormFields({
         onChange={(e) => set({ ...c, clientId: e.target.value })}
       />
       <InputField
-        label="Resource ID"
-        required
-        placeholder="/subscriptions/.../resourceGroups/.../providers/..."
-        value={c.resourceId ?? ''}
-        onChange={(e) => set({ ...c, resourceId: e.target.value })}
-      />
-      <InputField
         label="Client secret"
         required
         revealer

@@ -200,14 +200,12 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     }
   },
   [WorkbenchToolType.Azure]: (config) => {
-    const { subscriptionId, tenantId, clientId, resourceId } =
-      config?.azure ?? {}
+    const { subscriptionId, tenantId, clientId } = config?.azure ?? {}
     return {
       azure: {
         subscriptionId: subscriptionId ?? '',
         tenantId: tenantId ?? '',
         clientId: clientId ?? '',
-        resourceId: resourceId ?? '',
         clientSecret: '',
       },
     }
