@@ -1927,6 +1927,11 @@
          "name": "CreateWorkbenchJob",
          "body": "mutation CreateWorkbenchJob($workbenchId: ID!, $attributes: WorkbenchJobAttributes!) {\n  createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    status\n    prompt\n    insertedAt\n    __typename\n  }\n}"
       },
+      "sha256:dd0eb022c0aaaa8c305761cc3b9a52731a3df2a825b3af5722f2ed293400db36": {
+         "type": "mutation",
+         "name": "CancelWorkbenchJob",
+         "body": "mutation CancelWorkbenchJob($jobId: ID!) {\n  cancelWorkbenchJob(jobId: $jobId) {\n    id\n    status\n    __typename\n  }\n}"
+      },
       "sha256:7cc5d39dfdfc02aeb304e8a1b08e1b952eadd0db4ba5951c75af4270dc8c4112": {
          "type": "mutation",
          "name": "CreateWorkbenchMessage",

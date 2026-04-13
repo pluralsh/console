@@ -19520,6 +19520,13 @@ export type CreateWorkbenchJobMutationVariables = Exact<{
 
 export type CreateWorkbenchJobMutation = { __typename?: 'RootMutationType', createWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null } | null };
 
+export type CancelWorkbenchJobMutationVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type CancelWorkbenchJobMutation = { __typename?: 'RootMutationType', cancelWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
+
 export type CreateWorkbenchMessageMutationVariables = Exact<{
   jobId: Scalars['ID']['input'];
   attributes: WorkbenchMessageAttributes;
@@ -41402,6 +41409,40 @@ export function useCreateWorkbenchJobMutation(baseOptions?: Apollo.MutationHookO
 export type CreateWorkbenchJobMutationHookResult = ReturnType<typeof useCreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationResult = Apollo.MutationResult<CreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchJobMutation, CreateWorkbenchJobMutationVariables>;
+export const CancelWorkbenchJobDocument = gql`
+    mutation CancelWorkbenchJob($jobId: ID!) {
+  cancelWorkbenchJob(jobId: $jobId) {
+    id
+    status
+  }
+}
+    `;
+export type CancelWorkbenchJobMutationFn = Apollo.MutationFunction<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>;
+
+/**
+ * __useCancelWorkbenchJobMutation__
+ *
+ * To run a mutation, you first call `useCancelWorkbenchJobMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelWorkbenchJobMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelWorkbenchJobMutation, { data, loading, error }] = useCancelWorkbenchJobMutation({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useCancelWorkbenchJobMutation(baseOptions?: Apollo.MutationHookOptions<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>(CancelWorkbenchJobDocument, options);
+      }
+export type CancelWorkbenchJobMutationHookResult = ReturnType<typeof useCancelWorkbenchJobMutation>;
+export type CancelWorkbenchJobMutationResult = Apollo.MutationResult<CancelWorkbenchJobMutation>;
+export type CancelWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>;
 export const CreateWorkbenchMessageDocument = gql`
     mutation CreateWorkbenchMessage($jobId: ID!, $attributes: WorkbenchMessageAttributes!) {
   createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
@@ -42292,6 +42333,7 @@ export const namedOperations = {
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
     CreateWorkbenchJob: 'CreateWorkbenchJob',
+    CancelWorkbenchJob: 'CancelWorkbenchJob',
     CreateWorkbenchMessage: 'CreateWorkbenchMessage',
     CreateWorkbenchPrompt: 'CreateWorkbenchPrompt',
     UpdateWorkbenchPrompt: 'UpdateWorkbenchPrompt',
