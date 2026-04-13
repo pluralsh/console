@@ -15,7 +15,8 @@ defmodule Console.AI.Cron do
     AgentRun,
     SentinelRun,
     PrAutomation,
-    Catalog
+    Catalog,
+    WorkbenchJob
   }
 
   require Logger
@@ -153,6 +154,18 @@ defmodule Console.AI.Cron do
       |> Repo.stream(method: :keyset)
       |> Console.throttle()
       |> Stream.each(&Console.AI.PubSub.Vector.Bulk.insert/1)
+      |> Stream.run()
+    end
+  end
+
+  def vectorize_workbench_jobs() do
+    with true <- VectorStore.enabled?() do
+      Logger.info "re-vectorizing all workbench jobs"
+      WorkbenchJob.resolved()
+      |> WorkbenchJob.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
       |> Stream.run()
     end
   end

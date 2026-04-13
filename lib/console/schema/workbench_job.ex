@@ -74,6 +74,23 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, preload: ^preloads)
   end
 
+  def resolved(query \\ __MODULE__) do
+    from(j in __MODULE__,
+      join: pr in subquery(merged_prs(query)),
+      on: j.id == pr.id,
+      select: j
+    )
+  end
+
+  def merged_prs(query \\ __MODULE__) do
+    from(j in query,
+      join: pr in assoc(j, :pull_requests),
+      group_by: j.id,
+      select: %{id: j.id, merged_prs: count(pr.id)},
+      having: count(pr.id) > 0 and count(fragment("CASE WHEN ? = 'merged' THEN 1 ELSE 0 END", pr.status)) == count(pr.id)
+    )
+  end
+
   @valid ~w(status prompt workbench_id error user_id started_at completed_at alert_id issue_id)a
 
   def changeset(model, attrs \\ %{}) do
@@ -91,5 +108,48 @@ defmodule Console.Schema.WorkbenchJob do
     model
     |> cast(attrs, [])
     |> cast_assoc(:result)
+  end
+end
+
+defmodule Console.Schema.WorkbenchJob.Mini do
+  alias Console.Schema.WorkbenchJob
+
+  @type t :: %__MODULE__{
+    id: binary,
+    status: binary,
+    prompt: binary,
+    conclusion: binary,
+    topology: binary,
+    activities: [%{prompt: binary, type: binary, status: binary}],
+    pull_requests: [%{title: binary, url: binary, body: binary}]
+  }
+
+  @derive Jason.Encoder
+
+  defstruct [:id, :status, :prompt, :conclusion, :topology, :activities, :pull_requests]
+
+  def new(%WorkbenchJob{} = job) do
+    job = Console.Repo.preload(job, [:result, :activities, :pull_requests])
+    %__MODULE__{
+      id: job.id,
+      status: job.status,
+      prompt: job.prompt,
+      conclusion: job.result.conclusion,
+      topology: job.result.topology,
+      activities: Enum.map(job.activities, & %{prompt: &1.prompt, type: &1.type, status: &1.status}),
+      pull_requests: Enum.map(job.pull_requests, & %{title: &1.title, url: &1.url, body: &1.body}),
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      id: attrs["id"],
+      status: attrs["status"],
+      prompt: attrs["prompt"],
+      conclusion: attrs["conclusion"],
+      topology: attrs["topology"],
+      activities: Enum.map(attrs["activities"], & %{prompt: &1["prompt"], type: &1["type"], status: &1["status"]}),
+      pull_requests: Enum.map(attrs["pull_requests"], & %{title: &1["title"], url: &1["url"], body: &1["body"]}),
+    }
   end
 end

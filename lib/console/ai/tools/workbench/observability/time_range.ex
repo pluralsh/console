@@ -23,6 +23,13 @@ defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
     |> put_new_change(:end, fn -> Timex.now() end)
   end
 
+  def safe(%__MODULE__{start: s_ts, end: e_ts}, days \\ 7) do
+    case Timex.diff(e_ts, s_ts, :days) < days do
+      true -> :ok
+      _ -> {:error, "The time range is greater than the maximum allowed of #{days} days"}
+    end
+  end
+
   def to_proto(%__MODULE__{start: start_ts, end: end_ts}) do
     %TimeRange{
       start: to_proto_timestamp(start_ts),
