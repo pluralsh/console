@@ -80,6 +80,7 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`) |
 | Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required) |
 | CloudWatch | Yes | Yes | No | AWS SDK v2 (`GetMetricData`, Logs Insights `StartQuery`/`GetQueryResults`) with optional assume-role |
+| Azure | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials |
 
 ### Tool Provider Credentials and Permissions
 
@@ -109,6 +110,18 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
     - Logs with provider log groups: set `"log_group_names": ["/aws/eks/prod/app"]` and use query like `"fields @timestamp, @message | sort @timestamp desc"`.
     - Logs without provider log groups: omit `log_group_names` and use query like `"SOURCE logGroups(namePrefix: [\"/aws/eks/prod/app\"]) | fields @timestamp, @message | sort @timestamp desc"`.
     - Metrics: use CloudWatch metric math expression, for example `SEARCH("{AWS/EC2,InstanceId} MetricName=\"CPUUtilization\"", "Average", 300)`.
+- `Azure`:
+  - Requires `subscription_id`, `tenant_id`, `client_id`, `client_secret`, and `resource_id`.
+  - Metrics use `azmetrics.QueryResources`:
+    - `query` is a comma-separated metric name list (for example `"Percentage CPU,Network In Total"`).
+    - `options.azure.metrics_namespace` is required.
+    - Optional Azure metrics options: `aggregation`, `filter`, `order_by`, `roll_up_by`, `metrics_endpoint`.
+    - `options.azure.metrics_endpoint` overrides the metrics endpoint per request. If omitted, Cloud Query falls back to `https://global.metrics.monitor.azure.com`.
+  - Logs use `azlogs.QueryResource`:
+    - `query` is Azure Log Analytics query syntax (KQL).
+    - `resource_id` is used as the target resource.
+  - Metrics search is resource-scoped and uses metric definitions from `resource_id`.
+  - For Azure metrics, `step` is required and must be an ISO 8601 duration (for example `PT5M` or `PT1H`).
 
 For provider-specific request payloads, query formats, and examples, see the [API Reference Documentation](docs/api-reference.md).
 

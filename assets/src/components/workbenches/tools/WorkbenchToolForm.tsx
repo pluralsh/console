@@ -199,6 +199,19 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
       },
     }
   },
+  [WorkbenchToolType.Azure]: (config) => {
+    const { subscriptionId, tenantId, clientId, resourceId } =
+      config?.azure ?? {}
+    return {
+      azure: {
+        subscriptionId: subscriptionId ?? '',
+        tenantId: tenantId ?? '',
+        clientId: clientId ?? '',
+        resourceId: resourceId ?? '',
+        clientSecret: '',
+      },
+    }
+  },
   [WorkbenchToolType.Dynatrace]: (config) => {
     const { url } = config?.dynatrace ?? {}
     return { dynatrace: { url: url ?? '', platformToken: '' } }

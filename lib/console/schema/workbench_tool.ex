@@ -4,7 +4,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12, azure: 13
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -88,6 +88,14 @@ defmodule Console.Schema.WorkbenchTool do
         field :role_arn,          :string
         field :external_id,       EncryptedString
         field :role_session_name, :string
+      end
+
+      embeds_one :azure, AzureConnection, on_replace: :update do
+        field :subscription_id, :string
+        field :tenant_id,       :string
+        field :client_id,       :string
+        field :client_secret,   EncryptedString
+        field :resource_id,     :string
       end
 
       embeds_one :http, HttpConfiguration, on_replace: :update do
@@ -192,6 +200,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:datadog), do: [:metrics, :logs]
   defp categories(:dynatrace), do: [:metrics, :logs, :traces]
   defp categories(:cloudwatch), do: [:metrics, :logs]
+  defp categories(:azure), do: [:metrics, :logs]
   defp categories(:newrelic), do: [:metrics, :logs]
   defp categories(:splunk), do: [:logs]
   defp categories(:prometheus), do: [:metrics]
@@ -215,6 +224,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:dynatrace, with: &dynatrace_configuration_changeset/2)
     |> cast_embed(:cloudwatch, with: &cloudwatch_configuration_changeset/2)
+    |> cast_embed(:azure, with: &azure_configuration_changeset/2)
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
@@ -267,6 +277,12 @@ defmodule Console.Schema.WorkbenchTool do
       end
     end)
     |> validate_required([:region])
+  end
+
+  defp azure_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(subscription_id tenant_id client_id client_secret resource_id)a)
+    |> validate_required([:subscription_id, :tenant_id, :client_id, :client_secret, :resource_id])
   end
 
   defp splunk_configuration_changeset(model, attrs) do

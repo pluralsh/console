@@ -297,6 +297,8 @@ ToolQuery support varies by operation:
 | Loki | No | Yes | No | Loki HTTP `query_range` API |
 | Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
 | Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
+| CloudWatch | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
+| Azure | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs` |
 
 ## Client and Endpoint Details
 
@@ -315,6 +317,10 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
   - Logs: CloudWatch Logs Insights `StartQuery` + `GetQueryResults`.
   - Metrics: CloudWatch `GetMetricData` (query expression).
   - Metrics search: CloudWatch `ListMetrics` with bounded pagination and local filtering.
+- Azure: Azure Monitor Go SDK via Azure AD client credentials.
+  - Metrics: `monitor/query/azmetrics` `QueryResources`.
+  - Metrics search: `resourcemanager/monitor/armmonitor` metric definitions pager.
+  - Logs: `monitor/query/azlogs` `QueryResource`.
 
 ## Service Definition
 
@@ -388,6 +394,14 @@ message CloudwatchConnection {
   optional string external_id = 6;
   optional string role_session_name = 7;
 }
+
+message AzureConnection {
+  string subscription_id = 1;
+  string tenant_id = 2;
+  string client_id = 3;
+  string client_secret = 4;
+  string resource_id = 5;
+}
 ```
 
 Implementation notes:
@@ -400,6 +414,8 @@ Implementation notes:
 - CloudWatch requires `region`. Optional auth fields support static credentials and/or assume-role.
   - If static credentials are omitted, default AWS credential chain is used (including pod identity).
   - For logs queries, either `log_group_names` must be configured or the query must include a `SOURCE` command.
+- Azure requires `subscription_id`, `tenant_id`, `client_id`, `client_secret`, and `resource_id`.
+  - Metrics and logs operations are resource-scoped and use Azure Monitor.
 
 ## Common Models
 
@@ -414,6 +430,7 @@ message ToolConnection {
     SplunkConnection splunk = 6;
     DynatraceConnection dynatrace = 7;
     CloudwatchConnection cloudwatch = 8;
+    AzureConnection azure = 9;
   }
 }
 
@@ -433,6 +450,20 @@ message MetricsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional string step = 4;
+  optional Options options = 5;
+}
+
+message Options {
+  optional AzureOptions azure = 1;
+}
+
+message AzureOptions {
+  string metrics_namespace = 1;
+  optional string aggregation = 2;
+  optional string filter = 3;
+  optional string order_by = 4;
+  optional string roll_up_by = 5;
+  optional string metrics_endpoint = 6;
 }
 ```
 
@@ -496,14 +527,9 @@ Output:
       "labels": {
         "metrics_path": "/metrics/cadvisor",
         "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
         "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
+        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
+        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack"
       },
       "timestamp": "2026-02-20T11:00:00.000Z",
       "name": "container_memory_working_set_bytes",
@@ -513,52 +539,13 @@ Output:
       "labels": {
         "metrics_path": "/metrics/cadvisor",
         "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
         "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
+        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
+        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack"
       },
       "timestamp": "2026-02-20T11:10:00.000Z",
       "name": "container_memory_working_set_bytes",
       "value": 224718848
-    },
-    {
-      "labels": {
-        "metrics_path": "/metrics/cadvisor",
-        "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
-        "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
-      },
-      "timestamp": "2026-02-20T11:20:00.000Z",
-      "name": "container_memory_working_set_bytes",
-      "value": 241414144
-    },
-    {
-      "labels": {
-        "metrics_path": "/metrics/cadvisor",
-        "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
-        "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
-      },
-      "timestamp": "2026-02-20T11:30:00.000Z",
-      "name": "container_memory_working_set_bytes",
-      "value": 296030208
     }
   ]
 }
@@ -695,6 +682,76 @@ grpcurl -d '{
   },
   "step": "300s"
 }' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+### Azure
+
+Azure metrics query uses Azure Monitor `azmetrics.QueryResources`.
+- `connection.azure.resource_id` is required and used as the target resource.
+- `query` is a comma-separated metric names list.
+- `options.azure.metrics_namespace` is required.
+- Optional `options.azure` fields: `aggregation`, `filter`, `order_by`, `roll_up_by`, `metrics_endpoint`.
+- If `options.azure.metrics_endpoint` is omitted, Cloud Query uses `https://global.metrics.monitor.azure.com`.
+
+`range` maps to Azure Monitor `start_time` + `end_time`. For Azure metrics, `step` is required and must be an ISO 8601 duration string (for example `PT5M` or `PT1H`).
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>",
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/my-cluster"
+    }
+  },
+  "query": "apiserver_cpu_usage_percentage",
+  "options": {
+    "azure": {
+      "metrics_endpoint": "https://eastus.metrics.monitor.azure.com",
+      "metrics_namespace": "Microsoft.ContainerService/managedClusters"
+    }
+  }
+  "range": {
+    "start": "2026-04-13T00:00:00Z",
+    "end": "2026-04-13T21:00:00Z"
+  },
+  "step": "PT1H"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    {
+      "labels": {
+        "aggregation": "average",
+        "metric_namespace": "Microsoft.Compute/virtualMachines",
+        "resource_uri": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.Compute/virtualMachines/vm-prod-1",
+        "VMName": "vm-prod-1"
+      },
+      "timestamp": "2026-04-10T10:00:00Z",
+      "name": "Percentage CPU",
+      "value": 42.5
+    },
+    {
+      "labels": {
+        "aggregation": "maximum",
+        "metric_namespace": "Microsoft.Compute/virtualMachines",
+        "resource_uri": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.Compute/virtualMachines/vm-prod-1",
+        "VMName": "vm-prod-1"
+      },
+      "timestamp": "2026-04-10T10:00:00Z",
+      "name": "Percentage CPU",
+      "value": 65
+    }
+  ]
+}
 ```
 
 #### Example request (assume-role)
@@ -843,6 +900,40 @@ grpcurl -d '{
 }
 ```
 
+### Azure
+
+Azure metrics search is resource-scoped and lists metric definitions from Azure Monitor for `connection.azure.resource_id`.
+`query` is a plain substring filter applied locally to metric definition names.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>",
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod"
+    }
+  },
+  "query": "node",
+  "limit": 5
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "node_cpu_usage_percentage" },
+    { "name": "node_memory_working_set" }
+  ]
+}
+```
+
 ## Logs
 
 #### Request
@@ -868,6 +959,34 @@ message LogEntry {
 message LogsQueryOutput {
   repeated LogEntry logs = 1;
 }
+```
+
+### Azure
+
+Azure logs query uses Azure Monitor `azlogs.QueryResource`.
+- `connection.azure.resource_id` is required and used as the resource target.
+- `query` must be Azure Log Analytics syntax (KQL).
+- `range` is passed as `timespan`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>",
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/azure-cluster-workspace"
+    }
+  },
+  "query": "ContainerLog | where LogEntrySource == \"stderr\" | take 50",
+  "range": {
+    "start": "2026-04-10T09:00:00Z",
+    "end": "2026-04-10T11:00:00Z"
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
 ```
 
 ### Loki

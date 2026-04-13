@@ -108,6 +108,12 @@ fragment WorkbenchTool on WorkbenchTool {
       roleArn
       roleSessionName
     }
+    azure {
+      subscriptionId
+      tenantId
+      clientId
+      resourceId
+    }
     dynatrace {
       url
     }

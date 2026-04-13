@@ -65,6 +65,14 @@ message CloudwatchConnection {
   optional string role_session_name = 7;
 }
 
+message AzureConnection {
+  string subscription_id = 1;
+  string tenant_id = 2;
+  string client_id = 3;
+  string client_secret = 4;
+  string resource_id = 5;
+}
+
 message ToolConnection {
   oneof connection {
     ElasticConnection elastic = 1;
@@ -75,6 +83,7 @@ message ToolConnection {
     SplunkConnection splunk = 6;
     DynatraceConnection dynatrace = 7;
     CloudwatchConnection cloudwatch = 8;
+    AzureConnection azure = 9;
   }
 }
 
@@ -88,6 +97,20 @@ message MetricsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional string step = 4;
+  optional Options options = 5;
+}
+
+message Options {
+  optional AzureOptions azure = 1;
+}
+
+message AzureOptions {
+  string metrics_namespace = 1;
+  optional string aggregation = 2;
+  optional string filter = 3;
+  optional string order_by = 4;
+  optional string roll_up_by = 5;
+  optional string metrics_endpoint = 6;
 }
 
 message LogsQueryFacet {

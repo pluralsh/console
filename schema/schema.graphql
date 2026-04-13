@@ -2144,6 +2144,7 @@ enum WorkbenchToolType {
   SPLUNK
   DYNATRACE
   CLOUDWATCH
+  AZURE
 }
 
 enum WorkbenchToolCategory {
@@ -2363,6 +2364,9 @@ input WorkbenchToolConfigurationAttributes {
   "cloudwatch connection (metrics, logs)"
   cloudwatch: WorkbenchToolCloudwatchConnectionAttributes
 
+  "azure monitor connection (metrics)"
+  azure: WorkbenchToolAzureConnectionAttributes
+
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
@@ -2489,6 +2493,23 @@ input WorkbenchToolCloudwatchConnectionAttributes {
 
   "optional role session name for assume role"
   roleSessionName: String
+}
+
+input WorkbenchToolAzureConnectionAttributes {
+  "azure subscription id"
+  subscriptionId: String!
+
+  "azure tenant id"
+  tenantId: String!
+
+  "azure client id"
+  clientId: String!
+
+  "azure client secret"
+  clientSecret: String!
+
+  "azure resource id for metrics\/logs queries"
+  resourceId: String!
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -2929,6 +2950,9 @@ type WorkbenchToolConfiguration {
   "cloudwatch connection (no secrets)"
   cloudwatch: WorkbenchToolCloudwatchConnection
 
+  "azure monitor connection (no secrets)"
+  azure: WorkbenchToolAzureConnection
+
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
@@ -3010,6 +3034,20 @@ type WorkbenchToolCloudwatchConnection {
 
   "assume-role session name"
   roleSessionName: String
+}
+
+type WorkbenchToolAzureConnection {
+  "azure subscription id"
+  subscriptionId: String
+
+  "azure tenant id"
+  tenantId: String
+
+  "azure client id"
+  clientId: String
+
+  "azure resource id for metrics\/logs queries"
+  resourceId: String
 }
 
 type WorkbenchToolLinearConnection {

@@ -9822,6 +9822,30 @@ type WorkbenchToolAttributes struct {
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }
 
+type WorkbenchToolAzureConnection struct {
+	// azure subscription id
+	SubscriptionID *string `json:"subscriptionId,omitempty"`
+	// azure tenant id
+	TenantID *string `json:"tenantId,omitempty"`
+	// azure client id
+	ClientID *string `json:"clientId,omitempty"`
+	// azure resource id for metrics/logs queries
+	ResourceID *string `json:"resourceId,omitempty"`
+}
+
+type WorkbenchToolAzureConnectionAttributes struct {
+	// azure subscription id
+	SubscriptionID string `json:"subscriptionId"`
+	// azure tenant id
+	TenantID string `json:"tenantId"`
+	// azure client id
+	ClientID string `json:"clientId"`
+	// azure client secret
+	ClientSecret string `json:"clientSecret"`
+	// azure resource id for metrics/logs queries
+	ResourceID string `json:"resourceId"`
+}
+
 type WorkbenchToolCloudwatchConnection struct {
 	// aws region
 	Region *string `json:"region,omitempty"`
@@ -9869,6 +9893,8 @@ type WorkbenchToolConfiguration struct {
 	Dynatrace *WorkbenchToolDynatraceConnection `json:"dynatrace,omitempty"`
 	// cloudwatch connection (no secrets)
 	Cloudwatch *WorkbenchToolCloudwatchConnection `json:"cloudwatch,omitempty"`
+	// azure monitor connection (no secrets)
+	Azure *WorkbenchToolAzureConnection `json:"azure,omitempty"`
 	// linear connection (no secrets)
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// atlassian connection (no secrets)
@@ -9894,6 +9920,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Dynatrace *WorkbenchToolDynatraceConnectionAttributes `json:"dynatrace,omitempty"`
 	// cloudwatch connection (metrics, logs)
 	Cloudwatch *WorkbenchToolCloudwatchConnectionAttributes `json:"cloudwatch,omitempty"`
+	// azure monitor connection (metrics)
+	Azure *WorkbenchToolAzureConnectionAttributes `json:"azure,omitempty"`
 	// linear connection (ticketing)
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// atlassian/jira connection (ticketing)
@@ -16189,6 +16217,7 @@ const (
 	WorkbenchToolTypeSplunk     WorkbenchToolType = "SPLUNK"
 	WorkbenchToolTypeDynatrace  WorkbenchToolType = "DYNATRACE"
 	WorkbenchToolTypeCloudwatch WorkbenchToolType = "CLOUDWATCH"
+	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16205,11 +16234,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeSplunk,
 	WorkbenchToolTypeDynatrace,
 	WorkbenchToolTypeCloudwatch,
+	WorkbenchToolTypeAzure,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure:
 		return true
 	}
 	return false

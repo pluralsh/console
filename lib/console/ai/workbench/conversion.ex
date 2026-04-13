@@ -10,6 +10,7 @@ defmodule Console.AI.Workbench.Conversion do
     ElasticConnection,
     DynatraceConnection,
     CloudwatchConnection,
+    AzureConnection,
   }
 
   @spec to_proto(WorkbenchTool.t()) :: {:ok, %ToolConnection{}} | {:error, String.t()}
@@ -100,6 +101,18 @@ defmodule Console.AI.Workbench.Conversion do
         role_arn: cloudwatch.role_arn,
         external_id: cloudwatch.external_id,
         role_session_name: cloudwatch.role_session_name,
+      }}
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :azure, configuration: %{azure: %{} = azure}}) do
+    {:ok, %ToolConnection{
+      connection: {:azure, %AzureConnection{
+        subscription_id: azure.subscription_id,
+        tenant_id: azure.tenant_id,
+        client_id: azure.client_id,
+        client_secret: azure.client_secret,
+        resource_id: azure.resource_id,
       }}
     }}
   end

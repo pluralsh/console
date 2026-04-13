@@ -89,6 +89,18 @@ defmodule Toolquery.CloudwatchConnection do
   field :role_session_name, 7, proto3_optional: true, type: :string, json_name: "roleSessionName"
 end
 
+defmodule Toolquery.AzureConnection do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :subscription_id, 1, type: :string, json_name: "subscriptionId"
+  field :tenant_id, 2, type: :string, json_name: "tenantId"
+  field :client_id, 3, type: :string, json_name: "clientId"
+  field :client_secret, 4, type: :string, json_name: "clientSecret"
+  field :resource_id, 5, type: :string, json_name: "resourceId"
+end
+
 defmodule Toolquery.ToolConnection do
   @moduledoc false
 
@@ -104,6 +116,7 @@ defmodule Toolquery.ToolConnection do
   field :splunk, 6, type: Toolquery.SplunkConnection, oneof: 0
   field :dynatrace, 7, type: Toolquery.DynatraceConnection, oneof: 0
   field :cloudwatch, 8, type: Toolquery.CloudwatchConnection, oneof: 0
+  field :azure, 9, type: Toolquery.AzureConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do
@@ -124,6 +137,28 @@ defmodule Toolquery.MetricsQueryInput do
   field :query, 2, type: :string
   field :range, 3, type: Toolquery.TimeRange
   field :step, 4, proto3_optional: true, type: :string
+  field :options, 5, proto3_optional: true, type: Toolquery.Options
+end
+
+defmodule Toolquery.Options do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureOptions
+end
+
+defmodule Toolquery.AzureOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :metrics_namespace, 1, type: :string, json_name: "metricsNamespace"
+  field :aggregation, 2, proto3_optional: true, type: :string
+  field :filter, 3, proto3_optional: true, type: :string
+  field :order_by, 4, proto3_optional: true, type: :string, json_name: "orderBy"
+  field :roll_up_by, 5, proto3_optional: true, type: :string, json_name: "rollUpBy"
+  field :metrics_endpoint, 6, proto3_optional: true, type: :string, json_name: "metricsEndpoint"
 end
 
 defmodule Toolquery.LogsQueryFacet do
