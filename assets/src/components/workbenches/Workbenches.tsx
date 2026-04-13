@@ -14,8 +14,8 @@ import { getTabCrumb } from 'components/ai/AI'
 
 const directory = [
   { label: 'Workbenches', path: '' },
-  { label: 'Add tools', path: WORKBENCHES_TOOLS_ADD_REL_PATH },
-  { label: 'Your created tools', path: WORKBENCHES_TOOLS_YOUR_REL_PATH },
+  { label: 'Integrations', path: WORKBENCHES_TOOLS_ADD_REL_PATH },
+  { label: 'Configured Tools', path: WORKBENCHES_TOOLS_YOUR_REL_PATH },
   { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
   { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
 ]

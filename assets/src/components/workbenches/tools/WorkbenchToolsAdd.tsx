@@ -32,7 +32,6 @@ export function WorkbenchToolsAdd() {
         title="Integrations"
         description="Setup and integrate your observability, infra, code, and custom tools using MCP, APIs, and webhooks natively with Plural."
       />
-      <Subtitle1H1>Third party integrations</Subtitle1H1>
       <CardGrid styles={workbenchToolCardGridStyles(280)}>
         {TOOL_TYPE_CARDS.map(({ type, description, label, categoryLabels }) => (
           <ToolCardSC key={type}>
