@@ -179,6 +179,64 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert Enum.any?(nodes, & &1["crontab"] == "*/5 * * * *" and &1["prompt"] == "run 1")
     end
 
+    test "it can fetch workbench prompts" do
+      workbench = insert(:workbench)
+      p1 = insert(:workbench_prompt, workbench: workbench, prompt: "first")
+      p2 = insert(:workbench_prompt, workbench: workbench, prompt: "second")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            prompts(first: 5) {
+              edges {
+                node {
+                  id
+                  prompt
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["prompts"])
+      assert ids_equal(nodes, [p1, p2])
+      assert Enum.any?(nodes, & &1["prompt"] == "first")
+      assert Enum.any?(nodes, & &1["prompt"] == "second")
+    end
+
+    test "it can fetch workbench skills" do
+      workbench = insert(:workbench)
+      s1 = insert(:workbench_skill, workbench: workbench, name: "skill-one", description: "first", contents: "echo one")
+      s2 = insert(:workbench_skill, workbench: workbench, name: "skill-two", description: "second", contents: "echo two")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            workbenchSkills(first: 5) {
+              edges {
+                node {
+                  id
+                  name
+                  description
+                  contents
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["workbenchSkills"])
+      assert ids_equal(nodes, [s1, s2])
+      assert Enum.any?(nodes, & &1["name"] == "skill-one" and &1["description"] == "first" and &1["contents"] == "echo one")
+      assert Enum.any?(nodes, & &1["name"] == "skill-two" and &1["description"] == "second" and &1["contents"] == "echo two")
+    end
+
     test "it can fetch workbench webhooks" do
       workbench = insert(:workbench)
       webhook1 = insert(:workbench_webhook, workbench: workbench, name: "wh-one")
@@ -429,6 +487,103 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == job.id
       assert found["result"]["workingTheory"] == "theory"
       assert found["result"]["conclusion"] == "done"
+    end
+  end
+
+  describe "workbenchJobActivity" do
+    test "it can fetch a workbench job activity by id" do
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: insert(:workbench_job),
+          type: :coding,
+          status: :running,
+          prompt: "fix the bug"
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+            status
+            type
+            prompt
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["id"] == activity.id
+      assert found["status"] == "RUNNING"
+      assert found["type"] == "CODING"
+      assert found["prompt"] == "fix the bug"
+    end
+
+    test "users with read access to the workbench can fetch workbench job activities" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :plan)
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: user})
+
+      assert found["id"] == activity.id
+    end
+
+    test "users without read access cannot fetch workbench job activities" do
+      user = insert(:user)
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: user})
+    end
+
+    test "it can fetch embedded result on a workbench job activity" do
+      job = insert(:workbench_job)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :coding,
+          result: %{
+            output: "done",
+            job_update: %{diff: "a -> b", working_theory: "theory", conclusion: "ok"}
+          }
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+            result {
+              output
+              jobUpdate {
+                diff
+                workingTheory
+                conclusion
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["id"] == activity.id
+      assert found["result"]["output"] == "done"
+      assert found["result"]["jobUpdate"]["diff"] == "a -> b"
+      assert found["result"]["jobUpdate"]["workingTheory"] == "theory"
+      assert found["result"]["jobUpdate"]["conclusion"] == "ok"
     end
   end
 

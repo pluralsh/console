@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "handle": {
+            "type": "string",
+            "description": "The cluster handle (as shown in cluster lists)"
+        }
+    },
+    "required": ["handle"]
+}

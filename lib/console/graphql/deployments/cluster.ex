@@ -1769,7 +1769,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :add_cluster_audit_log, :boolean do
       middleware Authenticated
-      arg :audit, non_null(:cluster_audit_attributes)
+      arg :audit,  :cluster_audit_attributes
+      arg :audits, list_of(:cluster_audit_attributes)
 
       resolve &Deployments.add_cluster_audit/2
     end

@@ -41,13 +41,17 @@ defmodule Console.Schema.WorkbenchJob do
 
   def pollable(query \\ __MODULE__) do
     from(j in query,
-      where: j.status == ^:pending or (
-        j.status == ^:running
-          and is_nil(j.completed_at)
-          and (is_nil(j.updated_at) or j.updated_at < ago(1, "minute"))
-      ),
+      where: j.status == ^:pending,
       order_by: [asc: :inserted_at]
     )
+  end
+
+  def with_alert(query \\ __MODULE__) do
+    from(j in query, where: not is_nil(j.alert_id))
+  end
+
+  def with_issue(query \\ __MODULE__) do
+    from(j in query, where: not is_nil(j.issue_id))
   end
 
   def for_workbench(query \\ __MODULE__, workbench_id) do
@@ -81,5 +85,11 @@ defmodule Console.Schema.WorkbenchJob do
     |> foreign_key_constraint(:alert_id)
     |> foreign_key_constraint(:issue_id)
     |> validate_required([:status, :workbench_id, :user_id])
+  end
+
+  def update_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:result)
   end
 end

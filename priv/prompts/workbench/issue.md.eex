@@ -1,5 +1,37 @@
 You've been assigned the following issue from <%= @issue.provider %>, please investigate everything necessary to complete the task.  The issue will be described below:
 
-# <%= @issue.title %>
+## <%= @issue.title %>
 
 <%= @issue.body %>
+
+<%= if @issue.payload do %>
+### Full Webhook Payload
+
+For reference, this is the webhook result from the original <%= @issue.provider %> webhook:
+
+```json
+<%= Jason.encode!(@issue.payload) %>
+```
+<% end %>
+
+<%= if @issue.webhook && @issue.webhook.prompt do %>
+## User Notes
+
+The user has provided the following notes attached to this webhook receiver, which could be useful for your investigation as well:
+
+```
+<%= @issue.webhook.prompt %>
+```
+<% end %>
+
+<%= if @issue.provider == :linear do %>
+Linear provides a convenient way to link pull requests to linear issues.  Be sure to tell any coding agent to add:
+
+```
+Fixes {LINEAR_ISSUE_NUMBER}
+```
+
+to the pull request description for any pull requests created and replacing the correct issue number from the linear issue url.
+
+*it must have that exact `Fixes {LINEAR_ISSUE_NUMBER}` format or Linear's branch name format, no variations allowed*
+<% end %>

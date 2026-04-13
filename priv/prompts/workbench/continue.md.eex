@@ -1,0 +1,5 @@
+<%= if length(@engine.activities) > 1 do %>
+Ok we've made some progress, determine if you've done everything you need to complete the task, or keep working until its finished!
+<% else %>
+Ok, let's start working!
+<% end %>

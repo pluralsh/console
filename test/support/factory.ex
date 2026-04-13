@@ -1216,6 +1216,23 @@ defmodule Console.Factory do
       crontab: "*/5 * * * *",
       prompt: "test prompt",
       next_run_at: Timex.now(),
+      workbench: build(:workbench),
+      user: build(:user)
+    }
+  end
+
+  def workbench_prompt_factory do
+    %Schema.WorkbenchPrompt{
+      prompt: "saved prompt text",
+      workbench: build(:workbench)
+    }
+  end
+
+  def workbench_skill_factory do
+    %Schema.WorkbenchSkill{
+      name: sequence(:workbench_skill_name, &"workbench-skill-#{&1}"),
+      description: "saved skill description",
+      contents: "saved skill contents",
       workbench: build(:workbench)
     }
   end
@@ -1279,7 +1296,6 @@ defmodule Console.Factory do
   def issue_webhook_factory do
     %Schema.IssueWebhook{
       provider: 0,
-      url: sequence(:issue_webhook_url, & "https://issues.example.com/hook-#{&1}"),
       name: sequence(:issue_webhook, & "issue-wh-#{&1}"),
       secret: "test-secret-#{Ecto.UUID.generate()}",
       external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),

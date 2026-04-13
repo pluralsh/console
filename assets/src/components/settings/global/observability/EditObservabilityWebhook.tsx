@@ -9,6 +9,7 @@ import {
   Modal,
   NewrelicLogoIcon,
   PagerdutyLogoIcon,
+  PluralLogoIcon,
   Select,
   SentryLogoIcon,
   WebhooksIcon,
@@ -161,7 +162,9 @@ const WrapperFormSC = styled.form(({ theme }) => ({
   gap: theme.spacing.medium,
 }))
 
-function getObservabilityWebhookTypeIcon(type: ObservabilityWebhookType) {
+export function getObservabilityWebhookTypeIcon(
+  type: Nullable<ObservabilityWebhookType>
+) {
   switch (type) {
     case ObservabilityWebhookType.Grafana:
       return <GrafanaLogoIcon fullColor />
@@ -173,6 +176,8 @@ function getObservabilityWebhookTypeIcon(type: ObservabilityWebhookType) {
       return <PagerdutyLogoIcon fullColor />
     case ObservabilityWebhookType.Sentry:
       return <SentryLogoIcon />
+    case ObservabilityWebhookType.Plural:
+      return <PluralLogoIcon />
     default:
       return <WebhooksIcon />
   }

@@ -57,7 +57,6 @@ defmodule Console.Application do
       Console.Otel.MetricsExporter,
       Console.AI.GothManager,
       Console.PromEx,
-      Console.AI.Graph.Indexer.Supervisor,
       Console.Chat.Supervisor,
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,

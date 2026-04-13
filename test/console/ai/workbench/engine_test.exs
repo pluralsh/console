@@ -23,15 +23,15 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
-        {:ok, "Plan complete", [
-          %Tool{
-            id: "1",
-            name: "workbench_plan",
-            arguments: %{"todos" => [%{name: "todo 1", description: "todo 1", done: false}]}
-          }
-        ]}
-      end)
+      # expect(Provider, :completion, fn _, _ ->
+      #   {:ok, "Plan complete", [
+      #     %Tool{
+      #       id: "1",
+      #       name: "workbench_plan",
+      #       arguments: %{"todos" => [%{name: "todo 1", description: "todo 1", done: false}]}
+      #     }
+      #   ]}
+      # end)
 
       expect(Provider, :completion, fn _, _ ->
         {:ok, "make notes", [

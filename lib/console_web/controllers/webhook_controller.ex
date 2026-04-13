@@ -71,6 +71,13 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  defp verify(conn, %ScmWebhook{type: :azure_devops, hmac: hmac}) do
+    case Plug.BasicAuth.parse_basic_auth(conn) do
+      {_, ^hmac} -> :ok
+      _ -> :reject
+    end
+  end
+
   defp verify(conn, %ObservabilityWebhook{type: :grafana, secret: secret}) do
     with {_, password} <- Plug.BasicAuth.parse_basic_auth(conn),
          true <- Plug.Crypto.secure_compare(secret, password) do

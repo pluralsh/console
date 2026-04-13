@@ -18,13 +18,19 @@ defmodule Console.AI.MCP.ClientSupervisor do
   end
 
   def server_child(%ChatThread{} = t, %McpServer{url: url, protocol: proto} = s) do
-    Console.AI.MCP.Client.child_spec([
+    proto = proto || :sse
+    mod   = client_module(proto)
+
+    mod.child_spec([
       client_name: Agent.name(:client, t, s),
       transport_name: Agent.name(:transport, t, s),
-      transport: {proto || :sse, [base_url: url, headers: auth_headers(t, s)]}
+      transport: {proto, [base_url: url, headers: auth_headers(t, s)]}
     ])
     |> Map.put(:restart, :transient)
   end
+
+  def client_module(:sse), do: Console.AI.MCP.LegacyClient
+  def client_module(_), do: Console.AI.MCP.Client
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)

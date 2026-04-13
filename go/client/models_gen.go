@@ -742,6 +742,8 @@ type Alert struct {
 	Fingerprint *string `json:"fingerprint,omitempty"`
 	// Arbitrary key/value annotations attached to this alert
 	Annotations map[string]any `json:"annotations,omitempty"`
+	// Raw webhook payload received for this alert
+	Payload map[string]any `json:"payload,omitempty"`
 	// Link back to the originating dashboard or alert view in the provider
 	URL *string `json:"url,omitempty"`
 	// Key/value tags associated with this alert, often used for filtering clusters
@@ -4164,6 +4166,8 @@ type Issue struct {
 	Title string `json:"title"`
 	// the detailed description or body content of the issue
 	Body string `json:"body"`
+	// raw webhook payload received for this issue
+	Payload map[string]any `json:"payload,omitempty"`
 	// the flow this issue is associated with
 	Flow *Flow `json:"flow,omitempty"`
 	// the workbench this issue is associated with
@@ -4198,7 +4202,6 @@ type IssueWebhook struct {
 // input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required.
 type IssueWebhookAttributes struct {
 	Provider *IssueWebhookProvider `json:"provider,omitempty"`
-	URL      *string               `json:"url,omitempty"`
 	Name     *string               `json:"name,omitempty"`
 	Secret   *string               `json:"secret,omitempty"`
 }
@@ -6221,6 +6224,8 @@ type PolicyConstraintEdge struct {
 type PolicyEngine struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// whether to use custom policies from the repository
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
 	// the maximum allowed severity without failing the stack run
 	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
 }
@@ -6228,8 +6233,14 @@ type PolicyEngine struct {
 type PolicyEngineAttributes struct {
 	// the policy engine to use with this stack
 	Type PolicyEngineType `json:"type"`
+	// whether to use custom policies from the repository
+	CustomPolicies *bool `json:"customPolicies,omitempty"`
 	// the maximum allowed severity without failing the stack run
 	MaxSeverity *VulnSeverity `json:"maxSeverity,omitempty"`
+	// optional repository to source policy configuration from
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// git reference within the policy repository or stack repository
+	Git *GitRefAttributes `json:"git,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet
@@ -8897,6 +8908,10 @@ type TerraformConfiguration struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to use OpenTofu instead of Terraform for this stack
+	Tofu *bool `json:"tofu,omitempty"`
+	// whether to use the OpenTofu registry for provider and module sources
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 type TerraformConfigurationAttributes struct {
@@ -8906,6 +8921,10 @@ type TerraformConfigurationAttributes struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to use OpenTofu instead of Terraform for this stack
+	Tofu *bool `json:"tofu,omitempty"`
+	// whether to use the OpenTofu registry for provider and module sources
+	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
 }
 
 // Urls for configuring terraform HTTP remote state
@@ -9424,14 +9443,16 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings []*PolicyBinding            `json:"writeBindings,omitempty"`
-	Runs          *WorkbenchJobConnection     `json:"runs,omitempty"`
-	Crons         *WorkbenchCronConnection    `json:"crons,omitempty"`
-	Webhooks      *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
-	Alerts        *AlertConnection            `json:"alerts,omitempty"`
-	Issues        *IssueConnection            `json:"issues,omitempty"`
-	InsertedAt    *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
+	WriteBindings   []*PolicyBinding            `json:"writeBindings,omitempty"`
+	Runs            *WorkbenchJobConnection     `json:"runs,omitempty"`
+	Crons           *WorkbenchCronConnection    `json:"crons,omitempty"`
+	Prompts         *WorkbenchPromptConnection  `json:"prompts,omitempty"`
+	WorkbenchSkills *WorkbenchSkillConnection   `json:"workbenchSkills,omitempty"`
+	Webhooks        *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
+	Alerts          *AlertConnection            `json:"alerts,omitempty"`
+	Issues          *IssueConnection            `json:"issues,omitempty"`
+	InsertedAt      *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt       *string                     `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -9599,9 +9620,11 @@ type WorkbenchJobActivity struct {
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity
-	AgentRun   *AgentRun `json:"agentRun,omitempty"`
-	InsertedAt *string   `json:"insertedAt,omitempty"`
-	UpdatedAt  *string   `json:"updatedAt,omitempty"`
+	AgentRun *AgentRun `json:"agentRun,omitempty"`
+	// all agent runs associated with this activity (sideloadable)
+	AgentRuns  []*AgentRun `json:"agentRuns,omitempty"`
+	InsertedAt *string     `json:"insertedAt,omitempty"`
+	UpdatedAt  *string     `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobActivityConnection struct {
@@ -9734,6 +9757,16 @@ type WorkbenchJobThoughtAttributes struct {
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
+type WorkbenchJobThoughtDelta struct {
+	Delta   *Delta               `json:"delta,omitempty"`
+	Payload *WorkbenchJobThought `json:"payload,omitempty"`
+}
+
+type WorkbenchJobUpdateAttributes struct {
+	// the result for this job
+	Result *WorkbenchResultAttributes `json:"result,omitempty"`
+}
+
 type WorkbenchMessageAttributes struct {
 	// the prompt for the message
 	Prompt string `json:"prompt"`
@@ -9753,6 +9786,71 @@ type WorkbenchObservabilityAttributes struct {
 	Metrics *bool `json:"metrics,omitempty"`
 }
 
+type WorkbenchPrompt struct {
+	// the id of the saved prompt
+	ID string `json:"id"`
+	// the saved prompt text
+	Prompt *string `json:"prompt,omitempty"`
+	// the workbench this prompt belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchPromptAttributes struct {
+	// the saved prompt text
+	Prompt string `json:"prompt"`
+}
+
+type WorkbenchPromptConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*WorkbenchPromptEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchPromptEdge struct {
+	Node   *WorkbenchPrompt `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
+}
+
+type WorkbenchResultAttributes struct {
+	// mermaid diagram text for the job result topology (only field clients may set via this mutation)
+	Topology string `json:"topology"`
+}
+
+type WorkbenchSkill struct {
+	// the id of the saved skill
+	ID string `json:"id"`
+	// the saved skill name
+	Name *string `json:"name,omitempty"`
+	// the saved skill description
+	Description *string `json:"description,omitempty"`
+	// the saved skill contents
+	Contents *string `json:"contents,omitempty"`
+	// the workbench this skill belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchSkillAttributes struct {
+	// the saved skill name
+	Name string `json:"name"`
+	// the saved skill description
+	Description *string `json:"description,omitempty"`
+	// the saved skill contents
+	Contents string `json:"contents"`
+}
+
+type WorkbenchSkillConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*WorkbenchSkillEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchSkillEdge struct {
+	Node   *WorkbenchSkill `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
 type WorkbenchSkills struct {
 	// git reference for skills
 	Ref *GitRef `json:"ref,omitempty"`
@@ -9765,6 +9863,11 @@ type WorkbenchSkillsAttributes struct {
 	Ref *GitRefAttributes `json:"ref,omitempty"`
 	// files to include
 	Files []*string `json:"files,omitempty"`
+}
+
+type WorkbenchTextStream struct {
+	ActivityID *string `json:"activityId,omitempty"`
+	Text       *string `json:"text,omitempty"`
 }
 
 type WorkbenchTool struct {
@@ -10119,6 +10222,8 @@ type WorkbenchWebhook struct {
 	ID string `json:"id"`
 	// name of this webhook trigger
 	Name *string `json:"name,omitempty"`
+	// optional prompt text applied when this webhook matches
+	Prompt *string `json:"prompt,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
 	// the workbench this webhook belongs to
@@ -10140,6 +10245,8 @@ type WorkbenchWebhookAttributes struct {
 	IssueWebhookID *string `json:"issueWebhookId,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
+	// optional prompt text applied when this webhook matches
+	Prompt *string `json:"prompt,omitempty"`
 }
 
 type WorkbenchWebhookConnection struct {
@@ -15959,6 +16066,7 @@ const (
 	WorkbenchJobActivityTypePlan           WorkbenchJobActivityType = "PLAN"
 	WorkbenchJobActivityTypeUser           WorkbenchJobActivityType = "USER"
 	WorkbenchJobActivityTypeMemory         WorkbenchJobActivityType = "MEMORY"
+	WorkbenchJobActivityTypeConclusion     WorkbenchJobActivityType = "CONCLUSION"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -15971,11 +16079,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypePlan,
 	WorkbenchJobActivityTypeUser,
 	WorkbenchJobActivityTypeMemory,
+	WorkbenchJobActivityTypeConclusion,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion:
 		return true
 	}
 	return false

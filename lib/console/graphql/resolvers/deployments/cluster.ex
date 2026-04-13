@@ -361,6 +361,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   end
 
   def add_cluster_audit(_, %{context: %{current_user: %User{email: "console@plural.sh"}}}), do: {:ok, false}
+  def add_cluster_audit(%{audits: audits}, %{context: %{current_user: user}}) do
+    Enum.each(audits, fn audit ->
+      Map.put(audit, :actor_id, user.id)
+      |> Console.Buffers.ClusterAudit.audit()
+    end)
+
+    {:ok, true}
+  end
+
   def add_cluster_audit(%{audit: audit}, %{context: %{current_user: user}}) do
     Map.put(audit, :actor_id, user.id)
     |> Console.Buffers.ClusterAudit.audit()

@@ -1,81 +1,137 @@
-import { Accordion, Card, Markdown } from '@pluralsh/design-system'
+import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
 import {
-  useWorkbenchJobActivitiesSuspenseQuery,
-  useWorkbenchJobActivityDeltaSubscription,
-  WorkbenchJobActivitiesDocument,
-  WorkbenchJobActivitiesQuery,
+  useCreateWorkbenchMessageMutation,
+  useWorkbenchJobActivitiesQuery,
+  WorkbenchJobActivityFragment,
+  WorkbenchJobActivityStatus,
+  WorkbenchJobActivityType,
+  WorkbenchJobStatus,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
-import { useApolloClient } from '@apollo/client'
-import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
+import {
+  ChatInputSimple,
+  ChatInputSimpleRef,
+} from 'components/ai/chatbot/input/ChatInput'
+import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
 import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchJobActivity } from './WorkbenchJobActivity'
 import {
-  appendConnectionToEnd,
-  mapExistingNodes,
-  updateCache,
-} from 'utils/graphql'
-import { isActivityRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
+  appendActivityToCache,
+  useWorkbenchJobStreams,
+} from './useWorkbenchJobStreams'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 export const ACTIVITY_GAP = 'medium' as const
 
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
-  const client = useApolloClient()
-
-  const { data } = useWorkbenchJobActivitiesSuspenseQuery({
+  const [newMessage, setNewMessage] = useState('')
+  const chatInputRef = useRef<ChatInputSimpleRef>(null)
+  const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 30_000,
   })
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
 
-  useWorkbenchJobActivityDeltaSubscription({
-    variables: { jobId },
-    onData: ({ data: { data } }) => {
-      updateCache<WorkbenchJobActivitiesQuery>(client.cache, {
-        query: WorkbenchJobActivitiesDocument,
-        variables: { id: jobId },
-        update: (prev) => ({
-          ...prev,
-          workbenchJob: appendConnectionToEnd(
-            prev.workbenchJob,
-            data?.workbenchJobActivityDelta?.payload,
-            'activities'
-          ),
-        }),
-      })
+  const [closedIds, setClosedIds] = useState<Set<string> | null>(null)
+  if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
+
+  const openIds = useMemo(
+    () => activities.filter((a) => !closedIds?.has(a.id)).map((a) => a.id),
+    [activities, closedIds]
+  )
+
+  const textStreamMap = useWorkbenchJobStreams(jobId, setClosedIds)
+
+  const [
+    createMessage,
+    { loading: createMessageLoading, error: createMessageError },
+  ] = useCreateWorkbenchMessageMutation({
+    variables: { jobId, attributes: { prompt: newMessage } },
+    update: (cache, { data }) =>
+      appendActivityToCache(cache, jobId, data?.createWorkbenchMessage),
+    onCompleted: () => {
+      setNewMessage('')
+      chatInputRef.current?.resetInput?.()
     },
+    refetchQueries: ['WorkbenchJob'],
   })
 
-  const [openIds, setOpenIds] = useState<string[]>(() =>
-    activities
-      .filter((activity) => !isActivityRunning(activity.status))
-      .map((activity) => activity.id)
-  )
+  if (!data && loading)
+    return (
+      <RectangleSkeleton
+        $width="100%"
+        $height="100%"
+      />
+    )
+
+  if (error) return <GqlError error={error} />
+
+  const jobCompleted =
+    job?.status === WorkbenchJobStatus.Successful ||
+    job?.status === WorkbenchJobStatus.Failed
+
   return (
-    <ActivitiesPanelSC>
-      <ActivitiesAccordionSC
-        type="multiple"
-        value={openIds}
-        onValueChange={setOpenIds}
-      >
-        <VirtualList
-          isReversed
-          data={activities}
-          topContent={
-            <JobPromptCardSC>
-              <Markdown text={job?.prompt ?? ''} />
-            </JobPromptCardSC>
-          }
-          renderer={({ rowData }) => (
-            <WorkbenchJobActivity
-              activity={rowData}
-              progress={[]} // TODO
-            />
-          )}
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+    >
+      {createMessageError && <GqlError error={createMessageError} />}
+      <ActivitiesPanelSC>
+        <ActivitiesAccordionSC
+          type="multiple"
+          value={openIds}
+          onValueChange={(newOpenIds: string[]) => {
+            setClosedIds(
+              new Set(
+                activities
+                  .filter((a) => !newOpenIds.includes(a.id))
+                  .map((a) => a.id)
+              )
+            )
+          }}
+        >
+          <VirtualList
+            isReversed
+            data={activities}
+            topContent={
+              <JobPromptCardSC>
+                <Markdown text={job?.prompt ?? ''} />
+              </JobPromptCardSC>
+            }
+            bottomContent={
+              textStreamMap['none'] && (
+                <SimplifiedMarkdown text={textStreamMap['none']} />
+              )
+            }
+            renderer={({ rowData }) => (
+              <WorkbenchJobActivity
+                isOpen={openIds.includes(rowData.id)}
+                activity={rowData}
+                textStream={textStreamMap[rowData.id] ?? ''}
+              />
+            )}
+          />
+        </ActivitiesAccordionSC>
+      </ActivitiesPanelSC>
+      {jobCompleted && (
+        <ChatInputSimple
+          ref={chatInputRef}
+          placeholder="Send an additional message to this job"
+          loading={createMessageLoading}
+          setValue={setNewMessage}
+          onSubmit={() => createMessage()}
+          allowSubmit={!!newMessage}
+          wrapperStyles={{ minHeight: 90 }}
         />
-      </ActivitiesAccordionSC>
-    </ActivitiesPanelSC>
+      )}
+    </Flex>
   )
 }
 
@@ -88,9 +144,9 @@ const ActivitiesAccordionSC = styled(Accordion)({
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.medium,
+  borderRadius: theme.borderRadiuses.large,
   padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
-  background: AI_GRADIENT_BG,
+  background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
@@ -106,3 +162,31 @@ const JobPromptCardSC = styled(Card)(({ theme }) => ({
   wordBreak: 'break-word',
   marginBottom: theme.spacing.small,
 }))
+
+const lastActivityId = (
+  activities: WorkbenchJobActivityFragment[]
+): string | null => {
+  const last = activities.findLast(
+    (a) => a.type !== WorkbenchJobActivityType.Memo
+  )
+  if (last) return last.id
+  return null
+}
+
+const defaultClosedIds = (
+  activities: WorkbenchJobActivityFragment[]
+): Set<string> => {
+  const lastId = lastActivityId(activities)
+
+  return new Set(
+    activities
+      .filter((a) => a.id !== lastId && isActivityTerminal(a.status))
+      .map((a) => a.id)
+  )
+}
+
+export const isActivityTerminal = (
+  status: Nullable<WorkbenchJobActivityStatus>
+) =>
+  status === WorkbenchJobActivityStatus.Successful ||
+  status === WorkbenchJobActivityStatus.Failed

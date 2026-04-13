@@ -47,7 +47,6 @@ defmodule Console.GraphQl.Deployments.Integration do
   @desc "input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
   input_object :issue_webhook_attributes do
     field :provider, :issue_webhook_provider
-    field :url,      :string
     field :name,     :string
     field :secret,   :string
   end
@@ -89,6 +88,9 @@ defmodule Console.GraphQl.Deployments.Integration do
 
     field :body, non_null(:string),
       description: "the detailed description or body content of the issue"
+
+    field :payload, :map,
+      description: "raw webhook payload received for this issue"
 
     field :flow,          :flow, resolve: dataloader(Deployments), description: "the flow this issue is associated with"
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this issue is associated with"

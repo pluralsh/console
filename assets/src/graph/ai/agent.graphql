@@ -19,6 +19,8 @@ fragment AgentRunTiny on AgentRun {
     name
     namespace
   }
+  insertedAt
+  updatedAt
 }
 
 fragment AgentRun on AgentRun {

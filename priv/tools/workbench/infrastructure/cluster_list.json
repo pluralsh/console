@@ -1,0 +1,43 @@
+{
+    "type": "object",
+    "properties": {
+        "q": {
+            "type": "string",
+            "description": "Optional prefix search on cluster name"
+        },
+        "distro": {
+            "type": "string",
+            "enum": [
+                "generic",
+                "eks",
+                "aks",
+                "gke",
+                "rke",
+                "k3s",
+                "openshift"
+            ],
+            "description": "The distribution of kubernetes this cluster is running (generic, eks, aks, gke, rke, k3s, openshift).  If null, will search across all distros."
+        },
+        "tags": {
+            "type": "array",
+            "description": "Key/value tags to filter and organize clusters.  Multiple tag pairs combined with AND semantics. If ignored, will search across all tags.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the tag"
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "The value of the tag"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "value"
+            ]
+        }
+    }
+}

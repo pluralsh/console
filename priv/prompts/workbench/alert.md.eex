@@ -1,16 +1,13 @@
 We've found the following alert from <%= @alert.type %>, please investigate it's root cause and provide any supporting evidence to explain why it is happening.
 
-# <%= @alert.title %>
+## <%= @alert.title %>
 
 <%= @alert.message %>
 
 <%= if is_list(@alert.tags) do %>
-# Tags
-<%= for %{name: k, value: v} <- @alert.tags do %>
-- <%= k %>: <%= v %>
+### Tags
+<%= Enum.map(@alert.tags, & "- #{&1.name}: #{&1.value}") |> Enum.join("\n") %>
 <% end %>
-<% end %>
-
 <%= if is_map(@alert.stacktrace) do %>
 There's also an associated stacktrace, which I'll provide in JSON format:
 
@@ -18,3 +15,29 @@ There's also an associated stacktrace, which I'll provide in JSON format:
 <%= Jason.encode!(Console.mapify(@alert.stacktrace)) %>
 ```
 <% end %>
+
+<%= if @alert.payload do %>
+## Payload
+
+For reference, this is the webhook result from the original <%= @alert.type %> webhook:
+
+```json
+<%= Jason.encode!(@alert.payload) %>
+```
+<% end %>
+
+<%= if @alert.webhook && @alert.webhook.prompt do %>
+## User Notes
+
+The user has provided the following notes attached to this alert webhook receiver, which could be useful for your investigation as well:
+
+```
+<%= @alert.webhook.prompt %>
+```
+<% end %>
+
+An ideal root cause analysis will include:
+
+1. Observability analysis to validate the issue and determine its time frame.
+2. A code analysis, especially if it's due to a bug in application code, to determine the source fo the error.
+3. If the bug is clear, then generate a pull request to fix the issue.

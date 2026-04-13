@@ -40,6 +40,15 @@ defmodule Console.Deployments.GitTest do
       assert_receive {:event, %PubSub.GitRepositoryCreated{item: ^git}}
     end
 
+    test "it will support weird ado urls" do
+      user = admin_user()
+
+      {:ok, _} = Git.create_repository(%{
+        url: "SOME-ORG@vs-ssh.visualstudio.com:v3/SOME-ORG/SRE/plural-mgmtcluster",
+        private_key: "invalid-key"
+      }, user)
+    end
+
     test "it will suss out invalid git urls" do
       user = admin_user()
 

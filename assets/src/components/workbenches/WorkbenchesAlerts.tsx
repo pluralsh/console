@@ -1,7 +1,7 @@
 import { MegaphoneIcon } from '@pluralsh/design-system'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
-import { AlertsTable } from 'components/utils/alerts/AlertsTable'
+import { AlertsTable } from '../utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useWorkbenchesAlertsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -29,6 +29,8 @@ export function WorkbenchesAlerts() {
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         setVirtualSlice={setVirtualSlice}
+        fillLevel={0}
+        rowBg="stripes"
       />
     </WorkbenchTabWrapper>
   )

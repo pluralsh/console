@@ -19,6 +19,13 @@ fragment Alert on Alert {
   resolution {
     ...AlertResolution
   }
+  workbench {
+    id
+  }
+  workbenchJob {
+    id
+    status
+  }
   updatedAt
 }
 

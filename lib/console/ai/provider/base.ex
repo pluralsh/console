@@ -14,10 +14,10 @@ defmodule Console.AI.Provider.Base do
     |> reqllm_tools()
   end
 
-  def generate_text(messages, model, %Stream{}, opts) do
+  def generate_text(messages, model, %Stream{} = s, opts) do
     with {:ok, model} <- model(model),
          {:ok, stream} <- stream_retrier(model, messages, opts),
-         {:ok, result} <- StreamResponse.process_stream(stream, on_result: &Stream.publish/1) do
+         {:ok, result} <- StreamResponse.process_stream(stream, Stream.stream_options(s)) do
       Stream.offset(1)
       {:ok, result}
     end
@@ -33,14 +33,19 @@ defmodule Console.AI.Provider.Base do
       {:system, content} -> [Context.system(content)]
       {:user, content} -> [Context.user(content)]
       {:assistant, content} -> [Context.assistant(content)]
-      {:tool, content, %{call_id: id, name: name, arguments: args}} when is_binary(id) and is_binary(content) ->
+      {:tool, content, %{call_id: id, name: name, arguments: args}} when is_binary(content) ->
+        id = tid(id)
         [Context.assistant("", tool_calls: [ToolCall.new(id, name, Jason.encode!(args))]), Context.tool_result(id, content)]
-      {:tool, content, %{call_id: id, name: name, arguments: args}} when is_binary(id) ->
+      {:tool, content, %{call_id: id, name: name, arguments: args}} ->
+        id = tid(id)
         [Context.assistant("", tool_calls: [ToolCall.new(id, name, Jason.encode!(args))]), Context.tool_result(id, Poison.encode!(content))]
       {:tool, content} -> [Context.tool_result("unknown", content)]
     end)
     |> Context.new()
   end
+
+  defp tid(id) when is_binary(id), do: id
+  defp tid(_id), do: Ecto.UUID.generate()
 
   def reqllm_tools(tools) do
     Enum.map(tools, fn
@@ -85,8 +90,12 @@ defmodule Console.AI.Provider.Base do
   defp model(%LLMDB.Model{} = model), do: {:ok, model}
   defp model(model), do: {:error, "invalid model: #{inspect(model)}"}
 
-  defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}),
-    do: %Tool{id: id, name: name, arguments: JSON.decode!(args)}
+  defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
+    case JSON.decode(args) do
+      {:ok, args} -> %Tool{id: id, name: name, arguments: args}
+      _ -> %Tool{id: id, name: name, arguments: %{}}
+    end
+  end
 
   defp stream_retrier(model, messages, opts, retries \\ 0)
   defp stream_retrier(model, messages, opts, retries) when retries < 2 do

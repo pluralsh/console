@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.SummarizeComponent do
 
   def json_schema(), do: @json_schema
   def name(), do: "summarize_component"
-  def description(), do: "Deep introspects a given service component in kubernetes and answers any questions you might have about it.  Use this as a kubernetes oracle fo this specific resource"
+  def description(), do: "Deep introspects a given service component in kubernetes and answers any questions you might have about it.  Use this as a kubernetes oracle fo this specific resource, if you don't have the ability to use this, fall back to the k8s_get and k8s_list tools available to you"
 
   def implement(%__MODULE__{prompt: prompt, component_id: component_id}) do
     with {:actor, %User{} = user} <- {:actor, Tool.actor()},

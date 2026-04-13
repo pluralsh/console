@@ -299,6 +299,126 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "update_workbench_job/3" do
+    test "job owner can update result topology and keeps other result fields" do
+      user = insert(:user)
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          result:
+            build(:workbench_job_result,
+              working_theory: "keep me",
+              conclusion: "also keep",
+              topology: nil
+            )
+        )
+
+      {:ok, updated} =
+        Workbenches.update_workbench_job(
+          %{result: %{topology: "graph TD; A-->B"}},
+          job.id,
+          user
+        )
+
+      assert updated.id == job.id
+      result = Console.Repo.preload(refetch(updated), :result).result
+      assert result.topology == "graph TD; A-->B"
+      assert result.working_theory == "keep me"
+      assert result.conclusion == "also keep"
+    end
+
+    test "job owner can update when passing the job struct" do
+      user = insert(:user)
+      job = insert(:workbench_job, user: user, result: build(:workbench_job_result, topology: "old"))
+
+      {:ok, updated} =
+        Workbenches.update_workbench_job(%{result: %{topology: "new diagram"}}, job, user)
+
+      assert Console.Repo.preload(updated, :result).result.topology == "new diagram"
+    end
+
+    test "another user cannot update someone else's job" do
+      owner = insert(:user)
+      other = insert(:user)
+      job = insert(:workbench_job, user: owner)
+
+      {:error, _} = Workbenches.update_workbench_job(
+        %{result: %{topology: "hacked"}},
+        job.id,
+        other
+      )
+
+      assert refetch(job.result).topology != "hacked"
+    end
+  end
+
+  describe "cancel_workbench_job/2" do
+    test "job owner can cancel with only read access to the workbench" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
+
+      {:ok, cancelled} = Workbenches.cancel_workbench_job(job.id, user)
+
+      assert cancelled.id == job.id
+      assert cancelled.status == :cancelled
+      assert refetch(job).status == :cancelled
+    end
+
+    test "user with workbench write access can cancel another user's job" do
+      owner = insert(:user)
+      writer = insert(:user)
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}],
+          write_bindings: [%{user_id: writer.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench, status: :running)
+
+      {:ok, cancelled} = Workbenches.cancel_workbench_job(job.id, writer)
+
+      assert cancelled.status == :cancelled
+      assert refetch(job).status == :cancelled
+    end
+
+    test "user with only read access cannot cancel someone else's job" do
+      owner = insert(:user)
+      reader = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}, %{user_id: reader.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench, status: :running)
+
+      assert {:error, "forbidden"} = Workbenches.cancel_workbench_job(job.id, reader)
+      assert refetch(job).status == :running
+    end
+  end
+
+  describe "heartbeat/1" do
+    test "sets status to running and refreshes updated_at" do
+      job = insert(:workbench_job, status: :pending)
+      past = Timex.now() |> Timex.shift(seconds: -30)
+
+      {:ok, job} =
+        job
+        |> Ecto.Changeset.change(%{updated_at: past})
+        |> Console.Repo.update()
+
+      {:ok, updated} = Workbenches.heartbeat(job)
+
+      assert updated.status == :running
+      assert Timex.after?(updated.updated_at, past)
+
+      job = refetch(job)
+      assert job.status == :running
+    end
+  end
+
   describe "create_message/3" do
     test "job owner can create a user message for their job" do
       user = insert(:user)
@@ -312,6 +432,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.type == :user
       assert activity.status == :successful
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+
+      assert refetch(job).status == :pending
     end
 
     test "job owner can create a message when passing the job struct" do
@@ -330,8 +452,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       other = insert(:user)
       job = insert(:workbench_job, user: owner)
 
-      assert {:error, "you can only create messages for your own jobs"} =
-               Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
+      {:error, _} = Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
 
       refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
     end
@@ -399,8 +520,8 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
-  describe "update_job_activity/3" do
-    test "updates an activity and refreshes job updated_at and status to running" do
+  describe "update_job_activity/2" do
+    test "updates an activity" do
       job = insert(:workbench_job, status: :pending)
       activity = insert(:workbench_job_activity, workbench_job: job, type: :coding, status: :running)
 
@@ -416,12 +537,12 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       job = refetch(job)
-      assert job.updated_at
-      assert job.status == :running
+      assert job.status == :pending
     end
 
     test "updates only the given attributes" do
       job = insert(:workbench_job)
+      job_updated_at = job.updated_at
       activity =
         insert(:workbench_job_activity, workbench_job: job, type: :observability, status: :pending)
 
@@ -433,7 +554,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.type == :observability
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
-      assert refetch(job).updated_at
+      assert DateTime.compare(refetch(job).updated_at, job_updated_at) == :eq
     end
   end
 
@@ -497,6 +618,13 @@ defmodule Console.Deployments.WorkbenchesTest do
       job = refetch(job)
       assert job.status == :successful
       assert job.completed_at
+
+      [activity] = Console.Repo.all(Console.Schema.WorkbenchJobActivity)
+
+      assert activity.type == :conclusion
+      assert activity.status == :successful
+      assert activity.prompt == "completing job..."
+      assert activity.result.output == "Final conclusion."
     end
 
     test "updates the job result conclusion" do
@@ -570,6 +698,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       }, workbench.id, user)
 
       assert cron.workbench_id == workbench.id
+      assert cron.user_id == user.id
       assert cron.crontab == "*/5 * * * *"
       assert cron.prompt == "run analysis"
       assert cron.next_run_at
@@ -644,6 +773,184 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_workbench_cron(cron.id, user)
 
       assert refetch(cron)
+    end
+  end
+
+  describe "create_workbench_prompt/3" do
+    test "users with read access to the workbench can create a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, prompt} = Workbenches.create_workbench_prompt(%{prompt: "hello"}, workbench.id, user)
+
+      assert prompt.workbench_id == workbench.id
+      assert prompt.prompt == "hello"
+      assert_receive {:event, %PubSub.WorkbenchPromptCreated{item: ^prompt}}
+    end
+
+    test "users with write access to the workbench can create a prompt" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, prompt} = Workbenches.create_workbench_prompt(%{prompt: "from writer"}, workbench.id, user)
+
+      assert prompt.workbench_id == workbench.id
+      assert prompt.prompt == "from writer"
+    end
+
+    test "users without workbench access cannot create a prompt" do
+      user = insert(:user)
+      workbench = insert(:workbench)
+
+      {:error, _} = Workbenches.create_workbench_prompt(%{prompt: "nope"}, workbench.id, user)
+    end
+  end
+
+  describe "update_workbench_prompt/3" do
+    test "users with read access can update a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      prompt = insert(:workbench_prompt, workbench: workbench, prompt: "old")
+
+      {:ok, updated} = Workbenches.update_workbench_prompt(%{prompt: "new text"}, prompt.id, user)
+
+      assert updated.id == prompt.id
+      assert updated.prompt == "new text"
+      assert_receive {:event, %PubSub.WorkbenchPromptUpdated{item: ^updated}}
+    end
+
+    test "users without access cannot update a prompt" do
+      user = insert(:user)
+      prompt = insert(:workbench_prompt, prompt: "secret")
+
+      {:error, _} = Workbenches.update_workbench_prompt(%{prompt: "hacked"}, prompt.id, user)
+
+      assert refetch(prompt).prompt == "secret"
+    end
+  end
+
+  describe "delete_workbench_prompt/2" do
+    test "users with read access can delete a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      prompt = insert(:workbench_prompt, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_prompt(prompt.id, user)
+
+      assert deleted.id == prompt.id
+      refute refetch(prompt)
+      assert_receive {:event, %PubSub.WorkbenchPromptDeleted{item: ^deleted}}
+    end
+
+    test "users without access cannot delete a prompt" do
+      user = insert(:user)
+      prompt = insert(:workbench_prompt)
+
+      {:error, _} = Workbenches.delete_workbench_prompt(prompt.id, user)
+
+      assert refetch(prompt)
+    end
+  end
+
+  describe "create_workbench_skill/3" do
+    test "users with write access to the workbench can create a skill" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, skill} =
+        Workbenches.create_workbench_skill(
+          %{name: "debug-skill", description: "debug helper", contents: "run diagnostics"},
+          workbench.id,
+          user
+        )
+
+      assert skill.workbench_id == workbench.id
+      assert skill.name == "debug-skill"
+      assert skill.description == "debug helper"
+      assert skill.contents == "run diagnostics"
+      assert_receive {:event, %PubSub.WorkbenchSkillCreated{item: ^skill}}
+    end
+
+    test "users with read access cannot create a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, _} =
+        Workbenches.create_workbench_skill(
+          %{name: "nope", contents: "forbidden"},
+          workbench.id,
+          user
+        )
+    end
+  end
+
+  describe "update_workbench_skill/3" do
+    test "users with write access can update a skill" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench, name: "old", contents: "before")
+
+      {:ok, updated} =
+        Workbenches.update_workbench_skill(
+          %{name: "new", description: "new desc", contents: "after"},
+          skill.id,
+          user
+        )
+
+      assert updated.id == skill.id
+      assert updated.name == "new"
+      assert updated.description == "new desc"
+      assert updated.contents == "after"
+      assert_receive {:event, %PubSub.WorkbenchSkillUpdated{item: ^updated}}
+    end
+
+    test "users without write access cannot update a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench, name: "secret", contents: "secret body")
+
+      {:error, _} =
+        Workbenches.update_workbench_skill(
+          %{name: "hacked", contents: "hacked"},
+          skill.id,
+          user
+        )
+
+      assert refetch(skill).name == "secret"
+    end
+  end
+
+  describe "delete_workbench_skill/2" do
+    test "users with write access can delete a skill" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_skill(skill.id, user)
+
+      assert deleted.id == skill.id
+      refute refetch(skill)
+      assert_receive {:event, %PubSub.WorkbenchSkillDeleted{item: ^deleted}}
+    end
+
+    test "users without write access cannot delete a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench)
+
+      {:error, _} = Workbenches.delete_workbench_skill(skill.id, user)
+
+      assert refetch(skill)
     end
   end
 

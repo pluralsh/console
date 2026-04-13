@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Engine do
   @moduledoc """
-  The overarching orchstrator to manage workbench execution.  The general architecture is as follows:
+  The overarching orchestrator to manage workbench execution.  The general architecture is as follows:
 
   The engine first calls a plan subagent to compile a general plan of attack. From there it falls into an execution loop which:
 
@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -38,7 +38,7 @@ defmodule Console.AI.Workbench.Engine do
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job =
-      Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
+      Repo.preload(job, [user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: :mcp_server]]])
 
     user = Console.Services.Rbac.preload(user)
     with {:ok, _} <- Heartbeat.start_link(job),
@@ -55,9 +55,11 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   def run(%__MODULE__{job: job} = engine) do
-    with {:ok, job} <- SA.Plan.run(job, engine.environment) do
-      loop(%{engine | activities: list_activities(job)})
-    end
+    # stream_callbacks(job)
+    # with {:ok, job} <- SA.Plan.run(job, engine.environment) do
+    #   loop(%{engine | activities: list_activities(job)})
+    # end
+    loop(%{engine | activities: list_activities(job)})
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
@@ -71,7 +73,7 @@ defmodule Console.AI.Workbench.Engine do
       acc: %{},
       tool_fmt: &tool_fmt/1
     )
-    |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
+    |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine: engine)} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos, topology: topology}} ->
         drop_empty(%{
@@ -123,8 +125,12 @@ defmodule Console.AI.Workbench.Engine do
     module = subagent_module(type)
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
-      module.run(activity, job, %{environment | activities: activities})
+      # stream_callbacks(activity)
+      Console.safely(fn ->
+        module.run(activity, job, %{environment | activities: activities})
+      end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
+      |> log_error("Failed to update job activity")
     end
   end
 
@@ -141,6 +147,10 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activity(_, _), do: :ignore
+
+  defp crash_fallback(err) do
+    %{status: :failed, result: %{error: "error running subagent: #{inspect(err)}, feel free to try again if it is still necessary"}}
+  end
 
   defp subagent_module(:infrastructure), do: SA.Infrastructure
   defp subagent_module(:integration), do: SA.Integration
@@ -181,9 +191,7 @@ defmodule Console.AI.Workbench.Engine do
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
   defp maybe_add_memory(subagents, _), do: subagents
 
-  defp continue_prompt(%__MODULE__{activities: [_, _ | _]}), do: "Ok, let's keep working" # the first activity is the plan
-  defp continue_prompt(_), do: "Ok, let's start working"
-
+  EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns], trim: true)
 end

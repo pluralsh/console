@@ -291,11 +291,13 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
   require EEx
 
   def process(%@for{item: %Alert{state: :firing, state_changed: true, workbench_id: wid, id: id} = alert}) when is_binary(wid) do
-    alert = Console.Repo.preload(alert, [:tags])
-    Workbenches.create_workbench_job(%{
-      prompt: prompt(alert: alert),
-      alert_id: id,
-    }, wid, bot())
+    Console.debounce({:alert_created, wid, id}, fn ->
+      alert = Console.Repo.preload(alert, [:tags])
+      Workbenches.create_workbench_job(%{
+          prompt: prompt(alert: alert),
+          alert_id: id,
+        }, wid, bot())
+    end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok
 
@@ -310,11 +312,13 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
   alias Console.Services.Users
   require EEx
 
-  def process(%@for{item: %Issue{workbench_id: wid, id: id} = issue}) when is_binary(wid) do
-    Workbenches.create_workbench_job(%{
-      prompt: prompt(issue: issue),
-      issue_id: id,
-    }, wid, bot())
+  def process(%@for{item: %Issue{workbench_id: wid, id: id, status: :open, status_changed: true} = issue}) when is_binary(wid) do
+    Console.debounce({:issue_created, wid, id}, fn ->
+      Workbenches.create_workbench_job(%{
+        prompt: prompt(issue: issue),
+        issue_id: id,
+      }, wid, bot())
+    end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok
 
@@ -324,9 +328,10 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do
-  def process(%{item: %{type: :user}}), do: Console.Pipelines.AI.Workbench.Producer.kick()
+  def process(%{item: %{type: :user} = activity}), do: Console.Pipelines.AI.Workbench.Producer.kick(activity)
+  def process(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobCreated do
-  def process(_), do: Console.Pipelines.AI.Workbench.Producer.kick()
+  def process(%{item: job}), do: Console.Pipelines.AI.Workbench.Producer.kick(job)
 end

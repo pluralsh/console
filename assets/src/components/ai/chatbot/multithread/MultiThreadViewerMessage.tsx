@@ -10,7 +10,7 @@ import { ChatFragment, ChatType } from 'generated/graphql'
 import { ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
 
 export function MultiThreadViewerMessage({
@@ -41,6 +41,7 @@ export function SimpleToolCall({
   attributes: ChatFragment['attributes']
   isPending?: boolean
 }) {
+  const { colors } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
 
@@ -51,7 +52,8 @@ export function SimpleToolCall({
           $shimmer={isPending}
           $color="text-xlight"
         >
-          {isPending ? 'CALLING' : 'CALLED'} TOOL {toolName}
+          {isPending ? 'Calling' : 'Called'} tool{' '}
+          <span css={{ color: colors['text-light'] }}>{toolName}</span>
         </CaptionP>
       </ClickableLabelSC>
       <Modal
@@ -86,24 +88,14 @@ function CodeBlockLabel({
 
   if (language === 'bash' || language === 'sh')
     return (
-      <Accordion
-        type="multiple"
-        css={{ background: 'none', border: 'none' }}
-      >
-        <AccordionItem
-          value="code"
-          trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
-          padding="none"
-          caret="none"
+      <SimpleAccordion label={label}>
+        <Code
+          showHeader={false}
+          language={language}
         >
-          <Code
-            showHeader={false}
-            language={language}
-          >
-            {content}
-          </Code>
-        </AccordionItem>
-      </Accordion>
+          {content}
+        </Code>
+      </SimpleAccordion>
     )
 
   return (
@@ -177,6 +169,13 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
           ol: ({ children }) => <ListSC as="ol">{children}</ListSC>,
           li: ({ children }) => <li>{children}</li>,
           hr: () => <HrSC />,
+          table: ({ children }) => (
+            <TableWrapperSC>
+              <TableSC>{children}</TableSC>
+            </TableWrapperSC>
+          ),
+          th: ({ children }) => <ThSC>{children}</ThSC>,
+          td: ({ children }) => <TdSC>{children}</TdSC>,
         }}
       >
         {text}
@@ -185,7 +184,34 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
   )
 }
 
-const ClickableLabelSC = styled.button(({ theme }) => ({
+export function SimpleAccordion({
+  label,
+  defaultOpen = false,
+  children,
+}: {
+  label: ReactNode
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  return (
+    <Accordion
+      type="single"
+      value={defaultOpen ? 'val' : undefined}
+      css={{ background: 'none', border: 'none' }}
+    >
+      <AccordionItem
+        value="val"
+        trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
+        padding="none"
+        caret="none"
+      >
+        {children}
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+export const ClickableLabelSC = styled.button(({ theme }) => ({
   background: 'none',
   border: 'none',
   padding: 0,
@@ -215,6 +241,7 @@ const InlineCodeSC = styled.code(({ theme }) => ({
   backgroundColor: theme.colors['fill-two'],
   padding: `0 ${theme.spacing.xxsmall}px`,
   borderRadius: theme.borderRadiuses.medium,
+  wordBreak: 'break-word',
 }))
 
 const ListSC = styled.ul(({ theme }) => ({
@@ -228,4 +255,51 @@ const HrSC = styled.hr(({ theme }) => ({
   border: 0,
   margin: `${theme.spacing.xsmall}px 0`,
   width: '100%',
+}))
+
+const TableWrapperSC = styled.div(({ theme }) => ({
+  paddingTop: theme.spacing.medium,
+  overflowX: 'auto',
+  maxWidth: '100%',
+  minHeight: 'fit-content',
+}))
+
+const TableSC = styled.table(() => ({
+  borderCollapse: 'separate',
+  borderSpacing: 0,
+  minWidth: '100%',
+  width: 'max-content',
+}))
+
+const ThSC = styled.th(({ theme }) => ({
+  padding: theme.spacing.small,
+  height: 40,
+  textAlign: 'left',
+  backgroundColor: theme.colors['fill-one'],
+  border: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  'tr:first-child &': {
+    '&:first-child': { borderTopLeftRadius: theme.borderRadiuses.large },
+    '&:last-child': { borderTopRightRadius: theme.borderRadiuses.large },
+  },
+  '&:not(:last-child)': { borderRight: 'none' },
+  '&:not(:first-child)': { borderLeft: 'none' },
+}))
+
+const TdSC = styled.td(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero-selected'],
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  color: theme.colors['text-light'],
+  height: 40,
+  border: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  borderTop: 'none',
+  textAlign: 'left',
+  'tr:last-child &': {
+    borderBottom: theme.borders['fill-two'],
+    '&:first-child': { borderBottomLeftRadius: theme.borderRadiuses.large },
+    '&:last-child': { borderBottomRightRadius: theme.borderRadiuses.large },
+  },
+  '&:not(:last-child)': { borderRight: 'none' },
+  '&:not(:first-child)': { borderLeft: 'none' },
 }))

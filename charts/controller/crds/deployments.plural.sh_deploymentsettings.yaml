@@ -1084,6 +1084,24 @@ spec:
                   your infrastructure with Plural. Usually this
                   will be your `plural up repo`
                 type: string
+              metrics:
+                description: Metrics settings for OpenTelemetry metrics export
+                properties:
+                  crontab:
+                    description: |-
+                      Crontab is the cron expression for how often to export metrics.
+                      Example: "*/5 * * * *" for every 5 minutes.
+                    type: string
+                  enabled:
+                    default: false
+                    description: Enabled defines whether to enable the metrics export
+                      or not.
+                    type: boolean
+                  endpoint:
+                    description: Endpoint is the OpenTelemetry collector endpoint
+                      to send metrics to.
+                    type: string
+                type: object
               prometheusConnection:
                 description: PrometheusConnection connection details for a prometheus
                   instance to use

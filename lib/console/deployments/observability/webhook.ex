@@ -31,6 +31,7 @@ defmodule Console.Deployments.Observability.Webhook do
         tags: tags(alert["labels"]),
       }, add_associations(Grafana, alert))
       |> workbench_association(hook)
+      |> with_payload(payload)
       |> backfill_raw()
     end)
     |> ok()
@@ -51,6 +52,7 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Pagerduty.summary(payload),
       tags: tags(data["custom_details"] || %{}),
     }, add_associations(Pagerduty, payload))
+    |> with_payload(payload)
     |> backfill_raw()
     |> workbench_association(hook)
     |> listify()
@@ -71,6 +73,7 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Sentry.summary(payload),
       annotations: tags,
     }, add_associations(Sentry, tags))
+    |> with_payload(payload)
     |> workbench_association(hook)
     |> listify()
     |> ok()
@@ -92,6 +95,7 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Datadog.summary(payload),
       tags: tags(Datadog.datadog_tag_map(payload)),
     }, add_associations(Datadog, payload))
+    |> with_payload(payload)
     |> backfill_raw()
     |> workbench_association(hook)
     |> listify()
@@ -110,6 +114,7 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Newrelic.summary(payload),
       tags: %{},
     }, add_associations(Newrelic, payload))
+    |> with_payload(payload)
     |> workbench_association(hook)
     |> backfill_raw()
     |> listify()
@@ -123,7 +128,7 @@ defmodule Console.Deployments.Observability.Webhook do
     Workbenches.list_workbench_webhooks(id)
     |> Enum.find(&WorkbenchWebhook.matches?(&1, payload))
     |> case do
-      %WorkbenchWebhook{workbench_id: wid} -> Map.put(data, :workbench_id, wid)
+      %WorkbenchWebhook{workbench_id: wid} = wh -> Map.merge(data, %{workbench_id: wid, webhook: wh})
       _ -> data
     end
   end
@@ -152,4 +157,7 @@ defmodule Console.Deployments.Observability.Webhook do
 
   defp listify(l) when is_list(l), do: l
   defp listify(v), do: [v]
+
+  defp with_payload(data, payload) when is_map(data) and is_map(payload),
+    do: Map.put(data, :payload, payload)
 end
