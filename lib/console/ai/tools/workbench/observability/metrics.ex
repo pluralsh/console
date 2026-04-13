@@ -28,9 +28,10 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   end
 
   def implement(_, %__MODULE__{} = tool) do
-    with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
-         :ok <- TimeRange.safe(input.time_range),
+    tool = Map.put_new(tool, :time_range, TimeRange.default())
+    with :ok <- TimeRange.safe(tool.time_range),
+         {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(tool),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: content, metrics: Enum.map(output.metrics, &mapify/1)}}

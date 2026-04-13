@@ -74,6 +74,10 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, preload: ^preloads)
   end
 
+  def requires_backfill(query \\ __MODULE__) do
+    from(j in query, where: is_nil(j.knowledge_updated_at))
+  end
+
   def resolved(query \\ __MODULE__) do
     from(j in __MODULE__,
       join: pr in subquery(merged_prs(query)),

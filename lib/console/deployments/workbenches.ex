@@ -548,6 +548,17 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:update)
   end
 
+  @doc """
+  Updates the knowledge_updated_at timestamp for a job.
+  """
+  @spec knowledge_updated(WorkbenchJob.t()) :: job_resp
+  def knowledge_updated(%WorkbenchJob{} = job) do
+    job
+    |> WorkbenchJob.changeset(%{knowledge_updated_at: DateTime.utc_now()})
+    |> Repo.update()
+    |> notify(:update)
+  end
+
   defp notify({:ok, %Workbench{} = workbench}, :create, user),
     do: handle_notify(PubSub.WorkbenchCreated, workbench, actor: user)
   defp notify({:ok, %Workbench{} = workbench}, :update, user),
