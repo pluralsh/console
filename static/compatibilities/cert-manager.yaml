@@ -4,6 +4,62 @@ release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
 helm_repository_url: https://charts.jetstack.io
 eolApiSlug: cert-manager
 versions:
+- version: 1.20.0
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / chart behavior changes to review
+
+      - **`global.nodeSelector` now merges** with component-specific nodeSelectors
+      (previously behaved like a simple set/override). If you relied on per-component
+      nodeSelectors fully replacing the global one, re-check the rendered manifests.
+      (#8195)
+
+      - **NetworkPolicy configuration expanded**: new flags/values to apply NetworkPolicy
+      settings across all deployed containers; example policies had redundant global
+      IP ranges removed. If you customize NetworkPolicies, diff your rendered policies.
+      (#8370)
+
+      - **`startupapicheck-job.imagePullSecrets` added**: set this when pulling images
+      from a private registry for the startup API check Job. (#8186)
+
+      - **`extraContainers` added**: allows sidecar containers in the cert-manager
+      controller/operator pod (useful for IAM Roles Anywhere / custom auth helpers).
+      Review securityContext/resources for added containers. (#8355)
+
+      - **Prometheus ServiceMonitor label fix**: when monitoring is enabled, the `metrics`
+      label is now consistently `cert-manager` (previously varied by namespace/release
+      name). Update any Prometheus selectors/alerts that matched the old label value.
+      (#8162)
+
+      - **PodDisruptionBudget**: support for `unhealthyPodEvictionPolicy` (if you
+      manage PDB behavior). (#7728)
+
+      '
+    chart_updates: [Add GWAPI documentation to Helm chart `NOTES.txt` (#8353)., Helm
+        template enhancements to support private registries for startup API check
+        job (#8186)., Sidecar injection support via `extraContainers` (#8355).]
+    features: [Alpha support for the new **ListenerSet** resource (feature-gated;
+        introduced as `XListenerSets` then promoted/renamed)., 'ACME + Gateway API:
+        **`parentRefs` no longer required** in some flows; plus Certificate-level
+        `parentRef` override annotations.', 'DNS01: **Azure Private DNS** support
+        (private zones).', 'Observability/ops: configurable PEM decoding size limits
+        and improved error/log messages in several controllers.']
+    breaking_changes: ['**Container user/group IDs changed**: default UID/GID is now
+        `65532:65532` (was `1000:0`). This can break clusters with strict PodSecurityPolicies/PSA,
+        volume permissions, or fsGroup expectations; validate file ownership on mounted
+        volumes and any admission policies. (#8408)', '**Feature gate change**: `DefaultPrivateKeyRotationPolicyAlways`
+        moved to GA and **can no longer be disabled**. If you explicitly disabled
+        it, remove that config and confirm key-rotation behavior. (#8287)', '**IssuerRef
+        API defaults were reverted**: defaults for `.spec.issuerRef.group/kind` introduced
+        earlier are reverted; ensure manifests explicitly set issuerRef fields if
+        you depended on defaults. (#8173)', '**Monitoring label change** (if you select
+        on it): ServiceMonitor/metrics label now fixed to `cert-manager`; update selectors/alerts
+        accordingly. (#8162)']
+  chart_version: 1.20.0
+  images: ['quay.io/jetstack/cert-manager-cainjector:v1.20.0', 'quay.io/jetstack/cert-manager-controller:v1.20.0',
+    'quay.io/jetstack/cert-manager-startupapicheck:v1.20.0', 'quay.io/jetstack/cert-manager-webhook:v1.20.0']
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []

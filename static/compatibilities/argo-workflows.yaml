@@ -31,7 +31,15 @@ versions:
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional feature changes are called out in the provided notes;
+        v3.6.5 notes are primarily installation/asset references., Release notes indicate
+        v3.6.3 should not be used; upgrade should target v3.6.4+ (you are moving to
+        v3.6.5).]
+    breaking_changes: [No breaking changes are listed in the provided release notes
+        excerpts; follow the upstream upgrade guide for any unlisted changes.]
   chart_version: 0.45.12
   images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
 - version: 3.6.3
@@ -59,7 +67,13 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes are called out in the provided v3.5.6 and v3.5.3
+        GitHub release notes beyond updated install manifests and CLI binaries (standard
+        patch release packaging).]
+    breaking_changes: []
   chart_version: 0.41.6
   images: ['quay.io/argoproj/argocli:v3.5.6', 'quay.io/argoproj/workflow-controller:v3.5.6']
 - version: 3.5.3
@@ -115,7 +129,19 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Controller hardening and stability improvements between 3.0.7 and
+        3.1.5, including increased readiness timeout (to 30s), controller listening
+        on :6060, and a liveness probe to improve operability.', 'Multiple bug fixes
+        in controller and UI across 3.0.x that reduce crashes (e.g., empty global
+        output param), UI rendering issues, and pod spec handling issues that could
+        cause workflow failures.']
+    breaking_changes: ['Server TLS behavior changed in v3.0.7: the server now starts
+        with TLS enabled by default if a key is available; can be disabled with --secure=false.
+        Ingress backends may need to be configured for HTTPS (e.g., nginx/alb backend-protocol
+        annotations).']
   chart_version: 0.4.1
   images: ['quay.io/argoproj/argocli:v3.1.5', 'quay.io/argoproj/workflow-controller:v3.1.5']
 - version: 3.0.7

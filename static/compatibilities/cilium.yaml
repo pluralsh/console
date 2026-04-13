@@ -4,6 +4,47 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
+- version: 1.19.2
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes to pay attention to (1.19.0 \u2192 1.19.2)\n\
+      \n- **Ztunnel management moved from the operator to Helm** (\"ztunnel/helm:\
+      \ move ztunnel daemonset management from operator to helm\").\n  - If you are\
+      \ using **ztunnel**, expect the **DaemonSet to now be rendered/owned by the\
+      \ Helm release** rather than created by the operator.\n  - Upgrade implication:\
+      \ avoid having both mechanisms active at once; ensure your Helm values for ztunnel\
+      \ are set correctly before upgrading.\n\n- **ztunnel readiness probe binding\
+      \ tightened**: `helm/ztunnel` adds a **`host` field** so the readiness probe\
+      \ health check port **15021 binds to `127.0.0.1` instead of `0.0.0.0`**.\n \
+      \ - Upgrade implication: if you relied on probing that port from outside the\
+      \ pod/network namespace, that will no longer work.\n\n- **Helm value gating\
+      \ fix**: a bug where **more Helm options were incorrectly gated by the `loadbalancer`\
+      \ option** was fixed.\n  - Upgrade implication: charts may now honor values\
+      \ that were previously ignored when `loadbalancer` was disabled.\n\n- **Helm\
+      \ templating fix**: fix value rendering bug for `operator.unmanagedPodWatcher.intervalSeconds`.\n\
+      \  - Upgrade implication: if you set this value previously, re-check the rendered\
+      \ manifests in 1.19.2.\n"
+    chart_updates: ['ztunnel: DaemonSet lifecycle/ownership is now handled by Helm
+        rather than the operator (resource management shift).', 'ztunnel: readiness
+        probe now explicitly binds health check port 15021 to localhost via probe
+        `host` field.', Chart logic now correctly applies Helm options that were unintentionally
+        gated behind the `loadbalancer` flag., Operator manifest rendering corrected
+        for `operator.unmanagedPodWatcher.intervalSeconds`.]
+    features: ['Ztunnel DaemonSet is now managed by the Helm chart instead of the
+        operator, aligning ztunnel lifecycle with Helm/GitOps workflows.', Envoy (ingress/egress/external)
+        now supports circuit breaker configuration (max connections/requests/retries)
+        for improved resilience under load., 'New BGP Hive shell commands (e.g., `bgp/peers`,
+        `bgp/routes`) improve operational visibility and troubleshooting.']
+    breaking_changes: ["If you use ztunnel, resource ownership changes (operator \u2192\
+        \ Helm) can cause conflicts during upgrade if old resources are still managed\
+        \ by the operator or have mismatched labels/annotations; plan the transition\
+        \ to avoid duplicate/competing controllers.", Ztunnel health endpoint/probe
+        behavior changes by binding port 15021 to 127.0.0.1; any external health checks
+        against that port will fail after upgrade.]
+  chart_version: 1.19.2
+  images: []
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -1088,49 +1129,8 @@ versions:
   images: ['quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6',
     'quay.io/cilium/operator-generic:v1.13.2@sha256:a1982c0a22297aaac3563e428c330e17668305a41865a842dec53d241c5490ab']
   eolAt: '2024-07-24'
-- version: 1.13.1
-  kube: ['1.26', '1.25', '1.24']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: "### Helm values / chart changes to account for (1.13.0 \u2192 1.13.1)\n\
-      - **Use the new Helm chart version** when upgrading to Cilium **v1.13.1** (explicitly\
-      \ called out in the release notes).\n- **Removed Helm value**: `installIptablesRules`\n\
-      \  - The agent flag `--install-iptables-rules` is now hidden, and the Helm value\
-      \ is removed. If your values file sets it, **delete it** or the upgrade will\
-      \ fail/complain about an unknown value.\n- **New Helm options/features**:\n\
-      \  - **Pod/container `securityContext` support** added via Helm (you may now\
-      \ set hardened contexts through values).\n  - **ServiceAccount automount configuration**\
-      \ added (ability to configure `automountServiceAccountToken`).\n  - **Hubble\
-      \ UI Service annotations** supported (can now add annotations to the hubble-ui\
-      \ Service).\n- **Helm bugfixes** (no action unless you hit these cases):\n \
-      \ - Fix for `cni.configMap` value regression (if you rely on a custom CNI configmap,\
-      \ 1.13.1 restores expected behavior).\n  - Fix missing `updateStrategy` for\
-      \ hubble-ui deployment.\n  - Fix duplicate `enable-envoy-config` flag generation\
-      \ when enabling L7LB + Ingress Controller + Gateway API together.\n  - Chart\
-      \ rendering fix: don\u2019t render Role/RoleBinding when agent is disabled."
-    chart_updates: [Envoy image bumped to **1.23.4** (impacts L7 proxy behavior/perf/compatibility
-        in edge cases)., Chart now supports configuring **pod/container security contexts**
-        and **SA token automount** settings., Chart adds support for **annotations
-        on the Hubble UI Service**., Chart removes the deprecated/now-hidden iptables
-        install toggle (`installIptablesRules`)., 'Multiple Helm chart rendering/templating
-        fixes (hubble-ui updateStrategy, duplicate flags, RBAC rendering when agent
-        disabled).']
-    features: [New CLI command to dump **cgroups metadata** (useful for debugging
-        cgroup-related datapath behavior)., 'New Hubble metrics context: **pod-name**
-        label without namespace (helps metrics cardinality/labeling depending on your
-        dashboards).', Helm chart now supports configuring **pod/container securityContext**
-        and **ServiceAccount token automount** settings., Helm chart now supports
-        **annotations on the Hubble UI Service**.]
-    breaking_changes: ['Helm chart: **`installIptablesRules` value is removed**; you
-        must remove it from your Helm values if present. (Agent flag `--install-iptables-rules`
-        is hidden as well.)']
-  chart_version: 1.13.1
-  images: ['quay.io/cilium/cilium:v1.13.1@sha256:428a09552707cc90228b7ff48c6e7a33dc0a97fe1dd93311ca672834be25beda',
-    'quay.io/cilium/operator-generic:v1.13.1@sha256:f47ba86042e11b11b1a1e3c8c34768a171c6d8316a3856253f4ad4a92615d555']
-  eolAt: '2024-07-24'
 - version: 1.13.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:
@@ -1250,40 +1250,8 @@ versions:
   chart_version: 1.12.9
   images: ['quay.io/cilium/cilium:v1.12.9@sha256:677e7a906506b8a13fecb6f0f783ed647b36036786c8c640ff98e25ec2f2ab1f',
     'quay.io/cilium/operator-generic:v1.12.9@sha256:cc8d7b222f63812c691a685b32fedab8a805d243da720653cdc2ff0c4a562673']
-- version: 1.12.8
-  kube: ['1.26', '1.25', '1.24']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: "- **Use the matching/new Helm chart version for v1.12.8.** The\
-      \ release notes explicitly call this out (chart changes are included in this\
-      \ patch release).\n- **New/changed values you may want to set (or at least review):**\n\
-      \  - Pod/container security contexts were added for Cilium components (agent/operator/hubble/etc.).\
-      \ Review any PSP/OPA/Gatekeeper policies and consider pinning securityContext\
-      \ values if you already enforce standards.\n  - ServiceAccount automount token\
-      \ support was added. If your cluster security posture disables SA token mounts\
-      \ by default, decide whether to set the new `automountServiceAccountToken`-related\
-      \ values explicitly.\n  - Hubble UI service: chart now supports setting **annotations**\
-      \ on the Hubble UI Service; add your cloud/LB/DNS annotations via the new value(s)\
-      \ if needed.\n- **Operational flag to consider after upgrade:** enable the new\
-      \ option to **preserve the CNI configuration file on agent shutdown** (helps\
-      \ with stuck Pod deletions during upgrades). This is a behavior change you should\
-      \ decide on and test in your environment."
-    chart_updates: ['Helm chart: add pod and container `securityContext` support for
-        Cilium components.', 'Helm chart: add ServiceAccount `automountServiceAccountToken`
-        configuration support.', 'Helm chart: add support for annotations on the Hubble
-        UI Service.']
-    features: ['Helm chart gained first-class knobs for pod/container security contexts
-        and ServiceAccount token automounting, making it easier to comply with cluster
-        security policies.', Hubble UI Service can now be annotated via Helm values
-        (useful for cloud load balancer / external-dns / monitoring integrations).,
-      Envoy dependency was bumped to 1.23.4 in this patch line.]
-    breaking_changes: []
-  chart_version: 1.12.8
-  images: ['quay.io/cilium/cilium:v1.12.8@sha256:b6c3c48b380334b8f08dba6e0c28d906c0d722b8c2beb0d506b3cea27f66f78d',
-    'quay.io/cilium/operator-generic:v1.12.8@sha256:7431f0c2001fb875b1a8901e103825394c38cd6c63a1435a3273ed20ae0e7578']
 - version: 1.12.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:
@@ -1366,32 +1334,45 @@ versions:
   chart_version: 1.11.16
   images: ['quay.io/cilium/cilium:v1.11.16@sha256:d2f2632c997a027ee4e540432edb4d8594e78e33315427e7ec3c06b473ec1e4e',
     'quay.io/cilium/operator-generic:v1.11.16@sha256:ea3fbe5ab65efc41228d716a64804b6fca9e2299835c3d39ae1cb248c1594c55']
-- version: 1.11.15
+- version: 1.11.6
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **Use the newer Helm chart version when upgrading to v1.11.15.**\
-      \ The release notes explicitly call this out.\n- **New Helm chart knobs/behavior:**\n\
-      \  - Adds **Pod and container `securityContext`** support in the chart. If you\
-      \ previously set security context via custom patches, re-check rendered manifests\
-      \ and move settings into values where appropriate.\n  - Adds **ServiceAccount\
-      \ automount configuration** (ability to control `automountServiceAccountToken`).\
-      \ If your cluster enforces restricted PSA/OPA policies, you may need to explicitly\
-      \ set this for Cilium components.\n"
-    chart_updates: [Helm chart updated to support pod/container `securityContext`
-        fields., Helm chart updated to support ServiceAccount token automount configuration.,
-      Helm chart improvements mentioned; ensure chart version matches the app version
-        for this upgrade.]
-    features: [Helm chart gains first-class configuration for pod/container security
-        contexts (useful for Pod Security Standards / restricted clusters)., Helm
-        chart can now configure ServiceAccount token automount behavior for Cilium
-        pods., Envoy sidecar/proxy dependency updated to 1.23.4 (includes various
-        fixes and CVE coverage depending on upstream).]
-    breaking_changes: []
-  chart_version: 1.11.15
-  images: ['quay.io/cilium/cilium:v1.11.15@sha256:434ea1ff40b8db76c2be6cabfa1bbd2b887eaabe42e757651ea14757468e3bf4',
-    'quay.io/cilium/operator-generic:v1.11.15@sha256:1feed1b895b39c7bdcbfe6232536e26edba9beb41c160c66d539de4358275a2e']
+    helm_changes: "- **Node taint behavior (important for GKE):** Ensure your cluster\
+      \ uses the updated taint effect for the agent-not-ready taint: `node.cilium.io/agent-not-ready=true:NoExecute`\
+      \ (not `NoSchedule`). v1.11.6 also adds a **config flag to prefix** the `AgentNotReadyNodeTaint`\
+      \ value so cluster-autoscaler can ignore it.\n- **ServiceMonitor annotations:**\
+      \ v1.11.2 added Helm values to set **custom ServiceMonitor annotations**.\n\
+      - **Hubble peer service / preflight:** v1.11.6 Helm change: **don\u2019t generate\
+      \ the hubble-peer Service during preflight checks**.\n- **Hubble peer service\
+      \ ports:** v1.11.6 Helm change: peer service defaults to **port 80/443**.\n\
+      - **Helm templating:** v1.11.6 \"Templatize helm template image references\"\
+      \ (expect chart templates to reference image settings more consistently; review\
+      \ any custom image overrides).\n- **Links/values.yaml:** v1.11.2 updated links\
+      \ in `values.yaml` (no functional change)."
+    chart_updates: [Cilium host proxy / Envoy updated (v1.11.6 uses Envoy v1.21.3;
+        v1.11.2 used v1.21.1)., Hubble UI updated to v0.9.0 and **drops the Envoy
+        proxy sidecar container** (UI deployment shape changes)., Default agent health
+        check port changed to avoid conflicts (verify any NetworkPolicy/monitoring/firewall
+        rules that target the old port)., Priority scheduling for the CNI agent fixed
+        by repairing a deprecated K8s annotation (scheduling behavior may change to
+        the intended high-priority class)., Bugtool output expanded (more tc data;
+        structured node/health output).]
+    features: ['Improved FQDN/DNS scalability: concurrency limiting for DNS message
+        processing plus multiple FQDN regex-LRU optimizations and additional FQDN
+        metrics/counters.', Ability to prefix the AgentNotReady taint value (helps
+        cluster-autoscaler ignore it when desired)., 'More observability: new/extended
+        metrics (xfrm stats, identity type label, FQDN connection metrics, datapath
+        timeout counter) and richer bugtool output.']
+    breaking_changes: [GKE operators must ensure the `node.cilium.io/agent-not-ready`
+        taint uses `NoExecute` (not `NoSchedule`); wrong effect can disrupt scheduling/evictions
+        during upgrades or node lifecycle events., 'Hubble UI no longer deploys an
+        Envoy proxy container; if you depended on that container (resources, probes,
+        policies, scraping), re-validate manifests and monitoring assumptions.']
+  chart_version: 1.11.6
+  images: ['quay.io/cilium/cilium:v1.11.6@sha256:f7f93c26739b6641a3fa3d76b1e1605b15989f25d06625260099e01c8243f54c',
+    'quay.io/cilium/operator-generic:v1.11.6@sha256:9f6063c7bcaede801a39315ec7c166309f6a6783e98665f6693939cf1701bc17']
 - version: 1.11.2
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -1529,6 +1510,47 @@ versions:
   chart_version: 1.11.0
   images: ['quay.io/cilium/cilium:v1.11.0@sha256:ea677508010800214b0b5497055f38ed3bff57963fa2399bcb1c69cf9476453a',
     'quay.io/cilium/operator-generic:v1.11.0@sha256:b522279577d0d5f1ad7cadaacb7321d1b172d8ae8c8bc816e503c897b420cfe3']
+- version: 1.10.12
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **New Helm value:** `serviceMonitor.annotations` (or equivalent\
+      \ ServiceMonitor annotation values) added to support custom ServiceMonitor annotations\
+      \ (introduced in v1.10.8).\n- **Hubble peer service behavior:**\n  - Helm preflight\
+      \ checks no longer generate the `hubble-peer` Service (v1.10.12).\n  - Default\
+      \ ports for the peer service changed to **80/443** (v1.10.12) \u2014 review\
+      \ if you had explicit ports or NetworkPolicies/Firewall rules tied to old ports.\n\
+      - **Hubble peer service enablement edge case:** peer service is no longer disabled\
+      \ when `hubble.listenAddress` is empty (v1.10.12) \u2014 verify your intended\
+      \ Hubble exposure settings.\n- **Docs note / config to be aware of:** `operator.unmanagedPodWatcher`\
+      \ is documented (v1.10.12); check if you rely on unmanaged pod watching behavior\
+      \ and whether it should be set explicitly."
+    chart_updates: [Envoy (cilium host proxy) is updated to v1.21.1 in v1.10.8 and
+        to v1.21.3 in v1.10.12 to address multiple CVEs., UI images updated to v0.9.0
+        and the Envoy proxy container is dropped from the UI deployment (v1.10.12).,
+      Agent health check default port changed to avoid conflicts (v1.10.12)., Additional
+        bugtool output and structured node/health output improvements (v1.10.12).,
+      'Prometheus metrics additions/changes: xfrm stats exposed (v1.10.8), identity
+        metric gains a type label (v1.10.12), and additional FQDN/DNS-related metrics
+        (v1.10.12).']
+    features: ["Security hardening via Envoy updates (1.21.1 \u2192 1.21.3 across\
+        \ this upgrade path) to remediate multiple CVEs.", 'Significant FQDN/DNS scalability
+        improvements: concurrency limiting for DNS processing, reduced lock contention,
+        and metrics to observe DNS/FQDN behavior under load.', 'Improved observability:
+        new/expanded Prometheus metrics (xfrm stats, identity type label, FQDN connection
+        metrics) and richer `cilium-bugtool` output.']
+    breaking_changes: ['Default ports for the Hubble peer service switch to 80/443
+        (v1.10.12), which can break environments that depend on the previous port
+        numbers (e.g., NetworkPolicies, security groups, firewalls, or ServiceMonitors
+        scraping specific ports).', 'The agent health check default port changes (v1.10.12);
+        if you scrape/monitor or have allowlists targeting the previous port, update
+        them accordingly.', 'Cilium UI drops an Envoy proxy container (v1.10.12);
+        if you had custom sidecar configuration, resource requests/limits, or monitoring
+        expecting that container, adjust your expectations/manifests.']
+  chart_version: 1.10.12
+  images: ['quay.io/cilium/cilium:v1.10.12@sha256:6a119c4f249d42df0d5654295ac9466da117f9b838ff48b4bc64234f7ab20b80',
+    'quay.io/cilium/operator-generic:v1.10.12@sha256:35288de36cd1b6fe65e55a9b878100c2ab92ac88ed6a3ab04326e00326cff3f7']
 - version: 1.10.8
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -1659,6 +1681,19 @@ versions:
   chart_version: 1.10.0
   images: ['quay.io/cilium/cilium:v1.10.0@sha256:587627d909ffe0418c0bd907516496844867a21812946af82096d367760e4c1e',
     'quay.io/cilium/operator-generic:v1.10.0@sha256:65143311a62a95dbe23c69ff2f624e0fdf030eb225e6375d889da66a955dd828']
+- version: 1.9.17
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Envoy/host proxy updated (from Envoy 1.21.1 in v1.9.13 to Envoy 1.21.3
+        in v1.9.17), primarily to address multiple security CVEs.', Improved DNS proxy
+        error metrics (better observability around DNS proxy failures).]
+    breaking_changes: []
+  chart_version: 1.9.17
+  images: ['quay.io/cilium/cilium:v1.9.17', 'quay.io/cilium/operator-generic:v1.9.17']
 - version: 1.9.13
   kube: ['1.25', '1.24', '1.23']
   requirements: []

@@ -3,30 +3,52 @@ git_url: https://github.com/kubernetes/ingress-nginx
 release_url: https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v{vsn}
 helm_repository_url: https://kubernetes.github.io/ingress-nginx
 versions:
-- version: 1.14.3
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
+- version: 1.15.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ['Chart: Make extra init containers templatable.', 'Chart: Add
-        `controller.metrics.serviceMonitor.scrapeTimeout`.', 'Chart: Add resize policy.',
-      'Chart: Add volumes for webhook patch job.', 'Chart: Template default backend
-        extra volumes.', 'Chart: Push to OCI registry.', 'Chart: Bump Kube Webhook
-        CertGen (multiple times across the cycle).', Docs/CI/test runner and image
-        bumps accompany the chart but are not value changes.]
-    features: ['Security/behavior updates: OWASP CRS updated to v4.22.0; stronger
-        cipher ordering and several hardening fixes landed in the 1.14 line.', NGINX
-        runtime updated from v2.2.4 (in 1.14.0) to v2.2.7 (in 1.14.3)., 'Ingress/status
-        behavior improvements: support for multiple Node IPs for status and fixes
-        in path validation / limit_req_zone sorting.', 'Auth-related template/annotation
-        improvements: auth-proxy-set-headers respected, auth method regex anchored,
-        custom error pages bypassed for auth URL requests, and quoting/escaping of
-        `location` and `server_name` directives.']
+    chart_updates: [Primarily a patch release for the controller image; changes are
+        mostly CI/build/dependency/template cleanups with no chart-level breaking
+        changes called out., Controller image digest/tag changes to v1.15.1; chroot
+        variant updated as well., Minor template comment cleanup (removes a path from
+        a comment); otherwise no behavior changes highlighted in the release notes.]
+    features: ['No user-facing features called out in v1.15.1; it is largely rebuilds,
+        dependency bumps, and CI toolchain updates.']
     breaking_changes: []
-  chart_version: 4.14.3
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.3@sha256:82917be97c0939f6ada1717bb39aa7e66c229d6cfb10dcfc8f1bd42f9efe0f81',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.7@sha256:7c74a715af2c94cb734785b4d3ea1357b4f02b88e1e123c622a9cb68b62f669c']
+  chart_version: 4.15.1
+  images: ['registry.k8s.io/ingress-nginx/controller:v1.15.1@sha256:594ceea76b01c592858f803f9ff4d2cb40542cae2060410b2c95f75907d659e1',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9@sha256:01038e7de14b78d702d2849c3aad72fd25903c4765af63cf16aa3398f5d5f2dd']
+- version: 1.15.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Helm chart: extra init containers are now templatable (v1.14.0).',
+      'Helm chart: added `controller.metrics.serviceMonitor.scrapeTimeout` value (v1.14.0).',
+      'Helm chart: added resize policy support (v1.14.0).', 'Helm chart: webhook patch
+        job now supports additional volumes (v1.14.0).', 'Helm chart: template default
+        backend extra volumes (v1.14.0).', 'Helm chart: pushed/distributed via OCI
+        registry (v1.14.0).', 'Helm chart: bumped kube-webhook-certgen image multiple
+        times (v1.14.x line feeding into v1.15.0).']
+    features: [PROXY protocol v2 support for SSL proxying (1.14.0)., Status updates
+        can include multiple node IP addresses (1.14.0)., Ingress path validation
+        now allows `.` in `Exact` and `Prefix` paths (1.14.0)., AuthTLS annotations
+        allow named redirects (1.14.0)., 'Improved SSL passthrough behavior: enables
+        SSL passthrough when requested even before HTTP-only hosts (1.15.0).', 'Admission
+        controller changes: increased/standardized request body limit to 9MB and removed
+        obsolete error log (1.15.0).', 'Templating hardening: quote/escape `proxy_pass`,
+        `location`, and `server_name` directives to avoid malformed configs (1.15.0).']
+    breaking_changes: ['Config/Annotations: removed the default value for `proxy-busy-buffers-size`
+        (1.14.0); clusters relying on the previous implicit default may see behavior
+        changes and should set it explicitly if needed.', 'Project lifecycle: notes
+        about retiring the project were added in docs (1.15.0); not a runtime break,
+        but affects long-term upgrade/support planning.']
+  chart_version: 4.15.0
+  images: ['registry.k8s.io/ingress-nginx/controller:v1.15.0@sha256:4eea9a4cc2cb6ddcb7da14d377aaf452e68bd3dbe87fe280755d225c4d5e7e4e',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.8@sha256:d7e8257f8d8bce64b6df55f81fba92011a6a77269b3350f8b997b152af348dba']
 - version: 1.14.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
