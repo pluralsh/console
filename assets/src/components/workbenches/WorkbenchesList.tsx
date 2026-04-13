@@ -4,7 +4,7 @@ import {
   Card,
   Flex,
   IconFrame,
-  PlusIcon,
+  AddIcon,
 } from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
 import {
@@ -64,7 +64,7 @@ export function WorkbenchesList() {
               small
               as={Link}
               to={WORKBENCHES_CREATE_REL_PATH}
-              startIcon={<PlusIcon />}
+              startIcon={<AddIcon />}
             >
               Create Workbench
             </Button>

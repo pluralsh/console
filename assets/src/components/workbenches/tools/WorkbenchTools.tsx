@@ -6,7 +6,7 @@ import {
   Divider,
   Flex,
   IconFrame,
-  PlusIcon,
+  AddIcon,
 } from '@pluralsh/design-system'
 import {
   CardGrid,
@@ -104,7 +104,7 @@ export function WorkbenchTools() {
                   as={Link}
                   to={`${WORKBENCHES_CREATE_REL_PATH}?${WORKBENCH_TOOL_TYPE_PARAM}=${type}`}
                   style={{ boxShadow: 'none', marginTop: spacing.xsmall }}
-                  startIcon={<PlusIcon />}
+                  startIcon={<AddIcon />}
                 >
                   Add tool
                 </Button>
