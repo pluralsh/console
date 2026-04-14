@@ -74,7 +74,8 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
 
   const jobCompleted =
     job?.status === WorkbenchJobStatus.Successful ||
-    job?.status === WorkbenchJobStatus.Failed
+    job?.status === WorkbenchJobStatus.Failed ||
+    job?.status === WorkbenchJobStatus.Cancelled
 
   return (
     <Flex
