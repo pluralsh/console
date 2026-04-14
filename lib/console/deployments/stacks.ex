@@ -850,7 +850,7 @@ defmodule Console.Deployments.Stacks do
 
   defp merge_custom_policies(base, policy) do
     with {:ok, policy_stream} <- Tar.tar_stream(policy) do
-      Enum.map(policy_stream, fn {k, v} -> {Path.join([".plural", "policies", k]), v} end)
+      Map.new(policy_stream, fn {k, v} -> {Path.join([".plural", "policies", k]), v} end)
       |> then(&Tar.splice(base, &1))
     end
   end
