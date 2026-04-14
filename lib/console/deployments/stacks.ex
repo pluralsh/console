@@ -824,6 +824,7 @@ defmodule Console.Deployments.Stacks do
   """
   @spec tarstream(StackRun.t) :: {:ok, File.t} | error
   def tarstream(%StackRun{} = run) do
+    run = Repo.preload(run, [:repository])
     with {:ok, base} <- base_tarball(run) do
       case policy_tarball(run) do
         {:ok, policy} -> merge_custom_policies(base, policy)

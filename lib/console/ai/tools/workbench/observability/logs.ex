@@ -19,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(query limit operator)a
+  @valid ~w(query limit)a
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/logs.json") |> Jason.decode!()
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_logs_#{n}"
