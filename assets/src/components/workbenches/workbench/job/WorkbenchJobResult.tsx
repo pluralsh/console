@@ -3,11 +3,14 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { WorkbenchJobFragment } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import { groupBy, isEmpty } from 'lodash'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { JobActivityMetrics } from './WorkbenchJobActivityResults'
+import {
+  JobActivityMetrics,
+  WorkbenchJobMetricsLegend,
+} from './WorkbenchJobActivityResults'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
@@ -31,7 +34,6 @@ export function WorkbenchJobResult({
 
   const conclusion = job?.result?.conclusion
   const workingTheory = job?.result?.workingTheory
-  const metrics = job?.result?.metadata?.metrics?.filter(isNonNullable) ?? []
 
   return (
     <Flex
@@ -51,15 +53,6 @@ export function WorkbenchJobResult({
         overflow="auto"
       >
         <Markdown text={conclusion || workingTheory || 'No output yet.'} />
-        {!isEmpty(metrics) && (
-          <JobActivityMetrics
-            metrics={metrics}
-            css={{ minHeight: 300 }}
-            lineProps={{
-              margin: { top: 20, right: 40, bottom: 40, left: 40 },
-            }}
-          />
-        )}
       </Flex>
       {!isEmpty(job?.result?.todos) && !conclusion && (
         <>
@@ -70,6 +63,45 @@ export function WorkbenchJobResult({
           />
         </>
       )}
+    </Flex>
+  )
+}
+
+export function WorkbenchJobMetrics({
+  job,
+  loading,
+}: {
+  job: Nullable<WorkbenchJobFragment>
+  loading: boolean
+}) {
+  const metrics = job?.result?.metadata?.metrics?.filter(isNonNullable) ?? []
+  const seriesNames = Object.keys(groupBy(metrics, (m) => m.name ?? 'metric'))
+
+  if (loading)
+    return (
+      <RectangleSkeleton
+        $height={320}
+        $width="100%"
+      />
+    )
+
+  if (isEmpty(metrics)) return null
+
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+      width="100%"
+    >
+      <JobActivityMetrics
+        metrics={metrics}
+        css={{ minHeight: 300 }}
+        lineProps={{ margin: { top: 20, right: 40, bottom: 40, left: 40 } }}
+      />
+      <WorkbenchJobMetricsLegend
+        seriesNames={seriesNames}
+        paddingLeft={20}
+      />
     </Flex>
   )
 }

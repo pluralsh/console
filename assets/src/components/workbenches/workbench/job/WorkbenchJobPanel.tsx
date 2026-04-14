@@ -1,4 +1,5 @@
 import {
+  ChartIcon,
   CloseIcon,
   GraphIcon,
   IconFrame,
@@ -26,10 +27,14 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchJobPrs } from './WorkbenchJobPrs'
-import { WorkbenchJobResult, WorkbenchJobTopology } from './WorkbenchJobResult'
+import {
+  WorkbenchJobMetrics,
+  WorkbenchJobResult,
+  WorkbenchJobTopology,
+} from './WorkbenchJobResult'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab = 'Result' | 'Topology' | 'Pull requests'
+type JobPanelTab = 'Result' | 'Topology' | 'PRs' | 'Metrics'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -89,10 +94,16 @@ export function WorkbenchJobPanelContent() {
             loading={isLoading}
           />
         )}
+        {selectedTab === 'Metrics' && (
+          <WorkbenchJobMetrics
+            job={job}
+            loading={isLoading}
+          />
+        )}
         {selectedTab === 'Topology' && (
           <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
         )}
-        {selectedTab === 'Pull requests' && (
+        {selectedTab === 'PRs' && (
           <WorkbenchJobPrs
             prs={job?.pullRequests?.filter(isNonNullable) ?? []}
           />
@@ -145,8 +156,12 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
       icon: <GraphIcon size={12} />,
     },
     !isEmpty(job?.pullRequests) && {
-      label: 'Pull requests',
+      label: 'PRs',
       icon: <PrOpenIcon size={12} />,
+    },
+    !isEmpty(job?.result?.metadata?.metrics?.filter(isNonNullable) ?? []) && {
+      label: 'Metrics',
+      icon: <ChartIcon size={12} />,
     },
   ].filter((tab): tab is { label: JobPanelTab; icon: ReactElement } =>
     Boolean(tab)

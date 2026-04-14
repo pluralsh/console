@@ -189,6 +189,35 @@ export function JobActivityMetrics({
   )
 }
 
+export function WorkbenchJobMetricsLegend({
+  seriesNames,
+  ...props
+}: {
+  seriesNames: string[]
+} & FlexProps) {
+  if (isEmpty(seriesNames)) return null
+
+  return (
+    <Flex
+      wrap="wrap"
+      gap="small"
+      align="center"
+      {...props}
+    >
+      {seriesNames.map((name, i) => (
+        <Flex
+          key={name}
+          align="center"
+          gap="xsmall"
+        >
+          <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
+          <Body2P $color="text-light">{name}</Body2P>
+        </Flex>
+      ))}
+    </Flex>
+  )
+}
+
 export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
   const { spacing } = useTheme()
   if (!prompt) return null
@@ -211,4 +240,12 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
 const MetricsChartSC = styled.div(() => ({
   height: 160,
   width: '100%',
+}))
+
+const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
+  width: 12,
+  height: 12,
+  borderRadius: 2,
+  flexShrink: 0,
+  background: $color,
 }))
