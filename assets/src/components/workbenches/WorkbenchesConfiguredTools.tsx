@@ -6,7 +6,6 @@ import {
   Divider,
   Flex,
   IconFrame,
-  TicketIcon,
   ToolsIcon,
 } from '@pluralsh/design-system'
 import {
@@ -15,7 +14,6 @@ import {
 } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { useWorkbenchToolsQuery } from 'generated/graphql'
@@ -50,7 +48,7 @@ export function WorkbenchesConfiguredTools() {
     <WorkbenchTabWrapper>
       {data && !isEmpty(tools) && (
         <WorkbenchTabHeader
-          title="Configured Tools"
+          title={`Configured Tools (${tools.length})`}
           icon={<ToolsIcon />}
         />
       )}
