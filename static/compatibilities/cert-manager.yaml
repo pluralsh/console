@@ -4,6 +4,65 @@ release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
 helm_repository_url: https://charts.jetstack.io
 eolApiSlug: cert-manager
 versions:
+- version: 1.20.0
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '### Helm values / chart behavior changes to review
+
+      - **`global.nodeSelector` behavior changed**: it now **merges** with component-specific
+      `nodeSelector` values (rather than acting as a simple override). Verify your
+      existing per-component nodeSelectors still behave as expected. *(#8195)*
+
+      - **`startupapicheck-job.imagePullSecrets` added**: you can now set `imagePullSecrets`
+      for the `startupapicheck` Job to pull from private registries. *(#8186)*
+
+      - **`extraContainers` added**: new Helm value to add arbitrary **sidecar containers**
+      to the cert-manager controller/operator pod (useful for things like AWS IAM
+      Roles Anywhere helpers). *(#8355)*
+
+      - **NetworkPolicy flags added**: new flags to control NetworkPolicy across deployed
+      containers; also example policies were cleaned up (removed redundant global
+      IP ranges). If you manage NetworkPolicies via the chart, re-check policy generation
+      and any custom overrides. *(#8370)*
+
+      - **PodDisruptionBudget enhancement**: support for `unhealthyPodEvictionPolicy`
+      in the PDB (where supported by your cluster version). *(#7728)*
+
+
+      ### Observability note
+
+      - If you rely on the Prometheus `ServiceMonitor`/monitoring labels created by
+      the chart, note the **metrics label is now consistently `cert-manager`** (previously
+      it could vary by namespace/release name). Update any label-selectors in Prometheus/alerts
+      accordingly. *(#8162)*'
+    chart_updates: [NetworkPolicy configurability improvements and example policy
+        cleanup (#8370)., '`startupapicheck-job` template now supports `imagePullSecrets`
+        (#8186).', Helm chart adds `extraContainers` support for controller/operator
+        pod sidecars (#8355)., Helm chart `global.nodeSelector` now merges with per-component
+        nodeSelectors (#8195)., Helm chart NOTES.TXT includes Gateway API documentation
+        (#8353)., PodDisruptionBudget template supports `unhealthyPodEvictionPolicy`
+        (#7728).]
+    features: [Alpha/experimental support for the new ListenerSet resource (feature
+        gate renamed from `XListenerSets` to `ListenerSets`)., 'DNS-01: support for
+        Azure Private DNS zones.', 'Gateway API + ACME: `parentRefs` are no longer
+        required in some flows; you can also override parentRefs via Certificate annotations.',
+      OtherNames feature promoted to Beta and enabled by default., 'Operational flexibility
+        improvements: configurable PEM decoding size limits, plus the ability to run
+        sidecars (via Helm) and set imagePullSecrets for startup checks.']
+    breaking_changes: ['Container security context defaults changed: default UID/GID
+        are now **65532/65532** (was 1000/0). This can break clusters with strict
+        PSP/OPA/Kyverno policies, custom volume permissions, or sidecars expecting
+        the old IDs.', 'Feature gate `DefaultPrivateKeyRotationPolicyAlways` is now
+        **GA and cannot be disabled**. If you previously relied on disabling it, you
+        must remove that configuration and validate resulting key rotation behavior.',
+      'IssuerRef API defaults introduced in 1.19 were reverted; if you were depending
+        on implicit `group/kind` defaults, ensure your manifests explicitly set the
+        intended issuerRef fields to avoid unexpected behavior.']
+  chart_version: 1.20.0
+  images: ['quay.io/jetstack/cert-manager-cainjector:v1.20.0', 'quay.io/jetstack/cert-manager-controller:v1.20.0',
+    'quay.io/jetstack/cert-manager-startupapicheck:v1.20.0', 'quay.io/jetstack/cert-manager-webhook:v1.20.0']
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []
