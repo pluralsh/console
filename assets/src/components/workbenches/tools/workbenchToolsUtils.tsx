@@ -186,7 +186,7 @@ export const WorkbenchToolCardBody = styled.div(({ theme }) => ({
   minWidth: 0,
   minHeight: 0,
   flex: 1,
-  padding: theme.spacing.large,
+  padding: theme.spacing.medium,
 }))
 
 export function workbenchToolCardGridStyles(

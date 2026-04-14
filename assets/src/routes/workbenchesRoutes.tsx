@@ -4,7 +4,7 @@ import { WorkbenchesAlerts } from 'components/workbenches/WorkbenchesAlerts'
 import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
 import { WorkbenchToolsAdd } from 'components/workbenches/tools/WorkbenchToolsAdd'
-import { WorkbenchToolsYour } from 'components/workbenches/tools/WorkbenchToolsYour'
+import { ConfiguredTools } from 'components/workbenches/tools/ConfiguredTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
 import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
@@ -55,7 +55,7 @@ export const workbenchesRoutes = [
     />
     <Route
       path={WORKBENCHES_TOOLS_YOUR_REL_PATH}
-      element={<WorkbenchToolsYour />}
+      element={<ConfiguredTools />}
     />
     <Route
       path={WORKBENCHES_ALERTS_REL_PATH}

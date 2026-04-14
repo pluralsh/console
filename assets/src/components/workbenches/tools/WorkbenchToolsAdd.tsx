@@ -44,7 +44,12 @@ export function WorkbenchToolsAdd() {
                     <IconFrame
                       circle
                       type="secondary"
-                      icon={<WorkbenchToolIcon type={type} />}
+                      icon={
+                        <WorkbenchToolIcon
+                          size={20}
+                          type={type}
+                        />
+                      }
                     />
                     {label}
                   </Flex>
