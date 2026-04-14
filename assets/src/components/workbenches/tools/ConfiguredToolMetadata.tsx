@@ -1,31 +1,20 @@
 import { TRUNCATE } from 'components/utils/truncate'
-import { WorkbenchToolType, useWorkbenchToolQuery } from 'generated/graphql'
+import {
+  WorkbenchToolConfiguration,
+  WorkbenchToolHttpHeader,
+  WorkbenchToolType,
+  useWorkbenchToolQuery,
+} from 'generated/graphql'
 import styled from 'styled-components'
-
-type ToolConfig = {
-  http?: { url?: string | null } | null
-  datadog?: { site?: string | null } | null
-  elastic?: { index: string; url: string; username: string } | null
-  loki?: { url?: string | null; username?: string | null } | null
-  prometheus?: { url?: string | null; username?: string | null } | null
-  tempo?: { url?: string | null; username?: string | null } | null
-  atlassian?: { email?: string | null; url: string } | null
-  linear?: { url: string } | null
-  splunk?: { url?: string | null; username?: string | null } | null
-  cloudwatch?: {
-    logGroupNames?: (string | null)[] | null
-    region?: string | null
-    roleArn?: string | null
-  } | null
-  dynatrace?: { url?: string | null } | null
-}
 
 type MetadataRow = {
   label: string
   value?: string | null
 }
 
-type MetadataExtractor = (configuration: ToolConfig | null) => MetadataRow[]
+type MetadataExtractor = (
+  configuration: WorkbenchToolConfiguration | null
+) => MetadataRow[]
 
 const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Http]: extractHttpMetadata,
@@ -57,7 +46,7 @@ export function ConfiguredToolMetadata({
   const metadata = getToolMetadataRows(
     toolType,
     data?.workbenchTool?.configuration ?? null
-  )
+  ).filter(({ value }) => hasDisplayValue(value))
 
   if (metadata.length === 0) return null
 
@@ -66,7 +55,7 @@ export function ConfiguredToolMetadata({
       {metadata.map(({ label, value }) => (
         <ToolMetaRowSC key={label}>
           <ToolMetaLabelSC>{label}</ToolMetaLabelSC>
-          <ToolMetaValueSC>{value ?? '-'}</ToolMetaValueSC>
+          <ToolMetaValueSC>{value}</ToolMetaValueSC>
         </ToolMetaRowSC>
       ))}
     </ToolMetaSC>
@@ -75,32 +64,33 @@ export function ConfiguredToolMetadata({
 
 function getToolMetadataRows(
   toolType: WorkbenchToolType,
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return metadataExtractors[toolType]?.(configuration) ?? []
 }
 
-function extractHttpMetadata(configuration: ToolConfig | null): MetadataRow[] {
+function extractHttpMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
   return [
+    { label: 'Method', value: configuration?.http?.method },
+    {
+      label: 'Headers',
+      value: String(getConfiguredHeadersCount(configuration?.http?.headers)),
+    },
     { label: 'URL', value: configuration?.http?.url },
-    { label: 'Host', value: getUrlHost(configuration?.http?.url) },
-    { label: 'Protocol', value: getUrlProtocol(configuration?.http?.url) },
   ]
 }
 
 function extractDatadogMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   const site = configuration?.datadog?.site
-  return [
-    { label: 'Site', value: site },
-    { label: 'API', value: site ? `https://api.${site}` : null },
-    { label: 'Logs', value: site ? `https://http-intake.logs.${site}` : null },
-  ]
+  return [{ label: 'Site', value: site }]
 }
 
 function extractElasticMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [
     { label: 'URL', value: configuration?.elastic?.url },
@@ -109,50 +99,49 @@ function extractElasticMetadata(
   ]
 }
 
-function extractLokiMetadata(configuration: ToolConfig | null): MetadataRow[] {
+function extractLokiMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
   return [
     { label: 'URL', value: configuration?.loki?.url },
     { label: 'User', value: configuration?.loki?.username },
-    { label: 'Host', value: getUrlHost(configuration?.loki?.url) },
+    { label: 'Tenant', value: configuration?.loki?.tenantId },
   ]
 }
 
 function extractPrometheusMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [
     { label: 'URL', value: configuration?.prometheus?.url },
     { label: 'User', value: configuration?.prometheus?.username },
-    { label: 'Host', value: getUrlHost(configuration?.prometheus?.url) },
+    { label: 'Tenant', value: configuration?.prometheus?.tenantId },
   ]
 }
 
-function extractTempoMetadata(configuration: ToolConfig | null): MetadataRow[] {
+function extractTempoMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
   return [
     { label: 'URL', value: configuration?.tempo?.url },
     { label: 'User', value: configuration?.tempo?.username },
-    { label: 'Host', value: getUrlHost(configuration?.tempo?.url) },
+    { label: 'Tenant', value: configuration?.tempo?.tenantId },
   ]
 }
 
 function extractAtlassianMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [
     { label: 'URL', value: configuration?.atlassian?.url },
     { label: 'Email', value: configuration?.atlassian?.email },
-    { label: 'Host', value: getUrlHost(configuration?.atlassian?.url) },
   ]
 }
 
 function extractLinearMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
-  return [
-    { label: 'URL', value: configuration?.linear?.url },
-    { label: 'Host', value: getUrlHost(configuration?.linear?.url) },
-    { label: 'Protocol', value: getUrlProtocol(configuration?.linear?.url) },
-  ]
+  return [{ label: 'URL', value: configuration?.linear?.url }]
 }
 
 function extractNoConfigurationMetadata(): MetadataRow[] {
@@ -160,27 +149,22 @@ function extractNoConfigurationMetadata(): MetadataRow[] {
 }
 
 function extractSplunkMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [
     { label: 'URL', value: configuration?.splunk?.url },
     { label: 'User', value: configuration?.splunk?.username },
-    { label: 'Host', value: getUrlHost(configuration?.splunk?.url) },
   ]
 }
 
 function extractDynatraceMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
-  return [
-    { label: 'URL', value: configuration?.dynatrace?.url },
-    { label: 'Host', value: getUrlHost(configuration?.dynatrace?.url) },
-    { label: 'Protocol', value: getUrlProtocol(configuration?.dynatrace?.url) },
-  ]
+  return [{ label: 'URL', value: configuration?.dynatrace?.url }]
 }
 
 function extractCloudwatchMetadata(
-  configuration: ToolConfig | null
+  configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [
     { label: 'Region', value: configuration?.cloudwatch?.region },
@@ -192,22 +176,16 @@ function extractCloudwatchMetadata(
   ]
 }
 
-function getUrlHost(url?: string | null): string | null {
-  if (!url) return null
-  try {
-    return new URL(url).host
-  } catch {
-    return null
-  }
+function getConfiguredHeadersCount(
+  headers?: (WorkbenchToolHttpHeader | null)[] | null
+): number {
+  if (!headers) return 0
+
+  return headers.filter((header) => header?.name || header?.value).length
 }
 
-function getUrlProtocol(url?: string | null): string | null {
-  if (!url) return null
-  try {
-    return new URL(url).protocol.replace(':', '')
-  } catch {
-    return null
-  }
+function hasDisplayValue(value?: string | null): value is string {
+  return !!value?.trim()
 }
 
 const ToolMetaSC = styled.div(({ theme }) => ({
