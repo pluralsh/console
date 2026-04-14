@@ -7,9 +7,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
-    field :tool,   :map, virtual: true
-    field :query,  :string
-    field :limit,  :integer
+    field :tool,  :map, virtual: true
+    field :query, :string
+    field :limit, :integer
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
       field :name,  :string
@@ -19,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(query limit)a
+  @valid ~w(query limit operator)a
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/logs.json") |> Jason.decode!()
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_logs_#{n}"

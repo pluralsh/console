@@ -99,6 +99,12 @@ export function Logs({
   return (
     <MainContentWrapperSC>
       <Flex gap="small">
+        <LogsQueryOperatorSelect
+          operator={filters.queryOperator}
+          setOperator={(queryOperator) =>
+            setFilters({ ...filters, queryOperator })
+          }
+        />
         <Input2
           placeholder="Filter logs"
           startIcon={<SearchIcon size={14} />}
@@ -144,12 +150,6 @@ export function Logs({
                     initialDate={filters.date}
                     setDate={(date) => setFilters({ ...filters, date })}
                     setLive={setLive}
-                  />
-                  <LogsQueryOperatorSelect
-                    operator={filters.queryOperator}
-                    setOperator={(queryOperator) =>
-                      setFilters({ ...filters, queryOperator })
-                    }
                   />
                 </Flex>
                 <LogsScrollIndicator

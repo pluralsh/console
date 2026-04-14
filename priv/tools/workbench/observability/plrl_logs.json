@@ -34,6 +34,11 @@
             "type": "integer",
             "description": "The maximum number of logs to return"
         },
+        "operator": {
+            "type": "string",
+            "enum": ["or", "and"],
+            "description": "How the search query string is evaluated across tokens: \"or\" requires at least one token to match; \"and\" requires every token to match."
+        },
         "time_range": {
             "type": "object",
             "description": "Optional time window; if omitted, defaults to roughly the last 30 minutes.",

@@ -177,28 +177,32 @@ export function LogsQueryOperatorSelect({
   operator,
   setOperator,
   disabled = false,
+  ...props
 }: {
   operator: LogQueryOperator
   setOperator: (operator: LogQueryOperator) => void
   disabled?: boolean
-}) {
+} & FlexProps) {
   return (
-    <FillLevelDiv fillLevel={2}>
-      <Select
-        size="small"
-        selectedKey={operator}
-        onSelectionChange={(key) => setOperator(key as LogQueryOperator)}
-        isDisabled={disabled}
-      >
-        {Object.values(LogQueryOperator).map((op) => (
-          <ListBoxItem
-            key={op}
-            label={op}
-            selected={op === operator}
-          />
-        ))}
-      </Select>
-    </FillLevelDiv>
+    <Flex {...props}>
+      <FillLevelDiv fillLevel={1}>
+        <Select
+          // size="small"
+          titleContent="Operator"
+          selectedKey={operator}
+          onSelectionChange={(key) => setOperator(key as LogQueryOperator)}
+          isDisabled={disabled}
+        >
+          {Object.values(LogQueryOperator).map((op) => (
+            <ListBoxItem
+              key={op}
+              label={op}
+              selected={op === operator}
+            />
+          ))}
+        </Select>
+      </FillLevelDiv>
+    </Flex>
   )
 }
 
