@@ -1,9 +1,10 @@
-import { ResponsiveLine } from '@nivo/line'
+import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
   FileDiffIcon,
   Flex,
+  FlexProps,
   IconFrame,
   Modal,
 } from '@pluralsh/design-system'
@@ -21,6 +22,7 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
+  WorkbenchJobActivityResultFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, truncate } from 'lodash'
 import { ComponentPropsWithRef, useMemo, useState } from 'react'
@@ -30,12 +32,10 @@ import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
 
-type ActivityResult = NonNullable<WorkbenchJobActivityFragment['result']>
-
 export function MemoActivityResult({
   result,
 }: {
-  result: Nullable<ActivityResult>
+  result: Nullable<WorkbenchJobActivityResultFragment>
 }) {
   const { jobUpdate, output } = result ?? {}
   const [showDiff, setShowDiff] = useState(false)
@@ -107,13 +107,17 @@ const PromptCardSC = styled(Card)(({ theme }) => ({
 
 export function JobActivityLogs({
   logs,
+  ...props
 }: {
   logs: WorkbenchJobActivityLogFragment[]
-}) {
+} & FlexProps) {
   if (isEmpty(logs)) return null
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      {...props}
+    >
       {logs.map((log, i) => (
         <LogLine
           key={i}
@@ -124,13 +128,18 @@ export function JobActivityLogs({
   )
 }
 
+const CANVAS_THRESHOLD = 1000
+
 export function JobActivityMetrics({
   metrics,
   lineProps,
   ...props
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
-  lineProps?: Partial<ComponentPropsWithRef<typeof ResponsiveLine>>
+  lineProps?: Partial<
+    ComponentPropsWithRef<typeof ResponsiveLine> &
+      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+  >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
 
@@ -148,23 +157,34 @@ export function JobActivityMetrics({
 
   if (isEmpty(metrics)) return null
 
+  const sharedProps = {
+    theme: graphTheme,
+    data: graphData,
+    colors: COLORS,
+    margin: { top: 10, right: 20, bottom: 30, left: 30 } as const,
+    xScale: { type: 'time' as const, format: 'native' as const },
+    yScale: { type: 'linear' as const },
+    xFormat: dateFormat,
+    lineWidth: 1,
+    axisLeft: { tickValues: 5 },
+    axisBottom: { format: '%H:%M:%S', tickValues: 5 },
+    tooltip: SliceTooltip,
+  }
+
   return (
     <MetricsChartSC {...props}>
-      <ResponsiveLine
-        theme={graphTheme}
-        data={graphData}
-        tooltip={SliceTooltip}
-        colors={COLORS}
-        margin={{ top: 10, right: 20, bottom: 30, left: 30 }}
-        xScale={{ type: 'time', format: 'native' }}
-        yScale={{ type: 'linear' }}
-        xFormat={dateFormat}
-        curve="monotoneX"
-        lineWidth={1}
-        useMesh
-        axisBottom={{ format: '%H:%M:%S', tickRotation: 10 }}
-        {...lineProps}
-      />
+      {metrics.length > CANVAS_THRESHOLD ? (
+        <ResponsiveLineCanvas
+          {...sharedProps}
+          {...lineProps}
+        />
+      ) : (
+        <ResponsiveLine
+          {...sharedProps}
+          useMesh
+          {...lineProps}
+        />
+      )}
     </MetricsChartSC>
   )
 }

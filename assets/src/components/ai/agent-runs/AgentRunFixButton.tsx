@@ -234,7 +234,10 @@ export function AgentRunInfoCard({
       <Flex gap="small">
         <StackedText
           first={
-            <Body2BoldP $shimmer={isRunning}>
+            <Body2BoldP
+              $shimmer={isRunning}
+              css={{ whiteSpace: 'nowrap' }}
+            >
               {status === AgentRunStatus.Successful
                 ? 'Run complete'
                 : 'Started agent run'}
@@ -250,6 +253,7 @@ export function AgentRunInfoCard({
                   color={colors['icon-default']}
                 />
               }
+              css={{ flexShrink: 0 }}
             />
           }
         />
@@ -263,7 +267,7 @@ export function AgentRunInfoCard({
             small
             as={Link}
             to={getAgentRunAbsPath({ agentRunId: id })}
-            endIcon={<ArrowTopRightIcon />}
+            endIcon={<ArrowTopRightIcon size={12} />}
           >
             View details
           </Button>
@@ -319,4 +323,5 @@ const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
   justifyContent: 'space-between',
   padding: theme.spacing.medium,
   width: '100%',
+  overflow: 'auto',
 }))

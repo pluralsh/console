@@ -122,6 +122,14 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
   activity {
     id
   }
+  attributes {
+    logs {
+      ...WorkbenchJobActivityLog
+    }
+    metrics {
+      ...WorkbenchJobActivityMetric
+    }
+  }
 }
 
 fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
@@ -167,47 +175,47 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   }
 }
 
-fragment WorkbenchJobActivity on WorkbenchJobActivity {
+fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
+  output
+  error
+  jobUpdate {
+    diff
+    workingTheory
+    conclusion
+  }
+}
+
+fragment WorkbenchJobActivityResultWithData on WorkbenchJobActivityResult {
+  ...WorkbenchJobActivityResult
+  metrics {
+    ...WorkbenchJobActivityMetric
+  }
+  logs {
+    ...WorkbenchJobActivityLog
+  }
+}
+
+fragment WorkbenchJobActivityTiny on WorkbenchJobActivity {
   id
   type
   status
   prompt
   insertedAt
+  result {
+    ...WorkbenchJobActivityResult
+  }
+  agentRun {
+    ...AgentRunTiny
+  }
+}
+
+fragment WorkbenchJobActivity on WorkbenchJobActivity {
+  ...WorkbenchJobActivityTiny
   thoughts {
     ...WorkbenchJobThought
   }
   result {
-    output
-    error
-    jobUpdate {
-      diff
-      workingTheory
-      conclusion
-    }
-    logs {
-      ...WorkbenchJobActivityLog
-    }
-    metrics {
-      ...WorkbenchJobActivityMetric
-    }
-  }
-  thoughts {
-    id
-    content
-    toolName
-    toolArgs
-    insertedAt
-    attributes {
-      logs {
-        ...WorkbenchJobActivityLog
-      }
-      metrics {
-        ...WorkbenchJobActivityMetric
-      }
-    }
-  }
-  agentRun {
-    ...AgentRun
+    ...WorkbenchJobActivityResultWithData
   }
 }
 
@@ -536,43 +544,16 @@ query WorkbenchJobActivities($id: ID!) {
     activities(first: 100) {
       edges {
         node {
-          ...WorkbenchJobActivity
+          ...WorkbenchJobActivityTiny
         }
       }
     }
   }
 }
 
-subscription WorkbenchJobDelta($id: ID!) {
-  workbenchJobDelta(id: $id) {
-    delta
-    payload {
-      ...WorkbenchJob
-    }
-  }
-}
-
-subscription WorkbenchJobActivityDelta($jobId: ID!) {
-  workbenchJobActivityDelta(jobId: $jobId) {
-    delta
-    payload {
-      ...WorkbenchJobActivity
-    }
-  }
-}
-
-subscription WorkbenchJobThoughtDelta($jobId: ID!) {
-  workbenchJobThoughtDelta(jobId: $jobId) {
-    delta
-    payload {
-      ...WorkbenchJobThought
-    }
-  }
-}
-
-subscription WorkbenchTextStream($jobId: ID!) {
-  workbenchTextStream(jobId: $jobId) {
-    ...WorkbenchTextStream
+query WorkbenchJobActivity($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    ...WorkbenchJobActivity
   }
 }
 
@@ -730,5 +711,38 @@ mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
     name
     provider
     url
+  }
+}
+
+subscription WorkbenchJobDelta($id: ID!) {
+  workbenchJobDelta(id: $id) {
+    delta
+    payload {
+      ...WorkbenchJob
+    }
+  }
+}
+
+subscription WorkbenchJobActivityDelta($jobId: ID!) {
+  workbenchJobActivityDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobActivity
+    }
+  }
+}
+
+subscription WorkbenchJobThoughtDelta($jobId: ID!) {
+  workbenchJobThoughtDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobThought
+    }
+  }
+}
+
+subscription WorkbenchTextStream($jobId: ID!) {
+  workbenchTextStream(jobId: $jobId) {
+    ...WorkbenchTextStream
   }
 }

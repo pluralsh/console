@@ -112,7 +112,11 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
             }
             renderer={({ rowData }) => (
               <WorkbenchJobActivity
-                isOpen={openIds.includes(rowData.id)}
+                isOpen={
+                  openIds.includes(rowData.id) ||
+                  rowData.type === WorkbenchJobActivityType.Conclusion ||
+                  rowData.type === WorkbenchJobActivityType.User
+                }
                 activity={rowData}
                 textStream={textStreamMap[rowData.id] ?? ''}
               />

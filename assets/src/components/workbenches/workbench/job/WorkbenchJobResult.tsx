@@ -51,7 +51,6 @@ export function WorkbenchJobResult({
         overflow="auto"
       >
         <Markdown text={conclusion || workingTheory || 'No output yet.'} />
-        {/* TODO: this the logic for the parsing prob needs to be tweaked here */}
         {!isEmpty(metrics) && (
           <JobActivityMetrics
             metrics={metrics}

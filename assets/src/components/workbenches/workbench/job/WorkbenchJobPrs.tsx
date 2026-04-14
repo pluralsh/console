@@ -5,6 +5,7 @@ import {
   prettifyRepoUrl,
   PrOpenIcon,
 } from '@pluralsh/design-system'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { PullRequestBasicFragment } from 'generated/graphql'
@@ -43,6 +44,7 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
             firstColor="text"
             second={pr.title}
           />
+          <PrStatusChip status={pr.status} />
           <IconFrame
             size="small"
             tooltip="View PR"

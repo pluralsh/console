@@ -1,6 +1,8 @@
+import { ApolloError } from '@apollo/client'
 import {
   AccordionItem,
   BrainIcon,
+  Card,
   ChecklistCheckedIcon,
   CheckOutlineIcon,
   CloudLoggingIcon,
@@ -10,6 +12,7 @@ import {
   IconFrame,
   IconProps,
   InfrastructureIcon,
+  Markdown,
   NotebookIcon,
   SpinnerAlt,
   TicketIcon,
@@ -23,12 +26,16 @@ import {
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { CaptionP, OverlineH3 } from 'components/utils/typography/Text'
 import {
-  WorkbenchJobActivityFragment,
+  useWorkbenchJobActivityQuery,
+  WorkbenchJobActivityResultWithDataFragment,
   WorkbenchJobActivityStatus,
+  WorkbenchJobActivityTinyFragment,
   WorkbenchJobActivityType,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
@@ -52,14 +59,31 @@ export function WorkbenchJobActivity({
   textStream,
 }: {
   isOpen: boolean
-  activity: WorkbenchJobActivityFragment
+  activity: WorkbenchJobActivityTinyFragment
   textStream: Nullable<string>
 }) {
   const { spacing } = useTheme()
   const isRunning = isActivityRunning(activity.status)
 
+  const { data, loading, error } = useWorkbenchJobActivityQuery({
+    variables: { id: activity.id },
+    fetchPolicy: 'cache-and-network',
+    skip: !activity.id || !isOpen,
+    pollInterval: POLL_INTERVAL,
+  })
+
+  const resultData = data?.workbenchJobActivity?.result
+  const isLoading = !data && loading
+
   if (activity.type === WorkbenchJobActivityType.Conclusion)
-    return <WorkbenchJobActivityResult activity={activity} />
+    return (
+      <WorkbenchJobActivityResult
+        activity={activity}
+        resultData={resultData}
+        queryError={error}
+        markdownType="classic"
+      />
+    )
   if (activity.type === WorkbenchJobActivityType.User)
     return <UserActivityResult activity={activity} />
 
@@ -72,7 +96,6 @@ export function WorkbenchJobActivity({
       value={activity.id}
       caret="left"
       padding="compact"
-      paddingArea="trigger-only"
       trigger={
         <StretchedFlex gap="small">
           <OverlineH3
@@ -82,7 +105,7 @@ export function WorkbenchJobActivity({
               display: 'flex',
               alignItems: 'flex-start',
               gap: spacing.xsmall,
-              flex: 1,
+              marginRight: 'auto',
             }}
           >
             <TypeIcon
@@ -96,6 +119,8 @@ export function WorkbenchJobActivity({
               clickable
               as={Link}
               to={getAgentRunAbsPath({ agentRunId: agentRun.id })}
+              target="_blank"
+              rel="noopener noreferrer"
               icon={<DiscoverIcon color="icon-xlight" />}
               tooltip="Go to agent run details"
             />
@@ -110,11 +135,17 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
+        {error && <GqlError error={error} />}
         {activity.prompt && activity.type !== WorkbenchJobActivityType.Memo && (
           <JobActivityPrompt prompt={activity.prompt} />
         )}
         <WorkbenchJobActivityThoughts
-          thoughts={activity.thoughts?.filter(isNonNullable) ?? []}
+          thoughts={
+            data?.workbenchJobActivity?.thoughts?.filter(isNonNullable) ?? []
+          }
+          isLoading={
+            isLoading && activity.type !== WorkbenchJobActivityType.Memo
+          }
         />
         {textStream && (
           <Flex
@@ -125,7 +156,10 @@ export function WorkbenchJobActivity({
             <SimplifiedMarkdown text={textStream} />
           </Flex>
         )}
-        <WorkbenchJobActivityResult activity={activity} />
+        <WorkbenchJobActivityResult
+          activity={activity}
+          resultData={data?.workbenchJobActivity?.result}
+        />
       </Flex>
     </AccordionItem>
   )
@@ -133,10 +167,16 @@ export function WorkbenchJobActivity({
 
 function WorkbenchJobActivityResult({
   activity,
+  resultData,
+  queryError,
+  markdownType = 'simplified',
 }: {
-  activity: WorkbenchJobActivityFragment
+  activity: WorkbenchJobActivityTinyFragment
+  resultData: Nullable<WorkbenchJobActivityResultWithDataFragment>
+  queryError?: ApolloError
+  markdownType?: 'classic' | 'simplified'
 }) {
-  const { type, result, agentRun } = activity
+  const { type, agentRun, result } = activity
   switch (type) {
     case WorkbenchJobActivityType.Memo:
       return <MemoActivityResult result={result} />
@@ -146,12 +186,26 @@ function WorkbenchJobActivityResult({
           direction="column"
           gap="medium"
         >
-          {result?.error && <GqlError error={result.error} />}
-          <SimplifiedMarkdown text={result?.output ?? ''} />
+          {result?.error && (
+            <GqlError
+              error={result.error}
+              css={{ wordBreak: 'break-word' }}
+            />
+          )}
+          {queryError && <GqlError error={queryError} />}
+          <div>
+            {markdownType === 'simplified' ? (
+              <SimplifiedMarkdown text={result?.output ?? ''} />
+            ) : (
+              <Markdown text={result?.output ?? ''} />
+            )}
+          </div>
           <JobActivityMetrics
-            metrics={result?.metrics?.filter(isNonNullable) ?? []}
+            metrics={resultData?.metrics?.filter(isNonNullable) ?? []}
           />
-          <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
+          <JobActivityLogs
+            logs={resultData?.logs?.filter(isNonNullable) ?? []}
+          />
           <AgentRunInfoCard
             showLinkButton
             fillLevel={1}
@@ -164,27 +218,52 @@ function WorkbenchJobActivityResult({
 
 function WorkbenchJobActivityThoughts({
   thoughts,
+  isLoading,
 }: {
   thoughts: WorkbenchJobThoughtFragment[]
+  isLoading: boolean
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const isExpandable = thoughts.length > 3
   const visibleThoughts = isExpanded ? thoughts : thoughts.slice(0, 3)
-  if (isEmpty(thoughts)) return null
+  if (isEmpty(thoughts) && !isLoading) return null
+
   return (
     <Flex
       direction="column"
       gap="small"
       paddingLeft={spacing.small}
     >
-      {visibleThoughts.map((t, i) => (
-        <SimpleToolCall
-          key={i}
-          content={t.content}
-          attributes={{ tool: { name: t.toolName, arguments: t.toolArgs } }}
-        />
-      ))}
+      {isLoading &&
+        Array.from({ length: 3 }).map((_, i) => <RectangleSkeleton key={i} />)}
+      {visibleThoughts.map(({ toolName, toolArgs, content, attributes }, i) => {
+        const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+        const logs = attributes?.logs?.filter(isNonNullable) ?? []
+        return (
+          <SimpleToolCall
+            key={i}
+            content={content}
+            attributes={{ tool: { name: toolName, arguments: toolArgs } }}
+            customResultBody={
+              !isEmpty(metrics) ? (
+                <Card>
+                  <JobActivityMetrics
+                    metrics={metrics}
+                    lineProps={{
+                      margin: { top: 20, right: 16, bottom: 25, left: 35 },
+                    }}
+                  />
+                </Card>
+              ) : !isEmpty(logs) ? (
+                <Card css={{ height: '100%', overflow: 'auto' }}>
+                  <JobActivityLogs logs={logs} />
+                </Card>
+              ) : undefined
+            }
+          />
+        )
+      })}
       {isExpandable && (
         <ClickableLabelSC onClick={() => setIsExpanded(!isExpanded)}>
           <CaptionP $color="text-xlight">
