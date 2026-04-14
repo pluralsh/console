@@ -313,8 +313,32 @@ function SavedPromptsChip({
         },
       }}
     >
-      <Body2P css={{ ...TRUNCATE }}>{label}</Body2P>
-      {showRightContent && rightContent}
+      <Body2P
+        css={{
+          ...TRUNCATE,
+          minWidth: 0,
+          flex: 1,
+        }}
+      >
+        {label}
+      </Body2P>
+      {rightContent && (
+        <span
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            width: showRightContent ? 'fit-content' : 0,
+            marginLeft: showRightContent ? 4 : 0,
+            opacity: showRightContent ? 1 : 0,
+            transition:
+              'width 200ms ease, margin-left 200ms ease, opacity 200ms ease',
+          }}
+        >
+          {rightContent}
+        </span>
+      )}
     </Chip>
   )
 }
