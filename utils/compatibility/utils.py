@@ -11,7 +11,7 @@ from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
 from datetime import datetime
-from summarizer import helm_summary, summarization_enabled
+from summarizer import helm_summary
 from typing import Any, List, Set
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
@@ -97,42 +97,32 @@ def validate_semver(version_str):
         return None
 
 
-def _fallback_kube_version():
-    """Fall back to existing KUBE_VERSION file if network fetch fails."""
-    cached = current_kube_version()
-    if cached:
-        print_warning(f"Using cached kube version: {cached}")
-        return validate_semver(cached + ".0")
-    print_error("No cached KUBE_VERSION available and network fetch failed")
-    return None
-
-
 def latest_kube_version():
-    url = "https://cdn.dl.k8s.io/release/stable.txt"
-    try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            latest = response.text.lstrip("v")
-            latest = validate_semver(latest)
+    url = (
+        "https://cdn.dl.k8s.io/release/stable.txt"
+    )
+    response = requests.get(url)
+    if response.status_code == 200:
+        latest = response.text.lstrip("v")
+        latest = validate_semver(latest)
 
-            if not latest:
-                print_error(f"Invalid Latest K8s Version: {latest}")
-                return _fallback_kube_version()
-
-            print(f"Using Latest kube version: {latest}")
-            try:
-                with open(KUBE_VERSION_FILE, "w") as file:
-                    file.write(f"{latest.major}.{latest.minor}")
-            except Exception as e:
-                print_error(f"Failed to write to {KUBE_VERSION_FILE}: {e}")
-
+        if not latest:
+            print_error(f"Invalid Latest K8s Version: {latest}")
             return latest
-        else:
-            print_error(f"Failed to fetch the latest kube version: {response.status_code}")
-            return _fallback_kube_version()
-    except requests.exceptions.RequestException as e:
-        print_warning(f"Could not fetch latest K8s version: {e}")
-        return _fallback_kube_version()
+
+        print(f"Using Latest kube version: {latest}")
+        try:  # write latest version to KUBE_VERSION_FILE
+            with open(KUBE_VERSION_FILE, "w") as file:
+                file.write(f"{latest.major}.{latest.minor}")
+        except Exception as e:
+            print_error(f"Failed to write to {KUBE_VERSION_FILE}: {e}")
+
+        return latest
+    else:
+        print_error(
+            f"Failed to fetch the latest kube version: {response.status_code}"
+        )
+        return None
 
 
 def current_kube_version():
@@ -529,19 +519,16 @@ def update_compatibility_info(filepath, new_versions):
                 )
             }
         
-        if summarization_enabled():
-            for i in range(len(data["versions"]) - 1):
-                to_vsn = data["versions"][i] # in reverse order
-                from_vsn = data["versions"][i+1]
-                if to_vsn.get('summary'):
-                    continue
+        for i in range(len(data["versions"]) - 1):
+            to_vsn = data["versions"][i] # in reverse order
+            from_vsn = data["versions"][i+1]
+            if to_vsn.get('summary'):
+                continue
 
-                print(f"summarizing application updates for {app_name} from {from_vsn['version']} to {to_vsn['version']}")
-                summary = helm_summary(app_name, data, from_vsn, to_vsn)
-                if summary:
-                    data["versions"][i]["summary"] = summary
-        else:
-            print_warning("Skipping summarization: EXA_API_KEY or OPENAI_API_KEY not set")
+            print(f"summarizing application updates for {app_name} from {from_vsn['version']} to {to_vsn['version']}")
+            summary = helm_summary(app_name, data, from_vsn, to_vsn)
+            if summary:
+                data["versions"][i]["summary"] = summary
         
         if write_yaml(filepath, data):
             print_success(
