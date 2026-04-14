@@ -1,5 +1,6 @@
 import {
   Button,
+  Chip,
   CloseIcon,
   Flex,
   FormField,
@@ -7,6 +8,7 @@ import {
   ListBoxItem,
   Modal,
   Select,
+  SelectButton,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -150,6 +152,22 @@ export function WorkbenchToolsEditModal({
         <FormField label="Add tools">
           <Select
             label="Add tools"
+            triggerButton={
+              <SelectButton>
+                <Flex
+                  align="center"
+                  gap="xsmall"
+                >
+                  <Chip
+                    fillLevel={3}
+                    size="small"
+                  >
+                    {selectedToolIds.length}
+                  </Chip>
+                  <span>Tools selected</span>
+                </Flex>
+              </SelectButton>
+            }
             selectionMode="multiple"
             selectedKeys={selectedToolIds}
             onSelectionChange={(keys) =>
