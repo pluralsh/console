@@ -27,8 +27,11 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   end
 
   @valid ~w(query step)a
+  @default_schema Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
+  @azure_schema Console.priv_file!("tools/workbench/observability/metrics_azure.json") |> Jason.decode!()
 
-  def json_schema(_), do: Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
+  def json_schema(%{tool: %{tool: :azure}}), do: @azure_schema
+  def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_metrics_#{n}"
   def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather metrics from the #{n} observability connection. #{provider_hint(t)}")
 

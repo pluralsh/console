@@ -26,8 +26,11 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   end
 
   @valid ~w(query limit)a
+  @default_schema Console.priv_file!("tools/workbench/observability/logs.json") |> Jason.decode!()
+  @azure_schema Console.priv_file!("tools/workbench/observability/logs_azure.json") |> Jason.decode!()
 
-  def json_schema(_), do: Console.priv_file!("tools/workbench/observability/logs.json") |> Jason.decode!()
+  def json_schema(%{tool: %{tool: :azure}}), do: @azure_schema
+  def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_logs_#{n}"
   def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather logs from the #{n} observability connection. #{Metrics.provider_hint(t)}")
 

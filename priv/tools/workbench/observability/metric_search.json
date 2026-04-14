@@ -8,22 +8,6 @@
         "limit": {
             "type": "integer",
             "description": "The maximum number of metrics to return"
-        },
-        "options": {
-            "type": "object",
-            "description": "Provider-specific search options.",
-            "properties": {
-                "azure": {
-                    "type": "object",
-                    "description": "Optional per-query Azure metrics-search options. Used only for Azure tools.",
-                    "properties": {
-                        "resource_id": {
-                            "type": "string",
-                            "description": "Azure resource ID to list metric definitions from (required for Azure tools)."
-                        }
-                    }
-                }
-            }
         }
     },
     "required": []

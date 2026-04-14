@@ -15,8 +15,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   end
 
   @valid ~w(query limit)a
+  @default_schema Console.priv_file!("tools/workbench/observability/traces.json") |> Jason.decode!()
 
-  def json_schema(_), do: Console.priv_file!("tools/workbench/observability/traces.json") |> Jason.decode!()
+  def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_traces_#{n}"
   def description(%__MODULE__{tool: %{name: n}}), do: "Gather traces from the #{n} observability connection"
 
