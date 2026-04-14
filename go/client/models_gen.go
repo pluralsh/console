@@ -9488,8 +9488,6 @@ type WorkbenchAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// the agent runtime for this workbench
 	AgentRuntimeID *string `json:"agentRuntimeId,omitempty"`
-	// the service account user used for automated workbench agent runs
-	BotUserID *string `json:"botUserId,omitempty"`
 	// when true on update, sets botUserId to the authenticated user (ignores explicit botUserId for that operation)
 	OverrideBotUser *bool `json:"overrideBotUser,omitempty"`
 	// workbench configuration

@@ -2313,9 +2313,6 @@ input WorkbenchAttributes {
   "the agent runtime for this workbench"
   agentRuntimeId: ID
 
-  "the service account user used for automated workbench agent runs"
-  botUserId: ID
-
   "when true on update, sets botUserId to the authenticated user (ignores explicit botUserId for that operation)"
   overrideBotUser: Boolean
 

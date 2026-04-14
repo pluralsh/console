@@ -30,10 +30,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project_id,        :id, description: "the project for this workbench"
     field :repository_id,     :id, description: "the git repository for this workbench"
     field :agent_runtime_id,  :id, description: "the agent runtime for this workbench"
-    field :bot_user_id,       :id, description: "the service account user used for automated workbench agent runs"
-    field :override_bot_user, :boolean,
-      description:
-        "when true on update, sets botUserId to the authenticated user (ignores explicit botUserId for that operation)"
+    field :override_bot_user, :boolean, description: "when true on update, sets botUserId to the authenticated user"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
     field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"

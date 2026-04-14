@@ -14848,8 +14848,6 @@ export type WorkbenchWorkbenchSkillsArgs = {
 export type WorkbenchAttributes = {
   /** the agent runtime for this workbench */
   agentRuntimeId?: InputMaybe<Scalars['ID']['input']>;
-  /** the service account user used for automated workbench agent runs */
-  botUserId?: InputMaybe<Scalars['ID']['input']>;
   /** workbench configuration */
   configuration?: InputMaybe<WorkbenchConfigurationAttributes>;
   /** the description of the workbench */
