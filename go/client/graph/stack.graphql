@@ -30,6 +30,7 @@ fragment InfrastructureStackTinyFragment on InfrastructureStack {
 fragment PolicyEngineFragment on PolicyEngine {
     type
     maxSeverity
+    customPolicies
 }
 
 fragment InfrastructureStackFragment on InfrastructureStack {
