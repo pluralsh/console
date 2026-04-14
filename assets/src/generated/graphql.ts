@@ -14854,7 +14854,7 @@ export type WorkbenchAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   /** the name of the workbench (must be unique) */
   name: Scalars['String']['input'];
-  /** when true on update, sets botUserId to the authenticated user (ignores explicit botUserId for that operation) */
+  /** when true on update, sets botUserId to the authenticated user */
   overrideBotUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project for this workbench */
   projectId?: InputMaybe<Scalars['ID']['input']>;
