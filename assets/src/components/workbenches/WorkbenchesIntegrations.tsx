@@ -5,6 +5,7 @@ import {
   Flex,
   IconFrame,
   AddIcon,
+  ApiIcon,
 } from '@pluralsh/design-system'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -18,16 +19,17 @@ import {
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
-} from './workbenchToolsUtils'
+} from './tools/workbenchToolsUtils'
 
 const WORKBENCH_TOOL_TYPE_PARAM = 'type'
 
-export function WorkbenchToolsAdd() {
+export function WorkbenchesIntegrations() {
   const { spacing } = useTheme()
 
   return (
     <WorkbenchTabWrapper>
       <WorkbenchTabHeader
+        icon={<ApiIcon />}
         title="Integrations"
         description="Integrate your dev stack, including observability, ticketing, MCP, and Cloud services with Plural."
       />

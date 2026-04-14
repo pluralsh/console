@@ -6,6 +6,8 @@ import {
   Divider,
   Flex,
   IconFrame,
+  TicketIcon,
+  ToolsIcon,
 } from '@pluralsh/design-system'
 import {
   CardGrid,
@@ -28,11 +30,12 @@ import {
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
-} from './workbenchToolsUtils'
+} from './tools/workbenchToolsUtils'
 import { useNavigate } from 'react-router-dom'
-import { ConfiguredToolMetadata } from './ConfiguredToolMetadata'
+import { WorkbenchesConfiguredToolMetadata } from './WorkbenchesConfiguredToolMetadata'
+import { WorkbenchTabHeader } from './common/WorkbenchTabHeader'
 
-export function ConfiguredTools() {
+export function WorkbenchesConfiguredTools() {
   const navigate = useNavigate()
 
   const { data, error, loading, pageInfo, fetchNextPage } =
@@ -46,7 +49,10 @@ export function ConfiguredTools() {
   return (
     <WorkbenchTabWrapper>
       {data && !isEmpty(tools) && (
-        <Subtitle1H1>Your created tools ({tools.length})</Subtitle1H1>
+        <WorkbenchTabHeader
+          title="Configured Tools"
+          icon={<ToolsIcon />}
+        />
       )}
       {error && <GqlError error={error} />}
       {!data && loading ? (
@@ -83,7 +89,7 @@ export function ConfiguredTools() {
                       />
                     }
                   />
-                  <ConfiguredToolMetadata
+                  <WorkbenchesConfiguredToolMetadata
                     toolId={id}
                     toolType={type}
                   />

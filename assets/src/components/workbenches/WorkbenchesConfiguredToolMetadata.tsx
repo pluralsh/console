@@ -5,6 +5,7 @@ import {
   WorkbenchToolType,
   useWorkbenchToolQuery,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import styled from 'styled-components'
 
 type MetadataRow = {
@@ -25,14 +26,14 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
-  [WorkbenchToolType.Mcp]: extractNoConfigurationMetadata,
-  [WorkbenchToolType.Sentry]: extractNoConfigurationMetadata,
+  [WorkbenchToolType.Mcp]: () => [],
+  [WorkbenchToolType.Sentry]: () => [],
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
   [WorkbenchToolType.Dynatrace]: extractDynatraceMetadata,
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
 }
 
-export function ConfiguredToolMetadata({
+export function WorkbenchesConfiguredToolMetadata({
   toolId,
   toolType,
 }: {
@@ -48,7 +49,7 @@ export function ConfiguredToolMetadata({
     data?.workbenchTool?.configuration ?? null
   ).filter(({ value }) => hasDisplayValue(value))
 
-  if (metadata.length === 0) return null
+  if (isEmpty(metadata)) return null
 
   return (
     <ToolMetaSC>
@@ -142,10 +143,6 @@ function extractLinearMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.linear?.url }]
-}
-
-function extractNoConfigurationMetadata(): MetadataRow[] {
-  return []
 }
 
 function extractSplunkMetadata(
