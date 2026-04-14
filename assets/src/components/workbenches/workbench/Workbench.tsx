@@ -9,6 +9,7 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
   WebhooksIcon,
+  ToolsIcon,
 } from '@pluralsh/design-system'
 import { SubTabs } from 'components/utils/SubTabs'
 import { GqlError } from 'components/utils/Alert'
@@ -42,6 +43,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
+import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
 import { TRUNCATE } from 'components/utils/truncate'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -69,6 +71,7 @@ export type WorkbenchOutletContext = {
 export enum WorkbenchMoreMenuKey {
   Cron = 'cron',
   Webhook = 'webhook',
+  Tools = 'tools',
   SavedPrompts = 'saved-prompts',
   Delete = 'delete',
 }
@@ -82,6 +85,7 @@ export function Workbench() {
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [toolsEditOpen, setToolsEditOpen] = useState(false)
 
   const handleMoreMenuSelection = (selectedKey: Key) => {
     switch (selectedKey) {
@@ -90,6 +94,9 @@ export function Workbench() {
         return
       case WorkbenchMoreMenuKey.Webhook:
         navigate(WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.Tools:
+        setToolsEditOpen(true)
         return
       case WorkbenchMoreMenuKey.SavedPrompts:
         navigate(WORKBENCHES_SAVED_PROMPTS_REL_PATH)
@@ -154,7 +161,10 @@ export function Workbench() {
         overflow: 'hidden',
       }}
     >
-      <WorkbenchSidePanel workbenchId={id} />
+      <WorkbenchSidePanel
+        workbenchId={id}
+        onOpenToolsEdit={() => setToolsEditOpen(true)}
+      />
       <WrapperSC>
         <Flex
           align="center"
@@ -177,6 +187,11 @@ export function Workbench() {
             triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
             onSelectionChange={handleMoreMenuSelection}
           >
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.Tools}
+              leftContent={<ToolsIcon />}
+              label="Tools"
+            />
             <ListBoxItem
               key={WorkbenchMoreMenuKey.Cron}
               leftContent={<EventScheduleIcon />}
@@ -233,6 +248,10 @@ export function Workbench() {
               <strong>{workbench?.name ?? 'this workbench'}</strong>?
             </span>
           }
+        />
+        <WorkbenchToolsEditModal
+          open={toolsEditOpen}
+          onClose={() => setToolsEditOpen(false)}
         />
       </WrapperSC>
     </Flex>

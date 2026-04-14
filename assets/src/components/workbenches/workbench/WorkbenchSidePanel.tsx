@@ -21,7 +21,13 @@ import { getWebhookIcon } from './webhooks/utils'
 import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
 import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
 
-export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
+export function WorkbenchSidePanel({
+  workbenchId,
+  onOpenToolsEdit,
+}: {
+  workbenchId: string
+  onOpenToolsEdit: () => void
+}) {
   const navigate = useNavigate()
 
   const { data } = useWorkbenchTriggersSummaryQuery({
@@ -48,36 +54,50 @@ export function WorkbenchSidePanel({ workbenchId }: { workbenchId: string }) {
 
   return (
     <WrapperSC>
-      {hasTools && (
-        <SectionSC $first>
-          <HeaderSC>
-            <span>Tools</span>
-          </HeaderSC>
-          {hasTools ? (
-            <Flex
-              gap="xxsmall"
-              direction="column"
-            >
-              {tools.map((tool) => (
-                <Flex
-                  key={tool.id}
-                  gap="xsmall"
-                  align="center"
-                >
-                  <ItemIconContainerSC>
-                    <IconFrame
-                      icon={<WorkbenchToolIcon type={tool.tool} />}
-                      size="xsmall"
-                    />
-                  </ItemIconContainerSC>
-                  <ItemNameSC>{tool.name}</ItemNameSC>
-                </Flex>
-              ))}
-            </Flex>
-          ) : null}
-        </SectionSC>
-      )}
-      <SectionSC $first={!hasTools}>
+      <SectionSC $first>
+        <HeaderSC>
+          <span>Tools</span>
+          <IconFrame
+            clickable
+            size="small"
+            icon={<AddIcon size={12} />}
+            tooltip="Add or remove tools"
+            onClick={onOpenToolsEdit}
+          />
+        </HeaderSC>
+        {hasTools ? (
+          <Flex
+            gap="xxsmall"
+            direction="column"
+          >
+            {tools.map((tool) => (
+              <Flex
+                key={tool.id}
+                gap="xsmall"
+                align="center"
+              >
+                <ItemIconContainerSC>
+                  <IconFrame
+                    icon={<WorkbenchToolIcon type={tool.tool} />}
+                    size="xsmall"
+                  />
+                </ItemIconContainerSC>
+                <ItemNameSC>{tool.name}</ItemNameSC>
+              </Flex>
+            ))}
+          </Flex>
+        ) : (
+          <ButtonSC
+            small
+            startIcon={<AddIcon size={12} />}
+            tertiary
+            onClick={onOpenToolsEdit}
+          >
+            Add tools
+          </ButtonSC>
+        )}
+      </SectionSC>
+      <SectionSC>
         <HeaderSC>
           <span>Webhooks</span>
           {hasWebhooks && (
