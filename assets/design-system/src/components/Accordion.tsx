@@ -22,6 +22,13 @@ import IconFrame from './IconFrame'
 export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
   ComponentProps<typeof Card>
 
+type Caret =
+  | 'none'
+  | 'left'
+  | 'right'
+  | 'right-quarter'
+  | 'right-quarter-mirror'
+
 function Accordion({
   children,
   ...props
@@ -58,7 +65,7 @@ function AccordionItem({
   padding?: 'none' | 'compact' | 'relaxed'
   paddingArea?: 'trigger-only' | 'all'
   paddedCaret?: boolean
-  caret?: 'none' | 'left' | 'right' | 'right-quarter'
+  caret?: Caret
   trigger: ReactNode
   children: ReactNode
   additionalContentStyles?: CSSObject
@@ -135,7 +142,7 @@ const ItemSC = styled(RadixAccordion.Item)({
 })
 
 const TriggerSC = styled(RadixAccordion.Trigger)<{
-  $caret: 'none' | 'left' | 'right' | 'right-quarter'
+  $caret: Caret
   $padding?: number
 }>(({ theme, $caret, $padding }) => ({
   ...theme.partials.reset.button,
@@ -156,7 +163,7 @@ const TriggerSC = styled(RadixAccordion.Trigger)<{
   '.icon': {
     color: theme.colors['icon-xlight'],
     rotate:
-      $caret === 'left'
+      $caret === 'left' || $caret === 'right-quarter-mirror'
         ? '-90deg'
         : $caret === 'right-quarter'
           ? '90deg'

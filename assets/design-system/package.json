@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "start": "storybook dev -p 6006",
+    "start": "storybook dev -p 6006 --initial-path /story/icons--default",
     "build:storybook": "yarn build && storybook build && yarn build:fix:storybook",
     "build:fix:storybook": "perl -pi -w -e 's/%40/@/g;' storybook-static/index.html",
     "storybook:serve-static": "yarn build:storybook && http-server storybook-static",

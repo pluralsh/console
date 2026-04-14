@@ -26,9 +26,9 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { WorkbenchJobPrs } from './WorkbenchJobPrs'
 import {
   WorkbenchJobMetrics,
+  WorkbenchJobPrs,
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
@@ -61,6 +61,7 @@ export function WorkbenchJobPanelContent() {
     <SidePanelContent>
       <PanelHeaderSC>
         <TabList
+          scrollable
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'horizontal',
@@ -68,7 +69,7 @@ export function WorkbenchJobPanelContent() {
             onSelectionChange: (key) =>
               setSelectedTab(String(key) as JobPanelTab),
           }}
-          css={{ display: 'flex', alignItems: 'center', gap: spacing.small }}
+          css={{ gap: spacing.small, width: 'fit-content', maxWidth: '100%' }}
         >
           {tabs.map(({ label, icon }) => (
             <PanelSubTabSC
@@ -76,7 +77,11 @@ export function WorkbenchJobPanelContent() {
               textValue={label}
             >
               {icon}
-              {label}
+              {label !== 'Result'
+                ? label
+                : job?.result?.conclusion
+                  ? 'Conclusion'
+                  : 'Working theory'}
             </PanelSubTabSC>
           ))}
         </TabList>
