@@ -1,5 +1,6 @@
 import {
   Button,
+  Card,
   Chip,
   CloseIcon,
   Flex,
@@ -10,7 +11,9 @@ import {
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
+import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
+import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   useWorkbenchToolsQuery,
@@ -20,7 +23,12 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
+import {
+  TOOL_TYPE_TO_LABEL,
+  WorkbenchToolCardBody,
+  WorkbenchToolIcon,
+  workbenchToolCardGridStyles,
+} from '../tools/workbenchToolsUtils'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -62,6 +70,17 @@ export function WorkbenchToolsEditModal({
   const associatedToolIds = useMemo(
     () => (workbench?.tools ?? []).filter(isNonNullable).map((tool) => tool.id),
     [workbench?.tools]
+  )
+  const configuredToolsById = useMemo(
+    () => new Map(configuredTools.map((tool) => [tool.id, tool])),
+    [configuredTools]
+  )
+  const selectedTools = useMemo(
+    () =>
+      selectedToolIds
+        .map((toolId) => configuredToolsById.get(toolId))
+        .filter(isNonNullable),
+    [configuredToolsById, selectedToolIds]
   )
 
   const canSave = useMemo(() => {
@@ -149,46 +168,84 @@ export function WorkbenchToolsEditModal({
       {toolsError || saveError ? (
         <GqlError error={toolsError ?? saveError} />
       ) : (
-        <FormField label="Add tools">
-          <Select
-            label="Add tools"
-            triggerButton={
-              <SelectButton>
-                <Flex
-                  align="center"
-                  gap="xsmall"
-                >
-                  <Chip
-                    fillLevel={3}
-                    size="small"
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          <FormField label="Add tools">
+            <Select
+              label="Add tools"
+              triggerButton={
+                <SelectButton>
+                  <Flex
+                    align="center"
+                    gap="xsmall"
                   >
-                    {selectedToolIds.length}
-                  </Chip>
-                  <span>Tools selected</span>
-                </Flex>
-              </SelectButton>
-            }
-            selectionMode="multiple"
-            selectedKeys={selectedToolIds}
-            onSelectionChange={(keys) =>
-              setSelectedToolIds(Array.from(keys).map(String))
-            }
-            isDisabled={toolsLoading}
-          >
-            {configuredTools.map((tool) => (
-              <ListBoxItem
-                key={tool.id}
-                label={tool.name}
-                leftContent={
-                  <IconFrame
-                    icon={<WorkbenchToolIcon type={tool.tool} />}
-                    size="xsmall"
-                  />
-                }
-              />
-            ))}
-          </Select>
-        </FormField>
+                    <Chip
+                      fillLevel={3}
+                      size="small"
+                    >
+                      {selectedToolIds.length}
+                    </Chip>
+                    <span>Tools selected</span>
+                  </Flex>
+                </SelectButton>
+              }
+              selectionMode="multiple"
+              selectedKeys={selectedToolIds}
+              onSelectionChange={(keys) =>
+                setSelectedToolIds(Array.from(keys).map(String))
+              }
+              isDisabled={toolsLoading}
+            >
+              {configuredTools.map((tool) => (
+                <ListBoxItem
+                  key={tool.id}
+                  label={tool.name}
+                  leftContent={
+                    <IconFrame
+                      icon={<WorkbenchToolIcon type={tool.tool} />}
+                      size="xsmall"
+                    />
+                  }
+                />
+              ))}
+            </Select>
+          </FormField>
+          {selectedTools.length > 0 && (
+            <CardGrid
+              styles={{
+                ...workbenchToolCardGridStyles(320),
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              }}
+            >
+              {selectedTools.map(({ id, name, tool: type }) => (
+                <Card key={id}>
+                  <WorkbenchToolCardBody>
+                    <StackedText
+                      first={name}
+                      firstPartialType="body2Bold"
+                      firstColor="text"
+                      second={TOOL_TYPE_TO_LABEL[type]}
+                      icon={
+                        <IconFrame
+                          circle
+                          type="secondary"
+                          icon={
+                            <WorkbenchToolIcon
+                              size={20}
+                              type={type}
+                            />
+                          }
+                        />
+                      }
+                    />
+                  </WorkbenchToolCardBody>
+                </Card>
+              ))}
+            </CardGrid>
+          )}
+        </Flex>
       )}
     </Modal>
   )
