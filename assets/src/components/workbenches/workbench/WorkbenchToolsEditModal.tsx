@@ -122,6 +122,10 @@ export function WorkbenchToolsEditModal({
     })
   }
 
+  const handleDeselectTool = (toolId: string) => {
+    setSelectedToolIds((ids) => ids.filter((id) => id !== toolId))
+  }
+
   return (
     <Modal
       open={open}
@@ -222,24 +226,39 @@ export function WorkbenchToolsEditModal({
               {selectedTools.map(({ id, name, tool: type }) => (
                 <Card key={id}>
                   <WorkbenchToolCardBody>
-                    <StackedText
-                      first={name}
-                      firstPartialType="body2Bold"
-                      firstColor="text"
-                      second={TOOL_TYPE_TO_LABEL[type]}
-                      icon={
-                        <IconFrame
-                          circle
-                          type="secondary"
-                          icon={
-                            <WorkbenchToolIcon
-                              size={20}
-                              type={type}
-                            />
-                          }
-                        />
-                      }
-                    />
+                    <Flex
+                      align="center"
+                      justify="space-between"
+                      width="100%"
+                      gap="small"
+                    >
+                      <StackedText
+                        first={name}
+                        firstPartialType="body2Bold"
+                        firstColor="text"
+                        second={TOOL_TYPE_TO_LABEL[type]}
+                        icon={
+                          <IconFrame
+                            circle
+                            type="secondary"
+                            icon={
+                              <WorkbenchToolIcon
+                                size={20}
+                                type={type}
+                              />
+                            }
+                          />
+                        }
+                        css={{ minWidth: 0, flex: 1 }}
+                      />
+                      <IconFrame
+                        circle
+                        clickable
+                        icon={<CloseIcon />}
+                        tooltip="Deselect tool"
+                        onClick={() => handleDeselectTool(id)}
+                      />
+                    </Flex>
                   </WorkbenchToolCardBody>
                 </Card>
               ))}
