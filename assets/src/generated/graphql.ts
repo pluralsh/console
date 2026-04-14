@@ -5406,6 +5406,11 @@ export type LogLine = {
   timestamp?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export enum LogQueryOperator {
+  And = 'AND',
+  Or = 'OR'
+}
+
 export type LogStream = {
   __typename?: 'LogStream';
   stream?: Maybe<Scalars['Map']['output']>;
@@ -11194,6 +11199,7 @@ export type RootQueryTypeLogAggregationArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  operator?: InputMaybe<LogQueryOperator>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -11204,6 +11210,7 @@ export type RootQueryTypeLogAggregationBucketsArgs = {
   aggregation?: InputMaybe<LogAggregationInput>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  operator?: InputMaybe<LogQueryOperator>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -18386,6 +18393,7 @@ export type LogAggregationQueryVariables = Exact<{
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
+  operator?: InputMaybe<LogQueryOperator>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
 }>;
 
@@ -18408,6 +18416,7 @@ export type LogAggregationBucketsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   time?: InputMaybe<LogTimeRange>;
+  operator?: InputMaybe<LogQueryOperator>;
   aggregation?: InputMaybe<LogAggregationInput>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
 }>;
@@ -36128,7 +36137,7 @@ export type LoginLinkMutationHookResult = ReturnType<typeof useLoginLinkMutation
 export type LoginLinkMutationResult = Apollo.MutationResult<LoginLinkMutation>;
 export type LoginLinkMutationOptions = Apollo.BaseMutationOptions<LoginLinkMutation, LoginLinkMutationVariables>;
 export const LogAggregationDocument = gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput]) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
@@ -36136,6 +36145,7 @@ export const LogAggregationDocument = gql`
     serviceId: $serviceId
     time: $time
     facets: $facets
+    operator: $operator
   ) {
     ...LogLine
   }
@@ -36159,6 +36169,7 @@ export const LogAggregationDocument = gql`
  *      query: // value for 'query'
  *      serviceId: // value for 'serviceId'
  *      time: // value for 'time'
+ *      operator: // value for 'operator'
  *      facets: // value for 'facets'
  *   },
  * });
@@ -36236,13 +36247,14 @@ export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQue
 export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
 export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
 export const LogAggregationBucketsDocument = gql`
-    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
   logAggregationBuckets(
     serviceId: $serviceId
     clusterId: $clusterId
     query: $query
     time: $time
     aggregation: $aggregation
+    operator: $operator
     facets: $facets
   ) {
     ...LogAggregationBucket
@@ -36266,6 +36278,7 @@ export const LogAggregationBucketsDocument = gql`
  *      clusterId: // value for 'clusterId'
  *      query: // value for 'query'
  *      time: // value for 'time'
+ *      operator: // value for 'operator'
  *      aggregation: // value for 'aggregation'
  *      facets: // value for 'facets'
  *   },

@@ -12731,6 +12731,61 @@ func (e LogDriver) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type LogQueryOperator string
+
+const (
+	LogQueryOperatorAnd LogQueryOperator = "AND"
+	LogQueryOperatorOr  LogQueryOperator = "OR"
+)
+
+var AllLogQueryOperator = []LogQueryOperator{
+	LogQueryOperatorAnd,
+	LogQueryOperatorOr,
+}
+
+func (e LogQueryOperator) IsValid() bool {
+	switch e {
+	case LogQueryOperatorAnd, LogQueryOperatorOr:
+		return true
+	}
+	return false
+}
+
+func (e LogQueryOperator) String() string {
+	return string(e)
+}
+
+func (e *LogQueryOperator) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LogQueryOperator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LogQueryOperator", str)
+	}
+	return nil
+}
+
+func (e LogQueryOperator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *LogQueryOperator) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e LogQueryOperator) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type MatchStrategy string
 
 const (

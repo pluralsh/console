@@ -51,12 +51,14 @@ type RootQueryType {
 
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
+  logAggregation(
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, operator: LogQueryOperator, facets: [LogFacetInput]
+  ): [LogLine]
 
   logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
 
   logAggregationBuckets(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, operator: LogQueryOperator, facets: [LogFacetInput]
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -13169,6 +13171,11 @@ input LogFacetInput {
 
 input LogAggregationInput {
   bucketSize: String
+}
+
+enum LogQueryOperator {
+  AND
+  OR
 }
 
 type Dashboard {
