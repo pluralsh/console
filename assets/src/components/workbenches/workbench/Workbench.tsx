@@ -250,6 +250,7 @@ export function Workbench() {
           }
         />
         <WorkbenchToolsEditModal
+          workbench={workbench}
           open={toolsEditOpen}
           onClose={() => setToolsEditOpen(false)}
         />

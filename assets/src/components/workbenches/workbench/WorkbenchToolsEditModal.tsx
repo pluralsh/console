@@ -2,10 +2,25 @@ import {
   Button,
   CloseIcon,
   Flex,
+  FormField,
   IconFrame,
+  ListBoxItem,
   Modal,
+  Select,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  useWorkbenchToolsQuery,
+  useUpdateWorkbenchMutation,
+  WorkbenchQuery,
+} from 'generated/graphql'
+import { useEffect, useMemo, useState } from 'react'
+import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { isNonNullable } from 'utils/isNonNullable'
 
 const ModalActionsRowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -16,17 +31,80 @@ const ModalActionsRowSC = styled.div(({ theme }) => ({
 }))
 
 export function WorkbenchToolsEditModal({
+  workbench,
   open,
   onClose,
 }: {
+  workbench: Nullable<WorkbenchQuery['workbench']>
   open: boolean
   onClose: () => void
 }) {
-  const theme = useTheme()
+  const [selectedToolIds, setSelectedToolIds] = useState<string[]>([])
+  const { popToast } = useSimpleToast()
+
+  const {
+    data: toolsData,
+    error: toolsError,
+    loading: toolsLoading,
+  } = useFetchPaginatedData({
+    queryHook: useWorkbenchToolsQuery,
+    keyPath: ['workbenchTools'],
+    skip: !open,
+  })
+
+  const configuredTools = useMemo(
+    () => mapExistingNodes(toolsData?.workbenchTools),
+    [toolsData]
+  )
+
+  const associatedToolIds = useMemo(
+    () => (workbench?.tools ?? []).filter(isNonNullable).map((tool) => tool.id),
+    [workbench?.tools]
+  )
+
+  const canSave = useMemo(() => {
+    if (associatedToolIds.length !== selectedToolIds.length) return true
+
+    const selectedToolIdsSet = new Set(selectedToolIds)
+    return !associatedToolIds.every((id) => selectedToolIdsSet.has(id))
+  }, [associatedToolIds, selectedToolIds])
+
+  useEffect(() => {
+    if (open) setSelectedToolIds(associatedToolIds)
+  }, [associatedToolIds, open])
+
+  const [updateWorkbench, { loading: saveLoading, error: saveError }] =
+    useUpdateWorkbenchMutation({
+      refetchQueries: ['WorkbenchTriggersSummary', 'Workbench'],
+      awaitRefetchQueries: true,
+      onCompleted: () => {
+        popToast({
+          name: workbench?.name ?? 'workbench tools',
+          action: 'updated',
+          color: 'icon-success',
+        })
+        onClose()
+      },
+    })
+
+  const handleSave = () => {
+    if (!canSave || !workbench?.name || !workbench?.id) return
+
+    updateWorkbench({
+      variables: {
+        id: workbench?.id,
+        attributes: {
+          name: workbench?.name,
+          toolAssociations: selectedToolIds.map((toolId) => ({ toolId })),
+        },
+      },
+    })
+  }
 
   return (
     <Modal
       open={open}
+      size="large"
       onClose={onClose}
       header={
         <Flex
@@ -50,30 +128,50 @@ export function WorkbenchToolsEditModal({
             destructive
             type="button"
             onClick={onClose}
+            disabled={saveLoading}
           >
             Cancel
           </Button>
           <Button
             primary
             type="button"
-            onClick={() => {}}
+            onClick={handleSave}
+            loading={saveLoading}
+            disabled={!canSave}
           >
             Save
           </Button>
         </ModalActionsRowSC>
       }
     >
-      <Flex
-        align="center"
-        justify="center"
-        css={{
-          color: theme.colors['text-xlight'],
-          paddingTop: theme.spacing.large,
-          paddingBottom: theme.spacing.large,
-        }}
-      >
-        ...
-      </Flex>
+      {toolsError || saveError ? (
+        <GqlError error={toolsError ?? saveError} />
+      ) : (
+        <FormField label="Add tools">
+          <Select
+            label="Add tools"
+            selectionMode="multiple"
+            selectedKeys={selectedToolIds}
+            onSelectionChange={(keys) =>
+              setSelectedToolIds(Array.from(keys).map(String))
+            }
+            isDisabled={toolsLoading}
+          >
+            {configuredTools.map((tool) => (
+              <ListBoxItem
+                key={tool.id}
+                label={tool.name}
+                leftContent={
+                  <IconFrame
+                    icon={<WorkbenchToolIcon type={tool.tool} />}
+                    size="xsmall"
+                  />
+                }
+              />
+            ))}
+          </Select>
+        </FormField>
+      )}
     </Modal>
   )
 }
