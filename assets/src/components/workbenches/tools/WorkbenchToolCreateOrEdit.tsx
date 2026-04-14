@@ -176,6 +176,7 @@ export function WorkbenchToolCreateOrEdit({
               )
             }
             onSave={onSave}
+            onToolDeleted={() => navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)}
           />
           {/* TODO */}
           {/* <Button
