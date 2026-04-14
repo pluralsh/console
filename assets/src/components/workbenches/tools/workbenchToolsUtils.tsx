@@ -1,5 +1,6 @@
 import {
   AtlassianLogoIcon,
+  AwsLogoIcon,
   DatadogLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
@@ -211,5 +212,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
   [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
-  [WorkbenchToolType.Cloudwatch]: ToolsIcon,
+  [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,
 }

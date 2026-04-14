@@ -10479,11 +10479,12 @@ func (e AgentRunMode) MarshalJSON() ([]byte, error) {
 type AgentRunStatus string
 
 const (
-	AgentRunStatusPending    AgentRunStatus = "PENDING"
-	AgentRunStatusRunning    AgentRunStatus = "RUNNING"
-	AgentRunStatusSuccessful AgentRunStatus = "SUCCESSFUL"
-	AgentRunStatusFailed     AgentRunStatus = "FAILED"
-	AgentRunStatusCancelled  AgentRunStatus = "CANCELLED"
+	AgentRunStatusPending     AgentRunStatus = "PENDING"
+	AgentRunStatusRunning     AgentRunStatus = "RUNNING"
+	AgentRunStatusSuccessful  AgentRunStatus = "SUCCESSFUL"
+	AgentRunStatusFailed      AgentRunStatus = "FAILED"
+	AgentRunStatusCancelled   AgentRunStatus = "CANCELLED"
+	AgentRunStatusBabysitting AgentRunStatus = "BABYSITTING"
 )
 
 var AllAgentRunStatus = []AgentRunStatus{
@@ -10492,11 +10493,12 @@ var AllAgentRunStatus = []AgentRunStatus{
 	AgentRunStatusSuccessful,
 	AgentRunStatusFailed,
 	AgentRunStatusCancelled,
+	AgentRunStatusBabysitting,
 }
 
 func (e AgentRunStatus) IsValid() bool {
 	switch e {
-	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled:
+	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled, AgentRunStatusBabysitting:
 		return true
 	}
 	return false

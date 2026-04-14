@@ -16,7 +16,7 @@ export const WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM = 'selectedWebhook'
 
 export const WORKBENCHES_TOOLS_REL_PATH = 'tools'
 export const WORKBENCHES_TOOLS_ADD_REL_PATH = 'integrations'
-export const WORKBENCHES_TOOLS_YOUR_REL_PATH = 'your-integrations'
+export const WORKBENCHES_TOOLS_YOUR_REL_PATH = 'configured-tools'
 export const WORKBENCHES_ALERTS_REL_PATH = 'alerts'
 export const WORKBENCHES_ISSUES_REL_PATH = 'issues'
 export const WORKBENCHES_TOOLS_ABS_PATH = `${WORKBENCHES_ABS_PATH}/${WORKBENCHES_TOOLS_ADD_REL_PATH}`

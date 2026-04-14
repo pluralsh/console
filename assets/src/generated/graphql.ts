@@ -541,6 +541,7 @@ export type AgentRunRepositoryEdge = {
 };
 
 export enum AgentRunStatus {
+  Babysitting = 'BABYSITTING',
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
   Pending = 'PENDING',
