@@ -255,7 +255,7 @@ export function WorkbenchToolsEditModal({
                         circle
                         clickable
                         icon={<CloseIcon />}
-                        tooltip="Deselect tool"
+                        tooltip="Remove from selection"
                         onClick={() => handleDeselectTool(id)}
                       />
                     </Flex>
