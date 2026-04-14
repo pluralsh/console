@@ -415,6 +415,10 @@ export type AgentRun = {
   __typename?: 'AgentRun';
   /** the analysis of the agent run */
   analysis?: Maybe<AgentAnalysis>;
+  /** whether babysit mode is enabled for this run */
+  babysit?: Maybe<Scalars['Boolean']['output']>;
+  /** interval in seconds between babysit checks for this run */
+  babysitInterval?: Maybe<Scalars['Int']['output']>;
   /** the branch this agent run is operating on (if not set, use default branch on clone) */
   branch?: Maybe<Scalars['String']['output']>;
   /** the error reason of the agent run */
@@ -459,6 +463,10 @@ export type AgentRun = {
 };
 
 export type AgentRunAttributes = {
+  /** whether babysit mode is enabled for this run */
+  babysit?: InputMaybe<Scalars['Boolean']['input']>;
+  /** interval in seconds between babysit checks for this run */
+  babysitInterval?: InputMaybe<Scalars['Int']['input']>;
   /** the flow this agent run is associated with */
   flowId?: InputMaybe<Scalars['ID']['input']>;
   /** the programming language used in the agent run */
@@ -541,6 +549,10 @@ export enum AgentRunStatus {
 }
 
 export type AgentRunStatusAttributes = {
+  /** whether babysit mode is enabled for this run */
+  babysit?: InputMaybe<Scalars['Boolean']['input']>;
+  /** interval in seconds between babysit checks for this run */
+  babysitInterval?: InputMaybe<Scalars['Int']['input']>;
   /** the error reason of the agent run */
   error?: InputMaybe<Scalars['String']['input']>;
   /** the messages this agent run has generated during its run */
@@ -557,6 +569,8 @@ export type AgentRuntime = {
   aiProxy?: Maybe<Scalars['Boolean']['output']>;
   /** the git repositories allowed to be used with this runtime */
   allowedRepositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** default interval in seconds between babysit checks for runs on this runtime */
+  babysitInterval?: Maybe<Scalars['Int']['output']>;
   /** the cluster this runtime is running on */
   cluster?: Maybe<Cluster>;
   /** the policy for creating runs on this runtime */
@@ -586,6 +600,8 @@ export type AgentRuntimeAttributes = {
   aiProxy?: InputMaybe<Scalars['Boolean']['input']>;
   /** the git repositories allowed to be used with this runtime */
   allowedRepositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** default interval in seconds between babysit checks for runs on this runtime */
+  babysitInterval?: InputMaybe<Scalars['Int']['input']>;
   /** the policy for creating runs on this runtime */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
   /** whether this is the default runtime for coding agents */
@@ -12228,6 +12244,8 @@ export type ScmConnectionEdge = {
 export type ScmCreds = {
   __typename?: 'ScmCreds';
   token: Scalars['String']['output'];
+  /** the type of the scm connection */
+  type?: Maybe<ScmType>;
   username: Scalars['String']['output'];
 };
 
@@ -14735,6 +14753,8 @@ export type Workbench = {
   /** the agent runtime for this workbench */
   agentRuntime?: Maybe<AgentRuntime>;
   alerts?: Maybe<AlertConnection>;
+  /** the service account user used for automated workbench agent runs */
+  botUser?: Maybe<User>;
   /** workbench configuration */
   configuration?: Maybe<WorkbenchConfiguration>;
   crons?: Maybe<WorkbenchCronConnection>;
@@ -14828,12 +14848,16 @@ export type WorkbenchWorkbenchSkillsArgs = {
 export type WorkbenchAttributes = {
   /** the agent runtime for this workbench */
   agentRuntimeId?: InputMaybe<Scalars['ID']['input']>;
+  /** the service account user used for automated workbench agent runs */
+  botUserId?: InputMaybe<Scalars['ID']['input']>;
   /** workbench configuration */
   configuration?: InputMaybe<WorkbenchConfigurationAttributes>;
   /** the description of the workbench */
   description?: InputMaybe<Scalars['String']['input']>;
   /** the name of the workbench (must be unique) */
   name: Scalars['String']['input'];
+  /** when true on update, sets botUserId to the authenticated user (ignores explicit botUserId for that operation) */
+  overrideBotUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project for this workbench */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can read and execute this workbench */

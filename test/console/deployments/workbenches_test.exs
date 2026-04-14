@@ -67,6 +67,30 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert [name: _] = errors
     end
+
+    test "sets bot_user_id to the creating user by default" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, workbench} =
+        Workbenches.create_workbench(%{name: "wb-bot-default", project_id: project.id}, user)
+
+      assert workbench.bot_user_id == user.id
+    end
+
+    test "allows an explicit bot_user_id on create" do
+      creator = insert(:user)
+      bot = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: creator.id}])
+
+      {:ok, workbench} =
+        Workbenches.create_workbench(
+          %{name: "wb-explicit-bot", project_id: project.id, bot_user_id: bot.id},
+          creator
+        )
+
+      assert workbench.bot_user_id == bot.id
+    end
   end
 
   describe "update_workbench/3" do
@@ -131,6 +155,39 @@ defmodule Console.Deployments.WorkbenchesTest do
       updated = Console.Repo.preload(updated, :tools)
       assert length(updated.tools) == 1
       assert hd(updated.tools).id == tool2.id
+    end
+
+    test "override_bot_user: true sets bot_user_id to the updating user" do
+      writer = insert(:user)
+      other_bot = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project, bot_user: other_bot)
+
+      {:ok, updated} =
+        Workbenches.update_workbench(
+          %{name: workbench.name, override_bot_user: true},
+          workbench.id,
+          writer
+        )
+
+      assert updated.bot_user_id == writer.id
+    end
+
+    test "update can set bot_user_id explicitly when override_bot_user is not true" do
+      writer = insert(:user)
+      bot_a = insert(:user)
+      bot_b = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project, bot_user: bot_a)
+
+      {:ok, updated} =
+        Workbenches.update_workbench(
+          %{name: workbench.name, bot_user_id: bot_b.id},
+          workbench.id,
+          writer
+        )
+
+      assert updated.bot_user_id == bot_b.id
     end
   end
 
@@ -273,6 +330,30 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_tool(tool.id, user)
 
       assert refetch(tool)
+    end
+  end
+
+  describe "create_workbench_bot_job/2" do
+    test "creates a job as the workbench bot user when set" do
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
+
+      {:ok, job} =
+        Workbenches.create_workbench_bot_job(%{prompt: "automated prompt"}, workbench.id)
+
+      assert job.workbench_id == workbench.id
+      assert job.user_id == bot.id
+      assert job.prompt == "automated prompt"
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
+    test "returns an error when the workbench has no bot user" do
+      workbench = insert(:workbench, bot_user: nil)
+
+      assert {:error, "workbench does not have a bot user"} =
+               Workbenches.create_workbench_bot_job(%{prompt: "nope"}, workbench.id)
+
+      refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
     end
   end
 

@@ -23,6 +23,8 @@ defmodule Console.Schema.AgentRun do
     field :language_version, :string
     field :mode,             Mode, default: :write
     field :shared,           :boolean, default: false
+    field :babysit,          :boolean, default: false
+    field :babysit_interval, :integer
     field :prompt,           :binary
     field :repository,       :string
     field :branch,           :string
@@ -81,7 +83,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status language language_version shared prompt repository runtime_id user_id flow_id session_id mode branch error)a
+  @valid ~w(status language language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch error)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -11,8 +11,9 @@ defmodule Console.Schema.AgentRuntime do
     field :default,              :boolean, default: false
     field :create_policy_id,     :binary_id
     field :allowed_repositories, {:array, :string}
+    field :ai_proxy,             :boolean, default: false
+    field :babysit_interval,     :integer
 
-    field :ai_proxy, :boolean, default: false
 
     belongs_to :cluster,    Cluster
     belongs_to :connection, ScmConnection
@@ -61,7 +62,7 @@ defmodule Console.Schema.AgentRuntime do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(name type ai_proxy default allowed_repositories connection_id)a
+  @valid ~w(name type ai_proxy default allowed_repositories connection_id babysit_interval)a
 
   def changeset(model, attrs \\ %{}) do
     model

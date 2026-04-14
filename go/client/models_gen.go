@@ -358,6 +358,10 @@ type AgentRun struct {
 	Error *string `json:"error,omitempty"`
 	// whether this agent run is shared
 	Shared *bool `json:"shared,omitempty"`
+	// whether babysit mode is enabled for this run
+	Babysit *bool `json:"babysit,omitempty"`
+	// interval in seconds between babysit checks for this run
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -399,6 +403,10 @@ type AgentRunAttributes struct {
 	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the flow this agent run is associated with
 	FlowID *string `json:"flowId,omitempty"`
+	// whether babysit mode is enabled for this run
+	Babysit *bool `json:"babysit,omitempty"`
+	// interval in seconds between babysit checks for this run
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 }
 
 type AgentRunConnection struct {
@@ -446,6 +454,10 @@ type AgentRunStatusAttributes struct {
 	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *NamespacedName `json:"podReference,omitempty"`
+	// whether babysit mode is enabled for this run
+	Babysit *bool `json:"babysit,omitempty"`
+	// interval in seconds between babysit checks for this run
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 }
 
 type AgentRuntime struct {
@@ -460,6 +472,8 @@ type AgentRuntime struct {
 	Default *bool `json:"default,omitempty"`
 	// the git repositories allowed to be used with this runtime
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
+	// default interval in seconds between babysit checks for runs on this runtime
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 	// the cluster this runtime is running on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the policy for creating runs on this runtime
@@ -482,6 +496,8 @@ type AgentRuntimeAttributes struct {
 	Default *bool `json:"default,omitempty"`
 	// the git repositories allowed to be used with this runtime
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
+	// default interval in seconds between babysit checks for runs on this runtime
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 }
 
 type AgentRuntimeConnection struct {
@@ -7298,8 +7314,10 @@ type ScmConnectionEdge struct {
 }
 
 type ScmCreds struct {
-	Username string `json:"username"`
-	Token    string `json:"token"`
+	// the type of the scm connection
+	Type     *ScmType `json:"type,omitempty"`
+	Username string   `json:"username"`
+	Token    string   `json:"token"`
 }
 
 type ScmWebhook struct {
@@ -9438,6 +9456,8 @@ type Workbench struct {
 	Repository *GitRepository `json:"repository,omitempty"`
 	// the agent runtime for this workbench
 	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
+	// the service account user used for automated workbench agent runs
+	BotUser *User `json:"botUser,omitempty"`
 	// tools associated with this workbench
 	Tools []*WorkbenchTool `json:"tools,omitempty"`
 	// read policy for this service
@@ -9468,6 +9488,10 @@ type WorkbenchAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// the agent runtime for this workbench
 	AgentRuntimeID *string `json:"agentRuntimeId,omitempty"`
+	// the service account user used for automated workbench agent runs
+	BotUserID *string `json:"botUserId,omitempty"`
+	// when true on update, sets botUserId to the authenticated user (ignores explicit botUserId for that operation)
+	OverrideBotUser *bool `json:"overrideBotUser,omitempty"`
 	// workbench configuration
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
 	// skills configuration (ref and files)
