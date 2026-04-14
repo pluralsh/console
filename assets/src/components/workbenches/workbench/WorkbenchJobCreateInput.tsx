@@ -287,12 +287,18 @@ function SavedPromptsChip({
   rightContent?: ComponentProps<typeof Chip>['rightContent']
   onClick: () => void
 }) {
+  const [showRightContent, setShowRightContent] = useState(false)
+
   return (
     <Chip
       size="large"
       fillLevel={fillLevel}
       clickable
       onClick={onClick}
+      onMouseEnter={() => setShowRightContent(true)}
+      onMouseLeave={() => setShowRightContent(false)}
+      onFocus={() => setShowRightContent(true)}
+      onBlur={() => setShowRightContent(false)}
       css={{
         borderRadius: 16,
         width: 'fit-content',
@@ -308,7 +314,7 @@ function SavedPromptsChip({
       }}
     >
       <Body2P css={{ ...TRUNCATE }}>{label}</Body2P>
-      {rightContent}
+      {showRightContent && rightContent}
     </Chip>
   )
 }
