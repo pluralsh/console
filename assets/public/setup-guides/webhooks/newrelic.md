@@ -1,42 +1,51 @@
 # New Relic Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in New Relic against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts and incident lifecycle changes.
+References:
+- [New Relic - Destinations](https://docs.newrelic.com/docs/alerts/get-notified/destinations/)
+- [New Relic - Notifications and alert destinations](https://docs.newrelic.com/docs/workflow-automation/setup-and-configure/create-destinations/)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-Create webhook details in Plural:
+In Plural:
 
-- Type: Observability
-- Provider: NEWRELIC
-- Secret: shared secret for verification
+1. Set **Type** to `Observability`.
+2. Set **Provider** to `NEWRELIC`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-Copy the Plural webhook URL.
+Copy the generated Plural webhook URL.
 
-## 2. Register URL and secret in New Relic
+## 2. Create webhook destination in New Relic
 
-In New Relic workflows/destinations:
+In your New Relic account (`https://one.newrelic.com/` or your mapped account URL):
 
-- Destination type: webhook
-- URL: Plural webhook URL
-- Secret/signing credential: same secret as in Plural
+1. Go to notification **Destinations**
+2. Create a **Webhook** destination
+3. Set the destination URL to the Plural webhook URL
+4. Configure authentication headers
 
-Ensure destination is enabled and reachable from New Relic.
+For Plural verification, use HTTP Basic Auth where possible:
 
-## 3. Configure trigger workflows
+- username: any non-empty value
+- password: Plural signing secret
 
-Attach destination to workflows with conditions such as:
+If your New Relic workflow uses custom headers instead, store credentials in New Relic secrets and map them consistently.
 
-- incident created/opened
-- incident acknowledged
-- incident closed
-- policy/condition severity changes
+## 3. Attach destination to workflows
 
-Filter by account, policy, or tags to keep routing precise.
+Route incident lifecycle signals:
 
-## 4. Test and verify
+- activated/open incidents
+- acknowledged incidents
+- closed incidents
 
-Send a test payload from New Relic and open a test incident. In Plural verify:
+Use policy/account/tag filters to limit noise.
 
-- authenticated delivery
-- expected incident events captured
-- trigger automation reacts to open/close events
+## 4. Validate
+
+Send a test notification and trigger an alert. Confirm in Plural:
+
+- request accepted
+- auth validated
+- lifecycle events appear correctly

@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The skill to update. Use the workbench_skills tool to list valid skill names."
+    },
+    "previous": {
+      "type": "string",
+      "description": "The exact text block in the skill contents you want to replace. This must include and preserve all whitespace and newline characters exactly as they appear in the skill."
+    },
+    "replacement": {
+      "type": "string",
+      "description": "The new text block that replaces `previous`. Preserve all intended whitespace and newline characters exactly in this replacement text."
+    },
+    "branch_name": {
+      "type": "string",
+      "description": "A concise, valid git branch name for the pull request that will carry this skill update."
+    },
+    "pr_title": {
+      "type": "string",
+      "description": "The pull request title for this skill change."
+    },
+    "pr_description": {
+      "type": "string",
+      "description": "The pull request body. Should give reviewers enough context: Summary, what changed in the skill, and rationale. Use markdown as appropriate."
+    },
+    "commit_message": {
+      "type": "string",
+      "description": "The commit message for this skill change."
+    }
+  },
+  "required": ["name", "previous", "replacement", "branch_name", "pr_title", "pr_description"]
+}

@@ -7,9 +7,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
-    field :tool,   :map, virtual: true
-    field :query,  :string
-    field :limit,  :integer
+    field :tool,  :map, virtual: true
+    field :query, :string
+    field :limit, :integer
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
       field :name,  :string

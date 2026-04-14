@@ -381,6 +381,7 @@ const statusToSeverity: Record<
   [InfraResearchStatus.Pending]: 'info',
   [AgentRunStatus.Cancelled]: 'neutral',
   [AgentRunStatus.Successful]: 'success',
+  [AgentRunStatus.Babysitting]: 'neutral',
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

@@ -1322,20 +1322,20 @@
          "name": "LoginLink",
          "body": "mutation LoginLink($key: String!) {\n  loginLink(key: $key) {\n    ...User\n    jwt\n    refreshToken {\n      ...RefreshToken\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment User on User {\n  id\n  pluralId\n  name\n  email\n  emailSettings {\n    digest\n    __typename\n  }\n  profile\n  backgroundColor\n  readTimestamp\n  roles {\n    admin\n    __typename\n  }\n  personas {\n    ...Persona\n    __typename\n  }\n  __typename\n}\n\nfragment Persona on Persona {\n  id\n  name\n  description\n  bindings {\n    ...PolicyBinding\n    __typename\n  }\n  configuration {\n    ...PersonaConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment PersonaConfiguration on PersonaConfiguration {\n  all\n  deployments {\n    addOns\n    clusters\n    pipelines\n    providers\n    repositories\n    services\n    __typename\n  }\n  home {\n    manager\n    security\n    __typename\n  }\n  sidebar {\n    audits\n    kubernetes\n    pullRequests\n    settings\n    backups\n    stacks\n    __typename\n  }\n  services {\n    configuration\n    secrets\n    __typename\n  }\n  ai {\n    pr\n    __typename\n  }\n  __typename\n}\n\nfragment RefreshToken on RefreshToken {\n  id\n  token\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:7032522405d97aca3e5668708b81bb3c8c0b6674c3831214657e57b7db21c18d": {
+      "sha256:9ea0a36bcaac8f039c8e1b669c72a5eda5699dff058d50d9220704dd1a3657f3": {
          "type": "query",
          "name": "LogAggregation",
-         "body": "query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {\n  logAggregation(\n    clusterId: $clusterId\n    limit: $limit\n    query: $query\n    serviceId: $serviceId\n    time: $time\n    facets: $facets\n  ) {\n    ...LogLine\n    __typename\n  }\n}\n\nfragment LogLine on LogLine {\n  facets {\n    ...LogFacet\n    __typename\n  }\n  log\n  timestamp\n  __typename\n}\n\nfragment LogFacet on LogFacet {\n  key\n  value\n  __typename\n}"
+         "body": "query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput]) {\n  logAggregation(\n    clusterId: $clusterId\n    limit: $limit\n    query: $query\n    serviceId: $serviceId\n    time: $time\n    facets: $facets\n    operator: $operator\n  ) {\n    ...LogLine\n    __typename\n  }\n}\n\nfragment LogLine on LogLine {\n  facets {\n    ...LogFacet\n    __typename\n  }\n  log\n  timestamp\n  __typename\n}\n\nfragment LogFacet on LogFacet {\n  key\n  value\n  __typename\n}"
       },
       "sha256:14e64890f9fb4a797a6ad0dfeb4a93b03422869e202f969e4b38f6a977513865": {
          "type": "query",
          "name": "LogLabels",
          "body": "query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {\n  logLabels(\n    field: $field\n    clusterId: $clusterId\n    serviceId: $serviceId\n    query: $query\n    time: $time\n  ) {\n    ...LogFacetDetail\n    __typename\n  }\n}\n\nfragment LogFacetDetail on LogFacetDetail {\n  label\n  count\n  __typename\n}"
       },
-      "sha256:433a7e3bc2a206e3b6704db521c9ef9e954b63cba0018f83bdef58081c124c3d": {
+      "sha256:06956e5500b823ae48a18bd80fd599a778b4297631f7036a26548d173a8b7fcf": {
          "type": "query",
          "name": "LogAggregationBuckets",
-         "body": "query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {\n  logAggregationBuckets(\n    serviceId: $serviceId\n    clusterId: $clusterId\n    query: $query\n    time: $time\n    aggregation: $aggregation\n    facets: $facets\n  ) {\n    ...LogAggregationBucket\n    __typename\n  }\n}\n\nfragment LogAggregationBucket on LogAggregationBucket {\n  timestamp\n  count\n  __typename\n}"
+         "body": "query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {\n  logAggregationBuckets(\n    serviceId: $serviceId\n    clusterId: $clusterId\n    query: $query\n    time: $time\n    aggregation: $aggregation\n    operator: $operator\n    facets: $facets\n  ) {\n    ...LogAggregationBucket\n    __typename\n  }\n}\n\nfragment LogAggregationBucket on LogAggregationBucket {\n  timestamp\n  count\n  __typename\n}"
       },
       "sha256:d86d6daf39197ee5434862f7fe0b278a785a959a1ec0c86634d7af08735d43f3": {
          "type": "query",
@@ -1926,6 +1926,11 @@
          "type": "mutation",
          "name": "CreateWorkbenchJob",
          "body": "mutation CreateWorkbenchJob($workbenchId: ID!, $attributes: WorkbenchJobAttributes!) {\n  createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    status\n    prompt\n    insertedAt\n    __typename\n  }\n}"
+      },
+      "sha256:dd0eb022c0aaaa8c305761cc3b9a52731a3df2a825b3af5722f2ed293400db36": {
+         "type": "mutation",
+         "name": "CancelWorkbenchJob",
+         "body": "mutation CancelWorkbenchJob($jobId: ID!) {\n  cancelWorkbenchJob(jobId: $jobId) {\n    id\n    status\n    __typename\n  }\n}"
       },
       "sha256:7cc5d39dfdfc02aeb304e8a1b08e1b952eadd0db4ba5951c75af4270dc8c4112": {
          "type": "mutation",

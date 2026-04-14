@@ -51,12 +51,14 @@ type RootQueryType {
 
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
+  logAggregation(
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, operator: LogQueryOperator, facets: [LogFacetInput]
+  ): [LogLine]
 
   logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
 
   logAggregationBuckets(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, operator: LogQueryOperator, facets: [LogFacetInput]
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -1693,6 +1695,7 @@ enum AgentRunStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  BABYSITTING
 }
 
 enum AgentRunMode {
@@ -1737,6 +1740,9 @@ input AgentRuntimeAttributes {
 
   "the git repositories allowed to be used with this runtime"
   allowedRepositories: [String]
+
+  "default interval in seconds between babysit checks for runs on this runtime"
+  babysitInterval: Int
 }
 
 input AgentBindingAttributes {
@@ -1765,6 +1771,12 @@ input AgentRunAttributes {
 
   "the flow this agent run is associated with"
   flowId: ID
+
+  "whether babysit mode is enabled for this run"
+  babysit: Boolean
+
+  "interval in seconds between babysit checks for this run"
+  babysitInterval: Int
 }
 
 input AgentRunStatusAttributes {
@@ -1779,6 +1791,12 @@ input AgentRunStatusAttributes {
 
   "the kubernetes pod this agent is running on"
   podReference: NamespacedName
+
+  "whether babysit mode is enabled for this run"
+  babysit: Boolean
+
+  "interval in seconds between babysit checks for this run"
+  babysitInterval: Int
 }
 
 input AgentPullRequestAttributes {
@@ -1927,6 +1945,9 @@ type AgentRuntime {
   "the git repositories allowed to be used with this runtime"
   allowedRepositories: [String]
 
+  "default interval in seconds between babysit checks for runs on this runtime"
+  babysitInterval: Int
+
   "the cluster this runtime is running on"
   cluster: Cluster
 
@@ -1966,6 +1987,12 @@ type AgentRun {
 
   "whether this agent run is shared"
   shared: Boolean
+
+  "whether babysit mode is enabled for this run"
+  babysit: Boolean
+
+  "interval in seconds between babysit checks for this run"
+  babysitInterval: Int
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -2010,7 +2037,11 @@ type AgentRun {
 }
 
 type ScmCreds {
+  "the type of the scm connection"
+  type: ScmType
+
   username: String!
+
   token: String!
 }
 
@@ -2282,6 +2313,9 @@ input WorkbenchAttributes {
 
   "the agent runtime for this workbench"
   agentRuntimeId: ID
+
+  "when true on update, sets botUserId to the authenticated user"
+  overrideBotUser: Boolean
 
   "workbench configuration"
   configuration: WorkbenchConfigurationAttributes
@@ -2648,6 +2682,9 @@ type Workbench {
 
   "the agent runtime for this workbench"
   agentRuntime: AgentRuntime
+
+  "the service account user used for automated workbench agent runs"
+  botUser: User
 
   "tools associated with this workbench"
   tools: [WorkbenchTool]
@@ -13169,6 +13206,11 @@ input LogFacetInput {
 
 input LogAggregationInput {
   bucketSize: String
+}
+
+enum LogQueryOperator {
+  AND
+  OR
 }
 
 type Dashboard {

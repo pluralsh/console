@@ -4,7 +4,7 @@ import {
   Card,
   Flex,
   IconFrame,
-  PlusIcon,
+  AddIcon,
 } from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
 import {
@@ -13,14 +13,14 @@ import {
 } from 'components/self-service/catalog/CatalogsGrid'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { GqlError } from 'components/utils/Alert'
-import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { TRUNCATE_LEFT } from 'components/utils/truncate'
+import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchTinyFragment, useWorkbenchesQuery } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import { ComponentType } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchToolIcon } from './tools/workbenchToolsUtils'
@@ -55,6 +55,7 @@ export function WorkbenchesList() {
           <CardSC
             css={{
               background: 'transparent',
+              borderStyle: 'dashed',
               justifyContent: 'center',
               alignItems: 'center',
             }}
@@ -63,7 +64,7 @@ export function WorkbenchesList() {
               small
               as={Link}
               to={WORKBENCHES_CREATE_REL_PATH}
-              startIcon={<PlusIcon />}
+              startIcon={<AddIcon />}
             >
               Create Workbench
             </Button>
@@ -81,8 +82,7 @@ export function WorkbenchesList() {
 }
 
 function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
-  const { spacing } = useTheme()
-  const { id, name, description, tools: t } = workbench
+  const { id, name, description, repository, tools: t } = workbench
   const tools = t?.filter(isNonNullable) ?? []
   return (
     <CardSC
@@ -90,14 +90,29 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
       forwardedAs={Link}
       to={id}
     >
-      <StackedText
-        first={name}
-        firstPartialType="body2Bold"
-        firstColor="text"
-      />
+      <Flex
+        direction="column"
+        minWidth={0}
+      >
+        <Body2BoldP>{name}</Body2BoldP>
+        {repository?.url && (
+          <CaptionP
+            $color="text-xlight"
+            css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+          >
+            {repository.url}
+          </CaptionP>
+        )}
+      </Flex>
       <Body2P
         $color="text-light"
-        css={{ flex: 1 }}
+        css={{
+          flex: 1,
+          display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: 2,
+          overflow: 'hidden',
+        }}
       >
         {description}
       </Body2P>
@@ -122,9 +137,9 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
           />
         )}
         <div css={{ flex: 1 }} />
-        <ArrowRightIcon
-          color="icon-xlight"
-          size={spacing.xlarge}
+        <IconFrame
+          icon={<ArrowRightIcon color="icon-xlight" />}
+          size={'small'}
         />
       </Flex>
     </CardSC>

@@ -64,7 +64,7 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec create_workbench(map, User.t()) :: workbench_resp
   def create_workbench(attrs, %User{} = user) do
-    %Workbench{}
+    %Workbench{bot_user_id: user.id}
     |> Workbench.changeset(Settings.add_project_id(attrs, user))
     |> allow(user, :write)
     |> when_ok(:insert)
@@ -79,10 +79,14 @@ defmodule Console.Deployments.Workbenches do
     get_workbench!(id)
     |> Repo.preload([:tool_associations, :read_bindings, :write_bindings])
     |> allow(user, :write)
-    |> when_ok(&Workbench.changeset(&1, attrs))
+    |> when_ok(&Workbench.changeset(&1, override_bot_user(attrs, user)))
     |> when_ok(:update)
     |> notify(:update, user)
   end
+
+  defp override_bot_user(%{override_bot_user: true} = attrs, %User{id: id}),
+    do: Map.put(attrs, :bot_user_id, id)
+  defp override_bot_user(attrs, _), do: attrs
 
   @doc """
   Deletes a workbench.
@@ -312,6 +316,22 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:create, user)
   end
 
+  def create_workbench_bot_job(attrs, workbench_id) do
+    start_transaction()
+    |> add_operation(:user, fn _ ->
+      get_workbench!(workbench_id)
+      |> Repo.preload([:bot_user])
+      |> case do
+        %Workbench{bot_user: %User{} = user} -> {:ok, Console.Services.Rbac.preload(user)}
+        _ -> {:error, "workbench does not have a bot user"}
+      end
+    end)
+    |> add_operation(:job, fn %{user: user} ->
+      create_workbench_job(attrs, workbench_id, user)
+    end)
+    |> execute(extract: :job)
+  end
+
   @doc """
   Updates a workbench job. Requires read access to the workbench.
   """
@@ -334,10 +354,18 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec cancel_workbench_job(binary, User.t()) :: job_resp
   def cancel_workbench_job(id, %User{} = user) do
-    get_workbench_job!(id)
-    |> WorkbenchJob.changeset(%{status: :cancelled})
-    |> allow(user, :edit)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      get_workbench_job!(id)
+      |> WorkbenchJob.changeset(%{status: :cancelled})
+      |> allow(user, :edit)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:heartbeat, fn %{job: job} ->
+      Console.AI.Workbench.Router.stop(job)
+      {:ok, job}
+    end)
+    |> execute(extract: :job)
     |> notify(:update, user)
   end
 
@@ -536,6 +564,17 @@ defmodule Console.Deployments.Workbenches do
       completed_at: DateTime.utc_now(),
       error: error
     })
+    |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Updates the knowledge_updated_at timestamp for a job.
+  """
+  @spec knowledge_updated(WorkbenchJob.t()) :: job_resp
+  def knowledge_updated(%WorkbenchJob{} = job) do
+    job
+    |> WorkbenchJob.changeset(%{knowledge_updated_at: DateTime.utc_now()})
     |> Repo.update()
     |> notify(:update)
   end

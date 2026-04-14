@@ -27,10 +27,11 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     |> validate_required([:query])
   end
 
-
   def implement(_, %__MODULE__{} = tool) do
-    with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+    tool = Map.put_new(tool, :time_range, TimeRange.default())
+    with :ok <- TimeRange.safe(tool.time_range),
+         {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(tool),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: content, metrics: Enum.map(output.metrics, &mapify/1)}}
@@ -48,12 +49,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   defp input(%__MODULE__{tool: tool, query: q, step: s, time_range: tr}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
-      {:ok, %MetricsQueryInput{
-        connection: connection,
-        query: q,
-        step: s,
-        range: TimeRange.to_proto(tr),
-      }}
+      tr = TimeRange.to_proto(tr)
+      {:ok, %MetricsQueryInput{connection: connection, query: q, step: s,  range: tr}}
     end
   end
 

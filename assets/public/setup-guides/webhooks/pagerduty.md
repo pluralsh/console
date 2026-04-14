@@ -1,41 +1,43 @@
 # PagerDuty Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in PagerDuty against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, incidents, and escalation lifecycle changes.
+Reference: [PagerDuty - Webhooks](https://support.pagerduty.com/main/docs/webhooks)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-Configure webhook in Plural:
+In Plural:
 
-- Type: Observability
-- Provider: PAGERDUTY
-- Secret: shared secret
+1. Set **Type** to `Observability`.
+2. Set **Provider** to `PAGERDUTY`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-Copy the Plural webhook URL.
+Copy the generated webhook URL.
 
-## 2. Register URL and secret in PagerDuty
+## 2. Create webhook subscription in PagerDuty
 
-In PagerDuty extensions/webhooks or event orchestration actions:
+In your PagerDuty account (`https://<your-subdomain>.pagerduty.com/`):
 
-- URL: Plural webhook endpoint
-- Secret/signing token: same value as Plural secret
+1. Open webhook subscriptions (generic or service-scoped)
+2. Create a new subscription with HTTP delivery
+3. Set destination URL to the Plural webhook URL
+4. Select service/team/account filter scope
+5. Add auth header or Basic Auth using the Plural signing secret (if your PagerDuty webhook mode supports it)
 
-Choose the service(s) tied to your incident flow.
+## 3. Select event types
 
-## 3. Configure incident triggers
+Enable incident lifecycle events:
 
-Enable/route events such as:
+- `incident.triggered`
+- `incident.acknowledged`
+- `incident.resolved`
 
-- incident triggered
-- incident acknowledged
-- incident resolved
-- escalation events (if needed)
+Include additional incident update events only if needed.
 
-Prefer service-level filtering so only relevant incidents are sent.
+## 4. Validate
 
-## 4. Validate end-to-end
+Trigger a test incident in PagerDuty and confirm in Plural:
 
-Create a test incident in PagerDuty. Confirm in Plural:
-
-- event accepted
-- secret validated
-- incident state updates reflected
+- delivery accepted
+- auth/secret verification succeeds
+- incident state transitions are visible

@@ -1,41 +1,43 @@
 # Sentry Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in Sentry against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, issue lifecycle updates, and regressions.
+References:
+- [Sentry - Issue Alerts for webhook integrations](https://docs.sentry.io/organization/integrations/integration-platform/webhooks/issue-alerts/)
+- [Sentry Help - Issue webhooks vs alert rules](https://sentry.zendesk.com/hc/en-us/articles/41592230359835-Why-do-issues-get-pushed-to-my-webhook-integration-even-when-alert-rules-do-not-trigger)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-Create webhook details in Plural:
+In Plural:
 
-- Type: Observability
-- Provider: SENTRY
-- Secret: shared secret used for request verification
+1. Set **Type** to `Observability`.
+2. Set **Provider** to `SENTRY`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-Copy the Plural webhook URL.
+Copy the generated webhook URL.
 
-## 2. Register URL and secret in Sentry
+## 2. Configure webhook integration in your Sentry org
 
-In Sentry project/organization integrations for webhooks:
+Open your Sentry host (for example `https://<your-sentry-host>/`) and configure the webhook integration/action to POST to the Plural URL.
 
-- URL: Plural webhook endpoint
-- Secret/signing key: same secret from Plural
+If your Sentry setup allows custom auth headers, send HTTP Basic Auth with:
 
-Bind the integration to the right projects.
+- username: any non-empty value
+- password: the Plural signing secret
 
-## 3. Configure Sentry triggers
+## 3. Configure notifications
 
-Enable event categories for operational signal flow:
+Enable only the event streams you need:
 
-- issue created
-- issue regressed
-- issue resolved
-- alert rule fired/resolved (if configured)
+- issue alert events (rule-triggered)
+- issue lifecycle events (created/resolved/regressed) only if required
 
-Filter by project and severity to keep event volume relevant.
+This avoids duplicate/noisy deliveries.
 
-## 4. Validate and monitor
+## 4. Validate
 
-Trigger a test error and resolve/regress it. Confirm in Plural:
+Trigger a test error and an alert-rule event, then confirm in Plural:
 
-- events arrive with valid signature
-- lifecycle changes are represented correctly
-- downstream automations can key off these events
+- request accepted
+- auth/verification succeeds
+- lifecycle and alert events are mapped correctly

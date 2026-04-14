@@ -1,0 +1,39 @@
+Here's a prior resolution of a Workbench job.
+
+## Original Task
+
+```
+<%= @job.prompt %>
+```
+
+## Conclusion
+
+The ultimate accepted conclusion of the workbenches analysis.
+
+```
+<%= @job.conclusion %>
+```
+
+## Topology
+
+A mermaid diagram of the system graph at the time of the analysis.
+
+```mermaid
+<%= @job.topology %>
+```
+
+## Pull Requests
+
+All Pull Requests created to ultimately resolve the issue:
+
+```json
+<%= Jason.encode!(@job.pull_requests) %>
+```
+
+## Activities
+
+A list of activities done to derive the conclusion.
+
+```json
+<%= Jason.encode!(@job.activities) %>
+```

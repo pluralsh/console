@@ -1,46 +1,43 @@
 # GitLab Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in GitLab against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, new tickets, and incident issue updates.
+Reference: [GitLab - Webhooks](https://docs.gitlab.com/user/project/integrations/webhooks/)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-In Plural create:
+In Plural:
 
-- Type: Ticketing
-- Provider: GITLAB
-- URL: incoming webhook URL from Plural
-- Secret: shared secret
+1. Set **Type** to `Ticketing`.
+2. Set **Provider** to `GITLAB`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-## 2. Register URL and secret in GitLab
+Plural then shows the generated webhook URL. Copy it.
 
-In GitLab project/group settings under Webhooks:
+## 2. Create webhook in your GitLab instance
 
-- URL: paste the Plural URL
-- Secret token: paste the same secret from Plural
-- SSL verification: keep enabled unless your environment requires otherwise
+Open your GitLab host (for example `https://<your-gitlab-host>/`) and navigate to:
 
-## 3. Configure GitLab triggers
+1. **Project** -> **Settings** -> **Webhooks**
+2. **Add new webhook**
+3. **URL**: paste the Plural webhook URL
+4. **Secret token**: paste the same signing secret from Plural
+5. Keep **SSL verification** enabled (unless your security policy says otherwise)
 
-Enable events that correspond to ticket lifecycle:
+## 3. Select events
 
-- Issues events
-- Notes/comments events (optional)
-- Labels changes (if used for severity)
-- Confidential issue updates where applicable
+Enable at least:
 
-For alert-driven workflows, scope to projects where alert tickets are created.
+- Issue events
+- Note/comment events (if comments matter for workflows)
+- Label or state changes used by your routing logic
 
-## 4. Test the integration
+Use project/group scoping to keep event volume relevant.
 
-Use GitLab Test webhook for Issues events and then open a real test issue.
+## 4. Validate
 
-Check Plural for:
+Send GitLab's test event and then create a real test issue. Confirm in Plural:
 
-- successful request validation
-- processed event payload
-- activity logs with expected event type
-
-## 5. Operational tips
-
-- keep separate webhooks for staging and production projects
-- apply narrow event filters to reduce noise
+- request accepted
+- secret validation succeeds
+- expected issue activity is recorded

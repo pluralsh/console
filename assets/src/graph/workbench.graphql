@@ -624,6 +624,13 @@ mutation CreateWorkbenchJob(
   }
 }
 
+mutation CancelWorkbenchJob($jobId: ID!) {
+  cancelWorkbenchJob(jobId: $jobId) {
+    id
+    status
+  }
+}
+
 mutation CreateWorkbenchMessage(
   $jobId: ID!
   $attributes: WorkbenchMessageAttributes!

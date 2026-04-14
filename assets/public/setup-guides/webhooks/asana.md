@@ -1,54 +1,42 @@
 # Asana Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in Asana against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, new tickets, and workflow updates.
+Reference: [Asana Developers - Create a webhook](https://developers.asana.com/reference/createwebhook)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-In Plural, go to the webhook creation flow and choose:
+In Plural:
 
-- Type: Ticketing
-- Provider: ASANA
+1. Set **Type** to `Ticketing`.
+2. Set **Provider** to `ASANA`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-Fill in:
+Plural generates the webhook URL after create. Copy it.
 
-- Name: a clear name like Asana Production Tickets
-- URL: the callback URL Plural gives you
-- Secret: a strong shared secret
+## 2. Create webhook subscription in Asana
 
-Save the webhook in Plural.
+Asana webhooks are created through the Asana API against your workspace/project resources on `https://app.asana.com/`.
 
-## 2. Register URL and secret in Asana
+Create the webhook with:
 
-In Asana, open your app or integration settings and create a webhook subscription:
+- `resource`: the Asana project/task resource to watch
+- `target`: the Plural webhook URL
 
-- Target URL: paste the Plural webhook URL
-- Secret/token field: paste the same secret from Plural
+During creation, Asana sends a handshake with `X-Hook-Secret`. Your endpoint must echo that header in a `200`/`204` response to complete setup.
 
-If Asana requires signing secrets per endpoint, ensure the secret is bound to this exact URL.
+## 3. Event scope
 
-## 3. Configure triggers to send events to Plural
+Scope the webhook resource to incident/ticketing work so Plural receives only relevant task lifecycle updates.
 
-Enable triggers that map to operational ticketing activity:
+## 4. Secret and verification note
 
-- New task/ticket created
-- Task moved to incident/alerts project
-- Critical priority changes
-- Status transitions for incident-related work
+Asana signs events with its own webhook secret (`X-Hook-Secret` flow), which is different from tools that let you set a custom shared token. Keep the Plural signing secret for Plural-side webhook identity, and ensure Asana handshake succeeds.
 
-Prefer project-level or workspace-level filters so only relevant events are sent.
+## 5. Validate
 
-## 4. Validate delivery
+Create or update a test task in the subscribed resource, then confirm in Plural:
 
-Trigger a test event in Asana (for example create a test ticket) and verify in Plural:
-
-- request is received
-- signature/secret validation succeeds
-- event appears in webhook activity
-
-## 5. Troubleshooting
-
-If events fail:
-
-- confirm URL exactly matches the Plural endpoint
-- rotate and re-enter the secret on both sides
-- ensure the selected project/workspace scope includes the event source
+- request accepted
+- event payload parsed
+- expected task lifecycle changes visible

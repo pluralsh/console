@@ -1,7 +1,7 @@
 defmodule Console.AI.Cron do
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.{Repo, PubSub}
-  alias Console.AI.{Worker, Chat, VectorStore}
+  alias Console.AI.{Worker, Chat, VectorStore, Workbench}
   alias Console.Deployments.{Settings, Sentinels}
   alias Console.Schema.{
     Alert,
@@ -15,7 +15,8 @@ defmodule Console.AI.Cron do
     AgentRun,
     SentinelRun,
     PrAutomation,
-    Catalog
+    Catalog,
+    WorkbenchJob
   }
 
   require Logger
@@ -155,6 +156,30 @@ defmodule Console.AI.Cron do
       |> Stream.each(&Console.AI.PubSub.Vector.Bulk.insert/1)
       |> Stream.run()
     end
+  end
+
+  def vectorize_workbench_jobs() do
+    with true <- VectorStore.enabled?() do
+      Logger.info "re-vectorizing all workbench jobs"
+      WorkbenchJob.resolved()
+      |> WorkbenchJob.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
+      |> Stream.run()
+    end
+  end
+
+  def workbench_job_knowledge_backfill() do
+    WorkbenchJob.requires_backfill()
+    |> WorkbenchJob.resolved()
+    |> WorkbenchJob.preloaded([:result, :pull_requests, workbench: [:repository, :workbench_skills]])
+    |> WorkbenchJob.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle()
+    |> Flow.from_enumerable(stages: 5)
+    |> Flow.map(&Workbench.Knowledge.Backfill.skills/1)
+    |> Flow.run()
   end
 
   defp batch_insight(event, chunk) do

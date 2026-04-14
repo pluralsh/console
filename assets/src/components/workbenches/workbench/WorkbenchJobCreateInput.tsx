@@ -23,16 +23,18 @@ import {
 } from 'generated/graphql'
 import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
 import type { ComponentProps, RefObject } from 'react'
-import { useMemo, useRef, useState } from 'react'
+import { animated, useTransition } from '@react-spring/web'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
   getWorkbenchSavedPromptsAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { Body2P } from '../../utils/typography/Text.tsx'
+import { TRUNCATE } from 'components/utils/truncate.ts'
 
 const MAX_WIDTH = 924
 const SAVED_PROMPTS_LIMIT = 6
@@ -194,22 +196,57 @@ function WorkbenchSavedPromptsOverlay({
     () => mapExistingNodes(data?.workbench?.prompts),
     [data]
   )
-  const visiblePrompts = prompts.slice(0, SAVED_PROMPTS_LIMIT)
+  const visiblePrompts = useMemo(
+    () => prompts.slice(0, SAVED_PROMPTS_LIMIT),
+    [prompts]
+  )
   const hasMorePrompts = !!data?.workbench?.prompts?.pageInfo.hasNextPage
+  const showLoading = promptsLoading && !data
 
-  if (!open) return null
+  const [lastVisiblePrompts, setLastVisiblePrompts] = useState(visiblePrompts)
 
-  return (
-    <PromptsPanelSC>
+  useEffect(() => {
+    if (!open) return
+    // Preserve chip list during close animation while the query is skipped.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLastVisiblePrompts(visiblePrompts)
+  }, [open, visiblePrompts])
+
+  const renderedPrompts = open ? visiblePrompts : lastVisiblePrompts
+
+  const theme = useTheme()
+
+  const transitionProps = useMemo(
+    () => ({
+      from: { opacity: 0, maxHeight: 0, marginTop: 0 },
+      enter: { opacity: 1, maxHeight: 480, marginTop: theme.spacing.small },
+      leave: { opacity: 0, maxHeight: 0, marginTop: 0 },
+      config: open
+        ? { mass: 0.6, tension: 280, velocity: 0.02 }
+        : { mass: 0.6, tension: 400, velocity: 0.02, restVelocity: 0.1 },
+    }),
+    [open, theme.spacing.small]
+  )
+
+  const transitions = useTransition(open ? [true] : [], transitionProps)
+
+  return transitions((styles) => (
+    <AnimatedPromptsPanelSC
+      style={{
+        opacity: styles.opacity,
+        maxHeight: styles.maxHeight,
+        marginTop: styles.marginTop,
+      }}
+    >
       {error ? (
         <GqlError error={error} />
-      ) : promptsLoading && !data ? (
+      ) : showLoading ? (
         <OverlayLoadingSC>
           <Spinner />
         </OverlayLoadingSC>
       ) : (
         <PromptListSC>
-          {visiblePrompts.map((savedPrompt) => (
+          {renderedPrompts.map((savedPrompt) => (
             <SavedPromptsChip
               key={savedPrompt.id}
               label={savedPrompt.prompt ?? ''}
@@ -223,7 +260,7 @@ function WorkbenchSavedPromptsOverlay({
               onClick={() => onSelectPrompt(savedPrompt.prompt ?? '')}
             />
           ))}
-          {isEmpty(visiblePrompts) && (
+          {isEmpty(renderedPrompts) && (
             <EmptyPromptsTextSC>No saved prompts yet.</EmptyPromptsTextSC>
           )}
           {hasMorePrompts && (
@@ -235,8 +272,8 @@ function WorkbenchSavedPromptsOverlay({
           )}
         </PromptListSC>
       )}
-    </PromptsPanelSC>
-  )
+    </AnimatedPromptsPanelSC>
+  ))
 }
 
 function SavedPromptsChip({
@@ -250,20 +287,58 @@ function SavedPromptsChip({
   rightContent?: ComponentProps<typeof Chip>['rightContent']
   onClick: () => void
 }) {
+  const [showRightContent, setShowRightContent] = useState(false)
+
   return (
     <Chip
       size="large"
       fillLevel={fillLevel}
       clickable
       onClick={onClick}
+      onMouseEnter={() => setShowRightContent(true)}
+      onMouseLeave={() => setShowRightContent(false)}
+      onFocus={() => setShowRightContent(true)}
+      onBlur={() => setShowRightContent(false)}
       css={{
         borderRadius: 16,
         width: 'fit-content',
-        whiteSpace: 'pre-wrap',
+        maxWidth: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
+
+        '.children': {
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+        },
       }}
     >
-      <Body2P>{label}</Body2P>
-      {rightContent}
+      <Body2P
+        css={{
+          ...TRUNCATE,
+          minWidth: 0,
+          flex: 1,
+        }}
+      >
+        {label}
+      </Body2P>
+      {rightContent && (
+        <span
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            width: showRightContent ? 'fit-content' : 0,
+            marginLeft: showRightContent ? 4 : 0,
+            opacity: showRightContent ? 1 : 0,
+            transition:
+              'width 200ms ease, margin-left 200ms ease, opacity 200ms ease',
+          }}
+        >
+          {rightContent}
+        </span>
+      )}
     </Chip>
   )
 }
@@ -277,8 +352,10 @@ const OverlayLoadingSC = styled(Flex)({
 const PromptListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'flex-start',
   gap: theme.spacing.small,
   maxHeight: 320,
+  minWidth: 0,
   overflow: 'hidden auto',
 }))
 
@@ -287,12 +364,13 @@ const InputWrapperSC = styled.div({
   maxWidth: MAX_WIDTH,
 })
 
-const PromptsPanelSC = styled.div(({ theme }) => ({
+const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   left: 0,
   right: 0,
-  marginTop: theme.spacing.xsmall,
   zIndex: theme.zIndexes.selectPopover,
+  boxSizing: 'border-box',
+  overflow: 'hidden',
   backdropFilter: 'blur(4px)',
   border: `1px solid ${chroma(theme.colors['border-fill-two']).alpha(0.1).hex()}`,
   borderRadius: theme.borderRadiuses.large,

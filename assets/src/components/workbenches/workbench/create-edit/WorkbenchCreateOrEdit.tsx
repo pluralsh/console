@@ -397,6 +397,7 @@ function sanitizeInitialForm({
     systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
+    overrideBotUser: false,
     configuration: {
       infrastructure: { kubernetes, services, stacks },
       coding: { mode, repositories },

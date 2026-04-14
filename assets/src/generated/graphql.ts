@@ -415,6 +415,10 @@ export type AgentRun = {
   __typename?: 'AgentRun';
   /** the analysis of the agent run */
   analysis?: Maybe<AgentAnalysis>;
+  /** whether babysit mode is enabled for this run */
+  babysit?: Maybe<Scalars['Boolean']['output']>;
+  /** interval in seconds between babysit checks for this run */
+  babysitInterval?: Maybe<Scalars['Int']['output']>;
   /** the branch this agent run is operating on (if not set, use default branch on clone) */
   branch?: Maybe<Scalars['String']['output']>;
   /** the error reason of the agent run */
@@ -459,6 +463,10 @@ export type AgentRun = {
 };
 
 export type AgentRunAttributes = {
+  /** whether babysit mode is enabled for this run */
+  babysit?: InputMaybe<Scalars['Boolean']['input']>;
+  /** interval in seconds between babysit checks for this run */
+  babysitInterval?: InputMaybe<Scalars['Int']['input']>;
   /** the flow this agent run is associated with */
   flowId?: InputMaybe<Scalars['ID']['input']>;
   /** the programming language used in the agent run */
@@ -533,6 +541,7 @@ export type AgentRunRepositoryEdge = {
 };
 
 export enum AgentRunStatus {
+  Babysitting = 'BABYSITTING',
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
   Pending = 'PENDING',
@@ -541,6 +550,10 @@ export enum AgentRunStatus {
 }
 
 export type AgentRunStatusAttributes = {
+  /** whether babysit mode is enabled for this run */
+  babysit?: InputMaybe<Scalars['Boolean']['input']>;
+  /** interval in seconds between babysit checks for this run */
+  babysitInterval?: InputMaybe<Scalars['Int']['input']>;
   /** the error reason of the agent run */
   error?: InputMaybe<Scalars['String']['input']>;
   /** the messages this agent run has generated during its run */
@@ -557,6 +570,8 @@ export type AgentRuntime = {
   aiProxy?: Maybe<Scalars['Boolean']['output']>;
   /** the git repositories allowed to be used with this runtime */
   allowedRepositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** default interval in seconds between babysit checks for runs on this runtime */
+  babysitInterval?: Maybe<Scalars['Int']['output']>;
   /** the cluster this runtime is running on */
   cluster?: Maybe<Cluster>;
   /** the policy for creating runs on this runtime */
@@ -586,6 +601,8 @@ export type AgentRuntimeAttributes = {
   aiProxy?: InputMaybe<Scalars['Boolean']['input']>;
   /** the git repositories allowed to be used with this runtime */
   allowedRepositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** default interval in seconds between babysit checks for runs on this runtime */
+  babysitInterval?: InputMaybe<Scalars['Int']['input']>;
   /** the policy for creating runs on this runtime */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
   /** whether this is the default runtime for coding agents */
@@ -5405,6 +5422,11 @@ export type LogLine = {
   log?: Maybe<Scalars['String']['output']>;
   timestamp?: Maybe<Scalars['DateTime']['output']>;
 };
+
+export enum LogQueryOperator {
+  And = 'AND',
+  Or = 'OR'
+}
 
 export type LogStream = {
   __typename?: 'LogStream';
@@ -11194,6 +11216,7 @@ export type RootQueryTypeLogAggregationArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  operator?: InputMaybe<LogQueryOperator>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -11204,6 +11227,7 @@ export type RootQueryTypeLogAggregationBucketsArgs = {
   aggregation?: InputMaybe<LogAggregationInput>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  operator?: InputMaybe<LogQueryOperator>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -12221,6 +12245,8 @@ export type ScmConnectionEdge = {
 export type ScmCreds = {
   __typename?: 'ScmCreds';
   token: Scalars['String']['output'];
+  /** the type of the scm connection */
+  type?: Maybe<ScmType>;
   username: Scalars['String']['output'];
 };
 
@@ -14728,6 +14754,8 @@ export type Workbench = {
   /** the agent runtime for this workbench */
   agentRuntime?: Maybe<AgentRuntime>;
   alerts?: Maybe<AlertConnection>;
+  /** the service account user used for automated workbench agent runs */
+  botUser?: Maybe<User>;
   /** workbench configuration */
   configuration?: Maybe<WorkbenchConfiguration>;
   crons?: Maybe<WorkbenchCronConnection>;
@@ -14827,6 +14855,8 @@ export type WorkbenchAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   /** the name of the workbench (must be unique) */
   name: Scalars['String']['input'];
+  /** when true on update, sets botUserId to the authenticated user */
+  overrideBotUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project for this workbench */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can read and execute this workbench */
@@ -18386,6 +18416,7 @@ export type LogAggregationQueryVariables = Exact<{
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
+  operator?: InputMaybe<LogQueryOperator>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
 }>;
 
@@ -18408,6 +18439,7 @@ export type LogAggregationBucketsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   time?: InputMaybe<LogTimeRange>;
+  operator?: InputMaybe<LogQueryOperator>;
   aggregation?: InputMaybe<LogAggregationInput>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
 }>;
@@ -19519,6 +19551,13 @@ export type CreateWorkbenchJobMutationVariables = Exact<{
 
 
 export type CreateWorkbenchJobMutation = { __typename?: 'RootMutationType', createWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null } | null };
+
+export type CancelWorkbenchJobMutationVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type CancelWorkbenchJobMutation = { __typename?: 'RootMutationType', cancelWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
 export type CreateWorkbenchMessageMutationVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -36121,7 +36160,7 @@ export type LoginLinkMutationHookResult = ReturnType<typeof useLoginLinkMutation
 export type LoginLinkMutationResult = Apollo.MutationResult<LoginLinkMutation>;
 export type LoginLinkMutationOptions = Apollo.BaseMutationOptions<LoginLinkMutation, LoginLinkMutationVariables>;
 export const LogAggregationDocument = gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput]) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
@@ -36129,6 +36168,7 @@ export const LogAggregationDocument = gql`
     serviceId: $serviceId
     time: $time
     facets: $facets
+    operator: $operator
   ) {
     ...LogLine
   }
@@ -36152,6 +36192,7 @@ export const LogAggregationDocument = gql`
  *      query: // value for 'query'
  *      serviceId: // value for 'serviceId'
  *      time: // value for 'time'
+ *      operator: // value for 'operator'
  *      facets: // value for 'facets'
  *   },
  * });
@@ -36229,13 +36270,14 @@ export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQue
 export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
 export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
 export const LogAggregationBucketsDocument = gql`
-    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
   logAggregationBuckets(
     serviceId: $serviceId
     clusterId: $clusterId
     query: $query
     time: $time
     aggregation: $aggregation
+    operator: $operator
     facets: $facets
   ) {
     ...LogAggregationBucket
@@ -36259,6 +36301,7 @@ export const LogAggregationBucketsDocument = gql`
  *      clusterId: // value for 'clusterId'
  *      query: // value for 'query'
  *      time: // value for 'time'
+ *      operator: // value for 'operator'
  *      aggregation: // value for 'aggregation'
  *      facets: // value for 'facets'
  *   },
@@ -41402,6 +41445,40 @@ export function useCreateWorkbenchJobMutation(baseOptions?: Apollo.MutationHookO
 export type CreateWorkbenchJobMutationHookResult = ReturnType<typeof useCreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationResult = Apollo.MutationResult<CreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchJobMutation, CreateWorkbenchJobMutationVariables>;
+export const CancelWorkbenchJobDocument = gql`
+    mutation CancelWorkbenchJob($jobId: ID!) {
+  cancelWorkbenchJob(jobId: $jobId) {
+    id
+    status
+  }
+}
+    `;
+export type CancelWorkbenchJobMutationFn = Apollo.MutationFunction<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>;
+
+/**
+ * __useCancelWorkbenchJobMutation__
+ *
+ * To run a mutation, you first call `useCancelWorkbenchJobMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelWorkbenchJobMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelWorkbenchJobMutation, { data, loading, error }] = useCancelWorkbenchJobMutation({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useCancelWorkbenchJobMutation(baseOptions?: Apollo.MutationHookOptions<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>(CancelWorkbenchJobDocument, options);
+      }
+export type CancelWorkbenchJobMutationHookResult = ReturnType<typeof useCancelWorkbenchJobMutation>;
+export type CancelWorkbenchJobMutationResult = Apollo.MutationResult<CancelWorkbenchJobMutation>;
+export type CancelWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CancelWorkbenchJobMutation, CancelWorkbenchJobMutationVariables>;
 export const CreateWorkbenchMessageDocument = gql`
     mutation CreateWorkbenchMessage($jobId: ID!, $attributes: WorkbenchMessageAttributes!) {
   createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
@@ -42292,6 +42369,7 @@ export const namedOperations = {
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
     CreateWorkbenchJob: 'CreateWorkbenchJob',
+    CancelWorkbenchJob: 'CancelWorkbenchJob',
     CreateWorkbenchMessage: 'CreateWorkbenchMessage',
     CreateWorkbenchPrompt: 'CreateWorkbenchPrompt',
     UpdateWorkbenchPrompt: 'UpdateWorkbenchPrompt',

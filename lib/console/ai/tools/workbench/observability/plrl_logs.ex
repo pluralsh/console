@@ -9,6 +9,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     field :cluster_id, :string
     field :query,      :string
     field :limit,      :integer
+    field :operator,   Console.Schema.Monitor.Operator, default: :or
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
       field :name,  :string
@@ -18,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(service_id cluster_id query limit)a
+  @valid ~w(service_id cluster_id query limit operator)a
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/plrl_logs.json") |> Jason.decode!()
   def name(_), do: "plrl_logs"
@@ -55,10 +56,11 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     }
   end
 
-  def logs_query(%{query: q, limit: l, facets: f, time_range: tr}) do
+  def logs_query(%{query: q, limit: l, facets: f, time_range: tr, operator: op}) do
     Query.new(
       query: q,
       limit: l,
+      operator: op,
       facets: Enum.map(f || [], & %{key: &1.name, value: &1.value}),
       time: to_time(tr)
     )

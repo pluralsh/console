@@ -16,6 +16,7 @@ import {
   LogsDateDropdown,
   LogsFiltersT,
   LogsLabelsPicker,
+  LogsQueryOperatorSelect,
   LogsSinceSecondsSelect,
 } from './LogsFilters'
 import { LogsLabels } from './LogsLabels'
@@ -62,6 +63,7 @@ export function Logs({
       limit: filters.queryLength || DEFAULT_LOG_QUERY_LENGTH,
       time,
       facets: labels,
+      operator: filters.queryOperator,
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
@@ -97,6 +99,12 @@ export function Logs({
   return (
     <MainContentWrapperSC>
       <Flex gap="small">
+        <LogsQueryOperatorSelect
+          operator={filters.queryOperator}
+          setOperator={(queryOperator) =>
+            setFilters({ ...filters, queryOperator })
+          }
+        />
         <Input2
           placeholder="Filter logs"
           startIcon={<SearchIcon size={14} />}
