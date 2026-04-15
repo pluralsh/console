@@ -57,12 +57,14 @@ import {
 import { GqlError } from '../../../utils/Alert'
 import { StackedText } from '../../../utils/table/StackedText'
 import {
+  categoryToLabel,
   TOOL_TYPE_TO_LABEL,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
 } from '../../tools/workbenchToolsUtils'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
+import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
 
 type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
 type WorkbenchFormStepProps = {
@@ -605,9 +607,10 @@ export function WorkbenchAttachToolsStep({
           styles={{
             ...workbenchToolCardGridStyles(320),
             gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            padding: 0,
           }}
         >
-          {selectedTools.map(({ id, name, tool: type }) => (
+          {selectedTools.map(({ id, name, tool: type, categories }) => (
             <Card key={id}>
               <WorkbenchToolCardBody>
                 <Flex
@@ -646,6 +649,23 @@ export function WorkbenchAttachToolsStep({
                       )
                     }
                   />
+                </Flex>
+                <WorkbenchesConfiguredToolMetadata
+                  toolId={id}
+                  toolType={type}
+                />
+                <Flex
+                  gap="xsmall"
+                  wrap="wrap"
+                >
+                  {categories?.filter(isNonNullable).map((cat, i) => (
+                    <Chip
+                      key={i}
+                      size="small"
+                    >
+                      {categoryToLabel[cat]}
+                    </Chip>
+                  ))}
                 </Flex>
               </WorkbenchToolCardBody>
             </Card>
