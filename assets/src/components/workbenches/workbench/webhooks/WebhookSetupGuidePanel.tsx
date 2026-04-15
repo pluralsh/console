@@ -172,16 +172,21 @@ export function WebhookSetupGuidePanelContent() {
         direction="column"
         minHeight={0}
         overflow="auto"
-        padding="medium"
         color="text"
       >
-        {isMarkdownLoading ? (
-          'Loading setup guide...'
-        ) : markdownError ? (
-          markdownError
-        ) : (
-          <Markdown text={markdownText} />
-        )}
+        <Flex
+          direction="column"
+          padding="large"
+          minHeight={0}
+        >
+          {isMarkdownLoading ? (
+            'Loading setup guide...'
+          ) : markdownError ? (
+            markdownError
+          ) : (
+            <Markdown text={markdownText} />
+          )}
+        </Flex>
       </Flex>
     </SidePanelContent>
   )

@@ -54,147 +54,149 @@ export function WorkbenchSidePanel({
 
   return (
     <WrapperSC>
-      <SectionSC $first>
-        <HeaderSC>
-          <span>Tools</span>
-          <IconFrame
-            clickable
-            size="small"
-            icon={<AddIcon size={12} />}
-            tooltip="Add or remove tools"
-            onClick={onOpenToolsEdit}
-          />
-        </HeaderSC>
-        {hasTools ? (
-          <Flex
-            gap="xxsmall"
-            direction="column"
-          >
-            {tools.map((tool) => (
-              <Flex
-                key={tool.id}
-                gap="xsmall"
-                align="center"
-              >
-                <ItemIconContainerSC>
-                  <IconFrame
-                    icon={<WorkbenchToolIcon type={tool.tool} />}
-                    size="xsmall"
-                  />
-                </ItemIconContainerSC>
-                <ItemNameSC>{tool.name}</ItemNameSC>
-              </Flex>
-            ))}
-          </Flex>
-        ) : (
-          <ButtonSC
-            small
-            startIcon={<AddIcon size={12} />}
-            tertiary
-            onClick={onOpenToolsEdit}
-          >
-            Add tools
-          </ButtonSC>
-        )}
-      </SectionSC>
-      <SectionSC>
-        <HeaderSC>
-          <span>Webhooks</span>
-          {hasWebhooks && (
+      <ContentSC>
+        <SectionSC $first>
+          <HeaderSC>
+            <span>Tools</span>
             <IconFrame
               clickable
               size="small"
               icon={<AddIcon size={12} />}
-              tooltip="Add webhook"
+              tooltip="Add or remove tools"
+              onClick={onOpenToolsEdit}
+            />
+          </HeaderSC>
+          {hasTools ? (
+            <Flex
+              gap="xxsmall"
+              direction="column"
+            >
+              {tools.map((tool) => (
+                <Flex
+                  key={tool.id}
+                  gap="xsmall"
+                  align="center"
+                >
+                  <ItemIconContainerSC>
+                    <IconFrame
+                      icon={<WorkbenchToolIcon type={tool.tool} />}
+                      size="xsmall"
+                    />
+                  </ItemIconContainerSC>
+                  <ItemNameSC>{tool.name}</ItemNameSC>
+                </Flex>
+              ))}
+            </Flex>
+          ) : (
+            <ButtonSC
+              small
+              startIcon={<AddIcon size={12} />}
+              tertiary
+              onClick={onOpenToolsEdit}
+            >
+              Add tools
+            </ButtonSC>
+          )}
+        </SectionSC>
+        <SectionSC>
+          <HeaderSC>
+            <span>Webhooks</span>
+            {hasWebhooks && (
+              <IconFrame
+                clickable
+                size="small"
+                icon={<AddIcon size={12} />}
+                tooltip="Add webhook"
+                onClick={() =>
+                  navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
+                }
+              />
+            )}
+          </HeaderSC>
+          {hasWebhooks ? (
+            <Flex
+              gap="xxsmall"
+              direction="column"
+            >
+              {webhooks.map((webhook) => (
+                <WorkbenchSidePanelEditRow
+                  key={webhook.id}
+                  onClick={() =>
+                    navigate(
+                      getWorkbenchWebhookTriggerEditAbsPath({
+                        workbenchId,
+                        webhookId: webhook.id,
+                      })
+                    )
+                  }
+                >
+                  <ItemIconContainerSC>
+                    <IconFrame
+                      icon={getWebhookIcon(webhook)}
+                      size="xsmall"
+                    />
+                  </ItemIconContainerSC>
+                  <ItemNameSC>{webhook.name}</ItemNameSC>
+                </WorkbenchSidePanelEditRow>
+              ))}
+            </Flex>
+          ) : (
+            <ButtonSC
+              small
+              startIcon={<AddIcon size={12} />}
+              tertiary
               onClick={() =>
                 navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
               }
-            />
+            >
+              Add webhook
+            </ButtonSC>
           )}
-        </HeaderSC>
-        {hasWebhooks ? (
-          <Flex
-            gap="xxsmall"
-            direction="column"
-          >
-            {webhooks.map((webhook) => (
-              <WorkbenchSidePanelEditRow
-                key={webhook.id}
+        </SectionSC>
+        <SectionSC>
+          <HeaderSC>
+            <span>Cron schedules</span>
+            {hasCrons && (
+              <IconFrame
+                clickable
+                size="small"
+                icon={<AddIcon size={12} />}
+                tooltip="Add cron schedule"
                 onClick={() =>
-                  navigate(
-                    getWorkbenchWebhookTriggerEditAbsPath({
-                      workbenchId,
-                      webhookId: webhook.id,
-                    })
-                  )
+                  navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
                 }
-              >
-                <ItemIconContainerSC>
-                  <IconFrame
-                    icon={getWebhookIcon(webhook)}
-                    size="xsmall"
-                  />
-                </ItemIconContainerSC>
-                <ItemNameSC>{webhook.name}</ItemNameSC>
-              </WorkbenchSidePanelEditRow>
-            ))}
-          </Flex>
-        ) : (
-          <ButtonSC
-            small
-            startIcon={<AddIcon size={12} />}
-            tertiary
-            onClick={() =>
-              navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
-            }
-          >
-            Add webhook
-          </ButtonSC>
-        )}
-      </SectionSC>
-      <SectionSC>
-        <HeaderSC>
-          <span>Cron schedules</span>
-          {hasCrons && (
-            <IconFrame
-              clickable
-              size="small"
-              icon={<AddIcon size={12} />}
-              tooltip="Add cron schedule"
+              />
+            )}
+          </HeaderSC>
+          {hasCrons ? (
+            <Flex
+              gap="medium"
+              flexWrap="nowrap"
+              width="100%"
+              direction="column"
+            >
+              {crons.map((cron) => (
+                <WorkbenchSidePanelCron
+                  key={cron.id}
+                  cron={cron}
+                  workbenchId={workbenchId}
+                />
+              ))}
+            </Flex>
+          ) : (
+            <ButtonSC
+              small
+              startIcon={<AddIcon size={12} />}
+              tertiary
               onClick={() =>
                 navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
               }
-            />
+            >
+              Add cron schedule
+            </ButtonSC>
           )}
-        </HeaderSC>
-        {hasCrons ? (
-          <Flex
-            gap="medium"
-            flexWrap="nowrap"
-            width="100%"
-            direction="column"
-          >
-            {crons.map((cron) => (
-              <WorkbenchSidePanelCron
-                key={cron.id}
-                cron={cron}
-                workbenchId={workbenchId}
-              />
-            ))}
-          </Flex>
-        ) : (
-          <ButtonSC
-            small
-            startIcon={<AddIcon size={12} />}
-            tertiary
-            onClick={() =>
-              navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
-            }
-          >
-            Add cron schedule
-          </ButtonSC>
-        )}
-      </SectionSC>
+        </SectionSC>
+      </ContentSC>
     </WrapperSC>
   )
 }
@@ -205,12 +207,18 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flexGrow: 1,
-  gap: theme.spacing.large,
   minHeight: 0,
   minWidth: 250,
   maxWidth: 250,
   overflowX: 'hidden',
   overflowY: 'auto',
+}))
+
+const ContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.large,
+  minHeight: '100%',
   padding: theme.spacing.medium,
 }))
 
