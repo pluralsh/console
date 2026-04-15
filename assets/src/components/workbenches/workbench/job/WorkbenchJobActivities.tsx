@@ -2,6 +2,7 @@ import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
 import {
   useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
+  useWorkbenchJobWhimseyTextQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
@@ -37,6 +38,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     fetchPolicy: 'cache-and-network',
     pollInterval: 30_000,
   })
+  const { data: whimseyData } = useWorkbenchJobWhimseyTextQuery({
+    variables: { id: jobId },
+    errorPolicy: 'ignore',
+    pollInterval: 15_000,
+  })
+
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
 
@@ -116,7 +123,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
                 {!jobCompleted &&
                   activities.every(({ status }) =>
                     isActivityTerminal(status)
-                  ) && <AILoadingText marginTop={spacing.small} />}
+                  ) && (
+                    <AILoadingText
+                      whimsey={whimseyData?.workbenchJob?.whimsey}
+                      marginTop={spacing.small}
+                    />
+                  )}
               </>
             }
             renderer={({ rowData }) => (

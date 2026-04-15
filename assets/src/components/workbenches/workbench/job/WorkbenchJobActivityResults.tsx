@@ -17,6 +17,7 @@ import { LogLine } from 'components/cd/logs/LogLine'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   WorkbenchJobActivityFragment,
@@ -133,7 +134,7 @@ export function JobActivityMetrics({
     theme: graphTheme,
     data: graphData,
     colors: COLORS,
-    margin: { top: 10, right: 20, bottom: 30, left: 30 } as const,
+    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
     xScale: { type: 'time' as const, format: 'native' as const },
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
@@ -223,6 +224,7 @@ export function ActivityModalIcon({
   modalContent: ReactNode
 }) {
   const [showModal, setShowModal] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
   return (
     <>
       <IconFrame
@@ -244,9 +246,13 @@ export function ActivityModalIcon({
       />
       <Modal
         header={modalHeader}
-        size="auto"
+        size="large"
         open={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false)
+          setFinishedAnimating(false)
+        }}
+        onAnimationEnd={() => setFinishedAnimating(true)}
         actions={
           <Button
             secondary
@@ -256,7 +262,14 @@ export function ActivityModalIcon({
           </Button>
         }
       >
-        {modalContent}
+        {finishedAnimating ? (
+          modalContent
+        ) : (
+          <RectangleSkeleton
+            $height={160}
+            $width="100%"
+          />
+        )}
       </Modal>
     </>
   )

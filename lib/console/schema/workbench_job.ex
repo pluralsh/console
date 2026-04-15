@@ -79,19 +79,12 @@ defmodule Console.Schema.WorkbenchJob do
   end
 
   def resolved(query \\ __MODULE__) do
-    from(j in __MODULE__,
-      join: pr in subquery(merged_prs(query)),
-      on: j.id == pr.id,
-      select: j
-    )
-  end
-
-  def merged_prs(query \\ __MODULE__) do
     from(j in query,
-      join: pr in assoc(j, :pull_requests),
-      group_by: j.id,
-      select: %{id: j.id, merged_prs: count(pr.id)},
-      having: count(pr.id) > 0 and count(fragment("CASE WHEN ? = 'merged' THEN 1 ELSE 0 END", pr.status)) == count(pr.id)
+      left_join: pr in ^PullRequest.for_status(:merged),
+        on: pr.workbench_job_id == j.id,
+      where: not is_nil(pr.id),
+      select: j,
+      distinct: true
     )
   end
 

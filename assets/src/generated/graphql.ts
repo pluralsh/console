@@ -15002,6 +15002,8 @@ export type WorkbenchJob = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the user who created this run */
   user?: Maybe<User>;
+  /** whimsically describes current progress for you */
+  whimsey?: Maybe<Scalars['String']['output']>;
   /** the workbench this run belongs to */
   workbench?: Maybe<Workbench>;
 };
@@ -19473,6 +19475,13 @@ export type WorkbenchJobActivitiesQueryVariables = Exact<{
 
 
 export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchJobWhimseyTextQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobWhimseyTextQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, whimsey?: string | null } | null };
 
 export type WorkbenchJobActivityQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -41059,6 +41068,50 @@ export type WorkbenchJobActivitiesQueryHookResult = ReturnType<typeof useWorkben
 export type WorkbenchJobActivitiesLazyQueryHookResult = ReturnType<typeof useWorkbenchJobActivitiesLazyQuery>;
 export type WorkbenchJobActivitiesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobActivitiesSuspenseQuery>;
 export type WorkbenchJobActivitiesQueryResult = Apollo.QueryResult<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>;
+export const WorkbenchJobWhimseyTextDocument = gql`
+    query WorkbenchJobWhimseyText($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    whimsey
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchJobWhimseyTextQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchJobWhimseyTextQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobWhimseyTextQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobWhimseyTextQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchJobWhimseyTextQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables> & ({ variables: WorkbenchJobWhimseyTextQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>(WorkbenchJobWhimseyTextDocument, options);
+      }
+export function useWorkbenchJobWhimseyTextLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>(WorkbenchJobWhimseyTextDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchJobWhimseyTextSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>;
+export function useWorkbenchJobWhimseyTextSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobWhimseyTextQuery | undefined, WorkbenchJobWhimseyTextQueryVariables>;
+export function useWorkbenchJobWhimseyTextSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>(WorkbenchJobWhimseyTextDocument, options);
+        }
+export type WorkbenchJobWhimseyTextQueryHookResult = ReturnType<typeof useWorkbenchJobWhimseyTextQuery>;
+export type WorkbenchJobWhimseyTextLazyQueryHookResult = ReturnType<typeof useWorkbenchJobWhimseyTextLazyQuery>;
+export type WorkbenchJobWhimseyTextSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobWhimseyTextSuspenseQuery>;
+export type WorkbenchJobWhimseyTextQueryResult = Apollo.QueryResult<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>;
 export const WorkbenchJobActivityDocument = gql`
     query WorkbenchJobActivity($id: ID!) {
   workbenchJobActivity(id: $id) {
@@ -42198,6 +42251,7 @@ export const namedOperations = {
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
+    WorkbenchJobWhimseyText: 'WorkbenchJobWhimseyText',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchTools: 'WorkbenchTools',
     WorkbenchTool: 'WorkbenchTool'

@@ -19,6 +19,8 @@ defmodule Console.Deployments.Workbenches do
   alias Console.Deployments.Settings
   alias Console.PubSub
 
+  require EEx
+
   @type error :: Console.error
   @type workbench_resp :: {:ok, Workbench.t()} | error
   @type tool_resp :: {:ok, WorkbenchTool.t()} | error
@@ -303,6 +305,15 @@ defmodule Console.Deployments.Workbenches do
     |> when_ok(:delete)
     |> notify(:delete, user)
   end
+
+  @whimsey_prompt "Ok generate a whimsical phrase to describe the current thing you're working in in at most 5 words"
+
+  def whimsey_text(%WorkbenchJob{} = job) do
+    job = Repo.preload(job, [:activities])
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_prompt(job: job))
+  end
+
+  EEx.function_from_file(:defp, :whimsey_prompt, Console.priv_filename(["prompts", "workbench", "whimsey.md.eex"]), [:assigns], trim: true)
 
   @doc """
   Creates a new workbench job for a workbench. Requires read access to the workbench.

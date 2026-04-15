@@ -9622,8 +9622,10 @@ type WorkbenchJob struct {
 	// the issue this run was spawned from
 	Issue      *Issue                          `json:"issue,omitempty"`
 	Activities *WorkbenchJobActivityConnection `json:"activities,omitempty"`
-	InsertedAt *string                         `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                         `json:"updatedAt,omitempty"`
+	// whimsically describes current progress for you
+	Whimsey    *string `json:"whimsey,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobActivity struct {
