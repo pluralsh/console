@@ -18,6 +18,7 @@ import {
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import pluralize from 'pluralize'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
@@ -276,7 +277,8 @@ function WorkbenchJobActivityThoughts({
       numWithLogs += isEmpty(attributes?.logs) ? 0 : 1
       numWithMetrics += isEmpty(attributes?.metrics) ? 0 : 1
     })
-    let header = `${thoughts.length - numWithLogs - numWithMetrics} tool calls`
+    const numOtherToolCalls = thoughts.length - numWithLogs - numWithMetrics
+    let header = `${numOtherToolCalls} tool ${pluralize('call', numOtherToolCalls)}`
     if (numWithLogs > 0) header += `, ${numWithLogs} fetched logs`
     if (numWithMetrics > 0) header += `, ${numWithMetrics} fetched metrics`
     return { thoughts, lastThought: thoughts.at(-1), header }

@@ -121,7 +121,15 @@ export function JobActivityMetrics({
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
-    const grouped = groupBy(metrics, (m) => m.name ?? 'metric')
+    const grouped = groupBy(
+      metrics,
+      ({ name, labels }) =>
+        `${name ?? 'metric'}{${
+          Object.entries(labels ?? {})
+            .map(([key, value]) => `${key}:${value}`)
+            .join(',') ?? ''
+        }}`
+    )
     return Object.entries(grouped).map(([name, points]) => ({
       id: name,
       data: points
