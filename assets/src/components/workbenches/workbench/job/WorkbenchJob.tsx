@@ -156,54 +156,50 @@ export function WorkbenchJob() {
                     <span>{job.user.name.trim()}</span>
                   )}
                   {job.insertedAt && (
-                    <>
-                      <span>
+                    <span>
+                      {formatDateTime(
+                        job.insertedAt,
+                        'YYYY-MM-DD ',
+                        false,
+                        true
+                      )}
+                      <span css={{ color: theme.colors['code-block-purple'] }}>
                         {formatDateTime(
                           job.insertedAt,
-                          'YYYY-MM-DD ',
+                          'HH:mm:ss',
                           false,
                           true
                         )}
-                        <span
-                          css={{ color: theme.colors['code-block-purple'] }}
-                        >
-                          {formatDateTime(
-                            job.insertedAt,
-                            'HH:mm:ss',
-                            false,
-                            true
-                          )}
-                        </span>
-                        {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
                       </span>
-                      {!isEmpty(jobTools) && (
-                        <Flex gap="xsmall">
-                          {visibleJobTools.map((tool) => (
-                            <Tooltip
-                              key={tool.id}
-                              label={tool.name}
-                              placement="bottom"
-                            >
-                              <WorkbenchToolIcon
-                                type={tool.tool}
-                                size={12}
-                              />
-                            </Tooltip>
-                          ))}
-                          {!isEmpty(hiddenJobTools) && (
-                            <Tooltip
-                              label={
-                                hiddenJobToolsLabel ||
-                                `${hiddenJobTools.length} more`
-                              }
-                              placement="bottom"
-                            >
-                              <span>+{hiddenJobTools.length}</span>
-                            </Tooltip>
-                          )}
-                        </Flex>
+                      {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
+                    </span>
+                  )}
+                  {!isEmpty(jobTools) && (
+                    <Flex gap="xsmall">
+                      {visibleJobTools.map((tool) => (
+                        <Tooltip
+                          key={tool.id}
+                          label={tool.name}
+                          placement="bottom"
+                        >
+                          <WorkbenchToolIcon
+                            type={tool.tool}
+                            size={12}
+                          />
+                        </Tooltip>
+                      ))}
+                      {!isEmpty(hiddenJobTools) && (
+                        <Tooltip
+                          label={
+                            hiddenJobToolsLabel ||
+                            `${hiddenJobTools.length} more`
+                          }
+                          placement="bottom"
+                        >
+                          <span>+{hiddenJobTools.length}</span>
+                        </Tooltip>
                       )}
-                    </>
+                    </Flex>
                   )}
                 </Flex>
               )

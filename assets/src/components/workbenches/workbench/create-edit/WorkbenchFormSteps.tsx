@@ -524,7 +524,7 @@ export function WorkbenchAttachToolsStep({
     return <GqlError error={error} />
   }
 
-  return !data ? (
+  return tools.length === 0 ? (
     <EmptyStateCompact
       message="You have not set up any tools yet"
       description="You can set up tools by clicking the button below. Tools can also be added later."
