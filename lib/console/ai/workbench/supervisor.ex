@@ -24,7 +24,7 @@ defmodule Console.AI.Workbench.Supervisor do
       transport_name: Agent.name(:transport, t, job),
       transport: MCP.transport(t, job)
     ])
-    |> Map.put(:restart, :transient)
+    # |> Map.put(:restart, :transient)
   end
 
   def client_module(%WorkbenchTool{mcp_server: %McpServer{protocol: :sse}}), do: Console.AI.MCP.LegacyClient
