@@ -433,7 +433,6 @@ export function Stacks() {
                   />
                   <StackDeleteModal
                     stack={fullStack}
-                    refetch={refetch}
                     open={menuKey === MenuItemKey.Delete}
                     onClose={() => setMenuKey(MenuItemKey.None)}
                   />
