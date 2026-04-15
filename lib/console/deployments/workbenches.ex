@@ -306,7 +306,7 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:delete, user)
   end
 
-  @whimsey_prompt "Ok generate a whimsical phrase to describe the current thing you're working in in at most 5 words"
+  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words"
 
   def whimsey_text(%WorkbenchJob{} = job) do
     job = Repo.preload(job, [:activities])
