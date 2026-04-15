@@ -12,11 +12,13 @@ export function AILoadingText({
   jobId,
   activityId,
   size = 'medium',
+  defaultText = 'Planning next moves',
   ...props
 }: {
   jobId?: string
   activityId?: string
   size?: 'small' | 'medium'
+  defaultText?: string
 } & FlexProps) {
   const { data: jobData } = useWorkbenchJobWhimseyTextQuery({
     variables: { id: jobId ?? '' },
@@ -35,7 +37,7 @@ export function AILoadingText({
   const whimseyText =
     jobData?.workbenchJob?.whimsey ||
     activityData?.workbenchJobActivity?.whimsey ||
-    'Planning next moves'
+    defaultText
   return (
     <Flex
       alignItems="center"

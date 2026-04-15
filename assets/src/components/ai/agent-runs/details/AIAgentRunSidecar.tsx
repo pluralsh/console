@@ -113,7 +113,10 @@ export function AgentRunSidecar({
               </SidecarItem>
             )}
             <SidecarItem heading="Status">
-              <RunStatusChip status={run.status} />
+              <RunStatusChip
+                status={run.status}
+                showSpinner={false}
+              />
             </SidecarItem>
             {run.mode && (
               <SidecarItem heading="Mode">
