@@ -98,5 +98,50 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       assert result[:status] == :successful
       assert result[:result][:output] == "complete"
     end
+
+    @tag :skip
+    test "it can handle linear tools in the agent loop" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      # expect(Provider, :completion, fn _, _ ->
+      #   {:ok, "try mcp", [
+      #     %Tool{name: "mcp_example_echo", arguments: %{"message" => "world"}, id: "1"}
+      #   ]}
+      # end)
+      expect(Provider, :completion, fn msgs, _ ->
+        assert Enum.any?(msgs, &match?({:tool, "Echo: world", _}, &1))
+        {:ok, "complete", [
+          %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
+        ]}
+      end)
+
+      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
+      tool = insert(:workbench_tool,
+        tool: :linear,
+        name: "linear",
+        configuration: %{linear: %{access_token: System.get_env("LINEAR_ACCESS_TOKEN")}}
+      )
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :integration)
+
+      {:ok, _engine} = Engine.new(job)
+      result = Subagents.Integration.run(activity, job, Environment.new(job, [tool], []))
+
+      assert result[:status] == :successful
+      assert result[:result][:output] == "complete"
+    end
   end
 end

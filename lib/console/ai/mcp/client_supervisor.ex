@@ -19,18 +19,23 @@ defmodule Console.AI.MCP.ClientSupervisor do
 
   def server_child(%ChatThread{} = t, %McpServer{url: url, protocol: proto} = s) do
     proto = proto || :sse
-    mod   = client_module(proto)
 
-    mod.child_spec([
-      client_name: Agent.name(:client, t, s),
-      transport_name: Agent.name(:transport, t, s),
-      transport: {proto, [base_url: url, headers: auth_headers(t, s)]}
-    ])
-    |> Map.put(:restart, :transient)
+    %{
+      id: Agent.name(:client, t, s),
+      start: {Anubis.Client, :start_link, [[
+        name: Agent.name(:client, t, s),
+        transport_name: Agent.name(:transport, t, s),
+        transport: {proto, [base_url: url, headers: auth_headers(t, s)]}
+      ] ++ mcp_configuration(s)]},
+      restart: :transient
+    }
   end
 
-  def client_module(:sse), do: Console.AI.MCP.LegacyClient
-  def client_module(_), do: Console.AI.MCP.Client
+  @mcp_client_info [client_info: %{"name" => "Plural", "version" => "1.0.0"}]
+
+  def mcp_configuration(%McpServer{protocol: :sse}),
+    do: Keyword.put(@mcp_client_info, :protocol_version, "2025-03-26")
+  def mcp_configuration(_), do: Keyword.put(@mcp_client_info, :protocol_version, "2025-06-18")
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)
