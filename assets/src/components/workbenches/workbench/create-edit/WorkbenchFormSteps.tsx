@@ -37,13 +37,12 @@ import {
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { OverlineH3 } from 'components/utils/typography/Text'
+import { OverlineH3, InlineA } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
-import { InlineA } from 'components/utils/typography/Text'
 import { Link } from 'react-router-dom'
 import {
   WORKBENCHES_TOOLS_ABS_PATH,

@@ -2794,6 +2794,9 @@ type WorkbenchJobActivity {
   "thoughts emitted during this activity"
   thoughts: [WorkbenchJobThought]
 
+  "whimsically describes current progress for you"
+  whimsey: String
+
   "the job this activity belongs to"
   workbenchJob: WorkbenchJob
 

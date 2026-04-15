@@ -110,6 +110,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
 
   def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)
+  def whimsey_text(%WorkbenchJobActivity{} = activity, _, _), do: Workbenches.whimsey_text(activity)
 
   def create_workbench(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench(attrs, user)

@@ -291,6 +291,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :result,   :workbench_job_activity_result, description: "embedded result (output, metrics, logs) when present"
     field :thoughts, list_of(:workbench_job_thought), resolve: dataloader(Deployments), description: "thoughts emitted during this activity"
 
+    field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
+
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"

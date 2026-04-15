@@ -313,6 +313,12 @@ defmodule Console.Deployments.Workbenches do
     Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_prompt(job: job))
   end
 
+  def whimsey_text(%WorkbenchJobActivity{} = activity) do
+    activity = Repo.preload(activity, [:thoughts])
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_activity_prompt(activity: activity))
+  end
+
+  EEx.function_from_file(:defp, :whimsey_activity_prompt, Console.priv_filename(["prompts", "workbench", "whimsey_activity.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :whimsey_prompt, Console.priv_filename(["prompts", "workbench", "whimsey.md.eex"]), [:assigns], trim: true)
 
   @doc """
