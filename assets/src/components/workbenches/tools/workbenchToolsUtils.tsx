@@ -8,6 +8,7 @@ import {
   LinearLogoIcon,
   LokiLogoIcon,
   PrometheusLogoIcon,
+  SentryLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
@@ -167,8 +168,12 @@ export function WorkbenchToolIcon({
   fullColor = true,
   ...props
 }: { type: Nullable<string> } & IconProps) {
-  if (!isConfigurableWorkbenchToolType(type)) return <ToolsIcon {...props} />
-  const Icon = toolToIcon[type]
+  const Icon =
+    type === WorkbenchToolType.Sentry
+      ? SentryLogoIcon
+      : isConfigurableWorkbenchToolType(type)
+        ? toolToIcon[type]
+        : ToolsIcon
   return (
     <Icon
       fullColor={fullColor}

@@ -19,6 +19,9 @@ fragment Workbench on Workbench {
     id
     name
   }
+  repository {
+    id
+  }
   configuration {
     infrastructure {
       services
