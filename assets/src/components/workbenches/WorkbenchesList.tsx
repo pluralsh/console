@@ -1,6 +1,5 @@
 import {
   ArrowRightIcon,
-  Button,
   Card,
   Flex,
   IconFrame,
@@ -42,6 +41,7 @@ export function WorkbenchesList() {
       queryHook: useWorkbenchesQuery,
       keyPath: ['workbenches'],
     })
+
   const workbenches = mapExistingNodes(data?.workbenches)
 
   return (
@@ -64,23 +64,19 @@ export function WorkbenchesList() {
           }
           styles={workbenchToolCardGridStyles(320)}
         >
-          <CardSC
-            css={{
-              background: 'transparent',
-              borderStyle: 'dashed',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
+          <CreateCardSC
+            clickable
+            forwardedAs={Link}
+            to={WORKBENCHES_CREATE_REL_PATH}
           >
-            <Button
-              small
-              as={Link}
-              to={WORKBENCHES_CREATE_REL_PATH}
-              startIcon={<AddIcon />}
+            <Flex
+              align="center"
+              gap="xsmall"
             >
-              Create Workbench
-            </Button>
-          </CardSC>
+              <AddIcon />
+              <Body2BoldP>Create Workbench</Body2BoldP>
+            </Flex>
+          </CreateCardSC>
           {workbenches.map((workbench) => (
             <WorkbenchCard
               key={workbench.id}
@@ -181,6 +177,20 @@ const CardSC = styled(Card)(({ theme }) => ({
   height: '100%',
   minHeight: 180,
   textDecoration: 'none',
+}))
+
+const CreateCardSC = styled(CardSC)(({ theme }) => ({
+  background: 'transparent',
+  borderStyle: 'dashed',
+  justifyContent: 'center',
+  alignItems: 'center',
+  color: theme.colors['text-xlight'],
+
+  '&:hover': {
+    backgroundColor: theme.colors['fill-zero-hover'],
+    borderStyle: 'solid',
+    color: theme.colors.text,
+  },
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({
