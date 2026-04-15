@@ -41,7 +41,7 @@ export function WorkbenchesList() {
       <WorkbenchTabHeader
         title="Workbenches"
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
-        description="Configurable, reusable agent definitions for common DevOps tasks. Each workbench bundles prompts, tools, and skills that can spawn multiple agents on demand."
+        description="Build-your-own agents for common DevOps tasks. Each workbench bundles tools and skills that and orchestrates subagents tailored to observability, infra analysis and coding tasks."
       />
       {error && <GqlError error={error} />}
       {!data && loading ? (
