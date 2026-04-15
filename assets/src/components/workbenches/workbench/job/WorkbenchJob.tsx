@@ -30,6 +30,7 @@ import styled from 'styled-components'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
+import { CaptionP } from 'components/utils/typography/Text'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -134,6 +135,7 @@ export function WorkbenchJob() {
             align="center"
             gap="small"
           >
+            <CaptionP $color="text-xlight">{job?.user?.name}</CaptionP>
             {canCancelJob ? (
               <Button
                 small
