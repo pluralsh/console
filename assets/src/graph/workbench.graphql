@@ -209,6 +209,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   agentRun {
     ...AgentRunTiny
   }
+  agentRuns {
+    ...AgentRunTiny
+  }
 }
 
 fragment WorkbenchJobActivityWithThoughts on WorkbenchJobActivity {

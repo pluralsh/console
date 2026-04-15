@@ -5,11 +5,14 @@ import {
   FailedFilledIcon,
   Flex,
   IconFrame,
-  LogsIcon,
   Markdown,
   TimeSeriesIcon,
+  VisualInspectionIcon,
 } from '@pluralsh/design-system'
-import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunFixButton'
+import {
+  AgentRunInfoCard,
+  AgentRunInfoSimple,
+} from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import {
   ClickableLabelSC,
   SimpleToolCall,
@@ -26,7 +29,7 @@ import {
   WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -39,6 +42,7 @@ import {
   MemoActivityIcon,
   UserActivityResult,
 } from './WorkbenchJobActivityResults'
+import { StackedText } from 'components/utils/table/StackedText'
 
 export function WorkbenchJobActivity({
   isOpen,
@@ -50,9 +54,10 @@ export function WorkbenchJobActivity({
   textStream: Nullable<string>
 }) {
   const { spacing } = useTheme()
-  const isRunning = isActivityRunning(activity.status)
+  const { id, status, type, prompt, agentRun, result } = activity
+  const isRunning = isActivityRunning(status)
 
-  if (activity.type === WorkbenchJobActivityType.Conclusion)
+  if (type === WorkbenchJobActivityType.Conclusion)
     return (
       <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
         <WorkbenchJobActivityResult
@@ -61,14 +66,13 @@ export function WorkbenchJobActivity({
         />
       </div>
     )
-  if (activity.type === WorkbenchJobActivityType.User)
+  if (type === WorkbenchJobActivityType.User)
     return <UserActivityResult activity={activity} />
 
-  const { agentRun, result } = activity
   return (
     <AccordionItem
-      key={activity.id}
-      value={activity.id}
+      key={id}
+      value={id}
       caret="right-quarter-mirror"
       padding="none"
       triggerWrapperStyles={{
@@ -87,18 +91,19 @@ export function WorkbenchJobActivity({
             $shimmer={isRunning}
             css={{ textTransform: 'capitalize' }}
           >
-            {activity.type?.toLowerCase() ?? 'activity'}
+            {type?.toLowerCase() ?? 'activity'}
           </Body2P>
-          {activity.result?.jobUpdate && (
-            <MemoActivityIcon jobUpdate={activity.result.jobUpdate} />
+          {result?.jobUpdate && (
+            <MemoActivityIcon jobUpdate={result.jobUpdate} />
           )}
           {!isEmpty(result?.logs) && (
             <ActivityModalIcon
-              icon={LogsIcon}
+              icon={VisualInspectionIcon}
               tooltip="View logs"
               modalHeader="Logs"
               modalContent={
                 <JobActivityLogs
+                  cardWrapper
                   logs={result?.logs?.filter(isNonNullable) ?? []}
                 />
               }
@@ -127,13 +132,13 @@ export function WorkbenchJobActivity({
               icon={
                 <DiscoverIcon
                   color="icon-xlight"
-                  css={{ width: 12 }}
+                  css={{ width: 14 }}
                 />
               }
               tooltip="Go to agent run details"
             />
           )}
-          {activity.status == WorkbenchJobActivityStatus.Failed && (
+          {status == WorkbenchJobActivityStatus.Failed && (
             <FailedFilledIcon
               size={12}
               color="icon-danger"
@@ -148,12 +153,12 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {activity.prompt && activity.type !== WorkbenchJobActivityType.Memo && (
-          <JobActivityPrompt prompt={activity.prompt} />
+        {prompt && type !== WorkbenchJobActivityType.Memo && (
+          <JobActivityPrompt prompt={prompt} />
         )}
         <WorkbenchJobActivityThoughts
-          activityId={activity.id}
-          skip={!isOpen || activity.type === WorkbenchJobActivityType.Memo}
+          activityId={id}
+          skip={!isOpen || type === WorkbenchJobActivityType.Memo}
         />
         {textStream && (
           <Flex
@@ -177,7 +182,13 @@ function WorkbenchJobActivityResult({
   activity: WorkbenchJobActivityFragment
   markdownType?: 'classic' | 'simplified'
 }) {
-  const { agentRun, result } = activity
+  const { spacing } = useTheme()
+  const { agentRun, agentRuns, result } = activity
+  const otherAgentRuns = useMemo(
+    () =>
+      agentRuns?.filter(isNonNullable).filter(({ id }) => id !== agentRun?.id),
+    [agentRun?.id, agentRuns]
+  )
   return (
     <Flex
       direction="column"
@@ -200,6 +211,28 @@ function WorkbenchJobActivityResult({
         metrics={result?.metrics?.filter(isNonNullable) ?? []}
       />
       <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
+      {!isEmpty(otherAgentRuns) && (
+        <>
+          <StackedText
+            first="Other agent runs"
+            firstPartialType="body2Bold"
+            firstColor="text-xlight"
+            icon={
+              <DiscoverIcon
+                size={12}
+                color="icon-xlight"
+              />
+            }
+          />
+          {otherAgentRuns?.map((agentRun) => (
+            <AgentRunInfoSimple
+              key={agentRun.id}
+              agentRun={agentRun}
+              css={{ padding: `0 ${spacing.small}px` }}
+            />
+          ))}
+        </>
+      )}
       <AgentRunInfoCard
         showLinkButton
         fillLevel={1}
@@ -275,9 +308,10 @@ function WorkbenchJobActivityThoughts({
                 </CaptionP>
               ),
               customResultBody: (
-                <Card css={{ height: '100%', overflow: 'auto' }}>
-                  <JobActivityLogs logs={logs} />
-                </Card>
+                <JobActivityLogs
+                  cardWrapper
+                  logs={logs}
+                />
               ),
             })}
           />
