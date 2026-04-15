@@ -115,13 +115,14 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
         }
       )
 
-      # expect(Provider, :completion, fn _, _ ->
-      #   {:ok, "try mcp", [
-      #     %Tool{name: "mcp_example_echo", arguments: %{"message" => "world"}, id: "1"}
-      #   ]}
-      # end)
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "try mcp", [
+          %Tool{name: "linear_linear_list_teams", arguments: %{"query" => "Eng"}, id: "1"}
+        ]}
+      end)
       expect(Provider, :completion, fn msgs, _ ->
-        assert Enum.any?(msgs, &match?({:tool, "Echo: world", _}, &1))
+        {:tool, tool_result, _} = Enum.find(msgs, &match?({:tool, _, %{name: "linear_linear_list_teams"}}, &1))
+        {:ok, _} = Jason.decode(tool_result)
         {:ok, "complete", [
           %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
         ]}
