@@ -14,19 +14,22 @@ import {
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import {
-  ClickableLabelSC,
+  SimpleAccordion,
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { POLL_INTERVAL } from 'components/cluster/constants'
+import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
+import { EaseIn } from 'components/utils/EaseIn'
 import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -42,8 +45,6 @@ import {
   MemoActivityIcon,
   UserActivityResult,
 } from './WorkbenchJobActivityResults'
-import { StackedText } from 'components/utils/table/StackedText'
-import { AILoadingText } from 'components/utils/AILoadingText'
 
 export function WorkbenchJobActivity({
   isOpen,
@@ -265,78 +266,116 @@ function WorkbenchJobActivityThoughts({
     skip,
     pollInterval: POLL_INTERVAL,
   })
-  const thoughts =
-    data?.workbenchJobActivity?.thoughts?.filter(isNonNullable) ?? []
   const isLoading = !data && loading
+  const activity = data?.workbenchJobActivity
 
-  const isExpandable = thoughts.length > 3
-  const visibleThoughts = isExpanded ? thoughts : thoughts.slice(0, 3)
+  const { thoughts, lastThought, header } = useMemo(() => {
+    const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
+    let [numWithLogs, numWithMetrics] = [0, 0]
+    thoughts.forEach(({ attributes }) => {
+      numWithLogs += isEmpty(attributes?.logs) ? 0 : 1
+      numWithMetrics += isEmpty(attributes?.metrics) ? 0 : 1
+    })
+    let header = `${thoughts.length - numWithLogs - numWithMetrics} tool calls`
+    if (numWithLogs > 0) header += `, ${numWithLogs} fetched logs`
+    if (numWithMetrics > 0) header += `, ${numWithMetrics} fetched metrics`
+    return { thoughts, lastThought: thoughts.at(-1), header }
+  }, [activity?.thoughts])
+
   if (isEmpty(thoughts) && !isLoading) return null
+  if (error)
+    return (
+      <GqlError
+        header={
+          <Body2P $color="text-xlight">Failed to load activity thoughts</Body2P>
+        }
+        error={error}
+      />
+    )
 
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      paddingLeft={spacing.small}
-    >
-      {error && <GqlError error={error} />}
-      {isLoading &&
-        Array.from({ length: 3 }).map((_, i) => <RectangleSkeleton key={i} />)}
-      {visibleThoughts.map(({ toolName, toolArgs, content, attributes }, i) => {
-        const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
-        const logs = attributes?.logs?.filter(isNonNullable) ?? []
-        return (
-          <SimpleToolCall
-            key={i}
-            content={content}
-            attributes={{ tool: { name: toolName, arguments: toolArgs } }}
-            {...(!isEmpty(metrics) && {
-              customLabel: (
-                <CaptionP $color="text">
-                  Fetched metrics{' '}
-                  <SpanSC $color="text-xlight">{toolName}</SpanSC>
-                </CaptionP>
-              ),
-              customResultBody: (
-                <Card>
-                  <JobActivityMetrics
-                    metrics={metrics}
-                    lineProps={{
-                      margin: { top: 20, right: 16, bottom: 25, left: 35 },
-                    }}
-                  />
-                </Card>
-              ),
-            })}
-            {...(!isEmpty(logs) && {
-              customLabel: (
-                <CaptionP $color="text">
-                  Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
-                </CaptionP>
-              ),
-              customResultBody: (
-                <JobActivityLogs
-                  cardWrapper
-                  logs={logs}
-                />
-              ),
-            })}
-          />
-        )
-      })}
-      {isExpandable && (
-        <ClickableLabelSC onClick={() => setIsExpanded(!isExpanded)}>
-          <CaptionP $color="text-xlight">
-            {isExpanded
-              ? 'View less'
-              : `View more +${thoughts.length - visibleThoughts.length}`}
-          </CaptionP>
-        </ClickableLabelSC>
+    <>
+      <SimpleAccordion
+        label={header}
+        loading={isLoading}
+        isOpen={isExpanded}
+        setIsOpen={setIsExpanded}
+        caret="right-quarter-mirror"
+        triggerWrapperStyles={{
+          justifyContent: 'flex-start',
+          '.icon': { width: 10 },
+        }}
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginTop={spacing.xsmall}
+        >
+          {thoughts.map((thought, i) => (
+            <WorkbenchJobActivityThought
+              key={i}
+              thought={thought}
+            />
+          ))}
+        </Flex>
+      </SimpleAccordion>
+      {!isExpanded && lastThought && isActivityRunning(activity?.status) && (
+        <EaseIn currentKey={lastThought.id}>
+          <WorkbenchJobActivityThought thought={lastThought} />
+        </EaseIn>
       )}
-    </Flex>
+    </>
   )
 }
 
-export const isActivityRunning = (status: WorkbenchJobActivityStatus) =>
+function WorkbenchJobActivityThought({
+  thought,
+}: {
+  thought: WorkbenchJobThoughtFragment
+}) {
+  const { content, toolName, toolArgs, attributes } = thought
+  const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+  const logs = attributes?.logs?.filter(isNonNullable) ?? []
+  return (
+    <SimpleToolCall
+      content={content}
+      attributes={{ tool: { name: toolName, arguments: toolArgs } }}
+      {...(!isEmpty(metrics) && {
+        customLabel: (
+          <CaptionP $color="text">
+            Fetched metrics <SpanSC $color="text-xlight">{toolName}</SpanSC>
+          </CaptionP>
+        ),
+        customResultBody: (
+          <Card>
+            <JobActivityMetrics
+              metrics={metrics}
+              lineProps={{
+                margin: { top: 20, right: 16, bottom: 25, left: 35 },
+              }}
+            />
+          </Card>
+        ),
+      })}
+      {...(!isEmpty(logs) && {
+        customLabel: (
+          <CaptionP $color="text">
+            Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
+          </CaptionP>
+        ),
+        customResultBody: (
+          <JobActivityLogs
+            cardWrapper
+            logs={logs}
+          />
+        ),
+      })}
+    />
+  )
+}
+
+export const isActivityRunning = (
+  status: Nullable<WorkbenchJobActivityStatus>
+) =>
   status === WorkbenchJobActivityStatus.Pending ||
   status === WorkbenchJobActivityStatus.Running

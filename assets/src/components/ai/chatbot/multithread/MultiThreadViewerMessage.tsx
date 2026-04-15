@@ -9,8 +9,8 @@ import {
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
-import { truncate } from 'lodash'
-import { ReactElement, ReactNode, useState } from 'react'
+import { isNil, truncate } from 'lodash'
+import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
@@ -243,26 +243,43 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
   )
 }
 
+const ARBITRARY_VALUE_NAME = 'value'
 export function SimpleAccordion({
   label,
   defaultOpen = false,
+  isOpen,
+  setIsOpen,
+  loading = false,
   children,
+  ...props
 }: {
   label: ReactNode
   defaultOpen?: boolean
+  isOpen?: boolean
+  setIsOpen?: (isOpen: boolean) => void
+  loading?: boolean
   children: ReactNode
-}) {
+} & Partial<ComponentProps<typeof AccordionItem>>) {
   return (
     <Accordion
       type="single"
-      value={defaultOpen ? 'val' : undefined}
+      defaultValue={defaultOpen ? ARBITRARY_VALUE_NAME : undefined}
+      value={isOpen ? ARBITRARY_VALUE_NAME : isNil(isOpen) ? undefined : ''}
+      onValueChange={(value) => setIsOpen?.(value === 'value')}
       css={{ background: 'none', border: 'none', width: '100%' }}
     >
       <AccordionItem
-        value="val"
-        trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
+        value={ARBITRARY_VALUE_NAME}
+        trigger={
+          loading ? (
+            <RectangleSkeleton />
+          ) : (
+            <CaptionP $color="text-xlight">{label}</CaptionP>
+          )
+        }
         padding="none"
         caret="none"
+        {...props}
       >
         {children}
       </AccordionItem>

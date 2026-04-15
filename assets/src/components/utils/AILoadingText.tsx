@@ -4,6 +4,7 @@ import {
   useWorkbenchJobActivityWhimseyTextQuery,
   useWorkbenchJobWhimseyTextQuery,
 } from 'generated/graphql'
+import { EaseIn } from './EaseIn'
 
 const WHIMSEY_POLL_INTERVAL = 12_000
 
@@ -22,12 +23,14 @@ export function AILoadingText({
     skip: !jobId,
     errorPolicy: 'ignore',
     pollInterval: WHIMSEY_POLL_INTERVAL,
+    context: { noRetry: true },
   })
   const { data: activityData } = useWorkbenchJobActivityWhimseyTextQuery({
     variables: { id: activityId ?? '' },
     skip: !activityId,
     errorPolicy: 'ignore',
     pollInterval: WHIMSEY_POLL_INTERVAL,
+    context: { noRetry: true },
   })
   const whimseyText =
     jobData?.workbenchJob?.whimsey ||
@@ -51,11 +54,13 @@ export function AILoadingText({
           },
         }}
       />
-      {size === 'small' ? (
-        <CaptionP $shimmer>{whimseyText}</CaptionP>
-      ) : (
-        <Body2P $shimmer>{whimseyText}</Body2P>
-      )}
+      <EaseIn currentKey={whimseyText}>
+        {size === 'small' ? (
+          <CaptionP $shimmer>{whimseyText}</CaptionP>
+        ) : (
+          <Body2P $shimmer>{whimseyText}</Body2P>
+        )}
+      </EaseIn>
     </Flex>
   )
 }
