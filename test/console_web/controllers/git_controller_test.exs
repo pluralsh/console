@@ -136,6 +136,24 @@ defmodule ConsoleWeb.GitControllerTest do
       assert error.message == "could not resolve ref doesnt-exist"
     end
 
+    test "if repository doesn't exist it will 402 and persist an error", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+      repo_id = git.id
+
+      # Delete the repository to simulate a missing/deleted repository
+      Console.Repo.delete!(git)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: svc.id})
+      |> response(402)
+
+      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      assert error.source == "git"
+      assert error.message =~ "repository not found: #{repo_id}"
+    end
+
     @tag :skip
     test "if fetching and dependencies are not satisfied, it will 402 and persist an error", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
