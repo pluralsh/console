@@ -135,7 +135,14 @@ export function WorkbenchJob() {
             align="center"
             gap="small"
           >
-            <CaptionP $color="text-xlight">{job?.user?.name}</CaptionP>
+            {job?.user?.name && (
+              <CaptionP
+                $color="text-xlight"
+                css={{ whiteSpace: 'nowrap' }}
+              >
+                {job.user.name}
+              </CaptionP>
+            )}
             {canCancelJob ? (
               <Button
                 small
