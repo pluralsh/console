@@ -42,6 +42,9 @@ export const BadgeLabelP = styled.p<TextProps>((props) => ({
 export const StrongSC = styled.strong<TextProps>((props) => ({
   ...sharedTextStyles(props),
 }))
+export const SpanSC = styled.span<TextProps>((props) => ({
+  ...sharedTextStyles(props),
+}))
 export const OverlineH1 = styled.h1<TextProps>((props) => ({
   ...props.theme.partials.text.overline,
   ...sharedTextStyles(props),

@@ -2,11 +2,12 @@ import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
-  FileDiffIcon,
   Flex,
   FlexProps,
   IconFrame,
+  IconProps,
   Modal,
+  NotebookIcon,
 } from '@pluralsh/design-system'
 import {
   SimpleAccordion,
@@ -16,7 +17,6 @@ import { LogLine } from 'components/cd/logs/LogLine'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   WorkbenchJobActivityFragment,
@@ -25,62 +25,42 @@ import {
   WorkbenchJobActivityResultFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, truncate } from 'lodash'
-import { ComponentPropsWithRef, useMemo, useState } from 'react'
+import {
+  ComponentPropsWithRef,
+  ComponentType,
+  ReactNode,
+  useMemo,
+  useState,
+} from 'react'
 import { DiffMethod } from 'react-diff-viewer'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
 
-export function MemoActivityResult({
-  result,
+export function MemoActivityIcon({
+  jobUpdate,
 }: {
-  result: Nullable<WorkbenchJobActivityResultFragment>
+  jobUpdate: Nullable<WorkbenchJobActivityResultFragment['jobUpdate']>
 }) {
-  const { jobUpdate, output } = result ?? {}
-  const [showDiff, setShowDiff] = useState(false)
-
   const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''
   const oldValue = useMemo(
     () => getOldContentFromTextDiff(newValue, jobUpdate?.diff),
     [newValue, jobUpdate?.diff]
   )
-
   return (
-    <StretchedFlex gap="medium">
-      <Body2P $color="text-xlight">{output}</Body2P>
-      {!!jobUpdate?.diff && (
-        <>
-          <IconFrame
-            clickable
-            icon={<FileDiffIcon color="icon-light" />}
-            size="small"
-            tooltip="View diff"
-            onClick={() => setShowDiff(true)}
-          />
-          <Modal
-            header={`Updated ${jobUpdate?.workingTheory ? 'working theory' : 'conclusion'}`}
-            size="auto"
-            open={showDiff}
-            onClose={() => setShowDiff(false)}
-            actions={
-              <Button
-                secondary
-                onClick={() => setShowDiff(false)}
-              >
-                Close
-              </Button>
-            }
-          >
-            <DiffViewer
-              compareMethod={DiffMethod.WORDS}
-              oldValue={oldValue}
-              newValue={newValue}
-            />
-          </Modal>
-        </>
-      )}
-    </StretchedFlex>
+    <ActivityModalIcon
+      icon={NotebookIcon}
+      tooltip="View diff"
+      modalHeader={`Updated ${jobUpdate?.workingTheory ? 'working theory' : 'conclusion'}`}
+      modalContent={
+        <DiffViewer
+          compareMethod={DiffMethod.WORDS}
+          oldValue={oldValue}
+          newValue={newValue}
+        />
+      }
+    />
   )
 }
 
@@ -96,14 +76,6 @@ export function UserActivityResult({
     </PromptCardSC>
   )
 }
-
-const PromptCardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.medium,
-  width: 'fit-content',
-  marginLeft: 'auto',
-  marginTop: theme.spacing.small,
-  marginBottom: theme.spacing.small,
-}))
 
 export function JobActivityLogs({
   logs,
@@ -189,6 +161,35 @@ export function JobActivityMetrics({
   )
 }
 
+export function WorkbenchJobMetricsLegend({
+  seriesNames,
+  ...props
+}: {
+  seriesNames: string[]
+} & FlexProps) {
+  if (isEmpty(seriesNames)) return null
+
+  return (
+    <Flex
+      wrap="wrap"
+      gap="small"
+      align="center"
+      {...props}
+    >
+      {seriesNames.map((name, i) => (
+        <Flex
+          key={name}
+          align="center"
+          gap="xsmall"
+        >
+          <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
+          <Body2P $color="text-light">{name}</Body2P>
+        </Flex>
+      ))}
+    </Flex>
+  )
+}
+
 export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
   const { spacing } = useTheme()
   if (!prompt) return null
@@ -208,7 +209,76 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
   )
 }
 
+export function ActivityModalIcon({
+  icon: Icon,
+  onClick,
+  tooltip,
+  modalHeader,
+  modalContent,
+}: {
+  icon: ComponentType<IconProps>
+  onClick?: () => void
+  tooltip: string | undefined
+  modalHeader: string
+  modalContent: ReactNode
+}) {
+  const [showModal, setShowModal] = useState(false)
+  return (
+    <>
+      <IconFrame
+        clickable
+        as="a" // using an "a" tag because technically buttons can't be nested inside other buttons (e.g. the accordion trigger)
+        size="small"
+        tooltip={tooltip}
+        icon={
+          <Icon
+            color="icon-xlight"
+            style={{ width: 12 }}
+          />
+        }
+        onClick={(e) => {
+          e.preventDefault()
+          setShowModal(true)
+          onClick?.()
+        }}
+      />
+      <Modal
+        header={modalHeader}
+        size="auto"
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        actions={
+          <Button
+            secondary
+            onClick={() => setShowModal(false)}
+          >
+            Close
+          </Button>
+        }
+      >
+        {modalContent}
+      </Modal>
+    </>
+  )
+}
+
 const MetricsChartSC = styled.div(() => ({
   height: 160,
   width: '100%',
+}))
+
+const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
+  width: 12,
+  height: 12,
+  borderRadius: 2,
+  flexShrink: 0,
+  background: $color,
+}))
+
+const PromptCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.medium,
+  width: 'fit-content',
+  marginLeft: 'auto',
+  marginTop: theme.spacing.small,
+  marginBottom: theme.spacing.small,
 }))

@@ -154,12 +154,9 @@ export function Workbench() {
 
   return (
     <Flex
-      direction="row"
-      css={{
-        height: '100%',
-        minHeight: 0,
-        overflow: 'hidden',
-      }}
+      height="100%"
+      minHeight={0}
+      overflow="hidden"
     >
       <WorkbenchSidePanel
         workbenchId={id}
@@ -266,6 +263,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.large,
   minHeight: 0,
   minWidth: 0,
-  overflow: 'hidden',
+  overflow: 'auto',
   padding: theme.spacing.large,
 }))

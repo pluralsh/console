@@ -183,10 +183,6 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     workingTheory
     conclusion
   }
-}
-
-fragment WorkbenchJobActivityResultWithData on WorkbenchJobActivityResult {
-  ...WorkbenchJobActivityResult
   metrics {
     ...WorkbenchJobActivityMetric
   }
@@ -195,7 +191,7 @@ fragment WorkbenchJobActivityResultWithData on WorkbenchJobActivityResult {
   }
 }
 
-fragment WorkbenchJobActivityTiny on WorkbenchJobActivity {
+fragment WorkbenchJobActivity on WorkbenchJobActivity {
   id
   type
   status
@@ -209,13 +205,10 @@ fragment WorkbenchJobActivityTiny on WorkbenchJobActivity {
   }
 }
 
-fragment WorkbenchJobActivity on WorkbenchJobActivity {
-  ...WorkbenchJobActivityTiny
+fragment WorkbenchJobActivityWithThoughts on WorkbenchJobActivity {
+  ...WorkbenchJobActivity
   thoughts {
     ...WorkbenchJobThought
-  }
-  result {
-    ...WorkbenchJobActivityResultWithData
   }
 }
 
@@ -433,7 +426,7 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchPrompts($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchPrompts($id: ID!, $first: Int = 500, $after: String) {
   workbench(id: $id) {
     id
     prompts(first: $first, after: $after) {
@@ -544,7 +537,7 @@ query WorkbenchJobActivities($id: ID!) {
     activities(first: 100) {
       edges {
         node {
-          ...WorkbenchJobActivityTiny
+          ...WorkbenchJobActivity
         }
       }
     }
@@ -553,7 +546,7 @@ query WorkbenchJobActivities($id: ID!) {
 
 query WorkbenchJobActivity($id: ID!) {
   workbenchJobActivity(id: $id) {
-    ...WorkbenchJobActivity
+    ...WorkbenchJobActivityWithThoughts
   }
 }
 

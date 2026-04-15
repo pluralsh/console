@@ -1,29 +1,24 @@
 import {
-  BookmarkIcon,
   Button,
   EmptyState,
   Flex,
-  ListBoxItem,
   SidePanelOpenIcon,
-  StopIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
-import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
   useCancelWorkbenchJobMutation,
-  useCreateWorkbenchPromptMutation,
   useWorkbenchJobQuery,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { Key, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -32,13 +27,9 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
+import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-
-enum WorkbenchJobMoreMenuKey {
-  SavePrompt = 'save-prompt',
-  CancelJob = 'cancel-job',
-}
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -69,8 +60,6 @@ export function WorkbenchJob() {
   const trimmedPrompt = job?.prompt?.trim() ?? ''
   const breadcrumbPrompt = trimmedPrompt || 'workbench job'
 
-  const [savePrompt] = useCreateWorkbenchPromptMutation()
-
   const [cancelWorkbenchJob, { loading: cancelLoading, error: cancelError }] =
     useCancelWorkbenchJobMutation({
       awaitRefetchQueries: true,
@@ -89,37 +78,6 @@ export function WorkbenchJob() {
     job?.status === WorkbenchJobStatus.Pending ||
     job?.status === WorkbenchJobStatus.Running
 
-  const hasMoreMenuActions = Boolean(trimmedPrompt) || canCancelJob
-
-  const handleMoreMenuSelection = (selectedKey: Key) => {
-    switch (selectedKey) {
-      case WorkbenchJobMoreMenuKey.SavePrompt: {
-        if (!trimmedPrompt || !workbenchId) return
-
-        void savePrompt({
-          variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
-          onCompleted: () => {
-            popToast({ name: 'prompt', action: 'saved', color: 'icon-success' })
-          },
-          onError: () => {
-            popToast({
-              name: 'prompt',
-              action: 'save failed',
-              color: 'icon-danger',
-            })
-          },
-        })
-        return
-      }
-
-      case WorkbenchJobMoreMenuKey.CancelJob:
-        setCancelModalOpen(true)
-        return
-
-      default:
-        return
-    }
-  }
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -176,33 +134,25 @@ export function WorkbenchJob() {
             align="center"
             gap="small"
           >
-            <RunStatusChip
-              loading={isLoading}
-              status={job?.status}
-            />
-            {hasMoreMenuActions && (
-              <MoreMenu
-                disabled={!job || isLoading}
-                triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
-                onSelectionChange={handleMoreMenuSelection}
+            {canCancelJob ? (
+              <Button
+                small
+                destructive
+                onClick={() => setCancelModalOpen(true)}
               >
-                {!!trimmedPrompt && (
-                  <ListBoxItem
-                    key={WorkbenchJobMoreMenuKey.SavePrompt}
-                    leftContent={<BookmarkIcon />}
-                    label="Save prompt"
-                  />
-                )}
-                {canCancelJob && (
-                  <ListBoxItem
-                    key={WorkbenchJobMoreMenuKey.CancelJob}
-                    destructive
-                    leftContent={<StopIcon color="icon-danger" />}
-                    label="Cancel job"
-                  />
-                )}
-              </MoreMenu>
+                Cancel job
+              </Button>
+            ) : (
+              <RunStatusChip
+                loading={isLoading}
+                status={job?.status}
+                showSpinner={false}
+              />
             )}
+            <SaveWorkbenchPromptButton
+              workbenchId={workbenchId}
+              prompt={trimmedPrompt}
+            />
           </Flex>
         </StretchedFlex>
         <WorkbenchJobActivities jobId={jobId} />

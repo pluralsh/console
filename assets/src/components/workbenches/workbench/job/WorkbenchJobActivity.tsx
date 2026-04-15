@@ -1,24 +1,13 @@
-import { ApolloError } from '@apollo/client'
 import {
   AccordionItem,
-  BrainIcon,
   Card,
-  ChecklistCheckedIcon,
-  CheckOutlineIcon,
-  CloudLoggingIcon,
   DiscoverIcon,
   FailedFilledIcon,
   Flex,
   IconFrame,
-  IconProps,
-  InfrastructureIcon,
+  LogsIcon,
   Markdown,
-  NotebookIcon,
-  SpinnerAlt,
-  TicketIcon,
-  ToolKitIcon,
-  UnknownIcon,
-  VisualInspectionIcon,
+  TimeSeriesIcon,
 } from '@pluralsh/design-system'
 import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunFixButton'
 import {
@@ -29,27 +18,25 @@ import {
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { CaptionP, OverlineH3 } from 'components/utils/typography/Text'
+import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobActivityQuery,
-  WorkbenchJobActivityResultWithDataFragment,
+  WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
-  WorkbenchJobActivityTinyFragment,
   WorkbenchJobActivityType,
-  WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ComponentType, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  ActivityModalIcon,
   JobActivityLogs,
   JobActivityMetrics,
   JobActivityPrompt,
-  MemoActivityResult,
+  MemoActivityIcon,
   UserActivityResult,
 } from './WorkbenchJobActivityResults'
 
@@ -59,74 +46,100 @@ export function WorkbenchJobActivity({
   textStream,
 }: {
   isOpen: boolean
-  activity: WorkbenchJobActivityTinyFragment
+  activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
 }) {
   const { spacing } = useTheme()
   const isRunning = isActivityRunning(activity.status)
 
-  const { data, loading, error } = useWorkbenchJobActivityQuery({
-    variables: { id: activity.id },
-    fetchPolicy: 'cache-and-network',
-    skip: !activity.id || !isOpen,
-    pollInterval: POLL_INTERVAL,
-  })
-
-  const resultData = data?.workbenchJobActivity?.result
-  const isLoading = !data && loading
-
   if (activity.type === WorkbenchJobActivityType.Conclusion)
     return (
-      <WorkbenchJobActivityResult
-        activity={activity}
-        resultData={resultData}
-        queryError={error}
-        markdownType="classic"
-      />
+      <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
+        <WorkbenchJobActivityResult
+          activity={activity}
+          markdownType="classic"
+        />
+      </div>
     )
   if (activity.type === WorkbenchJobActivityType.User)
     return <UserActivityResult activity={activity} />
 
-  const TypeIcon =
-    activityTypeToIcon[activity.type ?? WorkbenchJobActivityType.Integration]
-  const { agentRun } = activity
+  const { agentRun, result } = activity
   return (
     <AccordionItem
       key={activity.id}
       value={activity.id}
-      caret="left"
-      padding="compact"
+      caret="right-quarter-mirror"
+      padding="none"
+      triggerWrapperStyles={{
+        justifyContent: 'flex-start',
+        gap: 10,
+        padding: `${spacing.xsmall}px 0`,
+        '.icon': { width: 10 },
+      }}
       trigger={
-        <StretchedFlex gap="small">
-          <OverlineH3
-            $color="text-primary-disabled"
+        <Flex
+          gap="xsmall"
+          alignItems="center"
+        >
+          <Body2P
+            $color="text-long-form"
             $shimmer={isRunning}
-            css={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: spacing.xsmall,
-              marginRight: 'auto',
-            }}
+            css={{ textTransform: 'capitalize' }}
           >
-            <TypeIcon
-              size={12}
-              color="icon-xlight"
+            {activity.type?.toLowerCase() ?? 'activity'}
+          </Body2P>
+          {activity.result?.jobUpdate && (
+            <MemoActivityIcon jobUpdate={activity.result.jobUpdate} />
+          )}
+          {!isEmpty(result?.logs) && (
+            <ActivityModalIcon
+              icon={LogsIcon}
+              tooltip="View logs"
+              modalHeader="Logs"
+              modalContent={
+                <JobActivityLogs
+                  logs={result?.logs?.filter(isNonNullable) ?? []}
+                />
+              }
             />
-            <span>{activity.type?.toLowerCase() ?? 'activity'}</span>
-          </OverlineH3>
-          {agentRun && !isOpen && (
+          )}
+          {!isEmpty(result?.metrics) && (
+            <ActivityModalIcon
+              icon={TimeSeriesIcon}
+              tooltip="View metrics"
+              modalHeader="Metrics"
+              modalContent={
+                <JobActivityMetrics
+                  metrics={result?.metrics?.filter(isNonNullable) ?? []}
+                />
+              }
+            />
+          )}
+          {agentRun && (
             <IconFrame
               clickable
               as={Link}
+              size="small"
               to={getAgentRunAbsPath({ agentRunId: agentRun.id })}
               target="_blank"
               rel="noopener noreferrer"
-              icon={<DiscoverIcon color="icon-xlight" />}
+              icon={
+                <DiscoverIcon
+                  color="icon-xlight"
+                  css={{ width: 12 }}
+                />
+              }
               tooltip="Go to agent run details"
             />
           )}
-          <ActivityStatusIcon status={activity.status} />
-        </StretchedFlex>
+          {activity.status == WorkbenchJobActivityStatus.Failed && (
+            <FailedFilledIcon
+              size={12}
+              color="icon-danger"
+            />
+          )}
+        </Flex>
       }
     >
       <Flex
@@ -135,17 +148,12 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {error && <GqlError error={error} />}
         {activity.prompt && activity.type !== WorkbenchJobActivityType.Memo && (
           <JobActivityPrompt prompt={activity.prompt} />
         )}
         <WorkbenchJobActivityThoughts
-          thoughts={
-            data?.workbenchJobActivity?.thoughts?.filter(isNonNullable) ?? []
-          }
-          isLoading={
-            isLoading && activity.type !== WorkbenchJobActivityType.Memo
-          }
+          activityId={activity.id}
+          skip={!isOpen || activity.type === WorkbenchJobActivityType.Memo}
         />
         {textStream && (
           <Flex
@@ -156,10 +164,7 @@ export function WorkbenchJobActivity({
             <SimplifiedMarkdown text={textStream} />
           </Flex>
         )}
-        <WorkbenchJobActivityResult
-          activity={activity}
-          resultData={data?.workbenchJobActivity?.result}
-        />
+        <WorkbenchJobActivityResult activity={activity} />
       </Flex>
     </AccordionItem>
   )
@@ -167,64 +172,63 @@ export function WorkbenchJobActivity({
 
 function WorkbenchJobActivityResult({
   activity,
-  resultData,
-  queryError,
   markdownType = 'simplified',
 }: {
-  activity: WorkbenchJobActivityTinyFragment
-  resultData: Nullable<WorkbenchJobActivityResultWithDataFragment>
-  queryError?: ApolloError
+  activity: WorkbenchJobActivityFragment
   markdownType?: 'classic' | 'simplified'
 }) {
-  const { type, agentRun, result } = activity
-  switch (type) {
-    case WorkbenchJobActivityType.Memo:
-      return <MemoActivityResult result={result} />
-    default:
-      return (
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          {result?.error && (
-            <GqlError
-              error={result.error}
-              css={{ wordBreak: 'break-word' }}
-            />
-          )}
-          {queryError && <GqlError error={queryError} />}
-          <div>
-            {markdownType === 'simplified' ? (
-              <SimplifiedMarkdown text={result?.output ?? ''} />
-            ) : (
-              <Markdown text={result?.output ?? ''} />
-            )}
-          </div>
-          <JobActivityMetrics
-            metrics={resultData?.metrics?.filter(isNonNullable) ?? []}
-          />
-          <JobActivityLogs
-            logs={resultData?.logs?.filter(isNonNullable) ?? []}
-          />
-          <AgentRunInfoCard
-            showLinkButton
-            fillLevel={1}
-            agentRun={agentRun}
-          />
-        </Flex>
-      )
-  }
+  const { agentRun, result } = activity
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+    >
+      {result?.error && (
+        <GqlError
+          error={result.error}
+          css={{ wordBreak: 'break-word' }}
+        />
+      )}
+      <div>
+        {markdownType === 'simplified' ? (
+          <SimplifiedMarkdown text={result?.output ?? ''} />
+        ) : (
+          <Markdown text={result?.output ?? ''} />
+        )}
+      </div>
+      <JobActivityMetrics
+        metrics={result?.metrics?.filter(isNonNullable) ?? []}
+      />
+      <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
+      <AgentRunInfoCard
+        showLinkButton
+        fillLevel={1}
+        agentRun={agentRun}
+      />
+    </Flex>
+  )
 }
 
 function WorkbenchJobActivityThoughts({
-  thoughts,
-  isLoading,
+  activityId,
+  skip,
 }: {
-  thoughts: WorkbenchJobThoughtFragment[]
-  isLoading: boolean
+  activityId: string
+  skip: boolean
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
+
+  const { data, loading, error } = useWorkbenchJobActivityQuery({
+    variables: { id: activityId },
+    fetchPolicy: 'cache-and-network',
+    skip,
+    pollInterval: POLL_INTERVAL,
+  })
+  const thoughts =
+    data?.workbenchJobActivity?.thoughts?.filter(isNonNullable) ?? []
+  const isLoading = !data && loading
+
   const isExpandable = thoughts.length > 3
   const visibleThoughts = isExpanded ? thoughts : thoughts.slice(0, 3)
   if (isEmpty(thoughts) && !isLoading) return null
@@ -235,6 +239,7 @@ function WorkbenchJobActivityThoughts({
       gap="small"
       paddingLeft={spacing.small}
     >
+      {error && <GqlError error={error} />}
       {isLoading &&
         Array.from({ length: 3 }).map((_, i) => <RectangleSkeleton key={i} />)}
       {visibleThoughts.map(({ toolName, toolArgs, content, attributes }, i) => {
@@ -245,8 +250,14 @@ function WorkbenchJobActivityThoughts({
             key={i}
             content={content}
             attributes={{ tool: { name: toolName, arguments: toolArgs } }}
-            customResultBody={
-              !isEmpty(metrics) ? (
+            {...(!isEmpty(metrics) && {
+              customLabel: (
+                <CaptionP $color="text">
+                  Fetched metrics{' '}
+                  <SpanSC $color="text-xlight">{toolName}</SpanSC>
+                </CaptionP>
+              ),
+              customResultBody: (
                 <Card>
                   <JobActivityMetrics
                     metrics={metrics}
@@ -255,12 +266,20 @@ function WorkbenchJobActivityThoughts({
                     }}
                   />
                 </Card>
-              ) : !isEmpty(logs) ? (
+              ),
+            })}
+            {...(!isEmpty(logs) && {
+              customLabel: (
+                <CaptionP $color="text">
+                  Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
+                </CaptionP>
+              ),
+              customResultBody: (
                 <Card css={{ height: '100%', overflow: 'auto' }}>
                   <JobActivityLogs logs={logs} />
                 </Card>
-              ) : undefined
-            }
+              ),
+            })}
           />
         )
       })}
@@ -275,55 +294,6 @@ function WorkbenchJobActivityThoughts({
       )}
     </Flex>
   )
-}
-
-const activityTypeToIcon: Record<
-  WorkbenchJobActivityType,
-  ComponentType<IconProps>
-> = {
-  [WorkbenchJobActivityType.Coding]: CloudLoggingIcon,
-  [WorkbenchJobActivityType.Infrastructure]: InfrastructureIcon,
-  [WorkbenchJobActivityType.Memo]: NotebookIcon,
-  [WorkbenchJobActivityType.Observability]: VisualInspectionIcon,
-  [WorkbenchJobActivityType.Plan]: ChecklistCheckedIcon,
-  [WorkbenchJobActivityType.Ticketing]: TicketIcon,
-  [WorkbenchJobActivityType.Integration]: ToolKitIcon,
-  [WorkbenchJobActivityType.Memory]: BrainIcon,
-  [WorkbenchJobActivityType.User]: BrainIcon,
-  [WorkbenchJobActivityType.Conclusion]: CheckOutlineIcon,
-} as const satisfies Record<WorkbenchJobActivityType, ComponentType<IconProps>>
-
-function ActivityStatusIcon({
-  status,
-}: {
-  status: WorkbenchJobActivityStatus
-}) {
-  switch (status) {
-    case WorkbenchJobActivityStatus.Pending:
-    case WorkbenchJobActivityStatus.Running:
-      return <SpinnerAlt size={12} />
-    case WorkbenchJobActivityStatus.Successful:
-      return (
-        <CheckOutlineIcon
-          size={12}
-          color="icon-success"
-        />
-      )
-    case WorkbenchJobActivityStatus.Failed:
-      return (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )
-    default:
-      return (
-        <UnknownIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-  }
 }
 
 export const isActivityRunning = (status: WorkbenchJobActivityStatus) =>

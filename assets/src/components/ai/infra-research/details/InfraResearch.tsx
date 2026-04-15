@@ -339,10 +339,12 @@ function RegenerateButton({
 export function RunStatusChip({
   status,
   runningText = 'Running',
+  showSpinner = true,
   ...props
 }: {
   status: Nullable<InfraResearchStatus | AgentRunStatus | WorkbenchJobStatus>
   runningText?: string
+  showSpinner?: boolean
 } & ChipProps) {
   if (!status) return null
   const isRunning =
@@ -360,7 +362,7 @@ export function RunStatusChip({
           gap="xsmall"
           align="center"
         >
-          <SpinnerAlt />
+          {showSpinner && <SpinnerAlt />}
           <span>{runningText}</span>
         </Flex>
       ) : (

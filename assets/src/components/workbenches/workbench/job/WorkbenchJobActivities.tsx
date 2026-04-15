@@ -13,21 +13,23 @@ import {
   ChatInputSimple,
   ChatInputSimpleRef,
 } from 'components/ai/chatbot/input/ChatInput'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchJobActivity } from './WorkbenchJobActivity'
 import {
   appendActivityToCache,
   useWorkbenchJobStreams,
 } from './useWorkbenchJobStreams'
-import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 export const ACTIVITY_GAP = 'medium' as const
 
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
+  const { spacing } = useTheme()
   const [newMessage, setNewMessage] = useState('')
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
@@ -107,9 +109,15 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
               </JobPromptCardSC>
             }
             bottomContent={
-              textStreamMap['none'] && (
-                <SimplifiedMarkdown text={textStreamMap['none']} />
-              )
+              <>
+                {textStreamMap['none'] && (
+                  <SimplifiedMarkdown text={textStreamMap['none']} />
+                )}
+                {!jobCompleted &&
+                  activities.every(({ status }) =>
+                    isActivityTerminal(status)
+                  ) && <AILoadingText marginTop={spacing.small} />}
+              </>
             }
             renderer={({ rowData }) => (
               <WorkbenchJobActivity
@@ -150,7 +158,7 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px ${theme.spacing.medium}px`,
   background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',

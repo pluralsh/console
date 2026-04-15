@@ -40,18 +40,20 @@ export function SimpleToolCall({
   attributes,
   isPending,
   customResultBody,
+  customLabel,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
   isPending?: boolean
   customResultBody?: ReactNode
+  customLabel?: ReactNode
 }) {
   const { colors } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
   const command = `${attributes?.tool?.arguments?.['command'] ?? ''}`
-  if (toolName.toLowerCase().includes('bash')) {
+  if (!customLabel && toolName.toLowerCase().includes('bash')) {
     return (
       <SimpleAccordion
         label={
@@ -89,13 +91,15 @@ export function SimpleToolCall({
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <CaptionP
-          $shimmer={isPending}
-          $color="text-xlight"
-        >
-          {isPending ? 'Calling' : 'Called'} tool{' '}
-          <span css={{ color: colors['text-light'] }}>{toolName}</span>
-        </CaptionP>
+        {customLabel || (
+          <CaptionP
+            $shimmer={isPending}
+            $color="text-xlight"
+          >
+            {isPending ? 'Calling' : 'Called'} tool{' '}
+            <span css={{ color: colors['text-light'] }}>{toolName}</span>
+          </CaptionP>
+        )}
       </ClickableLabelSC>
       <Modal
         open={isOpen}
