@@ -66,6 +66,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
     error: workbenchError,
   } = useWorkbenchQuery({
     variables: { id: workbenchId },
+    fetchPolicy: 'cache-and-network',
     skip: !workbenchId,
   })
   const workbench = workbenchData?.workbench

@@ -163,7 +163,10 @@ export function Stacks() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: useStacksQuery, keyPath: ['infrastructureStacks'] },
+    {
+      queryHook: useStacksQuery,
+      keyPath: ['infrastructureStacks'],
+    },
     {
       q: debouncedSearchString,
       projectId,

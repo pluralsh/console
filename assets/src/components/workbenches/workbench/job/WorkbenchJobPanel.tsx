@@ -51,6 +51,7 @@ export function WorkbenchJobPanelContent() {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
   })
   const job = data?.workbenchJob
   const isLoading = loading && !job
