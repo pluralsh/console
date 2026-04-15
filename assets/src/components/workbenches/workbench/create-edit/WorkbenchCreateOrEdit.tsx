@@ -91,7 +91,12 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
         <StackedText
           loading={!data && loading}
           first={workbench?.name}
+          firstPartialType="subtitle2"
+          firstColor="text"
           second={workbench?.description}
+          secondPartialType="body2"
+          secondColor="text-xlight"
+          gap="xxsmall"
         />
       )}
       <WorkbenchForm
