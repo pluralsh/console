@@ -3,6 +3,7 @@ import {
   EmptyState,
   Flex,
   SidePanelOpenIcon,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
@@ -17,7 +18,7 @@ import {
   useWorkbenchJobQuery,
   WorkbenchJobStatus,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
+import { isEmpty, truncate } from 'lodash'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -27,7 +28,9 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
+import { WorkbenchToolIcon } from '../../tools/workbenchToolsUtils'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
 import { formatDateTime } from 'utils/datetime'
@@ -134,7 +137,7 @@ export function WorkbenchJob() {
             second={
               job && (
                 <Flex
-                  gap="large"
+                  gap="medium"
                   css={{
                     ...theme.partials.text.caption,
                     color: theme.colors['text-xlight'],
@@ -144,23 +147,45 @@ export function WorkbenchJob() {
                     <span>{job.user.name.trim()}</span>
                   )}
                   {job.insertedAt && (
-                    <span>
-                      {formatDateTime(
-                        job.insertedAt,
-                        'YYYY-MM-DD ',
-                        false,
-                        true
-                      )}
-                      <span css={{ color: theme.colors['code-block-purple'] }}>
+                    <>
+                      <span>
                         {formatDateTime(
                           job.insertedAt,
-                          'HH:mm:ss',
+                          'YYYY-MM-DD ',
                           false,
                           true
                         )}
+                        <span
+                          css={{ color: theme.colors['code-block-purple'] }}
+                        >
+                          {formatDateTime(
+                            job.insertedAt,
+                            'HH:mm:ss',
+                            false,
+                            true
+                          )}
+                        </span>
+                        {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
                       </span>
-                      {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
-                    </span>
+                      {!isEmpty(job.workbench?.tools) && (
+                        <Flex gap="xsmall">
+                          {job.workbench?.tools
+                            ?.filter(isNonNullable)
+                            .map((tool) => (
+                              <Tooltip
+                                key={tool.id}
+                                label={tool.name}
+                                placement="bottom"
+                              >
+                                <WorkbenchToolIcon
+                                  type={tool.tool}
+                                  size={12}
+                                />
+                              </Tooltip>
+                            ))}
+                        </Flex>
+                      )}
+                    </>
                   )}
                 </Flex>
               )

@@ -295,6 +295,9 @@ fragment WorkbenchJob on WorkbenchJob {
   workbench {
     id
     name
+    tools {
+      ...WorkbenchToolTiny
+    }
   }
   error
   alert {
