@@ -15002,6 +15002,8 @@ export type WorkbenchJob = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the user who created this run */
   user?: Maybe<User>;
+  /** whimsically describes current progress for you */
+  whimsey?: Maybe<Scalars['String']['output']>;
   /** the workbench this run belongs to */
   workbench?: Maybe<Workbench>;
 };

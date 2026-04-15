@@ -2767,6 +2767,9 @@ type WorkbenchJob {
 
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
+  "whimsically describes current progress for you"
+  whimsey: String
+
   insertedAt: DateTime
 
   updatedAt: DateTime

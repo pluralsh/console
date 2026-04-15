@@ -278,6 +278,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_job_activities/3
     end
 
+    field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
+
     timestamps()
   end
 

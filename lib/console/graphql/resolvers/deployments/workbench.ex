@@ -109,6 +109,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)
+
   def create_workbench(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench(attrs, user)
 
