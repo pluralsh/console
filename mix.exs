@@ -118,7 +118,7 @@ defmodule Console.MixProject do
       {:flow, "~> 1.2"},
       {:gen_stage, "~> 1.0", override: true},
       {:bourne, "~> 1.1"},
-      {:tiktoken, "~> 0.3"},
+      # {:tiktoken, "~> 0.3"},
       {:phoenix_html, "~> 2.11"},
       {:parallel_task, "~> 0.1.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
