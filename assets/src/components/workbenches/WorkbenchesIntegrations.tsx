@@ -82,11 +82,7 @@ export function WorkbenchesIntegrations() {
                 floating
                 as={Link}
                 to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${WORKBENCH_TOOL_TYPE_PARAM}=${type}`}
-                style={{
-                  boxShadow: 'none',
-                  marginTop: 'auto',
-                  paddingTop: spacing.xsmall,
-                }}
+                style={{ boxShadow: 'none', marginTop: 'auto' }}
                 startIcon={<AddIcon />}
               >
                 Add tool
