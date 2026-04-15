@@ -16,3 +16,34 @@ Current progress
 Tool Called: <%= thought.tool_name %>
 Arguments: `<%= Jason.encode(thought.tool_args) %>`
 <% end %>
+
+<%= if !Enum.empty?(@activity.agent_runs) do %>
+We've also launched a few coding agents, described below:
+<%= for agent <- @activity.agent_runs do %>
+Prompt: <%= agent.prompt %>
+Mode: <%= agent.mode %>
+
+<%= if agent.analysis do %>
+# Agent Analysis
+
+## Summary
+<%= agent.analysis.summary %>
+
+<%= Enum.map(agent.analysis.bullets, &"- #{&1}") |> Enum.join("\n") %>
+<% end %>
+
+<%= if is_list(agent.pull_requests) and length(agent.pull_requests) > 0 do %>
+<% pr = hd(agent.pull_requests) %>
+# Pull Request Created (<%= pr.status %>)
+
+## PR Title
+<%= pr.title %>
+
+## PR Description
+<%= pr.body %>
+
+## PR URL
+<%= pr.url %>
+<% end %>
+<% end %>
+<% end %>
