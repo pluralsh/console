@@ -10,7 +10,7 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2BoldP, Subtitle1H1 } from 'components/utils/typography/Text'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
