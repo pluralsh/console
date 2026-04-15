@@ -12,11 +12,16 @@ import {
   CardGridSkeleton,
 } from 'components/self-service/catalog/CatalogsGrid'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
+import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
-import { WorkbenchTinyFragment, useWorkbenchesQuery } from 'generated/graphql'
+import {
+  AgentRuntimeType,
+  WorkbenchTinyFragment,
+  useWorkbenchesQuery,
+} from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import { ComponentType } from 'react'
@@ -82,8 +87,13 @@ export function WorkbenchesList() {
 }
 
 function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
-  const { id, name, description, repository, tools: t } = workbench
+  const { id, name, description, agentRuntime, tools: t } = workbench
+
   const tools = t?.filter(isNonNullable) ?? []
+
+  const RuntimeIcon =
+    runtimeToIcon[agentRuntime?.type ?? AgentRuntimeType.Custom]
+
   return (
     <CardSC
       clickable
@@ -95,13 +105,23 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
         minWidth={0}
       >
         <Body2BoldP>{name}</Body2BoldP>
-        {repository?.url && (
-          <CaptionP
-            $color="text-xlight"
-            css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+        {agentRuntime?.name && (
+          <Flex
+            align="center"
+            gap="xxsmall"
+            minWidth={0}
           >
-            {repository.url}
-          </CaptionP>
+            <RuntimeIcon
+              fullColor
+              size={12}
+            />
+            <CaptionP
+              $color="text-xlight"
+              css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+            >
+              {agentRuntime.name}
+            </CaptionP>
+          </Flex>
         )}
       </Flex>
       <Body2P

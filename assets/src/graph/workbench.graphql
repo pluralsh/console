@@ -2,10 +2,10 @@ fragment WorkbenchTiny on Workbench {
   id
   name
   description
-  repository {
+  agentRuntime {
     id
-    url
-    httpsPath
+    name
+    type
   }
   tools {
     ...WorkbenchToolTiny
