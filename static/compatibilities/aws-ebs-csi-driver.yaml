@@ -321,7 +321,13 @@ versions:
     '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No substantive v1.31.0 release notes were provided beyond a pointer
+        to the full CHANGELOG; expect mostly incremental fixes/maintenance since v1.30.0
+        was the major feature release in your notes.]
+    breaking_changes: []
   chart_version: 2.31.0
   images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
     'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.31.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-4',

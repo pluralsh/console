@@ -475,7 +475,13 @@ addons:
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No substantive v1.31.0 release notes were provided beyond a pointer
+          to the full CHANGELOG; expect mostly incremental fixes/maintenance since
+          v1.30.0 was the major feature release in your notes.]
+      breaking_changes: []
     chart_version: 2.31.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.31.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.1-eks-1-30-4',
@@ -7216,7 +7222,24 @@ addons:
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Controller IAM policy was split into multiple policies; review
+          any automation that installs/patches the controller policy and ensure you
+          apply the new policy documents before/with the upgrade., 'Max supported
+          Kubernetes version bumped to 1.35; if you run 1.35, ensure you are on v1.9.0+
+          and validate AMI/test matrix changes accordingly.', 'Monitoring: ServiceMonitor
+          gained a `sampleLimit` option; if you manage Prometheus Operator manifests,
+          consider whether you need to set/override this value.']
+      features: [Adds ICE filtering for the `MaxFleetCountExceeded` condition to improve
+          capacity selection behavior under fleet limits., Adds support for labeling
+          tenancy in AWS and improves related validation handling., Adds Windows Server
+          2025 (WS2025) support., Makes the controller policy helper script POSIX
+          compliant (quality-of-life for install/upgrade automation).]
+      breaking_changes: [Controller IAM policies were split; upgrades may fail or
+          the controller may be under-permissioned until the new set of policies is
+          applied/reconciled. Treat this as an upgrade prerequisite and verify permissions
+          before rolling out.]
     chart_version: 1.9.0
     images: ['public.ecr.aws/karpenter/controller:1.9.0@sha256:30a506c64fbb1d8026cbfd9a1d662be3ab6e33a7999290a104085d78b49a69d7']
   - version: 1.8.0
@@ -7534,6 +7557,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 83.4.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumps kube-prometheus-stack chart dependency versions with non-major
+          updates (via Renovate).]
+      features: [No new user-facing features called out; this release primarily refreshes
+          dependencies within the chart.]
+      breaking_changes: [None indicated in the provided release notes; change is described
+          as non-major dependency updates.]
+    chart_version: 83.4.2
+    images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.0',
+      'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+      'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 83.4.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -12972,7 +13013,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.7
+    chart_version: 1.0.8
     images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
       'registry.k8s.io/kubectl:v1.35.3']
   - version: 4.0.2
