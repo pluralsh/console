@@ -14,7 +14,7 @@ Activity status: <%= @activity.status %>
 Current progress
 <%= for thought <- @activity.thoughts do %>
 Tool Called: <%= thought.tool_name %>
-Arguments: `<%= Jason.encode(thought.tool_args) %>`
+Arguments: `<%= Jason.encode!(thought.tool_args) %>`
 <% end %>
 
 <%= if !Enum.empty?(@activity.agent_runs) do %>

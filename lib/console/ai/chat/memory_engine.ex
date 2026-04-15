@@ -5,7 +5,6 @@ defmodule Console.AI.Chat.MemoryEngine do
   """
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.AI.{Provider, Tool}
-  alias Console.AI.Chat.Engine
 
   defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: [], tool_fmt: &Console.identity/1]
 
