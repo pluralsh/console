@@ -1877,6 +1877,11 @@
          "name": "WorkbenchJobActivities",
          "body": "query WorkbenchJobActivities($id: ID!) {\n  workbenchJob(id: $id) {\n    id\n    status\n    prompt\n    activities(first: 100) {\n      edges {\n        node {\n          ...WorkbenchJobActivity\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchJobActivity on WorkbenchJobActivity {\n  id\n  type\n  status\n  prompt\n  insertedAt\n  result {\n    ...WorkbenchJobActivityResult\n    __typename\n  }\n  agentRun {\n    ...AgentRunTiny\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {\n  output\n  error\n  jobUpdate {\n    diff\n    workingTheory\n    conclusion\n    __typename\n  }\n  metrics {\n    ...WorkbenchJobActivityMetric\n    __typename\n  }\n  logs {\n    ...WorkbenchJobActivityLog\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {\n  timestamp\n  name\n  value\n  labels\n  __typename\n}\n\nfragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {\n  timestamp\n  message\n  labels\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  error\n  runtime {\n    id\n    name\n    type\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  podReference {\n    name\n    namespace\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
+      "sha256:1367ab87fa3cb2913dca622df4606e0b0e2217e1abedeae5807cbcaf496114ac": {
+         "type": "query",
+         "name": "WorkbenchJobWhimseyText",
+         "body": "query WorkbenchJobWhimseyText($id: ID!) {\n  workbenchJob(id: $id) {\n    id\n    whimsey\n    __typename\n  }\n}"
+      },
       "sha256:0e989c7b9d7ff03e37e69364a49bb3f09036eec2048941bdb96d41e12ff15aeb": {
          "type": "query",
          "name": "WorkbenchJobActivity",

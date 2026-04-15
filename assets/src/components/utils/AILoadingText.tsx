@@ -1,7 +1,10 @@
 import { Flex, FlexProps, LoaderIcon } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 
-export function AILoadingText({ ...props }: FlexProps) {
+export function AILoadingText({
+  whimsey,
+  ...props
+}: FlexProps & { whimsey?: Nullable<string> }) {
   return (
     <Flex
       alignItems="center"
@@ -23,7 +26,7 @@ export function AILoadingText({ ...props }: FlexProps) {
         $shimmer
         css={{ width: 'fit-content' }}
       >
-        Planning next moves
+        {whimsey || 'Planning next moves'}
       </Body2P>
     </Flex>
   )

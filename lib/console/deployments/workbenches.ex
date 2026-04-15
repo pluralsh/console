@@ -310,7 +310,6 @@ defmodule Console.Deployments.Workbenches do
 
   def whimsey_text(%WorkbenchJob{} = job) do
     job = Repo.preload(job, [:activities])
-
     Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_prompt(job: job))
   end
 
