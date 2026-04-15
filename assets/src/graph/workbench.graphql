@@ -170,6 +170,9 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
+  user {
+    name
+  }
   workbench {
     id
   }
