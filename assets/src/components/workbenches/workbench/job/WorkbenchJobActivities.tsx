@@ -110,6 +110,9 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           <VirtualList
             isReversed
             data={activities}
+            style={{
+              padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
+            }}
             topContent={
               <JobPromptCardSC>
                 <Markdown text={job?.prompt ?? ''} />
@@ -170,14 +173,12 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px ${theme.spacing.medium}px`,
   background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
   minHeight: 0,
-  overflow: 'auto',
+  overflow: 'hidden',
 }))
 
 const JobPromptCardSC = styled(Card)(({ theme }) => ({
