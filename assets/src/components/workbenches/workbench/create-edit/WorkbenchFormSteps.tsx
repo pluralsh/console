@@ -43,8 +43,12 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
+import { InlineA } from 'components/utils/typography/Text'
 import { Link } from 'react-router-dom'
-import { WORKBENCHES_TOOLS_ADD_ABS_PATH } from 'routes/workbenchesRoutesConsts'
+import {
+  WORKBENCHES_TOOLS_ABS_PATH,
+  WORKBENCHES_TOOLS_ADD_ABS_PATH,
+} from 'routes/workbenchesRoutesConsts'
 import { WorkbenchFormState } from './WorkbenchCreateOrEdit'
 import {
   CardGrid,
@@ -538,7 +542,25 @@ export function WorkbenchAttachToolsStep({
       direction="column"
       gap="medium"
     >
-      <FormField label="Add tools">
+      <FormField
+        label={
+          <Flex
+            align="center"
+            justify="space-between"
+            width="100%"
+          >
+            <span>Add tools</span>
+            <InlineA
+              css={{ fontWeight: 400 }}
+              href={WORKBENCHES_TOOLS_ABS_PATH}
+              target="_self"
+              rel={undefined}
+            >
+              Add or remove tools
+            </InlineA>
+          </Flex>
+        }
+      >
         <Select
           label="Add tools"
           triggerButton={
