@@ -90,9 +90,12 @@ export function WorkbenchToolCreateOrEdit({
       (id && typeParam !== tool?.tool) ||
       !isConfigurableWorkbenchToolType(typeParam)
     )
-      setSearchParams({
-        [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
-      })
+      setSearchParams(
+        {
+          [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
+        },
+        { replace: true }
+      )
   }, [id, searchParams, setSearchParams, tool, isLoading])
 
   const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
