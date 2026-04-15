@@ -26,13 +26,15 @@ import {
   WORKBENCH_JOBS_PARAM_JOB,
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
+import { formatDateTime } from 'utils/datetime'
 import { CaptionP } from 'components/utils/typography/Text'
 
 export function WorkbenchJob() {
+  const theme = useTheme()
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
   const { popToast } = useSimpleToast()
   const { isOpen, setOpen } = useWorkbenchJobPanel()
@@ -53,6 +55,7 @@ export function WorkbenchJob() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+
   const job = data?.workbenchJob
   const isLoading = loading && !job
 
@@ -124,10 +127,44 @@ export function WorkbenchJob() {
           <StackedText
             truncate
             loading={isLoading}
+            gap="xxsmall"
             first={job?.workbench?.name}
             firstColor="text"
             firstPartialType="subtitle2"
-            second={job?.prompt}
+            second={
+              job && (
+                <Flex
+                  gap="large"
+                  css={{
+                    ...theme.partials.text.caption,
+                    color: theme.colors['text-xlight'],
+                  }}
+                >
+                  {job.user?.name?.trim() && (
+                    <span>{job.user.name.trim()}</span>
+                  )}
+                  {job.insertedAt && (
+                    <span>
+                      {formatDateTime(
+                        job.insertedAt,
+                        'YYYY-MM-DD ',
+                        false,
+                        true
+                      )}
+                      <span css={{ color: theme.colors['code-block-purple'] }}>
+                        {formatDateTime(
+                          job.insertedAt,
+                          'HH:mm:ss',
+                          false,
+                          true
+                        )}
+                      </span>
+                      {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
+                    </span>
+                  )}
+                </Flex>
+              )
+            }
             secondColor="text-xlight"
             secondPartialType="body2"
           />

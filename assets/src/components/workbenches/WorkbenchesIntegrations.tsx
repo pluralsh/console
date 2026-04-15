@@ -13,7 +13,7 @@ import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHe
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_CREATE_ABS_PATH } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import {
   TOOL_TYPE_CARDS,
   WorkbenchToolCardBody,
@@ -24,8 +24,6 @@ import {
 const WORKBENCH_TOOL_TYPE_PARAM = 'type'
 
 export function WorkbenchesIntegrations() {
-  const { spacing } = useTheme()
-
   return (
     <WorkbenchTabWrapper>
       <WorkbenchTabHeader
