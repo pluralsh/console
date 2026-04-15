@@ -19485,6 +19485,13 @@ export type WorkbenchJobWhimseyTextQueryVariables = Exact<{
 
 export type WorkbenchJobWhimseyTextQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, whimsey?: string | null } | null };
 
+export type WorkbenchJobActivityWhimseyTextQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobActivityWhimseyTextQuery = { __typename?: 'RootQueryType', workbenchJobActivity?: { __typename?: 'WorkbenchJobActivity', id: string, whimsey?: string | null } | null };
+
 export type WorkbenchJobActivityQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -41124,6 +41131,50 @@ export type WorkbenchJobWhimseyTextQueryHookResult = ReturnType<typeof useWorkbe
 export type WorkbenchJobWhimseyTextLazyQueryHookResult = ReturnType<typeof useWorkbenchJobWhimseyTextLazyQuery>;
 export type WorkbenchJobWhimseyTextSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobWhimseyTextSuspenseQuery>;
 export type WorkbenchJobWhimseyTextQueryResult = Apollo.QueryResult<WorkbenchJobWhimseyTextQuery, WorkbenchJobWhimseyTextQueryVariables>;
+export const WorkbenchJobActivityWhimseyTextDocument = gql`
+    query WorkbenchJobActivityWhimseyText($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    id
+    whimsey
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchJobActivityWhimseyTextQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchJobActivityWhimseyTextQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobActivityWhimseyTextQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobActivityWhimseyTextQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchJobActivityWhimseyTextQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables> & ({ variables: WorkbenchJobActivityWhimseyTextQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>(WorkbenchJobActivityWhimseyTextDocument, options);
+      }
+export function useWorkbenchJobActivityWhimseyTextLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>(WorkbenchJobActivityWhimseyTextDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchJobActivityWhimseyTextSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>;
+export function useWorkbenchJobActivityWhimseyTextSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobActivityWhimseyTextQuery | undefined, WorkbenchJobActivityWhimseyTextQueryVariables>;
+export function useWorkbenchJobActivityWhimseyTextSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>(WorkbenchJobActivityWhimseyTextDocument, options);
+        }
+export type WorkbenchJobActivityWhimseyTextQueryHookResult = ReturnType<typeof useWorkbenchJobActivityWhimseyTextQuery>;
+export type WorkbenchJobActivityWhimseyTextLazyQueryHookResult = ReturnType<typeof useWorkbenchJobActivityWhimseyTextLazyQuery>;
+export type WorkbenchJobActivityWhimseyTextSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobActivityWhimseyTextSuspenseQuery>;
+export type WorkbenchJobActivityWhimseyTextQueryResult = Apollo.QueryResult<WorkbenchJobActivityWhimseyTextQuery, WorkbenchJobActivityWhimseyTextQueryVariables>;
 export const WorkbenchJobActivityDocument = gql`
     query WorkbenchJobActivity($id: ID!) {
   workbenchJobActivity(id: $id) {
@@ -42264,6 +42315,7 @@ export const namedOperations = {
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
     WorkbenchJobWhimseyText: 'WorkbenchJobWhimseyText',
+    WorkbenchJobActivityWhimseyText: 'WorkbenchJobActivityWhimseyText',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchTools: 'WorkbenchTools',
     WorkbenchTool: 'WorkbenchTool'

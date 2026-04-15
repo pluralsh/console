@@ -43,6 +43,7 @@ import {
   UserActivityResult,
 } from './WorkbenchJobActivityResults'
 import { StackedText } from 'components/utils/table/StackedText'
+import { AILoadingText } from 'components/utils/AILoadingText'
 
 export function WorkbenchJobActivity({
   isOpen,
@@ -170,6 +171,12 @@ export function WorkbenchJobActivity({
           </Flex>
         )}
         <WorkbenchJobActivityResult activity={activity} />
+        {isRunning && (
+          <AILoadingText
+            activityId={id}
+            size="small"
+          />
+        )}
       </Flex>
     </AccordionItem>
   )

@@ -1882,6 +1882,11 @@
          "name": "WorkbenchJobWhimseyText",
          "body": "query WorkbenchJobWhimseyText($id: ID!) {\n  workbenchJob(id: $id) {\n    id\n    whimsey\n    __typename\n  }\n}"
       },
+      "sha256:aa49fb82f38a57a0ee60225031386b3ab53bf2fe4ccc55aacadc5fecd75f3bd1": {
+         "type": "query",
+         "name": "WorkbenchJobActivityWhimseyText",
+         "body": "query WorkbenchJobActivityWhimseyText($id: ID!) {\n  workbenchJobActivity(id: $id) {\n    id\n    whimsey\n    __typename\n  }\n}"
+      },
       "sha256:752d922f57d050a779875df29e43f615b448a22e591f918ca2d5adf5bc70528e": {
          "type": "query",
          "name": "WorkbenchJobActivity",

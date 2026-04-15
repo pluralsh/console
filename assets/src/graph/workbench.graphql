@@ -563,6 +563,13 @@ query WorkbenchJobWhimseyText($id: ID!) {
   }
 }
 
+query WorkbenchJobActivityWhimseyText($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    id
+    whimsey
+  }
+}
+
 query WorkbenchJobActivity($id: ID!) {
   workbenchJobActivity(id: $id) {
     ...WorkbenchJobActivityWithThoughts
