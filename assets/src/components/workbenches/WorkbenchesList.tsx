@@ -28,7 +28,10 @@ import { ComponentType } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { WorkbenchToolIcon } from './tools/workbenchToolsUtils'
+import {
+  WorkbenchToolIcon,
+  workbenchToolCardGridStyles,
+} from './tools/workbenchToolsUtils'
 
 const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
@@ -50,12 +53,16 @@ export function WorkbenchesList() {
       />
       {error && <GqlError error={error} />}
       {!data && loading ? (
-        <CardGridSkeleton count={6} />
+        <CardGridSkeleton
+          count={6}
+          styles={workbenchToolCardGridStyles(320)}
+        />
       ) : (
         <CardGrid
           onBottomReached={() =>
             !loading && pageInfo?.hasNextPage && fetchNextPage()
           }
+          styles={workbenchToolCardGridStyles(320)}
         >
           <CardSC
             css={{
@@ -130,7 +137,7 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
           flex: 1,
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 2,
+          WebkitLineClamp: 3,
           overflow: 'hidden',
         }}
       >
@@ -172,7 +179,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
   height: '100%',
-  minHeight: 164,
+  minHeight: 180,
   textDecoration: 'none',
 }))
 
