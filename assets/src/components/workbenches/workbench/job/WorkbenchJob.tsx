@@ -36,6 +36,8 @@ import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
 import { formatDateTime } from 'utils/datetime'
 import { CaptionP } from 'components/utils/typography/Text'
 
+const MAX_VISIBLE_JOB_TOOLS = 3
+
 export function WorkbenchJob() {
   const theme = useTheme()
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -84,6 +86,13 @@ export function WorkbenchJob() {
   const canCancelJob =
     job?.status === WorkbenchJobStatus.Pending ||
     job?.status === WorkbenchJobStatus.Running
+  const jobTools = job?.workbench?.tools?.filter(isNonNullable) ?? []
+  const visibleJobTools = jobTools.slice(0, MAX_VISIBLE_JOB_TOOLS)
+  const hiddenJobTools = jobTools.slice(MAX_VISIBLE_JOB_TOOLS)
+  const hiddenJobToolsLabel = hiddenJobTools
+    .map((tool) => tool.name)
+    .filter(Boolean)
+    .join(', ')
 
   useSetBreadcrumbs(
     useMemo(
@@ -167,22 +176,31 @@ export function WorkbenchJob() {
                         </span>
                         {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
                       </span>
-                      {!isEmpty(job.workbench?.tools) && (
+                      {!isEmpty(jobTools) && (
                         <Flex gap="xsmall">
-                          {job.workbench?.tools
-                            ?.filter(isNonNullable)
-                            .map((tool) => (
-                              <Tooltip
-                                key={tool.id}
-                                label={tool.name}
-                                placement="bottom"
-                              >
-                                <WorkbenchToolIcon
-                                  type={tool.tool}
-                                  size={12}
-                                />
-                              </Tooltip>
-                            ))}
+                          {visibleJobTools.map((tool) => (
+                            <Tooltip
+                              key={tool.id}
+                              label={tool.name}
+                              placement="bottom"
+                            >
+                              <WorkbenchToolIcon
+                                type={tool.tool}
+                                size={12}
+                              />
+                            </Tooltip>
+                          ))}
+                          {!isEmpty(hiddenJobTools) && (
+                            <Tooltip
+                              label={
+                                hiddenJobToolsLabel ||
+                                `${hiddenJobTools.length} more`
+                              }
+                              placement="bottom"
+                            >
+                              <span>+{hiddenJobTools.length}</span>
+                            </Tooltip>
+                          )}
                         </Flex>
                       )}
                     </>
