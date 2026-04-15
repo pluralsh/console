@@ -66,13 +66,10 @@ export function WorkbenchJobResult({
         <Markdown text={conclusion || workingTheory || 'No output yet.'} />
       </Flex>
       {!isEmpty(job?.result?.todos) && !conclusion && (
-        <>
-          <Subtitle1H1 $color="text">Agent todos</Subtitle1H1>
-          <WorkbenchJobTodos
-            loading={loading}
-            result={job?.result}
-          />
-        </>
+        <WorkbenchJobTodos
+          loading={loading}
+          result={job?.result}
+        />
       )}
     </Flex>
   )
