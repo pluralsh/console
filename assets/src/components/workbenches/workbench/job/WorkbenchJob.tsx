@@ -34,7 +34,6 @@ import { WorkbenchToolIcon } from '../../tools/workbenchToolsUtils'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
 import { formatDateTime } from 'utils/datetime'
-import { CaptionP } from 'components/utils/typography/Text'
 
 const MAX_VISIBLE_JOB_TOOLS = 3
 
@@ -211,14 +210,6 @@ export function WorkbenchJob() {
             align="center"
             gap="small"
           >
-            {job?.user?.name && (
-              <CaptionP
-                $color="text-xlight"
-                css={{ whiteSpace: 'nowrap' }}
-              >
-                {job.user.name}
-              </CaptionP>
-            )}
             {canCancelJob ? (
               <Button
                 small
