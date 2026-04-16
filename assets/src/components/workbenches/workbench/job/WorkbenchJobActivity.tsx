@@ -5,28 +5,35 @@ import {
   FailedFilledIcon,
   Flex,
   IconFrame,
-  LogsIcon,
   Markdown,
   TimeSeriesIcon,
+  VisualInspectionIcon,
 } from '@pluralsh/design-system'
-import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunFixButton'
 import {
-  ClickableLabelSC,
+  AgentRunInfoCard,
+  AgentRunInfoSimple,
+} from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import {
+  SimpleAccordion,
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import pluralize from 'pluralize'
 import { POLL_INTERVAL } from 'components/cluster/constants'
+import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
+import { EaseIn } from 'components/utils/EaseIn'
 import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -50,9 +57,10 @@ export function WorkbenchJobActivity({
   textStream: Nullable<string>
 }) {
   const { spacing } = useTheme()
-  const isRunning = isActivityRunning(activity.status)
+  const { id, status, type, prompt, agentRun, result } = activity
+  const isRunning = isActivityRunning(status)
 
-  if (activity.type === WorkbenchJobActivityType.Conclusion)
+  if (type === WorkbenchJobActivityType.Conclusion)
     return (
       <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
         <WorkbenchJobActivityResult
@@ -61,14 +69,13 @@ export function WorkbenchJobActivity({
         />
       </div>
     )
-  if (activity.type === WorkbenchJobActivityType.User)
+  if (type === WorkbenchJobActivityType.User)
     return <UserActivityResult activity={activity} />
 
-  const { agentRun, result } = activity
   return (
     <AccordionItem
-      key={activity.id}
-      value={activity.id}
+      key={id}
+      value={id}
       caret="right-quarter-mirror"
       padding="none"
       triggerWrapperStyles={{
@@ -87,18 +94,19 @@ export function WorkbenchJobActivity({
             $shimmer={isRunning}
             css={{ textTransform: 'capitalize' }}
           >
-            {activity.type?.toLowerCase() ?? 'activity'}
+            {type?.toLowerCase() ?? 'activity'}
           </Body2P>
-          {activity.result?.jobUpdate && (
-            <MemoActivityIcon jobUpdate={activity.result.jobUpdate} />
+          {result?.jobUpdate && (
+            <MemoActivityIcon jobUpdate={result.jobUpdate} />
           )}
           {!isEmpty(result?.logs) && (
             <ActivityModalIcon
-              icon={LogsIcon}
+              icon={VisualInspectionIcon}
               tooltip="View logs"
               modalHeader="Logs"
               modalContent={
                 <JobActivityLogs
+                  cardWrapper
                   logs={result?.logs?.filter(isNonNullable) ?? []}
                 />
               }
@@ -127,13 +135,13 @@ export function WorkbenchJobActivity({
               icon={
                 <DiscoverIcon
                   color="icon-xlight"
-                  css={{ width: 12 }}
+                  css={{ width: 14 }}
                 />
               }
               tooltip="Go to agent run details"
             />
           )}
-          {activity.status == WorkbenchJobActivityStatus.Failed && (
+          {status == WorkbenchJobActivityStatus.Failed && (
             <FailedFilledIcon
               size={12}
               color="icon-danger"
@@ -148,12 +156,12 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {activity.prompt && activity.type !== WorkbenchJobActivityType.Memo && (
-          <JobActivityPrompt prompt={activity.prompt} />
+        {prompt && type !== WorkbenchJobActivityType.Memo && (
+          <JobActivityPrompt prompt={prompt} />
         )}
         <WorkbenchJobActivityThoughts
-          activityId={activity.id}
-          skip={!isOpen || activity.type === WorkbenchJobActivityType.Memo}
+          activityId={id}
+          skip={!isOpen || type === WorkbenchJobActivityType.Memo}
         />
         {textStream && (
           <Flex
@@ -165,6 +173,12 @@ export function WorkbenchJobActivity({
           </Flex>
         )}
         <WorkbenchJobActivityResult activity={activity} />
+        {isRunning && (
+          <AILoadingText
+            activityId={id}
+            size="small"
+          />
+        )}
       </Flex>
     </AccordionItem>
   )
@@ -177,7 +191,13 @@ function WorkbenchJobActivityResult({
   activity: WorkbenchJobActivityFragment
   markdownType?: 'classic' | 'simplified'
 }) {
-  const { agentRun, result } = activity
+  const { spacing } = useTheme()
+  const { agentRun, agentRuns, result } = activity
+  const otherAgentRuns = useMemo(
+    () =>
+      agentRuns?.filter(isNonNullable).filter(({ id }) => id !== agentRun?.id),
+    [agentRun?.id, agentRuns]
+  )
   return (
     <Flex
       direction="column"
@@ -200,6 +220,28 @@ function WorkbenchJobActivityResult({
         metrics={result?.metrics?.filter(isNonNullable) ?? []}
       />
       <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
+      {!isEmpty(otherAgentRuns) && (
+        <>
+          <StackedText
+            first="Other agent runs"
+            firstPartialType="body2Bold"
+            firstColor="text-xlight"
+            icon={
+              <DiscoverIcon
+                size={12}
+                color="icon-xlight"
+              />
+            }
+          />
+          {otherAgentRuns?.map((agentRun) => (
+            <AgentRunInfoSimple
+              key={agentRun.id}
+              agentRun={agentRun}
+              css={{ padding: `0 ${spacing.small}px` }}
+            />
+          ))}
+        </>
+      )}
       <AgentRunInfoCard
         showLinkButton
         fillLevel={1}
@@ -225,77 +267,117 @@ function WorkbenchJobActivityThoughts({
     skip,
     pollInterval: POLL_INTERVAL,
   })
-  const thoughts =
-    data?.workbenchJobActivity?.thoughts?.filter(isNonNullable) ?? []
   const isLoading = !data && loading
+  const activity = data?.workbenchJobActivity
 
-  const isExpandable = thoughts.length > 3
-  const visibleThoughts = isExpanded ? thoughts : thoughts.slice(0, 3)
+  const { thoughts, lastThought, header } = useMemo(() => {
+    const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
+    let [numWithLogs, numWithMetrics] = [0, 0]
+    thoughts.forEach(({ attributes }) => {
+      numWithLogs += isEmpty(attributes?.logs) ? 0 : 1
+      numWithMetrics += isEmpty(attributes?.metrics) ? 0 : 1
+    })
+    const numOtherToolCalls = thoughts.length - numWithLogs - numWithMetrics
+    let header = `${numOtherToolCalls} tool ${pluralize('call', numOtherToolCalls)}`
+    if (numWithLogs > 0) header += `, ${numWithLogs} fetched logs`
+    if (numWithMetrics > 0) header += `, ${numWithMetrics} fetched metrics`
+    return { thoughts, lastThought: thoughts.at(-1), header }
+  }, [activity?.thoughts])
+
   if (isEmpty(thoughts) && !isLoading) return null
+  if (error)
+    return (
+      <GqlError
+        header={
+          <Body2P $color="text-xlight">Failed to load activity thoughts</Body2P>
+        }
+        error={error}
+      />
+    )
 
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      paddingLeft={spacing.small}
-    >
-      {error && <GqlError error={error} />}
-      {isLoading &&
-        Array.from({ length: 3 }).map((_, i) => <RectangleSkeleton key={i} />)}
-      {visibleThoughts.map(({ toolName, toolArgs, content, attributes }, i) => {
-        const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
-        const logs = attributes?.logs?.filter(isNonNullable) ?? []
-        return (
-          <SimpleToolCall
-            key={i}
-            content={content}
-            attributes={{ tool: { name: toolName, arguments: toolArgs } }}
-            {...(!isEmpty(metrics) && {
-              customLabel: (
-                <CaptionP $color="text">
-                  Fetched metrics{' '}
-                  <SpanSC $color="text-xlight">{toolName}</SpanSC>
-                </CaptionP>
-              ),
-              customResultBody: (
-                <Card>
-                  <JobActivityMetrics
-                    metrics={metrics}
-                    lineProps={{
-                      margin: { top: 20, right: 16, bottom: 25, left: 35 },
-                    }}
-                  />
-                </Card>
-              ),
-            })}
-            {...(!isEmpty(logs) && {
-              customLabel: (
-                <CaptionP $color="text">
-                  Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
-                </CaptionP>
-              ),
-              customResultBody: (
-                <Card css={{ height: '100%', overflow: 'auto' }}>
-                  <JobActivityLogs logs={logs} />
-                </Card>
-              ),
-            })}
-          />
-        )
-      })}
-      {isExpandable && (
-        <ClickableLabelSC onClick={() => setIsExpanded(!isExpanded)}>
-          <CaptionP $color="text-xlight">
-            {isExpanded
-              ? 'View less'
-              : `View more +${thoughts.length - visibleThoughts.length}`}
-          </CaptionP>
-        </ClickableLabelSC>
+    <>
+      <SimpleAccordion
+        label={header}
+        loading={isLoading}
+        isOpen={isExpanded}
+        setIsOpen={setIsExpanded}
+        caret="right-quarter-mirror"
+        triggerWrapperStyles={{
+          justifyContent: 'flex-start',
+          '.icon': { width: 10 },
+        }}
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginTop={spacing.xsmall}
+        >
+          {thoughts.map((thought, i) => (
+            <WorkbenchJobActivityThought
+              key={i}
+              thought={thought}
+            />
+          ))}
+        </Flex>
+      </SimpleAccordion>
+      {!isExpanded && lastThought && isActivityRunning(activity?.status) && (
+        <EaseIn currentKey={lastThought.id}>
+          <WorkbenchJobActivityThought thought={lastThought} />
+        </EaseIn>
       )}
-    </Flex>
+    </>
   )
 }
 
-export const isActivityRunning = (status: WorkbenchJobActivityStatus) =>
+function WorkbenchJobActivityThought({
+  thought,
+}: {
+  thought: WorkbenchJobThoughtFragment
+}) {
+  const { content, toolName, toolArgs, attributes } = thought
+  const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+  const logs = attributes?.logs?.filter(isNonNullable) ?? []
+  return (
+    <SimpleToolCall
+      content={content}
+      attributes={{ tool: { name: toolName, arguments: toolArgs } }}
+      {...(!isEmpty(metrics) && {
+        customLabel: (
+          <CaptionP $color="text">
+            Fetched metrics <SpanSC $color="text-xlight">{toolName}</SpanSC>
+          </CaptionP>
+        ),
+        customResultBody: (
+          <Card>
+            <JobActivityMetrics
+              metrics={metrics}
+              lineProps={{
+                margin: { top: 20, right: 16, bottom: 25, left: 35 },
+              }}
+            />
+          </Card>
+        ),
+      })}
+      {...(!isEmpty(logs) && {
+        customLabel: (
+          <CaptionP $color="text">
+            Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
+          </CaptionP>
+        ),
+        customResultBody: (
+          <JobActivityLogs
+            cardWrapper
+            logs={logs}
+          />
+        ),
+      })}
+    />
+  )
+}
+
+export const isActivityRunning = (
+  status: Nullable<WorkbenchJobActivityStatus>
+) =>
   status === WorkbenchJobActivityStatus.Pending ||
   status === WorkbenchJobActivityStatus.Running

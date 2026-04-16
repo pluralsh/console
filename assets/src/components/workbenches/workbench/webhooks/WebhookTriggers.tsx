@@ -49,6 +49,7 @@ export function WebhookTriggers() {
     error: workbenchError,
   } = useWorkbenchQuery({
     variables: { id: workbenchId },
+    fetchPolicy: 'cache-and-network',
     skip: !workbenchId,
   })
 

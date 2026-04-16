@@ -14,7 +14,7 @@ defmodule Console.AI.Workbench.Knowledge.Backfill do
     job = Repo.preload(job, @preloads)
     with {:ok, job} <- Workbenches.knowledge_updated(job),
          {:ok, skills} <- SkillsUtils.skills(job.workbench) do
-      tools(job, skills)
+      tools(job, Map.new(skills, & {&1.name, &1}))
       |> MemoryEngine.new(20, system_prompt: system_prompt(job: job), acc: %{})
       |> MemoryEngine.reduce([
         {:user, "Here is a description of the job that was just completed:\n\n#{job_prompt(job: job)}"},

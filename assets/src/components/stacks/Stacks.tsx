@@ -163,7 +163,10 @@ export function Stacks() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: useStacksQuery, keyPath: ['infrastructureStacks'] },
+    {
+      queryHook: useStacksQuery,
+      keyPath: ['infrastructureStacks'],
+    },
     {
       q: debouncedSearchString,
       projectId,
@@ -433,7 +436,6 @@ export function Stacks() {
                   />
                   <StackDeleteModal
                     stack={fullStack}
-                    refetch={refetch}
                     open={menuKey === MenuItemKey.Delete}
                     onClose={() => setMenuKey(MenuItemKey.None)}
                   />

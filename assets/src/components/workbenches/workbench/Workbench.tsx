@@ -109,7 +109,10 @@ export function Workbench() {
     }
   }
 
-  const { data, loading, error } = useWorkbenchQuery({ variables: { id } })
+  const { data, loading, error } = useWorkbenchQuery({
+    variables: { id },
+    fetchPolicy: 'cache-and-network',
+  })
   const isLoading = !data && loading
   const workbench = data?.workbench
 

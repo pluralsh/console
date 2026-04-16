@@ -96,8 +96,9 @@ You should always return a markdown formatted conclusion based on the investigat
 * the time series data that proves that conclusion
 * the log data that informs that conclusion
 
-If either were present in the investigation, *always* include them in your result. If neither are relevant, you can omit them.  Regardless, users will find
-that supporting evidence helpful and so it should be included in your result.
+If either were present in the investigation, *always* include them in your result. If neither are relevant, you can omit them.
+
+**DO NOT** include time series data if it's just a few disconnected datapoints, it should be a real sequential time series, otherwise users will consider it noise.
 
 <%= if @engine.iteration >= @engine.max_iterations - 5 do %>
 ## Investigation Ending

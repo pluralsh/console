@@ -2,13 +2,33 @@ fragment WorkbenchTiny on Workbench {
   id
   name
   description
-  repository {
+  agentRuntime {
     id
-    url
-    httpsPath
+    name
+    type
   }
   tools {
     ...WorkbenchToolTiny
+  }
+  webhooks(first: 50) {
+    edges {
+      node {
+        ...WorkbenchWebhookTiny
+      }
+    }
+  }
+}
+
+fragment WorkbenchWebhookTiny on WorkbenchWebhook {
+  id
+  name
+  webhook {
+    id
+    type
+  }
+  issueWebhook {
+    id
+    provider
   }
 }
 
@@ -18,6 +38,9 @@ fragment Workbench on Workbench {
   agentRuntime {
     id
     name
+  }
+  repository {
+    id
   }
   configuration {
     infrastructure {
@@ -206,6 +229,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   agentRun {
     ...AgentRunTiny
   }
+  agentRuns {
+    ...AgentRunTiny
+  }
 }
 
 fragment WorkbenchJobActivityWithThoughts on WorkbenchJobActivity {
@@ -292,6 +318,9 @@ fragment WorkbenchJob on WorkbenchJob {
   workbench {
     id
     name
+    tools {
+      ...WorkbenchToolTiny
+    }
   }
   error
   alert {
@@ -549,6 +578,13 @@ query WorkbenchJobActivities($id: ID!) {
 
 query WorkbenchJobWhimseyText($id: ID!) {
   workbenchJob(id: $id) {
+    id
+    whimsey
+  }
+}
+
+query WorkbenchJobActivityWhimseyText($id: ID!) {
+  workbenchJobActivity(id: $id) {
     id
     whimsey
   }

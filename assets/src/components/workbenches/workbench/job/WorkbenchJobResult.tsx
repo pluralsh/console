@@ -10,7 +10,7 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2BoldP, Subtitle1H1 } from 'components/utils/typography/Text'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
@@ -66,13 +66,10 @@ export function WorkbenchJobResult({
         <Markdown text={conclusion || workingTheory || 'No output yet.'} />
       </Flex>
       {!isEmpty(job?.result?.todos) && !conclusion && (
-        <>
-          <Subtitle1H1 $color="text">Agent todos</Subtitle1H1>
-          <WorkbenchJobTodos
-            loading={loading}
-            result={job?.result}
-          />
-        </>
+        <WorkbenchJobTodos
+          loading={loading}
+          result={job?.result}
+        />
       )}
     </Flex>
   )

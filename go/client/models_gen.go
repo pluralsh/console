@@ -9641,6 +9641,8 @@ type WorkbenchJobActivity struct {
 	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
 	// thoughts emitted during this activity
 	Thoughts []*WorkbenchJobThought `json:"thoughts,omitempty"`
+	// whimsically describes current progress for you
+	Whimsey *string `json:"whimsey,omitempty"`
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity

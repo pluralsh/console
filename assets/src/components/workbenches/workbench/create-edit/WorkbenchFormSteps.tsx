@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   Chip,
+  CloseIcon,
   Divider,
   Flex,
   FormField,
@@ -13,6 +14,7 @@ import {
   Radio,
   RadioGroup,
   Select,
+  SelectButton,
   Switch,
 } from '@pluralsh/design-system'
 import {
@@ -35,14 +37,17 @@ import {
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { OverlineH3 } from 'components/utils/typography/Text'
+import { OverlineH3, InlineA } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
-import { WORKBENCHES_TOOLS_ADD_ABS_PATH } from 'routes/workbenchesRoutesConsts'
+import {
+  WORKBENCHES_TOOLS_ABS_PATH,
+  WORKBENCHES_TOOLS_ADD_ABS_PATH,
+} from 'routes/workbenchesRoutesConsts'
 import { WorkbenchFormState } from './WorkbenchCreateOrEdit'
 import {
   CardGrid,
@@ -53,9 +58,12 @@ import { StackedText } from '../../../utils/table/StackedText'
 import {
   categoryToLabel,
   TOOL_TYPE_TO_LABEL,
+  WorkbenchToolCardBody,
   WorkbenchToolIcon,
+  workbenchToolCardGridStyles,
 } from '../../tools/workbenchToolsUtils'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
+import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
 
 type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
 type WorkbenchFormStepProps = {
@@ -482,16 +490,30 @@ export function WorkbenchAttachToolsStep({
   setFormState,
 }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
-  const { data, error, loading, pageInfo, fetchNextPage } =
-    useFetchPaginatedData({
-      queryHook: useWorkbenchToolsQuery,
-      keyPath: ['workbenchTools'],
-    })
-  const toolAssociations = formState.toolAssociations
+
+  const { data, error, loading } = useFetchPaginatedData({
+    queryHook: useWorkbenchToolsQuery,
+    keyPath: ['workbenchTools'],
+  })
 
   if (!formState) return null
 
   const tools = mapExistingNodes(data?.workbenchTools)
+
+  const selectedToolIds = (formState.toolAssociations ?? [])
+    .map((ta) => ta?.toolId)
+    .filter(isNonNullable)
+
+  const toolsById = new Map(tools.map((tool) => [tool.id, tool]))
+
+  const selectedTools = selectedToolIds
+    .map((toolId) => toolsById.get(toolId))
+    .filter(isNonNullable)
+
+  const setSelectedToolIds = (ids: string[]) =>
+    update((wfs) => {
+      wfs.toolAssociations = ids.map((toolId) => ({ toolId }))
+    })
 
   if (!data && loading) {
     return <CardGridSkeleton count={4} />
@@ -501,7 +523,7 @@ export function WorkbenchAttachToolsStep({
     return <GqlError error={error} />
   }
 
-  return !data ? (
+  return tools.length === 0 ? (
     <EmptyStateCompact
       message="You have not set up any tools yet"
       description="You can set up tools by clicking the button below. Tools can also be added later."
@@ -517,80 +539,141 @@ export function WorkbenchAttachToolsStep({
       </Button>
     </EmptyStateCompact>
   ) : (
-    <CardGrid
-      onBottomReached={() =>
-        !loading && pageInfo?.hasNextPage && fetchNextPage()
-      }
-      styles={{
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-      }}
+    <Flex
+      direction="column"
+      gap="medium"
     >
-      {tools.map(({ id, name, tool: type, categories }) => (
-        <ToolCardSC
-          key={id}
-          clickable
-          selected={
-            toolAssociations?.map((ta) => ta?.toolId ?? '').includes(id) ??
-            false
-          }
-          onClick={() =>
-            update((wfs) => {
-              const exists =
-                wfs.toolAssociations?.map((t) => t?.toolId).includes(id) ??
-                false
-              if (exists) {
-                wfs.toolAssociations =
-                  wfs.toolAssociations?.filter((ta) => ta?.toolId !== id) ?? []
-                return
-              }
-
-              wfs.toolAssociations = [
-                ...(wfs.toolAssociations ?? []),
-                { toolId: id },
-              ]
-            })
-          }
-        >
-          <StackedText
-            first={name}
-            firstPartialType="body2Bold"
-            firstColor="text"
-            second={TOOL_TYPE_TO_LABEL[type]}
-            icon={
-              <IconFrame
-                circle
-                type="secondary"
-                icon={<WorkbenchToolIcon type={type} />}
-              />
-            }
-          />
+      <FormField
+        label={
           <Flex
-            gap="xsmall"
-            wrap="wrap"
+            align="center"
+            justify="space-between"
+            width="100%"
           >
-            {categories?.filter(isNonNullable).map((cat, i) => (
-              <Chip
-                key={i}
-                size="small"
-              >
-                {categoryToLabel[cat]}
-              </Chip>
-            ))}
+            <span>Add tools</span>
+            <InlineA
+              css={{ fontWeight: 400 }}
+              href={WORKBENCHES_TOOLS_ABS_PATH}
+              target="_self"
+              rel={undefined}
+            >
+              Add or remove tools
+            </InlineA>
           </Flex>
-        </ToolCardSC>
-      ))}
-    </CardGrid>
+        }
+      >
+        <Select
+          label="Add tools"
+          triggerButton={
+            <SelectButton>
+              <Flex
+                align="center"
+                gap="xsmall"
+              >
+                <Chip
+                  fillLevel={3}
+                  size="small"
+                >
+                  {selectedToolIds.length}
+                </Chip>
+                <span>Tools selected</span>
+              </Flex>
+            </SelectButton>
+          }
+          selectionMode="multiple"
+          selectedKeys={selectedToolIds}
+          onSelectionChange={(keys) =>
+            setSelectedToolIds(Array.from(keys).map(String))
+          }
+          isDisabled={loading}
+        >
+          {tools.map((tool) => (
+            <ListBoxItem
+              key={tool.id}
+              label={tool.name}
+              leftContent={
+                <IconFrame
+                  icon={<WorkbenchToolIcon type={tool.tool} />}
+                  size="xsmall"
+                />
+              }
+            />
+          ))}
+        </Select>
+      </FormField>
+      {selectedTools.length > 0 && (
+        <CardGrid
+          styles={{
+            ...workbenchToolCardGridStyles(320),
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            padding: 0,
+          }}
+        >
+          {selectedTools.map(({ id, name, tool: type, categories }) => (
+            <Card key={id}>
+              <WorkbenchToolCardBody>
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  width="100%"
+                  gap="small"
+                >
+                  <StackedText
+                    first={name}
+                    firstPartialType="body2Bold"
+                    firstColor="text"
+                    second={TOOL_TYPE_TO_LABEL[type]}
+                    icon={
+                      <IconFrame
+                        circle
+                        type="secondary"
+                        icon={
+                          <WorkbenchToolIcon
+                            size={20}
+                            type={type}
+                          />
+                        }
+                      />
+                    }
+                    css={{ minWidth: 0, flex: 1 }}
+                  />
+                  <IconFrame
+                    circle
+                    clickable
+                    icon={<CloseIcon />}
+                    tooltip="Remove from selection"
+                    onClick={() =>
+                      setSelectedToolIds(
+                        selectedToolIds.filter((toolId) => toolId !== id)
+                      )
+                    }
+                  />
+                </Flex>
+                <WorkbenchesConfiguredToolMetadata
+                  toolId={id}
+                  toolType={type}
+                />
+                <Flex
+                  gap="xsmall"
+                  wrap="wrap"
+                >
+                  {categories?.filter(isNonNullable).map((cat, i) => (
+                    <Chip
+                      key={i}
+                      size="small"
+                    >
+                      {categoryToLabel[cat]}
+                    </Chip>
+                  ))}
+                </Flex>
+              </WorkbenchToolCardBody>
+            </Card>
+          ))}
+        </CardGrid>
+      )}
+    </Flex>
   )
 }
-
-const ToolCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.large,
-  minHeight: 120,
-  textDecoration: 'none',
-}))
 
 const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,

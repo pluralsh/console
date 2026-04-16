@@ -12,7 +12,7 @@ export function WorkbenchJobs() {
     <Flex
       direction="column"
       gap="large"
-      minHeight={700}
+      minHeight={400}
     >
       <WorkbenchJobCreateInput
         workbenchId={workbenchId}

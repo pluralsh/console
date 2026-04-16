@@ -306,13 +306,25 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:delete, user)
   end
 
-  @whimsey_prompt "Ok generate a whimsical phrase to describe the current thing you're working in in at most 5 words"
+  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words"
 
   def whimsey_text(%WorkbenchJob{} = job) do
     job = Repo.preload(job, [:activities])
     Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_prompt(job: job))
   end
 
+  def whimsey_text(%WorkbenchJobActivity{type: :coding} = activity) do
+    activity = Repo.preload(activity, [:thoughts, agent_runs: :pull_requests])
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_activity_prompt(activity: activity))
+  end
+
+  def whimsey_text(%WorkbenchJobActivity{} = activity) do
+    Repo.preload(activity, [:thoughts])
+    |> Map.put(:agent_runs, [])
+    |> then(&Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_activity_prompt(activity: &1)))
+  end
+
+  EEx.function_from_file(:defp, :whimsey_activity_prompt, Console.priv_filename(["prompts", "workbench", "whimsey_activity.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :whimsey_prompt, Console.priv_filename(["prompts", "workbench", "whimsey.md.eex"]), [:assigns], trim: true)
 
   @doc """

@@ -176,7 +176,7 @@ defmodule Console.Schema.WorkbenchTool do
       cats = categories(tool)
       case MapSet.subset?(MapSet.new(categories), MapSet.new(cats)) do
         true -> []
-        false -> [categories: "must be a subset of #{inspect(cats)} for a #{tool} tool"]
+        false -> [categories: "must be a subset of [#{Enum.join(cats, ", ")}] for a #{tool} tool"]
       end
     end)
   end
@@ -199,8 +199,8 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:elastic), do: [:logs]
   defp categories(:tempo), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
-  defp categories(:linear), do: [:integration]
-  defp categories(:atlassian), do: [:integration]
+  defp categories(:linear), do: [:ticketing]
+  defp categories(:atlassian), do: [:ticketing]
   defp categories(_), do: [:integration]
 
   defp configuration_changeset(model, attrs, tool) do

@@ -42,6 +42,7 @@ export function WorkbenchesConfiguredToolMetadata({
 }) {
   const { data } = useWorkbenchToolQuery({
     variables: { id: toolId },
+    fetchPolicy: 'cache-and-network',
   })
 
   const metadata = getToolMetadataRows(

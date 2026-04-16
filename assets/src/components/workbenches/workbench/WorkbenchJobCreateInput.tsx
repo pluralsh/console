@@ -150,7 +150,7 @@ function WorkbenchSavedPromptsOverlay({
   })
 
   const prompts = useMemo(
-    () => mapExistingNodes(data?.workbench?.prompts),
+    () => mapExistingNodes(data?.workbench?.prompts).reverse(),
     [data]
   )
   const isLoading = promptsLoading && !data

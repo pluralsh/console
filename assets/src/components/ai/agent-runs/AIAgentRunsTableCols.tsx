@@ -2,6 +2,7 @@ import {
   CaretRightIcon,
   Chip,
   IconFrame,
+  IconFrameProps,
   Modal,
   PrOpenIcon,
   SmallPodIcon,
@@ -17,10 +18,13 @@ import {
 import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
-import { AgentRunTinyFragment } from 'generated/graphql'
+import {
+  AgentRunTinyFragment,
+  PullRequestBasicFragment,
+} from 'generated/graphql'
 import { capitalize, isEmpty } from 'lodash'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { RunStatusChip } from '../infra-research/details/InfraResearch'
@@ -46,43 +50,8 @@ export const agentRunsCols = [
   columnHelper.accessor((run) => run.pullRequests, {
     id: 'pullRequests',
     cell: function Cell({ getValue }) {
-      const [modalOpen, setModalOpen] = useState(false)
-      const prs = getValue()?.filter(isNonNullable) ?? []
-      if (isEmpty(prs)) return null
-      if (prs.length === 1)
-        return (
-          <IconFrame
-            clickable
-            type="secondary"
-            as={Link}
-            to={prs[0].url}
-            target="_blank"
-            rel="noopener noreferrer"
-            tooltip="View pull request"
-            icon={<PrOpenIcon />}
-          />
-        )
       return (
-        <>
-          <IconFrame
-            clickable
-            type="secondary"
-            tooltip="View pull requests"
-            icon={<PrOpenIcon />}
-            onClick={() => setModalOpen(true)}
-          />
-          <Modal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            header="Pull Requests"
-            size="auto"
-          >
-            <Table
-              data={prs.map((pr) => ({ node: pr }))}
-              columns={basicPrTableCols}
-            />
-          </Modal>
-        </>
+        <AgentRunPRsModalIcon prs={getValue()?.filter(isNonNullable) ?? []} />
       )
     },
   }),
@@ -148,4 +117,55 @@ export const agentRunsCols = [
   }),
 ]
 
-const basicPrTableCols = [ColTitle, ColStatus, ColInsertedAt, ColLinkout]
+export function AgentRunPRsModalIcon({
+  prs,
+  ...props
+}: {
+  prs: PullRequestBasicFragment[]
+} & Partial<IconFrameProps & LinkProps>) {
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const basicPrTableCols = useMemo(
+    () => [ColTitle, ColStatus, ColInsertedAt, ColLinkout],
+    []
+  )
+
+  if (isEmpty(prs)) return null
+  if (prs.length === 1)
+    return (
+      <IconFrame
+        clickable
+        type="secondary"
+        as={Link}
+        to={prs[0].url}
+        target="_blank"
+        rel="noopener noreferrer"
+        tooltip="View pull request"
+        icon={<PrOpenIcon />}
+        {...props}
+      />
+    )
+  return (
+    <>
+      <IconFrame
+        clickable
+        type="secondary"
+        tooltip="View pull requests"
+        icon={<PrOpenIcon />}
+        onClick={() => setModalOpen(true)}
+        {...props}
+      />
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        header="Pull Requests"
+        size="auto"
+      >
+        <Table
+          data={prs.map((pr) => ({ node: pr }))}
+          columns={basicPrTableCols}
+        />
+      </Modal>
+    </>
+  )
+}

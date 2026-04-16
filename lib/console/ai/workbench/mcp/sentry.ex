@@ -1,12 +1,14 @@
 defmodule Console.AI.Workbench.MCP.Sentry do
   @behaviour Console.AI.Workbench.MCP
+  import Console.AI.Workbench.MCP.Basic, only: [normalize_url: 1]
   alias Console.Schema.WorkbenchTool
 
   def transport(%WorkbenchTool{tool: :sentry, configuration: %{sentry: sentry}}, _),
     do: {:streamable_http, sentry_transport(sentry)}
 
   defp sentry_transport(%{url: url, access_token: access_token, path: path, agent_mode: agent_mode}) do
-    sentry_url(url || "https://mcp.sentry.dev/mcp", path)
+    normalize_url(url || "https://mcp.sentry.dev")
+    |> sentry_url(path)
     |> sentry_agent_mode(agent_mode)
     |> then(& [base_url: &1, headers: %{"Authorization" => "Bearer #{access_token}"}])
   end

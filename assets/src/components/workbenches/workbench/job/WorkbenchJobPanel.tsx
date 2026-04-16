@@ -51,6 +51,7 @@ export function WorkbenchJobPanelContent() {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
   })
   const job = data?.workbenchJob
   const isLoading = loading && !job
@@ -93,26 +94,28 @@ export function WorkbenchJobPanelContent() {
         />
       </PanelHeaderSC>
       <ContentWrapperSC>
-        {selectedTab === 'Result' && (
-          <WorkbenchJobResult
-            job={job}
-            loading={isLoading}
-          />
-        )}
-        {selectedTab === 'Metrics' && (
-          <WorkbenchJobMetrics
-            job={job}
-            loading={isLoading}
-          />
-        )}
-        {selectedTab === 'Topology' && (
-          <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
-        )}
-        {selectedTab === 'PRs' && (
-          <WorkbenchJobPrs
-            prs={job?.pullRequests?.filter(isNonNullable) ?? []}
-          />
-        )}
+        <ContentInnerSC>
+          {selectedTab === 'Result' && (
+            <WorkbenchJobResult
+              job={job}
+              loading={isLoading}
+            />
+          )}
+          {selectedTab === 'Metrics' && (
+            <WorkbenchJobMetrics
+              job={job}
+              loading={isLoading}
+            />
+          )}
+          {selectedTab === 'Topology' && (
+            <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
+          )}
+          {selectedTab === 'PRs' && (
+            <WorkbenchJobPrs
+              prs={job?.pullRequests?.filter(isNonNullable) ?? []}
+            />
+          )}
+        </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
   )
@@ -127,14 +130,18 @@ export function useWorkbenchJobPanel() {
   }
 }
 
-const ContentWrapperSC = styled.div(({ theme }) => ({
-  padding: theme.spacing.large,
+const ContentWrapperSC = styled.div(() => ({
   height: '100%',
   width: '100%',
   overflow: 'auto',
+}))
+
+const ContentInnerSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.large,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  minHeight: '100%',
 }))
 
 const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({

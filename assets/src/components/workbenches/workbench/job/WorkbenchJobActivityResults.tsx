@@ -8,6 +8,7 @@ import {
   IconProps,
   Modal,
   NotebookIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import {
   SimpleAccordion,
@@ -80,24 +81,27 @@ export function UserActivityResult({
 
 export function JobActivityLogs({
   logs,
-  ...props
+  cardWrapper = false,
 }: {
   logs: WorkbenchJobActivityLogFragment[]
-} & FlexProps) {
+  cardWrapper?: boolean
+}) {
   if (isEmpty(logs)) return null
 
   return (
-    <Flex
-      direction="column"
-      {...props}
+    <WrapWithIf
+      condition={cardWrapper}
+      wrapper={<Card css={{ height: '100%', overflow: 'auto' }} />}
     >
-      {logs.map((log, i) => (
-        <LogLine
-          key={i}
-          line={{ log: log.message, timestamp: log.timestamp }}
-        />
-      ))}
-    </Flex>
+      <Flex direction="column">
+        {logs.map((log, i) => (
+          <LogLine
+            key={i}
+            line={{ log: log.message, timestamp: log.timestamp }}
+          />
+        ))}
+      </Flex>
+    </WrapWithIf>
   )
 }
 
@@ -117,7 +121,15 @@ export function JobActivityMetrics({
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
-    const grouped = groupBy(metrics, (m) => m.name ?? 'metric')
+    const grouped = groupBy(
+      metrics,
+      ({ name, labels }) =>
+        `${name ?? 'metric'}{${
+          Object.entries(labels ?? {})
+            .map(([key, value]) => `${key}:${value}`)
+            .join(',') ?? ''
+        }}`
+    )
     return Object.entries(grouped).map(([name, points]) => ({
       id: name,
       data: points
@@ -235,7 +247,7 @@ export function ActivityModalIcon({
         icon={
           <Icon
             color="icon-xlight"
-            style={{ width: 12 }}
+            style={{ width: 14 }}
           />
         }
         onClick={(e) => {
@@ -252,6 +264,7 @@ export function ActivityModalIcon({
           setShowModal(false)
           setFinishedAnimating(false)
         }}
+        scrollable={false}
         onAnimationEnd={() => setFinishedAnimating(true)}
         actions={
           <Button

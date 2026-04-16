@@ -3,12 +3,10 @@ import { StackFragment, useDeleteStackMutation } from '../../generated/graphql'
 
 export default function StackDeleteModal({
   stack,
-  refetch,
   open,
   onClose,
 }: {
   stack: StackFragment
-  refetch?: Nullable<() => void>
   open: boolean
   onClose: () => void
 }) {
@@ -16,8 +14,9 @@ export default function StackDeleteModal({
 
   const [mutation, { loading, error }] = useDeleteStackMutation({
     variables: { id: stack.id ?? '' },
+    refetchQueries: ['Stacks', 'Stack'],
+    awaitRefetchQueries: true,
     onCompleted: () => {
-      refetch?.()
       onClose()
     },
   })

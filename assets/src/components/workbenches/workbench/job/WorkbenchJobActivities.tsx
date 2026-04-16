@@ -2,7 +2,6 @@ import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
 import {
   useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
-  useWorkbenchJobWhimseyTextQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
@@ -37,11 +36,6 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
     pollInterval: 30_000,
-  })
-  const { data: whimseyData } = useWorkbenchJobWhimseyTextQuery({
-    variables: { id: jobId },
-    errorPolicy: 'ignore',
-    pollInterval: 15_000,
   })
 
   const job = data?.workbenchJob
@@ -110,6 +104,9 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           <VirtualList
             isReversed
             data={activities}
+            style={{
+              padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
+            }}
             topContent={
               <JobPromptCardSC>
                 <Markdown text={job?.prompt ?? ''} />
@@ -125,7 +122,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
                     isActivityTerminal(status)
                   ) && (
                     <AILoadingText
-                      whimsey={whimseyData?.workbenchJob?.whimsey}
+                      jobId={jobId}
                       marginTop={spacing.small}
                     />
                   )}
@@ -170,14 +167,12 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px ${theme.spacing.medium}px`,
   background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
   minHeight: 0,
-  overflow: 'auto',
+  overflow: 'hidden',
 }))
 
 const JobPromptCardSC = styled(Card)(({ theme }) => ({

@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.MCP.Atlassian do
   alias Console.Schema.{WorkbenchTool}
   alias Console.Schema.WorkbenchTool.Configuration.AtlassianConnection
 
-  @base_url "https://mcp.atlassian.com/v1/mcp"
+  @base_url "https://mcp.atlassian.com/v1"
 
   def transport(%WorkbenchTool{tool: :atlassian, configuration: %{atlassian: atlassian}}, _),
     do: {:streamable_http, [base_url: @base_url, headers: headers(atlassian)]}
