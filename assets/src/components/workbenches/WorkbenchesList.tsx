@@ -138,8 +138,9 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
         {description}
       </Body2P>
       <Flex
-        direction="column"
-        gap="xsmall"
+        gap="small"
+        align="flex-end"
+        justify="space-between"
       >
         <MetadataGridSC>
           <MetadataLabelSC>coding agent</MetadataLabelSC>
@@ -193,15 +194,9 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
             />
           </MetadataValueSC>
         </MetadataGridSC>
-      </Flex>
-      <Flex
-        gap="xsmall"
-        align="center"
-      >
-        <div css={{ flex: 1 }} />
-        <IconFrame
-          icon={<ArrowRightIcon color="icon-xlight" />}
-          size={'small'}
+        <ArrowRightIcon
+          color="icon-xlight"
+          marginRight="xsmall"
         />
       </Flex>
     </CardSC>
@@ -270,6 +265,8 @@ const MetadataGridSC = styled.div(({ theme }) => ({
   columnGap: theme.spacing.small,
   rowGap: theme.spacing.xxsmall,
   alignItems: 'center',
+  flex: 1,
+  minWidth: 0,
 }))
 
 const MetadataLabelSC = styled.span(({ theme }) => ({
