@@ -72,10 +72,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   defp upgrade_plan_brief(plan) do
     %{
-      compatibilities: plan.compatibilities,
-      deprecations: plan.deprecations,
-      incompatibilities: plan.incompatibilities,
-      kubelet_skew: plan.kubelet_skew
+      kubernetes_component_compatibilities_satisfied: plan.compatibilities,
+      cloud_upgrade_insights_satisfied: plan.deprecations,
+      no_kubelet_skew: plan.kubelet_skew
     }
   end
 

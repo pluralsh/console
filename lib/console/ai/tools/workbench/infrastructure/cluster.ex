@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "plrl_cluster"
-  def description(_), do: "Get the details of a cluster from the Plural API."
+  def description(_), do: "Get the details of a cluster from the Plural API.  This will also include deep information about the cluster's upgradeability, plural metadata, and version/distro details"
 
   def implement(_, %__MODULE__{user: %User{} = user, handle: handle}) do
     Clusters.get_cluster_by_handle(handle)
