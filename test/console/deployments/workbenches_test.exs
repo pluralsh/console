@@ -662,6 +662,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       result = refetch(job.result)
       assert result.working_theory == "new theory"
       assert result.conclusion == "new conclusion"
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: updated_job}}
+      assert updated_job.id == job.id
     end
 
     test "creates a result when job has no results yet" do
@@ -683,6 +685,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       job = Console.Repo.preload(refetch(job), :result)
       assert job.result.working_theory == "theory"
       assert job.result.conclusion == "conclusion"
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: updated_job}}
+      assert updated_job.id == job.id
     end
   end
 
