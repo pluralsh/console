@@ -11,11 +11,11 @@
             "properties": {
                 "tool_name": {
                     "type": "string",
-                    "description": "The tool name used for querying metrics"
+                    "description": "The tool name used for querying metrics. This should be the exact tool/function name used to query the metrics."
                 },
                 "tool_args": {
                     "type": "object",
-                    "description": "The arguments passed to the metrics tool query",
+                    "description": "The arguments passed to the metrics tool/function call from `tool_name`. This is required but can be empty if needed.  Just pass as an unstructured object exactly as presented in the tool call history",
                     "additionalProperties": true
                 },
                 "summary": {

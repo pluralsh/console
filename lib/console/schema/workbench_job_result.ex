@@ -17,7 +17,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     def changeset(model, attrs) do
       model
       |> cast(attrs, [:tool_name, :tool_args, :summary])
-      |> validate_required([:tool_name, :tool_args])
+      |> validate_required([:tool_name])
     end
   end
 

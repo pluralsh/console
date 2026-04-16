@@ -41,7 +41,7 @@
                 },
                 "tool_args": {
                     "type": "object",
-                    "description": "The arguments used for the metrics query",
+                    "description": "The arguments used for the tool/function call from `tool_name`. This is required but can be empty if needed.  Just pass as an unstructured object exactly as presented in the tool call history",
                     "additionalProperties": true
                 },
                 "summary": {
