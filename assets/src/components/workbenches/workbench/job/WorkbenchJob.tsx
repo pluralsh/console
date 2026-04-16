@@ -16,7 +16,6 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   useCancelWorkbenchJobMutation,
   useWorkbenchJobQuery,
-  useWorkbenchJobDeltaSubscription,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
@@ -29,12 +28,12 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchToolIcon } from '../../tools/workbenchToolsUtils'
+import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-import { formatDateTime } from 'utils/datetime'
 
 const MAX_VISIBLE_JOB_TOOLS = 3
 
@@ -68,21 +67,6 @@ export function WorkbenchJob() {
   const workbenchName = job?.workbench?.name ?? 'workbench'
   const trimmedPrompt = job?.prompt?.trim() ?? ''
   const breadcrumbPrompt = trimmedPrompt || 'workbench job'
-
-  useWorkbenchJobDeltaSubscription({
-    variables: { id: jobId },
-    skip: !jobId,
-    // onData: ({ client, data: { data } }) => {
-    //   const payload = data?.workbenchJobDelta?.payload
-    //   if (!payload) return
-
-    //   client.cache.writeQuery({
-    //     query: WorkbenchJobDocument,
-    //     variables: { id: jobId },
-    //     data: { workbenchJob: payload },
-    //   })
-    // },
-  })
 
   const [cancelWorkbenchJob, { loading: cancelLoading, error: cancelError }] =
     useCancelWorkbenchJobMutation({
