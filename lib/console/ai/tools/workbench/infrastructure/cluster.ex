@@ -51,7 +51,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     %{
       current: Map.take(curr, [:version, :summary])
                |> Map.put(:name, curr.addon.name)
-               |> Map.put(:current, Map.drop(curr.addon, [:versions])),
+               |> Map.put(:addon_details, Map.drop(curr, [:addon])),
       fix: fix,
       callout: Map.get(addon, :callout)
     }
@@ -61,7 +61,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   defp simplify_cloud_addon(%{current: curr, fix: fix} = addon) do
     %{
       current: Map.take(curr, [:version, :summary])
-               |> Map.put(:current, Map.drop(curr.addon, [:versions])),
+               |> Map.put(:addon_details, Map.drop(curr, [:addon])),
       fix: fix,
       callout: Map.get(addon, :callout)
     }
