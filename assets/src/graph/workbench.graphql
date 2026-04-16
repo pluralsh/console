@@ -760,8 +760,8 @@ mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
   }
 }
 
-subscription WorkbenchJobDelta($id: ID!) {
-  workbenchJobDelta(id: $id) {
+subscription WorkbenchJobDelta($jobId: ID!) {
+  workbenchJobDelta(id: $jobId) {
     delta
     payload {
       ...WorkbenchJob

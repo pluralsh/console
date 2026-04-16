@@ -19662,7 +19662,7 @@ export type CreateIssueWebhookMutationVariables = Exact<{
 export type CreateIssueWebhookMutation = { __typename?: 'RootMutationType', createIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
-  id: Scalars['ID']['input'];
+  jobId: Scalars['ID']['input'];
 }>;
 
 
@@ -41987,8 +41987,8 @@ export type CreateIssueWebhookMutationHookResult = ReturnType<typeof useCreateIs
 export type CreateIssueWebhookMutationResult = Apollo.MutationResult<CreateIssueWebhookMutation>;
 export type CreateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
 export const WorkbenchJobDeltaDocument = gql`
-    subscription WorkbenchJobDelta($id: ID!) {
-  workbenchJobDelta(id: $id) {
+    subscription WorkbenchJobDelta($jobId: ID!) {
+  workbenchJobDelta(id: $jobId) {
     delta
     payload {
       ...WorkbenchJob
@@ -42009,7 +42009,7 @@ export const WorkbenchJobDeltaDocument = gql`
  * @example
  * const { data, loading, error } = useWorkbenchJobDeltaSubscription({
  *   variables: {
- *      id: // value for 'id'
+ *      jobId: // value for 'jobId'
  *   },
  * });
  */

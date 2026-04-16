@@ -1,6 +1,7 @@
 import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   useWorkbenchJobActivityDeltaSubscription,
+  useWorkbenchJobDeltaSubscription,
   useWorkbenchJobThoughtDeltaSubscription,
   useWorkbenchTextStreamSubscription,
   WorkbenchJobActivitiesDocument,
@@ -30,6 +31,12 @@ export function useWorkbenchJobStreams(
   const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
     {}
   )
+
+  // for updating conclusion/working theory etc. should be handled by Apollo cache automatically
+  useWorkbenchJobDeltaSubscription({
+    variables: { jobId: jobId ?? '' },
+    skip: !jobId,
+  })
 
   useWorkbenchTextStreamSubscription({
     variables: { jobId: jobId ?? '' },
