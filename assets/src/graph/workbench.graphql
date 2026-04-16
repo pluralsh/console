@@ -764,7 +764,12 @@ subscription WorkbenchJobDelta($id: ID!) {
   workbenchJobDelta(id: $id) {
     delta
     payload {
-      ...WorkbenchJob
+      id
+      status
+      error
+      result {
+        ...WorkbenchJobResult
+      }
     }
   }
 }

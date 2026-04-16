@@ -16,6 +16,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   useCancelWorkbenchJobMutation,
   useWorkbenchJobQuery,
+  useWorkbenchJobDeltaSubscription,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
@@ -67,6 +68,21 @@ export function WorkbenchJob() {
   const workbenchName = job?.workbench?.name ?? 'workbench'
   const trimmedPrompt = job?.prompt?.trim() ?? ''
   const breadcrumbPrompt = trimmedPrompt || 'workbench job'
+
+  useWorkbenchJobDeltaSubscription({
+    variables: { id: jobId },
+    skip: !jobId,
+    // onData: ({ client, data: { data } }) => {
+    //   const payload = data?.workbenchJobDelta?.payload
+    //   if (!payload) return
+
+    //   client.cache.writeQuery({
+    //     query: WorkbenchJobDocument,
+    //     variables: { id: jobId },
+    //     data: { workbenchJob: payload },
+    //   })
+    // },
+  })
 
   const [cancelWorkbenchJob, { loading: cancelLoading, error: cancelError }] =
     useCancelWorkbenchJobMutation({
