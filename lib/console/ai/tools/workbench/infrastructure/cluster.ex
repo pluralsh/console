@@ -38,7 +38,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     end
   end
 
-  defp simplified_upgrade_plan(%Cluster{} = cluster) do
+  def simplified_upgrade_plan(%Cluster{} = cluster) do
     plan = Clusters.upgrade_plan(cluster)
     %{
       blocking_addons: Enum.map(plan.blocking_addons, &simplify_addon/1),
@@ -51,7 +51,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     %{
       current: Map.take(curr, [:version, :summary])
                |> Map.put(:name, curr.addon.name)
-               |> Map.put(:version_details, curr.addon.addon_version),
+               |> Map.put(:current, Map.drop(curr.addon, [:versions])),
       fix: fix,
       callout: Map.get(addon, :callout)
     }
@@ -61,8 +61,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   defp simplify_cloud_addon(%{current: curr, fix: fix} = addon) do
     %{
       current: Map.take(curr, [:version, :summary])
-               |> Map.put(:name, curr.addon.name)
-               |> Map.put(:version_details, curr.addon.addon_version),
+               |> Map.put(:current, Map.drop(curr.addon, [:versions])),
       fix: fix,
       callout: Map.get(addon, :callout)
     }
