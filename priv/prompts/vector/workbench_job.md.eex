@@ -27,7 +27,7 @@ A mermaid diagram of the system graph at the time of the analysis.
 All Pull Requests created to ultimately resolve the issue:
 
 ```json
-<%= Jason.encode!(@job.pull_requests) %>
+<%= Console.mapify(@job.pull_requests) |> Jason.encode!(pretty: true) %>
 ```
 
 ## Activities
@@ -35,5 +35,5 @@ All Pull Requests created to ultimately resolve the issue:
 A list of activities done to derive the conclusion.
 
 ```json
-<%= Jason.encode!(@job.activities) %>
+<%= Console.mapify(@job.activities) |> Jason.encode!(pretty: true) %>
 ```
