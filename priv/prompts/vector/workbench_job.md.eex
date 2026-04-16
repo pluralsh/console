@@ -11,7 +11,7 @@ Here's a prior resolution of a Workbench job.
 The ultimate accepted conclusion of the workbenches analysis.
 
 ```
-<%= @job.conclusion %>
+<%= @job.result.conclusion %>
 ```
 
 ## Topology
@@ -19,7 +19,7 @@ The ultimate accepted conclusion of the workbenches analysis.
 A mermaid diagram of the system graph at the time of the analysis.
 
 ```mermaid
-<%= @job.topology %>
+<%= @job.result.topology %>
 ```
 
 ## Pull Requests
