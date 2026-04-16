@@ -2,7 +2,6 @@ import {
   ArrowRightIcon,
   Card,
   Flex,
-  IconFrame,
   AddIcon,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -42,6 +41,7 @@ import { getWebhookIcon } from './workbench/webhooks/utils'
 
 const MAX_VISIBLE_METADATA_ITEMS = 5
 const METADATA_ICON_SIZE = 12
+const WORKBENCH_CARD_MIN_WIDTH = 340
 
 const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
@@ -66,14 +66,14 @@ export function WorkbenchesList() {
       {!data && loading ? (
         <CardGridSkeleton
           count={6}
-          styles={workbenchToolCardGridStyles(320)}
+          styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
         />
       ) : (
         <CardGrid
           onBottomReached={() =>
             !loading && pageInfo?.hasNextPage && fetchNextPage()
           }
-          styles={workbenchToolCardGridStyles(320)}
+          styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
         >
           <CreateCardSC
             clickable
