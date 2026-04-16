@@ -26,6 +26,8 @@ import {
   useWorkbenchJobStreams,
 } from './useWorkbenchJobStreams'
 
+export const ACTIVITY_GAP = 'medium' as const
+
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const { spacing } = useTheme()
   const [newMessage, setNewMessage] = useState('')

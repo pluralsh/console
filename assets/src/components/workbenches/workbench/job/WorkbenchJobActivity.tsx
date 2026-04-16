@@ -62,7 +62,7 @@ export function WorkbenchJobActivity({
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
-      <div css={{ padding: `${spacing.xxsmall}px ${spacing.large}px 0 0` }}>
+      <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
         <WorkbenchJobActivityResult
           activity={activity}
           markdownType="classic"
@@ -81,7 +81,7 @@ export function WorkbenchJobActivity({
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
         gap: 10,
-        padding: `${spacing.xxsmall}px 0`,
+        padding: `${spacing.xsmall}px 0`,
         '.icon': { width: 10 },
       }}
       trigger={
@@ -154,11 +154,7 @@ export function WorkbenchJobActivity({
         direction="column"
         gap="xsmall"
         overflow="auto"
-        css={{
-          padding: spacing.xsmall,
-          paddingLeft: spacing.xlarge,
-          marginBottom: spacing.small,
-        }}
+        css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
         {prompt && type !== WorkbenchJobActivityType.Memo && (
           <JobActivityPrompt prompt={prompt} />
