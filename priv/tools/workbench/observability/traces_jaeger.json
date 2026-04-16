@@ -1,0 +1,69 @@
+{
+    "type": "object",
+    "properties": {
+        "service_name": {
+            "type": "string",
+            "description": "Jaeger service name (required primary selector)."
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of traces to search (mapped to Jaeger search depth)."
+        },
+        "options": {
+            "type": "object",
+            "description": "Provider-specific query options.",
+            "properties": {
+                "jaeger": {
+                    "type": "object",
+                    "description": "Structured Jaeger trace filters.",
+                    "properties": {
+                        "operation_name": {
+                            "type": "string",
+                            "description": "Jaeger operation/span name filter."
+                        },
+                        "duration_min": {
+                            "type": "string",
+                            "description": "Minimum span duration using protobuf duration format, e.g. `10ms`, `1.5s`."
+                        },
+                        "duration_max": {
+                            "type": "string",
+                            "description": "Maximum span duration using protobuf duration format, e.g. `500ms`, `10s`."
+                        },
+                        "attributes": {
+                            "type": "array",
+                            "description": "Dynamic Jaeger tag/attribute filters.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Tag/attribute key"
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "description": "Tag/attribute value"
+                                    }
+                                },
+                                "required": ["name", "value"]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time to use to filter traces. Provide in ISO8601 format."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time to use to filter traces. Provide in ISO8601 format."
+                }
+            }
+        }
+    },
+    "required": ["service_name"]
+}

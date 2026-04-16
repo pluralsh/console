@@ -55,6 +55,17 @@ defmodule Toolquery.TempoConnection do
   field :password, 5, proto3_optional: true, type: :string
 end
 
+defmodule Toolquery.JaegerConnection do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :url, 1, type: :string
+  field :token, 2, proto3_optional: true, type: :string
+  field :username, 3, proto3_optional: true, type: :string
+  field :password, 4, proto3_optional: true, type: :string
+end
+
 defmodule Toolquery.SplunkConnection do
   @moduledoc false
 
@@ -104,6 +115,7 @@ defmodule Toolquery.ToolConnection do
   field :splunk, 6, type: Toolquery.SplunkConnection, oneof: 0
   field :dynatrace, 7, type: Toolquery.DynatraceConnection, oneof: 0
   field :cloudwatch, 8, type: Toolquery.CloudwatchConnection, oneof: 0
+  field :jaeger, 9, type: Toolquery.JaegerConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do
@@ -156,6 +168,35 @@ defmodule Toolquery.TracesQueryInput do
   field :query, 2, type: :string
   field :range, 3, type: Toolquery.TimeRange
   field :limit, 4, proto3_optional: true, type: :int32
+  field :options, 5, proto3_optional: true, type: Toolquery.TracesOptions
+end
+
+defmodule Toolquery.TracesOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :jaeger, 1, proto3_optional: true, type: Toolquery.JaegerTracesOptions
+end
+
+defmodule Toolquery.JaegerTraceQueryAttribute do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :name, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Toolquery.JaegerTracesOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :operation_name, 1, proto3_optional: true, type: :string, json_name: "operationName"
+  field :attributes, 2, repeated: true, type: Toolquery.JaegerTraceQueryAttribute
+  field :duration_min, 3, proto3_optional: true, type: :string, json_name: "durationMin"
+  field :duration_max, 4, proto3_optional: true, type: :string, json_name: "durationMax"
 end
 
 defmodule Toolquery.MetricPoint.LabelsEntry do

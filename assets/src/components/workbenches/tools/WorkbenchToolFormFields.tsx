@@ -75,6 +75,8 @@ export function WorkbenchToolFormFields({
       return render(type, UrlUsernamePasswordTokenTenantFormFields)
     case WorkbenchToolType.Tempo:
       return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Jaeger:
+      return render(type, JaegerFormFields)
     case WorkbenchToolType.Atlassian:
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Linear:
@@ -483,6 +485,41 @@ function DynatraceFormFields({
         revealer
         value={c.platformToken ?? ''}
         onChange={(e) => set({ ...c, platformToken: e.target.value })}
+      />
+    </>
+  )
+}
+
+function JaegerFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Jaeger>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="http://jaeger-query.monitoring.svc:16686"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
       />
     </>
   )

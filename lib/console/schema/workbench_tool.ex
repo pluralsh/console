@@ -4,7 +4,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12, jaeger: 13
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -67,6 +67,13 @@ defmodule Console.Schema.WorkbenchTool do
         field :tenant_id, :string
         field :username,  :string
         field :password,  EncryptedString
+      end
+
+      embeds_one :jaeger, JaegerConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+        field :username, :string
+        field :password, EncryptedString
       end
 
       embeds_one :datadog, DatadogConnection, on_replace: :update do
@@ -198,6 +205,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:loki), do: [:logs]
   defp categories(:elastic), do: [:logs]
   defp categories(:tempo), do: [:traces]
+  defp categories(:jaeger), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
   defp categories(:linear), do: [:integration]
   defp categories(:atlassian), do: [:integration]
@@ -212,6 +220,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:loki, with: &prom_configuration_changeset/2)
     |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
     |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
+    |> cast_embed(:jaeger, with: &jaeger_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:dynatrace, with: &dynatrace_configuration_changeset/2)
     |> cast_embed(:cloudwatch, with: &cloudwatch_configuration_changeset/2)
@@ -244,6 +253,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(site api_key app_key)a)
     |> validate_required([:api_key])
+  end
+
+  defp jaeger_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token username password)a)
+    |> validate_required([:url])
   end
 
   defp dynatrace_configuration_changeset(model, attrs) do

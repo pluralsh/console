@@ -25,6 +25,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Loki,
   WorkbenchToolType.Prometheus,
   WorkbenchToolType.Tempo,
+  WorkbenchToolType.Jaeger,
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Splunk,
@@ -45,6 +46,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Prometheus]: 'prometheus',
   [WorkbenchToolType.Loki]: 'loki',
   [WorkbenchToolType.Tempo]: 'tempo',
+  [WorkbenchToolType.Jaeger]: 'jaeger',
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Atlassian]: 'atlassian',
@@ -81,6 +83,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Splunk]: 'Splunk',
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
+  [WorkbenchToolType.Jaeger]: 'Jaeger',
 }
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
@@ -110,6 +113,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
   ],
+  [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
@@ -134,6 +138,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Dynatrace]:
     'Query metrics, logs, and traces from Dynatrace.',
   [WorkbenchToolType.Cloudwatch]: 'Query metrics and logs from CloudWatch.',
+  [WorkbenchToolType.Jaeger]:
+    'Query distributed traces from Jaeger with structured filters.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -188,4 +194,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
   [WorkbenchToolType.Dynatrace]: ToolsIcon,
   [WorkbenchToolType.Cloudwatch]: ToolsIcon,
+  [WorkbenchToolType.Jaeger]: ToolsIcon,
 }

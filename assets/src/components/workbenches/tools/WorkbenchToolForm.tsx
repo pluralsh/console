@@ -176,6 +176,10 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { url, username, tenantId } = config?.tempo ?? {}
     return { tempo: { url: url ?? '', username, tenantId } }
   },
+  [WorkbenchToolType.Jaeger]: (config) => {
+    const { url, username } = config?.jaeger ?? {}
+    return { jaeger: { url: url ?? '', username } }
+  },
   [WorkbenchToolType.Atlassian]: (config) => {
     const { email } = config?.atlassian ?? {}
     return { atlassian: { email: email ?? '' } }

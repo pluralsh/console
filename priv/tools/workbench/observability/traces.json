@@ -3,7 +3,7 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "The query to use to gather traces"
+            "description": "The provider-specific query to use to gather traces"
         },
         "limit": {
             "type": "integer",

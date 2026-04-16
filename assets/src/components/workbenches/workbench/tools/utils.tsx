@@ -19,6 +19,7 @@ export function getToolIcon(toolType: Nullable<WorkbenchToolType>) {
     case WorkbenchToolType.Elastic:
     case WorkbenchToolType.Loki:
     case WorkbenchToolType.Tempo:
+    case WorkbenchToolType.Jaeger:
     case WorkbenchToolType.Mcp:
     default:
       return <ToolsIcon />
