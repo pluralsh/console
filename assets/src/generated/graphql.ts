@@ -15100,7 +15100,7 @@ export type WorkbenchJobActivityResult = {
   /** metrics emitted by the activity */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
   /** metrics tool query emitted by the activity */
-  metricsQuery?: Maybe<WorkbenchToolQuery>;
+  metricsQuery?: Maybe<WorkbenchToolQueryData>;
   /** output from the activity */
   output?: Maybe<Scalars['String']['output']>;
 };
@@ -15184,7 +15184,7 @@ export type WorkbenchJobResultMetadata = {
   /** metrics for this result */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
   /** metrics tool query for this result */
-  metricsQuery?: Maybe<WorkbenchToolQuery>;
+  metricsQuery?: Maybe<WorkbenchToolQueryData>;
 };
 
 export type WorkbenchJobResultTodo = {
@@ -15661,8 +15661,8 @@ export type WorkbenchToolPrometheusConnectionAttributes = {
   username?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type WorkbenchToolQuery = {
-  __typename?: 'WorkbenchToolQuery';
+export type WorkbenchToolQueryData = {
+  __typename?: 'WorkbenchToolQueryData';
   /** a short summary describing what this query means */
   summary?: Maybe<Scalars['String']['output']>;
   /** arguments used for this tool query */

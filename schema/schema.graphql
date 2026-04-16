@@ -2868,7 +2868,7 @@ type WorkbenchJobActivityResult {
   logs: [WorkbenchJobActivityLog]
 
   "metrics tool query emitted by the activity"
-  metricsQuery: WorkbenchToolQuery
+  metricsQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -2925,10 +2925,10 @@ type WorkbenchJobResultMetadata {
   logs: [WorkbenchJobActivityLog]
 
   "metrics tool query for this result"
-  metricsQuery: WorkbenchToolQuery
+  metricsQuery: WorkbenchToolQueryData
 }
 
-type WorkbenchToolQuery {
+type WorkbenchToolQueryData {
   "the tool name used to run this query"
   toolName: String
 

@@ -330,7 +330,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :job_update,    :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
     field :logs,          list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
-    field :metrics_query, :workbench_tool_query, description: "metrics tool query emitted by the activity"
+    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query emitted by the activity"
   end
 
   object :workbench_job_activity_job_update do
@@ -366,12 +366,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result_metadata do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
-    field :logs,    list_of(:workbench_job_activity_log), description: "logs for this result"
-    field :metrics_query, :workbench_tool_query, description: "metrics tool query for this result"
+    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :logs,          list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query for this result"
   end
 
-  object :workbench_tool_query do
+  object :workbench_tool_query_data do
     field :tool_name, :string, description: "the tool name used to run this query"
     field :tool_args, :map, description: "arguments used for this tool query"
     field :summary,   :string, description: "a short summary describing what this query means"

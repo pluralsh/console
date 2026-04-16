@@ -9700,7 +9700,7 @@ type WorkbenchJobActivityResult struct {
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 	// metrics tool query emitted by the activity
-	MetricsQuery *WorkbenchToolQuery `json:"metricsQuery,omitempty"`
+	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9755,7 +9755,7 @@ type WorkbenchJobResultMetadata struct {
 	// logs for this result
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 	// metrics tool query for this result
-	MetricsQuery *WorkbenchToolQuery `json:"metricsQuery,omitempty"`
+	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -10180,7 +10180,7 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	TenantID *string `json:"tenantId,omitempty"`
 }
 
-type WorkbenchToolQuery struct {
+type WorkbenchToolQueryData struct {
 	// the tool name used to run this query
 	ToolName *string `json:"toolName,omitempty"`
 	// arguments used for this tool query
