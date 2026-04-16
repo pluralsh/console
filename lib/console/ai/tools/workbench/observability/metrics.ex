@@ -38,6 +38,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     end
   end
 
+  def structured(%__MODULE__{} = tool) do
+    with {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input) do
+      {:ok, Enum.map(output.metrics, &mapify/1)}
+    end
+  end
+
   defp mapify(%MetricPoint{} = metric) do
     %{
       timestamp: TimeRange.to_datetime(metric.timestamp),

@@ -10,7 +10,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
   setup :set_mimic_global
 
   describe "run/3" do
-    test "happy path: metrics tool call then observability_result, output and metrics set and persisted" do
+    test "happy path: metrics tool call then observability_result, output and metrics query set and persisted" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{
@@ -26,14 +26,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       )
 
       metrics_tool_name = "workbench_observability_metrics_prom"
-      sample_metrics = [
-        %{
-          "timestamp" => "2025-02-25T12:00:00Z",
-          "name" => "cpu_usage",
-          "value" => 0.5,
-          "labels" => %{"env" => "test"}
-        }
-      ]
+      metrics_query = %{"tool_name" => metrics_tool_name, "tool_args" => %{"query" => "up"}}
       sample_logs = [
         %{
           "timestamp" => "2025-02-25T12:00:01Z",
@@ -61,7 +54,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
             name: "observability_result",
             arguments: %{
               "output" => result_output,
-              "metrics" => sample_metrics,
+              "metrics_query" => metrics_query,
               "logs" => sample_logs
             },
             id: "2"
@@ -92,11 +85,8 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
 
       assert result[:status] == :successful
       assert result[:result][:output] == result_output
-      assert length(result[:result][:metrics]) == 1
-      [result_metric] = result[:result][:metrics]
-      assert result_metric.name == "cpu_usage"
-      assert result_metric.value == 0.5
-      assert result_metric.labels == %{"env" => "test"}
+      assert result[:result][:metrics_query].tool_name == metrics_tool_name
+      assert result[:result][:metrics_query].tool_args == %{"query" => "up"}
       assert length(result[:result][:logs]) == 1
       [result_log] = result[:result][:logs]
       assert result_log.message == "connection reset"
@@ -105,11 +95,8 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       {:ok, updated} = Workbenches.update_job_activity(result, activity)
       assert updated.status == :successful
       assert updated.result.output == result_output
-      assert length(updated.result.metrics) == 1
-      [persisted_metric] = updated.result.metrics
-      assert persisted_metric.name == "cpu_usage"
-      assert persisted_metric.value == 0.5
-      assert persisted_metric.labels == %{"env" => "test"}
+      assert updated.result.metrics_query.tool_name == metrics_tool_name
+      assert updated.result.metrics_query.tool_args == %{"query" => "up"}
       assert length(updated.result.logs) == 1
       [persisted_log] = updated.result.logs
       assert persisted_log.message == "connection reset"

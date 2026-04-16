@@ -31,36 +31,25 @@
                 "required": ["name", "description", "done"]
             }
         },
-        "metrics": {
-            "type": "array",
-            "description": "Key metrics relevant to the conclusion to persist on the final result",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "The timestamp of the metric"
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "The name of the metric"
-                    },
-                    "value": {
-                        "type": "number",
-                        "description": "The value of the metric"
-                    },
-                    "labels": {
-                        "type": "object",
-                        "description": "Labels for the metric",
-                        "additionalProperties": true
-                    }
+        "metrics_query": {
+            "type": "object",
+            "description": "The metrics tool query to persist on the final result metadata",
+            "properties": {
+                "tool_name": {
+                    "type": "string",
+                    "description": "The metrics tool name"
                 },
-                "required": [
-                    "name",
-                    "value"
-                ]
-            }
+                "tool_args": {
+                    "type": "object",
+                    "description": "The arguments used for the metrics query",
+                    "additionalProperties": true
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "A two to three sentence summary of what this metrics query means, including what signal it measures and why it matters for the conclusion."
+                }
+            },
+            "required": ["tool_name", "tool_args"]
         },
         "logs": {
             "type": "array",

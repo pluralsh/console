@@ -5,19 +5,39 @@ defmodule Console.Schema.WorkbenchJobResult do
 
   defenum TodoStatus, pending: 0, in_progress: 1, completed: 2
 
+  defmodule ToolQuery do
+    use Console.Schema.Base
+
+    embedded_schema do
+      field :tool_name, :string
+      field :tool_args, :map
+      field :summary,   :string
+    end
+
+    def changeset(model, attrs) do
+      model
+      |> cast(attrs, [:tool_name, :tool_args, :summary])
+      |> validate_required([:tool_name, :tool_args])
+    end
+  end
+
   defmodule Metadata do
     use Console.Schema.Base
+    alias Console.Schema.WorkbenchJobResult.ToolQuery
 
     embedded_schema do
       embeds_many :metrics, Metric, on_replace: :delete
       embeds_many :logs,    Log, on_replace: :delete
+
+      embeds_one :metrics_query, ToolQuery, on_replace: :update
+      embeds_one :logs_query,    ToolQuery, on_replace: :update
     end
 
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, [])
-      |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
       |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
+      |> cast_embed(:metrics_query)
     end
   end
 

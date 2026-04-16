@@ -9620,8 +9620,9 @@ type WorkbenchJob struct {
 	// the alert this run was spawned from
 	Alert *Alert `json:"alert,omitempty"`
 	// the issue this run was spawned from
-	Issue      *Issue                          `json:"issue,omitempty"`
-	Activities *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	Issue       *Issue                          `json:"issue,omitempty"`
+	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -9698,6 +9699,8 @@ type WorkbenchJobActivityResult struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// metrics tool query emitted by the activity
+	MetricsQuery *WorkbenchToolQuery `json:"metricsQuery,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9751,6 +9754,8 @@ type WorkbenchJobResultMetadata struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for this result
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// metrics tool query for this result
+	MetricsQuery *WorkbenchToolQuery `json:"metricsQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -10173,6 +10178,15 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id (e.g. for Mimir)
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolQuery struct {
+	// the tool name used to run this query
+	ToolName *string `json:"toolName,omitempty"`
+	// arguments used for this tool query
+	ToolArgs map[string]any `json:"toolArgs,omitempty"`
+	// a short summary describing what this query means
+	Summary *string `json:"summary,omitempty"`
 }
 
 type WorkbenchToolSplunkConnection struct {
