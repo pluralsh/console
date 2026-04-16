@@ -10,7 +10,7 @@ defmodule Console.Schema.WorkbenchJobResult do
 
     embedded_schema do
       field :tool_name, :string
-      field :tool_args, :map
+      field :tool_args, Console.Schema.MapJson
       field :summary,   :string
     end
 
