@@ -136,6 +136,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
                   rowData.type === WorkbenchJobActivityType.User
                 }
                 activity={rowData}
+                jobId={jobId}
                 textStream={textStreamMap[rowData.id] ?? ''}
               />
             )}

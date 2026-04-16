@@ -26,6 +26,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { hasWorkbenchMetricsToolQuery } from './WorkbenchJobActivityResults'
 import {
   WorkbenchJobMetrics,
   WorkbenchJobPrs,
@@ -171,7 +172,7 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
       label: 'PRs',
       icon: <PrOpenIcon size={12} />,
     },
-    !isEmpty(job?.result?.metadata?.metrics?.filter(isNonNullable) ?? []) && {
+    hasWorkbenchMetricsToolQuery(job?.result?.metadata?.metricsQuery) && {
       label: 'Metrics',
       icon: <ChartIcon size={12} />,
     },
