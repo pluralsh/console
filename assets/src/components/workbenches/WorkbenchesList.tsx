@@ -4,6 +4,7 @@ import {
   Flex,
   IconFrame,
   AddIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
 import {
@@ -23,14 +24,24 @@ import {
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
-import { ComponentType } from 'react'
-import styled from 'styled-components'
+import {
+  cloneElement,
+  ComponentType,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+} from 'react'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
+import { getWebhookIcon } from './workbench/webhooks/utils'
+
+const MAX_VISIBLE_METADATA_ITEMS = 5
+const METADATA_ICON_SIZE = 12
 
 const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
@@ -90,9 +101,20 @@ export function WorkbenchesList() {
 }
 
 function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
-  const { id, name, description, agentRuntime, tools: t } = workbench
+  const theme = useTheme()
+
+  const {
+    id,
+    name,
+    description,
+    agentRuntime,
+    tools: t,
+    webhooks: w,
+  } = workbench
 
   const tools = t?.filter(isNonNullable) ?? []
+
+  const webhooks = mapExistingNodes(w)
 
   const RuntimeIcon =
     runtimeToIcon[agentRuntime?.type ?? AgentRuntimeType.Custom]
@@ -103,34 +125,10 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
       forwardedAs={Link}
       to={id}
     >
-      <Flex
-        direction="column"
-        minWidth={0}
-      >
-        <Body2BoldP>{name}</Body2BoldP>
-        {agentRuntime?.name && (
-          <Flex
-            align="center"
-            gap="xxsmall"
-            minWidth={0}
-          >
-            <RuntimeIcon
-              fullColor
-              size={12}
-            />
-            <CaptionP
-              $color="text-xlight"
-              css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
-            >
-              {agentRuntime.name}
-            </CaptionP>
-          </Flex>
-        )}
-      </Flex>
+      <Body2BoldP>{name}</Body2BoldP>
       <Body2P
-        $color="text-light"
         css={{
-          flex: 1,
+          color: theme.colors['text-light'],
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
           WebkitLineClamp: 3,
@@ -140,25 +138,66 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
         {description}
       </Body2P>
       <Flex
+        direction="column"
+        gap="xsmall"
+      >
+        <MetadataGridSC>
+          <MetadataLabelSC>coding agent</MetadataLabelSC>
+          <MetadataValueSC>
+            {agentRuntime?.name ? (
+              <Flex
+                align="center"
+                gap="xxsmall"
+                minWidth={0}
+              >
+                <RuntimeIcon
+                  fullColor
+                  size={12}
+                />
+                <CaptionP
+                  $color="text-xlight"
+                  css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+                >
+                  {agentRuntime.name}
+                </CaptionP>
+              </Flex>
+            ) : (
+              <CaptionP $color="text-xlight">-</CaptionP>
+            )}
+          </MetadataValueSC>
+
+          <MetadataLabelSC>webhooks</MetadataLabelSC>
+          <MetadataValueSC>
+            <MetadataIcons
+              items={webhooks.map((webhook) => ({
+                id: webhook.id,
+                label: webhook.name ?? 'Webhook',
+                icon: <span>{withIconSize(getWebhookIcon(webhook))}</span>,
+              }))}
+            />
+          </MetadataValueSC>
+
+          <MetadataLabelSC>bound tools</MetadataLabelSC>
+          <MetadataValueSC>
+            <MetadataIcons
+              items={tools.map((tool) => ({
+                id: tool.id,
+                label: tool.name,
+                icon: (
+                  <WorkbenchToolIcon
+                    type={tool.tool}
+                    size={METADATA_ICON_SIZE}
+                  />
+                ),
+              }))}
+            />
+          </MetadataValueSC>
+        </MetadataGridSC>
+      </Flex>
+      <Flex
         gap="xsmall"
         align="center"
-        height={32}
       >
-        {tools.slice(0, 3).map((tool) => (
-          <IconFrame
-            key={tool.id}
-            circle
-            type="secondary"
-            icon={<WorkbenchToolIcon type={tool.tool} />}
-          />
-        ))}
-        {tools.length > 3 && (
-          <IconFrame
-            circle
-            type="secondary"
-            icon={<CaptionP $color="text-xlight">+{tools.length - 3}</CaptionP>}
-          />
-        )}
         <div css={{ flex: 1 }} />
         <IconFrame
           icon={<ArrowRightIcon color="icon-xlight" />}
@@ -167,6 +206,52 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
       </Flex>
     </CardSC>
   )
+}
+
+function MetadataIcons({
+  items,
+}: {
+  items: Array<{ id: string; label: string; icon: ReactNode }>
+}) {
+  if (!items.length) return <CaptionP $color="text-xlight">-</CaptionP>
+
+  const visibleItems = items.slice(0, MAX_VISIBLE_METADATA_ITEMS)
+  const hiddenItems = items.slice(MAX_VISIBLE_METADATA_ITEMS)
+  const hiddenItemsLabel = hiddenItems.map(({ label }) => label).join(', ')
+
+  return (
+    <Flex
+      align="center"
+      gap="xsmall"
+      wrap="wrap"
+    >
+      {visibleItems.map((item) => (
+        <Tooltip
+          key={item.id}
+          label={item.label}
+          placement="bottom"
+        >
+          <span>{item.icon}</span>
+        </Tooltip>
+      ))}
+      {!!hiddenItems.length && (
+        <Tooltip
+          label={hiddenItemsLabel || `${hiddenItems.length} more`}
+          placement="bottom"
+        >
+          <CaptionP $color="text-xlight">+{hiddenItems.length}</CaptionP>
+        </Tooltip>
+      )}
+    </Flex>
+  )
+}
+
+function withIconSize(icon: ReactElement): ReactElement {
+  if (!isValidElement(icon)) return icon
+
+  return cloneElement(icon as ReactElement<{ size?: number }>, {
+    size: METADATA_ICON_SIZE,
+  })
 }
 
 const CardSC = styled(Card)(({ theme }) => ({
@@ -178,6 +263,23 @@ const CardSC = styled(Card)(({ theme }) => ({
   minHeight: 180,
   textDecoration: 'none',
 }))
+
+const MetadataGridSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr',
+  columnGap: theme.spacing.small,
+  rowGap: theme.spacing.xxsmall,
+  alignItems: 'center',
+}))
+
+const MetadataLabelSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-input-disabled'],
+}))
+
+const MetadataValueSC = styled.div({
+  minWidth: 0,
+})
 
 const CreateCardSC = styled(CardSC)(({ theme }) => ({
   background: 'transparent',

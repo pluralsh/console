@@ -10,6 +10,26 @@ fragment WorkbenchTiny on Workbench {
   tools {
     ...WorkbenchToolTiny
   }
+  webhooks(first: 50) {
+    edges {
+      node {
+        ...WorkbenchWebhookTiny
+      }
+    }
+  }
+}
+
+fragment WorkbenchWebhookTiny on WorkbenchWebhook {
+  id
+  name
+  webhook {
+    id
+    type
+  }
+  issueWebhook {
+    id
+    provider
+  }
 }
 
 fragment Workbench on Workbench {
