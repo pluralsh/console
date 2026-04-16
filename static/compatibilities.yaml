@@ -1337,13 +1337,13 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.31.4
+  - version: 3.31.5
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 3.31.4
-    images: ['quay.io/tigera/operator:v1.40.7']
+    chart_version: 3.31.5
+    images: ['quay.io/tigera/operator:v1.40.8']
   - version: 3.31.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -2664,46 +2664,35 @@ addons:
   helm_values: debug.verbose=flow
   eolApiSlug: cilium
   versions:
-  - version: 1.19.2
+  - version: 1.19.3
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: '## Helm / values changes to watch
+      helm_changes: '- **New Helm values:** `configDriftDetection` was added (with
+        docs) to help detect/flag configuration drift.
 
-        - **Ztunnel management moved from operator to Helm**: if you use ztunnel,
-        expect the **ztunnel DaemonSet to now be created/owned by the Helm release
-        instead of the cilium-operator**. Review your current `values.yaml`/GitOps
-        flow for any operator-managed ztunnel resources and ensure you only have one
-        controller creating them.
+        - **Init container compatibility:** chart now uses **bash instead of sh**
+        in init containers (notably for **Ubuntu 24.04** compatibility).
 
-        - **ztunnel readiness probe binds to localhost**: the ztunnel chart adds a
-        `host` field so the health check port **15021 binds to `127.0.0.1` instead
-        of `0.0.0.0`**. If you had custom probes, network policies, or monitoring
-        that expected the port to be reachable via the pod IP, adjust accordingly.
-
-        - **Helm gating fix**: a bug was fixed where **more Helm options were incorrectly
-        gated by `loadbalancer`** than intended. If you previously set some values
-        and they appeared to have no effect unless `loadbalancer=true`, re-test because
-        they may now apply as expected.
-
-        - **Helm rendering fix**: `operator.unmanagedPodWatcher.intervalSeconds` value
-        rendering bug fixed; if you set it before, confirm it renders to the manifest
-        as intended after upgrade.'
-      chart_updates: [Move ztunnel DaemonSet management from operator to Helm (Helm
-          chart behavior change)., Ztunnel readiness probe updated to bind health
-          port to localhost (127.0.0.1)., Fix Helm values gating issue related to
-          `loadbalancer` option., Fix Helm templating/rendering for `operator.unmanagedPodWatcher.intervalSeconds`.]
-      features: ['If you use ztunnel, it is now managed directly by the Helm chart
-          rather than the operator, simplifying lifecycle management under Helm/GitOps.',
-        Envoy (ingress/egress/external) gains configurable circuit breaker settings
-          (max connections/requests/retries) to help protect backends under load.,
-        'New BGP Hive shell commands (`bgp/peers`, `bgp/routes`) and ability to retrieve
-          BGP instance name from GoBGP improve day-2 troubleshooting.']
-      breaking_changes: ['Potential operational change if you run ztunnel: ownership/control
-          of the ztunnel DaemonSet shifts from the operator to Helm, so having both
-          enabled could cause conflicts/duplicate resources.']
-    chart_version: 1.19.2
+        - No other explicit Helm values changes were called out in the provided notes;
+        expect a patch-level upgrade otherwise (review your rendered manifests for
+        any incidental template changes).'
+      chart_updates: ['Helm chart/docs: added `configDriftDetection` values and documentation.',
+        'Helm chart: init containers now invoke `bash` instead of `sh` (Ubuntu 24.04
+          compatibility).', Installation metadata updated (image digests updated for
+          patch releases; ensure your chart points to v1.19.3 images).]
+      features: [Config drift detection support via new `configDriftDetection` Helm
+          values (operational feature)., 'BIG TCP for tunnels now probes kernel support
+          rather than relying solely on a config toggle, making enablement safer/automatic
+          when supported.', 'BGP CLI enhancement: `bgp/routes` adds a `--with-attrs`
+          option (operational visibility).']
+      breaking_changes: ['No explicit breaking changes were listed for v1.19.3 in
+          the provided notes; this looks like a patch release focused on fixes. The
+          major behavioral/breaking items remain those introduced in v1.19.0 (e.g.,
+          BGP v1 API removal, policy selector defaulting to local cluster, deprecated
+          policy fields).']
+    chart_version: 1.19.3
     images: []
   - version: 1.19.0
     kube: ['1.35', '1.34', '1.33']
@@ -7557,20 +7546,13 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 83.4.2
+  - version: 83.4.3
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: [Bumps kube-prometheus-stack chart dependency versions with non-major
-          updates (via Renovate).]
-      features: [No new user-facing features called out; this release primarily refreshes
-          dependencies within the chart.]
-      breaking_changes: [None indicated in the provided release notes; change is described
-          as non-major dependency updates.]
-    chart_version: 83.4.2
+    summary: null
+    chart_version: 83.4.3
     images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.0',
       'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
       'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
@@ -9181,7 +9163,7 @@ addons:
     incompatibilities: []
     summary: null
   - version: 2.19.0
-    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
@@ -12456,13 +12438,13 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.31.4
+  - version: 3.31.5
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 3.31.4
-    images: ['quay.io/tigera/operator:v1.40.7']
+    chart_version: 3.31.5
+    images: ['quay.io/tigera/operator:v1.40.8']
   - version: 3.31.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -13013,7 +12995,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.8
+    chart_version: 1.0.9
     images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
       'registry.k8s.io/kubectl:v1.35.3']
   - version: 4.0.2

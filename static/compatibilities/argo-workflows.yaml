@@ -9,7 +9,7 @@ versions:
   requirements: []
   incompatibilities: []
   summary: null
-  chart_version: 1.0.8
+  chart_version: 1.0.9
   images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
     'registry.k8s.io/kubectl:v1.35.3']
 - version: 4.0.2
