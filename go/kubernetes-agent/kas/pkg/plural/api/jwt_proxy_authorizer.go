@@ -42,6 +42,11 @@ func (a *JWTProxyAuthorizer) Authorize(token, clusterID string) (*AuthorizeProxy
 
 	claims := &proxyJWTClaims{}
 	_, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
+		// Validate signing method
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+
 		return a.secret, nil
 	}, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 	if err != nil {
