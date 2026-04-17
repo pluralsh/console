@@ -17,7 +17,6 @@ const (
 	defaultShutdownGracePeriod           = 1 * time.Hour
 	defaultAuditLogFlushInterval         = 30 * time.Second
 	defaultAuditLogFlushEvents           = 50
-	defaultAuditLogEventMaxAge           = 5 * time.Minute
 	defaultAuditLogDrainTimeout          = 15 * time.Second
 )
 
@@ -40,6 +39,5 @@ func ApplyDefaults(config *kascfg.ConfigurationFile) {
 	prototool.Duration(&o.AllowedAgentCacheErrorTtl, defaultAllowedAgentInfoCacheErrorTTL)
 	prototool.Duration(&o.AuditLogFlushInterval, defaultAuditLogFlushInterval)
 	prototool.Uint32(&o.AuditLogFlushEvents, defaultAuditLogFlushEvents)
-	prototool.Duration(&o.AuditLogEventMaxAge, defaultAuditLogEventMaxAge)
 	prototool.Duration(&o.AuditLogDrainTimeout, defaultAuditLogDrainTimeout)
 }
