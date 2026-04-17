@@ -37,11 +37,11 @@
             "properties": {
                 "tool_name": {
                     "type": "string",
-                    "description": "The metrics tool name"
+                    "description": "The metrics tool name from a prior observability subagent result"
                 },
                 "tool_args": {
                     "type": "string",
-                    "description": "The arguments passed to the metrics tool/function call from `tool_name`.  This should be a JSON string. This is required but can be empty if needed.  Just pass as an unstructured object exactly as presented in the tool call history"
+                    "description": "The arguments passed to the metrics tool/function call from `tool_name` (found from a prior observability subagent result).  This should be a JSON string."
                 },
                 "summary": {
                     "type": "string",

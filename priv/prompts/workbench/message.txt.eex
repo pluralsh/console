@@ -22,7 +22,7 @@ There were also some important log lines emitted by the activity, in json format
 ```
 <% end %>
 
-<%= if is_list(@activity.result.metrics_query) and !Enum.empty?(@activity.result.metrics_query) do %>
+<%= if is_map(@activity.result.metrics_query) and map_size(@activity.result.metrics_query) > 0 do %>
 There were also key metrics emitted by the activity, the tool call used to find them in json format:
 
 ```json
@@ -30,6 +30,7 @@ There were also key metrics emitted by the activity, the tool call used to find 
 ```
 
 That metrics query can be useful when reporting the final metrics informing your investigation.
+<% end %>
 
 <%= if @activity.result.job_update do %>
 The key job attributes you updated were:
@@ -37,7 +38,6 @@ The key job attributes you updated were:
 ```json
 <%= Console.clean(@activity.result.job_update) |> Jason.encode!() %>
 ```
-<% end %>
 <% end %>
 <% else %>
 Subagent is still running, waiting for the result...
