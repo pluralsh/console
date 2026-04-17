@@ -27,7 +27,7 @@ agent:
     # jwt_authentication_secret_file: /some/file
     audit_log_flush_interval: "30s"
     audit_log_flush_events: 50
-    audit_log_drain_timeout: "15s"
+    audit_log_drain_timeout: "45s"
   info_cache_ttl: "300s"
   info_cache_error_ttl: "60s"
   redis_conn_info_ttl: "300s"
