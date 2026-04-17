@@ -50,7 +50,7 @@ func (a *JWTProxyAuthorizer) Authorize(token, clusterID string) (*AuthorizeProxy
 		return a.secret, nil
 	}, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not parse jwt: %w", err)
 	}
 	if claims.ClusterID != "" && claims.ClusterID != clusterID {
 		return nil, fmt.Errorf("cluster_id claim does not match access token prefix")
