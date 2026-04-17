@@ -23,11 +23,13 @@ There were also some important log lines emitted by the activity, in json format
 <% end %>
 
 <%= if is_list(@activity.result.metrics_query) and !Enum.empty?(@activity.result.metrics_query) do %>
-There were also some important metrics emitted by the activity, the tool call used to find them in json format:
+There were also key metrics emitted by the activity, the tool call used to find them in json format:
 
 ```json
 <%= Console.clean(@activity.result.metrics_query) |> Jason.encode!() %>
 ```
+
+That metrics query can be useful when reporting the final metrics informing your investigation.
 
 <%= if @activity.result.job_update do %>
 The key job attributes you updated were:
