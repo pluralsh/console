@@ -2,14 +2,17 @@ import { Card, Code, Flex, Markdown } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
+import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
 export function ToolCallContent({
   content,
   attributes,
+  customResultBody,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
+  customResultBody?: ReactNode
 }) {
   const { spacing } = useTheme()
 
@@ -18,6 +21,7 @@ export function ToolCallContent({
       direction="column"
       gap="small"
       width="100%"
+      minHeight={0}
     >
       {attributes?.tool?.arguments && (
         <>
@@ -32,26 +36,27 @@ export function ToolCallContent({
         </>
       )}
       <Body2P $color="text-light">Response:</Body2P>
-      {isJson(content) ? (
-        <Code
-          fillLevel={2}
-          language="json"
-          showHeader={false}
-          css={{ maxHeight: 324 }}
-        >
-          {prettifyJsonStr(content)}
-        </Code>
-      ) : (
-        <Card
-          fillLevel={2}
-          css={{ padding: spacing.medium, overflow: 'auto', maxHeight: 324 }}
-        >
-          <Markdown
-            text={content}
-            css={{ whiteSpace: 'pre-line' }}
-          />
-        </Card>
-      )}
+      {customResultBody ||
+        (isJson(content) ? (
+          <Code
+            fillLevel={2}
+            language={content.length < 25_000 ? 'json' : undefined}
+            showHeader={false}
+            css={{ maxHeight: 324 }}
+          >
+            {prettifyJsonStr(content)}
+          </Code>
+        ) : (
+          <Card
+            fillLevel={2}
+            css={{ padding: spacing.medium, overflow: 'auto', maxHeight: 324 }}
+          >
+            <Markdown
+              text={content}
+              css={{ whiteSpace: 'pre-line' }}
+            />
+          </Card>
+        ))}
     </Flex>
   )
 }

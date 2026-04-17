@@ -7,8 +7,8 @@ import {
   FormField,
   Input2,
   ListBoxItem,
+  AddIcon,
   MinusIcon,
-  PlusIcon,
   Select,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
@@ -247,7 +247,7 @@ function HttpFormFields({
           <Button
             secondary
             small
-            startIcon={<PlusIcon />}
+            startIcon={<AddIcon />}
             onClick={addHeader}
           >
             Add header

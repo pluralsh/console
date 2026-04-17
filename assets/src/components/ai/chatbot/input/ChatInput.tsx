@@ -5,7 +5,6 @@ import {
   CaretDownIcon,
   Chip,
   Flex,
-  PlusIcon,
   RobotIcon,
   SemanticColorKey,
   SendMessageIcon,
@@ -13,13 +12,9 @@ import {
   SpinnerAlt,
 } from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 import { SemanticPartialType } from 'components/utils/table/StackedText.tsx'
-import {
-  ChatThreadDetailsFragment,
-  useAddChatContextMutation,
-} from 'generated/graphql.ts'
+import { ChatThreadDetailsFragment } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -38,7 +33,6 @@ import {
 import { mergeRefs } from 'react-merge-refs'
 import styled, { StyledObject, useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
-import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
@@ -68,22 +62,12 @@ export function ChatInput({
 } & Partial<ComponentPropsWithRef<typeof EditableDiv>>) {
   const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
 
-  const { sourceId, source } = useCurrentPageChatContext()
-  const showContextBtn = !!source && !!sourceId
-  const [contextBtnClicked, setContextBtnClicked] = useState(false)
   const [localMessage, setLocalMessage] = useState<string>('')
   const [persistedMessage, setPersistedMessage] =
     usePersistedSessionState<string>('currentAiChatMessage', '')
 
   const newMessage = stateless ? localMessage : persistedMessage
   const setNewMessage = stateless ? setLocalMessage : setPersistedMessage
-
-  const [addChatContext, { loading: contextLoading, error: contextError }] =
-    useAddChatContextMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
-      onCompleted: () => setContextBtnClicked(true),
-    })
 
   const contentEditableRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -106,14 +90,6 @@ export function ChatInput({
     },
     [newMessage, sendMessage, setNewMessage]
   )
-
-  const handleAddPageContext = useCallback(() => {
-    setContextBtnClicked(true)
-    if (showContextBtn && currentThread)
-      addChatContext({
-        variables: { source, sourceId, threadId: currentThread.id },
-      })
-  }, [addChatContext, currentThread, showContextBtn, source, sourceId])
 
   return (
     <SendMessageFormSC
@@ -147,7 +123,6 @@ export function ChatInput({
         $agent={!!selectedAgent}
         $bgColor="fill-zero"
       >
-        {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder={placeholder}
           setValue={(value) => {
@@ -166,15 +141,6 @@ export function ChatInput({
             align="flex-end"
             overflow="hidden"
           >
-            {showContextBtn && (
-              <ChatInputIconFrame
-                disabled={contextBtnClicked}
-                loading={contextLoading}
-                icon={<PlusIcon />}
-                onClick={handleAddPageContext}
-                tooltip={`Append prompts and files related to the ${source.toLowerCase()} currently being viewed`}
-              />
-            )}
             {enableExamplePrompts && (
               <ChatInputIconFrame
                 active={showPrompts}

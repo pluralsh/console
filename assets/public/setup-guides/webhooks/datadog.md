@@ -1,42 +1,48 @@
 # Datadog Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in Datadog against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts and monitor state changes.
+References:
+- [Datadog - Webhooks Integration API](https://docs.datadoghq.com/api/latest/webhooks-integration/)
+- [Datadog - Calling APIs with webhooks integration](https://docs.datadoghq.com/developers/guide/calling-on-datadog-s-api-with-the-webhooks-integration/)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-In Plural configure:
+In Plural:
 
-- Type: Observability
-- Provider: DATADOG
-- Name: for example Datadog Production Alerts
-- Secret: shared secret used for verification
+1. Set **Type** to `Observability`.
+2. Set **Provider** to `DATADOG`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-Plural stores the secret and gives you the target URL (if required by your flow).
+Copy the generated Plural webhook URL.
 
-## 2. Register URL and secret in Datadog
+## 2. Create webhook in Datadog
 
-In Datadog integrations/webhooks:
+In Datadog (`https://app.datadoghq.com/` or your Datadog site):
 
-- Target URL: set to the Plural webhook URL
-- Secret/signing token: set to the same secret from Plural
+1. Create/configure a Webhooks integration endpoint
+2. Set URL to the Plural webhook URL
+3. Configure authentication so Plural can verify calls
 
-If custom headers are required, keep them aligned with your Plural validation policy.
+Use one of:
 
-## 3. Configure alert triggers
+- HTTP Basic Auth where supported (password = Plural signing secret), or
+- Custom auth header carrying the same secret value
 
-Enable triggers for relevant alert lifecycle events:
+## 3. Trigger from monitors/incidents
 
-- monitor alert triggered
-- monitor recovered
-- incident state changes
-- high-priority signal transitions
+Reference the webhook integration from monitor notifications (`@webhook-<name>`) and include both alert and recovery paths.
 
-Scope notifications to production monitors or incident-critical tags.
+Recommended events:
 
-## 4. Validate delivery
+- monitor alert/firing
+- monitor recovery
+- incident lifecycle transitions
 
-Trigger a test monitor alert in Datadog and verify in Plural:
+## 4. Validate
 
-- event received and authenticated
-- payload parsed
-- trigger evaluation sees alert state correctly
+Trigger a test monitor alert and recovery, then confirm in Plural:
+
+- request accepted
+- auth validated
+- monitor state transitions are captured

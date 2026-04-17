@@ -1258,7 +1258,7 @@ end
 
 defmodule Console.Deployments.StacksSyncTest do
   use Console.DataCase, async: false
-  alias Console.Deployments.Stacks
+  alias Console.Deployments.{Stacks, Tar}
 
   describe "#poll/1" do
     test "it will create runs when it detects changes" do
@@ -1276,6 +1276,35 @@ defmodule Console.Deployments.StacksSyncTest do
       assert run.message
       assert run.stack_id == stack.id
       refute run.git.ref == stack.git.ref
+    end
+  end
+
+  describe "#tarstream/1" do
+    test "it can fetch a tarstream for a standard terraform dir" do
+      repo = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      run = insert(:stack_run, repository: repo, git: %{ref: "master", folder: "charts"})
+
+      {:ok, f} = Stacks.tarstream(run)
+      {:ok, content} = Tar.tar_stream(f)
+
+      refute Enum.empty?(content)
+    end
+
+    test "it can splice custom policies into stack tarstream" do
+      repo = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+
+      run = insert(:stack_run,
+        repository: repo,
+        git: %{ref: "master", folder: "charts"},
+        policy_engine: %{
+          type: :trivy,
+          custom_policies: true,
+          repository_id: repo.id,
+          git: %{ref: "master", folder: "templates"}
+        }
+      )
+
+      {:ok, _} = Stacks.tarstream(run)
     end
   end
 

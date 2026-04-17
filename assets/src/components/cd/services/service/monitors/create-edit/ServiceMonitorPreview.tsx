@@ -5,6 +5,8 @@ import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
+  InputMaybe,
+  LogQueryOperator,
   MonitorAttributes,
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
@@ -20,7 +22,7 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
   const { serviceId, query: q, threshold } = state
   const debouncedQ = useDebounce(q, 250)
   const {
-    log: { query, bucketSize, duration, facets },
+    log: { query, bucketSize, duration, facets, operator },
   } = debouncedQ
   const graphTheme = useGraphTheme()
   const { colors } = useTheme()
@@ -31,6 +33,7 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
       query,
       time: { duration },
       aggregation: { bucketSize },
+      operator: operator as InputMaybe<LogQueryOperator> | undefined,
       facets,
     },
     fetchPolicy: 'network-only', // caching kinda breaks on these because there's no ids to index on
@@ -125,7 +128,6 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
         xScale={{ type: 'time', format: 'native' }}
         yScale={{ type: 'linear', min: 0, max: 'auto' }}
         xFormat={dateFormat}
-        curve="monotoneX"
         lineWidth={1}
         enablePoints={false}
         useMesh

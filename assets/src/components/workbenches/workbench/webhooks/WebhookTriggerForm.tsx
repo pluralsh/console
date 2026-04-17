@@ -8,7 +8,7 @@ import {
   Input2,
   ListBoxFooter,
   ListBoxItem,
-  PlusIcon,
+  AddIcon,
   ReturnIcon,
   Select,
   Tab,
@@ -100,6 +100,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
     error: workbenchError,
   } = useWorkbenchQuery({
     variables: { id: workbenchId },
+    fetchPolicy: 'cache-and-network',
     skip: !workbenchId,
   })
   const workbench = workbenchData?.workbench
@@ -460,7 +461,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                             gap: theme.spacing.small,
                           }}
                         >
-                          <PlusIcon size={14} />
+                          <AddIcon size={14} />
                           Create new webhook
                         </InlineA>
                       </ListBoxFooter>,

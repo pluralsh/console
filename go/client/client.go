@@ -5276,8 +5276,9 @@ func (t *InfrastructureStackTinyFragment) GetName() string {
 }
 
 type PolicyEngineFragment struct {
-	Type        PolicyEngineType "json:\"type\" graphql:\"type\""
-	MaxSeverity *VulnSeverity    "json:\"maxSeverity,omitempty\" graphql:\"maxSeverity\""
+	Type           PolicyEngineType "json:\"type\" graphql:\"type\""
+	MaxSeverity    *VulnSeverity    "json:\"maxSeverity,omitempty\" graphql:\"maxSeverity\""
+	CustomPolicies *bool            "json:\"customPolicies,omitempty\" graphql:\"customPolicies\""
 }
 
 func (t *PolicyEngineFragment) GetType() *PolicyEngineType {
@@ -5291,6 +5292,12 @@ func (t *PolicyEngineFragment) GetMaxSeverity() *VulnSeverity {
 		t = &PolicyEngineFragment{}
 	}
 	return t.MaxSeverity
+}
+func (t *PolicyEngineFragment) GetCustomPolicies() *bool {
+	if t == nil {
+		t = &PolicyEngineFragment{}
+	}
+	return t.CustomPolicies
 }
 
 type InfrastructureStackFragment struct {
@@ -49816,6 +49823,7 @@ fragment GroupFragment on Group {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -50266,6 +50274,7 @@ fragment UserFragment on User {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 `
 
@@ -50691,6 +50700,7 @@ fragment GroupFragment on Group {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -51019,6 +51029,7 @@ fragment GroupFragment on Group {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -51347,6 +51358,7 @@ fragment GroupFragment on Group {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -51638,6 +51650,7 @@ fragment UserFragment on User {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 `
 
@@ -51859,6 +51872,7 @@ fragment UserFragment on User {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 `
 
@@ -52135,6 +52149,7 @@ fragment UserFragment on User {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 `
 
@@ -52823,6 +52838,7 @@ fragment GroupFragment on Group {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -53155,6 +53171,7 @@ fragment GroupFragment on Group {
 fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
+	customPolicies
 }
 fragment RunStepFragment on RunStep {
 	id

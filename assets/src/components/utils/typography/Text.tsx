@@ -42,6 +42,9 @@ export const BadgeLabelP = styled.p<TextProps>((props) => ({
 export const StrongSC = styled.strong<TextProps>((props) => ({
   ...sharedTextStyles(props),
 }))
+export const SpanSC = styled.span<TextProps>((props) => ({
+  ...sharedTextStyles(props),
+}))
 export const OverlineH1 = styled.h1<TextProps>((props) => ({
   ...props.theme.partials.text.overline,
   ...sharedTextStyles(props),
@@ -91,6 +94,11 @@ export function InlineA({
   )
 }
 
+// how wide the bright band is
+const SHIMMER_SPREAD = '5%'
+// how long one full sweep takes
+const SHIMMER_DURATION = '1.75s'
+
 const sharedTextStyles = ({
   theme,
   $color,
@@ -100,19 +108,13 @@ const sharedTextStyles = ({
   ...($shimmer && {
     '@keyframes shimmer-text': {
       '0%': { backgroundPosition: '100% center' },
-      '100%': { backgroundPosition: '-100% center' },
+      '100%': { backgroundPosition: '0% center' },
     },
-    background: `linear-gradient(
-      100deg,
-      
-      ${theme.colors['text-xlight']} 0%,
-      ${theme.colors['text-light']} 20%,
-      ${theme.colors['text-xlight']} 40%,
-      ${theme.colors['text-xlight']} 100%
-    )`,
-    backgroundSize: '200% auto',
+    backgroundImage: `linear-gradient(90deg, #0000 calc(50% - ${SHIMMER_SPREAD}), ${theme.colors['text-light']}, #0000 calc(50% + ${SHIMMER_SPREAD})), linear-gradient(${theme.colors['text-xlight']}, ${theme.colors['text-xlight']})`,
+    backgroundSize: '250% 100%, auto',
+    backgroundRepeat: 'no-repeat, padding-box',
     backgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    animation: 'shimmer-text 1.8s ease-in-out infinite',
+    color: 'transparent',
+    animation: `shimmer-text ${SHIMMER_DURATION} linear infinite`,
   }),
 })

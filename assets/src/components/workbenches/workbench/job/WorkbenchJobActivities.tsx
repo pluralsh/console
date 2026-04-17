@@ -13,21 +13,23 @@ import {
   ChatInputSimple,
   ChatInputSimpleRef,
 } from 'components/ai/chatbot/input/ChatInput'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchJobActivity } from './WorkbenchJobActivity'
 import {
   appendActivityToCache,
   useWorkbenchJobStreams,
 } from './useWorkbenchJobStreams'
-import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 export const ACTIVITY_GAP = 'medium' as const
 
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
+  const { spacing } = useTheme()
   const [newMessage, setNewMessage] = useState('')
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
@@ -35,6 +37,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     fetchPolicy: 'cache-and-network',
     pollInterval: 30_000,
   })
+
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
 
@@ -74,7 +77,8 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
 
   const jobCompleted =
     job?.status === WorkbenchJobStatus.Successful ||
-    job?.status === WorkbenchJobStatus.Failed
+    job?.status === WorkbenchJobStatus.Failed ||
+    job?.status === WorkbenchJobStatus.Cancelled
 
   return (
     <Flex
@@ -100,20 +104,39 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           <VirtualList
             isReversed
             data={activities}
+            style={{
+              padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
+            }}
             topContent={
               <JobPromptCardSC>
                 <Markdown text={job?.prompt ?? ''} />
               </JobPromptCardSC>
             }
             bottomContent={
-              textStreamMap['none'] && (
-                <SimplifiedMarkdown text={textStreamMap['none']} />
-              )
+              <>
+                {textStreamMap['none'] && (
+                  <SimplifiedMarkdown text={textStreamMap['none']} />
+                )}
+                {!jobCompleted &&
+                  activities.every(({ status }) =>
+                    isActivityTerminal(status)
+                  ) && (
+                    <AILoadingText
+                      jobId={jobId}
+                      marginTop={spacing.small}
+                    />
+                  )}
+              </>
             }
             renderer={({ rowData }) => (
               <WorkbenchJobActivity
-                isOpen={openIds.includes(rowData.id)}
+                isOpen={
+                  openIds.includes(rowData.id) ||
+                  rowData.type === WorkbenchJobActivityType.Conclusion ||
+                  rowData.type === WorkbenchJobActivityType.User
+                }
                 activity={rowData}
+                jobId={jobId}
                 textStream={textStreamMap[rowData.id] ?? ''}
               />
             )}
@@ -145,14 +168,12 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
   background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
   minHeight: 0,
-  overflow: 'auto',
+  overflow: 'hidden',
 }))
 
 const JobPromptCardSC = styled(Card)(({ theme }) => ({

@@ -4,12 +4,12 @@ release_url: https://github.com/linkerd/linkerd2/releases/tag/{vsn}
 helm_repository_url: https://helm.linkerd.io/stable
 versions:
 - version: 2.19.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
 - version: 2.19.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null

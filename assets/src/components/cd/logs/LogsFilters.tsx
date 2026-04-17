@@ -17,6 +17,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import {
   LogFacetInput,
   LogLineFragment,
+  LogQueryOperator,
   LogTimeRange,
   useLogLabelsQuery,
 } from 'generated/graphql'
@@ -35,12 +36,14 @@ export type LogsFiltersT = {
   date?: DateParam
   sinceSeconds: SinceSecondsOptions
   queryLength: number
+  queryOperator: LogQueryOperator
 }
 
 export const DEFAULT_LOG_FILTERS: LogsFiltersT = {
   date: undefined,
   sinceSeconds: SinceSecondsOptions.QuarterHour,
   queryLength: 100,
+  queryOperator: LogQueryOperator.Or,
 }
 
 export function LogsDateDropdown({
@@ -167,6 +170,39 @@ export function LogsSinceSecondsSelect({
         ))}
       </Select>
     </FillLevelDiv>
+  )
+}
+
+export function LogsQueryOperatorSelect({
+  operator,
+  setOperator,
+  disabled = false,
+  ...props
+}: {
+  operator: LogQueryOperator
+  setOperator: (operator: LogQueryOperator) => void
+  disabled?: boolean
+} & FlexProps) {
+  return (
+    <Flex {...props}>
+      <FillLevelDiv fillLevel={1}>
+        <Select
+          // size="small"
+          titleContent="Operator"
+          selectedKey={operator}
+          onSelectionChange={(key) => setOperator(key as LogQueryOperator)}
+          isDisabled={disabled}
+        >
+          {Object.values(LogQueryOperator).map((op) => (
+            <ListBoxItem
+              key={op}
+              label={op}
+              selected={op === operator}
+            />
+          ))}
+        </Select>
+      </FillLevelDiv>
+    </Flex>
   )
 }
 

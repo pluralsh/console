@@ -1,47 +1,43 @@
 # GitHub Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in GitHub against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, new tickets, and issue lifecycle updates.
+Reference: [GitHub - Creating webhooks](https://docs.github.com/en/developers/webhooks-and-events/webhooks/creating-webhooks)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-Create a new webhook in Plural with:
+In Plural:
 
-- Type: Ticketing
-- Provider: GITHUB
-- URL: Plural callback URL
-- Secret: shared secret used for signature verification
+1. Set **Type** to `Ticketing`.
+2. Set **Provider** to `GITHUB`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-## 2. Register URL and secret in GitHub
+Plural generates the webhook URL only after creation. Copy that URL.
 
-In GitHub repository or organization settings:
+## 2. Create webhook in your GitHub instance
 
-- go to Webhooks
-- click Add webhook
-- Payload URL: paste the Plural URL
-- Secret: paste the same secret configured in Plural
-- Content type: application/json
+Open your GitHub host (for example `https://<your-github-host>/`) and go to repository or organization settings:
 
-## 3. Configure GitHub events
+1. **Settings** -> **Webhooks** -> **Add webhook**
+2. **Payload URL**: paste the Plural URL
+3. **Content type**: `application/json`
+4. **Secret**: use the same signing secret from Plural
+5. Keep webhook **Active**, then save
 
-Select events relevant to ticketing and alerts, for example:
+## 3. Select events
 
-- Issues (opened, edited, closed, reopened)
+Enable only events Plural should process, usually:
+
+- Issues (opened/edited/closed/reopened)
 - Issue comments
-- Label changes
-- Projects if your team routes alert tickets through boards
+- Labels
 
-Use either individual events or Send me everything only in non-production environments.
+Avoid "Send me everything" in production.
 
-## 4. Test and verify
+## 4. Validate
 
-Use GitHub's ping/test delivery and also create a test issue. In Plural, verify:
+Use GitHub's ping delivery and create a test issue. Confirm in Plural that:
 
-- delivery succeeded (2xx)
-- event parsed successfully
-- issue/ticket event appears in webhook history
-
-## 5. Security recommendations
-
-- use a unique secret per webhook
-- rotate periodically
-- restrict admin rights for webhook management
+- the request is accepted
+- signature verification succeeds
+- issue events appear in webhook activity

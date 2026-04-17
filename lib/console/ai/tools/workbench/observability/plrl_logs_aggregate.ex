@@ -10,6 +10,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
     field :cluster_id, :string
     field :query,      :string
     field :limit,      :integer
+    field :operator,   Console.Schema.Monitor.Operator, default: :or
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
       field :name,  :string
@@ -19,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(service_id cluster_id query limit)a
+  @valid ~w(service_id cluster_id query limit operator)a
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/plrl_logs.json") |> Jason.decode!()
   def name(_), do: "plrl_logs_aggregate"

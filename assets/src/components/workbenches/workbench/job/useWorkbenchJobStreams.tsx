@@ -1,6 +1,7 @@
 import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   useWorkbenchJobActivityDeltaSubscription,
+  useWorkbenchJobDeltaSubscription,
   useWorkbenchJobThoughtDeltaSubscription,
   useWorkbenchTextStreamSubscription,
   WorkbenchJobActivitiesDocument,
@@ -31,6 +32,11 @@ export function useWorkbenchJobStreams(
     {}
   )
 
+  useWorkbenchJobDeltaSubscription({
+    variables: { id: jobId ?? '' },
+    skip: !jobId,
+  })
+
   useWorkbenchTextStreamSubscription({
     variables: { jobId: jobId ?? '' },
     skip: !jobId,
@@ -60,12 +66,14 @@ export function useWorkbenchJobStreams(
     skip: !jobId,
     ignoreResults: true,
     onData: ({ data: { data } }) => {
-      const id = data?.workbenchJobActivityDelta?.payload?.id
+      const payload = data?.workbenchJobActivityDelta?.payload
       if (
-        id &&
-        isActivityTerminal(data?.workbenchJobActivityDelta?.payload?.status)
+        payload?.id &&
+        (isActivityTerminal(payload?.status) || !!payload.result?.output)
       )
-        setClosedIds((prev) => new Set(prev ? prev.add(id) : new Set([id])))
+        setClosedIds(
+          (prev) => new Set(prev ? prev.add(payload.id) : new Set([payload.id]))
+        )
 
       appendActivityToCache(
         client.cache,

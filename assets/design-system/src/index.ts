@@ -14,6 +14,7 @@ export {
   default as Accordion,
   AccordionItem,
   type AccordionProps,
+  type AccordionCaret,
 } from './components/Accordion'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { default as AppIcon } from './components/AppIcon'

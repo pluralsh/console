@@ -2,12 +2,15 @@ import {
   Accordion,
   AccordionItem,
   Code,
+  Flex,
   getLastStringChild,
   Modal,
 } from '@pluralsh/design-system'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
-import { ReactElement, ReactNode, useState } from 'react'
+import { isNil, truncate } from 'lodash'
+import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
@@ -36,35 +39,91 @@ export function SimpleToolCall({
   content,
   attributes,
   isPending,
+  customResultBody,
+  customLabel,
 }: {
-  content: ChatFragment['content']
+  content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
   isPending?: boolean
+  customResultBody?: ReactNode
+  customLabel?: ReactNode
 }) {
   const { colors } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
-
+  const command = `${attributes?.tool?.arguments?.['command'] ?? ''}`
+  if (!customLabel && toolName.toLowerCase().includes('bash')) {
+    return (
+      <SimpleAccordion
+        label={
+          <CaptionP
+            as="span"
+            $color="text-light"
+          >
+            Bash{' '}
+            <CaptionP
+              as="span"
+              $color="text-xlight"
+            >
+              {truncate(command, { length: 30 })}
+            </CaptionP>
+          </CaptionP>
+        }
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          minWidth={0}
+          width="100%"
+        >
+          <Code
+            language="bash"
+            showHeader={false}
+          >
+            {command}
+          </Code>
+          <Code showHeader={false}>{content ?? ''}</Code>
+        </Flex>
+      </SimpleAccordion>
+    )
+  }
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <CaptionP
-          $shimmer={isPending}
-          $color="text-xlight"
-        >
-          {isPending ? 'Calling' : 'Called'} tool{' '}
-          <span css={{ color: colors['text-light'] }}>{toolName}</span>
-        </CaptionP>
+        {customLabel || (
+          <CaptionP
+            $shimmer={isPending}
+            $color="text-xlight"
+          >
+            {isPending ? 'Calling' : 'Called'} tool{' '}
+            <span css={{ color: colors['text-light'] }}>{toolName}</span>
+          </CaptionP>
+        )}
       </ClickableLabelSC>
       <Modal
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false)
+          setFinishedAnimating(false)
+        }}
+        onAnimationEnd={() => setFinishedAnimating(true)}
         header={`Tool: ${toolName}`}
         size="large"
       >
         <ToolCallContent
           content={content ?? ''}
           attributes={attributes}
+          customResultBody={
+            finishedAnimating ? (
+              customResultBody
+            ) : (
+              <RectangleSkeleton
+                $height={160}
+                $width="100%"
+              />
+            )
+          }
         />
       </Modal>
     </>
@@ -184,26 +243,43 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
   )
 }
 
+const ARBITRARY_VALUE_NAME = 'value'
 export function SimpleAccordion({
   label,
   defaultOpen = false,
+  isOpen,
+  setIsOpen,
+  loading = false,
   children,
+  ...props
 }: {
   label: ReactNode
   defaultOpen?: boolean
+  isOpen?: boolean
+  setIsOpen?: (isOpen: boolean) => void
+  loading?: boolean
   children: ReactNode
-}) {
+} & Partial<ComponentProps<typeof AccordionItem>>) {
   return (
     <Accordion
       type="single"
-      value={defaultOpen ? 'val' : undefined}
-      css={{ background: 'none', border: 'none' }}
+      defaultValue={defaultOpen ? ARBITRARY_VALUE_NAME : undefined}
+      value={isOpen ? ARBITRARY_VALUE_NAME : isNil(isOpen) ? undefined : ''}
+      onValueChange={(value) => setIsOpen?.(value === 'value')}
+      css={{ background: 'none', border: 'none', width: '100%' }}
     >
       <AccordionItem
-        value="val"
-        trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
+        value={ARBITRARY_VALUE_NAME}
+        trigger={
+          loading ? (
+            <RectangleSkeleton />
+          ) : (
+            <CaptionP $color="text-xlight">{label}</CaptionP>
+          )
+        }
         padding="none"
         caret="none"
+        {...props}
       >
         {children}
       </AccordionItem>

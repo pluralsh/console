@@ -67,7 +67,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   def poll_run(%AgentRun{} = run, iters) when iters >= 60 * 6, do: {:timeout, run}
   def poll_run(%AgentRun{mode: :write, pull_requests: [_ | _]} = run, _), do: {:success, run}
   def poll_run(%AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{}} = run, _), do: {:success, run}
-  def poll_run(%AgentRun{status: :successful} = run, _), do: {:success, run}
+  def poll_run(%AgentRun{status: s} = run, _) when s in [:successful, :babysitting], do: {:success, run}
   def poll_run(%AgentRun{status: s} = run, _) when s in [:failed, :cancelled], do: {:failed, run}
 
   def poll_run(%AgentRun{id: id}, iter) do
@@ -101,7 +101,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   def log_error(pass, _), do: pass
 
   defp jitter_sleep() do
-    time = :timer.seconds(5)
+    time = :timer.seconds(10)
     :timer.sleep(time + Console.jitter(time))
   end
 end

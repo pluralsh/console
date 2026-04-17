@@ -19,7 +19,7 @@ export default function StackRuns() {
   return (
     <StackRunsTable
       variables={{ id: stack?.id ?? '' }}
-      options={{ pollInterval: 2_000 }}
+      options={{ pollInterval: 2_000, fetchPolicy: 'cache-and-network' }}
     />
   )
 }

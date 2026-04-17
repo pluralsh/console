@@ -30,16 +30,18 @@ defmodule Console.Deployments.Issues.Webhook.Jira do
   def status(_), do: :open
 
   defp map_status(status) when is_binary(status) do
-    case String.downcase(status) do
-      "in progress" -> :in_progress
+    String.downcase(status)
+    |> String.replace(~r/[^a-z]/, "")
+    |> case do
+      "inprogress" -> :in_progress
       "done" -> :completed
       "closed" -> :completed
       "resolved" -> :completed
       "cancelled" -> :cancelled
       "canceled" -> :cancelled
       "rejected" -> :cancelled
-      "won't do" -> :cancelled
-      "won't fix" -> :cancelled
+      "wontdo" -> :cancelled
+      "wontfix" -> :cancelled
       _ -> :open
     end
   end

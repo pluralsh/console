@@ -3,6 +3,8 @@ import {
   GitHubLogoIcon,
   GitLabLogoIcon,
   GrafanaLogoIcon,
+  JiraLogoIcon,
+  LinearLogoIcon,
   NewrelicLogoIcon,
   PagerdutyLogoIcon,
   SentryLogoIcon,
@@ -15,6 +17,7 @@ import {
   IssueWebhookProvider,
   ObservabilityWebhookType,
   WorkbenchWebhookFragment,
+  WorkbenchWebhookTinyFragment,
 } from 'generated/graphql'
 
 export function webhookURL(webhook: WorkbenchWebhookFragment) {
@@ -61,15 +64,19 @@ export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
       return <GitHubLogoIcon />
     case IssueWebhookProvider.Gitlab:
       return <GitLabLogoIcon />
-    case IssueWebhookProvider.Jira:
     case IssueWebhookProvider.Linear:
+      return <LinearLogoIcon fullColor />
+    case IssueWebhookProvider.Jira:
+      return <JiraLogoIcon fullColor />
     case IssueWebhookProvider.Asana:
     default:
       return <WebhooksIcon />
   }
 }
 
-export function getWebhookIcon(webhook: WorkbenchWebhookFragment) {
+export function getWebhookIcon(
+  webhook: WorkbenchWebhookFragment | WorkbenchWebhookTinyFragment
+) {
   if (webhook.issueWebhook) {
     return getIssueWebhookProviderIcon(webhook.issueWebhook.provider)
   }

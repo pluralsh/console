@@ -5,7 +5,6 @@ defmodule Console.AI.Chat.MemoryEngine do
   """
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.AI.{Provider, Tool}
-  alias Console.AI.Chat.Engine
 
   defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: [], tool_fmt: &Console.identity/1]
 
@@ -40,13 +39,18 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> then(& {:cont, &1})
   end
 
+  def fit_context_window(msgs, preface) do
+    Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
+    |> trim_messages(msgs, Provider.context_window(:tool))
+  end
+
   defp loop(engine, iter \\ 0)
   defp loop(%__MODULE__{max_iterations: max, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
     preface = build_preface(preface, Map.put(engine, :iteration, iter))
 
     messages
     |> Enum.map(&msg(&1, :tool))
-    |> Engine.fit_context_window(preface)
+    |> fit_context_window(preface)
     |> Provider.completion(preface: preface, plural: engine.tools, client: :tool)
     |> case do
       {:ok, content} -> [callback(engine, {:assistant, content})]
@@ -55,6 +59,11 @@ defmodule Console.AI.Chat.MemoryEngine do
           {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
           err -> err
         end
+      {:error, %ReqLLM.Error.API.Request{status: nil}} ->
+        # almost certainly a llm provider failure, just retry
+        loop(engine, iter)
+      {:error, %ReqLLM.Error.API.Request{response_body: body}} ->
+        {:error, "llm provider failure: #{body}"}
       err -> err
     end
     |> then(fn
@@ -124,4 +133,17 @@ defmodule Console.AI.Chat.MemoryEngine do
 
   defp maybe_prepend(msg, messages) when is_binary(msg) and byte_size(msg) > 0, do: [{:assistant, msg} | messages]
   defp maybe_prepend(_, messages), do: messages
+
+  defp trim_messages(total, msgs, window) when total < window, do: msgs
+  defp trim_messages(_, [_] = msgs, _), do: msgs
+  defp trim_messages(_, [] = msgs, _), do: msgs
+  defp trim_messages(total, [msg | rest], window),
+    do: trim_messages(total - msg_size(msg), rest, window)
+
+  # @tkn_model "o200k_base"
+
+  defp msg_size(%{content: content}) when is_binary(content), do: byte_size(content)
+  defp msg_size({_, content}), do: byte_size(content)
+  defp msg_size({_, content, args}), do: byte_size(content <> Jason.encode!(Map.take(args, [:name, :arguments])))
+  defp msg_size(_), do: 0
 end

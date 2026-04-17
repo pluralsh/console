@@ -358,6 +358,10 @@ type AgentRun struct {
 	Error *string `json:"error,omitempty"`
 	// whether this agent run is shared
 	Shared *bool `json:"shared,omitempty"`
+	// whether babysit mode is enabled for this run
+	Babysit *bool `json:"babysit,omitempty"`
+	// interval in seconds between babysit checks for this run
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -399,6 +403,10 @@ type AgentRunAttributes struct {
 	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the flow this agent run is associated with
 	FlowID *string `json:"flowId,omitempty"`
+	// whether babysit mode is enabled for this run
+	Babysit *bool `json:"babysit,omitempty"`
+	// interval in seconds between babysit checks for this run
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 }
 
 type AgentRunConnection struct {
@@ -446,6 +454,10 @@ type AgentRunStatusAttributes struct {
 	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *NamespacedName `json:"podReference,omitempty"`
+	// whether babysit mode is enabled for this run
+	Babysit *bool `json:"babysit,omitempty"`
+	// interval in seconds between babysit checks for this run
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 }
 
 type AgentRuntime struct {
@@ -460,6 +472,8 @@ type AgentRuntime struct {
 	Default *bool `json:"default,omitempty"`
 	// the git repositories allowed to be used with this runtime
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
+	// default interval in seconds between babysit checks for runs on this runtime
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 	// the cluster this runtime is running on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the policy for creating runs on this runtime
@@ -482,6 +496,8 @@ type AgentRuntimeAttributes struct {
 	Default *bool `json:"default,omitempty"`
 	// the git repositories allowed to be used with this runtime
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
+	// default interval in seconds between babysit checks for runs on this runtime
+	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 }
 
 type AgentRuntimeConnection struct {
@@ -7298,8 +7314,10 @@ type ScmConnectionEdge struct {
 }
 
 type ScmCreds struct {
-	Username string `json:"username"`
-	Token    string `json:"token"`
+	// the type of the scm connection
+	Type     *ScmType `json:"type,omitempty"`
+	Username string   `json:"username"`
+	Token    string   `json:"token"`
 }
 
 type ScmWebhook struct {
@@ -9438,6 +9456,8 @@ type Workbench struct {
 	Repository *GitRepository `json:"repository,omitempty"`
 	// the agent runtime for this workbench
 	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
+	// the service account user used for automated workbench agent runs
+	BotUser *User `json:"botUser,omitempty"`
 	// tools associated with this workbench
 	Tools []*WorkbenchTool `json:"tools,omitempty"`
 	// read policy for this service
@@ -9468,6 +9488,8 @@ type WorkbenchAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// the agent runtime for this workbench
 	AgentRuntimeID *string `json:"agentRuntimeId,omitempty"`
+	// when true on update, sets botUserId to the authenticated user
+	OverrideBotUser *bool `json:"overrideBotUser,omitempty"`
 	// workbench configuration
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
 	// skills configuration (ref and files)
@@ -9598,10 +9620,13 @@ type WorkbenchJob struct {
 	// the alert this run was spawned from
 	Alert *Alert `json:"alert,omitempty"`
 	// the issue this run was spawned from
-	Issue      *Issue                          `json:"issue,omitempty"`
-	Activities *WorkbenchJobActivityConnection `json:"activities,omitempty"`
-	InsertedAt *string                         `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                         `json:"updatedAt,omitempty"`
+	Issue       *Issue                          `json:"issue,omitempty"`
+	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
+	// whimsically describes current progress for you
+	Whimsey    *string `json:"whimsey,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobActivity struct {
@@ -9617,6 +9642,8 @@ type WorkbenchJobActivity struct {
 	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
 	// thoughts emitted during this activity
 	Thoughts []*WorkbenchJobThought `json:"thoughts,omitempty"`
+	// whimsically describes current progress for you
+	Whimsey *string `json:"whimsey,omitempty"`
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity
@@ -9672,6 +9699,8 @@ type WorkbenchJobActivityResult struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// metrics tool query emitted by the activity
+	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9725,6 +9754,8 @@ type WorkbenchJobResultMetadata struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for this result
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// metrics tool query for this result
+	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -10177,6 +10208,15 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	TenantID *string `json:"tenantId,omitempty"`
 }
 
+type WorkbenchToolQueryData struct {
+	// the tool name used to run this query
+	ToolName *string `json:"toolName,omitempty"`
+	// arguments used for this tool query
+	ToolArgs map[string]any `json:"toolArgs,omitempty"`
+	// a short summary describing what this query means
+	Summary *string `json:"summary,omitempty"`
+}
+
 type WorkbenchToolSplunkConnection struct {
 	// splunk base url
 	URL *string `json:"url,omitempty"`
@@ -10485,11 +10525,12 @@ func (e AgentRunMode) MarshalJSON() ([]byte, error) {
 type AgentRunStatus string
 
 const (
-	AgentRunStatusPending    AgentRunStatus = "PENDING"
-	AgentRunStatusRunning    AgentRunStatus = "RUNNING"
-	AgentRunStatusSuccessful AgentRunStatus = "SUCCESSFUL"
-	AgentRunStatusFailed     AgentRunStatus = "FAILED"
-	AgentRunStatusCancelled  AgentRunStatus = "CANCELLED"
+	AgentRunStatusPending     AgentRunStatus = "PENDING"
+	AgentRunStatusRunning     AgentRunStatus = "RUNNING"
+	AgentRunStatusSuccessful  AgentRunStatus = "SUCCESSFUL"
+	AgentRunStatusFailed      AgentRunStatus = "FAILED"
+	AgentRunStatusCancelled   AgentRunStatus = "CANCELLED"
+	AgentRunStatusBabysitting AgentRunStatus = "BABYSITTING"
 )
 
 var AllAgentRunStatus = []AgentRunStatus{
@@ -10498,11 +10539,12 @@ var AllAgentRunStatus = []AgentRunStatus{
 	AgentRunStatusSuccessful,
 	AgentRunStatusFailed,
 	AgentRunStatusCancelled,
+	AgentRunStatusBabysitting,
 }
 
 func (e AgentRunStatus) IsValid() bool {
 	switch e {
-	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled:
+	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled, AgentRunStatusBabysitting:
 		return true
 	}
 	return false
@@ -12754,6 +12796,61 @@ func (e *LogDriver) UnmarshalJSON(b []byte) error {
 }
 
 func (e LogDriver) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type LogQueryOperator string
+
+const (
+	LogQueryOperatorAnd LogQueryOperator = "AND"
+	LogQueryOperatorOr  LogQueryOperator = "OR"
+)
+
+var AllLogQueryOperator = []LogQueryOperator{
+	LogQueryOperatorAnd,
+	LogQueryOperatorOr,
+}
+
+func (e LogQueryOperator) IsValid() bool {
+	switch e {
+	case LogQueryOperatorAnd, LogQueryOperatorOr:
+		return true
+	}
+	return false
+}
+
+func (e LogQueryOperator) String() string {
+	return string(e)
+}
+
+func (e *LogQueryOperator) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LogQueryOperator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LogQueryOperator", str)
+	}
+	return nil
+}
+
+func (e LogQueryOperator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *LogQueryOperator) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e LogQueryOperator) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

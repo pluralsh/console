@@ -5,6 +5,8 @@ import {
   Flex,
   GitHubLogoIcon,
   GitLabLogoIcon,
+  JiraLogoIcon,
+  LinearLogoIcon,
   Prop,
 } from '@pluralsh/design-system'
 import {
@@ -29,6 +31,8 @@ const providerToIcon: Partial<
 > = {
   [IssueWebhookProvider.Github]: GitHubLogoIcon,
   [IssueWebhookProvider.Gitlab]: GitLabLogoIcon,
+  [IssueWebhookProvider.Jira]: JiraLogoIcon,
+  [IssueWebhookProvider.Linear]: LinearLogoIcon,
 }
 
 export function WorkbenchJobTriggerIssue({

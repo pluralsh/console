@@ -1,27 +1,40 @@
 import styled from 'styled-components'
-import { ClockIcon, Flex, IconFrame } from '@pluralsh/design-system'
+import { ClockIcon, IconFrame } from '@pluralsh/design-system'
 import { WorkbenchCronFragment } from 'generated/graphql'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getWorkbenchCronScheduleEditAbsPath } from 'routes/workbenchesRoutesConsts'
+import { WorkbenchSidePanelEditRow } from 'components/workbenches/workbench/WorkbenchSidePanel'
+import { TRUNCATE } from 'components/utils/truncate'
 
 export function WorkbenchSidePanelCron({
   cron,
+  workbenchId,
 }: {
   cron: WorkbenchCronFragment
+  workbenchId: string
 }) {
+  const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
 
   return (
     <WrapperSC>
-      <Flex
-        align="center"
-        gap="xsmall"
+      <WorkbenchSidePanelEditRow
+        onClick={() =>
+          navigate(
+            getWorkbenchCronScheduleEditAbsPath({
+              workbenchId,
+              cronId: cron.id,
+            })
+          )
+        }
       >
         <IconFrame
           icon={<ClockIcon />}
           size="xsmall"
         />
         <CrontabSC>{cron.crontab}</CrontabSC>
-      </Flex>
+      </WorkbenchSidePanelEditRow>
       {cron.prompt && (
         <div>
           <PromptSC $expanded={expanded}>{cron.prompt}</PromptSC>
@@ -44,7 +57,11 @@ const WrapperSC = styled.div(({ theme }) => ({
 
 const CrontabSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
+  ...TRUNCATE,
+  color: theme.colors['text-light'],
+  flex: 1,
   fontFamily: 'monospace',
+  minWidth: 0,
 }))
 
 const PromptSC = styled.p<{ $expanded: boolean }>(({ theme, $expanded }) => ({

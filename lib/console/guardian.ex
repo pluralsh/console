@@ -12,6 +12,13 @@ defmodule Console.Guardian do
     do: {:ok, "user:#{id}"}
   def subject_for_token(_, _), do: {:error, :invalid_argument}
 
+  def build_claims(%{} = claims, %User{} = user, _) do
+    user = Console.Services.Rbac.preload(user)
+    Map.put(claims, "user.email", user.email)
+    |> Map.put("groups", groups(user))
+    |> then(& {:ok, &1})
+  end
+
   def resource_from_claims(%{"run_id" => run_id} = claims) do
     case Stacks.get_run(run_id) do
       %StackRun{status: s} when not is_terminal(s) ->
@@ -52,4 +59,7 @@ defmodule Console.Guardian do
 
   def allow(%User{}), do: true
   def allow(_), do: false
+
+  defp groups(%User{groups: [_ | _] = groups}), do: Enum.map(groups, & &1.name)
+  defp groups(_), do: []
 end

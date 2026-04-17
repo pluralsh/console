@@ -131,3 +131,26 @@ defimpl Console.AI.Authorizable, for: Console.Schema.Catalog do
     |> recurse(catalog.project)
   end
 end
+
+defimpl Console.AI.Authorizable, for: Console.Schema.WorkbenchJob do
+  import Console.AI.Authorizable.Utils
+
+  def authorize(%@for{} = job) do
+    job = preload(job)
+
+    job
+    |> recurse(job.workbench)
+  end
+end
+
+defimpl Console.AI.Authorizable, for: Console.Schema.Workbench do
+  import Console.AI.Authorizable.Utils
+
+  def authorize(%@for{} = workbench) do
+    workbench = preload(workbench)
+
+    workbench
+    |> pluck_bindings([:read_bindings, :write_bindings])
+    |> recurse(workbench.project)
+  end
+end

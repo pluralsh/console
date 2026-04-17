@@ -188,3 +188,17 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.CatalogDeleted do
   end
   def resource(_), do: :ok
 end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.WorkbenchJobResolved do
+  alias Console.Schema.WorkbenchJob
+  alias Console.AI.PubSub.Vector.Indexable
+
+  def resource(%@for{item: %WorkbenchJob{} = job}) do
+    {users, groups} = Console.AI.Authorizable.authorize(job)
+    %Indexable{
+      data: WorkbenchJob.Mini.new(job),
+      filters: [workbench_job_id: job.id, user_ids: users, group_ids: groups]
+    }
+  end
+  def resource(_), do: :ok
+end

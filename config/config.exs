@@ -197,5 +197,6 @@ config :req_llm,
     }
   ]
 
+# config :rustler_precompiled, :force_build, tiktoken: true
 
 import_config "#{Mix.env()}.exs"

@@ -61,6 +61,7 @@ defmodule Console.Schema.Workbench do
     belongs_to :project,   Project
     belongs_to :repository, GitRepository
     belongs_to :agent_runtime, AgentRuntime
+    belongs_to :bot_user, User, foreign_key: :bot_user_id
 
     has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
     has_many :tools, through: [:tool_associations, :tool]
@@ -106,7 +107,7 @@ defmodule Console.Schema.Workbench do
     end)
   end
 
-  @valid ~w(name description system_prompt project_id repository_id agent_runtime_id)a
+  @valid ~w(name description system_prompt project_id repository_id agent_runtime_id bot_user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -120,6 +121,7 @@ defmodule Console.Schema.Workbench do
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:agent_runtime_id)
+    |> foreign_key_constraint(:bot_user_id)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name])

@@ -3,6 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { CaptionP } from 'components/utils/typography/Text'
 import {
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
@@ -50,6 +51,14 @@ const columns = [
     ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
     { id: 'prompt', meta: { gridTemplate: '1fr' } }
   ),
+  columnHelper.accessor(({ user }) => user?.name, {
+    id: 'creator',
+    cell: ({ getValue }) => {
+      const name = getValue()
+      if (!name) return null
+      return <CaptionP $color="text-xlight">{name}</CaptionP>
+    },
+  }),
   columnHelper.accessor(({ status }) => status, {
     id: 'status',
     cell: ({ getValue }) => <RunStatusChip status={getValue()} />,

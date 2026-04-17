@@ -62,6 +62,10 @@ defmodule Console.Schema.PullRequest do
     timestamps()
   end
 
+  def for_status(query \\ __MODULE__, status) do
+    from(pr in query, where: pr.status == ^status)
+  end
+
   def pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
     stale = Timex.shift(now, days: -7)

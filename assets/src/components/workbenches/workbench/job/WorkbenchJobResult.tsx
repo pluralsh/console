@@ -1,16 +1,32 @@
-import { Code, Flex, Markdown } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Card,
+  Code,
+  Flex,
+  IconFrame,
+  Markdown,
+  prettifyRepoUrl,
+  PrOpenIcon,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
-import { WorkbenchJobFragment } from 'generated/graphql'
+import { Body2BoldP } from 'components/utils/typography/Text'
+import {
+  PullRequestBasicFragment,
+  WorkbenchJobFragment,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
-import { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
-import { JobActivityMetrics } from './WorkbenchJobActivityResults'
+import styled, { useTheme } from 'styled-components'
+import {
+  hasWorkbenchMetricsToolQuery,
+  JobActivityMetrics,
+} from './WorkbenchJobActivityResults'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
+import { StackedText } from 'components/utils/table/StackedText'
 
 export function WorkbenchJobResult({
   job,
@@ -31,7 +47,6 @@ export function WorkbenchJobResult({
 
   const conclusion = job?.result?.conclusion
   const workingTheory = job?.result?.workingTheory
-  const metrics = job?.result?.metadata?.metrics?.filter(isNonNullable) ?? []
 
   return (
     <Flex
@@ -43,35 +58,50 @@ export function WorkbenchJobResult({
     >
       <WorkbenchJobTriggerAlert alert={job?.alert} />
       <WorkbenchJobTriggerIssue issue={job?.issue} />
-      <Subtitle1H1 $color="text">
-        {job?.result?.conclusion ? 'Conclusion' : 'Working theory'}
-      </Subtitle1H1>
       <Flex
         direction="column"
         overflow="auto"
       >
         <Markdown text={conclusion || workingTheory || 'No output yet.'} />
-        {/* TODO: this the logic for the parsing prob needs to be tweaked here */}
-        {!isEmpty(metrics) && (
-          <JobActivityMetrics
-            metrics={metrics}
-            css={{ minHeight: 300 }}
-            lineProps={{
-              margin: { top: 20, right: 40, bottom: 40, left: 40 },
-            }}
-          />
-        )}
       </Flex>
       {!isEmpty(job?.result?.todos) && !conclusion && (
-        <>
-          <Subtitle1H1 $color="text">Agent todos</Subtitle1H1>
-          <WorkbenchJobTodos
-            loading={loading}
-            result={job?.result}
-          />
-        </>
+        <WorkbenchJobTodos
+          loading={loading}
+          result={job?.result}
+        />
       )}
     </Flex>
+  )
+}
+
+export function WorkbenchJobMetrics({
+  job,
+  loading,
+}: {
+  job: Nullable<WorkbenchJobFragment>
+  loading: boolean
+}) {
+  const metricsQuery = job?.result?.metadata?.metricsQuery
+
+  if (loading)
+    return (
+      <RectangleSkeleton
+        $height={320}
+        $width="100%"
+      />
+    )
+
+  if (!job?.id || !hasWorkbenchMetricsToolQuery(metricsQuery)) return null
+
+  return (
+    <JobActivityMetrics
+      jobId={job.id}
+      metricsQuery={metricsQuery}
+      withLegend
+      css={{ minHeight: 300 }}
+      lineProps={{ margin: { top: 20, right: 40, bottom: 40, left: 40 } }}
+      skeletonHeight={320}
+    />
   )
 }
 
@@ -90,3 +120,57 @@ export function WorkbenchJobTopology({ topology }: { topology: string }) {
     </>
   )
 }
+
+export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
+  return (
+    <>
+      <StackedText
+        icon={
+          <IconFrame
+            circle
+            type="secondary"
+            icon={<PrOpenIcon />}
+          />
+        }
+        first={<Body2BoldP>Generated pull requests</Body2BoldP>}
+      />
+      {prs.map((pr) => (
+        <WrapperCardSC
+          key={pr.id}
+          fillLevel={0}
+          clickable
+          forwardedAs="a"
+          href={pr.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <StackedText
+            truncate
+            first={
+              <span id={`link-${pr.id}`}>{prettifyRepoUrl(pr.url, true)}</span>
+            }
+            firstPartialType="body2"
+            firstColor="text"
+            second={pr.title}
+          />
+          <PrStatusChip status={pr.status} />
+          <IconFrame
+            size="small"
+            tooltip="View PR"
+            icon={<ArrowTopRightIcon color="icon-light" />}
+          />
+        </WrapperCardSC>
+      ))}
+    </>
+  )
+}
+
+const WrapperCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: theme.spacing.large,
+  padding: theme.spacing.medium,
+  textDecoration: 'none',
+  '&:hover span[id^="link-"]': { textDecoration: 'underline' },
+}))

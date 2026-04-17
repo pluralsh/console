@@ -11,7 +11,9 @@ defmodule Console.AI.Workbench.MCP.Basic do
   def transport(
     %WorkbenchTool{tool: :mcp, mcp_server: %McpServer{protocol: proto, url: url} = srv},
     %WorkbenchJob{} = job
-  ), do: {proto || :sse, [base_url: url, headers: auth_headers(job.user, srv)]}
+  ), do: {proto || :sse, [base_url: normalize_url(url), headers: auth_headers(job.user, srv)]}
+
+  def normalize_url(url), do: String.trim_trailing(url, "/mcp")
 
   defp auth_headers(%User{} = user, %McpServer{authentication: %{plural: true}} = srv) do
     {:ok, jwt, _} = MCP.mint(user)

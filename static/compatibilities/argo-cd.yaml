@@ -4,6 +4,29 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
+- version: 3.3.6
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['v3.3.0 introduced a large set of new capabilities across sync/diff
+        (notably initial Server-Side Apply/Server-Side Diff work), ApplicationSet
+        improvements (pprof endpoints, Progressive Sync beta work), new UI/CLI enhancements,
+        and additional built-in actions/health checks.', v3.3.6 is a patch release
+        over 3.3.x focused on correctness fixes (diff/normalization and cache installation
+        ID issues) with no new user-facing features called out in the notes you provided.]
+    breaking_changes: ['If Argo CD is managing itself (an Application deploys Argo
+        CD), you must enable the `ServerSideApply=true` sync option for the upgrade
+        to succeed; otherwise you may hit client-side apply migration failures.',
+      'As a temporary workaround for self-managed upgrades that fail with client-side
+        apply migration, you can set `ClientSideApplyMigration=false`, but this is
+        not recommended long-term and must be removed later to avoid field manager
+        conflicts.']
+  chart_version: 9.5.1
+  images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
+    'quay.io/argoproj/argocd:v3.3.6']
 - version: 3.3.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []

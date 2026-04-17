@@ -48,9 +48,22 @@
   import_types Console.GraphQl.Deployments.Agent
   import_types Console.GraphQl.Deployments.Integration
 
+  enum :agent_notification_resource do
+    value :service
+    value :stack_run
+    value :agent_run
+    value :gate
+  end
+
   input_object :rbac_attributes do
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
+  object :deploy_agent_notification do
+    field :resource,    non_null(:agent_notification_resource)
+    field :resource_id, non_null(:id)
+    field :kick,        :boolean
   end
 
   object :deployment_queries do
@@ -129,5 +142,15 @@
     import_fields :stack_subscriptions
     import_fields :pipeline_subscriptions
     import_fields :service_subscriptions
+  end
+
+  object :public_deployment_subscriptions do
+    field :deploy_agent_notification, :deploy_agent_notification do
+      config fn
+        _, %{context: %{cluster: %Console.Schema.Cluster{id: cid}}} ->
+          {:ok, topic: "deploy_agent_notifications:#{cid}"}
+        _, _ -> {:error, "unauthorized"}
+      end
+    end
   end
 end

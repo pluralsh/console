@@ -35,7 +35,6 @@ export function WorkbenchTabHeader({
       secondPartialType="body1"
       secondColor="text-xlight"
       gap={description ? 'xsmall' : undefined}
-      css={{ maxWidth: 840 }}
     />
   )
 }

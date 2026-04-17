@@ -1,12 +1,14 @@
 import {
+  ArrowTopRightIcon,
   ArrowUpIcon,
   BookmarkIcon,
   Chip,
+  ChipProps,
   Flex,
-  IconFrame,
-  Spinner,
 } from '@pluralsh/design-system'
+import { animated, useTransition } from '@react-spring/web'
 import chroma from 'chroma-js'
+import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
 import {
   ChatInputSimple,
   ChatOptionPill,
@@ -15,27 +17,26 @@ import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { VirtualList } from 'components/utils/VirtualList'
 import {
   useCreateWorkbenchJobMutation,
-  useCreateWorkbenchPromptMutation,
   useWorkbenchPromptsQuery,
 } from 'generated/graphql'
-import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
+import isEmpty from 'lodash/isEmpty'
+import truncate from 'lodash/truncate'
 import type { ComponentProps, RefObject } from 'react'
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
   getWorkbenchSavedPromptsAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import isEmpty from 'lodash/isEmpty'
 import { Body2P } from '../../utils/typography/Text.tsx'
+import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
 
 const MAX_WIDTH = 924
-const SAVED_PROMPTS_LIMIT = 6
 
 export function WorkbenchJobCreateInput({
   workbenchId,
@@ -45,7 +46,6 @@ export function WorkbenchJobCreateInput({
   workbenchLoading: boolean
 }) {
   const navigate = useNavigate()
-  const { popToast } = useSimpleToast()
   const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
   const inputWrapperRef = useRef<HTMLDivElement>(null)
   const [prompt, setPrompt] = useState('')
@@ -62,9 +62,6 @@ export function WorkbenchJobCreateInput({
       awaitRefetchQueries: true,
     })
 
-  const [savePrompt, { loading: savePromptLoading }] =
-    useCreateWorkbenchPromptMutation()
-
   useOutsideClick(inputWrapperRef, () => {
     if (!savedPromptsOpen) return
     setSavedPromptsOpen(false)
@@ -79,26 +76,6 @@ export function WorkbenchJobCreateInput({
     setSavedPromptsOpen(false)
     void createWorkbenchJob({
       variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
-    })
-  }
-
-  const handleSavePrompt = () => {
-    const trimmedPrompt = prompt.trim()
-
-    if (!trimmedPrompt) return
-
-    void savePrompt({
-      variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
-      onCompleted: () => {
-        popToast({ name: 'prompt', action: 'saved', color: 'icon-success' })
-      },
-      onError: () => {
-        popToast({
-          name: 'prompt',
-          action: 'failed to save',
-          color: 'icon-danger',
-        })
-      },
     })
   }
 
@@ -123,7 +100,10 @@ export function WorkbenchJobCreateInput({
           loading={loading}
           allowSubmit={!!prompt.trim()}
           options={
-            <Flex gap="xsmall">
+            <Flex
+              gap="xsmall"
+              height={32}
+            >
               <ChatOptionPill
                 isOpen={savedPromptsOpen}
                 disabled={loading}
@@ -132,22 +112,10 @@ export function WorkbenchJobCreateInput({
                 <BookmarkIcon size={12} />
                 <span>Saved prompts</span>
               </ChatOptionPill>
-              {!!prompt.trim() && (
-                <IconFrame
-                  clickable={!savePromptLoading}
-                  size="medium"
-                  icon={
-                    savePromptLoading ? (
-                      <Spinner />
-                    ) : (
-                      <BookmarkIcon color="icon-light" />
-                    )
-                  }
-                  tooltip="Save this prompt"
-                  onClick={handleSavePrompt}
-                  css={{ borderRadius: '50%' }}
-                />
-              )}
+              <SaveWorkbenchPromptButton
+                workbenchId={workbenchId}
+                prompt={prompt}
+              />
             </Flex>
           }
           wrapperStyles={{ maxWidth: MAX_WIDTH }}
@@ -156,10 +124,6 @@ export function WorkbenchJobCreateInput({
           open={savedPromptsOpen}
           workbenchId={workbenchId}
           onSelectPrompt={handleSubmitPrompt}
-          onShowAll={() => {
-            setSavedPromptsOpen(false)
-            navigate(getWorkbenchSavedPromptsAbsPath(workbenchId))
-          }}
         />
       </InputWrapperSC>
     </>
@@ -170,49 +134,66 @@ function WorkbenchSavedPromptsOverlay({
   open,
   workbenchId,
   onSelectPrompt,
-  onShowAll,
 }: {
   open: boolean
   workbenchId: string
   onSelectPrompt: (prompt: string) => void
-  onShowAll: () => void
 }) {
+  // this will get fetched fresh by SaveWorkbenchPromptButton, so we can rely on cache here
   const {
     data,
     loading: promptsLoading,
     error,
   } = useWorkbenchPromptsQuery({
-    variables: {
-      id: workbenchId,
-      first: SAVED_PROMPTS_LIMIT,
-    },
-    skip: !open || !workbenchId,
-    fetchPolicy: 'cache-and-network',
+    variables: { id: workbenchId },
+    skip: !workbenchId,
   })
 
   const prompts = useMemo(
-    () => mapExistingNodes(data?.workbench?.prompts),
+    () => mapExistingNodes(data?.workbench?.prompts).reverse(),
     [data]
   )
-  const visiblePrompts = prompts.slice(0, SAVED_PROMPTS_LIMIT)
-  const hasMorePrompts = !!data?.workbench?.prompts?.pageInfo.hasNextPage
+  const isLoading = promptsLoading && !data
+  const noPrompts = isEmpty(prompts) && !isLoading
 
-  if (!open) return null
+  const theme = useTheme()
 
-  return (
-    <PromptsPanelSC>
+  const transitionProps = useMemo(
+    () => ({
+      from: { opacity: 0, maxHeight: 0, marginTop: 0 },
+      enter: { opacity: 1, maxHeight: 480, marginTop: theme.spacing.small },
+      leave: { opacity: 0, maxHeight: 0, marginTop: 0 },
+      config: open
+        ? { mass: 0.6, tension: 280, velocity: 0.02 }
+        : { mass: 0.6, tension: 400, velocity: 0.02, restVelocity: 0.1 },
+    }),
+    [open, theme.spacing.small]
+  )
+
+  const transitions = useTransition(open ? [true] : [], transitionProps)
+
+  return transitions((styles) => (
+    <AnimatedPromptsPanelSC
+      style={{
+        opacity: styles.opacity,
+        maxHeight: styles.maxHeight,
+        marginTop: styles.marginTop,
+      }}
+    >
       {error ? (
         <GqlError error={error} />
-      ) : promptsLoading && !data ? (
-        <OverlayLoadingSC>
-          <Spinner />
-        </OverlayLoadingSC>
+      ) : noPrompts ? (
+        <Body2P $color="text-xlight">No saved prompts yet.</Body2P>
       ) : (
-        <PromptListSC>
-          {visiblePrompts.map((savedPrompt) => (
+        <VirtualList
+          data={prompts}
+          itemGap="small"
+          style={{ height: Math.min(320, (prompts.length + 1) * 44) }}
+          loading={isLoading}
+          skeletonProps={{ numRows: 6, gap: 'small' }}
+          renderer={({ rowData }) => (
             <SavedPromptsChip
-              key={savedPrompt.id}
-              label={savedPrompt.prompt ?? ''}
+              label={rowData.prompt ?? ''}
               fillLevel={2}
               rightContent={
                 <ArrowUpIcon
@@ -220,88 +201,85 @@ function WorkbenchSavedPromptsOverlay({
                   color="icon-light"
                 />
               }
-              onClick={() => onSelectPrompt(savedPrompt.prompt ?? '')}
-            />
-          ))}
-          {isEmpty(visiblePrompts) && (
-            <EmptyPromptsTextSC>No saved prompts yet.</EmptyPromptsTextSC>
-          )}
-          {hasMorePrompts && (
-            <SavedPromptsChip
-              label="Show all saved prompts"
-              fillLevel={1}
-              onClick={onShowAll}
+              onClick={() => onSelectPrompt(rowData.prompt ?? '')}
             />
           )}
-        </PromptListSC>
+        />
       )}
-    </PromptsPanelSC>
-  )
+      {!noPrompts && (
+        <SavedPromptsChip
+          label="View all saved prompts"
+          fillLevel={1}
+          forwardedAs={Link}
+          to={getWorkbenchSavedPromptsAbsPath(workbenchId)}
+          endIcon={
+            <ArrowTopRightIcon
+              size={12}
+              color="icon-light"
+            />
+          }
+        />
+      )}
+    </AnimatedPromptsPanelSC>
+  ))
 }
 
 function SavedPromptsChip({
   label,
   fillLevel,
   rightContent,
-  onClick,
+  ...props
 }: {
   label: string
   fillLevel?: ComponentProps<typeof Chip>['fillLevel']
   rightContent?: ComponentProps<typeof Chip>['rightContent']
-  onClick: () => void
-}) {
+} & ChipProps) {
+  const [showRightContent, setShowRightContent] = useState(false)
+
   return (
     <Chip
       size="large"
       fillLevel={fillLevel}
       clickable
-      onClick={onClick}
-      css={{
-        borderRadius: 16,
-        width: 'fit-content',
-        whiteSpace: 'pre-wrap',
-      }}
+      onMouseEnter={() => setShowRightContent(true)}
+      onMouseLeave={() => setShowRightContent(false)}
+      onFocus={() => setShowRightContent(true)}
+      onBlur={() => setShowRightContent(false)}
+      style={{ borderRadius: 16, width: 'fit-content' }}
+      {...props}
     >
-      <Body2P>{label}</Body2P>
-      {rightContent}
+      {truncate(label, { length: 116 })}
+      {rightContent && (
+        <span
+          css={{
+            width: showRightContent ? 'fit-content' : 0,
+            opacity: showRightContent ? 1 : 0,
+            transition: 'width 200ms ease, opacity 200ms ease',
+          }}
+        >
+          {rightContent}
+        </span>
+      )}
     </Chip>
   )
 }
-
-const OverlayLoadingSC = styled(Flex)({
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: 120,
-})
-
-const PromptListSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  maxHeight: 320,
-  overflow: 'hidden auto',
-}))
 
 const InputWrapperSC = styled.div({
   position: 'relative',
   maxWidth: MAX_WIDTH,
 })
 
-const PromptsPanelSC = styled.div(({ theme }) => ({
+const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   left: 0,
   right: 0,
-  marginTop: theme.spacing.xsmall,
   zIndex: theme.zIndexes.selectPopover,
+  boxSizing: 'border-box',
+  overflow: 'hidden',
   backdropFilter: 'blur(4px)',
   border: `1px solid ${chroma(theme.colors['border-fill-two']).alpha(0.1).hex()}`,
   borderRadius: theme.borderRadiuses.large,
   padding: theme.spacing.medium,
   backgroundColor: chroma(theme.colors['fill-zero']).alpha(0.4).hex(),
   boxShadow: theme.boxShadows.modal,
-}))
-
-const EmptyPromptsTextSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2,
-  color: theme.colors['text-xlight'],
 }))

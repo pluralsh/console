@@ -3,7 +3,8 @@ import { WorkbenchesList } from 'components/workbenches/WorkbenchesList'
 import { WorkbenchesAlerts } from 'components/workbenches/WorkbenchesAlerts'
 import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
-import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
+import { WorkbenchesIntegrations } from 'components/workbenches/WorkbenchesIntegrations'
+import { WorkbenchesConfiguredTools } from 'components/workbenches/WorkbenchesConfiguredTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
 import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
@@ -25,9 +26,10 @@ import {
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
-  WORKBENCHES_TOOLS_ABS_PATH,
-  WORKBENCHES_TOOLS_PARAM_ID,
-  WORKBENCHES_TOOLS_REL_PATH,
+  WORKBENCHES_TOOLS_ADD_ABS_PATH,
+  WORKBENCHES_TOOLS_ADD_REL_PATH,
+  WORKBENCHES_TOOLS_EDIT_ABS_PATH,
+  WORKBENCHES_TOOLS_YOUR_REL_PATH,
   WORKBENCHES_CRON_PARAM_ID,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
   WORKBENCHES_SAVED_PROMPTS_REL_PATH,
@@ -48,8 +50,12 @@ export const workbenchesRoutes = [
       element={<WorkbenchesList />}
     />
     <Route
-      path={WORKBENCHES_TOOLS_REL_PATH}
-      element={<WorkbenchTools />}
+      path={WORKBENCHES_TOOLS_ADD_REL_PATH}
+      element={<WorkbenchesIntegrations />}
+    />
+    <Route
+      path={WORKBENCHES_TOOLS_YOUR_REL_PATH}
+      element={<WorkbenchesConfiguredTools />}
     />
     <Route
       path={WORKBENCHES_ALERTS_REL_PATH}
@@ -63,6 +69,14 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
     element={<WorkbenchCreateOrEdit mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_TOOLS_ADD_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    element={<WorkbenchToolCreateOrEdit mode="create" />}
+  />,
+  <Route
+    path={WORKBENCHES_TOOLS_EDIT_ABS_PATH}
+    element={<WorkbenchToolCreateOrEdit mode="edit" />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}`}
@@ -124,14 +138,6 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/:${WORKBENCHES_WEBHOOK_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<WebhookTriggerForm mode="edit" />}
-  />,
-  <Route
-    path={`${WORKBENCHES_TOOLS_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
-    element={<WorkbenchToolCreateOrEdit mode="create" />}
-  />,
-  <Route
-    path={`${WORKBENCHES_TOOLS_ABS_PATH}/:${WORKBENCHES_TOOLS_PARAM_ID}`}
-    element={<WorkbenchToolCreateOrEdit mode="edit" />}
   />,
   <Route
     path={WORKBENCH_JOB_ABS_PATH}
