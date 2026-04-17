@@ -24,7 +24,7 @@ versions:
         apply migration, you can set `ClientSideApplyMigration=false`, but this is
         not recommended long-term and must be removed later to avoid field manager
         conflicts.']
-  chart_version: 9.5.0
+  chart_version: 9.5.1
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.3.6']
 - version: 3.3.0

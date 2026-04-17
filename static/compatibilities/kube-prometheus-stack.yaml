@@ -5,13 +5,25 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 83.4.3
+- version: 83.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
-  chart_version: 83.4.3
+  summary:
+    helm_changes: '- No required values changes mentioned in the provided release
+      notes.
+
+      - Optional: if you want Alertmanager session stickiness/persistence at the Service/ingress
+      layer, review the new `alertmanager.sessionPersistence` (or similarly named)
+      values introduced by the chart and enable/configure it to match your ingress/load
+      balancer behavior.'
+    chart_updates: ['Added support for Alertmanager session persistence (stickiness)
+        in the chart (PR #6847).']
+    features: ['Alertmanager can now be configured with session persistence, which
+        helps keep client sessions pinned to the same backend when behind a load balancer/ingress.']
+    breaking_changes: []
+  chart_version: 83.5.0
   images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.0',
     'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
     'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
