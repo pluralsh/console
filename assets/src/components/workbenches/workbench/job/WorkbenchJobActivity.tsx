@@ -26,6 +26,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
 import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
+  AgentRunStatus,
   useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
@@ -47,7 +48,7 @@ import {
   JobActivityMetricsChart,
   JobActivityPrompt,
   MemoActivityIcon,
-  UserActivityResult,
+  ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 
 export function WorkbenchJobActivity({
@@ -77,7 +78,7 @@ export function WorkbenchJobActivity({
       </div>
     )
   if (type === WorkbenchJobActivityType.User)
-    return <UserActivityResult activity={activity} />
+    return <ExpandableUserPrompt prompt={activity.prompt} />
 
   return (
     <AccordionItem
@@ -396,7 +397,7 @@ function WorkbenchJobActivityThought({
 }
 
 export const isJobRunning = (
-  status: Nullable<WorkbenchJobActivityStatus | WorkbenchJobStatus>
-) =>
-  status === WorkbenchJobActivityStatus.Pending ||
-  status === WorkbenchJobActivityStatus.Running
+  status: Nullable<
+    WorkbenchJobActivityStatus | WorkbenchJobStatus | AgentRunStatus
+  >
+) => status === 'PENDING' || status === 'RUNNING'

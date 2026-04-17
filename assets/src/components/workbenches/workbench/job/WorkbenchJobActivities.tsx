@@ -1,4 +1,4 @@
-import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
+import { Accordion, Flex } from '@pluralsh/design-system'
 import {
   useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
@@ -25,6 +25,7 @@ import {
   appendActivityToCache,
   useWorkbenchJobStreams,
 } from './useWorkbenchJobStreams'
+import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 
 export const ACTIVITY_GAP = 'medium' as const
 
@@ -64,6 +65,14 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     },
     refetchQueries: ['WorkbenchJob'],
   })
+
+  const userPromptIndices = useMemo(() => {
+    const indices = [0] // 0 is initial user prompt in topContent
+    activities.forEach((a, i) => {
+      if (a.type === WorkbenchJobActivityType.User) indices.push(i + 1)
+    })
+    return indices
+  }, [activities])
 
   if (!data && loading)
     return (
@@ -107,10 +116,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
             style={{
               padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
             }}
+            keepMounted={userPromptIndices}
             topContent={
-              <JobPromptCardSC>
-                <Markdown text={job?.prompt ?? ''} />
-              </JobPromptCardSC>
+              <ExpandableUserPrompt
+                prompt={job?.prompt}
+                css={{ width: '100%', marginTop: 0 }}
+              />
             }
             bottomContent={
               <>
@@ -174,14 +185,6 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   minHeight: 0,
   overflow: 'hidden',
-}))
-
-const JobPromptCardSC = styled(Card)(({ theme }) => ({
-  ...theme.partials.text.body2,
-  borderRadius: theme.borderRadiuses.medium,
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-  wordBreak: 'break-word',
-  marginBottom: theme.spacing.small,
 }))
 
 const lastActivityId = (

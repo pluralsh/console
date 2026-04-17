@@ -20,10 +20,10 @@ import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobMetricsToolQuery,
-  WorkbenchJobActivityFragment,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityResultFragment,
@@ -41,8 +41,8 @@ import { DiffMethod } from 'react-diff-viewer'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
-import { getOldContentFromTextDiff } from 'utils/textDiff'
 import { isNonNullable } from 'utils/isNonNullable'
+import { getOldContentFromTextDiff } from 'utils/textDiff'
 
 export function MemoActivityIcon({
   jobUpdate,
@@ -70,15 +70,33 @@ export function MemoActivityIcon({
   )
 }
 
-export function UserActivityResult({
-  activity,
-}: {
-  activity: WorkbenchJobActivityFragment
-}) {
-  const { prompt } = activity
+const EXPANDABLE_PROMPT_LENGTH = 100
+export function ExpandableUserPrompt({
+  prompt,
+  ...props
+}: { prompt: Nullable<string> } & ComponentPropsWithRef<typeof PromptCardSC>) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  if (!prompt) return null
+  const isExpandable = prompt.length > EXPANDABLE_PROMPT_LENGTH
+
   return (
-    <PromptCardSC>
-      <SimplifiedMarkdown text={prompt ?? ''} />
+    <PromptCardSC {...props}>
+      <SimplifiedMarkdown
+        text={
+          !isExpandable || isExpanded
+            ? prompt
+            : truncate(prompt, { length: EXPANDABLE_PROMPT_LENGTH })
+        }
+      />
+      {isExpandable && (
+        <BasicTextButton
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          css={{ width: '100%', textAlign: 'right' }}
+        >
+          {isExpanded ? 'view less' : 'view more'}
+        </BasicTextButton>
+      )}
     </PromptCardSC>
   )
 }
@@ -428,6 +446,9 @@ const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
 const PromptCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   width: 'fit-content',
+  maxWidth: '100%',
+  overflow: 'auto',
+  wordBreak: 'break-word',
   marginLeft: 'auto',
   marginTop: theme.spacing.small,
   marginBottom: theme.spacing.small,
