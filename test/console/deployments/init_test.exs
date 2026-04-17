@@ -183,14 +183,14 @@ defmodule Console.Deployments.InitTest do
 
       {:ok, %{es: es, prometheus: prometheus}} = Init.setup_workbench()
 
-      assert es.name == "plrl.elastic.logs"
+      assert es.name == "plrl_elastic_logs"
       assert es.tool == :elastic
       assert es.configuration.elastic.url == "http://test.es.com"
       assert es.configuration.elastic.username == "plrl-test"
       assert es.configuration.elastic.password == "secret"
       assert es.configuration.elastic.index == "plrl-test-logs-*"
 
-      assert prometheus.name == "plrl.prometheus"
+      assert prometheus.name == "plrl_prometheus"
       assert prometheus.tool == :prometheus
       assert prometheus.configuration.prometheus.url == "http://vmetrics.example.com/select/vtenant/prometheus"
       assert prometheus.configuration.prometheus.username == "plrl-test"
