@@ -1,13 +1,13 @@
 defmodule Console.AI.Tools.Workbench.ObservabilityResult do
   use Console.AI.Tools.Workbench.Base
   alias Console.Schema.WorkbenchJobActivity
-  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult, as: WJR
+  alias Console.Schema.WorkbenchJobResult.ToolQuery
 
   embedded_schema do
     field :output, :string
 
-    embeds_many :metrics, WJR.Metric, on_replace: :delete
-    embeds_many :logs, WJR.Log, on_replace: :delete
+    embeds_one :metrics_query, ToolQuery, on_replace: :update
+    embeds_many :logs, Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Log, on_replace: :delete
   end
 
   @json_schema Console.priv_file!("tools/workbench/observability_result.json") |> Jason.decode!()
@@ -19,8 +19,8 @@ defmodule Console.AI.Tools.Workbench.ObservabilityResult do
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:output])
-    |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
     |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
+    |> cast_embed(:metrics_query)
     |> validate_required([:output])
   end
 

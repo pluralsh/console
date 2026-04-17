@@ -28,11 +28,8 @@ You are producing output for a human user, and should expect them to want to rea
 
 You should always return a markdown formatted conclusion based on the investigation.  That said, it's also extremely important to include either:
 
-* the time series data that proves that conclusion
+* the time series data that proves that conclusion.  The time series is persisted as the tool name and arguments used to query the most salient graph used in the investigation.
 * the log data that informs that conclusion
-* final time series data should include surrounding datapoints instead of just a few individual points.  This can be just a handful, but enough to show a sequential graph with context.
-
-If either were present in the investigation, *always* include them in your result. If neither are relevant, you can omit them.
 
 The overarching task is as follows:
 

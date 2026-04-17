@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Workbenches
+  alias Console.AI.Workbench.Toolchain
   alias Console.Schema.{
     Alert,
     Issue,
@@ -91,6 +92,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Issue.for_user(user)
     |> Issue.ordered()
     |> paginate(args)
+  end
+
+  def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
+    Toolchain.metrics(job, name, args)
   end
 
   def workbenches(args, %{context: %{current_user: user}}) do

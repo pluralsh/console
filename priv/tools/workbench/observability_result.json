@@ -5,33 +5,24 @@
             "type": "string",
             "description": "The output of this investigation.  Should be an informative summary of the investigation in markdown."
         },
-        "metrics": {
-            "type": "array",
-            "description": "The metrics gathered from the observability tool call",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timestamp": {
-                        "type": "string",
-                        "description": "The timestamp of the metric",
-                        "format": "date-time"
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "The name of the metric"
-                    },
-                    "value": {
-                        "type": "number",
-                        "description": "The value of the metric"
-                    },
-                    "labels": {
-                        "type": "object",
-                        "description": "The labels of the metric",
-                        "additionalProperties": true
-                    }
+        "metrics_query": {
+            "type": "object",
+            "description": "The metrics query to persist with this result",
+            "properties": {
+                "tool_name": {
+                    "type": "string",
+                    "description": "The tool name used for querying metrics. This should be the exact tool/function name used to query the metrics."
                 },
-                "required": ["timestamp", "name", "value"]
-            }
+                "tool_args": {
+                    "type": "string",
+                    "description": "The arguments passed to the metrics tool/function call from `tool_name`.  This should be a JSON string. This is required but can be empty if needed.  Just pass as an unstructured object exactly as presented in the tool call history"
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "A two to three sentence summary of what this metrics query means, including what signal it measures and and concretely what you can conclude from it."
+                }
+            },
+            "required": ["tool_name", "tool_args"]
         },
         "logs": {
             "type": "array",

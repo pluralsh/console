@@ -278,6 +278,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_job_activities/3
     end
 
+    field :metrics_tool, list_of(:workbench_job_activity_metric) do
+      arg :name,      :string, description: "the name of the metrics tool"
+      arg :arguments, :json,   description: "the arguments for the metrics tool"
+
+      resolve &Deployments.metrics_tool/3
+    end
+
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     timestamps()
@@ -318,11 +325,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_activity_result do
-    field :output,     :string, description: "output from the activity"
-    field :error,      :string, description: "error from the activity"
-    field :job_update, :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
-    field :metrics,    list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
-    field :logs,       list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :output,        :string, description: "output from the activity"
+    field :error,         :string, description: "error from the activity"
+    field :job_update,    :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
+    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
+    field :logs,          list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query emitted by the activity"
   end
 
   object :workbench_job_activity_job_update do
@@ -358,8 +366,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result_metadata do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
-    field :logs,    list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :logs,          list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query for this result"
+  end
+
+  object :workbench_tool_query_data do
+    field :tool_name, :string, description: "the tool name used to run this query"
+    field :tool_args, :map, description: "arguments used for this tool query"
+    field :summary,   :string, description: "a short summary describing what this query means"
   end
 
   object :workbench_job_result_todo do
@@ -439,8 +454,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, :string, description: "optional prompt text applied when this webhook matches"
     field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
 
-    field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
-    field :webhook,     :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+    field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
+    field :webhook,       :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
     field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
 
     timestamps()

@@ -28,12 +28,12 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchToolIcon } from '../../tools/workbenchToolsUtils'
+import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-import { formatDateTime } from 'utils/datetime'
 
 const MAX_VISIBLE_JOB_TOOLS = 3
 

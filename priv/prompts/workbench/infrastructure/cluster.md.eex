@@ -5,12 +5,14 @@ Name: <%= @cluster.name %>
 Handle: <%= @cluster.handle %>
 Kubernetes Version: <%= @cluster.current_version %>
 Kubernetes Distribution: <%= @cluster.distro %>
-Extended Support: <%= Console.Deployments.Clusters.extended_support(@cluster) %>
+Extended Support: <%= Console.Deployments.Clusters.extended_support(@cluster) |> Jason.encode!() %>
 Metadata: <%= Jason.encode!(@cluster.metadata || %{}) %>
 Tags: <%= Enum.map(@cluster.tags, & %{name: &1.name, value: &1.value}) |> Jason.encode!() %>
 Project: <%= @cluster.project.name %>
 
 # Upgrade plan
+
+This will provide a list of k8s addons that are either helm managed or cloud managed that can block an upgrade, alongside their current versions (and what k8s versions they're known compatible with)
 
 ```json
 <%= Console.mapify(@upgrade_plan) |> Jason.encode!(pretty: true) %>

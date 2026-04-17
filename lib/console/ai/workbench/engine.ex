@@ -75,12 +75,12 @@ defmodule Console.AI.Workbench.Engine do
     )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine: engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos, topology: topology}} ->
+      {:ok, %Complete{conclusion: conclusion, metrics_query: metrics_query, logs: logs, todos: todos, topology: topology}} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
           topology: topology,
-          metadata: drop_empty(%{metrics: metrics, logs: logs}),
+          metadata: drop_empty(%{metrics_query: metrics_query, logs: logs}),
         })
         |> Workbenches.complete_job(job)
       {:ok, l} when is_list(l) -> spawn_activities(l, engine)

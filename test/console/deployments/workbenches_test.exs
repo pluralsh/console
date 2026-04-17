@@ -662,6 +662,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       result = refetch(job.result)
       assert result.working_theory == "new theory"
       assert result.conclusion == "new conclusion"
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: updated_job}}
+      assert updated_job.id == job.id
     end
 
     test "creates a result when job has no results yet" do
@@ -683,6 +685,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       job = Console.Repo.preload(refetch(job), :result)
       assert job.result.working_theory == "theory"
       assert job.result.conclusion == "conclusion"
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: updated_job}}
+      assert updated_job.id == job.id
     end
   end
 
@@ -733,24 +737,22 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert completed.result.working_theory == "theory"
     end
 
-    test "persists metadata with metrics alongside conclusion" do
+    test "persists metadata with metrics query alongside conclusion" do
       job = insert(:workbench_job, status: :running)
 
       {:ok, completed} = Workbenches.complete_job(%{
         conclusion: "Done.",
         metadata: %{
-          metrics: [
-            %{name: "cpu_usage", value: 0.85, labels: %{"pod" => "web-1"}},
-            %{name: "mem_usage", value: 0.60, labels: %{"pod" => "web-1"}}
-          ]
+          metrics_query: %{
+            tool_name: "workbench_observability_metrics_prom",
+            tool_args: %{query: "avg(cpu_usage)", step: "1m"}
+          }
         }
       }, job)
 
       assert completed.result.conclusion == "Done."
-      metrics = completed.result.metadata.metrics
-      assert length(metrics) == 2
-      assert Enum.any?(metrics, & &1.name == "cpu_usage" and &1.value == 0.85)
-      assert Enum.any?(metrics, & &1.name == "mem_usage" and &1.value == 0.60)
+      assert completed.result.metadata.metrics_query.tool_name == "workbench_observability_metrics_prom"
+      assert completed.result.metadata.metrics_query.tool_args == %{query: "avg(cpu_usage)", step: "1m"}
     end
   end
 

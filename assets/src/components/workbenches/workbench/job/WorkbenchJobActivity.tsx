@@ -40,8 +40,10 @@ import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   ActivityModalIcon,
+  hasWorkbenchMetricsToolQuery,
   JobActivityLogs,
   JobActivityMetrics,
+  JobActivityMetricsChart,
   JobActivityPrompt,
   MemoActivityIcon,
   UserActivityResult,
@@ -51,10 +53,12 @@ export function WorkbenchJobActivity({
   isOpen,
   activity,
   textStream,
+  jobId,
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
+  jobId: string
 }) {
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
@@ -65,7 +69,9 @@ export function WorkbenchJobActivity({
       <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
         <WorkbenchJobActivityResult
           activity={activity}
+          jobId={jobId}
           markdownType="classic"
+          metricsFetchEnabled
         />
       </div>
     )
@@ -112,14 +118,16 @@ export function WorkbenchJobActivity({
               }
             />
           )}
-          {!isEmpty(result?.metrics) && (
+          {hasWorkbenchMetricsToolQuery(result?.metricsQuery) && (
             <ActivityModalIcon
               icon={TimeSeriesIcon}
               tooltip="View metrics"
               modalHeader="Metrics"
               modalContent={
                 <JobActivityMetrics
-                  metrics={result?.metrics?.filter(isNonNullable) ?? []}
+                  jobId={jobId}
+                  metricsQuery={result?.metricsQuery}
+                  skeletonHeight={320}
                 />
               }
             />
@@ -172,7 +180,11 @@ export function WorkbenchJobActivity({
             <SimplifiedMarkdown text={textStream} />
           </Flex>
         )}
-        <WorkbenchJobActivityResult activity={activity} />
+        <WorkbenchJobActivityResult
+          activity={activity}
+          jobId={jobId}
+          metricsFetchEnabled={isOpen}
+        />
         {isRunning && (
           <AILoadingText
             activityId={id}
@@ -186,10 +198,14 @@ export function WorkbenchJobActivity({
 
 function WorkbenchJobActivityResult({
   activity,
+  jobId,
   markdownType = 'simplified',
+  metricsFetchEnabled,
 }: {
   activity: WorkbenchJobActivityFragment
+  jobId: string
   markdownType?: 'classic' | 'simplified'
+  metricsFetchEnabled: boolean
 }) {
   const { spacing } = useTheme()
   const { agentRun, agentRuns, result } = activity
@@ -217,7 +233,9 @@ function WorkbenchJobActivityResult({
         )}
       </div>
       <JobActivityMetrics
-        metrics={result?.metrics?.filter(isNonNullable) ?? []}
+        jobId={jobId}
+        fetchWhen={metricsFetchEnabled}
+        metricsQuery={result?.metricsQuery}
       />
       <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
       {!isEmpty(otherAgentRuns) && (
@@ -350,7 +368,7 @@ function WorkbenchJobActivityThought({
         ),
         customResultBody: (
           <Card>
-            <JobActivityMetrics
+            <JobActivityMetricsChart
               metrics={metrics}
               lineProps={{
                 margin: { top: 20, right: 16, bottom: 25, left: 35 },

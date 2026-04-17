@@ -48,6 +48,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     end
   end
 
+  def structured(%__MODULE__{} = tool) do
+    with {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input) do
+      {:ok, Enum.map(output.logs, &to_log/1)}
+    end
+  end
+
   defp to_log(%LogEntry{} = log) do
     %{
       timestamp: TimeRange.to_datetime(log.timestamp),

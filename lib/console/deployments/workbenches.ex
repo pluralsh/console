@@ -548,8 +548,13 @@ defmodule Console.Deployments.Workbenches do
         tool_call: args[:tool_call]
       }, job)
     end)
-    |> execute(extract: :activity)
-    |> notify(:update)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, result: result}} ->
+        notify({:ok, %{job | result: result}}, :update)
+        notify({:ok, activity}, :update)
+      err -> err
+    end
   end
   def update_job_status(_, _), do: {:error, "invalid input struct for job status update"}
 
@@ -610,6 +615,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchDeleted, workbench, actor: user)
   defp notify({:ok, %WorkbenchJob{} = job}, :create, user),
     do: handle_notify(PubSub.WorkbenchJobCreated, job, actor: user)
+  defp notify({:ok, %WorkbenchJob{} = job}, :update, user),
+    do: handle_notify(PubSub.WorkbenchJobUpdated, job, actor: user)
   defp notify({:ok, %WorkbenchTool{} = tool}, :create, user),
     do: handle_notify(PubSub.WorkbenchToolCreated, tool, actor: user)
   defp notify({:ok, %WorkbenchTool{} = tool}, :update, user),
@@ -648,6 +655,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchJobThoughtCreated, thought)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity)
+  def notify({:ok, %WorkbenchJob{} = job}, :update),
+    do: handle_notify(PubSub.WorkbenchJobUpdated, job)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
     do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
   def notify(pass, _), do: pass

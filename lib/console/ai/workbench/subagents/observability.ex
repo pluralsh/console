@@ -27,7 +27,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end
   end
 
-  defp tools(%Environment{skills: skills, tools: tools, job: job}) do
+  def tools(%Environment{skills: skills, tools: tools, job: job}) do
     obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(plrl_log_tools(job))

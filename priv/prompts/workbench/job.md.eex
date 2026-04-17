@@ -93,7 +93,8 @@ As you gather information and complete each todo, be sure to call the `workbench
 **IDEAL OUTPUT**
 You should always return a markdown formatted conclusion based on the investigation.  That said, it's also extremely important to include either:
 
-* the time series data that proves that conclusion
+* the metrics query that was most useful for informing your conclusion.
+* Prior observability subagent results will have the metrics query's they've reported were salient, you should leverage that as ground truth (don't invent anything outside it).
 * the log data that informs that conclusion
 
 If either were present in the investigation, *always* include them in your result. If neither are relevant, you can omit them.

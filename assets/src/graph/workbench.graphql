@@ -48,6 +48,10 @@ fragment Workbench on Workbench {
       stacks
       kubernetes
     }
+    observability {
+      logs
+      metrics
+    }
     coding {
       mode
       repositories
@@ -168,6 +172,12 @@ fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
   labels
 }
 
+fragment WorkbenchToolQueryData on WorkbenchToolQueryData {
+  toolName
+  toolArgs
+  summary
+}
+
 fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
   timestamp
   message
@@ -183,8 +193,8 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
     ...WorkbenchJobResultTodo
   }
   metadata {
-    metrics {
-      ...WorkbenchJobActivityMetric
+    metricsQuery {
+      ...WorkbenchToolQueryData
     }
   }
 }
@@ -209,8 +219,8 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     workingTheory
     conclusion
   }
-  metrics {
-    ...WorkbenchJobActivityMetric
+  metricsQuery {
+    ...WorkbenchToolQueryData
   }
   logs {
     ...WorkbenchJobActivityLog
@@ -561,6 +571,15 @@ query WorkbenchJob($id: ID!) {
   }
 }
 
+query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    metricsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityMetric
+    }
+  }
+}
+
 query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
@@ -764,7 +783,12 @@ subscription WorkbenchJobDelta($id: ID!) {
   workbenchJobDelta(id: $id) {
     delta
     payload {
-      ...WorkbenchJob
+      id
+      status
+      error
+      result {
+        ...WorkbenchJobResult
+      }
     }
   }
 }

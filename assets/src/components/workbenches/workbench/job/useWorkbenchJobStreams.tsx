@@ -1,6 +1,7 @@
 import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   useWorkbenchJobActivityDeltaSubscription,
+  useWorkbenchJobDeltaSubscription,
   useWorkbenchJobThoughtDeltaSubscription,
   useWorkbenchTextStreamSubscription,
   WorkbenchJobActivitiesDocument,
@@ -30,6 +31,11 @@ export function useWorkbenchJobStreams(
   const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
     {}
   )
+
+  useWorkbenchJobDeltaSubscription({
+    variables: { id: jobId ?? '' },
+    skip: !jobId,
+  })
 
   useWorkbenchTextStreamSubscription({
     variables: { jobId: jobId ?? '' },

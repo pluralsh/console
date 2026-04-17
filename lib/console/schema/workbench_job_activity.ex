@@ -41,6 +41,9 @@ defmodule Console.Schema.WorkbenchJobActivity do
         field :message,   :string
         field :labels,    :map
       end
+
+      embeds_one :metrics_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
+      embeds_one :logs_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
     end
 
     belongs_to :workbench_job, WorkbenchJob
@@ -99,8 +102,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     model
     |> cast(attrs, ~w(output error)a)
     |> cast_embed(:job_update, with: &job_update_changeset/2)
-    |> cast_embed(:metrics, with: &metric_changeset/2)
     |> cast_embed(:logs, with: &log_changeset/2)
+    |> cast_embed(:metrics_query)
   end
 
   defp job_update_changeset(model, attrs) do

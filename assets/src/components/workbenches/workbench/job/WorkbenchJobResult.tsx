@@ -15,13 +15,12 @@ import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
 } from 'generated/graphql'
-import { groupBy, isEmpty } from 'lodash'
+import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import {
+  hasWorkbenchMetricsToolQuery,
   JobActivityMetrics,
-  WorkbenchJobMetricsLegend,
 } from './WorkbenchJobActivityResults'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
@@ -82,8 +81,7 @@ export function WorkbenchJobMetrics({
   job: Nullable<WorkbenchJobFragment>
   loading: boolean
 }) {
-  const metrics = job?.result?.metadata?.metrics?.filter(isNonNullable) ?? []
-  const seriesNames = Object.keys(groupBy(metrics, (m) => m.name ?? 'metric'))
+  const metricsQuery = job?.result?.metadata?.metricsQuery
 
   if (loading)
     return (
@@ -93,24 +91,17 @@ export function WorkbenchJobMetrics({
       />
     )
 
-  if (isEmpty(metrics)) return null
+  if (!job?.id || !hasWorkbenchMetricsToolQuery(metricsQuery)) return null
 
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      width="100%"
-    >
-      <JobActivityMetrics
-        metrics={metrics}
-        css={{ minHeight: 300 }}
-        lineProps={{ margin: { top: 20, right: 40, bottom: 40, left: 40 } }}
-      />
-      <WorkbenchJobMetricsLegend
-        seriesNames={seriesNames}
-        paddingLeft={20}
-      />
-    </Flex>
+    <JobActivityMetrics
+      jobId={job.id}
+      metricsQuery={metricsQuery}
+      withLegend
+      css={{ minHeight: 300 }}
+      lineProps={{ margin: { top: 20, right: 40, bottom: 40, left: 40 } }}
+      skeletonHeight={320}
+    />
   )
 }
 

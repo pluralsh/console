@@ -15,16 +15,19 @@ import {
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { LogLine } from 'components/cd/logs/LogLine'
+import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2P } from 'components/utils/typography/Text'
 import {
+  useWorkbenchJobMetricsToolQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityResultFragment,
+  WorkbenchToolQueryData,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, truncate } from 'lodash'
 import {
@@ -39,6 +42,7 @@ import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { isNonNullable } from 'utils/isNonNullable'
 
 export function MemoActivityIcon({
   jobUpdate,
@@ -107,7 +111,20 @@ export function JobActivityLogs({
 
 const CANVAS_THRESHOLD = 1000
 
-export function JobActivityMetrics({
+export type WorkbenchMetricsToolQueryInput = Pick<
+  WorkbenchToolQueryData,
+  'toolName' | 'toolArgs' | 'summary'
+>
+
+export function hasWorkbenchMetricsToolQuery(
+  q: Nullable<Pick<WorkbenchToolQueryData, 'toolName' | 'toolArgs'>>
+): boolean {
+  if (!q?.toolName?.trim()) return false
+  return q.toolArgs != null && typeof q.toolArgs === 'object'
+}
+
+/** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export function JobActivityMetricsChart({
   metrics,
   lineProps,
   ...props
@@ -171,6 +188,110 @@ export function JobActivityMetrics({
         />
       )}
     </MetricsChartSC>
+  )
+}
+
+/**
+ * Loads metric series via `metricsTool` when `metricsQuery` is present on the
+ * activity or job result. Omit when there is no tool query to run.
+ */
+export function JobActivityMetrics({
+  jobId,
+  metricsQuery,
+  fetchWhen = true,
+  withLegend = false,
+  lineProps,
+  skeletonHeight = 160,
+  ...props
+}: {
+  jobId: string
+  metricsQuery: Nullable<WorkbenchMetricsToolQueryInput>
+  /** When false, skips the GraphQL request (e.g. collapsed activity accordion). */
+  fetchWhen?: boolean
+  withLegend?: boolean
+  skeletonHeight?: number
+  lineProps?: Partial<
+    ComponentPropsWithRef<typeof ResponsiveLine> &
+      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+  >
+} & ComponentPropsWithRef<typeof MetricsChartSC>) {
+  const shouldRunQuery =
+    !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
+
+  const { data, loading, error } = useWorkbenchJobMetricsToolQuery({
+    variables: {
+      id: jobId,
+      name: metricsQuery?.toolName?.trim(),
+      arguments: metricsQuery?.toolArgs
+        ? JSON.stringify(metricsQuery?.toolArgs)
+        : undefined,
+    },
+    skip: !shouldRunQuery,
+  })
+
+  if (!hasWorkbenchMetricsToolQuery(metricsQuery)) return null
+
+  if (!fetchWhen) return null
+
+  if (error)
+    return (
+      <GqlError
+        error={error}
+        css={{ wordBreak: 'break-word' }}
+      />
+    )
+
+  const metrics = data?.workbenchJob?.metricsTool?.filter(isNonNullable) ?? []
+
+  if (loading || !data)
+    return (
+      <RectangleSkeleton
+        $height={skeletonHeight}
+        $width="100%"
+      />
+    )
+
+  if (isEmpty(metrics)) return null
+
+  const seriesNames = Object.keys(groupBy(metrics, (m) => m.name ?? 'metric'))
+  const summaryText = metricsQuery?.summary?.trim()
+
+  const chartBlock = (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      width="100%"
+    >
+      <JobActivityMetricsChart
+        metrics={metrics}
+        lineProps={lineProps}
+        {...props}
+      />
+      {summaryText ? (
+        <Body2P
+          $color="text-light"
+          css={{ lineHeight: 1.45 }}
+        >
+          {summaryText}
+        </Body2P>
+      ) : null}
+    </Flex>
+  )
+
+  if (!withLegend) return chartBlock
+
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+      width="100%"
+    >
+      {chartBlock}
+      <WorkbenchJobMetricsLegend
+        seriesNames={seriesNames}
+        paddingLeft={20}
+      />
+    </Flex>
   )
 }
 

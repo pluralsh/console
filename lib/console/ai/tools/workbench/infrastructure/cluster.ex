@@ -2,7 +2,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   use Console.AI.Tools.Agent.Base
   alias Console.Repo
   alias Console.Deployments.{Clusters, Policies}
-  alias Console.Schema.{User}
+  alias Console.Schema.{User, Cluster}
 
   require EEx
 
@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "plrl_cluster"
-  def description(_), do: "Get the details of a cluster from the Plural API."
+  def description(_), do: "Get the details of a cluster from the Plural API.  This will also include deep information about the cluster's upgradeability, plural metadata, and version/distro details"
 
   def implement(_, %__MODULE__{user: %User{} = user, handle: handle}) do
     Clusters.get_cluster_by_handle(handle)
@@ -31,12 +31,42 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     |> Policies.allow(user, :read)
     |> case do
       {:ok, cluster} ->
-        {:ok, cluster_prompt(cluster: cluster, upgrade_plan: Clusters.upgrade_plan(cluster))}
+        {:ok, cluster_prompt(cluster: cluster, upgrade_plan: simplified_upgrade_plan(cluster))}
 
       nil -> {:error, "could not find cluster with handle #{handle}"}
       error -> error
     end
   end
+
+  def simplified_upgrade_plan(%Cluster{} = cluster) do
+    plan = Clusters.upgrade_plan(cluster)
+    %{
+      blocking_addons: Enum.map(plan.blocking_addons, &simplify_addon/1),
+      blocking_cloud_addons: Enum.map(plan.blocking_cloud_addons, &simplify_cloud_addon/1),
+      failed_insights: plan.failed_insights,
+    }
+  end
+
+  defp simplify_addon(%{current: curr, fix: fix} = addon) do
+    %{
+      current: Map.take(curr, [:version, :summary])
+               |> Map.put(:name, curr.addon.name)
+               |> Map.put(:addon_details, Map.drop(curr, [:addon])),
+      fix: fix,
+      callout: Map.get(addon, :callout)
+    }
+  end
+  defp simplify_addon(_), do: nil
+
+  defp simplify_cloud_addon(%{current: curr, fix: fix} = addon) do
+    %{
+      current: Map.take(curr, [:version, :summary])
+               |> Map.put(:addon_details, Map.drop(curr, [:addon])),
+      fix: fix,
+      callout: Map.get(addon, :callout)
+    }
+  end
+  defp simplify_cloud_addon(_), do: nil
 
   EEx.function_from_file(
     :defp,

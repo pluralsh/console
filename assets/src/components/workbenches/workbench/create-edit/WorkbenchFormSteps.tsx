@@ -2,6 +2,7 @@ import {
   ArrowTopRightIcon,
   Button,
   Card,
+  Checkbox,
   Chip,
   CloseIcon,
   Divider,
@@ -15,7 +16,6 @@ import {
   RadioGroup,
   Select,
   SelectButton,
-  Switch,
 } from '@pluralsh/design-system'
 import {
   AgentRunMode,
@@ -77,7 +77,7 @@ export function WorkbenchSetupStep({
 }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const infra = formState.configuration?.infrastructure
-
+  const observability = formState.configuration?.observability
   return (
     <>
       <FormField
@@ -121,48 +121,73 @@ export function WorkbenchSetupStep({
           />
         </EditableDivWrapperSC>
       </FormField>
-      <FormField label="Enable plural native configuration">
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          <Switch
+      <FormField label="Plural-native Infrastructure Capabilities">
+        <TwoColumnCheckboxGridSC>
+          <Checkbox
             checked={infra?.stacks ?? false}
-            onChange={(checked) =>
+            onChange={(e) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.stacks = checked
+                d.configuration.infrastructure.stacks = e.target.checked
               })
             }
           >
             Stacks
-          </Switch>
-          <Switch
+          </Checkbox>
+          <Checkbox
             checked={infra?.services ?? false}
-            onChange={(checked) =>
+            onChange={(e) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.services = checked
+                d.configuration.infrastructure.services = e.target.checked
               })
             }
           >
             Services
-          </Switch>
-          <Switch
+          </Checkbox>
+          <Checkbox
             checked={infra?.kubernetes ?? false}
-            onChange={(checked) =>
+            onChange={(e) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.kubernetes = checked
+                d.configuration.infrastructure.kubernetes = e.target.checked
               })
             }
           >
             Kubernetes
-          </Switch>
-        </Flex>
+          </Checkbox>
+        </TwoColumnCheckboxGridSC>
+      </FormField>
+      <FormField label="Plural-native Observability Capabilities">
+        <TwoColumnCheckboxGridSC>
+          <Checkbox
+            checked={observability?.metrics ?? false}
+            onChange={(e) =>
+              update((d) => {
+                d.configuration ??= {}
+                d.configuration.observability ??= {}
+                d.configuration.observability.metrics = e.target.checked
+              })
+            }
+          >
+            Plural integrated metrics
+          </Checkbox>
+          <Checkbox
+            checked={observability?.logs ?? false}
+            onChange={(e) =>
+              update((d) => {
+                d.configuration ??= {}
+                d.configuration.observability ??= {}
+                d.configuration.observability.logs = e.target.checked
+              })
+            }
+          >
+            Plural integrated logs
+          </Checkbox>
+        </TwoColumnCheckboxGridSC>
       </FormField>
     </>
   )
@@ -678,6 +703,12 @@ export function WorkbenchAttachToolsStep({
 const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   background: theme.colors['fill-zero'],
+}))
+
+const TwoColumnCheckboxGridSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: theme.spacing.medium,
 }))
 
 const skillsFilesToText = (files: Nullable<string>[] | null): string =>

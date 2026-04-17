@@ -2767,6 +2767,14 @@ type WorkbenchJob {
 
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
+  metricsTool(
+    "the name of the metrics tool"
+    name: String
+
+    "the arguments for the metrics tool"
+    arguments: Json
+  ): [WorkbenchJobActivityMetric]
+
   "whimsically describes current progress for you"
   whimsey: String
 
@@ -2858,6 +2866,9 @@ type WorkbenchJobActivityResult {
 
   "logs emitted by the activity"
   logs: [WorkbenchJobActivityLog]
+
+  "metrics tool query emitted by the activity"
+  metricsQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -2912,6 +2923,20 @@ type WorkbenchJobResultMetadata {
 
   "logs for this result"
   logs: [WorkbenchJobActivityLog]
+
+  "metrics tool query for this result"
+  metricsQuery: WorkbenchToolQueryData
+}
+
+type WorkbenchToolQueryData {
+  "the tool name used to run this query"
+  toolName: String
+
+  "arguments used for this tool query"
+  toolArgs: Map
+
+  "a short summary describing what this query means"
+  summary: String
 }
 
 type WorkbenchJobResultTodo {
