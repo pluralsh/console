@@ -16,7 +16,7 @@ const (
 	defaultAllowedAgentInfoCacheErrorTTL = 10 * time.Second
 	defaultShutdownGracePeriod           = 1 * time.Hour
 	defaultAuditLogFlushInterval         = 30 * time.Second
-	defaultAuditLogFlushEvents           = 50
+	defaultAuditLogFlushEvents           = 128
 	defaultAuditLogDrainTimeout          = 45 * time.Second
 )
 
