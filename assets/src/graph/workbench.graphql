@@ -73,6 +73,12 @@ fragment Workbench on Workbench {
   writeBindings {
     ...PolicyBinding
   }
+  botUser {
+    id
+    name
+    email
+    profile
+  }
 }
 
 fragment WorkbenchToolTiny on WorkbenchTool {
