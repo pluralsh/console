@@ -275,7 +275,7 @@ func (p *kubernetesApiProxy) authenticateAndImpersonateRequest(ctx context.Conte
 
 func (p *kubernetesApiProxy) authorizeProxyUser(ctx context.Context, log *zap.Logger, agentId int64, accessKey, clusterId string) (*pluralapi.AuthorizeProxyUserResponse, *grpctool.ErrResp) {
 	if p.jwtTokenAuthorizer != nil {
-		auth, err := p.jwtTokenAuthorizer.Authorize(accessKey, clusterId)
+		auth, err := p.jwtTokenAuthorizer.Authorize(accessKey)
 		if err == nil {
 			log.Debug("Local JWT validation succeeded")
 			return auth, nil
