@@ -154,6 +154,11 @@ func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEv
 		client := plural.New(b.pluralURL, token)
 		for key, event := range bucket.events {
 			callCtx, cancel := context.WithTimeout(context.Background(), auditLogWriteTimeout)
+			b.log.Debug("writing audit log",
+				zap.String("cluster_id", event.ClusterID),
+				zap.String("method", event.Method),
+				zap.String("path", event.Path),
+			)
 			_, err := client.Console.AddClusterAuditLog(callCtx, console.ClusterAuditAttributes{
 				ClusterID: event.ClusterID,
 				Method:    event.Method,
