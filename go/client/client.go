@@ -25,7 +25,7 @@ type ConsoleClient interface {
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
-	AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
+	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
 	CreateScmWebhook(ctx context.Context, connectionID string, owner string, interceptors ...clientv2.RequestInterceptor) (*CreateScmWebhook, error)
@@ -33945,14 +33945,15 @@ func (c *Client) CreateAgentMessage(ctx context.Context, runID string, attribute
 	return &res, nil
 }
 
-const AddClusterAuditLogDocument = `mutation AddClusterAuditLog ($attributes: ClusterAuditAttributes!) {
-	addClusterAuditLog(audit: $attributes)
+const AddClusterAuditLogDocument = `mutation AddClusterAuditLog ($audit: ClusterAuditAttributes, $audits: [ClusterAuditAttributes!]) {
+	addClusterAuditLog(audit: $audit, audits: $audits)
 }
 `
 
-func (c *Client) AddClusterAuditLog(ctx context.Context, attributes ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error) {
+func (c *Client) AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error) {
 	vars := map[string]any{
-		"attributes": attributes,
+		"audit":  audit,
+		"audits": audits,
 	}
 
 	var res AddClusterAuditLog
