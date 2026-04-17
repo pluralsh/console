@@ -31,6 +31,7 @@ func NewJWTProxyAuthorizer(secret []byte) *JWTProxyAuthorizer {
 	if len(secret) == 0 {
 		return nil
 	}
+
 	return &JWTProxyAuthorizer{secret: secret}
 }
 

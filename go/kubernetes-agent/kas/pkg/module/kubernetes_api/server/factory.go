@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"os"
 
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/rpc"
@@ -13,7 +14,6 @@ import (
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/plural/api"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/cache"
-	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/ioz"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 	redistool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
@@ -69,12 +69,9 @@ func (f *Factory) New(config *modserver.Config) (modserver.Module, error) {
 	var allowedOriginUrls []string
 	allowedAgentCacheTtl := k8sApi.AllowedAgentCacheTtl.AsDuration()
 	allowedAgentCacheErrorTtl := k8sApi.AllowedAgentCacheErrorTtl.AsDuration()
-	var jwtSecret []byte
-	if k8sApi.JwtAuthenticationSecretFile != "" {
-		jwtSecret, err = ioz.LoadBase64Secret(k8sApi.JwtAuthenticationSecretFile)
-		if err != nil {
-			return nil, fmt.Errorf("kubernetes_api.jwt_authentication_secret_file: %w", err)
-		}
+	jwtSecret, err := readJWTToken(k8sApi.JwtAuthenticationSecretFile)
+	if err != nil {
+		return nil, fmt.Errorf("kubernetes_api.jwt_authentication_secret_file: %w", err)
 	}
 	tracer := config.TraceProvider.Tracer(kubernetes_api.ModuleName)
 	m := &module{
@@ -160,6 +157,18 @@ func (f *Factory) StartStopPhase() modshared.ModuleStartStopPhase {
 	// Start after servers because proxy uses agent connection (config.AgentConn), which works by accessing
 	// in-memory private API server. So proxy needs to start after and stop before that server.
 	return modshared.ModuleStartAfterServers
+}
+
+func readJWTToken(path string) ([]byte, error) {
+	if len(path) == 0 {
+		return nil, nil
+	}
+
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return raw, nil
 }
 
 func getAuthorizedProxyUserCacheKey(redisKeyPrefix string) redistool2.KeyToRedisKey[proxyUserCacheKey] {
