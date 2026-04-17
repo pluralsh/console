@@ -64,6 +64,13 @@ export type WorkbenchFormState = Omit<
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
+  /** Bot user from the server when editing; omitted from mutation input. */
+  botUser: {
+    id: string
+    name: string
+    email: string
+    profile?: string | null
+  } | null
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -389,6 +396,7 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
     name,
     readBindings: r,
     writeBindings: w,
+    botUser: _botUser,
     ...rest
   } = cloneDeep(deepOmitFalsy(state))
 
@@ -414,6 +422,7 @@ function sanitizeInitialForm({
   tools,
   readBindings,
   writeBindings,
+  botUser,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
   const { kubernetes, services, stacks } = infrastructure ?? {}
@@ -427,6 +436,14 @@ function sanitizeInitialForm({
     systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
+    botUser: botUser
+      ? {
+          id: botUser.id,
+          name: botUser.name,
+          email: botUser.email,
+          profile: botUser.profile,
+        }
+      : null,
     overrideBotUser: false,
     configuration: {
       infrastructure: { kubernetes, services, stacks },
