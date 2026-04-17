@@ -70,7 +70,7 @@ export function MemoActivityIcon({
   )
 }
 
-const EXPANDABLE_PROMPT_LENGTH = 100
+const EXPANDABLE_PROMPT_LENGTH = 400
 export function ExpandableUserPrompt({
   prompt,
   ...props
