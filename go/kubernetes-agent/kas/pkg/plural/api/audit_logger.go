@@ -14,6 +14,7 @@ import (
 const (
 	defaultAuditLogQueueSize = 1024
 	auditLogWriteTimeout     = 30 * time.Second
+	auditLogMaxSendAttempts  = 3
 )
 
 type AuditLogEvent struct {
@@ -30,8 +31,9 @@ type auditLogEventKey struct {
 }
 
 type auditLogTokenBucket struct {
-	token  string
-	events map[auditLogEventKey]AuditLogEvent
+	token    string
+	events   map[auditLogEventKey]AuditLogEvent
+	attempts int
 }
 
 type AuditLogBatcher struct {
@@ -165,12 +167,21 @@ func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEv
 		_, err := client.Console.AddClusterAuditLog(callCtx, nil, lo.ToSlicePtr(audits))
 		cancel()
 		if err != nil {
+			bucket.attempts++
 			b.log.Error("failed to write audit logs",
 				zap.Error(err),
 				zap.Int("events", len(audits)),
+				zap.Int("attempt", bucket.attempts),
 				zap.String("token", token[:min(10, len(token))]),
 			)
-
+			if bucket.attempts >= auditLogMaxSendAttempts {
+				b.log.Warn("dropping audit log batch after max attempts",
+					zap.Int("events", len(audits)),
+					zap.String("token", token[:min(10, len(token))]),
+				)
+				totalEvents -= len(audits)
+				delete(buckets, token)
+			}
 			continue
 		}
 
