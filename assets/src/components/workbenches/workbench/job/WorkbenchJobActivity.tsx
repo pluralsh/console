@@ -30,6 +30,7 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -62,7 +63,7 @@ export function WorkbenchJobActivity({
 }) {
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
-  const isRunning = isActivityRunning(status)
+  const isRunning = isJobRunning(status)
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
@@ -339,7 +340,7 @@ function WorkbenchJobActivityThoughts({
           ))}
         </Flex>
       </SimpleAccordion>
-      {!isExpanded && lastThought && isActivityRunning(activity?.status) && (
+      {!isExpanded && lastThought && isJobRunning(activity?.status) && (
         <EaseIn currentKey={lastThought.id}>
           <WorkbenchJobActivityThought thought={lastThought} />
         </EaseIn>
@@ -394,8 +395,8 @@ function WorkbenchJobActivityThought({
   )
 }
 
-export const isActivityRunning = (
-  status: Nullable<WorkbenchJobActivityStatus>
+export const isJobRunning = (
+  status: Nullable<WorkbenchJobActivityStatus | WorkbenchJobStatus>
 ) =>
   status === WorkbenchJobActivityStatus.Pending ||
   status === WorkbenchJobActivityStatus.Running
