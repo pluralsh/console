@@ -59,6 +59,11 @@ defmodule Console.AI.Chat.MemoryEngine do
           {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
           err -> err
         end
+      {:error, %ReqLLM.Error.API.Request{status: nil}} ->
+        # almost certainly a llm provider failure, just retry
+        loop(engine, iter)
+      {:error, %ReqLLM.Error.API.Request{response_body: body}} ->
+        {:error, "llm provider failure: #{body}"}
       err -> err
     end
     |> then(fn

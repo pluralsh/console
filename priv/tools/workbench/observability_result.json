@@ -19,7 +19,7 @@
                 },
                 "summary": {
                     "type": "string",
-                    "description": "A two to three sentence summary of what this metrics query means, including what signal it measures and why it matters for this investigation."
+                    "description": "A two to three sentence summary of what this metrics query means, including what signal it measures and and concretely what you can conclude from it."
                 }
             },
             "required": ["tool_name", "tool_args"]

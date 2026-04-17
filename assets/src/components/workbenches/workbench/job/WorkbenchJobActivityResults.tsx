@@ -222,7 +222,9 @@ export function JobActivityMetrics({
     variables: {
       id: jobId,
       name: metricsQuery?.toolName?.trim(),
-      arguments: metricsQuery?.toolArgs ?? undefined,
+      arguments: metricsQuery?.toolArgs
+        ? JSON.stringify(metricsQuery?.toolArgs)
+        : undefined,
     },
     skip: !shouldRunQuery,
   })
