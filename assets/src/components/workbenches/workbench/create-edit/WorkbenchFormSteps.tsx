@@ -1,5 +1,6 @@
 import {
   ArrowTopRightIcon,
+  Avatar,
   Button,
   Card,
   CardTab,
@@ -46,7 +47,9 @@ import {
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { OverlineH3, InlineA } from 'components/utils/typography/Text'
+import { useLogin } from 'components/contexts'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { CaptionP, OverlineH3, InlineA } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -505,7 +508,10 @@ export function WorkbenchAccessPolicyStep({
       setFormState={setFormState}
     />
   ) : (
-    <WebhookActorSubStep />
+    <WebhookActorSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
   )
 }
 
@@ -563,13 +569,89 @@ function AccessPolicySubStep({
   )
 }
 
-function WebhookActorSubStep() {
+function WebhookActorSubStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const { me } = useLogin()
+  const update = createFormUpdater(setFormState)
+
+  const resolvedActor = useMemo(() => {
+    if (formState.overrideBotUser && me) {
+      return {
+        id: me.id,
+        name: me.name ?? '',
+        email: me.email ?? '',
+        profile: me.profile,
+      }
+    }
+    if (formState.botUser) return formState.botUser
+    return null
+  }, [formState.botUser, formState.overrideBotUser, me])
+
+  const showSetMeLink =
+    me &&
+    !formState.overrideBotUser &&
+    (!resolvedActor || resolvedActor.id !== me.id)
+
   return (
     <Flex
       direction="column"
-      gap="large"
+      gap="xsmall"
     >
-      ...
+      <FormField
+        label={
+          <Flex
+            align="center"
+            justify="space-between"
+            width="100%"
+            gap="medium"
+          >
+            <span>Current webhook actor*</span>
+            {showSetMeLink ? (
+              <InlineLink
+                css={{ fontWeight: 400, whiteSpace: 'nowrap' }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  update((d) => {
+                    d.overrideBotUser = true
+                  })
+                }}
+              >
+                Set me as webhook actor
+              </InlineLink>
+            ) : null}
+          </Flex>
+        }
+      >
+        {resolvedActor ? (
+          <EditableDivWrapperSC>
+            <StackedText
+              first={resolvedActor.name}
+              second={resolvedActor.email}
+              firstPartialType="body2Bold"
+              firstColor="text"
+              secondPartialType="body2"
+              secondColor="text-light"
+              icon={
+                <Avatar
+                  name={resolvedActor.name}
+                  src={resolvedActor.profile ?? undefined}
+                  css={{ borderRadius: '50%' }}
+                  size={48}
+                />
+              }
+              iconGap="small"
+              css={{ minWidth: 0 }}
+            />
+          </EditableDivWrapperSC>
+        ) : null}
+      </FormField>
+      <CaptionP $color="text-light">
+        For security, webhooks and crons run as a single user. This is set to
+        the workbench creator by default. Admins can take over this role at any
+        time.
+      </CaptionP>
     </Flex>
   )
 }
