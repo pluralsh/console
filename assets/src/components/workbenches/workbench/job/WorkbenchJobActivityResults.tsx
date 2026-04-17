@@ -168,6 +168,7 @@ export function JobActivityMetricsChart({
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
     lineWidth: 1,
+    enablePoints: false,
     axisLeft: { tickValues: 5 },
     axisBottom: { format: '%H:%M:%S', tickValues: 5 },
     tooltip: SliceTooltip,
