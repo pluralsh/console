@@ -284,7 +284,7 @@ func (p *kubernetesApiProxy) authorizeProxyUser(ctx context.Context, log *zap.Lo
 		if !errors.Is(err, pluralapi.ErrUnsupportedProxyJWTToken) {
 			log.Debug("Local JWT validation failed, falling back to TokenExchange",
 				logz.Error(err),
-				zap.String("token", accessKey[:10]),
+				zap.String("token", accessKey[:min(10, len(accessKey))]),
 			)
 		}
 	}
