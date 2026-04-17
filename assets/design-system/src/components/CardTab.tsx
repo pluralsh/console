@@ -33,59 +33,46 @@ const CardTabsSC = styled.div(({ theme }) => ({
 
 const CardTabSC = styled.button<{
   $active: boolean
-  $disabled: boolean
   $fillLevel: CardFillLevel
-}>(
-  ({ theme, $active: active, $disabled: disabled, $fillLevel: fillLevel }) => ({
-    ...theme.partials.reset.button,
-    ...theme.partials.text.buttonMedium,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 'fit-content',
-    maxWidth: '100%',
-    height: 40,
-    padding: `0 ${theme.spacing.medium}px`,
-    border: `1px solid ${
-      active ? theme.colors[fillToNeutralBorderC[fillLevel]] : 'transparent'
-    }`,
-    borderBottomColor: active
-      ? theme.colors[fillToNeutralBgC[fillLevel]]
-      : theme.colors[fillToNeutralBorderC[fillLevel]],
-    borderRadius: `${theme.borderRadiuses.medium}px ${theme.borderRadiuses.medium}px 0 0`,
-    backgroundColor: active
-      ? theme.colors[fillToNeutralBgC[fillLevel]]
-      : 'transparent',
-    color: theme.colors['text-xlight'],
-    transition:
-      'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
-    '&:focus, &:focus-visible': {
-      outline: 'none',
-    },
-    '&:focus-visible': {
-      zIndex: 1,
-      borderColor: theme.colors['border-outline-focused'],
-    },
-    ...(disabled
-      ? {
-          cursor: 'not-allowed',
-          opacity: 0.65,
-        }
-      : {
-          cursor: 'pointer',
-          '&:hover': {
-            color: theme.colors.text,
-            backgroundColor: theme.colors[fillToNeutralBgC[fillLevel]],
-          },
-        }),
-  })
-)
+}>(({ theme, $active: active, $fillLevel: fillLevel }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.buttonMedium,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 'fit-content',
+  maxWidth: '100%',
+  height: 40,
+  padding: `0 ${theme.spacing.medium}px`,
+  border: `1px solid ${
+    active ? theme.colors[fillToNeutralBorderC[fillLevel]] : 'transparent'
+  }`,
+  borderBottomColor: active
+    ? theme.colors[fillToNeutralBgC[fillLevel]]
+    : theme.colors[fillToNeutralBorderC[fillLevel]],
+  borderRadius: `${theme.borderRadiuses.medium}px ${theme.borderRadiuses.medium}px 0 0`,
+  backgroundColor: active
+    ? theme.colors[fillToNeutralBgC[fillLevel]]
+    : 'transparent',
+  color: theme.colors['text-xlight'],
+  '&:focus, &:focus-visible': {
+    outline: 'none',
+  },
+  '&:focus-visible': {
+    zIndex: 1,
+    borderColor: theme.colors['border-outline-focused'],
+  },
+  cursor: 'pointer',
+  '&:hover': {
+    color: theme.colors.text,
+    backgroundColor: theme.colors[fillToNeutralBgC[fillLevel]],
+  },
+}))
 
 function CardTab({
   ref,
   active = false,
   tabFillLevel,
-  disabled = false,
   children,
   ...props
 }: CardTabProps) {
@@ -101,9 +88,7 @@ function CardTab({
       ref={ref}
       type="button"
       $active={active}
-      $disabled={disabled}
       $fillLevel={fillLevel}
-      disabled={disabled}
       {...props}
     >
       {children}
