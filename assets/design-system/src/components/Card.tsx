@@ -134,7 +134,7 @@ const CardSC = styled(Div)<{
       ? `0 0 ${theme.borderRadiuses[cornerSize]}px ${theme.borderRadiuses[cornerSize]}px`
       : theme.borderRadiuses[cornerSize],
     ...($hasTabs && {
-      borderTopLeftRadius: 0,
+      borderTopLeftRadius: 0, // TODO: It should be applied only if first tab is active.
     }),
     backgroundColor:
       theme.colors[
