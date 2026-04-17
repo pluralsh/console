@@ -38,7 +38,7 @@ function Template({
 }: {
   width: number
   height: number
-  headerSize: ComponentProps<typeof Card>['header']['size']
+  headerSize: NonNullable<ComponentProps<typeof Card>['header']>['size']
   headerContent: ReactNode
 } & CardProps) {
   return (
