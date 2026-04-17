@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -41,9 +40,8 @@ type AuditLogBatcher struct {
 	flushAt      int
 	drainTimeout time.Duration
 
-	queue     chan AuditLogEvent
-	flushNow  chan struct{}
-	flushLock sync.Mutex
+	queue    chan AuditLogEvent
+	flushNow chan struct{}
 }
 
 func NewAuditLogBatcher(log *zap.Logger, pluralURL string, flushEvery, drainTimeout time.Duration, flushAt int) *AuditLogBatcher {
@@ -152,9 +150,6 @@ func addAuditLogEventToBuckets(buckets map[string]*auditLogTokenBucket, totalEve
 }
 
 func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEvents int) int {
-	b.flushLock.Lock()
-	defer b.flushLock.Unlock()
-
 	for token, bucket := range buckets {
 		client := plural.New(b.pluralURL, token)
 		for key, event := range bucket.events {
@@ -172,6 +167,8 @@ func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEv
 					zap.String("method", event.Method),
 					zap.String("path", event.Path),
 				)
+
+				continue
 			}
 
 			delete(bucket.events, key)

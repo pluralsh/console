@@ -595,7 +595,7 @@ type KubernetesApiCF struct {
 	// Maximum number of buffered audit events before triggering an early flush.
 	AuditLogFlushEvents uint32 `protobuf:"varint,7,opt,name=audit_log_flush_events,proto3" json:"audit_log_flush_events,omitempty"`
 	// How long to wait on shutdown while draining buffered audit events.
-	AuditLogDrainTimeout *durationpb.Duration `protobuf:"bytes,9,opt,name=audit_log_drain_timeout,proto3" json:"audit_log_drain_timeout,omitempty"`
+	AuditLogDrainTimeout *durationpb.Duration `protobuf:"bytes,8,opt,name=audit_log_drain_timeout,proto3" json:"audit_log_drain_timeout,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -2011,7 +2011,7 @@ const file_pkg_kascfg_kascfg_proto_rawDesc = "" +
 	"\x1ejwt_authentication_secret_file\x18\x05 \x01(\tR\x1ejwt_authentication_secret_file\x12_\n" +
 	"\x18audit_log_flush_interval\x18\x06 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x18audit_log_flush_interval\x12?\n" +
 	"\x16audit_log_flush_events\x18\a \x01(\rB\a\xfaB\x04*\x02 \x00R\x16audit_log_flush_events\x12]\n" +
-	"\x17audit_log_drain_timeout\x18\t \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x17audit_log_drain_timeout\"\xf7\x04\n" +
+	"\x17audit_log_drain_timeout\x18\b \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x17audit_log_drain_timeout\"\xf7\x04\n" +
 	"\aAgentCF\x12:\n" +
 	"\x06listen\x18\x01 \x01(\v2\".plural.agent.kascfg.ListenAgentCFR\x06listen\x12O\n" +
 	"\rconfiguration\x18\x02 \x01(\v2).plural.agent.kascfg.AgentConfigurationCFR\rconfiguration\x12K\n" +

@@ -129,7 +129,7 @@ message KubernetesApiCF {
   // Maximum number of buffered audit events before triggering an early flush.
   uint32 audit_log_flush_events = 7 [json_name = "audit_log_flush_events", (validate.rules).uint32.gt = 0];
   // How long to wait on shutdown while draining buffered audit events.
-  google.protobuf.Duration audit_log_drain_timeout = 9 [json_name = "audit_log_drain_timeout", (validate.rules).duration = {gt: {}}];
+  google.protobuf.Duration audit_log_drain_timeout = 8 [json_name = "audit_log_drain_timeout", (validate.rules).duration = {gt: {}}];
 }
 
 message AgentCF {

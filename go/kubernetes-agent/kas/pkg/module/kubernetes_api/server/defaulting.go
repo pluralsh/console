@@ -17,7 +17,7 @@ const (
 	defaultShutdownGracePeriod           = 1 * time.Hour
 	defaultAuditLogFlushInterval         = 30 * time.Second
 	defaultAuditLogFlushEvents           = 50
-	defaultAuditLogDrainTimeout          = 15 * time.Second
+	defaultAuditLogDrainTimeout          = 45 * time.Second
 )
 
 func ApplyDefaults(config *kascfg.ConfigurationFile) {
