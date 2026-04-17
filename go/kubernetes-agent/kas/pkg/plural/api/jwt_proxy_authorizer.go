@@ -15,13 +15,9 @@ var (
 
 type proxyJWTClaims struct {
 	jwt.RegisteredClaims
-	ID         string   `json:"id"`
-	Email      string   `json:"email"`
-	Username   string   `json:"username"`
-	Groups     []string `json:"groups"`
-	BoundRoles []string `json:"bound_roles"`
-	Roles      []string `json:"roles"`
-	ClusterID  string   `json:"cluster_id"`
+
+	Email  string   `json:"user.email"`
+	Groups []string `json:"groups"`
 }
 
 type JWTProxyAuthorizer struct {
@@ -37,7 +33,7 @@ func NewJWTProxyAuthorizer(logger *zap.Logger, secret []byte) *JWTProxyAuthorize
 	return &JWTProxyAuthorizer{log: logger, secret: secret}
 }
 
-func (a *JWTProxyAuthorizer) Authorize(token, clusterID string) (*AuthorizeProxyUserResponse, error) {
+func (a *JWTProxyAuthorizer) Authorize(token string) (*AuthorizeProxyUserResponse, error) {
 	// A quick format check avoids expensive parser work for non-JWT opaque tokens.
 	if strings.Count(token, ".") != 2 {
 		return nil, ErrUnsupportedProxyJWTToken
@@ -55,39 +51,28 @@ func (a *JWTProxyAuthorizer) Authorize(token, clusterID string) (*AuthorizeProxy
 	if err != nil {
 		return nil, fmt.Errorf("could not parse jwt: %w", err)
 	}
-	if claims.ClusterID != "" && claims.ClusterID != clusterID {
-		return nil, fmt.Errorf("cluster_id claim does not match access token prefix")
-	}
 
-	userID := firstNonEmpty(claims.ID, claims.Subject)
-	username := firstNonEmpty(claims.Username, claims.Email, claims.Subject)
-	email := firstNonEmpty(claims.Email, claims.Username, claims.Subject)
-	if userID == "" || username == "" || email == "" {
+	userID := strings.TrimPrefix(claims.Subject, "user:")
+	email := claims.Email
+	if userID == "" || email == "" {
 		return nil, fmt.Errorf("required user claims are missing")
-	}
-	roles := claims.BoundRoles
-	if len(roles) == 0 {
-		roles = claims.Roles
 	}
 
 	a.log.Debug("authorized proxy user",
 		zap.String("user_id", userID),
-		zap.String("username", username),
 		zap.String("email", email),
-		zap.Strings("roles", roles),
 		zap.Strings("groups", claims.Groups),
 	)
 
 	return &AuthorizeProxyUserResponse{
 		User: &User{
 			Id:       userID,
-			Username: username,
+			Username: email,
 			Email:    email,
 		},
 		AccessAs: &AccessAsProxyAuthorization{
 			AccessAs: &AccessAsProxyAuthorization_User{
 				User: &AccessAsUserAuthorization{
-					Roles:  roles,
 					Groups: claims.Groups,
 				},
 			},
