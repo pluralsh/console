@@ -168,7 +168,7 @@ func readJWTToken(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return raw, nil
+	return bytes.TrimSpace(raw), nil
 }
 
 func getAuthorizedProxyUserCacheKey(redisKeyPrefix string) redistool2.KeyToRedisKey[proxyUserCacheKey] {
