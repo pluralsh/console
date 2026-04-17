@@ -5,6 +5,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   """
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.AI.{Provider, Tool}
+  require Logger
 
   defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: [], tool_fmt: &Console.identity/1]
 
@@ -59,9 +60,10 @@ defmodule Console.AI.Chat.MemoryEngine do
           {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
           err -> err
         end
-      {:error, %ReqLLM.Error.API.Request{status: nil}} ->
+      {:error, %ReqLLM.Error.API.Request{status: nil}} = err ->
         # almost certainly a llm provider failure, just retry
-        loop(engine, iter)
+        Logger.warning "llm provider failure, retrying: #{inspect(err)}"
+        loop(engine, iter + 1)
       {:error, %ReqLLM.Error.API.Request{response_body: body}} ->
         {:error, "llm provider failure: #{body}"}
       err -> err
