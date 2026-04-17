@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/samber/lo"
 	"go.uber.org/zap"
 
 	console "github.com/pluralsh/console/go/client"
@@ -152,37 +153,29 @@ func addAuditLogEventToBuckets(buckets map[string]*auditLogTokenBucket, totalEve
 func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEvents int) int {
 	for token, bucket := range buckets {
 		client := plural.New(b.pluralURL, token)
-		for key, event := range bucket.events {
-			callCtx, cancel := context.WithTimeout(context.Background(), auditLogWriteTimeout)
-			b.log.Debug("writing audit log",
-				zap.String("cluster_id", event.ClusterID),
-				zap.String("method", event.Method),
-				zap.String("path", event.Path),
-			)
-			_, err := client.Console.AddClusterAuditLog(callCtx, console.ClusterAuditAttributes{
+
+		audits := lo.Map(lo.Values(bucket.events), func(event AuditLogEvent, _ int) console.ClusterAuditAttributes {
+			return console.ClusterAuditAttributes{
 				ClusterID: event.ClusterID,
 				Method:    event.Method,
 				Path:      event.Path,
-			})
-			cancel()
-			if err != nil {
-				b.log.Error("failed to write audit log",
-					zap.Error(err),
-					zap.String("cluster_id", event.ClusterID),
-					zap.String("method", event.Method),
-					zap.String("path", event.Path),
-				)
-
-				continue
 			}
+		})
+		callCtx, cancel := context.WithTimeout(context.Background(), auditLogWriteTimeout)
+		_, err := client.Console.AddClusterAuditLog(callCtx, nil, lo.ToSlicePtr(audits))
+		cancel()
+		if err != nil {
+			b.log.Error("failed to write audit logs",
+				zap.Error(err),
+				zap.Int("total_events", totalEvents),
+				zap.String("token", token[:min(10, len(token))]),
+			)
 
-			delete(bucket.events, key)
-			totalEvents--
+			continue
 		}
 
-		if len(bucket.events) == 0 {
-			delete(buckets, token)
-		}
+		totalEvents -= len(bucket.events)
+		delete(buckets, token)
 	}
 
 	return totalEvents
