@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"go.uber.org/zap"
 )
 
 var (
@@ -24,15 +25,16 @@ type proxyJWTClaims struct {
 }
 
 type JWTProxyAuthorizer struct {
+	log    *zap.Logger
 	secret []byte
 }
 
-func NewJWTProxyAuthorizer(secret []byte) *JWTProxyAuthorizer {
+func NewJWTProxyAuthorizer(logger *zap.Logger, secret []byte) *JWTProxyAuthorizer {
 	if len(secret) == 0 {
 		return nil
 	}
 
-	return &JWTProxyAuthorizer{secret: secret}
+	return &JWTProxyAuthorizer{log: logger, secret: secret}
 }
 
 func (a *JWTProxyAuthorizer) Authorize(token, clusterID string) (*AuthorizeProxyUserResponse, error) {
@@ -67,6 +69,14 @@ func (a *JWTProxyAuthorizer) Authorize(token, clusterID string) (*AuthorizeProxy
 	if len(roles) == 0 {
 		roles = claims.Roles
 	}
+
+	a.log.Debug("authorized proxy user",
+		zap.String("user_id", userID),
+		zap.String("username", username),
+		zap.String("email", email),
+		zap.Strings("roles", roles),
+		zap.Strings("groups", claims.Groups),
+	)
 
 	return &AuthorizeProxyUserResponse{
 		User: &User{

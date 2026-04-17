@@ -81,7 +81,7 @@ func (f *Factory) New(config *modserver.Config) (modserver.Module, error) {
 			api:                 config.Api,
 			kubernetesApiClient: rpc.NewKubernetesApiClient(config.AgentConn),
 			pluralUrl:           config.Config.PluralUrl,
-			jwtTokenAuthorizer:  api.NewJWTProxyAuthorizer(jwtSecret),
+			jwtTokenAuthorizer:  api.NewJWTProxyAuthorizer(config.Log, jwtSecret),
 			auditLogger: api.NewAuditLogBatcher(
 				config.Log,
 				config.Config.PluralUrl,
