@@ -167,14 +167,15 @@ func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEv
 		if err != nil {
 			b.log.Error("failed to write audit logs",
 				zap.Error(err),
-				zap.Int("total_events", totalEvents),
+				zap.Int("events", len(audits)),
 				zap.String("token", token[:min(10, len(token))]),
 			)
 
 			continue
 		}
 
-		totalEvents -= len(bucket.events)
+		b.log.Debug("wrote audit logs", zap.Int("events", len(audits)), zap.String("token", token[:min(10, len(token))]))
+		totalEvents -= len(audits)
 		delete(buckets, token)
 	}
 
