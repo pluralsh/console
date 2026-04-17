@@ -211,6 +211,14 @@ func (q *AggregatingQuerier) poll(ctx context.Context, agentId int64, pc *pollin
 			q.api.HandleProcessingError(ctx, q.log, agentId, "KasUrlsByAgentId() failed", err)
 			// fallthrough
 		}
+		if err != nil && len(kasUrls) == 0 {
+			// if there was an error, and we failed to retrieve any kas URLs from Redis, we don't want to erase the
+			// cache. So, no-op here.
+		} else {
+			// Update cache before notifying consumers so that if a consumer cancels its context in the callback,
+			// maybeStopPolling sees the populated cache and does not delete the listener entry.
+			pc.setKasUrls(kasUrls)
+		}
 		if len(kasUrls) > 0 {
 			consumers = pc.copyConsumersInto(consumers)
 			for _, h := range consumers {
@@ -221,12 +229,6 @@ func (q *AggregatingQuerier) poll(ctx context.Context, agentId int64, pc *pollin
 					// Data sent.
 				}
 			}
-		}
-		if err != nil && len(kasUrls) == 0 {
-			// if there was an error, and we failed to retrieve any kas URLs from Redis, we don't want to erase the
-			// cache. So, no-op here.
-		} else {
-			pc.setKasUrls(kasUrls)
 		}
 		return nil, retry.Continue
 	})
