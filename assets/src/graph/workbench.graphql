@@ -48,6 +48,10 @@ fragment Workbench on Workbench {
       stacks
       kubernetes
     }
+    observability {
+      logs
+      metrics
+    }
     coding {
       mode
       repositories

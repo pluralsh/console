@@ -391,8 +391,9 @@ function sanitizeInitialForm({
   readBindings,
   writeBindings,
 }: WorkbenchFragment): WorkbenchFormState {
-  const { infrastructure, coding } = configuration ?? {}
+  const { infrastructure, coding, observability } = configuration ?? {}
   const { kubernetes, services, stacks } = infrastructure ?? {}
+  const { logs, metrics } = observability ?? {}
   const { mode, repositories } = coding ?? {}
   const { files, ref } = skills ?? {}
 
@@ -405,6 +406,7 @@ function sanitizeInitialForm({
     overrideBotUser: false,
     configuration: {
       infrastructure: { kubernetes, services, stacks },
+      observability: { logs, metrics },
       coding: { mode, repositories },
     },
     skills: { ref, files },
