@@ -2,7 +2,10 @@ module github.com/pluralsh/console/go/kubernetes-agent
 
 go 1.26.2
 
-replace github.com/pluralsh/console/go/polly => ../../polly
+replace (
+	github.com/pluralsh/console/go/client => ../../client
+	github.com/pluralsh/console/go/polly => ../../polly
+)
 
 require (
 	github.com/alicebob/miniredis/v2 v2.35.0
@@ -21,6 +24,7 @@ require (
 	github.com/redis/rueidis v1.0.68
 	github.com/redis/rueidis/mock v1.0.68
 	github.com/redis/rueidis/rueidisotel v1.0.68
+	github.com/samber/lo v1.52.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.11.1
@@ -147,9 +151,7 @@ require (
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/samber/lo v1.52.0 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.9.0 // indirect
-	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.25.10 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
@@ -171,7 +173,6 @@ require (
 	go.opentelemetry.io/contrib/bridges/otelzap v0.12.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0 // indirect
 	go.opentelemetry.io/otel/log v0.14.0 // indirect
-	go.opentelemetry.io/otel/log/logtest v0.14.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
