@@ -277,6 +277,7 @@ func (p *kubernetesApiProxy) authorizeProxyUser(ctx context.Context, log *zap.Lo
 	if p.jwtTokenAuthorizer != nil {
 		auth, err := p.jwtTokenAuthorizer.Authorize(accessKey, clusterId)
 		if err == nil {
+			log.Debug("Local JWT validation succeeded")
 			return auth, nil
 		}
 
