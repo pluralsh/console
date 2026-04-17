@@ -587,8 +587,17 @@ type KubernetesApiCF struct {
 	// TTL for failed allowed agent lookups.
 	// /api/v4/job/allowed_agents
 	AllowedAgentCacheErrorTtl *durationpb.Duration `protobuf:"bytes,4,opt,name=allowed_agent_cache_error_ttl,proto3" json:"allowed_agent_cache_error_ttl,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	// Optional secret used to validate JWT proxy tokens locally.
+	// Secret should be base64-encoded and compatible with HS256/HS384/HS512.
+	JwtAuthenticationSecretFile string `protobuf:"bytes,5,opt,name=jwt_authentication_secret_file,proto3" json:"jwt_authentication_secret_file,omitempty"`
+	// How often to flush buffered audit events.
+	AuditLogFlushInterval *durationpb.Duration `protobuf:"bytes,6,opt,name=audit_log_flush_interval,proto3" json:"audit_log_flush_interval,omitempty"`
+	// Maximum number of buffered audit events before triggering an early flush.
+	AuditLogFlushEvents uint32 `protobuf:"varint,7,opt,name=audit_log_flush_events,proto3" json:"audit_log_flush_events,omitempty"`
+	// How long to wait on shutdown while draining buffered audit events.
+	AuditLogDrainTimeout *durationpb.Duration `protobuf:"bytes,9,opt,name=audit_log_drain_timeout,proto3" json:"audit_log_drain_timeout,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *KubernetesApiCF) Reset() {
@@ -645,6 +654,34 @@ func (x *KubernetesApiCF) GetAllowedAgentCacheTtl() *durationpb.Duration {
 func (x *KubernetesApiCF) GetAllowedAgentCacheErrorTtl() *durationpb.Duration {
 	if x != nil {
 		return x.AllowedAgentCacheErrorTtl
+	}
+	return nil
+}
+
+func (x *KubernetesApiCF) GetJwtAuthenticationSecretFile() string {
+	if x != nil {
+		return x.JwtAuthenticationSecretFile
+	}
+	return ""
+}
+
+func (x *KubernetesApiCF) GetAuditLogFlushInterval() *durationpb.Duration {
+	if x != nil {
+		return x.AuditLogFlushInterval
+	}
+	return nil
+}
+
+func (x *KubernetesApiCF) GetAuditLogFlushEvents() uint32 {
+	if x != nil {
+		return x.AuditLogFlushEvents
+	}
+	return 0
+}
+
+func (x *KubernetesApiCF) GetAuditLogDrainTimeout() *durationpb.Duration {
+	if x != nil {
+		return x.AuditLogDrainTimeout
 	}
 	return nil
 }
@@ -1965,12 +2002,16 @@ const file_pkg_kascfg_kascfg_proto_rawDesc = "" +
 	"\x13listen_grace_period\x18\x05 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x13listen_grace_period\x12Y\n" +
 	"\x15shutdown_grace_period\x18\x06 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x15shutdown_grace_periodB\n" +
 	"\n" +
-	"\b_network\"\xc9\x02\n" +
+	"\b_network\"\x92\x05\n" +
 	"\x0fKubernetesApiCF\x12B\n" +
 	"\x06listen\x18\x01 \x01(\v2*.plural.agent.kascfg.ListenKubernetesApiCFR\x06listen\x12(\n" +
 	"\x0furl_path_prefix\x18\x02 \x01(\tR\x0furl_path_prefix\x12]\n" +
 	"\x17allowed_agent_cache_ttl\x18\x03 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x022\x00R\x17allowed_agent_cache_ttl\x12i\n" +
-	"\x1dallowed_agent_cache_error_ttl\x18\x04 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x1dallowed_agent_cache_error_ttl\"\xf7\x04\n" +
+	"\x1dallowed_agent_cache_error_ttl\x18\x04 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x1dallowed_agent_cache_error_ttl\x12F\n" +
+	"\x1ejwt_authentication_secret_file\x18\x05 \x01(\tR\x1ejwt_authentication_secret_file\x12_\n" +
+	"\x18audit_log_flush_interval\x18\x06 \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x18audit_log_flush_interval\x12?\n" +
+	"\x16audit_log_flush_events\x18\a \x01(\rB\a\xfaB\x04*\x02 \x00R\x16audit_log_flush_events\x12]\n" +
+	"\x17audit_log_drain_timeout\x18\t \x01(\v2\x19.google.protobuf.DurationB\b\xfaB\x05\xaa\x01\x02*\x00R\x17audit_log_drain_timeout\"\xf7\x04\n" +
 	"\aAgentCF\x12:\n" +
 	"\x06listen\x18\x01 \x01(\v2\".plural.agent.kascfg.ListenAgentCFR\x06listen\x12O\n" +
 	"\rconfiguration\x18\x02 \x01(\v2).plural.agent.kascfg.AgentConfigurationCFR\rconfiguration\x12K\n" +
@@ -2132,47 +2173,49 @@ var file_pkg_kascfg_kascfg_proto_depIdxs = []int32{
 	7,  // 6: plural.agent.kascfg.KubernetesApiCF.listen:type_name -> plural.agent.kascfg.ListenKubernetesApiCF
 	25, // 7: plural.agent.kascfg.KubernetesApiCF.allowed_agent_cache_ttl:type_name -> google.protobuf.Duration
 	25, // 8: plural.agent.kascfg.KubernetesApiCF.allowed_agent_cache_error_ttl:type_name -> google.protobuf.Duration
-	1,  // 9: plural.agent.kascfg.AgentCF.listen:type_name -> plural.agent.kascfg.ListenAgentCF
-	10, // 10: plural.agent.kascfg.AgentCF.configuration:type_name -> plural.agent.kascfg.AgentConfigurationCF
-	25, // 11: plural.agent.kascfg.AgentCF.info_cache_ttl:type_name -> google.protobuf.Duration
-	25, // 12: plural.agent.kascfg.AgentCF.info_cache_error_ttl:type_name -> google.protobuf.Duration
-	25, // 13: plural.agent.kascfg.AgentCF.redis_conn_info_ttl:type_name -> google.protobuf.Duration
-	25, // 14: plural.agent.kascfg.AgentCF.redis_conn_info_refresh:type_name -> google.protobuf.Duration
-	25, // 15: plural.agent.kascfg.AgentCF.redis_conn_info_gc:type_name -> google.protobuf.Duration
-	8,  // 16: plural.agent.kascfg.AgentCF.kubernetes_api:type_name -> plural.agent.kascfg.KubernetesApiCF
-	25, // 17: plural.agent.kascfg.AgentConfigurationCF.poll_period:type_name -> google.protobuf.Duration
-	25, // 18: plural.agent.kascfg.ObservabilityCF.usage_reporting_period:type_name -> google.protobuf.Duration
-	3,  // 19: plural.agent.kascfg.ObservabilityCF.listen:type_name -> plural.agent.kascfg.ObservabilityListenCF
-	2,  // 20: plural.agent.kascfg.ObservabilityCF.prometheus:type_name -> plural.agent.kascfg.PrometheusCF
-	4,  // 21: plural.agent.kascfg.ObservabilityCF.tracing:type_name -> plural.agent.kascfg.TracingCF
-	6,  // 22: plural.agent.kascfg.ObservabilityCF.sentry:type_name -> plural.agent.kascfg.SentryCF
-	5,  // 23: plural.agent.kascfg.ObservabilityCF.logging:type_name -> plural.agent.kascfg.LoggingCF
-	11, // 24: plural.agent.kascfg.ObservabilityCF.google_profiler:type_name -> plural.agent.kascfg.GoogleProfilerCF
-	12, // 25: plural.agent.kascfg.ObservabilityCF.liveness_probe:type_name -> plural.agent.kascfg.LivenessProbeCF
-	13, // 26: plural.agent.kascfg.ObservabilityCF.readiness_probe:type_name -> plural.agent.kascfg.ReadinessProbeCF
-	18, // 27: plural.agent.kascfg.RedisCF.server:type_name -> plural.agent.kascfg.RedisServerCF
-	19, // 28: plural.agent.kascfg.RedisCF.sentinel:type_name -> plural.agent.kascfg.RedisSentinelCF
-	25, // 29: plural.agent.kascfg.RedisCF.dial_timeout:type_name -> google.protobuf.Duration
-	25, // 30: plural.agent.kascfg.RedisCF.read_timeout:type_name -> google.protobuf.Duration
-	25, // 31: plural.agent.kascfg.RedisCF.write_timeout:type_name -> google.protobuf.Duration
-	25, // 32: plural.agent.kascfg.RedisCF.idle_timeout:type_name -> google.protobuf.Duration
-	17, // 33: plural.agent.kascfg.RedisCF.tls:type_name -> plural.agent.kascfg.RedisTLSCF
-	25, // 34: plural.agent.kascfg.ListenApiCF.max_connection_age:type_name -> google.protobuf.Duration
-	25, // 35: plural.agent.kascfg.ListenApiCF.listen_grace_period:type_name -> google.protobuf.Duration
-	25, // 36: plural.agent.kascfg.ListenPrivateApiCF.max_connection_age:type_name -> google.protobuf.Duration
-	25, // 37: plural.agent.kascfg.ListenPrivateApiCF.listen_grace_period:type_name -> google.protobuf.Duration
-	20, // 38: plural.agent.kascfg.ApiCF.listen:type_name -> plural.agent.kascfg.ListenApiCF
-	21, // 39: plural.agent.kascfg.PrivateApiCF.listen:type_name -> plural.agent.kascfg.ListenPrivateApiCF
-	9,  // 40: plural.agent.kascfg.ConfigurationFile.agent:type_name -> plural.agent.kascfg.AgentCF
-	14, // 41: plural.agent.kascfg.ConfigurationFile.observability:type_name -> plural.agent.kascfg.ObservabilityCF
-	16, // 42: plural.agent.kascfg.ConfigurationFile.redis:type_name -> plural.agent.kascfg.RedisCF
-	22, // 43: plural.agent.kascfg.ConfigurationFile.api:type_name -> plural.agent.kascfg.ApiCF
-	23, // 44: plural.agent.kascfg.ConfigurationFile.private_api:type_name -> plural.agent.kascfg.PrivateApiCF
-	45, // [45:45] is the sub-list for method output_type
-	45, // [45:45] is the sub-list for method input_type
-	45, // [45:45] is the sub-list for extension type_name
-	45, // [45:45] is the sub-list for extension extendee
-	0,  // [0:45] is the sub-list for field type_name
+	25, // 9: plural.agent.kascfg.KubernetesApiCF.audit_log_flush_interval:type_name -> google.protobuf.Duration
+	25, // 10: plural.agent.kascfg.KubernetesApiCF.audit_log_drain_timeout:type_name -> google.protobuf.Duration
+	1,  // 11: plural.agent.kascfg.AgentCF.listen:type_name -> plural.agent.kascfg.ListenAgentCF
+	10, // 12: plural.agent.kascfg.AgentCF.configuration:type_name -> plural.agent.kascfg.AgentConfigurationCF
+	25, // 13: plural.agent.kascfg.AgentCF.info_cache_ttl:type_name -> google.protobuf.Duration
+	25, // 14: plural.agent.kascfg.AgentCF.info_cache_error_ttl:type_name -> google.protobuf.Duration
+	25, // 15: plural.agent.kascfg.AgentCF.redis_conn_info_ttl:type_name -> google.protobuf.Duration
+	25, // 16: plural.agent.kascfg.AgentCF.redis_conn_info_refresh:type_name -> google.protobuf.Duration
+	25, // 17: plural.agent.kascfg.AgentCF.redis_conn_info_gc:type_name -> google.protobuf.Duration
+	8,  // 18: plural.agent.kascfg.AgentCF.kubernetes_api:type_name -> plural.agent.kascfg.KubernetesApiCF
+	25, // 19: plural.agent.kascfg.AgentConfigurationCF.poll_period:type_name -> google.protobuf.Duration
+	25, // 20: plural.agent.kascfg.ObservabilityCF.usage_reporting_period:type_name -> google.protobuf.Duration
+	3,  // 21: plural.agent.kascfg.ObservabilityCF.listen:type_name -> plural.agent.kascfg.ObservabilityListenCF
+	2,  // 22: plural.agent.kascfg.ObservabilityCF.prometheus:type_name -> plural.agent.kascfg.PrometheusCF
+	4,  // 23: plural.agent.kascfg.ObservabilityCF.tracing:type_name -> plural.agent.kascfg.TracingCF
+	6,  // 24: plural.agent.kascfg.ObservabilityCF.sentry:type_name -> plural.agent.kascfg.SentryCF
+	5,  // 25: plural.agent.kascfg.ObservabilityCF.logging:type_name -> plural.agent.kascfg.LoggingCF
+	11, // 26: plural.agent.kascfg.ObservabilityCF.google_profiler:type_name -> plural.agent.kascfg.GoogleProfilerCF
+	12, // 27: plural.agent.kascfg.ObservabilityCF.liveness_probe:type_name -> plural.agent.kascfg.LivenessProbeCF
+	13, // 28: plural.agent.kascfg.ObservabilityCF.readiness_probe:type_name -> plural.agent.kascfg.ReadinessProbeCF
+	18, // 29: plural.agent.kascfg.RedisCF.server:type_name -> plural.agent.kascfg.RedisServerCF
+	19, // 30: plural.agent.kascfg.RedisCF.sentinel:type_name -> plural.agent.kascfg.RedisSentinelCF
+	25, // 31: plural.agent.kascfg.RedisCF.dial_timeout:type_name -> google.protobuf.Duration
+	25, // 32: plural.agent.kascfg.RedisCF.read_timeout:type_name -> google.protobuf.Duration
+	25, // 33: plural.agent.kascfg.RedisCF.write_timeout:type_name -> google.protobuf.Duration
+	25, // 34: plural.agent.kascfg.RedisCF.idle_timeout:type_name -> google.protobuf.Duration
+	17, // 35: plural.agent.kascfg.RedisCF.tls:type_name -> plural.agent.kascfg.RedisTLSCF
+	25, // 36: plural.agent.kascfg.ListenApiCF.max_connection_age:type_name -> google.protobuf.Duration
+	25, // 37: plural.agent.kascfg.ListenApiCF.listen_grace_period:type_name -> google.protobuf.Duration
+	25, // 38: plural.agent.kascfg.ListenPrivateApiCF.max_connection_age:type_name -> google.protobuf.Duration
+	25, // 39: plural.agent.kascfg.ListenPrivateApiCF.listen_grace_period:type_name -> google.protobuf.Duration
+	20, // 40: plural.agent.kascfg.ApiCF.listen:type_name -> plural.agent.kascfg.ListenApiCF
+	21, // 41: plural.agent.kascfg.PrivateApiCF.listen:type_name -> plural.agent.kascfg.ListenPrivateApiCF
+	9,  // 42: plural.agent.kascfg.ConfigurationFile.agent:type_name -> plural.agent.kascfg.AgentCF
+	14, // 43: plural.agent.kascfg.ConfigurationFile.observability:type_name -> plural.agent.kascfg.ObservabilityCF
+	16, // 44: plural.agent.kascfg.ConfigurationFile.redis:type_name -> plural.agent.kascfg.RedisCF
+	22, // 45: plural.agent.kascfg.ConfigurationFile.api:type_name -> plural.agent.kascfg.ApiCF
+	23, // 46: plural.agent.kascfg.ConfigurationFile.private_api:type_name -> plural.agent.kascfg.PrivateApiCF
+	47, // [47:47] is the sub-list for method output_type
+	47, // [47:47] is the sub-list for method input_type
+	47, // [47:47] is the sub-list for extension type_name
+	47, // [47:47] is the sub-list for extension extendee
+	0,  // [0:47] is the sub-list for field type_name
 }
 
 func init() { file_pkg_kascfg_kascfg_proto_init() }

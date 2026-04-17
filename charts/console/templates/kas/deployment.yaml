@@ -157,6 +157,11 @@ spec:
                 items:
                   - key: redis-password
                     path: redis_server_secret
+            - secret:
+                name: console-env
+                items:
+                  - key: JWT_SECRET
+                    path: jwt_secret
       {{- with .Values.kas.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

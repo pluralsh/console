@@ -13,6 +13,7 @@ import (
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/plural/api"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/cache"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/ioz"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 	redistool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
@@ -68,6 +69,13 @@ func (f *Factory) New(config *modserver.Config) (modserver.Module, error) {
 	var allowedOriginUrls []string
 	allowedAgentCacheTtl := k8sApi.AllowedAgentCacheTtl.AsDuration()
 	allowedAgentCacheErrorTtl := k8sApi.AllowedAgentCacheErrorTtl.AsDuration()
+	var jwtSecret []byte
+	if k8sApi.JwtAuthenticationSecretFile != "" {
+		jwtSecret, err = ioz.LoadBase64Secret(k8sApi.JwtAuthenticationSecretFile)
+		if err != nil {
+			return nil, fmt.Errorf("kubernetes_api.jwt_authentication_secret_file: %w", err)
+		}
+	}
 	tracer := config.TraceProvider.Tracer(kubernetes_api.ModuleName)
 	m := &module{
 		log: config.Log,
@@ -76,7 +84,15 @@ func (f *Factory) New(config *modserver.Config) (modserver.Module, error) {
 			api:                 config.Api,
 			kubernetesApiClient: rpc.NewKubernetesApiClient(config.AgentConn),
 			pluralUrl:           config.Config.PluralUrl,
-			allowedOriginUrls:   allowedOriginUrls,
+			jwtTokenAuthorizer:  api.NewJWTProxyAuthorizer(jwtSecret),
+			auditLogger: api.NewAuditLogBatcher(
+				config.Log,
+				config.Config.PluralUrl,
+				k8sApi.AuditLogFlushInterval.AsDuration(),
+				k8sApi.AuditLogDrainTimeout.AsDuration(),
+				int(k8sApi.AuditLogFlushEvents),
+			),
+			allowedOriginUrls: allowedOriginUrls,
 			allowedAgentsCache: cache.NewWithError[string, *api.AllowedAgentsForJob](
 				allowedAgentCacheTtl,
 				allowedAgentCacheErrorTtl,

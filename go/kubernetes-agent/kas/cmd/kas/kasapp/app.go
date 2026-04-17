@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-logr/zapr"
 	"github.com/spf13/cobra"
@@ -20,10 +21,16 @@ import (
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/errz"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/metric"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 )
 
 type App struct {
 	ConfigurationFile string
+
+	K8sProxyJWTAuthenticationSecretFile string
+	K8sProxyAuditLogFlushInterval       string
+	K8sProxyAuditLogFlushEvents         uint32
+	K8sProxyAuditLogDrainTimeout        string
 }
 
 func (a *App) Run(ctx context.Context) (retErr error) {
@@ -32,6 +39,10 @@ func (a *App) Run(ctx context.Context) (retErr error) {
 		return err
 	}
 	ApplyDefaultsToKasConfigurationFile(cfg)
+	err = a.applyConfigOverrides(cfg)
+	if err != nil {
+		return err
+	}
 	err = cfg.ValidateExtra()
 	if err != nil {
 		return fmt.Errorf("kascfg.ValidateExtra: %w", err)
@@ -89,9 +100,47 @@ func NewCommand() *cobra.Command {
 		SilenceUsage:  true,
 	}
 	c.Flags().StringVar(&a.ConfigurationFile, "configuration-file", "", "Configuration file to use (YAML)")
+	c.Flags().StringVar(&a.K8sProxyJWTAuthenticationSecretFile, "k8s-proxy-jwt-authentication-secret-file", "",
+		"Optional base64-encoded JWT secret file used for local proxy-token validation")
+	c.Flags().StringVar(&a.K8sProxyAuditLogFlushInterval, "k8s-proxy-audit-log-flush-interval", "",
+		"How often to flush buffered audit events (duration, e.g. 30s)")
+	c.Flags().Uint32Var(&a.K8sProxyAuditLogFlushEvents, "k8s-proxy-audit-log-flush-events", 0,
+		"Maximum number of buffered audit events before triggering an early flush")
+	c.Flags().StringVar(&a.K8sProxyAuditLogDrainTimeout, "k8s-proxy-audit-log-drain-timeout", "",
+		"How long to drain buffered audit events on shutdown (duration)")
 	cobra.CheckErr(c.MarkFlagRequired("configuration-file"))
 
 	return c
+}
+
+func (a *App) applyConfigOverrides(cfg *kascfg.ConfigurationFile) error {
+	if cfg.Agent == nil || cfg.Agent.KubernetesApi == nil {
+		return nil
+	}
+	k8sProxy := cfg.Agent.KubernetesApi
+
+	if a.K8sProxyJWTAuthenticationSecretFile != "" {
+		k8sProxy.JwtAuthenticationSecretFile = a.K8sProxyJWTAuthenticationSecretFile
+	}
+	if a.K8sProxyAuditLogFlushInterval != "" {
+		d, err := time.ParseDuration(a.K8sProxyAuditLogFlushInterval)
+		if err != nil {
+			return fmt.Errorf("--k8s-proxy-audit-log-flush-interval: %w", err)
+		}
+		prototool.Duration(&k8sProxy.AuditLogFlushInterval, d)
+	}
+	if a.K8sProxyAuditLogFlushEvents > 0 {
+		k8sProxy.AuditLogFlushEvents = a.K8sProxyAuditLogFlushEvents
+	}
+	if a.K8sProxyAuditLogDrainTimeout != "" {
+		d, err := time.ParseDuration(a.K8sProxyAuditLogDrainTimeout)
+		if err != nil {
+			return fmt.Errorf("--k8s-proxy-audit-log-drain-timeout: %w", err)
+		}
+		prototool.Duration(&k8sProxy.AuditLogDrainTimeout, d)
+	}
+
+	return nil
 }
 
 func loggerFromConfig(loggingCfg *kascfg.LoggingCF) (*zap.Logger, *zap.Logger, error) {
