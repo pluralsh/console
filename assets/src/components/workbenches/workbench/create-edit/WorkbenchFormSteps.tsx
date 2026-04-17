@@ -2,6 +2,8 @@ import {
   ArrowTopRightIcon,
   Button,
   Card,
+  CardTab,
+  CardTabs,
   Checkbox,
   Chip,
   CloseIcon,
@@ -26,7 +28,14 @@ import {
   useWorkbenchToolsQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import styled from 'styled-components'
 
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector'
@@ -48,7 +57,10 @@ import {
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import { WorkbenchFormState } from './WorkbenchCreateOrEdit'
+import {
+  useWorkbenchFormCardTabs,
+  WorkbenchFormState,
+} from './WorkbenchCreateOrEdit'
 import {
   CardGrid,
   CardGridSkeleton,
@@ -454,15 +466,56 @@ export function WorkbenchCodingAgentStep({
   )
 }
 
+type AccessPolicySubTab = 'policy' | 'webhook-actor'
+
 export function WorkbenchAccessPolicyStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const { setTabs } = useWorkbenchFormCardTabs()
+  const [subTab, setSubTab] = useState<AccessPolicySubTab>('policy')
+
+  // Register this step's tabs on the form's Card. Cleanup clears them
+  // when navigating away so other steps don't inherit stale tabs.
+  useEffect(() => {
+    setTabs(
+      <CardTabs>
+        <CardTab
+          active={subTab === 'policy'}
+          onClick={() => setSubTab('policy')}
+        >
+          Access policy
+        </CardTab>
+        <CardTab
+          active={subTab === 'webhook-actor'}
+          onClick={() => setSubTab('webhook-actor')}
+        >
+          Webhook actor
+        </CardTab>
+      </CardTabs>
+    )
+    return () => setTabs(null)
+  }, [subTab, setTabs])
+
+  if (!formState) return null
+
+  return subTab === 'policy' ? (
+    <AccessPolicySubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  ) : (
+    <WebhookActorSubStep />
+  )
+}
+
+function AccessPolicySubStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const readBindings = formState.readBindings ?? []
   const writeBindings = formState.writeBindings ?? []
-
-  if (!formState) return null
 
   return (
     <Flex
@@ -506,6 +559,17 @@ export function WorkbenchAccessPolicyStep({
           }}
         />
       </Flex>
+    </Flex>
+  )
+}
+
+function WebhookActorSubStep() {
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      ...
     </Flex>
   )
 }

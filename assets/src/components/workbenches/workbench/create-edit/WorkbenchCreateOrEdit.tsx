@@ -22,7 +22,7 @@ import {
   WorkbenchFragment,
 } from 'generated/graphql'
 import { cloneDeep } from 'lodash'
-import { useMemo, useState } from 'react'
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -38,6 +38,23 @@ import {
   workbenchFormSteps,
   WorkbenchStepLabel,
 } from './WorkbenchFormSteps'
+
+// Context lets individual form steps register tabs on the form's Card
+// without the form needing to know which step is active or what tabs it needs.
+type WorkbenchFormCardTabsContextValue = {
+  setTabs: (tabs: ReactNode | null) => void
+}
+const WorkbenchFormCardTabsContext =
+  createContext<WorkbenchFormCardTabsContextValue | null>(null)
+
+export function useWorkbenchFormCardTabs() {
+  const ctx = useContext(WorkbenchFormCardTabsContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormCardTabs must be used inside a WorkbenchForm'
+    )
+  return ctx
+}
 
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
 // use FormBinding[] so BindingInput can show chips (user email / group name).
@@ -129,6 +146,11 @@ function WorkbenchForm({
     useState<WorkbenchFormState>(initialFormState)
   const [curStep, setCurStepState] =
     useState<WorkbenchStepLabel>('Workbench setup')
+  const [cardTabs, setCardTabs] = useState<ReactNode | null>(null)
+  const cardTabsContextValue = useMemo<WorkbenchFormCardTabsContextValue>(
+    () => ({ setTabs: setCardTabs }),
+    []
+  )
   const [stepStatuses, setStepStatuses] = useState<
     Record<WorkbenchStepLabel, StepStatus>
   >(INITIAL_STEP_STATUSES)
@@ -187,69 +209,71 @@ function WorkbenchForm({
   }
 
   return (
-    <WorkbenchSplitLayoutSC>
-      <Flex
-        direction="column"
-        width={200}
-      >
-        {workbenchFormSteps.map(({ label }) => (
-          <SidebarItem
-            key={label}
-            label={label}
-            active={curStep === label}
-            status={isCreateMode ? stepStatuses[label] : null}
-            onClick={() => setCurStep(label)}
-          />
-        ))}
-      </Flex>
-      {loading ? (
-        <RectangleSkeleton
-          $width="100%"
-          $height="100%"
-        />
-      ) : (
-        StepComponent && (
-          <FormCardSC>
-            {mutationError && <GqlError error={mutationError} />}
-            <StepComponent
-              formState={formState}
-              setFormState={setFormState}
+    <WorkbenchFormCardTabsContext.Provider value={cardTabsContextValue}>
+      <WorkbenchSplitLayoutSC>
+        <Flex
+          direction="column"
+          width={200}
+        >
+          {workbenchFormSteps.map(({ label }) => (
+            <SidebarItem
+              key={label}
+              label={label}
+              active={curStep === label}
+              status={isCreateMode ? stepStatuses[label] : null}
+              onClick={() => setCurStep(label)}
             />
-            <StickyActionsFooterSC>
-              <Button
-                destructive
-                as={Link}
-                to={
-                  workbenchId
-                    ? getWorkbenchAbsPath(workbenchId)
-                    : WORKBENCHES_ABS_PATH
-                }
-              >
-                Cancel
-              </Button>
-              {numUnvisitedSteps < 2 ? (
+          ))}
+        </Flex>
+        {loading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="100%"
+          />
+        ) : (
+          StepComponent && (
+            <FormCardSC tabs={cardTabs}>
+              {mutationError && <GqlError error={mutationError} />}
+              <StepComponent
+                formState={formState}
+                setFormState={setFormState}
+              />
+              <StickyActionsFooterSC>
                 <Button
-                  disabled={!allowSubmit}
-                  loading={mutationLoading}
-                  onClick={onSave}
+                  destructive
+                  as={Link}
+                  to={
+                    workbenchId
+                      ? getWorkbenchAbsPath(workbenchId)
+                      : WORKBENCHES_ABS_PATH
+                  }
                 >
-                  {isCreateMode ? 'Create workbench' : 'Update workbench'}
+                  Cancel
                 </Button>
-              ) : (
-                <Button
-                  onClick={() => {
-                    if (!!workbenchFormSteps[curStepIndex + 1])
-                      setCurStep(workbenchFormSteps[curStepIndex + 1].label)
-                  }}
-                >
-                  Next
-                </Button>
-              )}
-            </StickyActionsFooterSC>
-          </FormCardSC>
-        )
-      )}
-    </WorkbenchSplitLayoutSC>
+                {numUnvisitedSteps < 2 ? (
+                  <Button
+                    disabled={!allowSubmit}
+                    loading={mutationLoading}
+                    onClick={onSave}
+                  >
+                    {isCreateMode ? 'Create workbench' : 'Update workbench'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      if (!!workbenchFormSteps[curStepIndex + 1])
+                        setCurStep(workbenchFormSteps[curStepIndex + 1].label)
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
+              </StickyActionsFooterSC>
+            </FormCardSC>
+          )
+        )}
+      </WorkbenchSplitLayoutSC>
+    </WorkbenchFormCardTabsContext.Provider>
   )
 }
 
