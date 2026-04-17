@@ -25,11 +25,24 @@ defmodule Console.AI.MCP.ClientSupervisor do
       start: {Anubis.Client, :start_link, [[
         name: Agent.name(:client, t, s),
         transport_name: Agent.name(:transport, t, s),
-        transport: {proto, [base_url: url, headers: auth_headers(t, s)]}
+        transport: {proto, [headers: auth_headers(t, s)] ++ url_arguments(url)}
       ] ++ mcp_configuration(s)]},
       restart: :transient
     }
   end
+
+  def url_arguments(url) do
+    case URI.parse(url) do
+      %URI{path: path, query: query} ->
+        p = uri_path(path, query)
+        [base_url: String.replace_trailing(url, p, ""), mcp_path: p]
+      _ -> [base_url: url]
+    end
+  end
+
+  defp uri_path(path, query) when is_binary(query) and byte_size(query) > 0, do: "#{path}?#{query}"
+  defp uri_path(path, _) when is_binary(path) and byte_size(path) > 0, do: path
+  defp uri_path(_, _), do: "/"
 
   @mcp_client_info [client_info: %{"name" => "Plural", "version" => "1.0.0"}]
 
