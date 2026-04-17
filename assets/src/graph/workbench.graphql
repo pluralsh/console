@@ -199,18 +199,6 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   }
 }
 
-fragment WorkbenchJobTiny on WorkbenchJob {
-  id
-  prompt
-  status
-  user {
-    name
-  }
-  workbench {
-    id
-  }
-}
-
 fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   output
   error
@@ -322,6 +310,26 @@ fragment WorkbenchIssue on Issue {
   }
 }
 
+fragment WorkbenchJobTiny on WorkbenchJob {
+  id
+  prompt
+  status
+  user {
+    id
+    name
+  }
+  workbench {
+    id
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  result {
+    id
+    conclusion
+  }
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
@@ -347,9 +355,6 @@ fragment WorkbenchJob on WorkbenchJob {
   }
   result {
     ...WorkbenchJobResult
-  }
-  pullRequests {
-    ...PullRequestBasic
   }
 }
 

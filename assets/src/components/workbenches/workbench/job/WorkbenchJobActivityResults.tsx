@@ -350,12 +350,14 @@ export function ActivityModalIcon({
   tooltip,
   modalHeader,
   modalContent,
+  size = 14,
 }: {
   icon: ComponentType<IconProps>
   onClick?: () => void
   tooltip: string | undefined
   modalHeader: string
   modalContent: ReactNode
+  size?: number
 }) {
   const [showModal, setShowModal] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
@@ -369,7 +371,7 @@ export function ActivityModalIcon({
         icon={
           <Icon
             color="icon-xlight"
-            style={{ width: 14 }}
+            style={{ width: size }}
           />
         }
         onClick={(e) => {
