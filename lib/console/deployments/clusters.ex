@@ -191,8 +191,9 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
-  defp user_claims(%User{email: email, groups: [_| _] = groups}), do: %{"groups" => Enum.map(groups, & &1.name), "user.email" => email}
-  defp user_claims(%User{email: email}), do: %{"groups" => [], "user.email" => email}
+  defp user_claims(%User{email: email, groups: [_| _] = groups}),
+    do: %{"groups" => Enum.map(groups, & &1.name), "email" => email, "user.email" => email}
+  defp user_claims(%User{email: email}), do: %{"groups" => [], "email" => email, "user.email" => email}
 
   @spec kubeconfig(Cluster.t) :: {:ok, binary} | {:error, term}
   def kubeconfig(%Cluster{name: name} = cluster) do

@@ -63,6 +63,7 @@ defmodule Console.AI.Chat.MemoryEngine do
       {:error, %ReqLLM.Error.API.Request{status: nil}} = err ->
         # almost certainly a llm provider failure, just retry
         Logger.warning "llm provider failure, retrying: #{inspect(err)}"
+        :timer.sleep(10)
         loop(engine, iter + 1)
       {:error, %ReqLLM.Error.API.Request{response_body: body}} ->
         {:error, "llm provider failure: #{body}"}
