@@ -10244,8 +10244,10 @@ type WorkbenchWebhook struct {
 	Webhook *ObservabilityWebhook `json:"webhook,omitempty"`
 	// the issue webhook that receives events
 	IssueWebhook *IssueWebhook `json:"issueWebhook,omitempty"`
-	InsertedAt   *string       `json:"insertedAt,omitempty"`
-	UpdatedAt    *string       `json:"updatedAt,omitempty"`
+	// the user who created this webhook
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchWebhookAttributes struct {
@@ -10259,6 +10261,8 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// when true on update, sets userId to the authenticated user
+	OverrideWebhookUser *bool `json:"overrideWebhookUser,omitempty"`
 }
 
 type WorkbenchWebhookConnection struct {
@@ -12603,11 +12607,12 @@ func (e IssueStatus) MarshalJSON() ([]byte, error) {
 type IssueWebhookProvider string
 
 const (
-	IssueWebhookProviderLinear IssueWebhookProvider = "LINEAR"
-	IssueWebhookProviderJira   IssueWebhookProvider = "JIRA"
-	IssueWebhookProviderAsana  IssueWebhookProvider = "ASANA"
-	IssueWebhookProviderGithub IssueWebhookProvider = "GITHUB"
-	IssueWebhookProviderGitlab IssueWebhookProvider = "GITLAB"
+	IssueWebhookProviderLinear      IssueWebhookProvider = "LINEAR"
+	IssueWebhookProviderJira        IssueWebhookProvider = "JIRA"
+	IssueWebhookProviderAsana       IssueWebhookProvider = "ASANA"
+	IssueWebhookProviderGithub      IssueWebhookProvider = "GITHUB"
+	IssueWebhookProviderGitlab      IssueWebhookProvider = "GITLAB"
+	IssueWebhookProviderAzureDevops IssueWebhookProvider = "AZURE_DEVOPS"
 )
 
 var AllIssueWebhookProvider = []IssueWebhookProvider{
@@ -12616,11 +12621,12 @@ var AllIssueWebhookProvider = []IssueWebhookProvider{
 	IssueWebhookProviderAsana,
 	IssueWebhookProviderGithub,
 	IssueWebhookProviderGitlab,
+	IssueWebhookProviderAzureDevops,
 }
 
 func (e IssueWebhookProvider) IsValid() bool {
 	switch e {
-	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab:
+	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops:
 		return true
 	}
 	return false

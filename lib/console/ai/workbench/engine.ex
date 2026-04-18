@@ -69,11 +69,11 @@ defmodule Console.AI.Workbench.Engine do
 
     tools(job, environment, activities)
     |> MemoryEngine.new(20,
-      system_prompt: &system_prompt(prompt: job.prompt, engine: &1),
+      system_prompt: &String.trim(system_prompt(prompt: job.prompt, engine: &1)),
       acc: %{},
       tool_fmt: &tool_fmt/1
     )
-    |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine: engine)} | messages]), &reducer/2)
+    |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics_query: metrics_query, logs: logs, todos: todos, topology: topology}} ->
         drop_empty(%{
@@ -88,7 +88,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp tool_fmt(%Notes{} = notes), do: notes_message(notes: notes)
+  defp tool_fmt(%Notes{} = notes), do: String.trim(notes_message(notes: notes))
   defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(pass), do: pass
@@ -191,7 +191,7 @@ defmodule Console.AI.Workbench.Engine do
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
   defp maybe_add_memory(subagents, _), do: subagents
 
-  EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns])
 end

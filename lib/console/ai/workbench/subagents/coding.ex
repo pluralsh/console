@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer(activity, &1, &2))
     |> case do
       {:ok, attrs} -> attrs
@@ -37,9 +37,9 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       {:failed, %AgentRun{error: error}} -> {:user, "Agent run failed: #{error}"}
       {:success, %AgentRun{mode: :write, pull_requests: [_ | _] = prs}} ->
         mark_prs(prs, activity)
-        tool_msg(analysis_prompt(analysis: nil, pull_requests: prs), run)
+        tool_msg(String.trim(analysis_prompt(analysis: nil, pull_requests: prs)), run)
       {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
-        tool_msg(analysis_prompt(pull_requests: nil, analysis: analysis), run)
+        tool_msg(String.trim(analysis_prompt(pull_requests: nil, analysis: analysis)), run)
       {:success, _} -> {:user, "Agent run completed successfully, but no output was generated"}
     end
   end
@@ -63,6 +63,6 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     ]
   end
 
-  EEx.function_from_file(:defp, :analysis_prompt, Console.priv_filename(["prompts", "workbench", "coding_output.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "coding.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :analysis_prompt, Console.priv_filename(["prompts", "workbench", "coding_output.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "coding.md.eex"]), [:assigns])
 end

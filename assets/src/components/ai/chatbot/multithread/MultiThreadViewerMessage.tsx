@@ -253,7 +253,7 @@ export function SimpleAccordion({
   children,
   ...props
 }: {
-  label: ReactNode
+  label?: ReactNode
   defaultOpen?: boolean
   isOpen?: boolean
   setIsOpen?: (isOpen: boolean) => void

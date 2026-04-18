@@ -91,11 +91,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_webhook_attributes do
-    field :name,             :string, description: "unique name for this webhook on the workbench (required for create)"
-    field :webhook_id,       :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
-    field :issue_webhook_id, :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
-    field :matches,          :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
-    field :prompt,           :string, description: "optional prompt text applied when this webhook matches"
+    field :name,                   :string, description: "unique name for this webhook on the workbench (required for create)"
+    field :webhook_id,             :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
+    field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
   end
 
   input_object :workbench_tool_attributes do
@@ -457,6 +458,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
     field :webhook,       :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
     field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
+    field :user,          :user, resolve: dataloader(User), description: "the user who created this webhook"
 
     timestamps()
   end

@@ -26,10 +26,12 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
 import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
+  AgentRunStatus,
   useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -46,7 +48,7 @@ import {
   JobActivityMetricsChart,
   JobActivityPrompt,
   MemoActivityIcon,
-  UserActivityResult,
+  ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 
 export function WorkbenchJobActivity({
@@ -62,7 +64,7 @@ export function WorkbenchJobActivity({
 }) {
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
-  const isRunning = isActivityRunning(status)
+  const isRunning = isJobRunning(status)
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
@@ -76,7 +78,7 @@ export function WorkbenchJobActivity({
       </div>
     )
   if (type === WorkbenchJobActivityType.User)
-    return <UserActivityResult activity={activity} />
+    return <ExpandableUserPrompt prompt={activity.prompt} />
 
   return (
     <AccordionItem
@@ -339,7 +341,7 @@ function WorkbenchJobActivityThoughts({
           ))}
         </Flex>
       </SimpleAccordion>
-      {!isExpanded && lastThought && isActivityRunning(activity?.status) && (
+      {!isExpanded && lastThought && isJobRunning(activity?.status) && (
         <EaseIn currentKey={lastThought.id}>
           <WorkbenchJobActivityThought thought={lastThought} />
         </EaseIn>
@@ -394,8 +396,8 @@ function WorkbenchJobActivityThought({
   )
 }
 
-export const isActivityRunning = (
-  status: Nullable<WorkbenchJobActivityStatus>
-) =>
-  status === WorkbenchJobActivityStatus.Pending ||
-  status === WorkbenchJobActivityStatus.Running
+export const isJobRunning = (
+  status: Nullable<
+    WorkbenchJobActivityStatus | WorkbenchJobStatus | AgentRunStatus
+  >
+) => status === 'PENDING' || status === 'RUNNING'

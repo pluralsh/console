@@ -17,7 +17,7 @@ import { toDateOrUndef } from 'utils/datetime'
 
 import CopyButton from 'components/utils/CopyButton'
 import { TRUNCATE } from 'components/utils/truncate'
-import { capitalize } from 'lodash'
+import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
 import { EditObservabilityWebhookModal } from './EditObservabilityWebhook'
 
 enum MenuItemKey {
@@ -27,10 +27,13 @@ enum MenuItemKey {
 
 export const columnHelper = createColumnHelper<ObservabilityWebhookFragment>()
 
-const ColType = columnHelper.accessor(({ type }) => capitalize(type), {
-  id: 'type',
-  header: 'Type',
-})
+const ColType = columnHelper.accessor(
+  ({ type }) => humanizeObservabilityWebhookType(type),
+  {
+    id: 'type',
+    header: 'Type',
+  }
+)
 
 const ColName = columnHelper.accessor(({ name }) => name, {
   id: 'name',

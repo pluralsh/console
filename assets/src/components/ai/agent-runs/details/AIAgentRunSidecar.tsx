@@ -23,6 +23,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
   AgentRunFragment,
   AgentRunStatus,
@@ -47,10 +48,11 @@ export function AgentRunSidecar({
   run: Nullable<AgentRunFragment>
   loading: boolean
 }) {
-  const { spacing } = useTheme()
+  const { spacing, colors } = useTheme()
   const [subscribedTodos, setSubscribedTodos] = useState<AgentTodoFragment[]>(
     []
   )
+  const isRunning = isJobRunning(run?.status)
   const RuntimeIcon =
     runtimeToIcon[run?.runtime?.type ?? AgentRuntimeType.Custom]
 
@@ -128,6 +130,25 @@ export function AgentRunSidecar({
                 </Chip>
               </SidecarItem>
             )}
+            <SidecarItem>
+              <Flex
+                direction="column"
+                gap="small"
+              >
+                <CaptionP $color="text-xlight">
+                  Start time{' '}
+                  <span css={{ color: colors['text-light'] }}>
+                    {formatDateTime(run.insertedAt)}
+                  </span>
+                </CaptionP>
+                <CaptionP $color="text-xlight">
+                  End time{' '}
+                  <span css={{ color: colors['text-light'] }}>
+                    {isRunning ? '---' : formatDateTime(run.updatedAt)}
+                  </span>
+                </CaptionP>
+              </Flex>
+            </SidecarItem>
           </Sidecar>
           {!isEmpty(todos) && (
             <Sidecar>

@@ -29,7 +29,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackFiles do
     with %Stack{} = stack <- Stacks.get_stack(id) |> Console.Repo.preload([:repository, parent: [:cluster]]),
          %User{} = user <- Tool.actor(),
          {:ok, stack} <- Policies.allow(stack, user, :write) do
-      {:ok, stack_prompt(stack: stack, failed_run_diagnostics: nil)}
+      {:ok, String.trim(stack_prompt(stack: stack, failed_run_diagnostics: nil))}
     else
       {:error, err} ->
         {:error, "failed to get stack files, reason: #{inspect(err)}"}
@@ -42,7 +42,6 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackFiles do
     :defp,
     :stack_prompt,
     Path.join(:code.priv_dir(:console), "prompts/workbench/infrastructure/stack.md.eex"),
-    [:assigns],
-    trim: true
+    [:assigns]
   )
 end

@@ -1309,4 +1309,150 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert issue.status == :completed
     end
   end
+
+  describe "#issue/2 (Azure DevOps)" do
+    test "it returns 403 without basic auth", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      payload = Jason.encode!(azure_workitem_payload())
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it returns 403 when basic auth password is invalid", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      payload = Jason.encode!(azure_workitem_payload())
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("user", "wrong-secret"))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it will ignore if payload is not a work item event", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      payload = Jason.encode!(%{"eventType" => "git.push", "resource" => %{}})
+
+      result =
+        conn
+        |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+
+    test "it can handle a valid workitem.updated webhook and creates the issue", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Fix pipeline"})
+
+      ado_payload = azure_workitem_payload()
+      payload = Jason.encode!(ado_payload)
+
+      result =
+        conn
+        |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+      refute result["ignored"]
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :azure_devops
+      assert issue.external_id == "42"
+      assert issue.title == "Fix pipeline failure"
+      assert issue.url == "https://dev.azure.com/org/project/_workitems/edit/42"
+
+      assert issue.body == "## Description\n\nSteps to reproduce the failure."
+
+      assert issue.status == :in_progress
+    end
+
+    test "it maps Closed state to completed", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      insert(:issue, provider: :azure_devops, external_id: "99")
+
+      closed =
+        azure_workitem_payload()
+        |> put_in(["resource", "id"], 99)
+        |> put_in(["resource", "fields", "System.State"], "Closed")
+
+      payload = Jason.encode!(closed)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.status == :completed
+    end
+
+    test "it upserts issue when external_id already exists", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      external_id = "100"
+
+      insert(:issue,
+        external_id: external_id,
+        provider: :azure_devops,
+        title: "Old",
+        url: "https://dev.azure.com/old",
+        body: "Old",
+        status: :open
+      )
+
+      updated =
+        azure_workitem_payload()
+        |> put_in(["resource", "id"], String.to_integer(external_id))
+        |> put_in(["resource", "fields", "System.Title"], "New title")
+        |> put_in(["resource", "fields", "System.Description"], "New body")
+        |> put_in(["resource", "fields", "System.State"], "Resolved")
+
+      payload = Jason.encode!(updated)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == external_id
+      assert issue.title == "New title"
+
+      assert issue.body == "## Description\n\nNew body"
+
+      assert issue.status == :in_progress
+    end
+  end
+
+  defp azure_workitem_payload do
+    %{
+      "subscriptionId" => "00000000-0000-0000-0000-000000000000",
+      "notificationId" => 1,
+      "eventType" => "workitem.updated",
+      "resource" => %{
+        "id" => 42,
+        "rev" => 3,
+        "url" => "https://dev.azure.com/org/project/_apis/wit/workItems/42",
+        "_links" => %{
+          "html" => %{"href" => "https://dev.azure.com/org/project/_workitems/edit/42"}
+        },
+        "fields" => %{
+          "System.Title" => "Fix pipeline failure",
+          "System.Description" => "Steps to reproduce the failure.",
+          "System.State" => "Active",
+          "System.WorkItemType" => "Bug"
+        }
+      }
+    }
+  end
 end

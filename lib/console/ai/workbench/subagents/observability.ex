@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(50, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(50, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -74,5 +74,5 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp to_tool(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
   defp to_tool(_, _), do: []
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns])
 end

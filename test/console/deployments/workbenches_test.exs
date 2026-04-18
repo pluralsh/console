@@ -333,13 +333,14 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
-  describe "create_workbench_bot_job/2" do
+  describe "create_workbench_bot_job/3" do
     test "creates a job as the workbench bot user when set" do
       bot = insert(:user, roles: %{admin: true})
       workbench = insert(:workbench, bot_user: bot)
+      hook = insert(:workbench_webhook, workbench: workbench, user: bot)
 
       {:ok, job} =
-        Workbenches.create_workbench_bot_job(%{prompt: "automated prompt"}, workbench.id)
+        Workbenches.create_workbench_bot_job(%{prompt: "automated prompt"}, workbench.id, hook)
 
       assert job.workbench_id == workbench.id
       assert job.user_id == bot.id
@@ -349,9 +350,10 @@ defmodule Console.Deployments.WorkbenchesTest do
 
     test "returns an error when the workbench has no bot user" do
       workbench = insert(:workbench, bot_user: nil)
+      hook = insert(:workbench_webhook, workbench: workbench, user: nil)
 
-      assert {:error, "workbench does not have a bot user"} =
-               Workbenches.create_workbench_bot_job(%{prompt: "nope"}, workbench.id)
+      assert {:error, "workbench webhook does not have a bot user"} =
+               Workbenches.create_workbench_bot_job(%{prompt: "nope"}, workbench.id, hook)
 
       refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
     end
@@ -1102,7 +1104,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      webhook = insert(:workbench_webhook, workbench: workbench, name: "original")
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "original", user: user)
 
       {:ok, updated} = Workbenches.update_workbench_webhook(%{
         name: "updated-name"
@@ -1128,6 +1130,41 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.matches.substring == "error"
       assert updated.matches.case_insensitive == true
       assert_receive {:event, %PubSub.WorkbenchWebhookUpdated{item: ^updated}}
+    end
+
+    test "override_webhook_user: true sets user_id to the updating user" do
+      writer = insert(:user)
+      other_owner = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench, user: other_owner, name: "takeover")
+
+      {:ok, updated} =
+        Workbenches.update_workbench_webhook(
+          %{override_webhook_user: true},
+          webhook.id,
+          writer
+        )
+
+      assert updated.user_id == writer.id
+    end
+
+    test "update can set user_id explicitly when override_webhook_user is not true" do
+      writer = insert(:user)
+      owner_a = insert(:user)
+      owner_b = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench, user: owner_a, name: "reassign")
+
+      {:ok, updated} =
+        Workbenches.update_workbench_webhook(
+          %{user_id: owner_b.id},
+          webhook.id,
+          writer
+        )
+
+      assert updated.user_id == owner_b.id
     end
 
     test "project readers cannot update a webhook" do

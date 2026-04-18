@@ -14,13 +14,13 @@ For reference, this is the webhook result from the original <%= @issue.provider 
 ```
 <% end %>
 
-<%= if @issue.webhook && @issue.webhook.prompt do %>
+<%= if @issue.workbench_webhook && @issue.workbench_webhook.prompt do %>
 ## User Notes
 
 The user has provided the following notes attached to this webhook receiver, which could be useful for your investigation as well:
 
 ```
-<%= @issue.webhook.prompt %>
+<%= @issue.workbench_webhook.prompt %>
 ```
 <% end %>
 

@@ -31,7 +31,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     |> Policies.allow(user, :read)
     |> case do
       {:ok, cluster} ->
-        {:ok, cluster_prompt(cluster: cluster, upgrade_plan: simplified_upgrade_plan(cluster))}
+        {:ok, String.trim(cluster_prompt(cluster: cluster, upgrade_plan: simplified_upgrade_plan(cluster)))}
 
       nil -> {:error, "could not find cluster with handle #{handle}"}
       error -> error
@@ -72,7 +72,6 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     :defp,
     :cluster_prompt,
     Path.join(:code.priv_dir(:console), "prompts/workbench/infrastructure/cluster.md.eex"),
-    [:assigns],
-    trim: true
+    [:assigns]
   )
 end

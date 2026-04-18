@@ -23,6 +23,7 @@ import {
   AgentRunStatus,
   AgentRunTinyFragment,
   useAgentRunTinyQuery,
+  WorkbenchJobStatus,
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { Link } from 'react-router-dom'
@@ -30,7 +31,7 @@ import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { AgentRunPRsModalIcon } from './AIAgentRunsTableCols'
+import { PRsModalIcon } from './AIAgentRunsTableCols'
 
 export function AgentRunInfoCard({
   agentRun,
@@ -158,7 +159,7 @@ export function AgentRunInfoSimple({
         size="small"
         style={{ flexShrink: 0 }}
       />
-      <AgentRunPRsModalIcon
+      <PRsModalIcon
         prs={pullRequests?.filter(isNonNullable) ?? []}
         type="tertiary"
         size="small"
@@ -175,42 +176,49 @@ export function AgentRunInfoSimple({
         label={capitalize(status)}
       >
         <div>
-          <AgentRunSmallStatusIcon status={status} />
+          <RunStatusIcon
+            size="small"
+            status={status}
+          />
         </div>
       </Tooltip>
     </Flex>
   )
 }
 
-function AgentRunSmallStatusIcon({
+export function RunStatusIcon({
   status,
+  size = 'medium',
+  fullColor = false,
 }: {
-  status: Nullable<AgentRunStatus>
+  status: Nullable<AgentRunStatus | WorkbenchJobStatus>
+  size?: 'small' | 'medium'
+  fullColor?: boolean
 }) {
   switch (status) {
     case AgentRunStatus.Successful:
       return (
         <CheckOutlineIcon
-          color="icon-xlight"
-          size={12}
+          color={fullColor ? 'icon-success' : 'icon-xlight'}
+          size={size === 'small' ? 12 : 16}
         />
       )
     case AgentRunStatus.Failed:
       return (
         <FailedFilledIcon
           color="icon-danger"
-          size={12}
+          size={size === 'small' ? 12 : 16}
         />
       )
     case AgentRunStatus.Babysitting:
     case AgentRunStatus.Running:
     case AgentRunStatus.Pending:
-      return <SpinnerAlt size={12} />
+      return <SpinnerAlt size={size === 'small' ? 12 : 16} />
     case AgentRunStatus.Cancelled:
       return (
         <CancelledFilledIcon
           color="icon-xlight"
-          size={12}
+          size={size === 'small' ? 12 : 16}
         />
       )
     default:

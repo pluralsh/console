@@ -11,7 +11,8 @@ defmodule Console.Schema.Alert do
     Flow,
     Workbench,
     WorkbenchJob,
-    Monitor
+    Monitor,
+    WorkbenchWebhook
   }
 
   defenum Severity, low: 0, medium: 1, high: 2, critical: 3, undefined: 4
@@ -67,6 +68,7 @@ defmodule Console.Schema.Alert do
     belongs_to :flow,      Flow
     belongs_to :workbench, Workbench
     belongs_to :monitor,   Monitor
+    belongs_to :workbench_webhook, WorkbenchWebhook
 
     has_one :resolution,    AlertResolution
     has_one :workbench_job, WorkbenchJob
@@ -162,6 +164,7 @@ defmodule Console.Schema.Alert do
     service_id
     monitor_id
     workbench_id
+    workbench_webhook_id
     ai_poll_at
     webhook
   )a

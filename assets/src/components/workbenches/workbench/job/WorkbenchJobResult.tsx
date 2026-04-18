@@ -27,6 +27,7 @@ import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { StackedText } from 'components/utils/table/StackedText'
+import { isJobRunning } from './WorkbenchJobActivity'
 
 export function WorkbenchJobResult({
   job,
@@ -44,8 +45,7 @@ export function WorkbenchJobResult({
         css={{ padding: spacing.large }}
       />
     )
-
-  const conclusion = job?.result?.conclusion
+  const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
   const workingTheory = job?.result?.workingTheory
 
   return (

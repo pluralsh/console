@@ -57,12 +57,12 @@ defmodule Console.Deployments.Pr.Governance.Impl.ServiceNow do
 
   defp github_comment({:ok, _}, %PrGovernance{} = gov, %PullRequest{} = pr, state, %{"number" => number} = prev) do
     %{connection: conn} = Repo.preload(gov, :connection)
-    case Dispatcher.review(conn, %{pr | comment_id: prev["comment_id"]}, pr_message(
+    case Dispatcher.review(conn, %{pr | comment_id: prev["comment_id"]}, String.trim(pr_message(
       approval_emoji: approval_emoji(state),
       url: snow_change_url(gov, number),
       state: state_name(state),
       pending: state <= -3
-    )) do
+    ))) do
       {:ok, id} -> {:ok, Map.merge(prev, %{"comment_id" => id, "state" => state})}
       _ -> {:ok, Map.put(prev, "state", state)}
     end
@@ -119,7 +119,7 @@ defmodule Console.Deployments.Pr.Governance.Impl.ServiceNow do
   """
 
   defp ai_attributes(attributes, %PullRequest{} =pr) do
-    [{:user, snow_prompt(pr: pr, attributes: attributes)}]
+    [{:user, String.trim(snow_prompt(pr: pr, attributes: attributes))}]
     |> Provider.simple_tool_call(ServiceNow, preface: @preface)
     |> case do
       {:ok, %ServiceNow{} = now} ->
@@ -152,6 +152,6 @@ defmodule Console.Deployments.Pr.Governance.Impl.ServiceNow do
     do: model
   defp change_model(_), do: "Standard"
 
-  EEx.function_from_file(:defp, :snow_prompt, Path.join([:code.priv_dir(:console), "prompts", "governance", "snow.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :pr_message, Path.join([:code.priv_dir(:console), "pr", "governance.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :snow_prompt, Path.join([:code.priv_dir(:console), "prompts", "governance", "snow.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :pr_message, Path.join([:code.priv_dir(:console), "pr", "governance.md.eex"]), [:assigns])
 end

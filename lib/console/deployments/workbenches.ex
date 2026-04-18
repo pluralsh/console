@@ -90,6 +90,10 @@ defmodule Console.Deployments.Workbenches do
     do: Map.put(attrs, :bot_user_id, id)
   defp override_bot_user(attrs, _), do: attrs
 
+  defp override_webhook_user(%{override_webhook_user: true} = attrs, %User{id: id}),
+    do: Map.put(attrs, :user_id, id)
+  defp override_webhook_user(attrs, _), do: attrs
+
   @doc """
   Deletes a workbench.
   """
@@ -275,8 +279,8 @@ defmodule Console.Deployments.Workbenches do
   Requires write permission on the workbench.
   """
   @spec create_workbench_webhook(map, binary, User.t()) :: webhook_resp
-  def create_workbench_webhook(attrs, workbench_id, %User{} = user) do
-    %WorkbenchWebhook{workbench_id: workbench_id}
+  def create_workbench_webhook(attrs, workbench_id, %User{id: uid} = user) do
+    %WorkbenchWebhook{workbench_id: workbench_id, user_id: uid}
     |> WorkbenchWebhook.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:insert)
@@ -290,7 +294,7 @@ defmodule Console.Deployments.Workbenches do
   def update_workbench_webhook(attrs, id, %User{} = user) do
     get_workbench_webhook!(id)
     |> allow(user, :write)
-    |> when_ok(&WorkbenchWebhook.changeset(&1, attrs))
+    |> when_ok(&WorkbenchWebhook.changeset(&1, override_webhook_user(attrs, user)))
     |> when_ok(:update)
     |> notify(:update, user)
   end
@@ -310,22 +314,22 @@ defmodule Console.Deployments.Workbenches do
 
   def whimsey_text(%WorkbenchJob{} = job) do
     job = Repo.preload(job, [:activities])
-    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_prompt(job: job))
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: String.trim(whimsey_prompt(job: job)))
   end
 
   def whimsey_text(%WorkbenchJobActivity{type: :coding} = activity) do
     activity = Repo.preload(activity, [:thoughts, agent_runs: :pull_requests])
-    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_activity_prompt(activity: activity))
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: String.trim(whimsey_activity_prompt(activity: activity)))
   end
 
   def whimsey_text(%WorkbenchJobActivity{} = activity) do
     Repo.preload(activity, [:thoughts])
     |> Map.put(:agent_runs, [])
-    |> then(&Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: whimsey_activity_prompt(activity: &1)))
+    |> then(&Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: String.trim(whimsey_activity_prompt(activity: &1))))
   end
 
-  EEx.function_from_file(:defp, :whimsey_activity_prompt, Console.priv_filename(["prompts", "workbench", "whimsey_activity.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :whimsey_prompt, Console.priv_filename(["prompts", "workbench", "whimsey.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :whimsey_activity_prompt, Console.priv_filename(["prompts", "workbench", "whimsey_activity.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :whimsey_prompt, Console.priv_filename(["prompts", "workbench", "whimsey.md.eex"]), [:assigns])
 
   @doc """
   Creates a new workbench job for a workbench. Requires read access to the workbench.
@@ -339,19 +343,18 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:create, user)
   end
 
-  def create_workbench_bot_job(attrs, workbench_id) do
+  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook) do
+    hook = Repo.preload(hook, [:user])
+    bench = get_workbench!(workbench_id) |> Repo.preload([:bot_user])
     start_transaction()
-    |> add_operation(:user, fn _ ->
-      get_workbench!(workbench_id)
-      |> Repo.preload([:bot_user])
-      |> case do
-        %Workbench{bot_user: %User{} = user} -> {:ok, Console.Services.Rbac.preload(user)}
-        _ -> {:error, "workbench does not have a bot user"}
+    |> add_operation(:actor, fn _ ->
+      case {hook, bench} do
+        {%WorkbenchWebhook{user: %User{} = user}, _} -> {:ok, Console.Services.Rbac.preload(user)}
+        {_, %Workbench{bot_user: %User{} = bot_user}} -> {:ok, Console.Services.Rbac.preload(bot_user)}
+        _ -> {:error, "workbench webhook does not have a bot user"}
       end
     end)
-    |> add_operation(:job, fn %{user: user} ->
-      create_workbench_job(attrs, workbench_id, user)
-    end)
+    |> add_operation(:job, fn %{actor: user} -> create_workbench_job(attrs, workbench_id, user) end)
     |> execute(extract: :job)
   end
 

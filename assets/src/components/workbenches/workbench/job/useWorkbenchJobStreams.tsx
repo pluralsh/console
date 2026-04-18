@@ -7,7 +7,7 @@ import {
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
-  WorkbenchJobActivityFragmentDoc,
+  WorkbenchJobActivityWithThoughtsFragmentDoc,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -113,8 +113,8 @@ const appendThoughtToActivityCache = (
       __typename: 'WorkbenchJobActivity',
       id: thought.activity?.id,
     }),
-    fragment: WorkbenchJobActivityFragmentDoc,
-    fragmentName: 'WorkbenchJobActivity',
+    fragment: WorkbenchJobActivityWithThoughtsFragmentDoc,
+    fragmentName: 'WorkbenchJobActivityWithThoughts',
     update: (prev) => {
       const thoughts = prev.thoughts ?? []
       if (thoughts.some((t) => t?.id === thought.id)) return prev
