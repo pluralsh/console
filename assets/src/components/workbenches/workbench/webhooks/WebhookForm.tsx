@@ -26,7 +26,6 @@ import {
   useUpsertObservabilityWebhookMutation,
   useWorkbenchQuery,
 } from 'generated/graphql'
-import { capitalize } from 'lodash'
 import queryString from 'query-string'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -43,6 +42,10 @@ import {
 import { WebhookTriggerFormState } from './WebhookTriggerForm'
 import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 import { getIssueWebhookProviderIcon } from './utils'
+import {
+  humanizeIssueWebhookProvider,
+  humanizeObservabilityWebhookType,
+} from 'utils/webhookLabels'
 import { useWebhookSetupGuidePanel } from './WebhookSetupGuidePanel'
 import { Body2P } from 'components/utils/typography/Text'
 
@@ -530,7 +533,7 @@ function CreateWebhookForm({
                 <ListBoxItem
                   key={type}
                   leftContent={getObservabilityWebhookTypeIcon(type)}
-                  label={capitalize(type)}
+                  label={humanizeObservabilityWebhookType(type)}
                 />
               ))}
             </Select>
@@ -586,7 +589,7 @@ function CreateWebhookForm({
                 <ListBoxItem
                   key={provider}
                   leftContent={getIssueWebhookProviderIcon(provider)}
-                  label={provider}
+                  label={humanizeIssueWebhookProvider(provider)}
                 />
               ))}
             </Select>
