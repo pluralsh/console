@@ -365,7 +365,7 @@ defmodule Console.Deployments.Agents do
     run = get_agent_run!(run_id) |> Repo.preload([:runtime])
     with %ScmConnection{} = conn <- Tool.scm_connection(),
          {:ok, conn} <- backfill_token(conn) do
-      Dispatcher.review(conn, pr, pr_blob(pr: pr, run: run))
+      Dispatcher.review(conn, pr, String.trim(pr_blob(pr: pr, run: run)))
     end
   end
   def pr_review(_), do: {:error, "no agent run id found"}
@@ -381,7 +381,7 @@ defmodule Console.Deployments.Agents do
     end
   end
 
-  EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
 
   defp notify({:ok, %AgentRun{} = run}, :create),
     do: handle_notify(PubSub.AgentRunCreated, run)

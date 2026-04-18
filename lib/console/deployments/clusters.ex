@@ -676,9 +676,9 @@ defmodule Console.Deployments.Clusters do
     |> notify(:create, user)
   end
 
-  EEx.function_from_file(:defp, :upgrade_prompt, Console.priv_filename(["prompts", "cluster_upgrade.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon_inline.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon_inline.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :upgrade_prompt, Console.priv_filename(["prompts", "cluster_upgrade.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon_inline.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon_inline.md.eex"]), [:assigns])
 
   @spec upgrade_plan(Cluster.t) :: %{
     failed_insights: [UpgradeInsight.t],

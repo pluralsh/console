@@ -1,4 +1,5 @@
 import {
+  AzureDevopsLogoIcon,
   DatadogLogoIcon,
   GitHubLogoIcon,
   GitLabLogoIcon,
@@ -60,10 +61,12 @@ export function getObservabilityWebhookTypeIcon(type: Nullable<string>) {
 
 export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
   switch (provider) {
+    case IssueWebhookProvider.AzureDevops:
+      return <AzureDevopsLogoIcon fullColor />
     case IssueWebhookProvider.Github:
       return <GitHubLogoIcon />
     case IssueWebhookProvider.Gitlab:
-      return <GitLabLogoIcon />
+      return <GitLabLogoIcon fullColor />
     case IssueWebhookProvider.Linear:
       return <LinearLogoIcon fullColor />
     case IssueWebhookProvider.Jira:

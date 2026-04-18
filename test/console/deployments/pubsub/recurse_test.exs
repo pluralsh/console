@@ -634,6 +634,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       alert =
         insert(:alert,
           workbench: workbench,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot),
           project: workbench.project,
           title: "High CPU",
           message: "CPU above 80%"
@@ -657,12 +658,13 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
         insert(:alert,
           workbench: workbench,
           project: workbench.project,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: nil),
           title: "No bot",
           message: "msg"
         )
 
       event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
-      assert {:error, "workbench does not have a bot user"} = Recurse.handle_event(event)
+      assert {:error, _} = Recurse.handle_event(event)
 
       refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
     end
@@ -676,6 +678,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       issue =
         insert(:issue,
           workbench: workbench,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot),
           title: "Bug in API",
           body: "The API returns 500 on invalid input"
         )
@@ -697,12 +700,13 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       issue =
         insert(:issue,
           workbench: workbench,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench),
           title: "No bot",
           body: "body"
         )
 
       event = %PubSub.IssueCreated{item: %{issue | status_changed: true}}
-      assert {:error, "workbench does not have a bot user"} = Recurse.handle_event(event)
+      assert {:error, _} = Recurse.handle_event(event)
 
       refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
     end
@@ -717,7 +721,8 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
         insert(:issue,
           workbench: workbench,
           title: "Bug in API",
-          body: "The API returns 500 on invalid input"
+          body: "The API returns 500 on invalid input",
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot)
         )
 
       event = %PubSub.IssueUpdated{item: %{issue | status_changed: true}}

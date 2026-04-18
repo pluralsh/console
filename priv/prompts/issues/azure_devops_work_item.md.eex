@@ -1,0 +1,29 @@
+## Description
+
+<%= @description %>
+
+<%= if @repro_steps do %>
+## Repro steps
+
+<%= @repro_steps %>
+<% end %>
+<%= if @acceptance_criteria do %>
+## Acceptance criteria
+
+<%= @acceptance_criteria %>
+<% end %>
+<%= if @system_info do %>
+## System info
+
+<%= @system_info %>
+<% end %>
+<%= if @found_in_build do %>
+## Found in build
+
+<%= @found_in_build %>
+<% end %>
+<%= if @resolved_reason do %>
+## Resolved reason
+
+<%= @resolved_reason %>
+<% end %>

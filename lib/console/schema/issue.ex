@@ -1,7 +1,7 @@
 defmodule Console.Schema.Issue do
   use Console.Schema.Base
 
-  alias Console.Schema.{Workbench, WorkbenchJob, Flow, IssueWebhook}
+  alias Console.Schema.{Workbench, WorkbenchJob, Flow, IssueWebhook, WorkbenchWebhook}
 
   defenum Status, open: 0, in_progress: 1, cancelled: 2, completed: 3
 
@@ -16,9 +16,10 @@ defmodule Console.Schema.Issue do
     field :status_changed, :boolean, virtual: true, default: false
     field :webhook,        :map, virtual: true
 
-    belongs_to :workbench,  Workbench
-    belongs_to :flow,       Flow
-    has_one :workbench_job, WorkbenchJob
+    belongs_to :workbench,         Workbench
+    belongs_to :workbench_webhook, WorkbenchWebhook
+    belongs_to :flow,              Flow
+    has_one :workbench_job,        WorkbenchJob
 
     timestamps()
   end
@@ -50,7 +51,7 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.status == ^status)
   end
 
-  @valid ~w(provider status external_id url title body payload workbench_id flow_id webhook)a
+  @valid ~w(provider status external_id url title body payload workbench_id workbench_webhook_id flow_id webhook)a
 
   def changeset(model, attrs \\ %{}) do
     model

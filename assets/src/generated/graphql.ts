@@ -5178,6 +5178,7 @@ export type IssueWebhookEdge = {
 
 export enum IssueWebhookProvider {
   Asana = 'ASANA',
+  AzureDevops = 'AZURE_DEVOPS',
   Github = 'GITHUB',
   Gitlab = 'GITLAB',
   Jira = 'JIRA',
@@ -15743,6 +15744,8 @@ export type WorkbenchWebhook = {
   /** optional prompt text applied when this webhook matches */
   prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who created this webhook */
+  user?: Maybe<User>;
   /** the observability webhook that receives events */
   webhook?: Maybe<ObservabilityWebhook>;
   /** the workbench this webhook belongs to */
@@ -15756,6 +15759,8 @@ export type WorkbenchWebhookAttributes = {
   matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
   /** unique name for this webhook on the workbench (required for create) */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** when true on update, sets userId to the authenticated user */
+  overrideWebhookUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** optional prompt text applied when this webhook matches */
   prompt?: InputMaybe<Scalars['String']['input']>;
   /** observability webhook to receive events (either webhook_id or issue_webhook_id required) */
@@ -19365,7 +19370,7 @@ export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, 
 
 export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
-export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null };
+export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null };
 
 export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
@@ -19465,14 +19470,14 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type GetWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
 
 export type IssueWebhooksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -19669,7 +19674,7 @@ export type CreateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
 
 export type UpdateWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19677,7 +19682,7 @@ export type UpdateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
 
 export type DeleteWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24691,6 +24696,7 @@ export const WorkbenchWebhookFragmentDoc = gql`
     fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
+  prompt
   matches {
     regex
     substring

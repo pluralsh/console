@@ -31,7 +31,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackInspect do
     |> Repo.preload([:repository, :cluster, :project, parent: [:cluster]])
     |> Policies.allow(user, :read)
     |> case do
-      {:ok, stack} -> {:ok, stack_prompt(stack: stack, failed_run: failed_run(stack))}
+      {:ok, stack} -> {:ok, String.trim(stack_prompt(stack: stack, failed_run: failed_run(stack)))}
       nil -> {:error, "could not find stack with id #{id}"}
       error -> error
     end
@@ -65,7 +65,6 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackInspect do
     :defp,
     :stack_prompt,
     Path.join(:code.priv_dir(:console), "prompts/workbench/infrastructure/stack.md.eex"),
-    [:assigns],
-    trim: true
+    [:assigns]
   )
 end

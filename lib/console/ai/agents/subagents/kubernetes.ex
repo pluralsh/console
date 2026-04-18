@@ -25,7 +25,7 @@ defmodule Console.AI.Agents.Subagents.Kubernetes do
   @spec exec(binary, Keyword.t) :: {:ok, Complete.t} | {:error, binary}
   def exec(prompt, opts \\ []) when is_binary(prompt) do
     @tools
-    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt), callback: &publish_thought(opts[:tool_id], &1))
+    |> MemoryEngine.new(30, system_prompt: String.trim(prompt(prompt: prompt)), callback: &publish_thought(opts[:tool_id], &1))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, %Complete{} = complete} -> {:ok, complete}
@@ -41,5 +41,5 @@ defmodule Console.AI.Agents.Subagents.Kubernetes do
     end
   end
 
-  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "kubernetes.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "kubernetes.md.eex"]), [:assigns])
 end

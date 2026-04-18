@@ -271,6 +271,7 @@ fragment WorkbenchPrompt on WorkbenchPrompt {
 fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
+  prompt
   matches {
     regex
     substring

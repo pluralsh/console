@@ -31,7 +31,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
     |> Repo.preload([:repository, :cluster, :errors, owner: [parent: :cluster], parent: [:cluster]])
     |> Policies.allow(user, :read)
     |> case do
-      {:ok, svc} -> {:ok, service_prompt(service: svc)}
+      {:ok, svc} -> {:ok, String.trim(service_prompt(service: svc))}
       nil -> {:error, "could not find service with id #{id}"}
       error -> error
     end
@@ -41,7 +41,6 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
     :defp,
     :service_prompt,
     Path.join(:code.priv_dir(:console), "prompts/workbench/infrastructure/service.md.eex"),
-    [:assigns],
-    trim: true
+    [:assigns]
   )
 end

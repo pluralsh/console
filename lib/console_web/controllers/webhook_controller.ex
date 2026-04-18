@@ -172,5 +172,8 @@ defmodule ConsoleWeb.WebhookController do
   defp verify(conn, %IssueWebhook{provider: :gitlab, secret: secret}),
     do: verify(conn, %ScmWebhook{type: :gitlab, hmac: secret})
 
+  defp verify(conn, %IssueWebhook{provider: :azure_devops, secret: secret}),
+    do: verify(conn, %ScmWebhook{type: :azure_devops, hmac: secret})
+
   defp verify(_, _), do: :reject
 end
