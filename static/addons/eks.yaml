@@ -5541,6 +5541,14 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.21.0-eksbuild.2
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v0.21.0-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5699,6 +5707,22 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.0.2-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v5.0.1-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.2.3-eksbuild.1
     compatibilities:
     - '1.35'
