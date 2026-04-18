@@ -5,6 +5,30 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 83.6.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / config changes
+
+      - **No required values changes identified** between `83.5.0` and `83.6.0` based
+      on the provided release notes.
+
+      - If you enabled/used Alertmanager `sessionPersistence` introduced in `83.5.0`,
+      ensure your values still match your ingress/service setup after upgrading (no
+      new notes for `83.6.0`).'
+    chart_updates: ['Bumped the embedded `kube-prometheus` (prometheus-operator/kube-prometheus)
+        content digest to `ac9a509` (chart content refresh: manifests/dashboards/rules).']
+    features: [Updated the bundled kube-prometheus assets (manifests/rules/dashboards)
+        to the upstream digest `ac9a509`.]
+    breaking_changes: []
+  chart_version: 83.6.0
+  images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 83.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']

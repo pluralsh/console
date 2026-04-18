@@ -7555,6 +7555,30 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 83.6.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm values / config changes
+
+        - **No required values changes identified** between `83.5.0` and `83.6.0`
+        based on the provided release notes.
+
+        - If you enabled/used Alertmanager `sessionPersistence` introduced in `83.5.0`,
+        ensure your values still match your ingress/service setup after upgrading
+        (no new notes for `83.6.0`).'
+      chart_updates: ['Bumped the embedded `kube-prometheus` (prometheus-operator/kube-prometheus)
+          content digest to `ac9a509` (chart content refresh: manifests/dashboards/rules).']
+      features: [Updated the bundled kube-prometheus assets (manifests/rules/dashboards)
+          to the upstream digest `ac9a509`.]
+      breaking_changes: []
+    chart_version: 83.6.0
+    images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+      'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+      'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 83.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -12556,30 +12580,35 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.3.6
+  - version: 3.3.7
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['v3.3.0 introduced a large set of new capabilities across sync/diff
-          (notably initial Server-Side Apply/Server-Side Diff work), ApplicationSet
-          improvements (pprof endpoints, Progressive Sync beta work), new UI/CLI enhancements,
-          and additional built-in actions/health checks.', v3.3.6 is a patch release
-          over 3.3.x focused on correctness fixes (diff/normalization and cache installation
-          ID issues) with no new user-facing features called out in the notes you
-          provided.]
-      breaking_changes: ['If Argo CD is managing itself (an Application deploys Argo
-          CD), you must enable the `ServerSideApply=true` sync option for the upgrade
-          to succeed; otherwise you may hit client-side apply migration failures.',
-        'As a temporary workaround for self-managed upgrades that fail with client-side
-          apply migration, you can set `ClientSideApplyMigration=false`, but this
-          is not recommended long-term and must be removed later to avoid field manager
-          conflicts.']
-    chart_version: 9.5.1
+      features: ['Argo CD 3.3.0 introduces/expands Server-Side Apply (SSA) capabilities,
+          including server-side diffs, SSA manager configuration, and automatic migration
+          from client-side apply field managers.', 'New sync and lifecycle controls
+          were added, such as ApplyOutOfSyncOnly, Replace=true, sync delete/cascade
+          options, reverse-order pruning, and PreDelete hook support.', 'App actions
+          and integrations were expanded (e.g., GitHub PR merge action, CloudNativePG
+          actions, KEDA pause actions), and UI received improvements like custom icons
+          and better sync warnings.', 'Operational and scale improvements include
+          better cluster cache behavior (retries, resync tuning, concurrency limits),
+          shallow git clone support, and additional health checks for more CRDs/operators.']
+      breaking_changes: ['When Argo CD manages its own installation, upgrades to 3.3.x
+          require enabling the Application sync option `ServerSideApply=true`; otherwise
+          the upgrade may fail.', 'Some environments may hit a client-side apply migration
+          failure during self-management; a temporary workaround is setting `ClientSideApplyMigration=false`,
+          but this is not recommended long-term due to potential field-manager conflicts.',
+        'Argo CD 3.3.7 includes a known issue where the application controller may
+          fail to refresh applications (apps may not sync or show OutOfSync); review
+          issue #27344 and consider delaying or adding monitoring/rollback plans if
+          affected.']
+    chart_version: 9.5.2
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.3.6']
+      'quay.io/argoproj/argocd:v3.3.7']
   - version: 3.3.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -13077,7 +13106,15 @@ addons:
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional changes are listed in the provided release note excerpts;
+          both pages primarily contain installation instructions and links to the
+          full changelog/upgrading guide.]
+      breaking_changes: [No breaking changes are listed in the provided release note
+          excerpts; you must consult the Argo Workflows 3.5 upgrading guide and the
+          project CHANGELOG for any breaking changes between v3.5.6 and v3.5.11.]
     chart_version: 0.42.5
     images: ['quay.io/argoproj/argocli:v3.5.11', 'quay.io/argoproj/workflow-controller:v3.5.11']
   - version: 3.5.6
@@ -13314,7 +13351,15 @@ addons:
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional changes were highlighted in the provided v0.44.0 notes
+          (the excerpt is essentially an assets list)., macOS x86_64 tarball is present
+          again in v0.44.0 assets; v0.43.0 explicitly removed that artifact.]
+      breaking_changes: ['If your upgrade process/download scripts relied on `vector-0.43.0-x86_64-apple-darwin.tar.gz`,
+          it did not exist in 0.43.0 (removed); verify artifact selection logic when
+          moving to 0.44.0 where it is available again.']
     chart_version: 0.40.0
     images: ['timberio/vector:0.44.0-distroless-libc']
   - version: 0.43.0
