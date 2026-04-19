@@ -5842,7 +5842,20 @@ addons:
     kube: ['1.33']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm chart was re-released alongside the app version (v0.18.1
+          chart release mentioned in v0.18.2 notes; v0.19.1 chart release mentioned
+          in v0.19.2 notes). No explicit values/schema changes are called out in the
+          provided notes., 'Container image options changed operationally: v0.18.2
+          notes warn UBI images are broken; v0.19.2 includes working `-ubi` and `-ubi-boringssl`
+          images again.']
+      features: ['Infisical provider enhancements: additional auth methods (Kubernetes,
+          AWS, token) in v0.19.2; earlier v0.18.2 added Azure auth/refactor to Go
+          SDK.', 'GitLab provider: support for custom CAs (v0.18.2).', 'AWS Parameter
+          Store: support selecting parameters by AWS tags (v0.18.2).', 'Bitwarden
+          SDK server subchart: ability to set namespace (v0.18.2).']
+      breaking_changes: []
     chart_version: 0.19.2
     images: ['oci.external-secrets.io/external-secrets/external-secrets:v0.19.2']
   - version: 0.18.2
@@ -12815,7 +12828,19 @@ addons:
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["v2.14.1 release notes provided don\u2019t enumerate feature changes;\
+          \ they mainly reference the full changelog diff from v2.14.0 to v2.14.1\
+          \ and standard install/upgrade guidance.", 'v2.13.2 notes list bug fixes
+          in CLI core mode appset generation, multi-source sync ordering, API server
+          secret reads, repo deletion with invalid URLs, Bitbucket Cloud PR author
+          parsing, and a repo-server memory leak fix.']
+      breaking_changes: ["No breaking changes are called out in the provided notes;\
+          \ because you\u2019re crossing a minor version (2.13 \u2192 2.14), you should\
+          \ still review the official Argo CD upgrading docs for any 2.14-specific\
+          \ breaking changes not included here."]
     chart_version: 7.8.0
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
       'quay.io/argoproj/argocd:v2.14.1']
@@ -15124,6 +15149,12 @@ addons:
   helm_values: dcgmExporter.config.name=default
   readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
   versions:
+  - version: 26.3.1
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    chart_version: 26.3.1
+    images: ['nvcr.io/nvidia/gpu-operator:v26.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.3']
+    incompatibilities: []
   - version: 26.3.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []

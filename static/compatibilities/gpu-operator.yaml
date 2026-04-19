@@ -5,6 +5,12 @@ helm_repository_url: https://nvidia.github.io/gpu-operator
 helm_values: dcgmExporter.config.name=default
 readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
 versions:
+- version: 26.3.1
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  chart_version: 26.3.1
+  images: ['nvcr.io/nvidia/gpu-operator:v26.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.3']
+  incompatibilities: []
 - version: 26.3.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
