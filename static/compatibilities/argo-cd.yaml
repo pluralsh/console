@@ -235,7 +235,19 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["v2.14.1 release notes provided don\u2019t enumerate feature changes;\
+        \ they mainly reference the full changelog diff from v2.14.0 to v2.14.1 and\
+        \ standard install/upgrade guidance.", 'v2.13.2 notes list bug fixes in CLI
+        core mode appset generation, multi-source sync ordering, API server secret
+        reads, repo deletion with invalid URLs, Bitbucket Cloud PR author parsing,
+        and a repo-server memory leak fix.']
+    breaking_changes: ["No breaking changes are called out in the provided notes;\
+        \ because you\u2019re crossing a minor version (2.13 \u2192 2.14), you should\
+        \ still review the official Argo CD upgrading docs for any 2.14-specific breaking\
+        \ changes not included here."]
   chart_version: 7.8.0
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
     'quay.io/argoproj/argocd:v2.14.1']
