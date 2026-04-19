@@ -32,6 +32,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Dynatrace]: extractDynatraceMetadata,
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
   [WorkbenchToolType.Azure]: extractAzureMetadata,
+  [WorkbenchToolType.Cloud]: () => [],
 }
 
 export function WorkbenchesConfiguredToolMetadata({

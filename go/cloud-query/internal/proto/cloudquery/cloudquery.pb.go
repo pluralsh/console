@@ -25,9 +25,11 @@ const (
 
 type AwsCredentials struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	AccessKeyId     string                 `protobuf:"bytes,1,opt,name=access_key_id,json=accessKeyId,proto3" json:"access_key_id,omitempty"`
-	SecretAccessKey string                 `protobuf:"bytes,2,opt,name=secret_access_key,json=secretAccessKey,proto3" json:"secret_access_key,omitempty"`
+	AccessKeyId     *string                `protobuf:"bytes,1,opt,name=access_key_id,json=accessKeyId,proto3,oneof" json:"access_key_id,omitempty"`
+	SecretAccessKey *string                `protobuf:"bytes,2,opt,name=secret_access_key,json=secretAccessKey,proto3,oneof" json:"secret_access_key,omitempty"`
 	Region          *string                `protobuf:"bytes,3,opt,name=region,proto3,oneof" json:"region,omitempty"`
+	Regions         []string               `protobuf:"bytes,4,rep,name=regions,proto3" json:"regions,omitempty"`
+	AssumeRoleArn   *string                `protobuf:"bytes,5,opt,name=assume_role_arn,json=assumeRoleArn,proto3,oneof" json:"assume_role_arn,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -63,15 +65,15 @@ func (*AwsCredentials) Descriptor() ([]byte, []int) {
 }
 
 func (x *AwsCredentials) GetAccessKeyId() string {
-	if x != nil {
-		return x.AccessKeyId
+	if x != nil && x.AccessKeyId != nil {
+		return *x.AccessKeyId
 	}
 	return ""
 }
 
 func (x *AwsCredentials) GetSecretAccessKey() string {
-	if x != nil {
-		return x.SecretAccessKey
+	if x != nil && x.SecretAccessKey != nil {
+		return *x.SecretAccessKey
 	}
 	return ""
 }
@@ -79,6 +81,20 @@ func (x *AwsCredentials) GetSecretAccessKey() string {
 func (x *AwsCredentials) GetRegion() string {
 	if x != nil && x.Region != nil {
 		return *x.Region
+	}
+	return ""
+}
+
+func (x *AwsCredentials) GetRegions() []string {
+	if x != nil {
+		return x.Regions
+	}
+	return nil
+}
+
+func (x *AwsCredentials) GetAssumeRoleArn() string {
+	if x != nil && x.AssumeRoleArn != nil {
+		return *x.AssumeRoleArn
 	}
 	return ""
 }
@@ -722,12 +738,17 @@ var File_cloudquery_proto protoreflect.FileDescriptor
 const file_cloudquery_proto_rawDesc = "" +
 	"\n" +
 	"\x10cloudquery.proto\x12\n" +
-	"cloudquery\"\x88\x01\n" +
-	"\x0eAwsCredentials\x12\"\n" +
-	"\raccess_key_id\x18\x01 \x01(\tR\vaccessKeyId\x12*\n" +
-	"\x11secret_access_key\x18\x02 \x01(\tR\x0fsecretAccessKey\x12\x1b\n" +
-	"\x06region\x18\x03 \x01(\tH\x00R\x06region\x88\x01\x01B\t\n" +
-	"\a_region\"\x9a\x01\n" +
+	"cloudquery\"\x95\x02\n" +
+	"\x0eAwsCredentials\x12'\n" +
+	"\raccess_key_id\x18\x01 \x01(\tH\x00R\vaccessKeyId\x88\x01\x01\x12/\n" +
+	"\x11secret_access_key\x18\x02 \x01(\tH\x01R\x0fsecretAccessKey\x88\x01\x01\x12\x1b\n" +
+	"\x06region\x18\x03 \x01(\tH\x02R\x06region\x88\x01\x01\x12\x18\n" +
+	"\aregions\x18\x04 \x03(\tR\aregions\x12+\n" +
+	"\x0fassume_role_arn\x18\x05 \x01(\tH\x03R\rassumeRoleArn\x88\x01\x01B\x10\n" +
+	"\x0e_access_key_idB\x14\n" +
+	"\x12_secret_access_keyB\t\n" +
+	"\a_regionB\x12\n" +
+	"\x10_assume_role_arn\"\x9a\x01\n" +
 	"\x10AzureCredentials\x12'\n" +
 	"\x0fsubscription_id\x18\x01 \x01(\tR\x0esubscriptionId\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1b\n" +

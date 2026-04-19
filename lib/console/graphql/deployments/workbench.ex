@@ -36,6 +36,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
     field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
     field :tool_associations, list_of(:workbench_tool_association_attributes), description: "tool ids to associate with this workbench"
+    field :workbench_skills,  list_of(:workbench_skill_attributes), description: "skills to include with this workbench"
   end
 
   input_object :workbench_configuration_attributes do
@@ -100,12 +101,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_attributes do
-    field :name,          non_null(:string), description: "the name of the tool (a-z, 0-9, underscores)"
-    field :tool,          non_null(:workbench_tool_type), description: "the type of tool"
-    field :categories,    list_of(:workbench_tool_category), description: "categories for the tool"
-    field :project_id,    :id, description: "the project for this tool"
-    field :mcp_server_id, :id, description: "the mcp server for this tool"
-    field :configuration, :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
+    field :name,                 non_null(:string), description: "the name of the tool (a-z, 0-9, underscores)"
+    field :tool,                 non_null(:workbench_tool_type), description: "the type of tool"
+    field :categories,           list_of(:workbench_tool_category), description: "categories for the tool"
+    field :project_id,           :id, description: "the project for this tool"
+    field :mcp_server_id,        :id, description: "the mcp server for this tool"
+    field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+    field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
   end
 
   input_object :workbench_tool_configuration_attributes do
@@ -472,13 +474,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool do
-    field :id,            non_null(:string), description: "the id of the tool"
-    field :name,          non_null(:string), description: "the name of the tool"
-    field :tool,          non_null(:workbench_tool_type), description: "the type of tool"
-    field :categories,    list_of(:workbench_tool_category), description: "categories for the tool"
-    field :project,       :project, resolve: dataloader(Deployments), description: "the project of this tool"
-    field :configuration, :workbench_tool_configuration, description: "tool configuration"
-    field :mcp_server,    :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
+    field :id,               non_null(:string), description: "the id of the tool"
+    field :name,             non_null(:string), description: "the name of the tool"
+    field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
+    field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
+    field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
+    field :configuration,    :workbench_tool_configuration, description: "tool configuration"
+    field :mcp_server,       :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
+    field :cloud_connection, :cloud_connection, resolve: dataloader(Deployments), description: "the cloud connection bound to this tool"
 
     timestamps()
   end

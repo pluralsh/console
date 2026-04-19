@@ -79,7 +79,7 @@ defmodule Console.Deployments.Workbenches do
   @spec update_workbench(map, binary, User.t()) :: workbench_resp
   def update_workbench(attrs, id, %User{} = user) do
     get_workbench!(id)
-    |> Repo.preload([:tool_associations, :read_bindings, :write_bindings])
+    |> Repo.preload([:tool_associations, :read_bindings, :write_bindings, :workbench_skills])
     |> allow(user, :write)
     |> when_ok(&Workbench.changeset(&1, override_bot_user(attrs, user)))
     |> when_ok(:update)

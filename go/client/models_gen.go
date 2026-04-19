@@ -1040,6 +1040,8 @@ type AWSCloudConnectionAttributes struct {
 	SecretAccessKey string    `json:"secretAccessKey"`
 	Region          *string   `json:"region,omitempty"`
 	Regions         []*string `json:"regions,omitempty"`
+	// optional IAM role ARN for the console to assume when using this connection
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
 }
 
 // aws specific cloud configuration
@@ -1057,6 +1059,8 @@ type AWSConnectionAttributes struct {
 	Region *string `json:"region,omitempty"`
 	// the regions for aws
 	Regions []*string `json:"regions,omitempty"`
+	// IAM role ARN for the console to assume when using this connection
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
 }
 
 type AWSNodeCloudAttributes struct {
@@ -9500,6 +9504,8 @@ type WorkbenchAttributes struct {
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// tool ids to associate with this workbench
 	ToolAssociations []*WorkbenchToolAssociationAttributes `json:"toolAssociations,omitempty"`
+	// skills to include with this workbench
+	WorkbenchSkills []*WorkbenchSkillAttributes `json:"workbenchSkills,omitempty"`
 }
 
 type WorkbenchCoding struct {
@@ -9915,9 +9921,11 @@ type WorkbenchTool struct {
 	// tool configuration
 	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
 	// the mcp server for this tool
-	McpServer  *McpServer `json:"mcpServer,omitempty"`
-	InsertedAt *string    `json:"insertedAt,omitempty"`
-	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+	McpServer *McpServer `json:"mcpServer,omitempty"`
+	// the cloud connection bound to this tool
+	CloudConnection *CloudConnection `json:"cloudConnection,omitempty"`
+	InsertedAt      *string          `json:"insertedAt,omitempty"`
+	UpdatedAt       *string          `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchToolAssociationAttributes struct {
@@ -9952,6 +9960,8 @@ type WorkbenchToolAttributes struct {
 	ProjectID *string `json:"projectId,omitempty"`
 	// the mcp server for this tool
 	McpServerID *string `json:"mcpServerId,omitempty"`
+	// the cloud connection for this tool (e.g. infrastructure cloud tools)
+	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
 	// tool configuration (e.g. http)
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }
@@ -16288,12 +16298,13 @@ func (e WorkbenchJobStatus) MarshalJSON() ([]byte, error) {
 type WorkbenchToolCategory string
 
 const (
-	WorkbenchToolCategoryMetrics       WorkbenchToolCategory = "METRICS"
-	WorkbenchToolCategoryLogs          WorkbenchToolCategory = "LOGS"
-	WorkbenchToolCategoryIntegration   WorkbenchToolCategory = "INTEGRATION"
-	WorkbenchToolCategoryTicketing     WorkbenchToolCategory = "TICKETING"
-	WorkbenchToolCategoryTraces        WorkbenchToolCategory = "TRACES"
-	WorkbenchToolCategoryErrorTracking WorkbenchToolCategory = "ERROR_TRACKING"
+	WorkbenchToolCategoryMetrics        WorkbenchToolCategory = "METRICS"
+	WorkbenchToolCategoryLogs           WorkbenchToolCategory = "LOGS"
+	WorkbenchToolCategoryIntegration    WorkbenchToolCategory = "INTEGRATION"
+	WorkbenchToolCategoryTicketing      WorkbenchToolCategory = "TICKETING"
+	WorkbenchToolCategoryTraces         WorkbenchToolCategory = "TRACES"
+	WorkbenchToolCategoryErrorTracking  WorkbenchToolCategory = "ERROR_TRACKING"
+	WorkbenchToolCategoryInfrastructure WorkbenchToolCategory = "INFRASTRUCTURE"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -16303,11 +16314,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryTicketing,
 	WorkbenchToolCategoryTraces,
 	WorkbenchToolCategoryErrorTracking,
+	WorkbenchToolCategoryInfrastructure,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure:
 		return true
 	}
 	return false
@@ -16426,6 +16438,7 @@ const (
 	WorkbenchToolTypeDynatrace  WorkbenchToolType = "DYNATRACE"
 	WorkbenchToolTypeCloudwatch WorkbenchToolType = "CLOUDWATCH"
 	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
+	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16443,11 +16456,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeDynatrace,
 	WorkbenchToolTypeCloudwatch,
 	WorkbenchToolTypeAzure,
+	WorkbenchToolTypeCloud,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud:
 		return true
 	}
 	return false

@@ -112,6 +112,7 @@ defmodule Console.Schema.Workbench do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_assoc(:workbench_skills)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:tool_associations)
