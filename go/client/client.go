@@ -307,6 +307,14 @@ type ConsoleClient interface {
 	ListWorkbenchTools(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ListWorkbenchTools, error)
 	GetWorkbenchTool(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTool, error)
 	GetWorkbenchToolTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchToolTiny, error)
+	CreateWorkbenchCron(ctx context.Context, workbenchID string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchCron, error)
+	UpdateWorkbenchCron(ctx context.Context, id string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchCron, error)
+	DeleteWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchCron, error)
+	GetWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchCron, error)
+	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error)
+	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error)
+	DeleteWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchWebhook, error)
+	GetWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchWebhook, error)
 }
 
 type Client struct {
@@ -6716,6 +6724,63 @@ func (t *WorkbenchToolFragment) GetUpdatedAt() *string {
 	return t.UpdatedAt
 }
 
+type WorkbenchCronFragment struct {
+	ID      string  "json:\"id\" graphql:\"id\""
+	Crontab *string "json:\"crontab,omitempty\" graphql:\"crontab\""
+	Prompt  *string "json:\"prompt,omitempty\" graphql:\"prompt\""
+}
+
+func (t *WorkbenchCronFragment) GetID() string {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.ID
+}
+func (t *WorkbenchCronFragment) GetCrontab() *string {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.Crontab
+}
+func (t *WorkbenchCronFragment) GetPrompt() *string {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.Prompt
+}
+
+type WorkbenchWebhookFragment struct {
+	ID      string                            "json:\"id\" graphql:\"id\""
+	Name    *string                           "json:\"name,omitempty\" graphql:\"name\""
+	Prompt  *string                           "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Matches *WorkbenchWebhookFragment_Matches "json:\"matches,omitempty\" graphql:\"matches\""
+}
+
+func (t *WorkbenchWebhookFragment) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment) GetName() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Name
+}
+func (t *WorkbenchWebhookFragment) GetPrompt() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Prompt
+}
+func (t *WorkbenchWebhookFragment) GetMatches() *WorkbenchWebhookFragment_Matches {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Matches
+}
+
 type TinyAgentRuntimeFragment_Cluster struct {
 	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
 	ID     string  "json:\"id\" graphql:\"id\""
@@ -12952,6 +13017,31 @@ func (t *WorkbenchToolFragment_Configuration) GetHTTP() *WorkbenchToolFragment_C
 		t = &WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+
+type WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
 }
 
 type DeleteAgentRuntime_DeleteAgentRuntime struct {
@@ -29414,6 +29504,106 @@ func (t *GetWorkbenchToolTiny_WorkbenchTool) GetName() string {
 	return t.Name
 }
 
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
 type GetAgentRuntime struct {
 	AgentRuntime *AgentRuntimeFragment "json:\"agentRuntime,omitempty\" graphql:\"agentRuntime\""
 }
@@ -32690,6 +32880,94 @@ func (t *GetWorkbenchToolTiny) GetWorkbenchTool() *GetWorkbenchToolTiny_Workbenc
 		t = &GetWorkbenchToolTiny{}
 	}
 	return t.WorkbenchTool
+}
+
+type CreateWorkbenchCron struct {
+	CreateWorkbenchCron *WorkbenchCronFragment "json:\"createWorkbenchCron,omitempty\" graphql:\"createWorkbenchCron\""
+}
+
+func (t *CreateWorkbenchCron) GetCreateWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &CreateWorkbenchCron{}
+	}
+	return t.CreateWorkbenchCron
+}
+
+type UpdateWorkbenchCron struct {
+	UpdateWorkbenchCron *WorkbenchCronFragment "json:\"updateWorkbenchCron,omitempty\" graphql:\"updateWorkbenchCron\""
+}
+
+func (t *UpdateWorkbenchCron) GetUpdateWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &UpdateWorkbenchCron{}
+	}
+	return t.UpdateWorkbenchCron
+}
+
+type DeleteWorkbenchCron struct {
+	DeleteWorkbenchCron *WorkbenchCronFragment "json:\"deleteWorkbenchCron,omitempty\" graphql:\"deleteWorkbenchCron\""
+}
+
+func (t *DeleteWorkbenchCron) GetDeleteWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &DeleteWorkbenchCron{}
+	}
+	return t.DeleteWorkbenchCron
+}
+
+type GetWorkbenchCron struct {
+	WorkbenchCron *WorkbenchCronFragment "json:\"workbenchCron,omitempty\" graphql:\"workbenchCron\""
+}
+
+func (t *GetWorkbenchCron) GetWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &GetWorkbenchCron{}
+	}
+	return t.WorkbenchCron
+}
+
+type CreateWorkbenchWebhook struct {
+	CreateWorkbenchWebhook *WorkbenchWebhookFragment "json:\"createWorkbenchWebhook,omitempty\" graphql:\"createWorkbenchWebhook\""
+}
+
+func (t *CreateWorkbenchWebhook) GetCreateWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &CreateWorkbenchWebhook{}
+	}
+	return t.CreateWorkbenchWebhook
+}
+
+type UpdateWorkbenchWebhook struct {
+	UpdateWorkbenchWebhook *WorkbenchWebhookFragment "json:\"updateWorkbenchWebhook,omitempty\" graphql:\"updateWorkbenchWebhook\""
+}
+
+func (t *UpdateWorkbenchWebhook) GetUpdateWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook{}
+	}
+	return t.UpdateWorkbenchWebhook
+}
+
+type DeleteWorkbenchWebhook struct {
+	DeleteWorkbenchWebhook *WorkbenchWebhookFragment "json:\"deleteWorkbenchWebhook,omitempty\" graphql:\"deleteWorkbenchWebhook\""
+}
+
+func (t *DeleteWorkbenchWebhook) GetDeleteWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook{}
+	}
+	return t.DeleteWorkbenchWebhook
+}
+
+type GetWorkbenchWebhook struct {
+	GetWorkbenchWebhook *WorkbenchWebhookFragment "json:\"getWorkbenchWebhook,omitempty\" graphql:\"getWorkbenchWebhook\""
+}
+
+func (t *GetWorkbenchWebhook) GetGetWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &GetWorkbenchWebhook{}
+	}
+	return t.GetWorkbenchWebhook
 }
 
 const GetAgentRuntimeDocument = `query GetAgentRuntime ($id: ID!) {
@@ -54896,6 +55174,262 @@ func (c *Client) GetWorkbenchToolTiny(ctx context.Context, id *string, name *str
 	return &res, nil
 }
 
+const CreateWorkbenchCronDocument = `mutation CreateWorkbenchCron ($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+	createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+}
+`
+
+func (c *Client) CreateWorkbenchCron(ctx context.Context, workbenchID string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchCron, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"attributes":  attributes,
+	}
+
+	var res CreateWorkbenchCron
+	if err := c.Client.Post(ctx, "CreateWorkbenchCron", CreateWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateWorkbenchCronDocument = `mutation UpdateWorkbenchCron ($id: ID!, $attributes: WorkbenchCronAttributes!) {
+	updateWorkbenchCron(id: $id, attributes: $attributes) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+}
+`
+
+func (c *Client) UpdateWorkbenchCron(ctx context.Context, id string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchCron, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateWorkbenchCron
+	if err := c.Client.Post(ctx, "UpdateWorkbenchCron", UpdateWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteWorkbenchCronDocument = `mutation DeleteWorkbenchCron ($id: ID!) {
+	deleteWorkbenchCron(id: $id) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+}
+`
+
+func (c *Client) DeleteWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchCron, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteWorkbenchCron
+	if err := c.Client.Post(ctx, "DeleteWorkbenchCron", DeleteWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetWorkbenchCronDocument = `mutation GetWorkbenchCron ($id: ID!) {
+	workbenchCron(id: $id) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+}
+`
+
+func (c *Client) GetWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchCron, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetWorkbenchCron
+	if err := c.Client.Post(ctx, "GetWorkbenchCron", GetWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateWorkbenchWebhookDocument = `mutation CreateWorkbenchWebhook ($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+	createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+}
+`
+
+func (c *Client) CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"attributes":  attributes,
+	}
+
+	var res CreateWorkbenchWebhook
+	if err := c.Client.Post(ctx, "CreateWorkbenchWebhook", CreateWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateWorkbenchWebhookDocument = `mutation UpdateWorkbenchWebhook ($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+	updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+}
+`
+
+func (c *Client) UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateWorkbenchWebhook
+	if err := c.Client.Post(ctx, "UpdateWorkbenchWebhook", UpdateWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteWorkbenchWebhookDocument = `mutation DeleteWorkbenchWebhook ($id: ID!) {
+	deleteWorkbenchWebhook(id: $id) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+}
+`
+
+func (c *Client) DeleteWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteWorkbenchWebhook
+	if err := c.Client.Post(ctx, "DeleteWorkbenchWebhook", DeleteWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetWorkbenchWebhookDocument = `mutation GetWorkbenchWebhook ($id: ID!) {
+	getWorkbenchWebhook(id: $id) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+}
+`
+
+func (c *Client) GetWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetWorkbenchWebhook
+	if err := c.Client.Post(ctx, "GetWorkbenchWebhook", GetWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 var DocumentOperationNames = map[string]string{
 	GetAgentRuntimeDocument:                           "GetAgentRuntime",
 	GetAgentRuntimeByNameDocument:                     "GetAgentRuntimeByName",
@@ -55195,4 +55729,12 @@ var DocumentOperationNames = map[string]string{
 	ListWorkbenchToolsDocument:                        "ListWorkbenchTools",
 	GetWorkbenchToolDocument:                          "GetWorkbenchTool",
 	GetWorkbenchToolTinyDocument:                      "GetWorkbenchToolTiny",
+	CreateWorkbenchCronDocument:                       "CreateWorkbenchCron",
+	UpdateWorkbenchCronDocument:                       "UpdateWorkbenchCron",
+	DeleteWorkbenchCronDocument:                       "DeleteWorkbenchCron",
+	GetWorkbenchCronDocument:                          "GetWorkbenchCron",
+	CreateWorkbenchWebhookDocument:                    "CreateWorkbenchWebhook",
+	UpdateWorkbenchWebhookDocument:                    "UpdateWorkbenchWebhook",
+	DeleteWorkbenchWebhookDocument:                    "DeleteWorkbenchWebhook",
+	GetWorkbenchWebhookDocument:                       "GetWorkbenchWebhook",
 }

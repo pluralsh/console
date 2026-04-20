@@ -149,3 +149,68 @@ query GetWorkbenchToolTiny($id: ID, $name: String) {
         name
     }
 }
+
+fragment WorkbenchCronFragment on WorkbenchCron {
+    id
+    crontab
+    prompt
+}
+
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+    id
+    name
+    prompt
+    matches {
+        regex
+        substring
+        caseInsensitive
+    }
+}
+
+mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+    createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+    updateWorkbenchCron(id: $id, attributes: $attributes) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation DeleteWorkbenchCron($id: ID!) {
+    deleteWorkbenchCron(id: $id) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation GetWorkbenchCron($id: ID!) {
+    workbenchCron(id: $id) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+    createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+        ...WorkbenchWebhookFragment
+    }
+}
+
+mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+    updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+        ...WorkbenchWebhookFragment
+    }
+}
+
+mutation DeleteWorkbenchWebhook($id: ID!) {
+    deleteWorkbenchWebhook(id: $id) {
+        ...WorkbenchWebhookFragment
+    }
+}
+
+mutation GetWorkbenchWebhook($id: ID!) {
+    getWorkbenchWebhook(id: $id) {
+        ...WorkbenchWebhookFragment
+    }
+}
