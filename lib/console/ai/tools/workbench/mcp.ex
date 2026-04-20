@@ -12,7 +12,7 @@ defmodule Console.AI.Tools.Workbench.MCP do
   end
 
   def name(%__MODULE__{tool: %WorkbenchTool{tool: :mcp, name: name}, mcp_tool: %Tool{name: tname}}), do: "mcp_#{name}_#{tname}"
-  def name(%__MODULE__{tool: %WorkbenchTool{tool: :sentry, name: name}, mcp_tool: %Tool{name: tname}}), do: "sentry_#{name}_#{tname}"
+  def name(%__MODULE__{tool: %WorkbenchTool{tool: tool, name: name}, mcp_tool: %Tool{name: tname}}), do: "#{tool}_#{name}_#{tname}"
 
   def description(%__MODULE__{mcp_tool: %Tool{description: description}}), do: description
 

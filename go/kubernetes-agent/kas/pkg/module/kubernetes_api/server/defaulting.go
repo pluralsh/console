@@ -15,6 +15,9 @@ const (
 	defaultAllowedAgentInfoCacheTTL      = 1 * time.Minute
 	defaultAllowedAgentInfoCacheErrorTTL = 10 * time.Second
 	defaultShutdownGracePeriod           = 1 * time.Hour
+	defaultAuditLogFlushInterval         = 30 * time.Second
+	defaultAuditLogFlushEvents           = 128
+	defaultAuditLogDrainTimeout          = 45 * time.Second
 )
 
 func ApplyDefaults(config *kascfg.ConfigurationFile) {
@@ -34,4 +37,7 @@ func ApplyDefaults(config *kascfg.ConfigurationFile) {
 	}
 	prototool.Duration(&o.AllowedAgentCacheTtl, defaultAllowedAgentInfoCacheTTL)
 	prototool.Duration(&o.AllowedAgentCacheErrorTtl, defaultAllowedAgentInfoCacheErrorTTL)
+	prototool.Duration(&o.AuditLogFlushInterval, defaultAuditLogFlushInterval)
+	prototool.Uint32(&o.AuditLogFlushEvents, defaultAuditLogFlushEvents)
+	prototool.Duration(&o.AuditLogDrainTimeout, defaultAuditLogDrainTimeout)
 }

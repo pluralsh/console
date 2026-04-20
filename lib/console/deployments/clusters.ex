@@ -191,8 +191,9 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
-  defp user_claims(%User{email: email, groups: [_| _] = groups}), do: %{"groups" => Enum.map(groups, & &1.name), "user.email" => email}
-  defp user_claims(%User{email: email}), do: %{"groups" => [], "user.email" => email}
+  defp user_claims(%User{email: email, groups: [_| _] = groups}),
+    do: %{"groups" => Enum.map(groups, & &1.name), "email" => email, "user.email" => email}
+  defp user_claims(%User{email: email}), do: %{"groups" => [], "email" => email, "user.email" => email}
 
   @spec kubeconfig(Cluster.t) :: {:ok, binary} | {:error, term}
   def kubeconfig(%Cluster{name: name} = cluster) do
@@ -675,9 +676,9 @@ defmodule Console.Deployments.Clusters do
     |> notify(:create, user)
   end
 
-  EEx.function_from_file(:defp, :upgrade_prompt, Console.priv_filename(["prompts", "cluster_upgrade.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon_inline.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon_inline.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :upgrade_prompt, Console.priv_filename(["prompts", "cluster_upgrade.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon_inline.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon_inline.md.eex"]), [:assigns])
 
   @spec upgrade_plan(Cluster.t) :: %{
     failed_insights: [UpgradeInsight.t],

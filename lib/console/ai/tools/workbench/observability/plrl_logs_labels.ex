@@ -11,6 +11,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
     field :query,      :string
     field :field,      :string
     field :limit,      :integer
+    field :operator,   Console.Schema.Monitor.Operator, default: :or
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
       field :name,  :string
@@ -20,7 +21,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(service_id cluster_id query limit field)a
+  @valid ~w(service_id cluster_id query limit field operator)a
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/plrl_logs_labels.json") |> Jason.decode!()
   def name(_), do: "plrl_logs_facets"

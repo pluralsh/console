@@ -17,18 +17,20 @@ type MetricsProvider interface {
 	MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error)
 }
 
-func newMetricsProvider(conn *toolquery.ToolConnection) MetricsProvider {
+func newMetricsProvider(conn *toolquery.ToolConnection) (MetricsProvider, error) {
 	switch provider := conn.GetConnection().(type) {
 	case *toolquery.ToolConnection_Prometheus:
-		return NewPrometheusProvider(provider.Prometheus)
+		return NewPrometheusProvider(provider.Prometheus), nil
 	case *toolquery.ToolConnection_Datadog:
-		return NewDatadogProvider(provider.Datadog)
+		return NewDatadogProvider(provider.Datadog), nil
 	case *toolquery.ToolConnection_Dynatrace:
-		return NewDynatraceProvider(provider.Dynatrace)
+		return NewDynatraceProvider(provider.Dynatrace), nil
 	case *toolquery.ToolConnection_Cloudwatch:
-		return NewCloudwatchProvider(provider.Cloudwatch)
+		return NewCloudwatchProvider(provider.Cloudwatch), nil
+	case *toolquery.ToolConnection_Azure:
+		return NewAzureProvider(provider.Azure)
 	default:
-		return nil
+		return nil, nil
 	}
 }
 
@@ -50,6 +52,8 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 		return NewSplunkProvider(provider.Splunk), nil
 	case *toolquery.ToolConnection_Cloudwatch:
 		return NewCloudwatchProvider(provider.Cloudwatch), nil
+	case *toolquery.ToolConnection_Azure:
+		return NewAzureProvider(provider.Azure)
 	default:
 		return nil, nil
 	}
@@ -124,8 +128,13 @@ func NewProvider(conn *toolquery.ToolConnection) (Provider, error) {
 		return nil, err
 	}
 
+	metrics, err := newMetricsProvider(conn)
+	if err != nil {
+		return nil, err
+	}
+
 	return &toolProvider{
-		metrics: newMetricsProvider(conn),
+		metrics: metrics,
 		logs:    logs,
 		traces:  newTracesProvider(conn),
 	}, nil

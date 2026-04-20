@@ -1,10 +1,13 @@
 import {
   AccordionItem,
   ArrowTopRightIcon,
+  AzureDevopsLogoIcon,
   DocumentIcon,
   Flex,
   GitHubLogoIcon,
   GitLabLogoIcon,
+  JiraLogoIcon,
+  LinearLogoIcon,
   Prop,
 } from '@pluralsh/design-system'
 import {
@@ -27,8 +30,11 @@ const providerToIcon: Partial<
     ComponentType<{ size?: number; fullColor?: boolean }>
   >
 > = {
+  [IssueWebhookProvider.AzureDevops]: AzureDevopsLogoIcon,
   [IssueWebhookProvider.Github]: GitHubLogoIcon,
   [IssueWebhookProvider.Gitlab]: GitLabLogoIcon,
+  [IssueWebhookProvider.Jira]: JiraLogoIcon,
+  [IssueWebhookProvider.Linear]: LinearLogoIcon,
 }
 
 export function WorkbenchJobTriggerIssue({

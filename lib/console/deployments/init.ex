@@ -135,7 +135,7 @@ defmodule Console.Deployments.Init do
       start_transaction()
       |> add_operation(:es, fn _ ->
         Workbenches.create_tool(%{
-          name: "plrl.elastic.logs",
+          name: "plrl_elastic_logs",
           tool: :elastic,
           configuration: %{
             elastic: %{
@@ -149,7 +149,7 @@ defmodule Console.Deployments.Init do
       end)
       |> add_operation(:prometheus, fn _ ->
         Workbenches.create_tool(%{
-          name: "plrl.prometheus",
+          name: "plrl_prometheus",
           tool: :prometheus,
           configuration: %{
             prometheus: %{
@@ -157,6 +157,16 @@ defmodule Console.Deployments.Init do
               username: "plrl-#{inst}",
               password: pass
             }
+          }
+        }, bot)
+      end)
+      |> add_operation(:bench, fn _ ->
+        Workbenches.create_workbench(%{
+          name: "plural",
+          description: "Workbench pre-configured with all plural-native tools",
+          configuration: %{
+            infrastructure: %{services: true, stacks: true, kubernetes: true},
+            observability: %{logs: true, metrics: true}
           }
         }, bot)
       end)

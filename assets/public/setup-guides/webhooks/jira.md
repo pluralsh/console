@@ -1,45 +1,46 @@
 # Jira Webhook Setup for Plural
 
-Generate markdown documentation for creating a webhook in Jira against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts, new tickets, and issue transitions.
+References:
+- [Atlassian Support - Managing webhooks](https://confluence.atlassian.com/adminjiracloud/managing-webhooks-776636231.html)
+- [Atlassian Developer - Jira webhooks](https://developer.atlassian.com/cloud/jira/platform/webhooks/)
 
-## 1. Create the webhook in Plural
+## 1. Create the webhook in Plural first
 
-Configure a webhook in Plural with:
+In Plural:
 
-- Type: Ticketing
-- Provider: JIRA
-- URL: Plural callback endpoint
-- Secret: shared signing secret
+1. Set **Type** to `Ticketing`.
+2. Set **Provider** to `JIRA`.
+3. Enter a webhook **Name**.
+4. Enter a **Signing secret**.
+5. Click **Create new webhook**.
 
-## 2. Register URL and secret in Jira
+Copy the generated Plural webhook URL.
 
-In Jira admin settings for webhooks:
+## 2. Create webhook in your Jira site
 
-- Endpoint URL: paste Plural URL
-- Secret or authentication field: paste the Plural secret (if available in your Jira deployment)
-- Authentication: configure additional auth headers only if your policy requires it
+Open your Jira host (for example `https://<your-jira-host>/`) as a Jira admin:
 
-## 3. Configure Jira trigger events
+1. Go to Jira admin webhook management
+2. Click **Create a Webhook**
+3. Set **Name**
+4. Set **URL** to the Plural webhook URL
+5. Select issue events and optional JQL filter
 
-Enable events commonly used for alert workflows:
+Jira admin webhooks do not have a standard shared-secret field like GitHub/GitLab, so use HTTPS and restricted JQL scope for safety.
 
-- Issue created
-- Issue updated
-- Issue transitioned
-- Issue reopened/resolved
+## 3. Select events
 
-If supported, apply JQL filter to include only incident/alert projects and severities.
+Recommended issue lifecycle events:
 
-## 4. Validate end-to-end
+- issue created
+- issue updated
+- issue transitioned
+- issue resolved/reopened
 
-Create and transition a test issue in Jira. In Plural confirm:
+## 4. Validate
 
-- webhook accepted
-- signature/secret check passed
-- trigger appears with expected metadata
+Create and transition a test issue in Jira, then confirm in Plural:
 
-## 5. Best practices
-
-- keep dedicated Jira webhook per environment
-- document JQL filters with your on-call process
-- rotate secret after team ownership changes
+- event arrives and is parsed
+- expected issue metadata is present
+- workflow/trigger behavior matches expectations

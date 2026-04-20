@@ -1,107 +1,163 @@
 import {
   AccordionItem,
-  BrainIcon,
-  ChecklistCheckedIcon,
-  CheckOutlineIcon,
-  CloudLoggingIcon,
+  Card,
   DiscoverIcon,
   FailedFilledIcon,
   Flex,
   IconFrame,
-  IconProps,
-  InfrastructureIcon,
-  NotebookIcon,
-  SpinnerAlt,
-  TicketIcon,
-  ToolKitIcon,
-  UnknownIcon,
+  Markdown,
+  TimeSeriesIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
-import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunFixButton'
 import {
-  ClickableLabelSC,
+  AgentRunInfoCard,
+  AgentRunInfoSimple,
+} from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import {
+  SimpleAccordion,
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import pluralize from 'pluralize'
+import { POLL_INTERVAL } from 'components/cluster/constants'
+import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { CaptionP, OverlineH3 } from 'components/utils/typography/Text'
+import { StackedText } from 'components/utils/table/StackedText'
+import { EaseIn } from 'components/utils/EaseIn'
+import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
+  AgentRunStatus,
+  useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ComponentType, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  ActivityModalIcon,
+  hasWorkbenchMetricsToolQuery,
   JobActivityLogs,
   JobActivityMetrics,
+  JobActivityMetricsChart,
   JobActivityPrompt,
-  MemoActivityResult,
-  UserActivityResult,
+  MemoActivityIcon,
+  ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 
 export function WorkbenchJobActivity({
   isOpen,
   activity,
   textStream,
+  jobId,
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
+  jobId: string
 }) {
   const { spacing } = useTheme()
-  const isRunning = isActivityRunning(activity.status)
+  const { id, status, type, prompt, agentRun, result } = activity
+  const isRunning = isJobRunning(status)
 
-  if (activity.type === WorkbenchJobActivityType.Conclusion)
-    return <WorkbenchJobActivityResult activity={activity} />
-  if (activity.type === WorkbenchJobActivityType.User)
-    return <UserActivityResult activity={activity} />
+  if (type === WorkbenchJobActivityType.Conclusion)
+    return (
+      <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
+        <WorkbenchJobActivityResult
+          activity={activity}
+          jobId={jobId}
+          markdownType="classic"
+          metricsFetchEnabled
+        />
+      </div>
+    )
+  if (type === WorkbenchJobActivityType.User)
+    return <ExpandableUserPrompt prompt={activity.prompt} />
 
-  const TypeIcon =
-    activityTypeToIcon[activity.type ?? WorkbenchJobActivityType.Integration]
-  const { agentRun } = activity
   return (
     <AccordionItem
-      key={activity.id}
-      value={activity.id}
-      caret="left"
-      padding="compact"
-      paddingArea="trigger-only"
+      key={id}
+      value={id}
+      caret="right-quarter-mirror"
+      padding="none"
+      triggerWrapperStyles={{
+        justifyContent: 'flex-start',
+        gap: 10,
+        padding: `${spacing.xsmall}px 0`,
+        '.icon': { width: 10 },
+      }}
       trigger={
-        <StretchedFlex gap="small">
-          <OverlineH3
-            $color="text-primary-disabled"
+        <Flex
+          gap="xsmall"
+          alignItems="center"
+        >
+          <Body2P
+            $color="text-long-form"
             $shimmer={isRunning}
-            css={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: spacing.xsmall,
-              flex: 1,
-            }}
+            css={{ textTransform: 'capitalize' }}
           >
-            <TypeIcon
-              size={12}
-              color="icon-xlight"
+            {type?.toLowerCase() ?? 'activity'}
+          </Body2P>
+          {result?.jobUpdate && (
+            <MemoActivityIcon jobUpdate={result.jobUpdate} />
+          )}
+          {!isEmpty(result?.logs) && (
+            <ActivityModalIcon
+              icon={VisualInspectionIcon}
+              tooltip="View logs"
+              modalHeader="Logs"
+              modalContent={
+                <JobActivityLogs
+                  cardWrapper
+                  logs={result?.logs?.filter(isNonNullable) ?? []}
+                />
+              }
             />
-            <span>{activity.type?.toLowerCase() ?? 'activity'}</span>
-          </OverlineH3>
-          {agentRun && !isOpen && (
+          )}
+          {hasWorkbenchMetricsToolQuery(result?.metricsQuery) && (
+            <ActivityModalIcon
+              icon={TimeSeriesIcon}
+              tooltip="View metrics"
+              modalHeader="Metrics"
+              modalContent={
+                <JobActivityMetrics
+                  jobId={jobId}
+                  metricsQuery={result?.metricsQuery}
+                  skeletonHeight={320}
+                />
+              }
+            />
+          )}
+          {agentRun && (
             <IconFrame
               clickable
               as={Link}
+              size="small"
               to={getAgentRunAbsPath({ agentRunId: agentRun.id })}
-              icon={<DiscoverIcon color="icon-xlight" />}
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={
+                <DiscoverIcon
+                  color="icon-xlight"
+                  css={{ width: 14 }}
+                />
+              }
               tooltip="Go to agent run details"
             />
           )}
-          <ActivityStatusIcon status={activity.status} />
-        </StretchedFlex>
+          {status == WorkbenchJobActivityStatus.Failed && (
+            <FailedFilledIcon
+              size={12}
+              color="icon-danger"
+            />
+          )}
+        </Flex>
       }
     >
       <Flex
@@ -110,11 +166,12 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {activity.prompt && activity.type !== WorkbenchJobActivityType.Memo && (
-          <JobActivityPrompt prompt={activity.prompt} />
+        {prompt && type !== WorkbenchJobActivityType.Memo && (
+          <JobActivityPrompt prompt={prompt} />
         )}
         <WorkbenchJobActivityThoughts
-          thoughts={activity.thoughts?.filter(isNonNullable) ?? []}
+          activityId={id}
+          skip={!isOpen || type === WorkbenchJobActivityType.Memo}
         />
         {textStream && (
           <Flex
@@ -125,7 +182,17 @@ export function WorkbenchJobActivity({
             <SimplifiedMarkdown text={textStream} />
           </Flex>
         )}
-        <WorkbenchJobActivityResult activity={activity} />
+        <WorkbenchJobActivityResult
+          activity={activity}
+          jobId={jobId}
+          metricsFetchEnabled={isOpen}
+        />
+        {isRunning && (
+          <AILoadingText
+            activityId={id}
+            size="small"
+          />
+        )}
       </Flex>
     </AccordionItem>
   )
@@ -133,120 +200,204 @@ export function WorkbenchJobActivity({
 
 function WorkbenchJobActivityResult({
   activity,
+  jobId,
+  markdownType = 'simplified',
+  metricsFetchEnabled,
 }: {
   activity: WorkbenchJobActivityFragment
-}) {
-  const { type, result, agentRun } = activity
-  switch (type) {
-    case WorkbenchJobActivityType.Memo:
-      return <MemoActivityResult result={result} />
-    default:
-      return (
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          {result?.error && <GqlError error={result.error} />}
-          <SimplifiedMarkdown text={result?.output ?? ''} />
-          <JobActivityMetrics
-            metrics={result?.metrics?.filter(isNonNullable) ?? []}
-          />
-          <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
-          <AgentRunInfoCard
-            showLinkButton
-            fillLevel={1}
-            agentRun={agentRun}
-          />
-        </Flex>
-      )
-  }
-}
-
-function WorkbenchJobActivityThoughts({
-  thoughts,
-}: {
-  thoughts: WorkbenchJobThoughtFragment[]
+  jobId: string
+  markdownType?: 'classic' | 'simplified'
+  metricsFetchEnabled: boolean
 }) {
   const { spacing } = useTheme()
-  const [isExpanded, setIsExpanded] = useState(false)
-  const isExpandable = thoughts.length > 3
-  const visibleThoughts = isExpanded ? thoughts : thoughts.slice(0, 3)
-  if (isEmpty(thoughts)) return null
+  const { agentRun, agentRuns, result } = activity
+  const otherAgentRuns = useMemo(
+    () =>
+      agentRuns?.filter(isNonNullable).filter(({ id }) => id !== agentRun?.id),
+    [agentRun?.id, agentRuns]
+  )
   return (
     <Flex
       direction="column"
-      gap="small"
-      paddingLeft={spacing.small}
+      gap="medium"
     >
-      {visibleThoughts.map((t, i) => (
-        <SimpleToolCall
-          key={i}
-          content={t.content}
-          attributes={{ tool: { name: t.toolName, arguments: t.toolArgs } }}
+      {result?.error && (
+        <GqlError
+          error={result.error}
+          css={{ wordBreak: 'break-word' }}
         />
-      ))}
-      {isExpandable && (
-        <ClickableLabelSC onClick={() => setIsExpanded(!isExpanded)}>
-          <CaptionP $color="text-xlight">
-            {isExpanded
-              ? 'View less'
-              : `View more +${thoughts.length - visibleThoughts.length}`}
-          </CaptionP>
-        </ClickableLabelSC>
       )}
+      <div>
+        {markdownType === 'simplified' ? (
+          <SimplifiedMarkdown text={result?.output ?? ''} />
+        ) : (
+          <Markdown text={result?.output ?? ''} />
+        )}
+      </div>
+      <JobActivityMetrics
+        jobId={jobId}
+        fetchWhen={metricsFetchEnabled}
+        metricsQuery={result?.metricsQuery}
+      />
+      <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
+      {!isEmpty(otherAgentRuns) && (
+        <>
+          <StackedText
+            first="Other agent runs"
+            firstPartialType="body2Bold"
+            firstColor="text-xlight"
+            icon={
+              <DiscoverIcon
+                size={12}
+                color="icon-xlight"
+              />
+            }
+          />
+          {otherAgentRuns?.map((agentRun) => (
+            <AgentRunInfoSimple
+              key={agentRun.id}
+              agentRun={agentRun}
+              css={{ padding: `0 ${spacing.small}px` }}
+            />
+          ))}
+        </>
+      )}
+      <AgentRunInfoCard
+        showLinkButton
+        fillLevel={1}
+        agentRun={agentRun}
+      />
     </Flex>
   )
 }
 
-const activityTypeToIcon: Record<
-  WorkbenchJobActivityType,
-  ComponentType<IconProps>
-> = {
-  [WorkbenchJobActivityType.Coding]: CloudLoggingIcon,
-  [WorkbenchJobActivityType.Infrastructure]: InfrastructureIcon,
-  [WorkbenchJobActivityType.Memo]: NotebookIcon,
-  [WorkbenchJobActivityType.Observability]: VisualInspectionIcon,
-  [WorkbenchJobActivityType.Plan]: ChecklistCheckedIcon,
-  [WorkbenchJobActivityType.Ticketing]: TicketIcon,
-  [WorkbenchJobActivityType.Integration]: ToolKitIcon,
-  [WorkbenchJobActivityType.Memory]: BrainIcon,
-  [WorkbenchJobActivityType.User]: BrainIcon,
-  [WorkbenchJobActivityType.Conclusion]: CheckOutlineIcon,
-} as const satisfies Record<WorkbenchJobActivityType, ComponentType<IconProps>>
-
-function ActivityStatusIcon({
-  status,
+function WorkbenchJobActivityThoughts({
+  activityId,
+  skip,
 }: {
-  status: WorkbenchJobActivityStatus
+  activityId: string
+  skip: boolean
 }) {
-  switch (status) {
-    case WorkbenchJobActivityStatus.Pending:
-    case WorkbenchJobActivityStatus.Running:
-      return <SpinnerAlt size={12} />
-    case WorkbenchJobActivityStatus.Successful:
-      return (
-        <CheckOutlineIcon
-          size={12}
-          color="icon-success"
-        />
-      )
-    case WorkbenchJobActivityStatus.Failed:
-      return (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )
-    default:
-      return (
-        <UnknownIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-  }
+  const { spacing } = useTheme()
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  const { data, loading, error } = useWorkbenchJobActivityQuery({
+    variables: { id: activityId },
+    fetchPolicy: 'cache-and-network',
+    skip,
+    pollInterval: POLL_INTERVAL,
+  })
+  const isLoading = !data && loading
+  const activity = data?.workbenchJobActivity
+
+  const { thoughts, lastThought, header } = useMemo(() => {
+    const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
+    let [numWithLogs, numWithMetrics] = [0, 0]
+    thoughts.forEach(({ attributes }) => {
+      numWithLogs += isEmpty(attributes?.logs) ? 0 : 1
+      numWithMetrics += isEmpty(attributes?.metrics) ? 0 : 1
+    })
+    const numOtherToolCalls = thoughts.length - numWithLogs - numWithMetrics
+    let header = `${numOtherToolCalls} tool ${pluralize('call', numOtherToolCalls)}`
+    if (numWithLogs > 0) header += `, ${numWithLogs} fetched logs`
+    if (numWithMetrics > 0) header += `, ${numWithMetrics} fetched metrics`
+    return { thoughts, lastThought: thoughts.at(-1), header }
+  }, [activity?.thoughts])
+
+  if (isEmpty(thoughts) && !isLoading) return null
+  if (error)
+    return (
+      <GqlError
+        header={
+          <Body2P $color="text-xlight">Failed to load activity thoughts</Body2P>
+        }
+        error={error}
+      />
+    )
+
+  return (
+    <>
+      <SimpleAccordion
+        label={header}
+        loading={isLoading}
+        isOpen={isExpanded}
+        setIsOpen={setIsExpanded}
+        caret="right-quarter-mirror"
+        triggerWrapperStyles={{
+          justifyContent: 'flex-start',
+          '.icon': { width: 10 },
+        }}
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginTop={spacing.xsmall}
+        >
+          {thoughts.map((thought, i) => (
+            <WorkbenchJobActivityThought
+              key={i}
+              thought={thought}
+            />
+          ))}
+        </Flex>
+      </SimpleAccordion>
+      {!isExpanded && lastThought && isJobRunning(activity?.status) && (
+        <EaseIn currentKey={lastThought.id}>
+          <WorkbenchJobActivityThought thought={lastThought} />
+        </EaseIn>
+      )}
+    </>
+  )
 }
 
-export const isActivityRunning = (status: WorkbenchJobActivityStatus) =>
-  status === WorkbenchJobActivityStatus.Pending ||
-  status === WorkbenchJobActivityStatus.Running
+function WorkbenchJobActivityThought({
+  thought,
+}: {
+  thought: WorkbenchJobThoughtFragment
+}) {
+  const { content, toolName, toolArgs, attributes } = thought
+  const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+  const logs = attributes?.logs?.filter(isNonNullable) ?? []
+  return (
+    <SimpleToolCall
+      content={content}
+      attributes={{ tool: { name: toolName, arguments: toolArgs } }}
+      {...(!isEmpty(metrics) && {
+        customLabel: (
+          <CaptionP $color="text">
+            Fetched metrics <SpanSC $color="text-xlight">{toolName}</SpanSC>
+          </CaptionP>
+        ),
+        customResultBody: (
+          <Card>
+            <JobActivityMetricsChart
+              metrics={metrics}
+              lineProps={{
+                margin: { top: 20, right: 16, bottom: 25, left: 35 },
+              }}
+            />
+          </Card>
+        ),
+      })}
+      {...(!isEmpty(logs) && {
+        customLabel: (
+          <CaptionP $color="text">
+            Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
+          </CaptionP>
+        ),
+        customResultBody: (
+          <JobActivityLogs
+            cardWrapper
+            logs={logs}
+          />
+        ),
+      })}
+    />
+  )
+}
+
+export const isJobRunning = (
+  status: Nullable<
+    WorkbenchJobActivityStatus | WorkbenchJobStatus | AgentRunStatus
+  >
+) => status === 'PENDING' || status === 'RUNNING'

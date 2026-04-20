@@ -30,6 +30,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project_id,        :id, description: "the project for this workbench"
     field :repository_id,     :id, description: "the git repository for this workbench"
     field :agent_runtime_id,  :id, description: "the agent runtime for this workbench"
+    field :override_bot_user, :boolean, description: "when true on update, sets botUserId to the authenticated user"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
     field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
@@ -90,11 +91,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_webhook_attributes do
-    field :name,             :string, description: "unique name for this webhook on the workbench (required for create)"
-    field :webhook_id,       :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
-    field :issue_webhook_id, :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
-    field :matches,          :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
-    field :prompt,           :string, description: "optional prompt text applied when this webhook matches"
+    field :name,                   :string, description: "unique name for this webhook on the workbench (required for create)"
+    field :webhook_id,             :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
+    field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
   end
 
   input_object :workbench_tool_attributes do
@@ -117,6 +119,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
     field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
+    field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
   end
@@ -187,6 +190,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :role_session_name, :string, description: "optional role session name for assume role"
   end
 
+  input_object :workbench_tool_azure_connection_attributes do
+    field :subscription_id, non_null(:string), description: "azure subscription id"
+    field :tenant_id,       non_null(:string), description: "azure tenant id"
+    field :client_id,       non_null(:string), description: "azure client id"
+    field :client_secret,   non_null(:string), description: "azure client secret"
+  end
+
   input_object :workbench_tool_linear_connection_attributes do
     field :access_token, :string, description: "linear API access token"
   end
@@ -225,6 +235,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project,       :project,                  resolve: dataloader(Deployments), description: "the project of this workbench"
     field :repository,    :git_repository,           resolve: dataloader(Deployments), description: "the git repository for this workbench"
     field :agent_runtime, :agent_runtime,            resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
+    field :bot_user,      :user,                     resolve: dataloader(User), description: "the service account user used for automated workbench agent runs"
     field :tools,         list_of(:workbench_tool),  resolve: dataloader(Deployments), description: "tools associated with this workbench"
 
     field :read_bindings, list_of(:policy_binding),  resolve: dataloader(Deployments), description: "read policy for this service"
@@ -284,6 +295,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_job_activities/3
     end
 
+    field :metrics_tool, list_of(:workbench_job_activity_metric) do
+      arg :name,      :string, description: "the name of the metrics tool"
+      arg :arguments, :json,   description: "the arguments for the metrics tool"
+
+      resolve &Deployments.metrics_tool/3
+    end
+
+    field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
+
     timestamps()
   end
 
@@ -294,6 +314,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,   :string, description: "the prompt for this activity"
     field :result,   :workbench_job_activity_result, description: "embedded result (output, metrics, logs) when present"
     field :thoughts, list_of(:workbench_job_thought), resolve: dataloader(Deployments), description: "thoughts emitted during this activity"
+
+    field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
@@ -320,11 +342,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_activity_result do
-    field :output,     :string, description: "output from the activity"
-    field :error,      :string, description: "error from the activity"
-    field :job_update, :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
-    field :metrics,    list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
-    field :logs,       list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :output,        :string, description: "output from the activity"
+    field :error,         :string, description: "error from the activity"
+    field :job_update,    :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
+    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
+    field :logs,          list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query emitted by the activity"
   end
 
   object :workbench_job_activity_job_update do
@@ -360,8 +383,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result_metadata do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
-    field :logs,    list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :logs,          list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query for this result"
+  end
+
+  object :workbench_tool_query_data do
+    field :tool_name, :string, description: "the tool name used to run this query"
+    field :tool_args, :map, description: "arguments used for this tool query"
+    field :summary,   :string, description: "a short summary describing what this query means"
   end
 
   object :workbench_job_result_todo do
@@ -441,9 +471,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, :string, description: "optional prompt text applied when this webhook matches"
     field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
 
-    field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
-    field :webhook,     :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+    field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
+    field :webhook,       :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
     field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
+    field :user,          :user, resolve: dataloader(User), description: "the user who created this webhook"
 
     timestamps()
   end
@@ -471,6 +502,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
     field :dynatrace, :workbench_tool_dynatrace_connection, description: "dynatrace connection (no secrets)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
+    field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
   end
@@ -522,6 +554,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :log_group_names, list_of(:string), description: "default log groups for logs insights queries"
     field :role_arn, :string, description: "assumed role ARN when configured"
     field :role_session_name, :string, description: "assume-role session name"
+  end
+
+  object :workbench_tool_azure_connection do
+    field :subscription_id, :string, description: "azure subscription id"
+    field :tenant_id,       :string, description: "azure tenant id"
+    field :client_id,       :string, description: "azure client id"
   end
 
   object :workbench_tool_linear_connection do

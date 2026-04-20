@@ -1,5 +1,9 @@
 defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   use Console.DataCase, async: true
+  use Mimic
+  alias CloudQuery.Client
+  alias Toolquery.ToolQuery.Stub
+  alias Toolquery.{MetricPoint, MetricsQueryOutput}
 
   describe "workbenches" do
     test "it can fetch workbenches" do
@@ -488,6 +492,82 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["result"]["workingTheory"] == "theory"
       assert found["result"]["conclusion"] == "done"
     end
+
+    test "it resolves metricsTool using the generated observability metrics tool name and parses GraphQL output" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "prom",
+        tool: :prometheus,
+        categories: [:metrics],
+        configuration: %{
+          prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :metrics, fn :mock_conn, input ->
+        assert input.query == "sum(rate(http_requests_total[5m]))"
+        assert input.step == "30s"
+
+        {:ok,
+         %MetricsQueryOutput{
+           metrics: [
+             %MetricPoint{
+               timestamp: Google.Protobuf.from_datetime(now),
+               name: "http_requests_total",
+               value: 42.5,
+               labels: %{"service" => "api", "method" => "GET"}
+             }
+           ]
+         }}
+      end)
+
+      tool_name = "workbench_observability_metrics_prom"
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $name: String!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            id
+            metricsTool(name: $name, arguments: $arguments) {
+              timestamp
+              name
+              value
+              labels
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "name" => tool_name,
+        "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m]))", "step" => "30s"})
+      }, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      [metric] = found["metricsTool"]
+      assert metric["timestamp"]
+      assert metric["name"] == "http_requests_total"
+      assert metric["value"] == 42.5
+      assert metric["labels"] == %{"service" => "api", "method" => "GET"}
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query WorkbenchJob($id: ID!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            id
+            metricsTool(name: "prom", arguments: $arguments) {
+              name
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m]))", "step" => "30s"})
+      }, %{current_user: admin_user()})
+    end
   end
 
   describe "workbenchJobActivity" do
@@ -585,6 +665,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["result"]["jobUpdate"]["workingTheory"] == "theory"
       assert found["result"]["jobUpdate"]["conclusion"] == "ok"
     end
+
   end
 
   describe "workbench_tools" do

@@ -51,12 +51,14 @@ type RootQueryType {
 
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
+  logAggregation(
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, operator: LogQueryOperator, facets: [LogFacetInput]
+  ): [LogLine]
 
   logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
 
   logAggregationBuckets(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
+    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, operator: LogQueryOperator, facets: [LogFacetInput]
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -1543,6 +1545,7 @@ enum IssueWebhookProvider {
   ASANA
   GITHUB
   GITLAB
+  AZURE_DEVOPS
 }
 
 enum IssueStatus {
@@ -1693,6 +1696,7 @@ enum AgentRunStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  BABYSITTING
 }
 
 enum AgentRunMode {
@@ -1737,6 +1741,9 @@ input AgentRuntimeAttributes {
 
   "the git repositories allowed to be used with this runtime"
   allowedRepositories: [String]
+
+  "default interval in seconds between babysit checks for runs on this runtime"
+  babysitInterval: Int
 }
 
 input AgentBindingAttributes {
@@ -1765,6 +1772,12 @@ input AgentRunAttributes {
 
   "the flow this agent run is associated with"
   flowId: ID
+
+  "whether babysit mode is enabled for this run"
+  babysit: Boolean
+
+  "interval in seconds between babysit checks for this run"
+  babysitInterval: Int
 }
 
 input AgentRunStatusAttributes {
@@ -1779,6 +1792,12 @@ input AgentRunStatusAttributes {
 
   "the kubernetes pod this agent is running on"
   podReference: NamespacedName
+
+  "whether babysit mode is enabled for this run"
+  babysit: Boolean
+
+  "interval in seconds between babysit checks for this run"
+  babysitInterval: Int
 }
 
 input AgentPullRequestAttributes {
@@ -1927,6 +1946,9 @@ type AgentRuntime {
   "the git repositories allowed to be used with this runtime"
   allowedRepositories: [String]
 
+  "default interval in seconds between babysit checks for runs on this runtime"
+  babysitInterval: Int
+
   "the cluster this runtime is running on"
   cluster: Cluster
 
@@ -1966,6 +1988,12 @@ type AgentRun {
 
   "whether this agent run is shared"
   shared: Boolean
+
+  "whether babysit mode is enabled for this run"
+  babysit: Boolean
+
+  "interval in seconds between babysit checks for this run"
+  babysitInterval: Int
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -2010,7 +2038,11 @@ type AgentRun {
 }
 
 type ScmCreds {
+  "the type of the scm connection"
+  type: ScmType
+
   username: String!
+
   token: String!
 }
 
@@ -2201,7 +2233,7 @@ enum WorkbenchToolType {
   SPLUNK
   DYNATRACE
   CLOUDWATCH
-  JAEGER
+  AZURE
 }
 
 enum WorkbenchToolCategory {
@@ -2283,6 +2315,9 @@ input WorkbenchAttributes {
 
   "the agent runtime for this workbench"
   agentRuntimeId: ID
+
+  "when true on update, sets botUserId to the authenticated user"
+  overrideBotUser: Boolean
 
   "workbench configuration"
   configuration: WorkbenchConfigurationAttributes
@@ -2401,6 +2436,9 @@ input WorkbenchWebhookAttributes {
 
   "optional prompt text applied when this webhook matches"
   prompt: String
+
+  "when true on update, sets userId to the authenticated user"
+  overrideWebhookUser: Boolean
 }
 
 input WorkbenchToolAttributes {
@@ -2442,9 +2480,6 @@ input WorkbenchToolConfigurationAttributes {
   "tempo connection (traces)"
   tempo: WorkbenchToolTempoConnectionAttributes
 
-  "jaeger connection (traces)"
-  jaeger: WorkbenchToolJaegerConnectionAttributes
-
   "datadog connection (metrics, logs)"
   datadog: WorkbenchToolDatadogConnectionAttributes
 
@@ -2453,6 +2488,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "cloudwatch connection (metrics, logs)"
   cloudwatch: WorkbenchToolCloudwatchConnectionAttributes
+
+  "azure monitor connection (metrics)"
+  azure: WorkbenchToolAzureConnectionAttributes
 
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
@@ -2540,20 +2578,6 @@ input WorkbenchToolSplunkConnectionAttributes {
   password: String
 }
 
-input WorkbenchToolJaegerConnectionAttributes {
-  "jaeger base url"
-  url: String!
-
-  "bearer token"
-  token: String
-
-  "basic auth username"
-  username: String
-
-  "basic auth password"
-  password: String
-}
-
 input WorkbenchToolDatadogConnectionAttributes {
   "datadog site (e.g. datadoghq.com)"
   site: String
@@ -2594,6 +2618,20 @@ input WorkbenchToolCloudwatchConnectionAttributes {
 
   "optional role session name for assume role"
   roleSessionName: String
+}
+
+input WorkbenchToolAzureConnectionAttributes {
+  "azure subscription id"
+  subscriptionId: String!
+
+  "azure tenant id"
+  tenantId: String!
+
+  "azure client id"
+  clientId: String!
+
+  "azure client secret"
+  clientSecret: String!
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -2666,6 +2704,9 @@ type Workbench {
 
   "the agent runtime for this workbench"
   agentRuntime: AgentRuntime
+
+  "the service account user used for automated workbench agent runs"
+  botUser: User
 
   "tools associated with this workbench"
   tools: [WorkbenchTool]
@@ -2748,6 +2789,17 @@ type WorkbenchJob {
 
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
+  metricsTool(
+    "the name of the metrics tool"
+    name: String
+
+    "the arguments for the metrics tool"
+    arguments: Json
+  ): [WorkbenchJobActivityMetric]
+
+  "whimsically describes current progress for you"
+  whimsey: String
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2771,6 +2823,9 @@ type WorkbenchJobActivity {
 
   "thoughts emitted during this activity"
   thoughts: [WorkbenchJobThought]
+
+  "whimsically describes current progress for you"
+  whimsey: String
 
   "the job this activity belongs to"
   workbenchJob: WorkbenchJob
@@ -2833,6 +2888,9 @@ type WorkbenchJobActivityResult {
 
   "logs emitted by the activity"
   logs: [WorkbenchJobActivityLog]
+
+  "metrics tool query emitted by the activity"
+  metricsQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -2887,6 +2945,20 @@ type WorkbenchJobResultMetadata {
 
   "logs for this result"
   logs: [WorkbenchJobActivityLog]
+
+  "metrics tool query for this result"
+  metricsQuery: WorkbenchToolQueryData
+}
+
+type WorkbenchToolQueryData {
+  "the tool name used to run this query"
+  toolName: String
+
+  "arguments used for this tool query"
+  toolArgs: Map
+
+  "a short summary describing what this query means"
+  summary: String
 }
 
 type WorkbenchJobResultTodo {
@@ -3034,6 +3106,9 @@ type WorkbenchWebhook {
   "the issue webhook that receives events"
   issueWebhook: IssueWebhook
 
+  "the user who created this webhook"
+  user: User
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -3085,9 +3160,6 @@ type WorkbenchToolConfiguration {
   "tempo connection (no secrets)"
   tempo: WorkbenchToolTempoConnection
 
-  "jaeger connection (no secrets)"
-  jaeger: WorkbenchToolJaegerConnection
-
   "datadog connection (no secrets)"
   datadog: WorkbenchToolDatadogConnection
 
@@ -3096,6 +3168,9 @@ type WorkbenchToolConfiguration {
 
   "cloudwatch connection (no secrets)"
   cloudwatch: WorkbenchToolCloudwatchConnection
+
+  "azure monitor connection (no secrets)"
+  azure: WorkbenchToolAzureConnection
 
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
@@ -3148,14 +3223,6 @@ type WorkbenchToolTempoConnection {
   tenantId: String
 }
 
-type WorkbenchToolJaegerConnection {
-  "jaeger base url"
-  url: String
-
-  "basic auth username"
-  username: String
-}
-
 type WorkbenchToolSplunkConnection {
   "splunk base url"
   url: String
@@ -3186,6 +3253,17 @@ type WorkbenchToolCloudwatchConnection {
 
   "assume-role session name"
   roleSessionName: String
+}
+
+type WorkbenchToolAzureConnection {
+  "azure subscription id"
+  subscriptionId: String
+
+  "azure tenant id"
+  tenantId: String
+
+  "azure client id"
+  clientId: String
 }
 
 type WorkbenchToolLinearConnection {
@@ -13198,6 +13276,11 @@ input LogFacetInput {
 
 input LogAggregationInput {
   bucketSize: String
+}
+
+enum LogQueryOperator {
+  AND
+  OR
 }
 
 type Dashboard {

@@ -55,17 +55,6 @@ defmodule Toolquery.TempoConnection do
   field :password, 5, proto3_optional: true, type: :string
 end
 
-defmodule Toolquery.JaegerConnection do
-  @moduledoc false
-
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
-
-  field :url, 1, type: :string
-  field :token, 2, proto3_optional: true, type: :string
-  field :username, 3, proto3_optional: true, type: :string
-  field :password, 4, proto3_optional: true, type: :string
-end
-
 defmodule Toolquery.SplunkConnection do
   @moduledoc false
 
@@ -100,6 +89,17 @@ defmodule Toolquery.CloudwatchConnection do
   field :role_session_name, 7, proto3_optional: true, type: :string, json_name: "roleSessionName"
 end
 
+defmodule Toolquery.AzureConnection do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :subscription_id, 1, type: :string, json_name: "subscriptionId"
+  field :tenant_id, 2, type: :string, json_name: "tenantId"
+  field :client_id, 3, type: :string, json_name: "clientId"
+  field :client_secret, 4, type: :string, json_name: "clientSecret"
+end
+
 defmodule Toolquery.ToolConnection do
   @moduledoc false
 
@@ -115,7 +115,7 @@ defmodule Toolquery.ToolConnection do
   field :splunk, 6, type: Toolquery.SplunkConnection, oneof: 0
   field :dynatrace, 7, type: Toolquery.DynatraceConnection, oneof: 0
   field :cloudwatch, 8, type: Toolquery.CloudwatchConnection, oneof: 0
-  field :jaeger, 9, type: Toolquery.JaegerConnection, oneof: 0
+  field :azure, 9, type: Toolquery.AzureConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do
@@ -136,6 +136,29 @@ defmodule Toolquery.MetricsQueryInput do
   field :query, 2, type: :string
   field :range, 3, type: Toolquery.TimeRange
   field :step, 4, proto3_optional: true, type: :string
+  field :options, 5, proto3_optional: true, type: Toolquery.MetricsOptions
+end
+
+defmodule Toolquery.MetricsOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsOptions
+end
+
+defmodule Toolquery.AzureMetricsOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :resource_id, 1, type: :string, json_name: "resourceId"
+  field :metrics_namespace, 2, type: :string, json_name: "metricsNamespace"
+  field :aggregation, 3, proto3_optional: true, type: :string
+  field :filter, 4, proto3_optional: true, type: :string
+  field :order_by, 5, proto3_optional: true, type: :string, json_name: "orderBy"
+  field :roll_up_by, 6, proto3_optional: true, type: :string, json_name: "rollUpBy"
+  field :metrics_endpoint, 7, proto3_optional: true, type: :string, json_name: "metricsEndpoint"
 end
 
 defmodule Toolquery.LogsQueryFacet do
@@ -157,6 +180,23 @@ defmodule Toolquery.LogsQueryInput do
   field :range, 3, type: Toolquery.TimeRange
   field :limit, 4, proto3_optional: true, type: :int32
   field :facets, 5, repeated: true, type: Toolquery.LogsQueryFacet
+  field :options, 6, proto3_optional: true, type: Toolquery.LogsOptions
+end
+
+defmodule Toolquery.LogsOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureLogsOptions
+end
+
+defmodule Toolquery.AzureLogsOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :resource_id, 1, type: :string, json_name: "resourceId"
 end
 
 defmodule Toolquery.TracesQueryInput do
@@ -168,35 +208,6 @@ defmodule Toolquery.TracesQueryInput do
   field :query, 2, type: :string
   field :range, 3, type: Toolquery.TimeRange
   field :limit, 4, proto3_optional: true, type: :int32
-  field :options, 5, proto3_optional: true, type: Toolquery.TracesOptions
-end
-
-defmodule Toolquery.TracesOptions do
-  @moduledoc false
-
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
-
-  field :jaeger, 1, proto3_optional: true, type: Toolquery.JaegerTracesOptions
-end
-
-defmodule Toolquery.JaegerTraceQueryAttribute do
-  @moduledoc false
-
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
-
-  field :name, 1, type: :string
-  field :value, 2, type: :string
-end
-
-defmodule Toolquery.JaegerTracesOptions do
-  @moduledoc false
-
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
-
-  field :operation_name, 1, proto3_optional: true, type: :string, json_name: "operationName"
-  field :attributes, 2, repeated: true, type: Toolquery.JaegerTraceQueryAttribute
-  field :duration_min, 3, proto3_optional: true, type: :string, json_name: "durationMin"
-  field :duration_max, 4, proto3_optional: true, type: :string, json_name: "durationMax"
 end
 
 defmodule Toolquery.MetricPoint.LabelsEntry do
@@ -235,6 +246,23 @@ defmodule Toolquery.MetricsSearchInput do
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
   field :limit, 3, proto3_optional: true, type: :int64
+  field :options, 4, proto3_optional: true, type: Toolquery.MetricsSearchOptions
+end
+
+defmodule Toolquery.MetricsSearchOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsSearchOptions
+end
+
+defmodule Toolquery.AzureMetricsSearchOptions do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :resource_id, 1, type: :string, json_name: "resourceId"
 end
 
 defmodule Toolquery.MetricsSearchResult do

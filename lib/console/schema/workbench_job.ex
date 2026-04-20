@@ -74,6 +74,20 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, preload: ^preloads)
   end
 
+  def requires_backfill(query \\ __MODULE__) do
+    from(j in query, where: is_nil(j.knowledge_updated_at))
+  end
+
+  def resolved(query \\ __MODULE__) do
+    from(j in query,
+      left_join: pr in ^PullRequest.for_status(:merged),
+        on: pr.workbench_job_id == j.id,
+      where: not is_nil(pr.id),
+      select: j,
+      distinct: true
+    )
+  end
+
   @valid ~w(status prompt workbench_id error user_id started_at completed_at alert_id issue_id)a
 
   def changeset(model, attrs \\ %{}) do
@@ -91,5 +105,48 @@ defmodule Console.Schema.WorkbenchJob do
     model
     |> cast(attrs, [])
     |> cast_assoc(:result)
+  end
+end
+
+defmodule Console.Schema.WorkbenchJob.Mini do
+  alias Console.Schema.WorkbenchJob
+
+  @type t :: %__MODULE__{
+    id: binary,
+    status: binary,
+    prompt: binary,
+    conclusion: binary,
+    topology: binary,
+    activities: [%{prompt: binary, type: binary, status: binary}],
+    pull_requests: [%{title: binary, url: binary, body: binary}]
+  }
+
+  @derive Jason.Encoder
+
+  defstruct [:id, :status, :prompt, :conclusion, :topology, :activities, :pull_requests]
+
+  def new(%WorkbenchJob{} = job) do
+    job = Console.Repo.preload(job, [:result, :activities, :pull_requests])
+    %__MODULE__{
+      id: job.id,
+      status: job.status,
+      prompt: job.prompt,
+      conclusion: job.result.conclusion,
+      topology: job.result.topology,
+      activities: Enum.map(job.activities, & %{prompt: &1.prompt, type: &1.type, status: &1.status}),
+      pull_requests: Enum.map(job.pull_requests, & %{title: &1.title, url: &1.url, body: &1.body}),
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      id: attrs["id"],
+      status: attrs["status"],
+      prompt: attrs["prompt"],
+      conclusion: attrs["conclusion"],
+      topology: attrs["topology"],
+      activities: Enum.map(attrs["activities"], & %{prompt: &1["prompt"], type: &1["type"], status: &1["status"]}),
+      pull_requests: Enum.map(attrs["pull_requests"], & %{title: &1["title"], url: &1["url"], body: &1["body"]}),
+    }
   end
 end

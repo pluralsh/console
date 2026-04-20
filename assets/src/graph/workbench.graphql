@@ -2,13 +2,33 @@ fragment WorkbenchTiny on Workbench {
   id
   name
   description
-  repository {
+  agentRuntime {
     id
-    url
-    httpsPath
+    name
+    type
   }
   tools {
     ...WorkbenchToolTiny
+  }
+  webhooks(first: 50) {
+    edges {
+      node {
+        ...WorkbenchWebhookTiny
+      }
+    }
+  }
+}
+
+fragment WorkbenchWebhookTiny on WorkbenchWebhook {
+  id
+  name
+  webhook {
+    id
+    type
+  }
+  issueWebhook {
+    id
+    provider
   }
 }
 
@@ -19,11 +39,18 @@ fragment Workbench on Workbench {
     id
     name
   }
+  repository {
+    id
+  }
   configuration {
     infrastructure {
       services
       stacks
       kubernetes
+    }
+    observability {
+      logs
+      metrics
     }
     coding {
       mode
@@ -112,6 +139,11 @@ fragment WorkbenchTool on WorkbenchTool {
       roleArn
       roleSessionName
     }
+    azure {
+      subscriptionId
+      tenantId
+      clientId
+    }
     dynatrace {
       url
     }
@@ -126,6 +158,14 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
   activity {
     id
   }
+  attributes {
+    logs {
+      ...WorkbenchJobActivityLog
+    }
+    metrics {
+      ...WorkbenchJobActivityMetric
+    }
+  }
 }
 
 fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
@@ -139,6 +179,12 @@ fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
   name
   value
   labels
+}
+
+fragment WorkbenchToolQueryData on WorkbenchToolQueryData {
+  toolName
+  toolArgs
+  summary
 }
 
 fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
@@ -156,18 +202,25 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
     ...WorkbenchJobResultTodo
   }
   metadata {
-    metrics {
-      ...WorkbenchJobActivityMetric
+    metricsQuery {
+      ...WorkbenchToolQueryData
     }
   }
 }
 
-fragment WorkbenchJobTiny on WorkbenchJob {
-  id
-  prompt
-  status
-  workbench {
-    id
+fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
+  output
+  error
+  jobUpdate {
+    diff
+    workingTheory
+    conclusion
+  }
+  metricsQuery {
+    ...WorkbenchToolQueryData
+  }
+  logs {
+    ...WorkbenchJobActivityLog
   }
 }
 
@@ -177,41 +230,21 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
-  thoughts {
-    ...WorkbenchJobThought
-  }
   result {
-    output
-    error
-    jobUpdate {
-      diff
-      workingTheory
-      conclusion
-    }
-    logs {
-      ...WorkbenchJobActivityLog
-    }
-    metrics {
-      ...WorkbenchJobActivityMetric
-    }
-  }
-  thoughts {
-    id
-    content
-    toolName
-    toolArgs
-    insertedAt
-    attributes {
-      logs {
-        ...WorkbenchJobActivityLog
-      }
-      metrics {
-        ...WorkbenchJobActivityMetric
-      }
-    }
+    ...WorkbenchJobActivityResult
   }
   agentRun {
-    ...AgentRun
+    ...AgentRunTiny
+  }
+  agentRuns {
+    ...AgentRunTiny
+  }
+}
+
+fragment WorkbenchJobActivityWithThoughts on WorkbenchJobActivity {
+  ...WorkbenchJobActivity
+  thoughts {
+    ...WorkbenchJobThought
   }
 }
 
@@ -247,6 +280,7 @@ fragment WorkbenchPrompt on WorkbenchPrompt {
 fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
+  prompt
   matches {
     regex
     substring
@@ -286,12 +320,35 @@ fragment WorkbenchIssue on Issue {
   }
 }
 
+fragment WorkbenchJobTiny on WorkbenchJob {
+  id
+  prompt
+  status
+  user {
+    id
+    name
+  }
+  workbench {
+    id
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  result {
+    id
+    conclusion
+  }
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
   workbench {
     id
     name
+    tools {
+      ...WorkbenchToolTiny
+    }
   }
   error
   alert {
@@ -308,9 +365,6 @@ fragment WorkbenchJob on WorkbenchJob {
   }
   result {
     ...WorkbenchJobResult
-  }
-  pullRequests {
-    ...PullRequestBasic
   }
 }
 
@@ -429,7 +483,7 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchPrompts($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchPrompts($id: ID!, $first: Int = 500, $after: String) {
   workbench(id: $id) {
     id
     prompts(first: $first, after: $after) {
@@ -532,6 +586,15 @@ query WorkbenchJob($id: ID!) {
   }
 }
 
+query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    metricsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityMetric
+    }
+  }
+}
+
 query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
@@ -547,36 +610,23 @@ query WorkbenchJobActivities($id: ID!) {
   }
 }
 
-subscription WorkbenchJobDelta($id: ID!) {
-  workbenchJobDelta(id: $id) {
-    delta
-    payload {
-      ...WorkbenchJob
-    }
+query WorkbenchJobWhimseyText($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    whimsey
   }
 }
 
-subscription WorkbenchJobActivityDelta($jobId: ID!) {
-  workbenchJobActivityDelta(jobId: $jobId) {
-    delta
-    payload {
-      ...WorkbenchJobActivity
-    }
+query WorkbenchJobActivityWhimseyText($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    id
+    whimsey
   }
 }
 
-subscription WorkbenchJobThoughtDelta($jobId: ID!) {
-  workbenchJobThoughtDelta(jobId: $jobId) {
-    delta
-    payload {
-      ...WorkbenchJobThought
-    }
-  }
-}
-
-subscription WorkbenchTextStream($jobId: ID!) {
-  workbenchTextStream(jobId: $jobId) {
-    ...WorkbenchTextStream
+query WorkbenchJobActivity($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    ...WorkbenchJobActivityWithThoughts
   }
 }
 
@@ -644,6 +694,13 @@ mutation CreateWorkbenchJob(
     status
     prompt
     insertedAt
+  }
+}
+
+mutation CancelWorkbenchJob($jobId: ID!) {
+  cancelWorkbenchJob(jobId: $jobId) {
+    id
+    status
   }
 }
 
@@ -734,5 +791,43 @@ mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
     name
     provider
     url
+  }
+}
+
+subscription WorkbenchJobDelta($id: ID!) {
+  workbenchJobDelta(id: $id) {
+    delta
+    payload {
+      id
+      status
+      error
+      result {
+        ...WorkbenchJobResult
+      }
+    }
+  }
+}
+
+subscription WorkbenchJobActivityDelta($jobId: ID!) {
+  workbenchJobActivityDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobActivity
+    }
+  }
+}
+
+subscription WorkbenchJobThoughtDelta($jobId: ID!) {
+  workbenchJobThoughtDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobThought
+    }
+  }
+}
+
+subscription WorkbenchTextStream($jobId: ID!) {
+  workbenchTextStream(jobId: $jobId) {
+    ...WorkbenchTextStream
   }
 }

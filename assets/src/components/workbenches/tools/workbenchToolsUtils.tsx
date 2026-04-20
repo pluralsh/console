@@ -1,11 +1,15 @@
 import {
   AtlassianLogoIcon,
+  AwsLogoIcon,
+  AzureLogoIcon,
   DatadogLogoIcon,
+  DynatraceLogoIcon,
   ElasticsearchLogoIcon,
   IconProps,
   LinearLogoIcon,
   LokiLogoIcon,
   PrometheusLogoIcon,
+  SentryLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
@@ -15,7 +19,8 @@ import {
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolType,
 } from 'generated/graphql'
-import { ComponentType } from 'react'
+import { ComponentType, type CSSProperties } from 'react'
+import styled from 'styled-components'
 
 /** Tool types that have a configuration branch in WorkbenchToolConfigurationAttributes and editable forms. */
 const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
@@ -31,6 +36,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Splunk,
   WorkbenchToolType.Dynatrace,
   WorkbenchToolType.Cloudwatch,
+  WorkbenchToolType.Azure,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -53,6 +59,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Splunk]: 'splunk',
   [WorkbenchToolType.Dynatrace]: 'dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
+  [WorkbenchToolType.Azure]: 'azure',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -83,6 +90,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Splunk]: 'Splunk',
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
+  [WorkbenchToolType.Azure]: 'Azure',
   [WorkbenchToolType.Jaeger]: 'Jaeger',
 }
 
@@ -113,6 +121,10 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
   ],
+  [WorkbenchToolType.Azure]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+  ],
   [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
 }
 
@@ -138,6 +150,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Dynatrace]:
     'Query metrics, logs, and traces from Dynatrace.',
   [WorkbenchToolType.Cloudwatch]: 'Query metrics and logs from CloudWatch.',
+  [WorkbenchToolType.Azure]:
+    'Query Azure Monitor metrics and logs for Azure resources.',
   [WorkbenchToolType.Jaeger]:
     'Query distributed traces from Jaeger with structured filters.',
 }
@@ -170,8 +184,12 @@ export function WorkbenchToolIcon({
   fullColor = true,
   ...props
 }: { type: Nullable<string> } & IconProps) {
-  if (!isConfigurableWorkbenchToolType(type)) return <ToolsIcon {...props} />
-  const Icon = toolToIcon[type]
+  const Icon =
+    type === WorkbenchToolType.Sentry
+      ? SentryLogoIcon
+      : isConfigurableWorkbenchToolType(type)
+        ? toolToIcon[type]
+        : ToolsIcon
   return (
     <Icon
       fullColor={fullColor}
@@ -179,6 +197,28 @@ export function WorkbenchToolIcon({
     />
   )
 }
+
+export const WorkbenchToolCardBody = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  boxSizing: 'border-box',
+  width: '100%',
+  minWidth: 0,
+  minHeight: 0,
+  flex: 1,
+  padding: theme.spacing.medium,
+}))
+
+export function workbenchToolCardGridStyles(
+  minColumnWidthPx: number
+): CSSProperties {
+  return {
+    gridTemplateColumns: `repeat(auto-fill, minmax(${minColumnWidthPx}px, 1fr))`,
+    gridAutoRows: 'minmax(min-content, auto)',
+  }
+}
+
 const toolToIcon: Record<
   ConfigurableWorkbenchToolType,
   ComponentType<IconProps>
@@ -192,7 +232,8 @@ const toolToIcon: Record<
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
-  [WorkbenchToolType.Dynatrace]: ToolsIcon,
-  [WorkbenchToolType.Cloudwatch]: ToolsIcon,
+  [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
+  [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,
+  [WorkbenchToolType.Azure]: AzureLogoIcon,
   [WorkbenchToolType.Jaeger]: ToolsIcon,
 }

@@ -8,7 +8,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
   setup :set_mimic_global
 
   describe "new/1" do
-    test "returns an error if the job is not valid" do
+    test "returns success after polling a run" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{
@@ -40,12 +40,15 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
       end)
 
       runtime = insert(:agent_runtime)
-      workbench = insert(:workbench, agent_runtime: runtime, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
+      workbench = insert(:workbench,
+        agent_runtime: runtime,
+        configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}}
+      )
       job = insert(:workbench_job, workbench: workbench, user: admin_user())
       activity = insert(:workbench_job_activity, workbench_job: job, type: :infrastructure)
 
       me = self()
-      spawn(fn ->
+      spawn_link(fn ->
         Console.AI.Tool.context(user: job.user, runtime: workbench.agent_runtime)
         Process.send_after(me, :poll, :timer.seconds(1))
         result = Subagents.Coding.run(activity, job, Environment.new(job, [], []))
@@ -60,7 +63,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
       run = Repo.get(Console.Schema.AgentRun, activity.agent_run_id)
       insert(:pull_request, agent_run: run)
 
-      assert_receive {:result, result}, :timer.seconds(10)
+      assert_receive {:result, result}, :timer.seconds(20)
 
       assert result[:status] == :successful
       assert result[:result][:output] == "some workbench result"

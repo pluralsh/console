@@ -1,40 +1,45 @@
 # Plural-to-Plural Webhook Setup
 
-Generate markdown documentation for creating a webhook in Plural against plural. Plural allows a webhook to have a url and secret, you need to explain to the user how to register those, and how to configure the appropriate triggers so plural can receive events from alerts and internal event streams.
+Use this flow when one Plural environment sends observability webhook events to another Plural environment.
 
 ## 1. Create the receiving webhook in target Plural
 
-In the target Plural environment create:
+In the target Plural environment:
 
-- Type: Observability
-- Provider: PLURAL
-- Secret: shared secret
+1. Open webhook creation.
+2. Set **Type** to `Observability`.
+3. Set **Provider** to `PLURAL`.
+4. Enter a user-chosen **Name**.
+5. Enter a strong **Signing secret**.
+6. Click **Create new webhook**.
 
-Copy the receiving URL.
+After creation, Plural generates and shows the receiving **Webhook URL**. Copy it.
 
-## 2. Register destination URL and secret in source Plural
+## 2. Configure outbound webhook in source Plural
 
-In the source Plural environment configure outbound webhook destination:
+In the source Plural environment, create the outbound webhook/contact point:
 
-- URL: target Plural webhook URL
-- Secret: same secret as target receiver
+- **Destination URL:** the target Plural webhook URL from step 1
+- **Authentication:** HTTP Basic Auth
+- **Password:** the same signing secret from step 1
+- **Username:** any non-empty value
 
-This ensures the receiving environment can validate authenticity.
+Plural validates requests using the Basic Auth password.
 
-## 3. Configure source triggers
+## 3. Route events
 
-Enable event routing for the signals you want to federate:
+Enable source routing for the events you want to federate:
 
-- alert raised
-- alert resolved
-- workflow or policy events relevant to operations
+- alert firing/opened
+- alert resolved/closed
+- other internal observability events required by your team
 
-Apply project/environment filters to avoid duplicate or noisy events.
+Use environment/project filters to avoid duplicate or noisy forwarding.
 
 ## 4. Validate
 
-Send a controlled test event from source Plural and verify target Plural:
+Trigger a controlled test alert in the source environment and confirm in target Plural:
 
-- receives event
-- validates secret
-- records event under webhook activity
+- request is accepted
+- auth validation succeeds
+- event appears in webhook activity/history

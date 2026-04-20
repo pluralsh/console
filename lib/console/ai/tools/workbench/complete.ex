@@ -1,14 +1,15 @@
 defmodule Console.AI.Tools.Workbench.Complete do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.{WorkbenchJobActivity, WorkbenchJobResult}
-  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log}
+  alias Console.Schema.WorkbenchJobActivity
+  alias Console.Schema.WorkbenchJobResult
+  alias Console.Schema.WorkbenchJobResult.ToolQuery
 
   embedded_schema do
     field :conclusion, :string
     field :topology, :string
     embeds_many :todos, WorkbenchJobResult.Todo, on_replace: :delete
-    embeds_many :metrics, Metric, on_replace: :delete
-    embeds_many :logs, Log, on_replace: :delete
+    embeds_one :metrics_query, ToolQuery, on_replace: :update
+    embeds_many :logs, Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Log, on_replace: :delete
   end
 
   @json_schema Console.priv_file!("tools/workbench/complete.json") |> Jason.decode!()
@@ -20,8 +21,8 @@ defmodule Console.AI.Tools.Workbench.Complete do
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:conclusion, :topology])
-    |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
     |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
+    |> cast_embed(:metrics_query)
     |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2, required: true)
     |> validate_required([:conclusion])
   end

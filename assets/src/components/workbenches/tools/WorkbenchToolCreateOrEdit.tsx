@@ -16,9 +16,12 @@ import { capitalize, isEmpty } from 'lodash'
 import { useLayoutEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
-  WORKBENCHES_TOOLS_ABS_PATH,
+  getWorkbenchToolEditAbsPath,
+  WORKBENCHES_TOOLS_ADD_ABS_PATH,
+  WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
-  WORKBENCHES_TOOLS_REL_PATH,
+  WORKBENCHES_TOOLS_YOUR_REL_PATH,
+  WORKBENCHES_TOOLS_YOUR_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
@@ -32,10 +35,31 @@ import {
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
-const getBreadcrumbs = (mode: 'create' | 'edit') => [
-  ...getWorkbenchesBreadcrumbs(WORKBENCHES_TOOLS_REL_PATH),
-  { label: mode === 'create' ? 'create' : 'edit' },
-]
+function getBreadcrumbs(
+  mode: 'create' | 'edit',
+  toolId: string | undefined,
+  tool: { id: string; name: string } | null | undefined
+) {
+  const crumbs = [
+    ...getWorkbenchesBreadcrumbs(
+      mode === 'create'
+        ? WORKBENCHES_TOOLS_ADD_REL_PATH
+        : WORKBENCHES_TOOLS_YOUR_REL_PATH
+    ),
+  ]
+
+  if (mode === 'edit') {
+    const label = tool?.name?.trim() || tool?.id || toolId
+    if (label)
+      crumbs.push({
+        label,
+        url: getWorkbenchToolEditAbsPath(toolId ?? tool?.id),
+      })
+  }
+
+  crumbs.push({ label: mode, url: '' })
+  return crumbs
+}
 
 export function WorkbenchToolCreateOrEdit({
   mode,
@@ -43,10 +67,8 @@ export function WorkbenchToolCreateOrEdit({
   mode: 'create' | 'edit'
 }) {
   const navigate = useNavigate()
-  // const { borderRadiuses, borders } = useTheme()
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(mode), [mode]))
 
   const { data, loading, error } = useWorkbenchToolQuery({
     variables: { id },
@@ -57,6 +79,10 @@ export function WorkbenchToolCreateOrEdit({
   const tool = data?.workbenchTool
   const isLoading = !tool && loading
 
+  useSetBreadcrumbs(
+    useMemo(() => getBreadcrumbs(mode, id, tool), [mode, id, tool])
+  )
+
   useLayoutEffect(() => {
     if (isLoading) return
     const typeParam = searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM)
@@ -64,9 +90,12 @@ export function WorkbenchToolCreateOrEdit({
       (id && typeParam !== tool?.tool) ||
       !isConfigurableWorkbenchToolType(typeParam)
     )
-      setSearchParams({
-        [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
-      })
+      setSearchParams(
+        {
+          [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
+        },
+        { replace: true }
+      )
   }, [id, searchParams, setSearchParams, tool, isLoading])
 
   const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
@@ -79,7 +108,7 @@ export function WorkbenchToolCreateOrEdit({
       onCompleted: ({ createWorkbenchTool }) => {
         const name = createWorkbenchTool?.name ?? 'Tool'
         popToast({ name, action: 'created', color: 'icon-success' })
-        navigate(WORKBENCHES_TOOLS_ABS_PATH)
+        navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)
       },
     })
   const [update, { loading: updateLoading, error: updateError }] =
@@ -142,8 +171,15 @@ export function WorkbenchToolCreateOrEdit({
             type={type}
             tool={tool}
             mutationLoading={mutationLoading}
-            onCancel={() => navigate(WORKBENCHES_TOOLS_ABS_PATH)}
+            onCancel={() =>
+              navigate(
+                mode === 'create'
+                  ? WORKBENCHES_TOOLS_ADD_ABS_PATH
+                  : WORKBENCHES_TOOLS_YOUR_ABS_PATH
+              )
+            }
             onSave={onSave}
+            onToolDeleted={() => navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)}
           />
           {/* TODO */}
           {/* <Button

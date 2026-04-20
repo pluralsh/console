@@ -1,141 +1,170 @@
-import { ResponsiveLine } from '@nivo/line'
+import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
-  FileDiffIcon,
   Flex,
+  FlexProps,
   IconFrame,
+  IconProps,
   Modal,
+  NotebookIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import {
   SimpleAccordion,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { LogLine } from 'components/cd/logs/LogLine'
+import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body2P } from 'components/utils/typography/Text'
 import {
-  WorkbenchJobActivityFragment,
+  useWorkbenchJobMetricsToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
+  WorkbenchJobActivityResultFragment,
+  WorkbenchToolQueryData,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, truncate } from 'lodash'
-import { ComponentPropsWithRef, useMemo, useState } from 'react'
+import {
+  ComponentPropsWithRef,
+  ComponentType,
+  ReactNode,
+  useMemo,
+  useState,
+} from 'react'
 import { DiffMethod } from 'react-diff-viewer'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
+import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
 
-type ActivityResult = NonNullable<WorkbenchJobActivityFragment['result']>
-
-export function MemoActivityResult({
-  result,
+export function MemoActivityIcon({
+  jobUpdate,
 }: {
-  result: Nullable<ActivityResult>
+  jobUpdate: Nullable<WorkbenchJobActivityResultFragment['jobUpdate']>
 }) {
-  const { jobUpdate, output } = result ?? {}
-  const [showDiff, setShowDiff] = useState(false)
-
   const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''
   const oldValue = useMemo(
     () => getOldContentFromTextDiff(newValue, jobUpdate?.diff),
     [newValue, jobUpdate?.diff]
   )
-
   return (
-    <StretchedFlex gap="medium">
-      <Body2P $color="text-xlight">{output}</Body2P>
-      {!!jobUpdate?.diff && (
-        <>
-          <IconFrame
-            clickable
-            icon={<FileDiffIcon color="icon-light" />}
-            size="small"
-            tooltip="View diff"
-            onClick={() => setShowDiff(true)}
-          />
-          <Modal
-            header={`Updated ${jobUpdate?.workingTheory ? 'working theory' : 'conclusion'}`}
-            size="auto"
-            open={showDiff}
-            onClose={() => setShowDiff(false)}
-            actions={
-              <Button
-                secondary
-                onClick={() => setShowDiff(false)}
-              >
-                Close
-              </Button>
-            }
-          >
-            <DiffViewer
-              compareMethod={DiffMethod.WORDS}
-              oldValue={oldValue}
-              newValue={newValue}
-            />
-          </Modal>
-        </>
-      )}
-    </StretchedFlex>
+    <ActivityModalIcon
+      icon={NotebookIcon}
+      tooltip="View diff"
+      modalHeader={`Updated ${jobUpdate?.workingTheory ? 'working theory' : 'conclusion'}`}
+      modalContent={
+        <DiffViewer
+          compareMethod={DiffMethod.WORDS}
+          oldValue={oldValue}
+          newValue={newValue}
+        />
+      }
+    />
   )
 }
 
-export function UserActivityResult({
-  activity,
-}: {
-  activity: WorkbenchJobActivityFragment
-}) {
-  const { prompt } = activity
+const EXPANDABLE_PROMPT_LENGTH = 400
+export function ExpandableUserPrompt({
+  prompt,
+  ...props
+}: { prompt: Nullable<string> } & ComponentPropsWithRef<typeof PromptCardSC>) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  if (!prompt) return null
+  const isExpandable = prompt.length > EXPANDABLE_PROMPT_LENGTH
+
   return (
-    <PromptCardSC>
-      <SimplifiedMarkdown text={prompt ?? ''} />
+    <PromptCardSC {...props}>
+      <SimplifiedMarkdown
+        text={
+          !isExpandable || isExpanded
+            ? prompt
+            : truncate(prompt, { length: EXPANDABLE_PROMPT_LENGTH })
+        }
+      />
+      {isExpandable && (
+        <BasicTextButton
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          css={{ width: '100%', textAlign: 'right' }}
+        >
+          {isExpanded ? 'view less' : 'view more'}
+        </BasicTextButton>
+      )}
     </PromptCardSC>
   )
 }
 
-const PromptCardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.medium,
-  width: 'fit-content',
-  marginLeft: 'auto',
-  marginTop: theme.spacing.small,
-  marginBottom: theme.spacing.small,
-}))
-
 export function JobActivityLogs({
   logs,
+  cardWrapper = false,
 }: {
   logs: WorkbenchJobActivityLogFragment[]
+  cardWrapper?: boolean
 }) {
   if (isEmpty(logs)) return null
 
   return (
-    <Flex direction="column">
-      {logs.map((log, i) => (
-        <LogLine
-          key={i}
-          line={{ log: log.message, timestamp: log.timestamp }}
-        />
-      ))}
-    </Flex>
+    <WrapWithIf
+      condition={cardWrapper}
+      wrapper={<Card css={{ height: '100%', overflow: 'auto' }} />}
+    >
+      <Flex direction="column">
+        {logs.map((log, i) => (
+          <LogLine
+            key={i}
+            line={{ log: log.message, timestamp: log.timestamp }}
+          />
+        ))}
+      </Flex>
+    </WrapWithIf>
   )
 }
 
-export function JobActivityMetrics({
+const CANVAS_THRESHOLD = 1000
+
+export type WorkbenchMetricsToolQueryInput = Pick<
+  WorkbenchToolQueryData,
+  'toolName' | 'toolArgs' | 'summary'
+>
+
+export function hasWorkbenchMetricsToolQuery(
+  q: Nullable<Pick<WorkbenchToolQueryData, 'toolName' | 'toolArgs'>>
+): boolean {
+  if (!q?.toolName?.trim()) return false
+  return q.toolArgs != null && typeof q.toolArgs === 'object'
+}
+
+/** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export function JobActivityMetricsChart({
   metrics,
   lineProps,
   ...props
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
-  lineProps?: Partial<ComponentPropsWithRef<typeof ResponsiveLine>>
+  lineProps?: Partial<
+    ComponentPropsWithRef<typeof ResponsiveLine> &
+      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+  >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
-    const grouped = groupBy(metrics, (m) => m.name ?? 'metric')
+    const grouped = groupBy(
+      metrics,
+      ({ name, labels }) =>
+        `${name ?? 'metric'}{${
+          Object.entries(labels ?? {})
+            .map(([key, value]) => `${key}:${value}`)
+            .join(',') ?? ''
+        }}`
+    )
     return Object.entries(grouped).map(([name, points]) => ({
       id: name,
       data: points
@@ -148,24 +177,169 @@ export function JobActivityMetrics({
 
   if (isEmpty(metrics)) return null
 
+  const sharedProps = {
+    theme: graphTheme,
+    data: graphData,
+    colors: COLORS,
+    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
+    xScale: { type: 'time' as const, format: 'native' as const },
+    yScale: { type: 'linear' as const },
+    xFormat: dateFormat,
+    lineWidth: 1,
+    enablePoints: false,
+    axisLeft: { tickValues: 5 },
+    axisBottom: { format: '%H:%M:%S', tickValues: 5 },
+    tooltip: SliceTooltip,
+  }
+
   return (
     <MetricsChartSC {...props}>
-      <ResponsiveLine
-        theme={graphTheme}
-        data={graphData}
-        tooltip={SliceTooltip}
-        colors={COLORS}
-        margin={{ top: 10, right: 20, bottom: 30, left: 30 }}
-        xScale={{ type: 'time', format: 'native' }}
-        yScale={{ type: 'linear' }}
-        xFormat={dateFormat}
-        curve="monotoneX"
-        lineWidth={1}
-        useMesh
-        axisBottom={{ format: '%H:%M:%S', tickRotation: 10 }}
-        {...lineProps}
-      />
+      {metrics.length > CANVAS_THRESHOLD ? (
+        <ResponsiveLineCanvas
+          {...sharedProps}
+          {...lineProps}
+        />
+      ) : (
+        <ResponsiveLine
+          {...sharedProps}
+          useMesh
+          {...lineProps}
+        />
+      )}
     </MetricsChartSC>
+  )
+}
+
+/**
+ * Loads metric series via `metricsTool` when `metricsQuery` is present on the
+ * activity or job result. Omit when there is no tool query to run.
+ */
+export function JobActivityMetrics({
+  jobId,
+  metricsQuery,
+  fetchWhen = true,
+  withLegend = false,
+  lineProps,
+  skeletonHeight = 160,
+  ...props
+}: {
+  jobId: string
+  metricsQuery: Nullable<WorkbenchMetricsToolQueryInput>
+  /** When false, skips the GraphQL request (e.g. collapsed activity accordion). */
+  fetchWhen?: boolean
+  withLegend?: boolean
+  skeletonHeight?: number
+  lineProps?: Partial<
+    ComponentPropsWithRef<typeof ResponsiveLine> &
+      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+  >
+} & ComponentPropsWithRef<typeof MetricsChartSC>) {
+  const shouldRunQuery =
+    !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
+
+  const { data, loading, error } = useWorkbenchJobMetricsToolQuery({
+    variables: {
+      id: jobId,
+      name: metricsQuery?.toolName?.trim(),
+      arguments: metricsQuery?.toolArgs
+        ? JSON.stringify(metricsQuery?.toolArgs)
+        : undefined,
+    },
+    skip: !shouldRunQuery,
+  })
+
+  if (!hasWorkbenchMetricsToolQuery(metricsQuery)) return null
+
+  if (!fetchWhen) return null
+
+  if (error)
+    return (
+      <GqlError
+        error={error}
+        css={{ wordBreak: 'break-word' }}
+      />
+    )
+
+  const metrics = data?.workbenchJob?.metricsTool?.filter(isNonNullable) ?? []
+
+  if (loading || !data)
+    return (
+      <RectangleSkeleton
+        $height={skeletonHeight}
+        $width="100%"
+      />
+    )
+
+  if (isEmpty(metrics)) return null
+
+  const seriesNames = Object.keys(groupBy(metrics, (m) => m.name ?? 'metric'))
+  const summaryText = metricsQuery?.summary?.trim()
+
+  const chartBlock = (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      width="100%"
+    >
+      <JobActivityMetricsChart
+        metrics={metrics}
+        lineProps={lineProps}
+        {...props}
+      />
+      {summaryText ? (
+        <Body2P
+          $color="text-light"
+          css={{ lineHeight: 1.45 }}
+        >
+          {summaryText}
+        </Body2P>
+      ) : null}
+    </Flex>
+  )
+
+  if (!withLegend) return chartBlock
+
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+      width="100%"
+    >
+      {chartBlock}
+      <WorkbenchJobMetricsLegend
+        seriesNames={seriesNames}
+        paddingLeft={20}
+      />
+    </Flex>
+  )
+}
+
+export function WorkbenchJobMetricsLegend({
+  seriesNames,
+  ...props
+}: {
+  seriesNames: string[]
+} & FlexProps) {
+  if (isEmpty(seriesNames)) return null
+
+  return (
+    <Flex
+      wrap="wrap"
+      gap="small"
+      align="center"
+      {...props}
+    >
+      {seriesNames.map((name, i) => (
+        <Flex
+          key={name}
+          align="center"
+          gap="xsmall"
+        >
+          <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
+          <Body2P $color="text-light">{name}</Body2P>
+        </Flex>
+      ))}
+    </Flex>
   )
 }
 
@@ -188,7 +362,94 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
   )
 }
 
+export function ActivityModalIcon({
+  icon: Icon,
+  onClick,
+  tooltip,
+  modalHeader,
+  modalContent,
+  size = 14,
+}: {
+  icon: ComponentType<IconProps>
+  onClick?: () => void
+  tooltip: string | undefined
+  modalHeader: string
+  modalContent: ReactNode
+  size?: number
+}) {
+  const [showModal, setShowModal] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
+  return (
+    <>
+      <IconFrame
+        clickable
+        as="a" // using an "a" tag because technically buttons can't be nested inside other buttons (e.g. the accordion trigger)
+        size="small"
+        tooltip={tooltip}
+        icon={
+          <Icon
+            color="icon-xlight"
+            style={{ width: size }}
+          />
+        }
+        onClick={(e) => {
+          e.preventDefault()
+          setShowModal(true)
+          onClick?.()
+        }}
+      />
+      <Modal
+        header={modalHeader}
+        size="large"
+        open={showModal}
+        onClose={() => {
+          setShowModal(false)
+          setFinishedAnimating(false)
+        }}
+        scrollable={false}
+        onAnimationEnd={() => setFinishedAnimating(true)}
+        actions={
+          <Button
+            secondary
+            onClick={() => setShowModal(false)}
+          >
+            Close
+          </Button>
+        }
+      >
+        {finishedAnimating ? (
+          modalContent
+        ) : (
+          <RectangleSkeleton
+            $height={160}
+            $width="100%"
+          />
+        )}
+      </Modal>
+    </>
+  )
+}
+
 const MetricsChartSC = styled.div(() => ({
   height: 160,
   width: '100%',
+}))
+
+const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
+  width: 12,
+  height: 12,
+  borderRadius: 2,
+  flexShrink: 0,
+  background: $color,
+}))
+
+const PromptCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.medium,
+  width: 'fit-content',
+  maxWidth: '100%',
+  overflow: 'auto',
+  wordBreak: 'break-word',
+  marginLeft: 'auto',
+  marginTop: theme.spacing.small,
+  marginBottom: theme.spacing.small,
 }))

@@ -3,6 +3,28 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.54.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Enhanced `vector top` TUI with keybinds for scrolling, sorting, and
+        filtering (press `?` for help).', '`datadog_logs` sink now uses `zstd` compression
+        by default, improving network efficiency and throughput.', 'New internal metrics:
+        `component_latency_seconds` histogram and `component_latency_mean_seconds`
+        gauge to measure time events spend inside each component.', 'Syslog encoding
+        transform got RFC-compliance and safety improvements, including better handling
+        of structured data (scalars/nested objects/arrays) and UTF-8 safety.', New
+        `azure_logs_ingestion` sink for Azure Monitor Logs Ingestion API; legacy `azure_monitor_logs`
+        sink is deprecated ahead of the Data Collector API retirement (currently Sept
+        2026).]
+    breaking_changes: ['`datadog_logs` sink default compression changed from none
+        to `zstd`; set `compression` explicitly if you need the previous behavior
+        (e.g., `none`).']
+  chart_version: 0.51.0
+  images: ['docker.io/timberio/vector:0.54.0-distroless-libc']
 - version: 0.53.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -135,7 +157,15 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes were highlighted in the provided v0.44.0 notes
+        (the excerpt is essentially an assets list)., macOS x86_64 tarball is present
+        again in v0.44.0 assets; v0.43.0 explicitly removed that artifact.]
+    breaking_changes: ['If your upgrade process/download scripts relied on `vector-0.43.0-x86_64-apple-darwin.tar.gz`,
+        it did not exist in 0.43.0 (removed); verify artifact selection logic when
+        moving to 0.44.0 where it is available again.']
   chart_version: 0.40.0
   images: ['timberio/vector:0.44.0-distroless-libc']
 - version: 0.43.0
@@ -259,8 +289,15 @@ versions:
   summary: null
   chart_version: 0.22.1
   images: ['timberio/vector:0.30.0-distroless-libc']
-- version: 0.29.0
+- version: 0.29.1
   kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.21.1
+  images: ['timberio/vector:0.29.1-distroless-libc']
+- version: 0.29.0
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
@@ -273,92 +310,85 @@ versions:
   summary: null
   chart_version: 0.20.0
   images: ['timberio/vector:0.28.0-distroless-libc']
-- version: 0.27.1
-  kube: ['1.26', '1.25', '1.24']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 0.19.2
-  images: ['timberio/vector:0.27.1-distroless-libc']
 - version: 0.27.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.19.0
   images: ['timberio/vector:0.27.0-distroless-libc']
 - version: 0.26.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.18.0
   images: ['timberio/vector:0.26.0-distroless-libc']
 - version: 0.25.1
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.17.0
   images: ['timberio/vector:0.25.1-distroless-libc']
 - version: 0.24.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.16.0
   images: ['timberio/vector:0.24.0-distroless-libc']
 - version: 0.23.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.15.0
   images: ['timberio/vector:0.23.0-distroless-libc']
 - version: 0.22.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.13.0
   images: ['timberio/vector:0.22.0-distroless-libc']
 - version: 0.21.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.10.0
   images: ['timberio/vector:0.21.0-distroless-libc']
 - version: 0.20.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.7.0
   images: ['timberio/vector:0.20.0-distroless-libc']
 - version: 0.19.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.4.0
   images: ['timberio/vector:0.19.0-distroless-libc']
 - version: 0.18.0
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.2.1
   images: ['timberio/vector:0.18.0-distroless-libc']
 - version: 0.17.3
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.1.1
   images: ['timberio/vector:0.17.3-distroless-libc']
 - version: 0.16.1
-  kube: ['1.25', '1.24', '1.23']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null

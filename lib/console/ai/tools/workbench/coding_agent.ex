@@ -34,7 +34,16 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}) do
     conn = Tool.agent_runtime() |> Agents.scm_conection()
     repos = Enum.map(repos, &to_http(conn, &1))
-    validate_inclusion(cs, :repository, repos)
+
+    case get_field(cs, :repository) do
+      val when is_binary(val) -> put_change(cs, :repository, to_http(conn, val))
+      _ -> cs
+    end
+    |> validate_inclusion(
+      :repository,
+      repos,
+      message: "coding agents are restricted to just the [#{Enum.join(repos, ", ")}] repository urls"
+    )
   end
   defp validate_repository(cs, _), do: cs
 

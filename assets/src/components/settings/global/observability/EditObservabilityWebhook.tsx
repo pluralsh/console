@@ -26,7 +26,7 @@ import {
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { GqlError } from 'components/utils/Alert'
-import { capitalize } from 'lodash'
+import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
 
 export function EditObservabilityWebhookModal({
   open,
@@ -109,7 +109,7 @@ export function EditObservabilityWebhook({
             <ListBoxItem
               key={type}
               leftContent={getObservabilityWebhookTypeIcon(type)}
-              label={capitalize(type)}
+              label={humanizeObservabilityWebhookType(type)}
             />
           ))}
         </Select>

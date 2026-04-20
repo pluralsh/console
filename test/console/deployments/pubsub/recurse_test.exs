@@ -627,12 +627,14 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   end
 
   describe "AlertCreated" do
-    test "creates a workbench job when alert has workbench_id and console bot and workbench are present" do
-      bot = insert(:user, bot_name: "console", roles: %{admin: true})
-      workbench = insert(:workbench)
+    test "creates a workbench job owned by the workbench bot user when alert targets a workbench" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
       alert =
         insert(:alert,
           workbench: workbench,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot),
           project: workbench.project,
           title: "High CPU",
           message: "CPU above 80%"
@@ -648,15 +650,35 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert job.alert_id == alert.id
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
     end
+
+    test "does not create a job when the workbench has no bot user" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: nil)
+      alert =
+        insert(:alert,
+          workbench: workbench,
+          project: workbench.project,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: nil),
+          title: "No bot",
+          message: "msg"
+        )
+
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
+      assert {:error, _} = Recurse.handle_event(event)
+
+      refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
+    end
   end
 
   describe "IssueCreated" do
-    test "creates a workbench job when issue has workbench_id and console bot and workbench are present" do
-      bot = insert(:user, bot_name: "console", roles: %{admin: true})
-      workbench = insert(:workbench)
+    test "creates a workbench job owned by the workbench bot user when issue targets a workbench" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
       issue =
         insert(:issue,
           workbench: workbench,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot),
           title: "Bug in API",
           body: "The API returns 500 on invalid input"
         )
@@ -671,17 +693,36 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert job.issue_id == issue.id
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
     end
+
+    test "does not create a job when the workbench has no bot user" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: nil)
+      issue =
+        insert(:issue,
+          workbench: workbench,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench),
+          title: "No bot",
+          body: "body"
+        )
+
+      event = %PubSub.IssueCreated{item: %{issue | status_changed: true}}
+      assert {:error, _} = Recurse.handle_event(event)
+
+      refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
+    end
   end
 
   describe "IssueUpdated" do
-    test "creates a workbench job when issue has workbench_id and console bot and workbench are present" do
-      bot = insert(:user, bot_name: "console", roles: %{admin: true})
-      workbench = insert(:workbench)
+    test "creates a workbench job owned by the workbench bot user when issue status changes on a workbench" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
       issue =
         insert(:issue,
           workbench: workbench,
           title: "Bug in API",
-          body: "The API returns 500 on invalid input"
+          body: "The API returns 500 on invalid input",
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot)
         )
 
       event = %PubSub.IssueUpdated{item: %{issue | status_changed: true}}

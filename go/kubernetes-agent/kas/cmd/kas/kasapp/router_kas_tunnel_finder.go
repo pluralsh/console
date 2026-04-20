@@ -96,8 +96,6 @@ func (f *tunnelFinder) Find(ctx context.Context) (readyTunnel, error) {
 	pollCtx, f.pollCancel = context.WithCancel(ctx)
 	defer f.pollCancel()
 
-	// Unconditionally connect to self ASAP.
-	f.tryKasLocked(f.ownPrivateApiUrl) // nolint: contextcheck
 	startedPolling := false
 	// This flag is set when we've run out of kas URLs to try. When a new set of URLs is received, if this is set,
 	// we try to connect to one of those URLs.
@@ -112,6 +110,8 @@ func (f *tunnelFinder) Find(ctx context.Context) (readyTunnel, error) {
 	defer t.Stop()
 	kasUrlsC := make(chan []string)
 	f.kasUrls = f.tunnelQuerier.CachedKasUrlsByAgentId(f.agentId)
+	// Unconditionally connect to self ASAP.
+	f.tryKasLocked(f.ownPrivateApiUrl) // nolint: contextcheck
 	done := ctx.Done()
 
 	// Timer must have been stopped or has fired when this function is called

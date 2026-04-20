@@ -91,7 +91,12 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
         <StackedText
           loading={!data && loading}
           first={workbench?.name}
+          firstPartialType="subtitle2"
+          firstColor="text"
           second={workbench?.description}
+          secondPartialType="body2"
+          secondColor="text-xlight"
+          gap="xxsmall"
         />
       )}
       <WorkbenchForm
@@ -386,8 +391,9 @@ function sanitizeInitialForm({
   readBindings,
   writeBindings,
 }: WorkbenchFragment): WorkbenchFormState {
-  const { infrastructure, coding } = configuration ?? {}
+  const { infrastructure, coding, observability } = configuration ?? {}
   const { kubernetes, services, stacks } = infrastructure ?? {}
+  const { logs, metrics } = observability ?? {}
   const { mode, repositories } = coding ?? {}
   const { files, ref } = skills ?? {}
 
@@ -397,8 +403,10 @@ function sanitizeInitialForm({
     systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
+    overrideBotUser: false,
     configuration: {
       infrastructure: { kubernetes, services, stacks },
+      observability: { logs, metrics },
       coding: { mode, repositories },
     },
     skills: { ref, files },

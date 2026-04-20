@@ -7,8 +7,8 @@ import {
   FormField,
   Input2,
   ListBoxItem,
+  AddIcon,
   MinusIcon,
-  PlusIcon,
   Select,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
@@ -85,6 +85,8 @@ export function WorkbenchToolFormFields({
       return render(type, SplunkFormFields)
     case WorkbenchToolType.Cloudwatch:
       return render(type, CloudwatchFormFields)
+    case WorkbenchToolType.Azure:
+      return render(type, AzureFormFields)
     case WorkbenchToolType.Dynatrace:
       return render(type, DynatraceFormFields)
   }
@@ -247,7 +249,7 @@ function HttpFormFields({
           <Button
             secondary
             small
-            startIcon={<PlusIcon />}
+            startIcon={<AddIcon />}
             onClick={addHeader}
           >
             Add header
@@ -485,6 +487,44 @@ function DynatraceFormFields({
         revealer
         value={c.platformToken ?? ''}
         onChange={(e) => set({ ...c, platformToken: e.target.value })}
+      />
+    </>
+  )
+}
+
+function AzureFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Azure>) {
+  return (
+    <>
+      <InputField
+        label="Subscription ID"
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.subscriptionId ?? ''}
+        onChange={(e) => set({ ...c, subscriptionId: e.target.value })}
+      />
+      <InputField
+        label="Tenant ID"
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.tenantId ?? ''}
+        onChange={(e) => set({ ...c, tenantId: e.target.value })}
+      />
+      <InputField
+        label="Client ID"
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.clientId ?? ''}
+        onChange={(e) => set({ ...c, clientId: e.target.value })}
+      />
+      <InputField
+        label="Client secret"
+        required
+        revealer
+        value={c.clientSecret ?? ''}
+        onChange={(e) => set({ ...c, clientSecret: e.target.value })}
       />
     </>
   )

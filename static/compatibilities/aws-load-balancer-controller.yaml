@@ -5,6 +5,115 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
+- version: 3.2.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm upgrade notes (3.2.0 \u2192 3.2.1)\n- **No user-facing\
+      \ values changes called out** in the provided notes.\n- **However:** v3.2.1\
+      \ exists to **fix Helm RBAC permissions for Gateway API\u2019s new `ListenerSet`\
+      \ resources**. If you\u2019re using Gateway API, ensure your Helm release is\
+      \ updated so it deploys the corrected RBAC (don\u2019t keep any pinned/overridden\
+      \ RBAC templates).\n\n## Helm chart-related changes introduced in 3.2.0 (relevant\
+      \ when coming from 3.2.0)\n- Helm chart now **exposes additional max-concurrency\
+      \ flags** (previously missing), and includes **backfilled concurrency controls**.\n\
+      - Helm chart adds **namespace selectors to Service and Ingress webhooks** and\
+      \ **Ingress webhook validator selectors** (new values may exist depending on\
+      \ chart version)."
+    chart_updates: ['v3.2.1: Helm install RBAC fix for Gateway API users: correct
+        permissions for `ListenerSet` resources.', 'v3.2.0: Chart exposes additional
+        max-concurrency flags and backfills concurrency controls.', 'v3.2.0: Webhook
+        configs enhanced with namespace selectors (Service + Ingress) and ingress
+        webhook validator selectors.']
+    features: [Gateway API updated to v1.5.0; controller can autodetect Gateway resources
+        (feature flags still available to disable)., 'Gateway API: introduces `ListenerSet`
+        resources and adds Gateway/GatewayClass-level TargetGroupConfig support.',
+      'Ingress: adds an annotation for Frontend NLB attributes.', 'Operational: configurable
+        re-queue duration for TargetGroupBinding; improved tag reconciliation (skips
+        `aws:` system tags).']
+    breaking_changes: ["Gateway API version bump 1.3 \u2192 1.5; for NLB Gateway users,\
+        \ `TLSRoute` moves to v1 and is no longer served in alpha\u2014install experimental\
+        \ TLSRoute CRDs to avoid downtime during upgrade.", '`--aws-vpc-tag-key` is
+        deprecated/ignored; VPC lookup now always uses all tags from `--aws-vpc-tags`.
+        If your VPC previously matched only a subset of tags, the controller may now
+        fail to find the VPC unless tags/value are corrected.']
+  chart_version: 3.2.1
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.1']
+- version: 3.2.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n\n- **Webhook\
+      \ TLS secret handling during upgrades (3.1.x context):** v3.1.0 reintroduced\
+      \ the `keepTLSSecret` Helm value and improved upgrade logic to avoid webhook\
+      \ certificate regeneration issues (and maintain cert-manager compatibility).\
+      \ When upgrading beyond 3.1.0, **verify whether you rely on cert-manager-managed\
+      \ webhook certs** and whether you need `keepTLSSecret: true` to preserve an\
+      \ existing secret during `helm upgrade`.\n\n- **Concurrency controls exposed\
+      \ via Helm chart (v3.2.0):** v3.2.0 **backfills/exposes additional max-concurrency\
+      \ flags in the Helm chart**. If you previously set these via extraArgs or couldn\u2019\
+      t tune them, review values for any new knobs and confirm defaults are acceptable\
+      \ for your cluster/API limits.\n\n- **Webhook namespace selectors (v3.2.0):**\
+      \ v3.2.0 adds **namespace selectors for Service and Ingress webhooks** (and\
+      \ updates Helm chart accordingly). If you need to scope/limit webhook enforcement\
+      \ to particular namespaces (or you previously used object selectors), review\
+      \ and set these new selector values.\n\n- **Controller flags deprecation / behavior\
+      \ change (v3.2.0):** `--aws-vpc-tag-key` is **deprecated and ignored**. Ensure\
+      \ your Helm `extraArgs` no longer depends on it. Also, VPC lookup behavior changed:\
+      \ **all** tags in `--aws-vpc-tags` are now used as filters (can be breaking\
+      \ if your VPC only matches a subset)."
+    chart_updates: [Exposes additional controller concurrency/max-concurrency flags
+        through the Helm chart (previously not all were configurable)., Adds Helm
+        values to configure namespace selectors for the Service and Ingress validating/mutating
+        webhooks., "Carries forward improved webhook cert handling introduced in v3.1.0\
+        \ (notably `keepTLSSecret`)\u2014ensure your chart values align with your\
+        \ certificate management approach."]
+    features: ['Gateway API upgraded to v1.5.0, including new resources like ListenerSet
+        and improved Gateway functionality.', Gateway API resources are now auto-detected
+        (feature flags no longer required to enable; flags remain to disable)., Ingress
+        adds a new annotation for Frontend NLB attributes to tune NLB behavior via
+        Ingress.]
+    breaking_changes: ['Gateway API moves from v1.3 to v1.5; for NLB Gateway users,
+        TLSRoute is now served in v1 (not alpha). To avoid downtime, install the experimental
+        TLSRoute CRD during upgrade as recommended.', 'VPC tag lookup now requires
+        *all* tags in `--aws-vpc-tags` to match; previously a partial match might
+        have worked. `--aws-vpc-tag-key` is deprecated/ignored, so update flags/tags
+        accordingly.']
+  chart_version: 3.2.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.0']
+- version: 3.1.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to check\n\n- **`keepTLSSecret`\
+      \ parameter is (re)introduced in v3.1.0 with improved logic.**\n  - v3.0.0 removed\
+      \ the KeepTLS/keepTLSSecret knob in the Helm chart.\n  - v3.1.0 **reintroduces\
+      \ `keepTLSSecret`** to address webhook certificate regeneration issues during\
+      \ Helm upgrades and to maintain **cert-manager compatibility**.\n  - **Action:**\
+      \ If you previously set/relied on `keepTLSSecret` (or were impacted by the v3.0.0\
+      \ removal), review your values and explicitly set the desired behavior for upgrades,\
+      \ especially when `enableCertManager=true`.\n\n- **Webhook certificate handling\
+      \ during Helm upgrades is changed/fixed in v3.1.0.**\n  - **Action:** Expect\
+      \ different behavior around webhook TLS secret/certificate regeneration on upgrade;\
+      \ validate that the webhook comes up with a valid cert and that `aws-load-balancer-tls`\
+      \ is managed as intended in your environment.\n"
+    chart_updates: [Helm chart and controller versions remain aligned in v3.x (introduced
+        in v3.0.0)., v3.1.0 updates Helm chart information/documentation and changes
+        webhook cert upgrade logic (fixes cert regeneration and brings back `keepTLSSecret`).]
+    features: ['Gateway API: Redirect port defaulting now follows spec (defaults to
+        80/443 based on scheme when port is omitted).', 'Gateway API: Improved regex
+        handling for route matching.', 'Gateway API: Gateway status hostname is normalized
+        to lowercase for consistency.', 'AWS Global Accelerator (AGA): Cross-namespace
+        reference support for more flexible multi-namespace setups.']
+    breaking_changes: []
+  chart_version: 3.1.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.1.0']
 - version: 3.0.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

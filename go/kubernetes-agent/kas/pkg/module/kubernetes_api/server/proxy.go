@@ -80,6 +80,8 @@ type kubernetesApiProxy struct {
 	api                      modserver.Api
 	kubernetesApiClient      rpc2.KubernetesApiClient
 	pluralUrl                string
+	jwtTokenAuthorizer       *pluralapi.JWTProxyAuthorizer
+	auditLogger              *pluralapi.AuditLogBatcher
 	allowedOriginUrls        []string
 	allowedAgentsCache       *cache.CacheWithErr[string, *pluralapi.AllowedAgentsForJob]
 	authorizeProxyUserCache  *cache.CacheWithErr[proxyUserCacheKey, *pluralapi.AuthorizeProxyUserResponse]
@@ -120,6 +122,8 @@ func (p *kubernetesApiProxy) Run(ctx context.Context, listener net.Listener) err
 		ReadHeaderTimeout: readHeaderTimeout,
 		IdleTimeout:       idleTimeout,
 	}
+
+	p.auditLogger.Run(ctx)
 	return httpz2.RunServer(ctx, srv, listener, p.listenerGracePeriod, p.shutdownGracePeriod)
 }
 
@@ -234,7 +238,12 @@ func (p *kubernetesApiProxy) authenticateAndImpersonateRequest(ctx context.Conte
 
 	switch c := creds.(type) {
 	case patAuthn:
-		pluralapi.CreateAuditLogInBackground(log, agentId, r, c.token, c.clusterId, p.pluralUrl)
+		p.auditLogger.Enqueue(pluralapi.AuditLogEvent{
+			Token:     c.token,
+			ClusterID: c.clusterId,
+			Method:    r.Method,
+			Path:      r.URL.Path,
+		})
 		auth, eResp := p.authorizeProxyUser(ctx, log, agentId, c.token, c.clusterId)
 		if eResp != nil {
 			return log, agentId, nil, eResp
@@ -265,6 +274,21 @@ func (p *kubernetesApiProxy) authenticateAndImpersonateRequest(ctx context.Conte
 }
 
 func (p *kubernetesApiProxy) authorizeProxyUser(ctx context.Context, log *zap.Logger, agentId int64, accessKey, clusterId string) (*pluralapi.AuthorizeProxyUserResponse, *grpctool.ErrResp) {
+	if p.jwtTokenAuthorizer != nil {
+		auth, err := p.jwtTokenAuthorizer.Authorize(accessKey)
+		if err == nil {
+			log.Debug("Local JWT validation succeeded")
+			return auth, nil
+		}
+
+		if !errors.Is(err, pluralapi.ErrUnsupportedProxyJWTToken) {
+			log.Debug("Local JWT validation failed, falling back to TokenExchange",
+				logz.Error(err),
+				zap.String("token", accessKey[:min(10, len(accessKey))]),
+			)
+		}
+	}
+
 	key := proxyUserCacheKey{
 		agentId:   agentId,
 		clusterId: clusterId,

@@ -287,44 +287,39 @@ end
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
   alias Console.Schema.Alert
   alias Console.Deployments.Workbenches
-  alias Console.Services.Users
   require EEx
 
   def process(%@for{item: %Alert{state: :firing, state_changed: true, workbench_id: wid, id: id} = alert}) when is_binary(wid) do
     Console.debounce({:alert_created, wid, id}, fn ->
-      alert = Console.Repo.preload(alert, [:tags])
-      Workbenches.create_workbench_job(%{
-          prompt: prompt(alert: alert),
+      alert = Console.Repo.preload(alert, [:tags, :workbench_webhook])
+      Workbenches.create_workbench_bot_job(%{
+          prompt: String.trim(prompt(alert: alert)),
           alert_id: id,
-        }, wid, bot())
+        }, wid, alert.workbench_webhook)
     end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok
 
-  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
-
-  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns], trim: true)
+  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns])
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSub.IssueUpdated] do
   alias Console.Schema.Issue
   alias Console.Deployments.Workbenches
-  alias Console.Services.Users
   require EEx
 
   def process(%@for{item: %Issue{workbench_id: wid, id: id, status: :open, status_changed: true} = issue}) when is_binary(wid) do
     Console.debounce({:issue_created, wid, id}, fn ->
-      Workbenches.create_workbench_job(%{
-        prompt: prompt(issue: issue),
+      issue = Console.Repo.preload(issue, [:workbench_webhook])
+      Workbenches.create_workbench_bot_job(%{
+        prompt: String.trim(prompt(issue: issue)),
         issue_id: id,
-      }, wid, bot())
+      }, wid, issue.workbench_webhook)
     end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok
 
-  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
-
-  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns], trim: true)
+    EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns])
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do

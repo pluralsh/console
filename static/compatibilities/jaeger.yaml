@@ -9,125 +9,174 @@ versions:
     '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.61.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
     '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.60.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
     '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.59.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.57.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.56.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.55.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.54.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.53.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.74.1
+  summary: null
+  chart_version: 3.4.1
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.53.0', 'jaegertracing/jaeger-cassandra-schema:1.53.0',
+    'jaegertracing/jaeger-collector:1.53.0', 'jaegertracing/jaeger-query:1.53.0']
 - version: 1.52.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.51.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.72.0
+  summary: null
+  chart_version: 0.73.2
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.51.0', 'jaegertracing/jaeger-cassandra-schema:1.51.0',
+    'jaegertracing/jaeger-collector:1.51.0', 'jaegertracing/jaeger-query:1.51.0']
 - version: 1.50.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.49.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.48.0
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.47.0
   kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.46.0
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.45.0
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.71.0
+  summary: null
+  chart_version: 0.71.18
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.45.0', 'jaegertracing/jaeger-cassandra-schema:1.45.0',
+    'jaegertracing/jaeger-collector:1.45.0', 'jaegertracing/jaeger-query:1.45.0']
 - version: 1.44.0
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.43.0
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.42.0
   kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.69.0
+  summary: null
+  chart_version: 0.70.2
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.42.0', 'jaegertracing/jaeger-cassandra-schema:1.42.0',
+    'jaegertracing/jaeger-collector:1.42.0', 'jaegertracing/jaeger-query:1.42.0']
 - version: 1.41.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.40.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.39.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.65.2
+  summary: null
+  chart_version: 0.68.2
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.39.0', 'jaegertracing/jaeger-cassandra-schema:1.39.0',
+    'jaegertracing/jaeger-collector:1.39.0', 'jaegertracing/jaeger-query:1.39.0']
 - version: 1.38.0
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.37.0
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.58.0
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Introduces a new remote-storage service to support remote storage backends
+        via a dedicated service endpoint., UI dependency is bumped by pinning the
+        Jaeger UI to version 1.26.0 (from 1.25.0 in 1.36.0).]
+    breaking_changes: []
+  chart_version: 0.65.1
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.37.0', 'jaegertracing/jaeger-cassandra-schema:1.37.0',
+    'jaegertracing/jaeger-collector:1.37.0', 'jaegertracing/jaeger-query:1.37.0']
 - version: 1.36.0
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  chart_version: 0.57.0
+  summary: null
+  chart_version: 0.57.1
+  images: ['cassandra:3.11.6', 'jaegertracing/jaeger-agent:1.36.0', 'jaegertracing/jaeger-cassandra-schema:1.36.0',
+    'jaegertracing/jaeger-collector:1.36.0', 'jaegertracing/jaeger-query:1.36.0']
 - version: 1.35.0
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.34.0
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.33.0
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
 name: jaeger

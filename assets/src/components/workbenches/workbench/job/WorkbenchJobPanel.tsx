@@ -1,4 +1,5 @@
 import {
+  ChartIcon,
   CloseIcon,
   GraphIcon,
   IconFrame,
@@ -25,11 +26,17 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { WorkbenchJobPrs } from './WorkbenchJobPrs'
-import { WorkbenchJobResult, WorkbenchJobTopology } from './WorkbenchJobResult'
+import { hasWorkbenchMetricsToolQuery } from './WorkbenchJobActivityResults'
+import {
+  WorkbenchJobMetrics,
+  WorkbenchJobPrs,
+  WorkbenchJobResult,
+  WorkbenchJobTopology,
+} from './WorkbenchJobResult'
+import { isJobRunning } from './WorkbenchJobActivity'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab = 'Result' | 'Topology' | 'Pull requests'
+type JobPanelTab = 'Result' | 'Topology' | 'PRs' | 'Metrics'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -46,6 +53,7 @@ export function WorkbenchJobPanelContent() {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
   })
   const job = data?.workbenchJob
   const isLoading = loading && !job
@@ -56,6 +64,7 @@ export function WorkbenchJobPanelContent() {
     <SidePanelContent>
       <PanelHeaderSC>
         <TabList
+          scrollable
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'horizontal',
@@ -63,7 +72,7 @@ export function WorkbenchJobPanelContent() {
             onSelectionChange: (key) =>
               setSelectedTab(String(key) as JobPanelTab),
           }}
-          css={{ display: 'flex', alignItems: 'center', gap: spacing.small }}
+          css={{ gap: spacing.small, width: 'fit-content', maxWidth: '100%' }}
         >
           {tabs.map(({ label, icon }) => (
             <PanelSubTabSC
@@ -71,7 +80,11 @@ export function WorkbenchJobPanelContent() {
               textValue={label}
             >
               {icon}
-              {label}
+              {label !== 'Result'
+                ? label
+                : !isJobRunning(job?.status) && job?.result?.conclusion
+                  ? 'Conclusion'
+                  : 'Working theory'}
             </PanelSubTabSC>
           ))}
         </TabList>
@@ -83,20 +96,28 @@ export function WorkbenchJobPanelContent() {
         />
       </PanelHeaderSC>
       <ContentWrapperSC>
-        {selectedTab === 'Result' && (
-          <WorkbenchJobResult
-            job={job}
-            loading={isLoading}
-          />
-        )}
-        {selectedTab === 'Topology' && (
-          <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
-        )}
-        {selectedTab === 'Pull requests' && (
-          <WorkbenchJobPrs
-            prs={job?.pullRequests?.filter(isNonNullable) ?? []}
-          />
-        )}
+        <ContentInnerSC>
+          {selectedTab === 'Result' && (
+            <WorkbenchJobResult
+              job={job}
+              loading={isLoading}
+            />
+          )}
+          {selectedTab === 'Metrics' && (
+            <WorkbenchJobMetrics
+              job={job}
+              loading={isLoading}
+            />
+          )}
+          {selectedTab === 'Topology' && (
+            <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
+          )}
+          {selectedTab === 'PRs' && (
+            <WorkbenchJobPrs
+              prs={job?.pullRequests?.filter(isNonNullable) ?? []}
+            />
+          )}
+        </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
   )
@@ -111,14 +132,18 @@ export function useWorkbenchJobPanel() {
   }
 }
 
-const ContentWrapperSC = styled.div(({ theme }) => ({
-  padding: theme.spacing.large,
+const ContentWrapperSC = styled.div(() => ({
   height: '100%',
   width: '100%',
   overflow: 'auto',
+}))
+
+const ContentInnerSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.large,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  minHeight: '100%',
 }))
 
 const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
@@ -145,8 +170,12 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
       icon: <GraphIcon size={12} />,
     },
     !isEmpty(job?.pullRequests) && {
-      label: 'Pull requests',
+      label: 'PRs',
       icon: <PrOpenIcon size={12} />,
+    },
+    hasWorkbenchMetricsToolQuery(job?.result?.metadata?.metricsQuery) && {
+      label: 'Metrics',
+      icon: <ChartIcon size={12} />,
     },
   ].filter((tab): tab is { label: JobPanelTab; icon: ReactElement } =>
     Boolean(tab)

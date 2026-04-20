@@ -4,7 +4,6 @@ import {
   Button,
   ButtonProps,
   Card,
-  CardProps,
   CloseIcon,
   DiscoverIcon,
   Flex,
@@ -13,7 +12,7 @@ import {
   Markdown,
   SelectButton,
 } from '@pluralsh/design-system'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { GqlError } from 'components/utils/Alert'
@@ -22,12 +21,9 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunMode,
-  AgentRunStatus,
-  useAgentRunTinyQuery,
   useCreateAgentRunMutation,
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
@@ -37,8 +33,6 @@ import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { AgentRunRepoSelector } from './AgentRunRepoSelector'
-import { TRUNCATE } from 'components/utils/truncate'
-import { formatDateTime } from 'utils/datetime'
 
 export function AgentRunFixButton({
   headerTitle,
@@ -210,91 +204,6 @@ function AgentRunForm({
   )
 }
 
-export function AgentRunInfoCard({
-  agentRun,
-  showLinkButton = false,
-  ...props
-}: {
-  agentRun: Nullable<AgentRunFragment>
-  showLinkButton?: boolean
-} & CardProps) {
-  const { colors } = useTheme()
-  const { id = '', status, prompt, insertedAt, updatedAt } = agentRun ?? {}
-  const isRunning =
-    status === AgentRunStatus.Running || status === AgentRunStatus.Pending
-  const { data } = useAgentRunTinyQuery({
-    variables: { id },
-    skip: !isRunning,
-    fetchPolicy: 'cache-and-network',
-    pollInterval: 5000,
-  })
-  if (!agentRun) return null
-  return (
-    <AgentRunStatusBoxSC {...props}>
-      <Flex gap="small">
-        <StackedText
-          first={
-            <Body2BoldP $shimmer={isRunning}>
-              {status === AgentRunStatus.Successful
-                ? 'Run complete'
-                : 'Started agent run'}
-            </Body2BoldP>
-          }
-          icon={
-            <IconFrame
-              circle
-              type="secondary"
-              icon={
-                <DiscoverIcon
-                  size={16}
-                  color={colors['icon-default']}
-                />
-              }
-            />
-          }
-        />
-        <RunStatusChip
-          status={data?.agentRun?.status ?? status}
-          fillLevel={2}
-          css={{ marginLeft: 'auto' }}
-        />
-        {showLinkButton && (
-          <Button
-            small
-            as={Link}
-            to={getAgentRunAbsPath({ agentRunId: id })}
-            endIcon={<ArrowTopRightIcon />}
-          >
-            View details
-          </Button>
-        )}
-      </Flex>
-      <CaptionP
-        $color="text-xlight"
-        css={TRUNCATE}
-      >
-        {prompt}
-      </CaptionP>
-      <StretchedFlex>
-        <CaptionP $color="text-xlight">
-          Start time{' '}
-          <span css={{ color: colors['text-light'] }}>
-            {formatDateTime(insertedAt)}
-          </span>
-        </CaptionP>
-        {!isRunning && (
-          <CaptionP $color="text-xlight">
-            End time{' '}
-            <span css={{ color: colors['text-light'] }}>
-              {formatDateTime(updatedAt)}
-            </span>
-          </CaptionP>
-        )}
-      </StretchedFlex>
-    </AgentRunStatusBoxSC>
-  )
-}
-
 export const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
   width: 578,
   padding: theme.spacing.medium,
@@ -310,13 +219,4 @@ export const PromptInputBoxSC = styled(Card)(({ theme }) => ({
   '&:focus-within': {
     border: theme.borders['outline-focused'],
   },
-}))
-
-const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  justifyContent: 'space-between',
-  padding: theme.spacing.medium,
-  width: '100%',
 }))

@@ -14,10 +14,12 @@ import {
   WorkbenchToolType,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
+import { useState } from 'react'
 import {
   FormCardSC,
   StickyActionsFooterSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
   categoryToLabel,
@@ -39,13 +41,16 @@ export function WorkbenchToolForm({
   mutationLoading,
   onCancel,
   onSave,
+  onToolDeleted,
 }: {
   type: WorkbenchToolType
   tool: Nullable<WorkbenchToolFragment>
   mutationLoading: boolean
   onCancel: () => void
   onSave: (state: WorkbenchToolFormState) => void
+  onToolDeleted?: () => void
 }) {
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const { state, update, hasUpdates } = useUpdateState<WorkbenchToolFormState>({
     name: tool?.name ?? '',
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
@@ -106,21 +111,41 @@ export function WorkbenchToolForm({
         </FormField>
       )}
       <StickyActionsFooterSC>
-        <Button
-          secondary
-          destructive={!!hasUpdates}
-          onClick={onCancel}
+        {tool?.id ? (
+          <Button
+            destructive
+            onClick={() => setDeleteOpen(true)}
+          >
+            Delete tool
+          </Button>
+        ) : null}
+        <Flex
+          gap="small"
+          grow={1}
+          justify="end"
         >
-          {hasUpdates ? 'Cancel' : 'Back'}
-        </Button>
-        <Button
-          disabled={!hasUpdates}
-          loading={mutationLoading}
-          onClick={() => onSave(state)}
-        >
-          Save
-        </Button>
+          <Button
+            secondary
+            destructive={!!hasUpdates}
+            onClick={onCancel}
+          >
+            {hasUpdates ? 'Cancel' : 'Back'}
+          </Button>
+          <Button
+            disabled={!hasUpdates}
+            loading={mutationLoading}
+            onClick={() => onSave(state)}
+          >
+            Save
+          </Button>
+        </Flex>
       </StickyActionsFooterSC>
+      <WorkbenchToolDeleteModal
+        open={deleteOpen}
+        tool={tool}
+        onClose={() => setDeleteOpen(false)}
+        onDeleted={onToolDeleted}
+      />
     </FormCardSC>
   )
 }
@@ -200,6 +225,17 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         accessKeyId: undefined,
         secretAccessKey: undefined,
         externalId: undefined,
+      },
+    }
+  },
+  [WorkbenchToolType.Azure]: (config) => {
+    const { subscriptionId, tenantId, clientId } = config?.azure ?? {}
+    return {
+      azure: {
+        subscriptionId: subscriptionId ?? '',
+        tenantId: tenantId ?? '',
+        clientId: clientId ?? '',
+        clientSecret: '',
       },
     }
   },

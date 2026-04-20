@@ -130,7 +130,6 @@ export function ProjectUsageTimeSeries({
       yFormat={(value) => formatByMetric(value, metric)}
       xScale={{ type: 'time' }}
       yScale={yScale}
-      curve="natural"
       axisBottom={{
         format: (value) => formatDateTime(value, 'M/DD'),
         legend: 'date',
@@ -171,6 +170,7 @@ export function ProjectUsageTimeSeries({
       xFormat={(value) => formatDateTime(value, 'MMM DD, YYYY')}
       pointSize={0}
       enableTouchCrosshair
+      lineWidth={1}
       useMesh
       legends={[
         {

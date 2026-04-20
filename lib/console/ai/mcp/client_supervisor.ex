@@ -19,18 +19,36 @@ defmodule Console.AI.MCP.ClientSupervisor do
 
   def server_child(%ChatThread{} = t, %McpServer{url: url, protocol: proto} = s) do
     proto = proto || :sse
-    mod   = client_module(proto)
 
-    mod.child_spec([
-      client_name: Agent.name(:client, t, s),
-      transport_name: Agent.name(:transport, t, s),
-      transport: {proto, [base_url: url, headers: auth_headers(t, s)]}
-    ])
-    |> Map.put(:restart, :transient)
+    %{
+      id: Agent.name(:client, t, s),
+      start: {Anubis.Client, :start_link, [[
+        name: Agent.name(:client, t, s),
+        transport_name: Agent.name(:transport, t, s),
+        transport: {proto, [headers: auth_headers(t, s)] ++ url_arguments(url)}
+      ] ++ mcp_configuration(s)]},
+      restart: :transient
+    }
   end
 
-  def client_module(:sse), do: Console.AI.MCP.LegacyClient
-  def client_module(_), do: Console.AI.MCP.Client
+  def url_arguments(url) do
+    case URI.parse(url) do
+      %URI{path: path, query: query} ->
+        p = uri_path(path, query)
+        [base_url: String.replace_trailing(url, p, ""), mcp_path: p]
+      _ -> [base_url: url]
+    end
+  end
+
+  defp uri_path(path, query) when is_binary(query) and byte_size(query) > 0, do: "#{path}?#{query}"
+  defp uri_path(path, _) when is_binary(path) and byte_size(path) > 0, do: path
+  defp uri_path(_, _), do: "/"
+
+  @mcp_client_info [client_info: %{"name" => "Plural", "version" => "1.0.0"}]
+
+  def mcp_configuration(%McpServer{protocol: :sse}),
+    do: Keyword.put(@mcp_client_info, :protocol_version, "2025-03-26")
+  def mcp_configuration(_), do: Keyword.put(@mcp_client_info, :protocol_version, "2025-06-18")
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)

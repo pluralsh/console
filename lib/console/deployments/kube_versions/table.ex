@@ -23,6 +23,7 @@ defmodule Console.Deployments.KubeVersions.Table do
   defmodule Version do
     @type t :: %__MODULE__{version: binary, extended: boolean}
 
+    @derive Jason.Encoder
     defstruct [:version, :extended, :extended_from]
 
     def new(attrs) do

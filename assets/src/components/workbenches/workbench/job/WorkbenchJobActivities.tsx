@@ -1,40 +1,35 @@
-import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
+import { Accordion, Flex } from '@pluralsh/design-system'
 import {
-  useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
-  WorkbenchJobStatus,
 } from 'generated/graphql'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import {
-  ChatInputSimple,
-  ChatInputSimpleRef,
-} from 'components/ai/chatbot/input/ChatInput'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchJobActivity } from './WorkbenchJobActivity'
-import {
-  appendActivityToCache,
-  useWorkbenchJobStreams,
-} from './useWorkbenchJobStreams'
-import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { useWorkbenchJobStreams } from './useWorkbenchJobStreams'
+import { isJobRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
+import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
+import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 
 export const ACTIVITY_GAP = 'medium' as const
 
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
-  const [newMessage, setNewMessage] = useState('')
-  const chatInputRef = useRef<ChatInputSimpleRef>(null)
+  const { spacing } = useTheme()
+
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
     pollInterval: 30_000,
   })
+
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
 
@@ -48,19 +43,13 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
 
   const textStreamMap = useWorkbenchJobStreams(jobId, setClosedIds)
 
-  const [
-    createMessage,
-    { loading: createMessageLoading, error: createMessageError },
-  ] = useCreateWorkbenchMessageMutation({
-    variables: { jobId, attributes: { prompt: newMessage } },
-    update: (cache, { data }) =>
-      appendActivityToCache(cache, jobId, data?.createWorkbenchMessage),
-    onCompleted: () => {
-      setNewMessage('')
-      chatInputRef.current?.resetInput?.()
-    },
-    refetchQueries: ['WorkbenchJob'],
-  })
+  const userPromptIndices = useMemo(() => {
+    const indices = [0] // 0 is initial user prompt in topContent
+    activities.forEach((a, i) => {
+      if (a.type === WorkbenchJobActivityType.User) indices.push(i + 1)
+    })
+    return indices
+  }, [activities])
 
   if (!data && loading)
     return (
@@ -72,17 +61,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
 
   if (error) return <GqlError error={error} />
 
-  const jobCompleted =
-    job?.status === WorkbenchJobStatus.Successful ||
-    job?.status === WorkbenchJobStatus.Failed
-
   return (
     <Flex
       direction="column"
       gap="medium"
       height="100%"
     >
-      {createMessageError && <GqlError error={createMessageError} />}
       <ActivitiesPanelSC>
         <ActivitiesAccordionSC
           type="multiple"
@@ -100,37 +84,48 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           <VirtualList
             isReversed
             data={activities}
+            style={{
+              padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
+            }}
+            keepMounted={userPromptIndices}
             topContent={
-              <JobPromptCardSC>
-                <Markdown text={job?.prompt ?? ''} />
-              </JobPromptCardSC>
+              <ExpandableUserPrompt
+                prompt={job?.prompt}
+                css={{ width: '100%', marginTop: 0 }}
+              />
             }
             bottomContent={
-              textStreamMap['none'] && (
-                <SimplifiedMarkdown text={textStreamMap['none']} />
-              )
+              <>
+                {textStreamMap['none'] && (
+                  <SimplifiedMarkdown text={textStreamMap['none']} />
+                )}
+                {isJobRunning(job?.status) &&
+                  activities.every(({ status }) =>
+                    isActivityTerminal(status)
+                  ) && (
+                    <AILoadingText
+                      jobId={jobId}
+                      marginTop={spacing.small}
+                    />
+                  )}
+              </>
             }
             renderer={({ rowData }) => (
               <WorkbenchJobActivity
-                isOpen={openIds.includes(rowData.id)}
+                isOpen={
+                  openIds.includes(rowData.id) ||
+                  rowData.type === WorkbenchJobActivityType.Conclusion ||
+                  rowData.type === WorkbenchJobActivityType.User
+                }
                 activity={rowData}
+                jobId={jobId}
                 textStream={textStreamMap[rowData.id] ?? ''}
               />
             )}
           />
         </ActivitiesAccordionSC>
       </ActivitiesPanelSC>
-      {jobCompleted && (
-        <ChatInputSimple
-          ref={chatInputRef}
-          placeholder="Send an additional message to this job"
-          loading={createMessageLoading}
-          setValue={setNewMessage}
-          onSubmit={() => createMessage()}
-          allowSubmit={!!newMessage}
-          wrapperStyles={{ minHeight: 90 }}
-        />
-      )}
+      <WorkbenchJobPromptInput job={job} />
     </Flex>
   )
 }
@@ -145,22 +140,12 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
   background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
   minHeight: 0,
-  overflow: 'auto',
-}))
-
-const JobPromptCardSC = styled(Card)(({ theme }) => ({
-  ...theme.partials.text.body2,
-  borderRadius: theme.borderRadiuses.medium,
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-  wordBreak: 'break-word',
-  marginBottom: theme.spacing.small,
+  overflow: 'hidden',
 }))
 
 const lastActivityId = (

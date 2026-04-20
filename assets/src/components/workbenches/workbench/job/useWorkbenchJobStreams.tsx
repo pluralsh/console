@@ -1,12 +1,13 @@
 import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   useWorkbenchJobActivityDeltaSubscription,
+  useWorkbenchJobDeltaSubscription,
   useWorkbenchJobThoughtDeltaSubscription,
   useWorkbenchTextStreamSubscription,
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
-  WorkbenchJobActivityFragmentDoc,
+  WorkbenchJobActivityWithThoughtsFragmentDoc,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -30,6 +31,11 @@ export function useWorkbenchJobStreams(
   const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
     {}
   )
+
+  useWorkbenchJobDeltaSubscription({
+    variables: { id: jobId ?? '' },
+    skip: !jobId,
+  })
 
   useWorkbenchTextStreamSubscription({
     variables: { jobId: jobId ?? '' },
@@ -60,12 +66,14 @@ export function useWorkbenchJobStreams(
     skip: !jobId,
     ignoreResults: true,
     onData: ({ data: { data } }) => {
-      const id = data?.workbenchJobActivityDelta?.payload?.id
+      const payload = data?.workbenchJobActivityDelta?.payload
       if (
-        id &&
-        isActivityTerminal(data?.workbenchJobActivityDelta?.payload?.status)
+        payload?.id &&
+        (isActivityTerminal(payload?.status) || !!payload.result?.output)
       )
-        setClosedIds((prev) => new Set(prev ? prev.add(id) : new Set([id])))
+        setClosedIds(
+          (prev) => new Set(prev ? prev.add(payload.id) : new Set([payload.id]))
+        )
 
       appendActivityToCache(
         client.cache,
@@ -105,8 +113,8 @@ const appendThoughtToActivityCache = (
       __typename: 'WorkbenchJobActivity',
       id: thought.activity?.id,
     }),
-    fragment: WorkbenchJobActivityFragmentDoc,
-    fragmentName: 'WorkbenchJobActivity',
+    fragment: WorkbenchJobActivityWithThoughtsFragmentDoc,
+    fragmentName: 'WorkbenchJobActivityWithThoughts',
     update: (prev) => {
       const thoughts = prev.thoughts ?? []
       if (thoughts.some((t) => t?.id === thought.id)) return prev

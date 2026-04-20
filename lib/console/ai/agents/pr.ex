@@ -13,7 +13,7 @@ defmodule Console.AI.Agents.Pr do
   @spec exec(binary, binary) :: {:ok, Commit.t} | {:error, binary}
   def exec(dir, prompt) do
     tools(dir)
-    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt))
+    |> MemoryEngine.new(30, system_prompt: String.trim(prompt(prompt: prompt)))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, %Commit{} = commit} -> {:ok, commit}
@@ -38,5 +38,5 @@ defmodule Console.AI.Agents.Pr do
     ]
   end
 
-  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "pr", "agent.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "pr", "agent.md.eex"]), [:assigns])
 end
