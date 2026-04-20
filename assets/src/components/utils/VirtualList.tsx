@@ -75,6 +75,10 @@ export function VirtualList<T, M>({
   const internalRef = useRef<VListHandle>(null)
   const hasInitiallyAligned = useRef(false)
   const shouldStickToBottom = useRef(true)
+  const lastEmittedSliceRef = useRef<{
+    startIdx: number
+    endIdx: number
+  } | null>(null)
 
   // for doing slice polling similar to our table component
   const emitVirtualSlice = useCallback(() => {
@@ -87,6 +91,17 @@ export function VirtualList<T, M>({
       viewportSize,
     } = internalRef.current
 
+    const startIdx = findItemIndex(scrollOffset)
+    const endIdx = findItemIndex(scrollOffset + viewportSize)
+
+    // skip re-emitting unchanged slices to avoid churning downstream state
+    if (
+      lastEmittedSliceRef.current?.startIdx === startIdx &&
+      lastEmittedSliceRef.current?.endIdx === endIdx
+    )
+      return
+    lastEmittedSliceRef.current = { startIdx, endIdx }
+
     const toVirtualItem = (index: number): VirtualItem => {
       const [start, size] = [getItemOffset(index), getItemSize(index)]
       const end = start + size
@@ -94,8 +109,8 @@ export function VirtualList<T, M>({
     }
 
     onVirtualSliceChange({
-      start: toVirtualItem(findItemIndex(scrollOffset)),
-      end: toVirtualItem(findItemIndex(scrollOffset + viewportSize)),
+      start: toVirtualItem(startIdx),
+      end: toVirtualItem(endIdx),
     })
   }, [onVirtualSliceChange])
 
