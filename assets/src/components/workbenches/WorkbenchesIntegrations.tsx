@@ -19,7 +19,6 @@ import {
   WORKBENCHES_TOOLS_TYPE_PARAM,
 } from './tools/WorkbenchToolCreateOrEdit'
 import {
-  PROVIDER_TO_ICON,
   WORKBENCH_TOOL_CARDS,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
@@ -37,7 +36,6 @@ export function WorkbenchesIntegrations() {
       <CardGrid styles={workbenchToolCardGridStyles(280)}>
         {WORKBENCH_TOOL_CARDS.map(
           ({ type, provider, label, description, categoryLabels }) => {
-            const ProviderIcon = provider ? PROVIDER_TO_ICON[provider] : null
             const params = new URLSearchParams({
               [WORKBENCHES_TOOLS_TYPE_PARAM]: type,
             })
@@ -55,17 +53,11 @@ export function WorkbenchesIntegrations() {
                           circle
                           type="secondary"
                           icon={
-                            ProviderIcon ? (
-                              <ProviderIcon
-                                fullColor
-                                size={20}
-                              />
-                            ) : (
-                              <WorkbenchToolIcon
-                                size={20}
-                                type={type}
-                              />
-                            )
+                            <WorkbenchToolIcon
+                              size={20}
+                              type={type}
+                              provider={provider}
+                            />
                           }
                         />
                         {label}

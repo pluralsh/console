@@ -32,7 +32,6 @@ import {
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   isConfigurableWorkbenchToolType,
   isProvider,
-  PROVIDER_TO_ICON,
   PROVIDER_TO_LABEL,
   TOOL_TYPE_TO_LABEL,
   WorkbenchToolIcon,
@@ -142,7 +141,6 @@ export function WorkbenchToolCreateOrEdit({
     if (mode === 'create') create({ variables: { attributes } })
     else update({ variables: { id: id ?? '', attributes } })
   }
-  const ProviderIcon = provider ? PROVIDER_TO_ICON[provider] : null
 
   return (
     <WrapperSC>
@@ -168,11 +166,10 @@ export function WorkbenchToolCreateOrEdit({
               circle
               type="secondary"
               icon={
-                ProviderIcon ? (
-                  <ProviderIcon fullColor />
-                ) : (
-                  <WorkbenchToolIcon type={type} />
-                )
+                <WorkbenchToolIcon
+                  type={type}
+                  provider={provider}
+                />
               }
               textValue={capitalize(provider || type)}
             />

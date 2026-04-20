@@ -16,6 +16,10 @@ import { EditableDiv } from 'components/utils/EditableDiv'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { OverlineH3 } from 'components/utils/typography/Text'
 import {
+  FormCardSC,
+  StickyActionsFooterSC,
+} from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
+import {
   AwsCloudConnectionAttributes,
   AzureCloudConnectionAttributes,
   CloudConnectionAttributes,
@@ -31,15 +35,11 @@ import {
   CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
   WORKBENCHES_TOOLS_CREATE_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import { EditableDivWrapperSC } from '../WorkbenchToolFormFields'
-import {
-  FormCardSC,
-  StickyActionsFooterSC,
-} from '../../workbench/create-edit/WorkbenchCreateOrEdit'
 import {
   WORKBENCHES_TOOLS_PROVIDER_PARAM,
   WORKBENCHES_TOOLS_TYPE_PARAM,
 } from '../WorkbenchToolCreateOrEdit'
+import { EditableDivWrapperSC } from '../WorkbenchToolFormFields'
 import { isProvider, PROVIDER_TO_LABEL } from '../workbenchToolsUtils'
 
 export function CloudConnectionCreateForm() {
@@ -161,97 +161,81 @@ export function CloudConnectionCreateForm() {
   return (
     <Flex
       direction="column"
-      gap="large"
-      height="100%"
-      width="100%"
-      overflow="auto"
+      gap="medium"
       padding="large"
+      maxWidth={750}
+      minHeight={0}
     >
-      <Flex
-        direction="column"
-        width="100%"
-        css={{ maxWidth: 750 }}
-      >
-        <FormCardSC>
-          <Flex
-            direction="column"
-            gap="large"
-            height="100%"
-            width="100%"
+      {error && <GqlError error={error} />}
+
+      <FormCardSC css={{ maxWidth: 750 }}>
+        <OverlineH3 $color="text-xlight">
+          New {PROVIDER_TO_LABEL[provider]} connection
+        </OverlineH3>
+        <FormField
+          required
+          label="Name"
+        >
+          <Input2
+            placeholder="Connection name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </FormField>
+
+        {provider === Provider.Aws && (
+          <AwsFields
+            state={aws}
+            setState={setAws}
+          />
+        )}
+        {provider === Provider.Gcp && (
+          <GcpFields
+            state={gcp}
+            setState={setGcp}
+          />
+        )}
+        {provider === Provider.Azure && (
+          <AzureFields
+            state={azure}
+            setState={setAzure}
+          />
+        )}
+
+        <Flex
+          direction="column"
+          gap="xsmall"
+        >
+          <OverlineH3 $color="text-xlight">Read permissions</OverlineH3>
+          <FormBindings
+            bindings={readBindings}
+            setBindings={(next: PolicyBindingFragment[]) =>
+              setReadBindings(next)
+            }
+            hints={{
+              user: 'Users with read permissions for this connection',
+              group: 'Groups with read permissions for this connection',
+            }}
+          />
+        </Flex>
+        <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
+          <Button
+            secondary
+            as={Link}
+            to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
+            disabled={loading}
           >
-            {error && <GqlError error={error} />}
-            <OverlineH3 $color="text-xlight">
-              New {PROVIDER_TO_LABEL[provider]} connection
-            </OverlineH3>
-            <FormField
-              required
-              label="Name"
-            >
-              <Input2
-                placeholder="Connection name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </FormField>
-
-            {provider === Provider.Aws && (
-              <AwsFields
-                state={aws}
-                setState={setAws}
-              />
-            )}
-            {provider === Provider.Gcp && (
-              <GcpFields
-                state={gcp}
-                setState={setGcp}
-              />
-            )}
-            {provider === Provider.Azure && (
-              <AzureFields
-                state={azure}
-                setState={setAzure}
-              />
-            )}
-
-            <Flex
-              direction="column"
-              gap="xsmall"
-            >
-              <OverlineH3 $color="text-xlight">Read permissions</OverlineH3>
-              <FormBindings
-                bindings={readBindings}
-                setBindings={(next: PolicyBindingFragment[]) =>
-                  setReadBindings(next)
-                }
-                hints={{
-                  user: 'Users with read permissions for this connection',
-                  group: 'Groups with read permissions for this connection',
-                }}
-              />
-            </Flex>
-
-            <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
-              <Button
-                secondary
-                as={Link}
-                to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
-                disabled={loading}
-              >
-                Back
-              </Button>
-              <Button
-                onClick={() =>
-                  attributes && upsert({ variables: { attributes } })
-                }
-                loading={loading}
-                disabled={!canSave}
-              >
-                Save
-              </Button>
-            </StickyActionsFooterSC>
-          </Flex>
-        </FormCardSC>
-      </Flex>
+            Back
+          </Button>
+          <Button
+            onClick={() => attributes && upsert({ variables: { attributes } })}
+            loading={loading}
+            disabled={!canSave}
+          >
+            Save
+          </Button>
+        </StickyActionsFooterSC>
+      </FormCardSC>
     </Flex>
   )
 }

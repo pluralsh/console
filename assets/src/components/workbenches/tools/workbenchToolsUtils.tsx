@@ -230,15 +230,21 @@ export const isProvider = (value: Nullable<string>): value is Provider =>
 
 export function WorkbenchToolIcon({
   type,
+  provider,
   fullColor = true,
   ...props
-}: { type: Nullable<string> } & IconProps) {
+}: {
+  type: Nullable<string>
+  provider?: Nullable<Provider>
+} & IconProps) {
   const Icon =
-    type === WorkbenchToolType.Sentry
-      ? SentryLogoIcon
-      : isConfigurableWorkbenchToolType(type)
-        ? toolToIcon[type]
-        : ToolsIcon
+    type === WorkbenchToolType.Cloud && provider
+      ? PROVIDER_TO_ICON[provider]
+      : type === WorkbenchToolType.Sentry
+        ? SentryLogoIcon
+        : isConfigurableWorkbenchToolType(type)
+          ? toolToIcon[type]
+          : ToolsIcon
   return (
     <Icon
       fullColor={fullColor}

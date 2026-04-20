@@ -838,7 +838,12 @@ export function WorkbenchAttachToolsStep({
               label={tool.name}
               leftContent={
                 <IconFrame
-                  icon={<WorkbenchToolIcon type={tool.tool} />}
+                  icon={
+                    <WorkbenchToolIcon
+                      type={tool.tool}
+                      provider={tool.cloudConnection?.provider}
+                    />
+                  }
                   size="xsmall"
                 />
               }
@@ -854,66 +859,69 @@ export function WorkbenchAttachToolsStep({
             padding: 0,
           }}
         >
-          {selectedTools.map(({ id, name, tool: type, categories }) => (
-            <Card key={id}>
-              <WorkbenchToolCardBody>
-                <Flex
-                  align="center"
-                  justify="space-between"
-                  width="100%"
-                  gap="small"
-                >
-                  <StackedText
-                    first={name}
-                    firstPartialType="body2Bold"
-                    firstColor="text"
-                    second={TOOL_TYPE_TO_LABEL[type]}
-                    icon={
-                      <IconFrame
-                        circle
-                        type="secondary"
-                        icon={
-                          <WorkbenchToolIcon
-                            size={20}
-                            type={type}
-                          />
-                        }
-                      />
-                    }
-                    css={{ minWidth: 0, flex: 1 }}
+          {selectedTools.map(
+            ({ id, name, tool: type, categories, cloudConnection }) => (
+              <Card key={id}>
+                <WorkbenchToolCardBody>
+                  <Flex
+                    align="center"
+                    justify="space-between"
+                    width="100%"
+                    gap="small"
+                  >
+                    <StackedText
+                      first={name}
+                      firstPartialType="body2Bold"
+                      firstColor="text"
+                      second={TOOL_TYPE_TO_LABEL[type]}
+                      icon={
+                        <IconFrame
+                          circle
+                          type="secondary"
+                          icon={
+                            <WorkbenchToolIcon
+                              size={20}
+                              type={type}
+                              provider={cloudConnection?.provider}
+                            />
+                          }
+                        />
+                      }
+                      css={{ minWidth: 0, flex: 1 }}
+                    />
+                    <IconFrame
+                      circle
+                      clickable
+                      icon={<CloseIcon />}
+                      tooltip="Remove from selection"
+                      onClick={() =>
+                        setSelectedToolIds(
+                          selectedToolIds.filter((toolId) => toolId !== id)
+                        )
+                      }
+                    />
+                  </Flex>
+                  <WorkbenchesConfiguredToolMetadata
+                    toolId={id}
+                    toolType={type}
                   />
-                  <IconFrame
-                    circle
-                    clickable
-                    icon={<CloseIcon />}
-                    tooltip="Remove from selection"
-                    onClick={() =>
-                      setSelectedToolIds(
-                        selectedToolIds.filter((toolId) => toolId !== id)
-                      )
-                    }
-                  />
-                </Flex>
-                <WorkbenchesConfiguredToolMetadata
-                  toolId={id}
-                  toolType={type}
-                />
-                <Flex
-                  gap="xsmall"
-                  wrap="wrap"
-                >
-                  {categories?.filter(isNonNullable).map((cat, i) => (
-                    <Chip
-                      key={i}
-                      size="small"
-                    >
-                      {categoryToLabel[cat]}
-                    </Chip>
-                  ))}
-                </Flex>
-              </WorkbenchToolCardBody>
-            </Card>
-          ))}
+                  <Flex
+                    gap="xsmall"
+                    wrap="wrap"
+                  >
+                    {categories?.filter(isNonNullable).map((cat, i) => (
+                      <Chip
+                        key={i}
+                        size="small"
+                      >
+                        {categoryToLabel[cat]}
+                      </Chip>
+                    ))}
+                  </Flex>
+                </WorkbenchToolCardBody>
+              </Card>
+            )
+          )}
         </CardGrid>
       )}
     </Flex>
