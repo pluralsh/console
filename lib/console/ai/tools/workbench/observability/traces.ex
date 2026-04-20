@@ -15,7 +15,6 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
 
   embedded_schema do
     field :tool, :map, virtual: true
-    field :service_name, :string
     field :query,      :string
     field :limit,      :integer
 
@@ -35,7 +34,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(service_name query limit)a
+  @valid ~w(query limit)a
 
   @default_schema Console.priv_file!("tools/workbench/observability/traces.json") |> Jason.decode!()
   @jaeger_schema Console.priv_file!("tools/workbench/observability/traces_jaeger.json") |> Jason.decode!()
@@ -50,16 +49,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
     |> cast(attrs, @valid)
     |> cast_embed(:time_range)
     |> cast_embed(:options, with: &options_changeset/2)
-    |> set_query_from_service_name()
     |> validate_required([:query])
-  end
-
-  defp set_query_from_service_name(changeset) do
-    case {get_field(changeset, :query), get_field(changeset, :service_name)} do
-      {nil, service} when is_binary(service) and service != "" -> put_change(changeset, :query, String.trim(service))
-      {"", service} when is_binary(service) and service != "" -> put_change(changeset, :query, String.trim(service))
-      _ -> changeset
-    end
   end
 
   defp options_changeset(model, attrs) do
