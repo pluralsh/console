@@ -225,23 +225,23 @@ export function WorkbenchSkillsConfigStep({
 }: WorkbenchFormStepProps) {
   const { setTabs } = useWorkbenchFormCardTabs()
   const [subTab, setSubTab] = useState<'git-skills' | 'plural-skills'>(
-    'git-skills'
+    'plural-skills'
   )
 
   useEffect(() => {
     setTabs(
       <CardTabs>
         <CardTab
-          active={subTab === 'git-skills'}
-          onClick={() => setSubTab('git-skills')}
-        >
-          Git skills
-        </CardTab>
-        <CardTab
           active={subTab === 'plural-skills'}
           onClick={() => setSubTab('plural-skills')}
         >
           Plural skills
+        </CardTab>
+        <CardTab
+          active={subTab === 'git-skills'}
+          onClick={() => setSubTab('git-skills')}
+        >
+          Git skills
         </CardTab>
       </CardTabs>
     )
