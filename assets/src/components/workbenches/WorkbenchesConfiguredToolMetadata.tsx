@@ -32,6 +32,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Dynatrace]: extractDynatraceMetadata,
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
   [WorkbenchToolType.Azure]: extractAzureMetadata,
+  [WorkbenchToolType.Jaeger]: extractJaegerMetadata,
 }
 
 export function WorkbenchesConfiguredToolMetadata({
@@ -182,6 +183,15 @@ function extractAzureMetadata(
     { label: 'Tenant', value: configuration?.azure?.tenantId },
     { label: 'Client ID', value: configuration?.azure?.clientId },
     { label: 'Subscription ID', value: configuration?.azure?.subscriptionId },
+  ]
+}
+
+function extractJaegerMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'URL', value: configuration?.jaeger?.url },
+    { label: 'User', value: configuration?.jaeger?.username },
   ]
 }
 
