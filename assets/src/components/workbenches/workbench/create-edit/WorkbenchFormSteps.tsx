@@ -97,8 +97,8 @@ export function WorkbenchSetupStep({
     <>
       <FormField
         required
+        infoTooltip="Name must be unique"
         label="Workbench name"
-        caption="Name must be unique"
       >
         <Input2
           placeholder="Enter a name"
@@ -136,9 +136,13 @@ export function WorkbenchSetupStep({
           />
         </EditableDivWrapperSC>
       </FormField>
-      <FormField label="Plural-native Infrastructure Capabilities">
-        <TwoColumnCheckboxGridSC>
+      <FormField
+        infoTooltip="Plural native integration"
+        label="Enable Infrastructure"
+      >
+        <Flex gap="large">
           <Checkbox
+            small
             checked={infra?.stacks ?? false}
             onChange={(e) =>
               update((d) => {
@@ -151,6 +155,7 @@ export function WorkbenchSetupStep({
             Stacks
           </Checkbox>
           <Checkbox
+            small
             checked={infra?.services ?? false}
             onChange={(e) =>
               update((d) => {
@@ -163,6 +168,7 @@ export function WorkbenchSetupStep({
             Services
           </Checkbox>
           <Checkbox
+            small
             checked={infra?.kubernetes ?? false}
             onChange={(e) =>
               update((d) => {
@@ -174,11 +180,15 @@ export function WorkbenchSetupStep({
           >
             Kubernetes
           </Checkbox>
-        </TwoColumnCheckboxGridSC>
+        </Flex>
       </FormField>
-      <FormField label="Plural-native Observability Capabilities">
-        <TwoColumnCheckboxGridSC>
+      <FormField
+        infoTooltip="Plural native integration"
+        label="Enable Observability"
+      >
+        <Flex gap="large">
           <Checkbox
+            small
             checked={observability?.metrics ?? false}
             onChange={(e) =>
               update((d) => {
@@ -191,6 +201,7 @@ export function WorkbenchSetupStep({
             Plural integrated metrics
           </Checkbox>
           <Checkbox
+            small
             checked={observability?.logs ?? false}
             onChange={(e) =>
               update((d) => {
@@ -202,7 +213,7 @@ export function WorkbenchSetupStep({
           >
             Plural integrated logs
           </Checkbox>
-        </TwoColumnCheckboxGridSC>
+        </Flex>
       </FormField>
     </>
   )
@@ -858,12 +869,6 @@ export function WorkbenchAttachToolsStep({
 const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   background: theme.colors['fill-zero'],
-}))
-
-const TwoColumnCheckboxGridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  gap: theme.spacing.medium,
 }))
 
 const skillsFilesToText = (files: Nullable<string>[] | null): string =>
