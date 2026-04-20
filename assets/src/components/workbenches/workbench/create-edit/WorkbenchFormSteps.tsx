@@ -652,6 +652,8 @@ function WebhookActorSubStep({
     !!me.roles?.admin &&
     !formState.overrideBotUser &&
     (!resolvedActor || resolvedActor.id !== me.id)
+  const showResetLink =
+    me && !!me.roles?.admin && formState.overrideBotUser && !!formState.botUser
 
   return (
     <Flex
@@ -678,6 +680,18 @@ function WebhookActorSubStep({
                 }}
               >
                 Set me as webhook actor
+              </InlineLink>
+            ) : showResetLink ? (
+              <InlineLink
+                css={{ fontWeight: 400, whiteSpace: 'nowrap' }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  update((d) => {
+                    d.overrideBotUser = false
+                  })
+                }}
+              >
+                Reset to original actor
               </InlineLink>
             ) : null}
           </Flex>
