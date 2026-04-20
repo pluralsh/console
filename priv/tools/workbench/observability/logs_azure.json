@@ -26,6 +26,23 @@
             "type": "integer",
             "description": "The maximum number of logs to return"
         },
+        "options": {
+            "type": "object",
+            "description": "Provider-specific query options.",
+            "properties": {
+                "azure": {
+                    "type": "object",
+                    "description": "Optional per-query Azure logs options. Used only for Azure tools.",
+                    "properties": {
+                        "resource_id": {
+                            "type": "string",
+                            "description": "Azure resource ID target for this logs query (required for Azure tools)."
+                        }
+                    },
+                    "required": ["resource_id"]
+                }
+            }
+        },
         "time_range": {
             "type": "object",
             "properties": {
