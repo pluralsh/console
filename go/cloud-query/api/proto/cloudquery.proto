@@ -7,9 +7,11 @@ package cloudquery;
 option go_package = "internal/proto/cloudquery";
 
 message AwsCredentials {
-  string access_key_id = 1;
-  string secret_access_key = 2;
+  optional string access_key_id = 1;
+  optional string secret_access_key = 2;
   optional string region = 3;
+  repeated string regions = 4;
+  optional string assume_role_arn = 5;
 }
 
 message AzureCredentials {
