@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Subagents.Infrastructure do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, Workbench, User}
+  alias Console.Schema.{WorkbenchJob, WorkbenchTool, WorkbenchJobActivity, Workbench, User}
   alias Console.AI.Tools.Workbench.{
     SummarizeComponent,
     Result,
@@ -15,7 +15,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.ClusterServices,
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
-    Infrastructure.StackInspect
+    Infrastructure.StackInspect,
+    Infrastructure.CloudSchema,
+    Infrastructure.CloudQuery
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.Environment
@@ -23,8 +25,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
+    system_prompt = String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools)))
     tools(job, environment)
-    |> MemoryEngine.new(50, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(50, system_prompt: system_prompt, acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -42,15 +45,30 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills}) do
+  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills} = environment) do
     svc_tools(bench, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
+    |> Enum.concat(cloud_tools(environment))
     |> Enum.concat([
       %Skills{skills: skills},
       %Skill{skills: skills},
       Result
     ])
+  end
+
+  defp cloud_tools(%Environment{tools: tools}) do
+    Enum.flat_map(tools, fn
+      {_, %WorkbenchTool{tool: :cloud} = tool} -> [%CloudSchema{tool: tool}, %CloudQuery{tool: tool}]
+      _ -> []
+    end)
+  end
+
+  defp has_cloud_tools?(tools) do
+    Enum.any?(tools, fn
+      {_, %WorkbenchTool{tool: :cloud}} -> true
+      _ -> false
+    end)
   end
 
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, user) do

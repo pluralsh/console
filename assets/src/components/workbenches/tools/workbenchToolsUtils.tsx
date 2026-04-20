@@ -92,6 +92,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
   [WorkbenchToolType.Azure]: 'Azure',
   [WorkbenchToolType.Jaeger]: 'Jaeger',
+  [WorkbenchToolType.Cloud]: 'Cloud',
 }
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
@@ -126,6 +127,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Logs,
   ],
   [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
+  [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
@@ -163,6 +165,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Ticketing]: 'Ticketing',
   [WorkbenchToolCategory.Integration]: 'Integration',
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
+  [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
 }
 
 export const TOOL_TYPE_CARDS: {

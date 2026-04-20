@@ -86,7 +86,9 @@ defmodule Console.AI.Tools.Agent.Base do
     %AwsCredentials{
       access_key_id:     aws.access_key_id,
       secret_access_key: aws.secret_access_key,
-      region:            aws.region
+      region:            aws.region,
+      regions:           aws.regions,
+      assume_role_arn:   aws.assume_role_arn
     }
   end
 

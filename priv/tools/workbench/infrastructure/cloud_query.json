@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "A valid postgresql-compatible SQL query using the schema from the cloud_schema tool to perform some query or analysis on the cloud accounts configuration data"
+        }
+    },
+    "required": ["query"]
+}

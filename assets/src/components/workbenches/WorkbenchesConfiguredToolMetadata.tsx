@@ -33,6 +33,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
   [WorkbenchToolType.Azure]: extractAzureMetadata,
   [WorkbenchToolType.Jaeger]: extractJaegerMetadata,
+  [WorkbenchToolType.Cloud]: () => [],
 }
 
 export function WorkbenchesConfiguredToolMetadata({
