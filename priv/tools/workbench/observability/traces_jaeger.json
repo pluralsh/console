@@ -1,9 +1,9 @@
 {
     "type": "object",
     "properties": {
-        "service_name": {
+        "query": {
             "type": "string",
-            "description": "Jaeger service name (required primary selector)."
+            "description": "The provider-specific query to use to gather traces"
         },
         "limit": {
             "type": "integer",
@@ -65,5 +65,5 @@
             }
         }
     },
-    "required": ["service_name"]
+    "required": ["query"]
 }
