@@ -223,6 +223,42 @@ export function WorkbenchSkillsConfigStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
+  const { setTabs } = useWorkbenchFormCardTabs()
+  const [subTab, setSubTab] = useState<'git-skills' | 'plural-skills'>(
+    'git-skills'
+  )
+
+  useEffect(() => {
+    setTabs(
+      <CardTabs>
+        <CardTab
+          active={subTab === 'git-skills'}
+          onClick={() => setSubTab('git-skills')}
+        >
+          Git skills
+        </CardTab>
+        <CardTab
+          active={subTab === 'plural-skills'}
+          onClick={() => setSubTab('plural-skills')}
+        >
+          Plural skills
+        </CardTab>
+      </CardTabs>
+    )
+    return () => setTabs(null)
+  }, [setTabs, subTab])
+
+  return subTab === 'git-skills' ? (
+    <GitSkillsSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  ) : (
+    <FormField label="Plural skills">...</FormField>
+  )
+}
+
+function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const { data: reposData, loading: reposLoading } = useGitRepositoriesQuery({
     variables: { first: 500 },
@@ -303,7 +339,7 @@ export function WorkbenchSkillsConfigStep({
                   })
                 }
                 placeholder={`e.g:\nskill_math.md\nskill_science.md`}
-                css={{ minHeight: 120 }}
+                css={{ minHeight: 75 }}
               />
             </EditableDivWrapperSC>
           </FormField>
