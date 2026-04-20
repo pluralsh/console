@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "table": {
+            "type": "string",
+            "description": "Query for tables containing this substring. Searches for all tables if not provided."
+        }
+    },
+    "required": []
+}

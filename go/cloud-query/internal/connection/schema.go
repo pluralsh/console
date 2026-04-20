@@ -54,3 +54,28 @@ func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 	}
 	return result, nil
 }
+
+func (in *connection) Tables(table string) ([]string, error) {
+	klog.V(log.LogLevelDebug).InfoS("running tables query", "table", table)
+
+	prefix := fmt.Sprintf("%s_", in.provider)
+
+	qResponse, err := in.db.Query(`
+		SELECT table_name
+		FROM information_schema.columns
+		WHERE table_name LIKE $1;`, lo.Ternary(lo.IsEmpty(table), prefix+"%", "%"+table+"%"))
+	if err != nil {
+		return nil, err
+	}
+	defer qResponse.Close()
+
+	result := make([]string, 0)
+	for qResponse.Next() {
+		var tableName string
+		if err = qResponse.Scan(&tableName); err != nil {
+			return nil, err
+		}
+		result = append(result, tableName)
+	}
+	return result, nil
+}
