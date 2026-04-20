@@ -254,7 +254,10 @@ export function WorkbenchSkillsConfigStep({
       setFormState={setFormState}
     />
   ) : (
-    <FormField label="Plural skills">...</FormField>
+    <PluralSkillsSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
   )
 }
 
@@ -347,6 +350,13 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
       )}
     </>
   )
+}
+
+function PluralSkillsSubStep({
+  formState: _formState,
+  setFormState: _setFormState,
+}: WorkbenchFormStepProps) {
+  return <FormField label="Skills">...</FormField>
 }
 
 export function WorkbenchCodingAgentStep({
