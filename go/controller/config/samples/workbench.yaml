@@ -40,7 +40,7 @@ spec:
   name: workbenchtool_metrics_sample
   tool: HTTP
   categories:
-    - METRICS
+    - INTEGRATION
   configuration:
     http:
       url: https://metrics.example.com/query
@@ -121,7 +121,7 @@ spec:
     name: workbench-sample
     namespace: default
   name: workbenchwebhook-sample
-  webhookName: my-grafana-webhook
+  webhookName: test
   matches:
     substring: "error"
     caseInsensitive: true
