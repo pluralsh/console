@@ -69,7 +69,15 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes are listed in the provided release note excerpts;
+        both pages primarily contain installation instructions and links to the full
+        changelog/upgrading guide.]
+    breaking_changes: [No breaking changes are listed in the provided release note
+        excerpts; you must consult the Argo Workflows 3.5 upgrading guide and the
+        project CHANGELOG for any breaking changes between v3.5.6 and v3.5.11.]
   chart_version: 0.42.5
   images: ['quay.io/argoproj/argocli:v3.5.11', 'quay.io/argoproj/workflow-controller:v3.5.11']
 - version: 3.5.6

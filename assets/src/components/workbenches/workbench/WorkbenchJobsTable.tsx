@@ -1,6 +1,14 @@
-import { CaretRightIcon, Table } from '@pluralsh/design-system'
+import {
+  Card,
+  CaretRightIcon,
+  Flex,
+  Markdown,
+  PaperCheckIcon,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -12,7 +20,10 @@ import { truncate } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
+import { ActivityModalIcon } from './job/WorkbenchJobActivityResults'
 
 export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -59,12 +70,43 @@ const columns = [
       return <CaptionP $color="text-xlight">{name}</CaptionP>
     },
   }),
-  columnHelper.accessor(({ status }) => status, {
-    id: 'status',
-    cell: ({ getValue }) => <RunStatusChip status={getValue()} />,
-  }),
-  columnHelper.display({
-    id: 'insertedAt',
-    cell: () => <CaretRightIcon color="icon-xlight" />,
+  columnHelper.accessor((job) => job, {
+    id: 'actions',
+    cell: function Cell({ getValue }) {
+      const { spacing } = useTheme()
+      const { pullRequests, result, status } = getValue()
+      return (
+        <Flex
+          gap="medium"
+          align="center"
+          justify="flex-end"
+          width="100%"
+        >
+          <PRsModalIcon
+            size="small"
+            type="tertiary"
+            prs={pullRequests?.filter(isNonNullable) ?? []}
+          />
+          {result?.conclusion && (
+            <ActivityModalIcon
+              icon={PaperCheckIcon}
+              tooltip="View conclusion"
+              modalHeader="Conclusion"
+              modalContent={
+                <Card css={{ padding: spacing.large, overflow: 'auto' }}>
+                  <Markdown text={result?.conclusion} />
+                </Card>
+              }
+              size={16}
+            />
+          )}
+          <RunStatusIcon
+            fullColor
+            status={status}
+          />
+          <CaretRightIcon color="icon-xlight" />
+        </Flex>
+      )
+    },
   }),
 ]

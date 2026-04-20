@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchWebhook do
   use Console.Schema.Base
-  alias Console.Schema.{ObservabilityWebhook, Workbench, IssueWebhook}
+  alias Console.Schema.{ObservabilityWebhook, Workbench, IssueWebhook, User}
 
   schema "workbench_webhooks" do
     field :name,    :string
@@ -15,6 +15,7 @@ defmodule Console.Schema.WorkbenchWebhook do
     belongs_to :webhook,       ObservabilityWebhook
     belongs_to :issue_webhook, IssueWebhook
     belongs_to :workbench,     Workbench
+    belongs_to :user,          User
 
     timestamps()
   end
@@ -47,7 +48,7 @@ defmodule Console.Schema.WorkbenchWebhook do
     from(w in query, where: w.issue_webhook_id == ^issue_webhook_id)
   end
 
-  @valid ~w(name webhook_id issue_webhook_id workbench_id prompt)a
+  @valid ~w(name webhook_id issue_webhook_id workbench_id prompt user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -56,8 +57,9 @@ defmodule Console.Schema.WorkbenchWebhook do
     |> foreign_key_constraint(:webhook_id)
     |> foreign_key_constraint(:issue_webhook_id)
     |> foreign_key_constraint(:workbench_id)
+    |> foreign_key_constraint(:user_id)
     |> unique_constraint([:workbench_id, :name])
-    |> validate_required([:name, :workbench_id])
+    |> validate_required([:name, :workbench_id, :user_id])
     |> validate_webhook_or_issue_webhook()
   end
 

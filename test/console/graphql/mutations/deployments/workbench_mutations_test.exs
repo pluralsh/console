@@ -1016,7 +1016,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
   describe "updateWorkbenchWebhook" do
     test "it can update a workbench webhook" do
       workbench = insert(:workbench)
-      webhook = insert(:workbench_webhook, workbench: workbench, name: "original")
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "original", user: admin_user())
 
       {:ok, %{data: %{"updateWorkbenchWebhook" => updated}}} = run_query("""
         mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {

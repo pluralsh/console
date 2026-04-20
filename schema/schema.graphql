@@ -1545,6 +1545,7 @@ enum IssueWebhookProvider {
   ASANA
   GITHUB
   GITLAB
+  AZURE_DEVOPS
 }
 
 enum IssueStatus {
@@ -2434,6 +2435,9 @@ input WorkbenchWebhookAttributes {
 
   "optional prompt text applied when this webhook matches"
   prompt: String
+
+  "when true on update, sets userId to the authenticated user"
+  overrideWebhookUser: Boolean
 }
 
 input WorkbenchToolAttributes {
@@ -3083,6 +3087,9 @@ type WorkbenchWebhook {
 
   "the issue webhook that receives events"
   issueWebhook: IssueWebhook
+
+  "the user who created this webhook"
+  user: User
 
   insertedAt: DateTime
 

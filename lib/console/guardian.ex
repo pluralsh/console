@@ -15,6 +15,7 @@ defmodule Console.Guardian do
   def build_claims(%{} = claims, %User{} = user, _) do
     user = Console.Services.Rbac.preload(user)
     Map.put(claims, "user.email", user.email)
+    |> Map.put("email", user.email)
     |> Map.put("groups", groups(user))
     |> then(& {:ok, &1})
   end

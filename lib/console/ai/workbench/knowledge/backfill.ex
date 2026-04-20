@@ -15,9 +15,9 @@ defmodule Console.AI.Workbench.Knowledge.Backfill do
     with {:ok, job} <- Workbenches.knowledge_updated(job),
          {:ok, skills} <- SkillsUtils.skills(job.workbench) do
       tools(job, Map.new(skills, & {&1.name, &1}))
-      |> MemoryEngine.new(20, system_prompt: system_prompt(job: job), acc: %{})
+      |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(job: job)), acc: %{})
       |> MemoryEngine.reduce([
-        {:user, "Here is a description of the job that was just completed:\n\n#{job_prompt(job: job)}"},
+        {:user, "Here is a description of the job that was just completed:\n\n#{String.trim(job_prompt(job: job))}"},
         {:user, "Go ahead and update whatever skill is necessary or abort based on the general parameters we've described for skill updates"}
       ], &reducer/2)
       |> case do
@@ -49,6 +49,6 @@ defmodule Console.AI.Workbench.Knowledge.Backfill do
     ]
   end
 
-  EEx.function_from_file(:defp, :job_prompt, Console.priv_filename(["prompts", "vector", "workbench_job.md.eex"]), [:assigns], trim: true)
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "skill_backfill.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :job_prompt, Console.priv_filename(["prompts", "vector", "workbench_job.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "skill_backfill.md.eex"]), [:assigns])
 end

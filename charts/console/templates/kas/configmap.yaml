@@ -14,9 +14,12 @@ data:
         listen:
           address: ":{{ .Values.kas.service.kubernetesApiPort }}"
         url_path_prefix: "{{ .Values.kas.ingress.kubernetesApiPath }}"
+        jwt_authentication_secret_file: "/etc/kas/jwt_secret"
     observability:
       listen:
         address: ":{{ .Values.kas.service.observabilityPort }}"
+      logging:
+        level: {{ .Values.kas.logging.level }}
     redis:
       server:
         address: "{{ printf "%s-master" (include "redis.fullname" .) }}:{{ .Values.kas.redis.master.service.ports.redis }}"

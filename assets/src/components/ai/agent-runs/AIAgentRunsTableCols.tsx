@@ -50,9 +50,7 @@ export const agentRunsCols = [
   columnHelper.accessor((run) => run.pullRequests, {
     id: 'pullRequests',
     cell: function Cell({ getValue }) {
-      return (
-        <AgentRunPRsModalIcon prs={getValue()?.filter(isNonNullable) ?? []} />
-      )
+      return <PRsModalIcon prs={getValue()?.filter(isNonNullable) ?? []} />
     },
   }),
   columnHelper.accessor((run) => run, {
@@ -117,7 +115,7 @@ export const agentRunsCols = [
   }),
 ]
 
-export function AgentRunPRsModalIcon({
+export function PRsModalIcon({
   prs,
   ...props
 }: {

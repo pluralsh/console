@@ -5,6 +5,7 @@ import {
   EmptyState,
   Flex,
   FormField,
+  Input,
   Input2,
   ListBoxFooter,
   ListBoxItem,
@@ -68,6 +69,7 @@ export type WebhookTriggerFormState = {
   regex: string
   substring: string
   caseInsensitive: boolean
+  prompt: string
 }
 
 function parseWebhookKey(key: string): {
@@ -118,13 +120,15 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 
   // Source form state is based on the location state (if coming back from create webhook page) or the fetched webhook (if editing),
   // with the selected webhook key from the query param taking precedence if present.
-  const sourceFormState = useMemo(
-    () => ({
-      ...(routeState?.draftState ?? getInitialFormState(webhook)),
+  const sourceFormState = useMemo(() => {
+    const base = routeState?.draftState ?? getInitialFormState(webhook)
+
+    return {
+      ...base,
       ...(webhookKeyParam ? { selectedWebhookKey: webhookKeyParam } : {}),
-    }),
-    [routeState?.draftState, webhookKeyParam, webhook]
-  )
+      prompt: base.prompt ?? '',
+    }
+  }, [routeState?.draftState, webhookKeyParam, webhook])
 
   // Local form draft state that can be modified as the user interacts with the form.
   const [formDraft, setFormDraft] =
@@ -206,6 +210,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   const regex = formState.regex.trim()
   const substring = formState.substring.trim()
   const activeMatchValue = formState.matchType === 'regex' ? regex : substring
+  const promptTrimmed = formState.prompt.trim()
 
   const attributes = {
     name: label,
@@ -218,6 +223,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
             caseInsensitive: formState.caseInsensitive,
           }
       : undefined,
+    prompt: promptTrimmed || null,
   }
 
   const canSave =
@@ -541,6 +547,24 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                   </Checkbox>
                 </>
               )}
+              <FormField
+                infoTooltip="Optional text appended to the agent prompt when an incoming event matches this webhook."
+                label="Custom instructions"
+              >
+                <Input
+                  multiline
+                  minRows={3}
+                  maxRows={6}
+                  value={formState.prompt}
+                  onChange={(e) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      prompt: e.target.value,
+                    }))
+                  }
+                  placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only."
+                />
+              </FormField>
               <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
                 <Button
                   secondary
@@ -585,6 +609,7 @@ function getInitialFormState(
     regex: webhook?.matches?.regex ?? '',
     substring: webhook?.matches?.substring ?? '',
     caseInsensitive: webhook?.matches?.caseInsensitive ?? false,
+    prompt: webhook?.prompt ?? '',
   }
 }
 
@@ -593,6 +618,7 @@ function getAttributesFromState(formState: WebhookTriggerFormState) {
   const regex = formState.regex.trim()
   const substring = formState.substring.trim()
   const activeMatchValue = formState.matchType === 'regex' ? regex : substring
+  const promptTrimmed = formState.prompt.trim()
 
   return {
     name,
@@ -605,5 +631,6 @@ function getAttributesFromState(formState: WebhookTriggerFormState) {
             caseInsensitive: formState.caseInsensitive,
           }
       : undefined,
+    prompt: promptTrimmed || null,
   }
 }

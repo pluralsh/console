@@ -566,6 +566,8 @@ dex:
       - <your-console-fqdn>
 
 kas:
+  logging:
+    level: info
   global:
     additionalVolumes: ~
     additionalVolumeMounts: ~

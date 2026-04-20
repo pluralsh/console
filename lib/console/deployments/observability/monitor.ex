@@ -79,9 +79,9 @@ defmodule Console.Deployments.Observability.Monitor do
         {:ok, "#{template}\n\n(P.S. there was an error in monitor template rendering: #{inspect(err)})"}
     end
   end
-  defp description(_, monitor, results), do: {:ok, monitor_md(monitor: monitor, results: results)}
+  defp description(_, monitor, results), do: {:ok, String.trim(monitor_md(monitor: monitor, results: results))}
 
-  EEx.function_from_file(:defp, :monitor_md, Path.join([:code.priv_dir(:console), "monitor.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :monitor_md, Path.join([:code.priv_dir(:console), "monitor.md.eex"]), [:assigns])
 
   defp monitor_context(%Monitor{} = monitor) do
     Console.mapify(monitor)

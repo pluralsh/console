@@ -26,7 +26,6 @@ import {
   useUpsertObservabilityWebhookMutation,
   useWorkbenchQuery,
 } from 'generated/graphql'
-import { capitalize } from 'lodash'
 import queryString from 'query-string'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -43,6 +42,10 @@ import {
 import { WebhookTriggerFormState } from './WebhookTriggerForm'
 import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 import { getIssueWebhookProviderIcon } from './utils'
+import {
+  humanizeIssueWebhookProvider,
+  humanizeObservabilityWebhookType,
+} from 'utils/webhookLabels'
 import { useWebhookSetupGuidePanel } from './WebhookSetupGuidePanel'
 import { Body2P } from 'components/utils/typography/Text'
 
@@ -83,6 +86,7 @@ const OBSERVABILITY_SETUP_GUIDE_PATHS: Record<
 
 const ISSUE_SETUP_GUIDE_PATHS: Record<IssueWebhookProvider, string> = {
   [IssueWebhookProvider.Asana]: '/setup-guides/webhooks/asana.md',
+  [IssueWebhookProvider.AzureDevops]: '/setup-guides/webhooks/azure_devops.md',
   [IssueWebhookProvider.Github]: '/setup-guides/webhooks/github.md',
   [IssueWebhookProvider.Gitlab]: '/setup-guides/webhooks/gitlab.md',
   [IssueWebhookProvider.Jira]: '/setup-guides/webhooks/jira.md',
@@ -96,6 +100,13 @@ const OBSERVABILITY_SETUP_GUIDE_DOCUMENTATION_URLS: Partial<
     'https://docs.plural.sh/plural-features/observability/observability-webhooks/datadog',
   [ObservabilityWebhookType.Grafana]:
     'https://docs.plural.sh/plural-features/observability/observability-webhooks/grafana',
+}
+
+const ISSUE_SETUP_GUIDE_DOCUMENTATION_URLS: Partial<
+  Record<IssueWebhookProvider, string>
+> = {
+  [IssueWebhookProvider.AzureDevops]:
+    'https://learn.microsoft.com/en-us/azure/devops/service-hooks/services/webhooks?view=azure-devops',
 }
 
 function getSetupGuideMarkdownPath({
@@ -117,10 +128,17 @@ function getSetupGuideMarkdownPath({
 function getSetupGuideDocumentationUrl({
   webhookType,
   observabilityType,
+  issueProvider,
 }: SetupGuideSelection): string | undefined {
-  if (webhookType !== 'observability' || !observabilityType) return undefined
+  if (webhookType === 'observability' && observabilityType) {
+    return OBSERVABILITY_SETUP_GUIDE_DOCUMENTATION_URLS[observabilityType]
+  }
 
-  return OBSERVABILITY_SETUP_GUIDE_DOCUMENTATION_URLS[observabilityType]
+  if (webhookType === 'issue' && issueProvider) {
+    return ISSUE_SETUP_GUIDE_DOCUMENTATION_URLS[issueProvider]
+  }
+
+  return undefined
 }
 
 function getInitialCreateWebhookFormState(): CreateWebhookFormState {
@@ -511,7 +529,7 @@ function CreateWebhookForm({
                 <ListBoxItem
                   key={type}
                   leftContent={getObservabilityWebhookTypeIcon(type)}
-                  label={capitalize(type)}
+                  label={humanizeObservabilityWebhookType(type)}
                 />
               ))}
             </Select>
@@ -567,7 +585,7 @@ function CreateWebhookForm({
                 <ListBoxItem
                   key={provider}
                   leftContent={getIssueWebhookProviderIcon(provider)}
-                  label={provider}
+                  label={humanizeIssueWebhookProvider(provider)}
                 />
               ))}
             </Select>
@@ -589,6 +607,11 @@ function CreateWebhookForm({
           <FormField
             label="Secret"
             required
+            hint={
+              formState.issueProvider === IssueWebhookProvider.AzureDevops
+                ? 'Use this value as the HTTP Basic authentication password in the Azure DevOps Web Hook action (HTTPS required). Any username is accepted.'
+                : undefined
+            }
           >
             <Input2
               value={formState.issueSecret}

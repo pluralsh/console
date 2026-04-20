@@ -33,6 +33,7 @@ import {
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
+import { isJobRunning } from './WorkbenchJobActivity'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab = 'Result' | 'Topology' | 'PRs' | 'Metrics'
@@ -81,7 +82,7 @@ export function WorkbenchJobPanelContent() {
               {icon}
               {label !== 'Result'
                 ? label
-                : job?.result?.conclusion
+                : !isJobRunning(job?.status) && job?.result?.conclusion
                   ? 'Conclusion'
                   : 'Working theory'}
             </PanelSubTabSC>

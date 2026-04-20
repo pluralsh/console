@@ -24,7 +24,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
     tools(job, environment)
-    |> MemoryEngine.new(50, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(50, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -84,5 +84,5 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
   defp k8s_tools(_, _), do: []
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])
 end

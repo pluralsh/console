@@ -1241,7 +1241,8 @@ defmodule Console.Factory do
     %Schema.WorkbenchWebhook{
       name: sequence(:workbench_webhook, & "workbench-webhook-#{&1}"),
       workbench: build(:workbench),
-      webhook: build(:observability_webhook)
+      webhook: build(:observability_webhook),
+      user: build(:user)
     }
   end
 
