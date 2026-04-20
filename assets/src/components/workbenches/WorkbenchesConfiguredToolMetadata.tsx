@@ -31,6 +31,8 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
   [WorkbenchToolType.Dynatrace]: extractDynatraceMetadata,
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
+  [WorkbenchToolType.Azure]: extractAzureMetadata,
+  [WorkbenchToolType.Cloud]: () => [],
 }
 
 export function WorkbenchesConfiguredToolMetadata({
@@ -171,6 +173,16 @@ function extractCloudwatchMetadata(
       value: String(configuration?.cloudwatch?.logGroupNames?.length ?? 0),
     },
     { label: 'Role', value: configuration?.cloudwatch?.roleArn },
+  ]
+}
+
+function extractAzureMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'Tenant', value: configuration?.azure?.tenantId },
+    { label: 'Client ID', value: configuration?.azure?.clientId },
+    { label: 'Subscription ID', value: configuration?.azure?.subscriptionId },
   ]
 }
 

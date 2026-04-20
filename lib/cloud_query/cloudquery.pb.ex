@@ -3,9 +3,11 @@ defmodule Cloudquery.AwsCredentials do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :access_key_id, 1, type: :string, json_name: "accessKeyId"
-  field :secret_access_key, 2, type: :string, json_name: "secretAccessKey"
+  field :access_key_id, 1, proto3_optional: true, type: :string, json_name: "accessKeyId"
+  field :secret_access_key, 2, proto3_optional: true, type: :string, json_name: "secretAccessKey"
   field :region, 3, proto3_optional: true, type: :string
+  field :regions, 4, repeated: true, type: :string
+  field :assume_role_arn, 5, proto3_optional: true, type: :string, json_name: "assumeRoleArn"
 end
 
 defmodule Cloudquery.AzureCredentials do

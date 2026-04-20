@@ -10,13 +10,13 @@ defmodule Console.Deployments.Pr.Utils do
 
   @ansi_code ~r/\x1b\[[0-9;]*m/
 
-  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural [sS]tacks?:\s+([[:alnum:]_\-]+)/]
-  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural [sS]ervices?:\s+([[:alnum:]_\/\-]+)/]
-  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural [cC]lusters?:\s+([[:alnum:]_\-]+)/]
-  @flow_regex [~r/plrl\/flow\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(flow:([[:alnum:]_\-]*)\)/, ~r/Plural [fF]low:\s+([[:alnum:]_\-]+)/]
-  @preview_regex [~r/plrl\/preview\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(preview:([[:alnum:]_\-]*)\)/, ~r/Plural [pP]review:\s+([[:alnum:]_\-]+)/]
-  @merge_cron_regex [~r/[Pp]lural [Mm]erge [Cc]ron:\s+([0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+)/]
-  @governance_regex [~r/[Pp]lural [Gg]overnance:\s+([[:alnum:]_\-]+)/]
+  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/\**Plural [sS]tacks?:\**\s+([[:alnum:]_\-]+)/]
+  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/\**Plural [sS]ervices?:\**\s+([[:alnum:]_\/\-]+)/]
+  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/\**Plural [cC]lusters?:\**\s+([[:alnum:]_\-]+)/]
+  @flow_regex [~r/plrl\/flow\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(flow:([[:alnum:]_\-]*)\)/, ~r/\**Plural [fF]low:\**\s+([[:alnum:]_\-]+)/]
+  @preview_regex [~r/plrl\/preview\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(preview:([[:alnum:]_\-]*)\)/, ~r/\**Plural [pP]review:\**\s+([[:alnum:]_\-]+)/]
+  @merge_cron_regex [~r/\**Plural [Mm]erge [Cc]ron:\**\s+([0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+\s[0-9,\-*\/]+)/]
+  @governance_regex [~r/\**Plural [Gg]overnance:\**\s+([[:alnum:]_\-]+)/]
 
   @solid_opts [strict_variables: true, strict_filters: true]
 

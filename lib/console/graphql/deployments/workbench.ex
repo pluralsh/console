@@ -36,6 +36,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
     field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
     field :tool_associations, list_of(:workbench_tool_association_attributes), description: "tool ids to associate with this workbench"
+    field :workbench_skills,  list_of(:workbench_skill_attributes), description: "skills to include with this workbench"
   end
 
   input_object :workbench_configuration_attributes do
@@ -100,12 +101,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_attributes do
-    field :name,          non_null(:string), description: "the name of the tool (a-z, 0-9, underscores)"
-    field :tool,          non_null(:workbench_tool_type), description: "the type of tool"
-    field :categories,    list_of(:workbench_tool_category), description: "categories for the tool"
-    field :project_id,    :id, description: "the project for this tool"
-    field :mcp_server_id, :id, description: "the mcp server for this tool"
-    field :configuration, :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
+    field :name,                 non_null(:string), description: "the name of the tool (a-z, 0-9, underscores)"
+    field :tool,                 non_null(:workbench_tool_type), description: "the type of tool"
+    field :categories,           list_of(:workbench_tool_category), description: "categories for the tool"
+    field :project_id,           :id, description: "the project for this tool"
+    field :mcp_server_id,        :id, description: "the mcp server for this tool"
+    field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+    field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
   end
 
   input_object :workbench_tool_configuration_attributes do
@@ -118,6 +120,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
     field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
+    field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
   end
@@ -179,6 +182,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :role_arn,          :string, description: "optional IAM role ARN to assume"
     field :external_id,       :string, description: "optional external id for assume role"
     field :role_session_name, :string, description: "optional role session name for assume role"
+  end
+
+  input_object :workbench_tool_azure_connection_attributes do
+    field :subscription_id, non_null(:string), description: "azure subscription id"
+    field :tenant_id,       non_null(:string), description: "azure tenant id"
+    field :client_id,       non_null(:string), description: "azure client id"
+    field :client_secret,   non_null(:string), description: "azure client secret"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -464,13 +474,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool do
-    field :id,            non_null(:string), description: "the id of the tool"
-    field :name,          non_null(:string), description: "the name of the tool"
-    field :tool,          non_null(:workbench_tool_type), description: "the type of tool"
-    field :categories,    list_of(:workbench_tool_category), description: "categories for the tool"
-    field :project,       :project, resolve: dataloader(Deployments), description: "the project of this tool"
-    field :configuration, :workbench_tool_configuration, description: "tool configuration"
-    field :mcp_server,    :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
+    field :id,               non_null(:string), description: "the id of the tool"
+    field :name,             non_null(:string), description: "the name of the tool"
+    field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
+    field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
+    field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
+    field :configuration,    :workbench_tool_configuration, description: "tool configuration"
+    field :mcp_server,       :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
+    field :cloud_connection, :cloud_connection, resolve: dataloader(Deployments), description: "the cloud connection bound to this tool"
 
     timestamps()
   end
@@ -485,6 +496,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
     field :dynatrace, :workbench_tool_dynatrace_connection, description: "dynatrace connection (no secrets)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
+    field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
   end
@@ -531,6 +543,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :log_group_names, list_of(:string), description: "default log groups for logs insights queries"
     field :role_arn, :string, description: "assumed role ARN when configured"
     field :role_session_name, :string, description: "assume-role session name"
+  end
+
+  object :workbench_tool_azure_connection do
+    field :subscription_id, :string, description: "azure subscription id"
+    field :tenant_id,       :string, description: "azure tenant id"
+    field :client_id,       :string, description: "azure client id"
   end
 
   object :workbench_tool_linear_connection do

@@ -1,0 +1,68 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query to use to filter the desired timeseries metrics"
+        },
+        "step": {
+            "type": "string",
+            "description": "The step to use to aggregate the desired timeseries metrics"
+        },
+        "options": {
+            "type": "object",
+            "description": "Provider-specific query options.",
+            "properties": {
+                "azure": {
+                    "type": "object",
+                    "description": "Optional per-query Azure metrics options. Used only for Azure tools.",
+                    "properties": {
+                        "resource_id": {
+                            "type": "string",
+                            "description": "Azure resource ID target for this metrics query (required for Azure tools)."
+                        },
+                        "metrics_namespace": {
+                            "type": "string",
+                            "description": "Azure metrics namespace (required for Azure metrics query)."
+                        },
+                        "aggregation": {
+                            "type": "string",
+                            "description": "Azure aggregation to apply (for example Average, Maximum)."
+                        },
+                        "filter": {
+                            "type": "string",
+                            "description": "Azure data filter expression."
+                        },
+                        "order_by": {
+                            "type": "string",
+                            "description": "Azure ordering expression."
+                        },
+                        "roll_up_by": {
+                            "type": "string",
+                            "description": "Azure roll-up dimensions."
+                        },
+                        "metrics_endpoint": {
+                            "type": "string",
+                            "description": "Azure metrics endpoint override. If omitted, global endpoint is used."
+                        }
+                    },
+                    "required": ["resource_id", "metrics_namespace"]
+                }
+            }
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time to use to filter metrics. Provide in ISO8601 format."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time to use to filter metrics. Provide in ISO8601 format."
+                }
+            }
+        }
+    },
+    "required": ["query"]
+}

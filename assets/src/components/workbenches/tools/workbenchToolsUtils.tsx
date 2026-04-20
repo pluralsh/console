@@ -1,6 +1,7 @@
 import {
   AtlassianLogoIcon,
   AwsLogoIcon,
+  AzureLogoIcon,
   DatadogLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
@@ -34,6 +35,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Splunk,
   WorkbenchToolType.Dynatrace,
   WorkbenchToolType.Cloudwatch,
+  WorkbenchToolType.Azure,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -55,6 +57,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Splunk]: 'splunk',
   [WorkbenchToolType.Dynatrace]: 'dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
+  [WorkbenchToolType.Azure]: 'azure',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -85,6 +88,8 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Splunk]: 'Splunk',
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
+  [WorkbenchToolType.Azure]: 'Azure',
+  [WorkbenchToolType.Cloud]: 'Cloud',
 }
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
@@ -114,6 +119,11 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
   ],
+  [WorkbenchToolType.Azure]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+  ],
+  [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
@@ -138,6 +148,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Dynatrace]:
     'Query metrics, logs, and traces from Dynatrace.',
   [WorkbenchToolType.Cloudwatch]: 'Query metrics and logs from CloudWatch.',
+  [WorkbenchToolType.Azure]:
+    'Query Azure Monitor metrics and logs for Azure resources.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -147,6 +159,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Ticketing]: 'Ticketing',
   [WorkbenchToolCategory.Integration]: 'Integration',
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
+  [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
 }
 
 export const TOOL_TYPE_CARDS: {
@@ -218,4 +231,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
   [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
   [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,
+  [WorkbenchToolType.Azure]: AzureLogoIcon,
 }
