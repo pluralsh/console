@@ -109,29 +109,36 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
       overflow="auto"
       padding="large"
     >
-      {mode === 'create' ? (
-        <Title2H1>Create a workbench</Title2H1>
-      ) : (
-        <StackedText
-          loading={!data && loading}
-          first={workbench?.name}
-          firstPartialType="subtitle2"
-          firstColor="text"
-          second={workbench?.description}
-          secondPartialType="body2"
-          secondColor="text-xlight"
-          gap="xxsmall"
-        />
-      )}
-      <WorkbenchForm
-        workbenchId={id}
-        key={`${JSON.stringify(data?.workbench)}`} // reset form state if data updates
-        initialFormState={sanitizeInitialForm(
-          workbench ?? { id: '', name: '' }
+      <Flex
+        direction="column"
+        gap="large"
+        width="100%"
+        css={{ maxWidth: 968, marginInline: 'auto' }}
+      >
+        {mode === 'create' ? (
+          <Title2H1>Create a workbench</Title2H1>
+        ) : (
+          <StackedText
+            loading={!data && loading}
+            first={workbench?.name}
+            firstPartialType="subtitle2"
+            firstColor="text"
+            second={workbench?.description}
+            secondPartialType="body2"
+            secondColor="text-xlight"
+            gap="xxsmall"
+          />
         )}
-        mode={mode}
-        loading={!data && loading}
-      />
+        <WorkbenchForm
+          workbenchId={id}
+          key={`${JSON.stringify(data?.workbench)}`} // reset form state if data updates
+          initialFormState={sanitizeInitialForm(
+            workbench ?? { id: '', name: '' }
+          )}
+          mode={mode}
+          loading={!data && loading}
+        />
+      </Flex>
     </Flex>
   )
 }
