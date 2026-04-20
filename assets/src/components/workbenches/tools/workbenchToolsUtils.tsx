@@ -5,6 +5,7 @@ import {
   DatadogLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
+  GoogleCloudLogoIcon,
   IconProps,
   LinearLogoIcon,
   LokiLogoIcon,
@@ -15,6 +16,7 @@ import {
   ToolsIcon,
 } from '@pluralsh/design-system'
 import {
+  Provider,
   WorkbenchToolCategory,
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolType,
@@ -168,19 +170,63 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
 }
 
-export const TOOL_TYPE_CARDS: {
-  type: ConfigurableWorkbenchToolType
-  description: string
+type WorkbenchToolCard = {
+  type: WorkbenchToolType
+  provider?: Provider
   label: string
+  description: string
   categoryLabels: string[]
-}[] = CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
-  type,
-  description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
-  label: TOOL_TYPE_TO_LABEL[type],
-  categoryLabels: TOOL_TYPE_TO_CATEGORIES[type].map(
-    (category) => categoryToLabel[category]
-  ),
-}))
+}
+
+export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Aws,
+    label: 'AWS',
+    description:
+      'Query AWS infrastructure (EC2, S3, RDS, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Gcp,
+    label: 'GCP',
+    description:
+      'Query Google Cloud infrastructure (Compute, Storage, BigQuery, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Azure,
+    label: 'Azure',
+    description:
+      'Query Azure infrastructure (VMs, storage accounts, resource groups, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  ...CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
+    type,
+    description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
+    label: TOOL_TYPE_TO_LABEL[type],
+    categoryLabels: TOOL_TYPE_TO_CATEGORIES[type].map(
+      (category) => categoryToLabel[category]
+    ),
+  })),
+]
+
+export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
+  [Provider.Aws]: AwsLogoIcon,
+  [Provider.Gcp]: GoogleCloudLogoIcon,
+  [Provider.Azure]: AzureLogoIcon,
+}
+
+export const PROVIDER_TO_LABEL: Record<Provider, string> = {
+  [Provider.Aws]: 'AWS',
+  [Provider.Gcp]: 'GCP',
+  [Provider.Azure]: 'Azure',
+}
+
+export const isProvider = (value: Nullable<string>): value is Provider =>
+  !!value && (Object.values(Provider) as string[]).includes(value)
 
 export function WorkbenchToolIcon({
   type,

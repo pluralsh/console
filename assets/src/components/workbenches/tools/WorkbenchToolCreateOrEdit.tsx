@@ -6,6 +6,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import {
+  Provider,
   useCreateWorkbenchToolMutation,
   useUpdateWorkbenchToolMutation,
   useWorkbenchToolQuery,
@@ -30,10 +31,15 @@ import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   isConfigurableWorkbenchToolType,
+  isProvider,
+  PROVIDER_TO_ICON,
+  PROVIDER_TO_LABEL,
+  TOOL_TYPE_TO_LABEL,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
+export const WORKBENCHES_TOOLS_PROVIDER_PARAM = 'provider'
 
 function getBreadcrumbs(
   mode: 'create' | 'edit',
@@ -69,6 +75,7 @@ export function WorkbenchToolCreateOrEdit({
   const navigate = useNavigate()
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
+  const providerParam = searchParams.get(WORKBENCHES_TOOLS_PROVIDER_PARAM)
 
   const { data, loading, error } = useWorkbenchToolQuery({
     variables: { id },
@@ -82,24 +89,34 @@ export function WorkbenchToolCreateOrEdit({
   useSetBreadcrumbs(
     useMemo(() => getBreadcrumbs(mode, id, tool), [mode, id, tool])
   )
+  const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
+    '') as WorkbenchToolType // the effect below ensures this type is valid
+  const provider =
+    type === WorkbenchToolType.Cloud && isProvider(providerParam)
+      ? providerParam
+      : null
 
   useLayoutEffect(() => {
     if (isLoading) return
-    const typeParam = searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM)
-    if (
-      (id && typeParam !== tool?.tool) ||
-      !isConfigurableWorkbenchToolType(typeParam)
-    )
-      setSearchParams(
-        {
-          [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
-        },
-        { replace: true }
-      )
-  }, [id, searchParams, setSearchParams, tool, isLoading])
 
-  const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
-    '') as WorkbenchToolType // the effect above ensures this type is valid
+    const nextType =
+      tool?.tool ??
+      (isConfigurableWorkbenchToolType(type) || type === WorkbenchToolType.Cloud
+        ? type
+        : WorkbenchToolType.Http)
+    const nextProvider =
+      tool?.cloudConnection?.provider ??
+      (isProvider(providerParam) ? providerParam : Provider.Aws)
+
+    if (nextType !== type || nextProvider !== providerParam) {
+      const next: Record<string, string> = {
+        [WORKBENCHES_TOOLS_TYPE_PARAM]: nextType,
+      }
+      if (nextProvider && nextType === WorkbenchToolType.Cloud)
+        next[WORKBENCHES_TOOLS_PROVIDER_PARAM] = nextProvider
+      setSearchParams(next, { replace: true })
+    }
+  }, [id, searchParams, setSearchParams, tool, isLoading, providerParam, type])
 
   const { popToast } = useSimpleToast()
 
@@ -125,14 +142,20 @@ export function WorkbenchToolCreateOrEdit({
     if (mode === 'create') create({ variables: { attributes } })
     else update({ variables: { id: id ?? '', attributes } })
   }
+  const ProviderIcon = provider ? PROVIDER_TO_ICON[provider] : null
+
   return (
     <WrapperSC>
       <StretchedFlex>
         <StackedText
-          first={mode === 'create' ? 'New tool' : 'Edit tool'}
+          first={
+            mode === 'create'
+              ? `New ${provider ? PROVIDER_TO_LABEL[provider] : TOOL_TYPE_TO_LABEL[type]} tool`
+              : 'Edit tool'
+          }
           firstPartialType="subtitle1"
           firstColor="text"
-          second="Integrate external observability provider tools with your workbenches"
+          second="Integrate external tools with your workbenches"
           secondPartialType="body1"
           gap="xsmall"
         />
@@ -144,11 +167,19 @@ export function WorkbenchToolCreateOrEdit({
             <IconFrame
               circle
               type="secondary"
-              icon={<WorkbenchToolIcon type={type} />}
-              textValue={capitalize(type)}
+              icon={
+                ProviderIcon ? (
+                  <ProviderIcon fullColor />
+                ) : (
+                  <WorkbenchToolIcon type={type} />
+                )
+              }
+              textValue={capitalize(provider || type)}
             />
             <Subtitle1H1 as="h3">
-              {capitalize(type === WorkbenchToolType.Http ? 'Custom' : type)}
+              {type === WorkbenchToolType.Cloud && provider
+                ? PROVIDER_TO_LABEL[provider]
+                : capitalize(type === WorkbenchToolType.Http ? 'Custom' : type)}
             </Subtitle1H1>
           </Flex>
         )}
@@ -169,14 +200,13 @@ export function WorkbenchToolCreateOrEdit({
           <WorkbenchToolForm
             key={`${JSON.stringify(tool)}`} // reset form state if data updates
             type={type}
+            provider={provider}
             tool={tool}
             mutationLoading={mutationLoading}
-            onCancel={() =>
-              navigate(
-                mode === 'create'
-                  ? WORKBENCHES_TOOLS_ADD_ABS_PATH
-                  : WORKBENCHES_TOOLS_YOUR_ABS_PATH
-              )
+            backPath={
+              mode === 'create'
+                ? WORKBENCHES_TOOLS_ADD_ABS_PATH
+                : WORKBENCHES_TOOLS_YOUR_ABS_PATH
             }
             onSave={onSave}
             onToolDeleted={() => navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)}
@@ -203,8 +233,12 @@ function formStateToAttributes(
   state: WorkbenchToolFormState,
   type: WorkbenchToolType
 ): WorkbenchToolAttributes {
-  const { name, categories, configuration } = state
-  const base = { tool: type, name, categories }
+  const { name, categories, configuration, cloudConnectionId } = state
+  const base: WorkbenchToolAttributes = { tool: type, name, categories }
+
+  if (type === WorkbenchToolType.Cloud)
+    return { ...base, cloudConnectionId: cloudConnectionId ?? null }
+
   if (!isConfigurableWorkbenchToolType(type) || !configuration) return base
 
   const configKey = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]

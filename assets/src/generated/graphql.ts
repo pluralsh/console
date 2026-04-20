@@ -20454,13 +20454,6 @@ export const ChatThreadMessagesFragmentDoc = gql`
 }
     ${PageInfoFragmentDoc}
 ${ChatFragmentDoc}`;
-export const CloudConnectionTinyFragmentDoc = gql`
-    fragment CloudConnectionTiny on CloudConnection {
-  id
-  name
-  provider
-}
-    `;
 export const ServiceDeploymentTinyFragmentDoc = gql`
     fragment ServiceDeploymentTiny on ServiceDeployment {
   id
@@ -24536,13 +24529,18 @@ export const WorkbenchTinyFragmentDoc = gql`
 }
     ${WorkbenchToolTinyFragmentDoc}
 ${WorkbenchWebhookTinyFragmentDoc}`;
+export const CloudConnectionTinyFragmentDoc = gql`
+    fragment CloudConnectionTiny on CloudConnection {
+  id
+  name
+  provider
+}
+    `;
 export const WorkbenchToolFragmentDoc = gql`
     fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
   cloudConnection {
-    id
-    name
-    provider
+    ...CloudConnectionTiny
   }
   configuration {
     http {
@@ -24609,7 +24607,8 @@ export const WorkbenchToolFragmentDoc = gql`
     }
   }
 }
-    ${WorkbenchToolTinyFragmentDoc}`;
+    ${WorkbenchToolTinyFragmentDoc}
+${CloudConnectionTinyFragmentDoc}`;
 export const WorkbenchFragmentDoc = gql`
     fragment Workbench on Workbench {
   ...WorkbenchTiny
