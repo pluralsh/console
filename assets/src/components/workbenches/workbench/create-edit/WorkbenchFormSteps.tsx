@@ -37,7 +37,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector'
 import {
@@ -573,6 +573,7 @@ function WebhookActorSubStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
+  const theme = useTheme()
   const { me } = useLogin()
   const update = createFormUpdater(setFormState)
 
@@ -625,14 +626,21 @@ function WebhookActorSubStep({
         }
       >
         {resolvedActor ? (
-          <EditableDivWrapperSC>
+          <Card
+            fillLevel={1}
+            css={{
+              border: theme.borders['fill-one'],
+              borderRadius: theme.borderRadiuses.medium,
+              padding: theme.spacing.medium,
+            }}
+          >
             <StackedText
               first={resolvedActor.name}
               second={resolvedActor.email}
-              firstPartialType="body2Bold"
+              firstPartialType="body2"
               firstColor="text"
-              secondPartialType="body2"
-              secondColor="text-light"
+              secondPartialType="caption"
+              secondColor="text-xlight"
               icon={
                 <Avatar
                   name={resolvedActor.name}
@@ -644,7 +652,7 @@ function WebhookActorSubStep({
               iconGap="small"
               css={{ minWidth: 0 }}
             />
-          </EditableDivWrapperSC>
+          </Card>
         ) : null}
       </FormField>
       <CaptionP $color="text-light">
