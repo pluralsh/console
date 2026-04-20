@@ -16,7 +16,10 @@ import { EditableDiv } from 'components/utils/EditableDiv'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { OverlineH3 } from 'components/utils/typography/Text'
 import {
+  AwsCloudConnectionAttributes,
+  AzureCloudConnectionAttributes,
   CloudConnectionAttributes,
+  GcpCloudConnectionAttributes,
   PolicyBindingFragment,
   Provider,
   useUpsertCloudConnectionMutation,
@@ -39,25 +42,6 @@ import {
 } from '../WorkbenchToolCreateOrEdit'
 import { isProvider, PROVIDER_TO_LABEL } from '../workbenchToolsUtils'
 
-type AwsState = {
-  accessKeyId: string
-  secretAccessKey: string
-  region: string
-  assumeRoleArn: string
-}
-
-type GcpState = {
-  serviceAccountKey: string
-  projectId: string
-}
-
-type AzureState = {
-  subscriptionId: string
-  tenantId: string
-  clientId: string
-  clientSecret: string
-}
-
 export function CloudConnectionCreateForm() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -75,17 +59,17 @@ export function CloudConnectionCreateForm() {
   }, [provider])
 
   const [name, setName] = useState('')
-  const [aws, setAws] = useState<AwsState>({
+  const [aws, setAws] = useState<AwsCloudConnectionAttributes>({
     accessKeyId: '',
     secretAccessKey: '',
     region: '',
     assumeRoleArn: '',
   })
-  const [gcp, setGcp] = useState<GcpState>({
+  const [gcp, setGcp] = useState<GcpCloudConnectionAttributes>({
     serviceAccountKey: '',
     projectId: '',
   })
-  const [azure, setAzure] = useState<AzureState>({
+  const [azure, setAzure] = useState<AzureCloudConnectionAttributes>({
     subscriptionId: '',
     tenantId: '',
     clientId: '',
@@ -108,8 +92,8 @@ export function CloudConnectionCreateForm() {
             aws: {
               accessKeyId: aws.accessKeyId.trim(),
               secretAccessKey: aws.secretAccessKey,
-              region: aws.region.trim() || undefined,
-              assumeRoleArn: aws.assumeRoleArn.trim() || undefined,
+              region: aws.region?.trim() || undefined,
+              assumeRoleArn: aws.assumeRoleArn?.trim() || undefined,
             },
           },
         }
@@ -274,7 +258,15 @@ export function CloudConnectionCreateForm() {
 
 function providerFieldsValid(
   provider: Provider,
-  { aws, gcp, azure }: { aws: AwsState; gcp: GcpState; azure: AzureState }
+  {
+    aws,
+    gcp,
+    azure,
+  }: {
+    aws: AwsCloudConnectionAttributes
+    gcp: GcpCloudConnectionAttributes
+    azure: AzureCloudConnectionAttributes
+  }
 ) {
   switch (provider) {
     case Provider.Aws:
@@ -295,8 +287,8 @@ function AwsFields({
   state,
   setState,
 }: {
-  state: AwsState
-  setState: (next: AwsState) => void
+  state: AwsCloudConnectionAttributes
+  setState: (next: AwsCloudConnectionAttributes) => void
 }) {
   return (
     <>
@@ -323,7 +315,7 @@ function AwsFields({
       <FormField label="Region">
         <Input2
           placeholder="us-east-1"
-          value={state.region}
+          value={state.region ?? ''}
           onChange={(e) => setState({ ...state, region: e.target.value })}
         />
       </FormField>
@@ -333,7 +325,7 @@ function AwsFields({
       >
         <Input2
           placeholder="arn:aws:iam::123456789012:role/my-role"
-          value={state.assumeRoleArn}
+          value={state.assumeRoleArn ?? ''}
           onChange={(e) =>
             setState({ ...state, assumeRoleArn: e.target.value })
           }
@@ -347,8 +339,8 @@ function GcpFields({
   state,
   setState,
 }: {
-  state: GcpState
-  setState: (next: GcpState) => void
+  state: GcpCloudConnectionAttributes
+  setState: (next: GcpCloudConnectionAttributes) => void
 }) {
   return (
     <>
@@ -383,8 +375,8 @@ function AzureFields({
   state,
   setState,
 }: {
-  state: AzureState
-  setState: (next: AzureState) => void
+  state: AzureCloudConnectionAttributes
+  setState: (next: AzureCloudConnectionAttributes) => void
 }) {
   return (
     <>

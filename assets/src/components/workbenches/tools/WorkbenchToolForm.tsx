@@ -63,9 +63,14 @@ export function WorkbenchToolForm({
     cloudConnectionId: tool?.cloudConnection?.id,
   })
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
+  const allowSave =
+    hasUpdates &&
+    !!state.name.trim() &&
+    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId)
   return (
     <FormCardSC>
       <FormField
+        required
         label="Name"
         value={state.name}
         onChange={(e) => update({ name: e.target.value })}
@@ -146,7 +151,7 @@ export function WorkbenchToolForm({
             {hasUpdates ? 'Cancel' : 'Back'}
           </Button>
           <Button
-            disabled={!hasUpdates}
+            disabled={!allowSave}
             loading={mutationLoading}
             onClick={() => onSave(state)}
           >

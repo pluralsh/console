@@ -1355,8 +1355,6 @@ export type AwsConnectionAttributes = {
   region?: Maybe<Scalars['String']['output']>;
   /** the regions for aws */
   regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  /** the secret access key for aws */
-  secretAccessKey: Scalars['String']['output'];
 };
 
 export type AwsNodeCloudAttributes = {
@@ -1396,8 +1394,6 @@ export type AzureConnectionAttributes = {
   __typename?: 'AzureConnectionAttributes';
   /** the client id for azure */
   clientId: Scalars['String']['output'];
-  /** the client secret for azure */
-  clientSecret: Scalars['String']['output'];
   /** the subscription id for azure */
   subscriptionId: Scalars['String']['output'];
   /** the tenant id for azure */
@@ -4254,8 +4250,6 @@ export type GcpConnectionAttributes = {
   __typename?: 'GcpConnectionAttributes';
   /** the project id for gcp */
   projectId: Scalars['String']['output'];
-  /** the service account key for gcp */
-  serviceAccountKey: Scalars['String']['output'];
 };
 
 export type GcpSettingsAttributes = {

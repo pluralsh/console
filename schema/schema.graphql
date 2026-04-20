@@ -5153,9 +5153,6 @@ type AwsConnectionAttributes {
   "the access key id for aws"
   accessKeyId: String!
 
-  "the secret access key for aws"
-  secretAccessKey: String!
-
   "the region for aws"
   region: String
 
@@ -5168,9 +5165,6 @@ type AwsConnectionAttributes {
 
 "The configuration for a cloud provider"
 type GcpConnectionAttributes {
-  "the service account key for gcp"
-  serviceAccountKey: String!
-
   "the project id for gcp"
   projectId: String!
 }
@@ -5185,9 +5179,6 @@ type AzureConnectionAttributes {
 
   "the client id for azure"
   clientId: String!
-
-  "the client secret for azure"
-  clientSecret: String!
 }
 
 "A federated credential is a way to authenticate users from an external identity provider"

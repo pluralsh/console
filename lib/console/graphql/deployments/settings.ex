@@ -453,17 +453,15 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "The configuration for a cloud provider"
   object :aws_connection_attributes do
-    field :access_key_id,     non_null(:string), description: "the access key id for aws"
-    field :secret_access_key, non_null(:string), description: "the secret access key for aws"
-    field :region,            :string, description: "the region for aws"
-    field :regions,           list_of(:string), description: "the regions for aws"
-    field :assume_role_arn,   :string, description: "IAM role ARN for the console to assume when using this connection"
+    field :access_key_id,   non_null(:string), description: "the access key id for aws"
+    field :region,          :string, description: "the region for aws"
+    field :regions,         list_of(:string), description: "the regions for aws"
+    field :assume_role_arn, :string, description: "IAM role ARN for the console to assume when using this connection"
   end
 
   @desc "The configuration for a cloud provider"
   object :gcp_connection_attributes do
-    field :service_account_key, non_null(:string), description: "the service account key for gcp"
-    field :project_id,          non_null(:string), description: "the project id for gcp"
+    field :project_id, non_null(:string), description: "the project id for gcp"
   end
 
   @desc "The configuration for a cloud provider"
@@ -471,7 +469,6 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :subscription_id, non_null(:string), description: "the subscription id for azure"
     field :tenant_id,       non_null(:string), description: "the tenant id for azure"
     field :client_id,       non_null(:string), description: "the client id for azure"
-    field :client_secret,   non_null(:string), description: "the client secret for azure"
   end
 
   @desc "A federated credential is a way to authenticate users from an external identity provider"

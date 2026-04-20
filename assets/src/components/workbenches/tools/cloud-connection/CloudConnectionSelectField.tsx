@@ -8,7 +8,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Provider, useCloudConnectionsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useEffectEvent, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
@@ -39,16 +39,20 @@ export function CloudConnectionSelectField({
   )
 
   // auto-select the newly-created connection when returning from the sub-wizard
+  const consumedSelectedParam = useEffectEvent((selectedParam: string) => {
+    onChange(selectedParam)
+    const next = new URLSearchParams(searchParams)
+    next.delete(CLOUD_CONNECTION_SELECTED_QUERY_PARAM)
+    setSearchParams(next, { replace: true })
+  })
+
   useEffect(() => {
     const selectedParam = searchParams.get(
       CLOUD_CONNECTION_SELECTED_QUERY_PARAM
     )
     if (!selectedParam) return
-    onChange(selectedParam)
-    const next = new URLSearchParams(searchParams)
-    next.delete(CLOUD_CONNECTION_SELECTED_QUERY_PARAM)
-    setSearchParams(next, { replace: true })
-  }, [onChange, searchParams, setSearchParams])
+    consumedSelectedParam(selectedParam)
+  }, [searchParams])
 
   const ProviderIcon = PROVIDER_TO_ICON[provider]
   const selectedConnection = connections.find((c) => c.id === selectedId)
