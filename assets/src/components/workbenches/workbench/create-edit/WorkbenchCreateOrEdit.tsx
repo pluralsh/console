@@ -354,8 +354,10 @@ export const WorkbenchSplitLayoutSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.medium,
   height: '100%',
+  width: '100%',
   minWidth: 750,
   maxWidth: 968,
+  marginInline: 'auto',
   minHeight: 0,
 }))
 
