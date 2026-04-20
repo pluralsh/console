@@ -2,7 +2,6 @@ package connection
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
@@ -15,14 +14,11 @@ func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 	klog.V(log.LogLevelDebug).InfoS("running schema query", "table", table)
 
 	prefix := fmt.Sprintf("%s_", in.provider)
-	if table != "" && !strings.HasPrefix(table, prefix) {
-		return nil, fmt.Errorf("table name must start with '%s_' prefix", in.provider)
-	}
 
 	qResponse, err := in.db.Query(`
 		SELECT table_name, column_name, data_type
 		FROM information_schema.columns
-		WHERE table_name LIKE $1;`, lo.Ternary(lo.IsEmpty(table), prefix+"%", table))
+		WHERE table_name LIKE $1;`, lo.Ternary(lo.IsEmpty(table), prefix+"%", "%"+table+"%"))
 	if err != nil {
 		return nil, err
 	}

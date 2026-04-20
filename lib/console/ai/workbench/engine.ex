@@ -126,9 +126,9 @@ defmodule Console.AI.Workbench.Engine do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
-      # Console.safely(fn ->
-      module.run(activity, job, %{environment | activities: activities})
-      # end, &crash_fallback/1)
+      Console.safely(fn ->
+        module.run(activity, job, %{environment | activities: activities})
+      end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
       |> log_error("Failed to update job activity")
     end
