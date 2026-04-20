@@ -540,7 +540,8 @@ defmodule Console.GraphQl.Deployments.Settings do
         resource: :settings,
         action: :read,
         api: "cloudConnections"
-      arg :q, :string
+      arg :q,        :string
+      arg :provider, :provider
 
       resolve &Deployments.list_cloud_connections/2
     end

@@ -55,6 +55,10 @@ defmodule Console.Schema.CloudConnection do
     from(c in query, where: ilike(c.name, ^"%#{q}%"))
   end
 
+  def for_provider(query \\ __MODULE__, provider) do
+    from(c in query, where: c.provider == ^provider)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(c in query, order_by: ^order)
   end

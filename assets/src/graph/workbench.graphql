@@ -99,6 +99,11 @@ fragment WorkbenchToolTiny on WorkbenchTool {
 
 fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
+  cloudConnection {
+    id
+    name
+    provider
+  }
   configuration {
     http {
       url
