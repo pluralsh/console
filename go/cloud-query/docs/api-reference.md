@@ -403,6 +403,13 @@ message AzureConnection {
   string client_id = 3;
   string client_secret = 4;
 }
+
+message JaegerConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
 ```
 
 Implementation notes:
@@ -1366,8 +1373,12 @@ grpcurl -d '{
 Jaeger traces query uses the stable Query v3 API.
 
 - `query` maps to Jaeger `service_name`.
-- `range` maps to `start_time_min`/`start_time_max`.
-- `limit` maps to `search_depth`.
+- `time_range` maps to `start_time_min`/`start_time_max`.
+- `limit` maps to `num_traces`.
+- `options.jaeger.operation_name` maps to `operation_name`.
+- `options.jaeger.attributes` maps to `attributes`.
+- `options.jaeger.duration_min` maps to `min_duration`.
+- `options.jaeger.duration_max` maps to `max_duration`.
 - Structured filters are passed through `options.jaeger`:
   - `operation_name`
   - `duration_min` / `duration_max`

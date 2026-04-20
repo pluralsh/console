@@ -70,18 +70,18 @@ For detailed information about the API endpoints, request/response schemas, and 
 
 Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metrics, logs, traces). Compatibility is per operation:
 
-| Tool | Metrics | Logs | Traces | Notes |
-|------|---------|------|--------|-------|
-| Prometheus | Yes | No | No | Prometheus HTTP API via `prometheus/client_golang` with optional bearer token or basic auth |
-| Datadog | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional) |
-| Elasticsearch | No | Yes | No | Elasticsearch typed client v9 Search API (API key required) |
-| Loki | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`) |
-| Splunk | No | Yes | No | Splunk export search API (token or basic auth) |
-| Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`) |
-| Jaeger | No | No | Yes | Jaeger Query v3 REST API (`POST /api/v3/traces`) with structured trace filters |
-| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required) |
+| Tool | Metrics | Logs | Traces | Notes                                                                                                |
+|------|---------|------|--------|------------------------------------------------------------------------------------------------------|
+| Prometheus | Yes | No | No | Prometheus HTTP API via `prometheus/client_golang` with optional bearer token or basic auth          |
+| Datadog | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional)            |
+| Elasticsearch | No | Yes | No | Elasticsearch typed client v9 Search API (API key required)                                          |
+| Loki | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`)                   |
+| Splunk | No | Yes | No | Splunk export search API (token or basic auth)                                                       |
+| Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`)    |
+| Jaeger | No | No | Yes | Jaeger Query v3 REST API (`GET /api/v3/traces`) with structured trace filters                        |
+| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required)      |
 | CloudWatch | Yes | Yes | No | AWS SDK v2 (`GetMetricData`, Logs Insights `StartQuery`/`GetQueryResults`) with optional assume-role |
-| Azure | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials |
+| Azure | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials                                                |
 
 ### Tool Provider Credentials and Permissions
 
@@ -101,9 +101,11 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
   - Use bearer token and/or basic auth credentials when required by your backend.
   - If multi-tenant, also configure `tenant_id` (`X-Scope-OrgID`).
 - `Jaeger`:
-  - Uses Jaeger stable v3 Query API.
+  - Uses Jaeger stable v3 Query API (`GET /api/v3/traces`).
   - `Traces.query` is interpreted as Jaeger `service_name`.
   - Additional structured filters are provided via `Traces.options.jaeger` (`operation_name`, `duration_min`, `duration_max`, `attributes`).
+  - Handles both `application/json` and `text/plain` Content-Type responses with automatic fallback parsing.
+  - Supports bearer token and basic authentication.
 - `Splunk`:
   - Use bearer token or username/password.
 - `CloudWatch`:

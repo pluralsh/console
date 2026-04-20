@@ -3,11 +3,11 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "The provider-specific query to use to gather traces"
+            "description": "The provider-specific query to use to gather traces. For Jaeger, this is the service name."
         },
         "limit": {
             "type": "integer",
-            "description": "Maximum number of traces to search (mapped to Jaeger search depth)."
+            "description": "Maximum number of traces to search. Not a hard limit, but the provider may impose a limit. Defaults to 100."
         },
         "options": {
             "type": "object",
@@ -56,14 +56,14 @@
             "properties": {
                 "start": {
                     "type": "string",
-                    "description": "The start time to use to filter traces. Provide in ISO8601 format."
+                    "description": "The start time to use to filter traces. Provide in RFC3339 format, e.g. `2023-01-01T00:00:00Z`."
                 },
                 "end": {
                     "type": "string",
-                    "description": "The end time to use to filter traces. Provide in ISO8601 format."
+                    "description": "The end time to use to filter traces. Provide in RFC3339 format, e.g. `2023-01-01T00:00:00Z`."
                 }
             }
         }
     },
-    "required": ["query"]
+    "required": ["query", "time_range"]
 }

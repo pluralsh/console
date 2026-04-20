@@ -36,6 +36,12 @@ func TestJaegerProvider_TracesUsesServiceQueryAndOptions(t *testing.T) {
 		if q.Get("query.search_depth") != "25" {
 			t.Fatalf("unexpected query.search_depth: %v", q.Get("query.search_depth"))
 		}
+		if q.Get("query.limit") != "25" {
+			t.Fatalf("unexpected query.limit: %v", q.Get("query.limit"))
+		}
+		if q.Get("query.num_traces") != "25" {
+			t.Fatalf("unexpected query.num_traces: %v", q.Get("query.num_traces"))
+		}
 		if q.Get("query.attributes") == "" {
 			t.Fatalf("missing query.attributes")
 		}
@@ -104,6 +110,62 @@ func TestJaegerProvider_TracesUsesServiceQueryAndOptions(t *testing.T) {
 	}
 	if resp.GetSpans()[0].GetService() != "frontend" {
 		t.Fatalf("unexpected span service: %s", resp.GetSpans()[0].GetService())
+	}
+}
+
+func TestJaegerProvider_TracesHandlesTextPlainContentType(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Simulate Jaeger returning text/plain instead of application/json
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"result": {
+				"resourceSpans": [{
+					"resource": {
+						"attributes": [{
+							"key": "service.name",
+							"value": {"stringValue": "test-service"}
+						}]
+					},
+					"scopeSpans": [{
+						"spans": [{
+							"traceId": "test-trace-id",
+							"spanId": "test-span-id",
+							"name": "test-span",
+							"startTimeUnixNano": "1712000000000000000",
+							"endTimeUnixNano": "1712000000001000000"
+						}]
+					}]
+				}]
+			}
+		}`))
+	}))
+	defer ts.Close()
+
+	provider := NewJaegerProvider(&toolquery.JaegerConnection{
+		Url: ts.URL,
+	})
+	limit := int32(1)
+
+	resp, err := provider.Traces(context.Background(), &toolquery.TracesQueryInput{
+		Query: "test-service",
+		Range: &toolquery.TimeRange{
+			Start: timestamppb.Now(),
+			End:   timestamppb.Now(),
+		},
+		Limit: &limit,
+	})
+	if err != nil {
+		t.Fatalf("provider traces failed: %v", err)
+	}
+	if got := len(resp.GetSpans()); got != 1 {
+		t.Fatalf("expected 1 span, got %d", got)
+	}
+	if resp.GetSpans()[0].GetService() != "test-service" {
+		t.Fatalf("unexpected span service: %s", resp.GetSpans()[0].GetService())
+	}
+	if resp.GetSpans()[0].GetTraceId() != "test-trace-id" {
+		t.Fatalf("unexpected trace ID: %s", resp.GetSpans()[0].GetTraceId())
 	}
 }
 
