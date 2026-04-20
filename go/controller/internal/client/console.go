@@ -203,6 +203,18 @@ type ConsoleClient interface {
 	GetWorkbenchToolTiny(ctx context.Context, id, name *string) (*console.GetWorkbenchToolTiny_WorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string) error
 	IsWorkbenchToolExists(ctx context.Context, id, name *string) (bool, error)
+	CreateWorkbenchCron(ctx context.Context, workbenchID string, attributes console.WorkbenchCronAttributes) (*console.WorkbenchCronFragment, error)
+	UpdateWorkbenchCron(ctx context.Context, id string, attributes console.WorkbenchCronAttributes) (*console.WorkbenchCronFragment, error)
+	GetWorkbenchCron(ctx context.Context, id string) (*console.WorkbenchCronFragment, error)
+	DeleteWorkbenchCron(ctx context.Context, id string) error
+	IsWorkbenchCronExists(ctx context.Context, id string) (bool, error)
+	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes console.WorkbenchWebhookAttributes) (*console.WorkbenchWebhookFragment, error)
+	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes console.WorkbenchWebhookAttributes) (*console.WorkbenchWebhookFragment, error)
+	GetWorkbenchWebhook(ctx context.Context, id string) (*console.WorkbenchWebhookFragment, error)
+	DeleteWorkbenchWebhook(ctx context.Context, id string) error
+	IsWorkbenchWebhookExists(ctx context.Context, id string) (bool, error)
+	GetObservabilityWebhookByName(ctx context.Context, name string) (*console.ObservabilityWebhookFragment, error)
+	GetIssueWebhookByName(ctx context.Context, name string) (*console.IssueWebhookFragment, error)
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {

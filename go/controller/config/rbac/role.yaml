@@ -69,8 +69,10 @@ rules:
   - servicedeployments
   - stackdefinitions
   - upgradeplancallouts
+  - workbenchcrons
   - workbenches
   - workbenchtools
+  - workbenchwebhooks
   verbs:
   - create
   - delete
@@ -124,8 +126,10 @@ rules:
   - servicedeployments/finalizers
   - stackdefinitions/finalizers
   - upgradeplancallouts/finalizers
+  - workbenchcrons/finalizers
   - workbenches/finalizers
   - workbenchtools/finalizers
+  - workbenchwebhooks/finalizers
   verbs:
   - update
 - apiGroups:
@@ -173,8 +177,10 @@ rules:
   - servicedeployments/status
   - stackdefinitions/status
   - upgradeplancallouts/status
+  - workbenchcrons/status
   - workbenches/status
   - workbenchtools/status
+  - workbenchwebhooks/status
   verbs:
   - get
   - patch

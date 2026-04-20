@@ -52,7 +52,9 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [StackDefinition](#stackdefinition)
 - [UpgradePlanCallout](#upgradeplancallout)
 - [Workbench](#workbench)
+- [WorkbenchCron](#workbenchcron)
 - [WorkbenchTool](#workbenchtool)
+- [WorkbenchWebhook](#workbenchwebhook)
 
 
 
@@ -4068,8 +4070,10 @@ _Appears in:_
 - [ServiceSpec](#servicespec)
 - [StackDefinitionSpec](#stackdefinitionspec)
 - [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
+- [WorkbenchCronSpec](#workbenchcronspec)
 - [WorkbenchSpec](#workbenchspec)
 - [WorkbenchToolSpec](#workbenchtoolspec)
+- [WorkbenchWebhookSpec](#workbenchwebhookspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -5295,6 +5299,44 @@ _Appears in:_
 | `infrastructure` _[WorkbenchInfrastructureConfig](#workbenchinfrastructureconfig)_ | Infrastructure configures infrastructure capabilities (services, stacks, Kubernetes). |  | Optional: \{\} <br /> |
 
 
+#### WorkbenchCron
+
+
+
+WorkbenchCron represents a scheduled cron trigger for a Workbench. It runs a prompt
+on the associated workbench at the configured cron schedule.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `WorkbenchCron` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchCronSpec](#workbenchcronspec)_ | Spec defines the desired state of the WorkbenchCron. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchCronSpec
+
+
+
+WorkbenchCronSpec defines the desired state of a WorkbenchCron.
+
+
+
+_Appears in:_
+- [WorkbenchCron](#workbenchcron)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench this cron belongs to. |  | Required: \{\} <br /> |
+| `crontab` _string_ | Crontab is the cron expression defining the schedule (e.g. */5 * * * *). |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
+| `prompt` _string_ | Prompt is the prompt to run when the cron triggers. |  | Optional: \{\} <br />Type: string <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
+
+
 #### WorkbenchInfrastructureConfig
 
 
@@ -5463,6 +5505,65 @@ _Appears in:_
 | `categories` _WorkbenchToolCategory array_ | Categories for the tool (e.g. METRICS, LOGS, INTEGRATION). |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this tool belongs to. |  | Optional: \{\} <br /> |
 | `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Configuration is the tool-specific configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchWebhook
+
+
+
+WorkbenchWebhook represents a webhook trigger for a Workbench. When an incoming
+webhook payload matches the configured criteria, a prompt is run on the workbench.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `WorkbenchWebhook` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchWebhookSpec](#workbenchwebhookspec)_ | Spec defines the desired state of the WorkbenchWebhook. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchWebhookMatchesSpec
+
+
+
+WorkbenchWebhookMatchesSpec defines criteria to match incoming webhook payloads.
+
+
+
+_Appears in:_
+- [WorkbenchWebhookSpec](#workbenchwebhookspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regex` _string_ | Regex is a regex pattern to match in the webhook body. |  | Optional: \{\} <br />Type: string <br /> |
+| `substring` _string_ | Substring is a substring to match in the webhook body. |  | Optional: \{\} <br />Type: string <br /> |
+| `caseInsensitive` _boolean_ | CaseInsensitive enables case-insensitive matching. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchWebhookSpec
+
+
+
+WorkbenchWebhookSpec defines the desired state of a WorkbenchWebhook.
+
+
+
+_Appears in:_
+- [WorkbenchWebhook](#workbenchwebhook)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench this webhook trigger belongs to. |  | Required: \{\} <br /> |
+| `name` _string_ | Name is the unique name for this webhook trigger on the workbench.<br />If not set, metadata.name is used. |  | Optional: \{\} <br />Type: string <br /> |
+| `webhookName` _string_ | WebhookName is the name of an observability webhook in the Console API that receives events.<br />Either WebhookName or IssueWebhookName must be set. |  | Optional: \{\} <br />Type: string <br /> |
+| `issueWebhookName` _string_ | IssueWebhookName is the name of an issue webhook in the Console API that receives events.<br />Either WebhookName or IssueWebhookName must be set. |  | Optional: \{\} <br />Type: string <br /> |
+| `matches` _[WorkbenchWebhookMatchesSpec](#workbenchwebhookmatchesspec)_ | Matches defines criteria to match incoming webhook payloads. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | Prompt is the prompt to run when the webhook matches. |  | Optional: \{\} <br />Type: string <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
 
 

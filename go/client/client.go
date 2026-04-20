@@ -35,6 +35,7 @@ type ConsoleClient interface {
 	GetObservabilityWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityWebhook, error)
 	UpsertObservabilityWebhook(ctx context.Context, attributes ObservabilityWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityWebhook, error)
 	DeleteObservabilityWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityWebhook, error)
+	GetIssueWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetIssueWebhook, error)
 	CreateClusterBackup(ctx context.Context, attributes BackupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterBackup, error)
 	GetClusterBackup(ctx context.Context, id *string, clusterID *string, namespace *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterBackup, error)
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
@@ -780,6 +781,31 @@ func (t *ObservabilityWebhookFragment) GetURL() string {
 		t = &ObservabilityWebhookFragment{}
 	}
 	return t.URL
+}
+
+type IssueWebhookFragment struct {
+	ID       string               "json:\"id\" graphql:\"id\""
+	Name     string               "json:\"name\" graphql:\"name\""
+	Provider IssueWebhookProvider "json:\"provider\" graphql:\"provider\""
+}
+
+func (t *IssueWebhookFragment) GetID() string {
+	if t == nil {
+		t = &IssueWebhookFragment{}
+	}
+	return t.ID
+}
+func (t *IssueWebhookFragment) GetName() string {
+	if t == nil {
+		t = &IssueWebhookFragment{}
+	}
+	return t.Name
+}
+func (t *IssueWebhookFragment) GetProvider() *IssueWebhookProvider {
+	if t == nil {
+		t = &IssueWebhookFragment{}
+	}
+	return &t.Provider
 }
 
 type ClusterBackupFragment struct {
@@ -29890,6 +29916,17 @@ func (t *DeleteObservabilityWebhook) GetDeleteObservabilityWebhook() *Observabil
 	return t.DeleteObservabilityWebhook
 }
 
+type GetIssueWebhook struct {
+	IssueWebhook *IssueWebhookFragment "json:\"issueWebhook,omitempty\" graphql:\"issueWebhook\""
+}
+
+func (t *GetIssueWebhook) GetIssueWebhook() *IssueWebhookFragment {
+	if t == nil {
+		t = &GetIssueWebhook{}
+	}
+	return t.IssueWebhook
+}
+
 type CreateClusterBackup struct {
 	CreateClusterBackup *ClusterBackupFragment "json:\"createClusterBackup,omitempty\" graphql:\"createClusterBackup\""
 }
@@ -34560,6 +34597,36 @@ func (c *Client) DeleteObservabilityWebhook(ctx context.Context, id string, inte
 
 	var res DeleteObservabilityWebhook
 	if err := c.Client.Post(ctx, "DeleteObservabilityWebhook", DeleteObservabilityWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetIssueWebhookDocument = `query GetIssueWebhook ($id: ID, $name: String) {
+	issueWebhook(id: $id, name: $name) {
+		... IssueWebhookFragment
+	}
+}
+fragment IssueWebhookFragment on IssueWebhook {
+	id
+	name
+	provider
+}
+`
+
+func (c *Client) GetIssueWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetIssueWebhook, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetIssueWebhook
+	if err := c.Client.Post(ctx, "GetIssueWebhook", GetIssueWebhookDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -55457,6 +55524,7 @@ var DocumentOperationNames = map[string]string{
 	GetObservabilityWebhookDocument:                   "GetObservabilityWebhook",
 	UpsertObservabilityWebhookDocument:                "UpsertObservabilityWebhook",
 	DeleteObservabilityWebhookDocument:                "DeleteObservabilityWebhook",
+	GetIssueWebhookDocument:                           "GetIssueWebhook",
 	CreateClusterBackupDocument:                       "CreateClusterBackup",
 	GetClusterBackupDocument:                          "GetClusterBackup",
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",

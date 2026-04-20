@@ -85,3 +85,15 @@ mutation DeleteObservabilityWebhook($id: ID!) {
     ...ObservabilityWebhookFragment
   }
 }
+
+fragment IssueWebhookFragment on IssueWebhook {
+  id
+  name
+  provider
+}
+
+query GetIssueWebhook($id: ID, $name: String) {
+  issueWebhook(id: $id, name: $name) {
+    ...IssueWebhookFragment
+  }
+}

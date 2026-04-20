@@ -86,3 +86,43 @@ spec:
       namespace: default
     - name: workbenchtool-metrics-sample
       namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchCron
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchcron
+    app.kubernetes.io/instance: workbenchcron-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchcron-sample
+  namespace: default
+spec:
+  workbenchRef:
+    name: workbench-sample
+    namespace: default
+  crontab: "0 * * * *"
+  prompt: Check the health of all monitored API endpoints and summarize any issues found.
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchWebhook
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchwebhook
+    app.kubernetes.io/instance: workbenchwebhook-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchwebhook-sample
+  namespace: default
+spec:
+  workbenchRef:
+    name: workbench-sample
+    namespace: default
+  name: workbenchwebhook-sample
+  webhookName: my-grafana-webhook
+  matches:
+    substring: "error"
+    caseInsensitive: true
+  prompt: Analyze the incoming alert and suggest remediation steps.

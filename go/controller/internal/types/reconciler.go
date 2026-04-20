@@ -63,7 +63,9 @@ const (
 	CustomCompatibilityMatrixReconciler  Reconciler = "customcompatibilitymatrix"
 	UpgradePlanCalloutReconciler         Reconciler = "upgradeplancallout"
 	WorkbenchReconciler                  Reconciler = "workbench"
+	WorkbenchCronReconciler              Reconciler = "workbenchcron"
 	WorkbenchToolReconciler              Reconciler = "workbenchtool"
+	WorkbenchWebhookReconciler           Reconciler = "workbenchwebhook"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.
