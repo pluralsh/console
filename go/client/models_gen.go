@@ -9963,8 +9963,6 @@ type WorkbenchToolAzureConnection struct {
 	TenantID *string `json:"tenantId,omitempty"`
 	// azure client id
 	ClientID *string `json:"clientId,omitempty"`
-	// azure resource id for metrics/logs queries
-	ResourceID *string `json:"resourceId,omitempty"`
 }
 
 type WorkbenchToolAzureConnectionAttributes struct {
@@ -9976,8 +9974,6 @@ type WorkbenchToolAzureConnectionAttributes struct {
 	ClientID string `json:"clientId"`
 	// azure client secret
 	ClientSecret string `json:"clientSecret"`
-	// azure resource id for metrics/logs queries
-	ResourceID string `json:"resourceId"`
 }
 
 type WorkbenchToolCloudwatchConnection struct {
