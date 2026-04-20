@@ -91,9 +91,8 @@ func (in *WorkbenchWebhook) SetCondition(condition metav1.Condition) {
 }
 
 func (in *WorkbenchWebhook) Attributes(webhookID, issueWebhookID *string) console.WorkbenchWebhookAttributes {
-	name := in.ConsoleName()
 	return console.WorkbenchWebhookAttributes{
-		Name:           &name,
+		Name:           new(in.ConsoleName()),
 		WebhookID:      webhookID,
 		IssueWebhookID: issueWebhookID,
 		Matches:        in.Spec.Matches.Attributes(),
