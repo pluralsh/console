@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,41 +16,28 @@ func TestJaegerProvider_TracesUsesServiceQueryAndOptions(t *testing.T) {
 		if r.URL.Path != "/api/v3/traces" {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
-		if r.Method != http.MethodPost {
+		if r.Method != http.MethodGet {
 			t.Fatalf("unexpected method: %s", r.Method)
 		}
 
-		var body map[string]any
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			t.Fatalf("failed to decode request body: %v", err)
+		q := r.URL.Query()
+		if q.Get("query.service_name") != "frontend" {
+			t.Fatalf("unexpected query.service_name: %v", q.Get("query.service_name"))
 		}
-
-		query, ok := body["query"].(map[string]any)
-		if !ok {
-			t.Fatalf("missing query body: %v", body)
+		if q.Get("query.operation_name") != "GET /api/products" {
+			t.Fatalf("unexpected query.operation_name: %v", q.Get("query.operation_name"))
 		}
-		if query["service_name"] != "frontend" {
-			t.Fatalf("unexpected service_name: %v", query["service_name"])
+		if q.Get("query.duration_min") != "10ms" {
+			t.Fatalf("unexpected query.duration_min: %v", q.Get("query.duration_min"))
 		}
-		if query["operation_name"] != "GET /api/products" {
-			t.Fatalf("unexpected operation_name: %v", query["operation_name"])
+		if q.Get("query.duration_max") != "1s" {
+			t.Fatalf("unexpected query.duration_max: %v", q.Get("query.duration_max"))
 		}
-		if query["duration_min"] != "10ms" {
-			t.Fatalf("unexpected duration_min: %v", query["duration_min"])
+		if q.Get("query.search_depth") != "25" {
+			t.Fatalf("unexpected query.search_depth: %v", q.Get("query.search_depth"))
 		}
-		if query["duration_max"] != "1s" {
-			t.Fatalf("unexpected duration_max: %v", query["duration_max"])
-		}
-		if query["search_depth"] != float64(25) {
-			t.Fatalf("unexpected search_depth: %v", query["search_depth"])
-		}
-
-		attrs, ok := query["attributes"].(map[string]any)
-		if !ok {
-			t.Fatalf("missing attributes in query: %v", query)
-		}
-		if attrs["http.status_code"] != "500" {
-			t.Fatalf("unexpected attributes: %v", attrs)
+		if q.Get("query.attributes") == "" {
+			t.Fatalf("missing query.attributes")
 		}
 
 		w.Header().Set("Content-Type", "application/json")

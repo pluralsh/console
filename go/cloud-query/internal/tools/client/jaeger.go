@@ -2,7 +2,9 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"resty.dev/v3"
@@ -10,37 +12,10 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/datasource"
 )
 
-const jaegerTracesEndpoint = "/api/v3/traces"
-
-type JaegerTraceQuery struct {
-	ServiceName   string
-	OperationName string
-	Attributes    map[string]string
-	StartTimeMin  string
-	StartTimeMax  string
-	DurationMin   string
-	DurationMax   string
-	SearchDepth   int32
-}
-
-type jaegerTracesRequest struct {
-	Query *jaegerTraceQueryBody `json:"query"`
-}
-
-type jaegerTraceQueryBody struct {
-	ServiceName   string            `json:"service_name,omitempty"`
-	OperationName string            `json:"operation_name,omitempty"`
-	Attributes    map[string]string `json:"attributes,omitempty"`
-	StartTimeMin  string            `json:"start_time_min,omitempty"`
-	StartTimeMax  string            `json:"start_time_max,omitempty"`
-	DurationMin   string            `json:"duration_min,omitempty"`
-	DurationMax   string            `json:"duration_max,omitempty"`
-	SearchDepth   int32             `json:"search_depth,omitempty"`
-}
-
-type jaegerTracesResponse struct {
-	Result datasource.TempoTraceResponse `json:"result"`
-}
+const (
+	jaegerTracesEndpoint = "/api/v3/traces"
+	defaultLimit         = 100
+)
 
 type JaegerClient struct {
 	*resty.Client
@@ -50,6 +25,7 @@ type JaegerClient struct {
 
 func NewJaegerClient(baseURL, token, username, password string) *JaegerClient {
 	client := resty.New()
+
 	if token != "" {
 		client.SetAuthToken(token)
 		client.SetAuthScheme("Bearer")
@@ -63,26 +39,49 @@ func NewJaegerClient(baseURL, token, username, password string) *JaegerClient {
 	}
 }
 
-func (in *JaegerClient) Traces(ctx context.Context, query JaegerTraceQuery) (*datasource.TempoTraceResponse, error) {
-	body := &jaegerTracesRequest{
-		Query: &jaegerTraceQueryBody{
-			ServiceName:   query.ServiceName,
-			OperationName: query.OperationName,
-			Attributes:    query.Attributes,
-			StartTimeMin:  query.StartTimeMin,
-			StartTimeMax:  query.StartTimeMax,
-			DurationMin:   query.DurationMin,
-			DurationMax:   query.DurationMax,
-			SearchDepth:   query.SearchDepth,
-		},
+func (in *JaegerClient) Traces(ctx context.Context, query datasource.JaegerTraceQuery) (*datasource.JaegerTraceResponse, error) {
+	traces := new(datasource.JaegerTracesResponse)
+	req := in.R().
+		SetContext(ctx).
+		SetHeader("Accept", "application/json").
+		SetResult(traces)
+
+	if query.ServiceName != "" {
+		req.SetQueryParam("query.service_name", query.ServiceName)
+	}
+	if query.OperationName != "" {
+		req.SetQueryParam("query.operation_name", query.OperationName)
+	}
+	if query.StartTimeMin != "" {
+		req.SetQueryParam("query.start_time_min", query.StartTimeMin)
+	}
+	if query.StartTimeMax != "" {
+		req.SetQueryParam("query.start_time_max", query.StartTimeMax)
+	}
+	if query.DurationMin != "" {
+		req.SetQueryParam("query.duration_min", query.DurationMin)
+	}
+	if query.DurationMax != "" {
+		req.SetQueryParam("query.duration_max", query.DurationMax)
+	}
+	if query.Limit > 0 {
+		req.SetQueryParam("query.num_traces", strconv.Itoa(int(query.Limit)))
+		req.SetQueryParam("query.search_depth", strconv.Itoa(int(query.Limit)))
+		req.SetQueryParam("query.limit", strconv.Itoa(int(query.Limit)))
+	} else {
+		req.SetQueryParam("query.num_traces", strconv.Itoa(defaultLimit))
+		req.SetQueryParam("query.search_depth", strconv.Itoa(defaultLimit))
+		req.SetQueryParam("query.limit", strconv.Itoa(defaultLimit))
+	}
+	if len(query.Attributes) > 0 {
+		attrsJSON, err := json.Marshal(query.Attributes)
+		if err != nil {
+			return nil, fmt.Errorf("jaeger: failed to encode attributes: %w", err)
+		}
+		req.SetQueryParam("query.attributes", string(attrsJSON))
 	}
 
-	var resp jaegerTracesResponse
-	response, err := in.R().
-		SetContext(ctx).
-		SetBody(body).
-		SetResult(&resp).
-		Post(in.baseURL + jaegerTracesEndpoint)
+	response, err := req.Get(in.baseURL + jaegerTracesEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -90,5 +89,12 @@ func (in *JaegerClient) Traces(ctx context.Context, query JaegerTraceQuery) (*da
 		return nil, fmt.Errorf("jaeger traces search failed: status=%d body=%s", response.StatusCode(), response.String())
 	}
 
-	return &resp.Result, nil
+	// Fallback: manually unmarshal if automatic unmarshalling failed due to incorrect Content-Type
+	if len(traces.Result.ResourceSpans) == 0 && len(response.Bytes()) > 0 {
+		if err := json.Unmarshal(response.Bytes(), traces); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+		}
+	}
+
+	return &traces.Result, nil
 }

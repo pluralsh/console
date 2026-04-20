@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
-)
-
-const (
-	jaegerPrimaryQueryField = "service_name"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/datasource"
 )
 
 type JaegerProvider struct {
@@ -26,47 +24,42 @@ func (in *JaegerProvider) Traces(ctx context.Context, input *toolquery.TracesQue
 		return nil, ErrInvalidArgument
 	}
 	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
-		return nil, fmt.Errorf("%w: query must be set to Jaeger %s", ErrInvalidArgument, jaegerPrimaryQueryField)
+		return nil, fmt.Errorf("%w: query must be set to service_name", ErrInvalidArgument)
 	}
 
-	query, err := in.toJaegerQuery(input)
-	if err != nil {
-		return nil, err
-	}
-
-	client := client.NewJaegerClient(
+	jaegerClient := client.NewJaegerClient(
 		in.conn.GetUrl(),
 		in.conn.GetToken(),
 		in.conn.GetUsername(),
 		in.conn.GetPassword(),
 	)
-	defer client.Close()
+	defer jaegerClient.Close()
 
-	resp, err := client.Traces(ctx, query)
+	resp, err := jaegerClient.Traces(ctx, in.toJaegerQuery(input))
 	if err != nil {
 		return nil, err
 	}
 
-	return &toolquery.TracesQueryOutput{Spans: resp.ToTraceSpans()}, nil
+	return resp.ToTracesQueryOutput(), nil
 }
 
-func (in *JaegerProvider) toJaegerQuery(input *toolquery.TracesQueryInput) (client.JaegerTraceQuery, error) {
-	q := client.JaegerTraceQuery{
+func (in *JaegerProvider) toJaegerQuery(input *toolquery.TracesQueryInput) datasource.JaegerTraceQuery {
+	q := datasource.JaegerTraceQuery{
 		ServiceName: strings.TrimSpace(input.GetQuery()),
 		Attributes:  map[string]string{},
 	}
 
 	if input.GetRange() != nil {
 		if input.GetRange().GetStart() != nil {
-			q.StartTimeMin = input.GetRange().GetStart().AsTime().UTC().Format("2006-01-02T15:04:05.999999999Z07:00")
+			q.StartTimeMin = input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339)
 		}
 		if input.GetRange().GetEnd() != nil {
-			q.StartTimeMax = input.GetRange().GetEnd().AsTime().UTC().Format("2006-01-02T15:04:05.999999999Z07:00")
+			q.StartTimeMax = input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339)
 		}
 	}
 
 	if input.GetLimit() > 0 {
-		q.SearchDepth = input.GetLimit()
+		q.Limit = input.GetLimit()
 	}
 
 	if options := input.GetOptions(); options != nil {
@@ -95,5 +88,5 @@ func (in *JaegerProvider) toJaegerQuery(input *toolquery.TracesQueryInput) (clie
 		q.Attributes = nil
 	}
 
-	return q, nil
+	return q
 }
