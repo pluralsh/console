@@ -592,6 +592,7 @@ function WebhookActorSubStep({
 
   const showSetMeLink =
     me &&
+    !!me.roles?.admin &&
     !formState.overrideBotUser &&
     (!resolvedActor || resolvedActor.id !== me.id)
 
