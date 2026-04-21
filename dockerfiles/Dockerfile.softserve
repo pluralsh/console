@@ -57,12 +57,11 @@ RUN apk upgrade --no-cache libexpat musl musl-utils zlib
 RUN apk add git
 
 COPY --from=builder /usr/bin/soft /usr/bin/
-COPY --from=builder /data /data
-COPY --from=builder /go/data /go/data
+COPY --from=builder /go/data /data
 
 RUN addgroup -g 65543 softserve
 RUN adduser -u 65543 -G softserve -D softserve
-RUN chown -R softserve:softserve /go/data && chown -R softserve:softserve /data
+RUN chown -R softserve:softserve /data 
 USER softserve
 
 ENTRYPOINT [ "soft", "serve" ]
