@@ -64,6 +64,15 @@ fragment Workbench on Workbench {
     }
     files
   }
+  workbenchSkills(first: 500) {
+    edges {
+      node {
+        name
+        description
+        contents
+      }
+    }
+  }
   tools {
     ...WorkbenchTool
   }
@@ -73,6 +82,12 @@ fragment Workbench on Workbench {
   writeBindings {
     ...PolicyBinding
   }
+  botUser {
+    id
+    name
+    email
+    profile
+  }
 }
 
 fragment WorkbenchToolTiny on WorkbenchTool {
@@ -80,6 +95,9 @@ fragment WorkbenchToolTiny on WorkbenchTool {
   name
   tool
   categories
+  cloudConnection {
+    ...CloudConnectionTiny
+  }
 }
 
 fragment WorkbenchTool on WorkbenchTool {
@@ -543,9 +561,7 @@ query WorkbenchTriggersSummary($id: ID!) {
     name
     description
     tools {
-      id
-      name
-      tool
+      ...WorkbenchToolTiny
     }
     crons(first: 30) {
       edges {

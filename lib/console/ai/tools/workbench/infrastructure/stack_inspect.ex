@@ -26,7 +26,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackInspect do
   def name(_), do: "plrl_stack"
   def description(_), do: "Get detailed information about an infrastructure stack by id (from plrl_stacks)."
 
-  def implement(_, %__MODULE__{user: %User{} = user, stack_id: id}) do
+  def implement(%__MODULE__{user: %User{} = user, stack_id: id}) do
     Stacks.get_stack(id)
     |> Repo.preload([:repository, :cluster, :project, parent: [:cluster]])
     |> Policies.allow(user, :read)

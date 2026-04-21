@@ -20,16 +20,17 @@ import {
   useWorkbenchQuery,
   WorkbenchAttributes,
   WorkbenchFragment,
+  WorkbenchSkillAttributes,
 } from 'generated/graphql'
 import { cloneDeep } from 'lodash'
-import { useMemo, useState } from 'react'
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
@@ -39,14 +40,60 @@ import {
   WorkbenchStepLabel,
 } from './WorkbenchFormSteps'
 
+// Context lets individual form steps register card tabs and override footer actions
+// without the form needing to know which step is active or what UI they need.
+type WorkbenchFormContextValue = {
+  setTabs: (tabs: ReactNode | null) => void
+  setFooterActions: (actions: ReactNode | null) => void
+  setRightContent: (content: ReactNode | null) => void
+}
+const WorkbenchFormContext = createContext<WorkbenchFormContextValue | null>(
+  null
+)
+
+export function useWorkbenchFormCardTabs() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormCardTabs must be used inside a WorkbenchForm'
+    )
+  return { setTabs: ctx.setTabs }
+}
+
+export function useWorkbenchFormFooterActions() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormFooterActions must be used inside a WorkbenchForm'
+    )
+  return { setFooterActions: ctx.setFooterActions }
+}
+
+export function useWorkbenchFormCardRightContent() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormCardRightContent must be used inside a WorkbenchForm'
+    )
+  return { setRightContent: ctx.setRightContent }
+}
+
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
 // use FormBinding[] so BindingInput can show chips (user email / group name).
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
-  'readBindings' | 'writeBindings' | 'projectId' | 'workbenchSkills'
+  'readBindings' | 'writeBindings' | 'projectId'
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
+  /** Bot user from the server when editing; omitted from mutation input. */
+  botUser: {
+    id: string
+    name: string
+    email: string
+    profile?: string | null
+  } | null
+  workbenchSkills: WorkbenchSkillAttributes[]
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -85,29 +132,36 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
       overflow="auto"
       padding="large"
     >
-      {mode === 'create' ? (
-        <Title2H1>Create a workbench</Title2H1>
-      ) : (
-        <StackedText
-          loading={!data && loading}
-          first={workbench?.name}
-          firstPartialType="subtitle2"
-          firstColor="text"
-          second={workbench?.description}
-          secondPartialType="body2"
-          secondColor="text-xlight"
-          gap="xxsmall"
-        />
-      )}
-      <WorkbenchForm
-        workbenchId={id}
-        key={`${JSON.stringify(data?.workbench)}`} // reset form state if data updates
-        initialFormState={sanitizeInitialForm(
-          workbench ?? { id: '', name: '' }
+      <Flex
+        direction="column"
+        gap="large"
+        width="100%"
+        css={{ maxWidth: 968, marginInline: 'auto' }}
+      >
+        {mode === 'create' ? (
+          <Title2H1>Create a workbench</Title2H1>
+        ) : (
+          <StackedText
+            loading={!data && loading}
+            first={workbench?.name}
+            firstPartialType="subtitle2"
+            firstColor="text"
+            second={workbench?.description}
+            secondPartialType="body2"
+            secondColor="text-xlight"
+            gap="xxsmall"
+          />
         )}
-        mode={mode}
-        loading={!data && loading}
-      />
+        <WorkbenchForm
+          workbenchId={id}
+          key={`${JSON.stringify(data?.workbench)}`} // reset form state if data updates
+          initialFormState={sanitizeInitialForm(
+            workbench ?? { id: '', name: '' }
+          )}
+          mode={mode}
+          loading={!data && loading}
+        />
+      </Flex>
     </Flex>
   )
 }
@@ -123,12 +177,20 @@ function WorkbenchForm({
   mode: 'create' | 'edit'
   loading: boolean
 }) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const isCreateMode = mode === 'create'
   const [formState, setFormState] =
     useState<WorkbenchFormState>(initialFormState)
   const [curStep, setCurStepState] =
     useState<WorkbenchStepLabel>('Workbench setup')
+  const [cardTabs, setCardTabs] = useState<ReactNode | null>(null)
+  const [footerActions, setFooterActions] = useState<ReactNode | null>(null)
+  const [rightContent, setRightContent] = useState<ReactNode | null>(null)
+  const formContextValue = useMemo<WorkbenchFormContextValue>(
+    () => ({ setTabs: setCardTabs, setFooterActions, setRightContent }),
+    []
+  )
   const [stepStatuses, setStepStatuses] = useState<
     Record<WorkbenchStepLabel, StepStatus>
   >(INITIAL_STEP_STATUSES)
@@ -187,69 +249,94 @@ function WorkbenchForm({
   }
 
   return (
-    <WorkbenchSplitLayoutSC>
-      <Flex
-        direction="column"
-        width={200}
-      >
-        {workbenchFormSteps.map(({ label }) => (
-          <SidebarItem
-            key={label}
-            label={label}
-            active={curStep === label}
-            status={isCreateMode ? stepStatuses[label] : null}
-            onClick={() => setCurStep(label)}
-          />
-        ))}
-      </Flex>
-      {loading ? (
-        <RectangleSkeleton
-          $width="100%"
-          $height="100%"
-        />
-      ) : (
-        StepComponent && (
-          <FormCardSC>
-            {mutationError && <GqlError error={mutationError} />}
-            <StepComponent
-              formState={formState}
-              setFormState={setFormState}
+    <WorkbenchFormContext.Provider value={formContextValue}>
+      <WorkbenchSplitLayoutSC>
+        <Flex
+          direction="column"
+          width={200}
+          flexShrink={0}
+        >
+          {workbenchFormSteps.map(({ label }) => (
+            <SidebarItem
+              key={label}
+              label={label}
+              active={curStep === label}
+              status={isCreateMode ? stepStatuses[label] : null}
+              onClick={() => setCurStep(label)}
             />
-            <StickyActionsFooterSC>
-              <Button
-                destructive
-                as={Link}
-                to={
-                  workbenchId
-                    ? getWorkbenchAbsPath(workbenchId)
-                    : WORKBENCHES_ABS_PATH
-                }
-              >
-                Cancel
-              </Button>
-              {numUnvisitedSteps < 2 ? (
-                <Button
-                  disabled={!allowSubmit}
-                  loading={mutationLoading}
-                  onClick={onSave}
+          ))}
+        </Flex>
+        {loading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="100%"
+          />
+        ) : (
+          StepComponent && (
+            <Flex
+              gap="medium"
+              css={{ minWidth: 0 }}
+            >
+              <FormCardSC tabs={cardTabs}>
+                {mutationError && <GqlError error={mutationError} />}
+                <StepComponent
+                  formState={formState}
+                  setFormState={setFormState}
+                />
+                <StickyActionsFooterSC>
+                  {footerActions ?? (
+                    <>
+                      <Button
+                        destructive
+                        as={Link}
+                        to={
+                          workbenchId
+                            ? getWorkbenchAbsPath(workbenchId)
+                            : WORKBENCHES_ABS_PATH
+                        }
+                      >
+                        Cancel
+                      </Button>
+                      {numUnvisitedSteps < 2 ? (
+                        <Button
+                          disabled={!allowSubmit}
+                          loading={mutationLoading}
+                          onClick={onSave}
+                        >
+                          {isCreateMode
+                            ? 'Create workbench'
+                            : 'Update workbench'}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            if (!!workbenchFormSteps[curStepIndex + 1])
+                              setCurStep(
+                                workbenchFormSteps[curStepIndex + 1].label
+                              )
+                          }}
+                        >
+                          Next
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </StickyActionsFooterSC>
+              </FormCardSC>
+              {rightContent && (
+                <Flex
+                  direction="column"
+                  flexShrink={0}
+                  css={{ marginTop: theme.spacing.xlarge, width: 120 }}
                 >
-                  {isCreateMode ? 'Create workbench' : 'Update workbench'}
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => {
-                    if (!!workbenchFormSteps[curStepIndex + 1])
-                      setCurStep(workbenchFormSteps[curStepIndex + 1].label)
-                  }}
-                >
-                  Next
-                </Button>
+                  {rightContent}
+                </Flex>
               )}
-            </StickyActionsFooterSC>
-          </FormCardSC>
-        )
-      )}
-    </WorkbenchSplitLayoutSC>
+            </Flex>
+          )
+        )}
+      </WorkbenchSplitLayoutSC>
+    </WorkbenchFormContext.Provider>
   )
 }
 
@@ -315,6 +402,9 @@ export const FormCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   flex: 1,
+  minWidth: 0,
+  maxWidth: 750,
+  width: 750,
   overflow: 'auto',
   height: '100%',
 }))
@@ -323,8 +413,10 @@ export const WorkbenchSplitLayoutSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.medium,
   height: '100%',
+  width: '100%',
   minWidth: 750,
   maxWidth: 968,
+  marginInline: 'auto',
   minHeight: 0,
 }))
 
@@ -361,12 +453,17 @@ const validateForm = (formState: WorkbenchFormState) =>
   )
 
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
+  const sanitizedState = cloneDeep(deepOmitFalsy(state))
   const {
     name,
     readBindings: r,
     writeBindings: w,
+    botUser: _botUser,
     ...rest
-  } = cloneDeep(deepOmitFalsy(state))
+  } = sanitizedState
+
+  // Keep explicit empty list so "delete all skills" is persisted.
+  rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
 
   return {
     name: name ?? '',
@@ -387,9 +484,11 @@ function sanitizeInitialForm({
   agentRuntime,
   repository,
   skills,
+  workbenchSkills,
   tools,
   readBindings,
   writeBindings,
+  botUser,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
   const { kubernetes, services, stacks } = infrastructure ?? {}
@@ -397,12 +496,30 @@ function sanitizeInitialForm({
   const { mode, repositories } = coding ?? {}
   const { files, ref } = skills ?? {}
 
+  // TODO: Load all skills via pagination instead of first 500.
+  const resolvedWorkbenchSkills = (workbenchSkills?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter(isNonNullable)
+    .map((skill) => ({
+      name: skill.name ?? '',
+      description: skill.description ?? null,
+      contents: skill.contents ?? '',
+    }))
+
   return {
     name,
     description,
     systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
+    botUser: botUser
+      ? {
+          id: botUser.id,
+          name: botUser.name,
+          email: botUser.email,
+          profile: botUser.profile,
+        }
+      : null,
     overrideBotUser: false,
     configuration: {
       infrastructure: { kubernetes, services, stacks },
@@ -428,5 +545,6 @@ function sanitizeInitialForm({
           group: group && { id: group.id, name: group.name },
         },
       ]) ?? [],
+    workbenchSkills: resolvedWorkbenchSkills,
   }
 }

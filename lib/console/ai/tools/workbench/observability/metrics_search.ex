@@ -33,7 +33,7 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   end
 
 
-  def implement(_, %__MODULE__{} = tool) do
+  def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
          {:ok, %MetricsSearchOutput{} = output} <- Stub.metrics_search(conn, input),

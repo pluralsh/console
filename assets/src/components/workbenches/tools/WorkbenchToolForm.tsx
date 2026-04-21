@@ -7,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
+  Provider,
   WorkbenchToolAttributes,
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolFragment,
@@ -19,6 +20,7 @@ import {
   FormCardSC,
   StickyActionsFooterSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
+import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
 import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
@@ -29,24 +31,27 @@ import {
   isConfigurableWorkbenchToolType,
   TOOL_TYPE_TO_CATEGORIES,
 } from './workbenchToolsUtils'
+import { Link } from 'react-router-dom'
 
 export type WorkbenchToolFormState = Pick<
   WorkbenchToolAttributes,
-  'name' | 'categories' | 'configuration'
+  'name' | 'categories' | 'configuration' | 'cloudConnectionId'
 >
 
 export function WorkbenchToolForm({
   type,
+  provider,
   tool,
   mutationLoading,
-  onCancel,
+  backPath,
   onSave,
   onToolDeleted,
 }: {
   type: WorkbenchToolType
+  provider: Nullable<Provider>
   tool: Nullable<WorkbenchToolFragment>
   mutationLoading: boolean
-  onCancel: () => void
+  backPath: string
   onSave: (state: WorkbenchToolFormState) => void
   onToolDeleted?: () => void
 }) {
@@ -55,11 +60,17 @@ export function WorkbenchToolForm({
     name: tool?.name ?? '',
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
+    cloudConnectionId: tool?.cloudConnection?.id,
   })
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
+  const allowSave =
+    hasUpdates &&
+    !!state.name.trim() &&
+    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId)
   return (
     <FormCardSC>
       <FormField
+        required
         label="Name"
         value={state.name}
         onChange={(e) => update({ name: e.target.value })}
@@ -70,11 +81,19 @@ export function WorkbenchToolForm({
           onChange={(e) => update({ name: e.target.value })}
         />
       </FormField>
-      <WorkbenchToolFormFields
-        type={type}
-        state={state}
-        update={update}
-      />
+      {type === WorkbenchToolType.Cloud && provider ? (
+        <CloudConnectionSelectField
+          provider={provider}
+          selectedId={state.cloudConnectionId ?? null}
+          onChange={(id) => update({ cloudConnectionId: id })}
+        />
+      ) : (
+        <WorkbenchToolFormFields
+          type={type}
+          state={state}
+          update={update}
+        />
+      )}
       {categories.length > 1 && (
         <FormField label="Allowed capabilities (must select at least one)">
           <Flex
@@ -126,13 +145,13 @@ export function WorkbenchToolForm({
         >
           <Button
             secondary
-            destructive={!!hasUpdates}
-            onClick={onCancel}
+            as={Link}
+            to={backPath}
           >
             {hasUpdates ? 'Cancel' : 'Back'}
           </Button>
           <Button
-            disabled={!hasUpdates}
+            disabled={!allowSave}
             loading={mutationLoading}
             onClick={() => onSave(state)}
           >

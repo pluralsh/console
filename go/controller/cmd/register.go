@@ -489,4 +489,13 @@ func init() {
 			CredentialsCache: credentialsCache,
 		}
 	})
+
+	types.RegisterController(types.SentinelTriggerReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.SentinelTriggerReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
 }

@@ -215,6 +215,8 @@ type ConsoleClient interface {
 	IsWorkbenchWebhookExists(ctx context.Context, id string) (bool, error)
 	GetObservabilityWebhookByName(ctx context.Context, name string) (*console.ObservabilityWebhookFragment, error)
 	GetIssueWebhookByName(ctx context.Context, name string) (*console.IssueWebhookFragment, error)
+	GetSentinelRun(ctx context.Context, id string) (*console.SentinelRunFragment, error)
+	RunSentinel(ctx context.Context, id string) (*string, error)
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {

@@ -94,6 +94,23 @@ defmodule Cloudquery.SchemaOutput do
   field :result, 1, repeated: true, type: Cloudquery.SchemaResult
 end
 
+defmodule Cloudquery.TablesInput do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :connection, 1, type: Cloudquery.Connection
+  field :table, 2, proto3_optional: true, type: :string
+end
+
+defmodule Cloudquery.TablesOutput do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :result, 1, repeated: true, type: :string
+end
+
 defmodule Cloudquery.SchemaResult do
   @moduledoc false
 
@@ -122,6 +139,8 @@ defmodule Cloudquery.CloudQuery.Service do
   rpc :Query, Cloudquery.QueryInput, Cloudquery.QueryResult
 
   rpc :Schema, Cloudquery.SchemaInput, Cloudquery.SchemaOutput
+
+  rpc :Tables, Cloudquery.TablesInput, Cloudquery.TablesOutput
 
   rpc :Extract, Cloudquery.ExtractInput, stream(Cloudquery.ExtractOutput)
 end

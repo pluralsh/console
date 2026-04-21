@@ -1,0 +1,14 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: SentinelTrigger
+metadata:
+  labels:
+    app.kubernetes.io/name: sentineltrigger
+    app.kubernetes.io/instance: sentineltrigger-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: sentineltrigger-sample
+spec:
+  sentinelRef:
+    name: sentinel-terratest
+    namespace: default

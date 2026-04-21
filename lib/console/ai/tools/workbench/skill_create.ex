@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Workbench.SkillCreate do
     |> validate_required([:name, :description, :contents])
   end
 
-  def implement(_, %__MODULE__{job: job} = model) do
+  def implement(%__MODULE__{job: job} = model) do
     %WorkbenchSkill{workbench_id: job.workbench_id}
     |> WorkbenchSkill.changeset(%{name: model.name, description: model.description, contents: model.contents})
     |> Console.Repo.insert()
