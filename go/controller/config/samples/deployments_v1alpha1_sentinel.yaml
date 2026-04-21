@@ -37,7 +37,7 @@ metadata:
   name: sentinel-terratest
   namespace: default
 spec:
-  name: terratest-git
+  name: terratest-trigger
   description: "test sentinel for terratest"
   checks:
     - type: INTEGRATION_TEST
