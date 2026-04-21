@@ -66,3 +66,5 @@ secrets/
 data/
 
 # config/pubkey.pem
+
+release-notes.md
