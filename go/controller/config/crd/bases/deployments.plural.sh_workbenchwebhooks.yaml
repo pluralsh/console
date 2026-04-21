@@ -151,6 +151,9 @@ spec:
             required:
             - workbenchRef
             type: object
+            x-kubernetes-validations:
+            - message: either webhookName or issueWebhookName must be set
+              rule: has(self.webhookName) || has(self.issueWebhookName)
           status:
             description: Status represents the current state of this resource.
             properties:

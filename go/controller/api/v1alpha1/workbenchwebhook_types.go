@@ -101,6 +101,7 @@ func (in *WorkbenchWebhook) Attributes(webhookID, issueWebhookID *string) consol
 }
 
 // WorkbenchWebhookSpec defines the desired state of a WorkbenchWebhook.
+// +kubebuilder:validation:XValidation:rule="has(self.webhookName) || has(self.issueWebhookName)",message="either webhookName or issueWebhookName must be set"
 type WorkbenchWebhookSpec struct {
 	// WorkbenchRef references the Workbench this webhook trigger belongs to.
 	// +kubebuilder:validation:Required
