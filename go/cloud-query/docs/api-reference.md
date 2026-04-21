@@ -296,6 +296,7 @@ ToolQuery support varies by operation:
 | Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
 | Loki | No | Yes | No | Loki HTTP `query_range` API |
 | Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
+| Jaeger | No | No | Yes | Jaeger Query v3 REST API with structured filters |
 | Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
 | CloudWatch | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
 | Azure | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs` |
@@ -312,6 +313,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Elasticsearch: `elastic/go-elasticsearch` v9 typed client, `Search` (Elasticsearch `/_search`) with a `query_string` query and `@timestamp` range filter. Requires API key.
 - Loki: REST client to `/loki/api/v1/query_range`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
 - Tempo: REST client to `/api/search` and `/api/traces/{traceID}`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
+- Jaeger: REST client to stable Query v3 endpoint `POST /api/v3/traces` with structured trace filters.
 - Dynatrace: REST client to `/platform/storage/query/v1/query:execute` and `/platform/storage/query/v1/query:poll` (Grail DQL), bearer token auth.
 - CloudWatch: AWS SDK for Go v2.
   - Logs: CloudWatch Logs Insights `StartQuery` + `GetQueryResults`.
@@ -401,6 +403,13 @@ message AzureConnection {
   string client_id = 3;
   string client_secret = 4;
 }
+
+message JaegerConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
 ```
 
 Implementation notes:
@@ -430,6 +439,7 @@ message ToolConnection {
     DynatraceConnection dynatrace = 7;
     CloudwatchConnection cloudwatch = 8;
     AzureConnection azure = 9;
+    JaegerConnection jaeger = 10;
   }
 }
 
@@ -1265,6 +1275,23 @@ message TracesQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  optional TracesOptions options = 5;
+}
+
+message TracesOptions {
+  optional JaegerTracesOptions jaeger = 1;
+}
+
+message JaegerTraceQueryAttribute {
+  string name = 1;
+  string value = 2;
+}
+
+message JaegerTracesOptions {
+  optional string operation_name = 1;
+  repeated JaegerTraceQueryAttribute attributes = 2;
+  optional string duration_min = 3;
+  optional string duration_max = 4;
 }
 ```
 
@@ -1339,6 +1366,50 @@ grpcurl -d '{
     }
   ]
 }
+```
+
+### Jaeger
+
+Jaeger traces query uses the stable Query v3 API.
+
+- `query` maps to Jaeger `service_name`.
+- `time_range` maps to `start_time_min`/`start_time_max`.
+- `limit` maps to `num_traces`.
+- `options.jaeger.operation_name` maps to `operation_name`.
+- `options.jaeger.attributes` maps to `attributes`.
+- `options.jaeger.duration_min` maps to `min_duration`.
+- `options.jaeger.duration_max` maps to `max_duration`.
+- Structured filters are passed through `options.jaeger`:
+  - `operation_name`
+  - `duration_min` / `duration_max`
+  - dynamic `attributes[]` (key/value)
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "jaeger": {
+      "url": "http://jaeger-query.monitoring.svc:16686",
+      "token": "<OPTIONAL_TOKEN>"
+    }
+  },
+  "query": "frontend",
+  "range": {
+    "start": "2026-04-10T00:00:00Z",
+    "end": "2026-04-10T01:00:00Z"
+  },
+  "limit": 20,
+  "options": {
+    "jaeger": {
+      "operation_name": "GET /api/products",
+      "duration_min": "10ms",
+      "attributes": [
+        { "name": "http.status_code", "value": "500" }
+      ]
+    }
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Traces
 ```
 
 ### Datadog

@@ -7,6 +7,7 @@ defmodule Console.AI.Workbench.Conversion do
     LokiConnection,
     SplunkConnection,
     TempoConnection,
+    JaegerConnection,
     ElasticConnection,
     DynatraceConnection,
     CloudwatchConnection,
@@ -67,6 +68,17 @@ defmodule Console.AI.Workbench.Conversion do
         username: tempo.username,
         password: tempo.password,
         tenant_id: tempo.tenant_id,
+      }}
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :jaeger, configuration: %{jaeger: %{} = jaeger}}) do
+    {:ok, %ToolConnection{
+      connection: {:jaeger, %JaegerConnection{
+        url: jaeger.url,
+        token: jaeger.token,
+        username: jaeger.username,
+        password: jaeger.password,
       }}
     }}
   end

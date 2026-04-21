@@ -118,6 +118,10 @@ fragment WorkbenchTool on WorkbenchTool {
       username
       tenantId
     }
+    jaeger {
+      url
+      username
+    }
     atlassian {
       email
       url

@@ -2235,6 +2235,7 @@ enum WorkbenchToolType {
   CLOUDWATCH
   AZURE
   CLOUD
+  JAEGER
 }
 
 enum WorkbenchToolCategory {
@@ -2488,6 +2489,9 @@ input WorkbenchToolConfigurationAttributes {
   "tempo connection (traces)"
   tempo: WorkbenchToolTempoConnectionAttributes
 
+  "jaeger connection (traces)"
+  jaeger: WorkbenchToolJaegerConnectionAttributes
+
   "datadog connection (metrics, logs)"
   datadog: WorkbenchToolDatadogConnectionAttributes
 
@@ -2570,6 +2574,20 @@ input WorkbenchToolTempoConnectionAttributes {
 
   "optional tenant id"
   tenantId: String
+}
+
+input WorkbenchToolJaegerConnectionAttributes {
+  "jaeger base url"
+  url: String!
+
+  "bearer token"
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 }
 
 input WorkbenchToolSplunkConnectionAttributes {
@@ -3171,6 +3189,9 @@ type WorkbenchToolConfiguration {
   "tempo connection (no secrets)"
   tempo: WorkbenchToolTempoConnection
 
+  "jaeger connection (no secrets)"
+  jaeger: WorkbenchToolJaegerConnection
+
   "datadog connection (no secrets)"
   datadog: WorkbenchToolDatadogConnection
 
@@ -3232,6 +3253,14 @@ type WorkbenchToolTempoConnection {
 
   "optional tenant id"
   tenantId: String
+}
+
+type WorkbenchToolJaegerConnection {
+  "jaeger base url"
+  url: String
+
+  "basic auth username"
+  username: String
 }
 
 type WorkbenchToolSplunkConnection {
