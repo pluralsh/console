@@ -40,21 +40,32 @@ import {
   WorkbenchStepLabel,
 } from './WorkbenchFormSteps'
 
-// Context lets individual form steps register tabs on the form's Card
-// without the form needing to know which step is active or what tabs it needs.
-type WorkbenchFormCardTabsContextValue = {
+// Context lets individual form steps register card tabs and override footer actions
+// without the form needing to know which step is active or what UI they need.
+type WorkbenchFormContextValue = {
   setTabs: (tabs: ReactNode | null) => void
+  setFooterActions: (actions: ReactNode | null) => void
 }
-const WorkbenchFormCardTabsContext =
-  createContext<WorkbenchFormCardTabsContextValue | null>(null)
+const WorkbenchFormContext = createContext<WorkbenchFormContextValue | null>(
+  null
+)
 
 export function useWorkbenchFormCardTabs() {
-  const ctx = useContext(WorkbenchFormCardTabsContext)
+  const ctx = useContext(WorkbenchFormContext)
   if (!ctx)
     throw new Error(
       'useWorkbenchFormCardTabs must be used inside a WorkbenchForm'
     )
-  return ctx
+  return { setTabs: ctx.setTabs }
+}
+
+export function useWorkbenchFormFooterActions() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormFooterActions must be used inside a WorkbenchForm'
+    )
+  return { setFooterActions: ctx.setFooterActions }
 }
 
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
@@ -163,8 +174,9 @@ function WorkbenchForm({
   const [curStep, setCurStepState] =
     useState<WorkbenchStepLabel>('Workbench setup')
   const [cardTabs, setCardTabs] = useState<ReactNode | null>(null)
-  const cardTabsContextValue = useMemo<WorkbenchFormCardTabsContextValue>(
-    () => ({ setTabs: setCardTabs }),
+  const [footerActions, setFooterActions] = useState<ReactNode | null>(null)
+  const formContextValue = useMemo<WorkbenchFormContextValue>(
+    () => ({ setTabs: setCardTabs, setFooterActions }),
     []
   )
   const [stepStatuses, setStepStatuses] = useState<
@@ -225,7 +237,7 @@ function WorkbenchForm({
   }
 
   return (
-    <WorkbenchFormCardTabsContext.Provider value={cardTabsContextValue}>
+    <WorkbenchFormContext.Provider value={formContextValue}>
       <WorkbenchSplitLayoutSC>
         <Flex
           direction="column"
@@ -255,41 +267,47 @@ function WorkbenchForm({
                 setFormState={setFormState}
               />
               <StickyActionsFooterSC>
-                <Button
-                  destructive
-                  as={Link}
-                  to={
-                    workbenchId
-                      ? getWorkbenchAbsPath(workbenchId)
-                      : WORKBENCHES_ABS_PATH
-                  }
-                >
-                  Cancel
-                </Button>
-                {numUnvisitedSteps < 2 ? (
-                  <Button
-                    disabled={!allowSubmit}
-                    loading={mutationLoading}
-                    onClick={onSave}
-                  >
-                    {isCreateMode ? 'Create workbench' : 'Update workbench'}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      if (!!workbenchFormSteps[curStepIndex + 1])
-                        setCurStep(workbenchFormSteps[curStepIndex + 1].label)
-                    }}
-                  >
-                    Next
-                  </Button>
+                {footerActions ?? (
+                  <>
+                    <Button
+                      destructive
+                      as={Link}
+                      to={
+                        workbenchId
+                          ? getWorkbenchAbsPath(workbenchId)
+                          : WORKBENCHES_ABS_PATH
+                      }
+                    >
+                      Cancel
+                    </Button>
+                    {numUnvisitedSteps < 2 ? (
+                      <Button
+                        disabled={!allowSubmit}
+                        loading={mutationLoading}
+                        onClick={onSave}
+                      >
+                        {isCreateMode ? 'Create workbench' : 'Update workbench'}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          if (!!workbenchFormSteps[curStepIndex + 1])
+                            setCurStep(
+                              workbenchFormSteps[curStepIndex + 1].label
+                            )
+                        }}
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </>
                 )}
               </StickyActionsFooterSC>
             </FormCardSC>
           )
         )}
       </WorkbenchSplitLayoutSC>
-    </WorkbenchFormCardTabsContext.Provider>
+    </WorkbenchFormContext.Provider>
   )
 }
 

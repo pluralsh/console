@@ -7,16 +7,16 @@ import {
   IconFrame,
   Input2,
   PencilIcon,
-  ReturnIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { WorkbenchSkillAttributes } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import {
@@ -24,7 +24,7 @@ import {
   EditableDivWrapperSC,
   WorkbenchFormStepProps,
 } from './WorkbenchFormSteps'
-import { isEmpty } from 'lodash'
+import { useWorkbenchFormFooterActions } from './WorkbenchCreateOrEdit'
 
 export const CREATE_SKILL_SENTINEL = ''
 
@@ -61,6 +61,13 @@ export function PluralSkillsSubStep({
     })
 
   const handleSave = (draft: WorkbenchSkillAttributes) => {
+    const canSave = !!draft.contents.trim() && !!draft.name.trim()
+    if (!canSave) return
+    const normalizedDraft: WorkbenchSkillAttributes = {
+      ...draft,
+      name: draft.name.trim(),
+      description: draft.description?.trim(),
+    }
     update((d) => {
       const list: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? []).filter(
         isNonNullable
@@ -69,13 +76,15 @@ export function PluralSkillsSubStep({
         editingName !== null && editingName !== CREATE_SKILL_SENTINEL
           ? list.findIndex((s) => s.name === editingName)
           : -1
-      if (idx >= 0) list[idx] = draft
-      else list.push(draft)
+      if (idx >= 0) list[idx] = normalizedDraft
+      else list.push(normalizedDraft)
       d.workbenchSkills =
         list as WorkbenchFormStepProps['formState']['workbenchSkills']
     })
     setEditingName(null)
   }
+
+  const handleCancel = () => setEditingName(null)
 
   if (editingName !== null) {
     return (
@@ -83,7 +92,7 @@ export function PluralSkillsSubStep({
         initialSkill={editingSkill}
         isNew={editingName === CREATE_SKILL_SENTINEL}
         onSave={handleSave}
-        onCancel={() => setEditingName(null)}
+        onCancel={handleCancel}
       />
     )
   }
@@ -225,17 +234,38 @@ function PluralSkillForm({
         contents: '',
       }
   )
-
+  const { setFooterActions } = useWorkbenchFormFooterActions()
   const canSave = !!draft.contents.trim() && !!draft.name.trim()
 
-  const handleSave = () => {
-    if (!canSave) return
-    onSave({
-      ...draft,
-      name: draft.name.trim(),
-      description: draft.description?.trim(),
-    })
-  }
+  const onSaveRef = useRef(onSave)
+  const onCancelRef = useRef(onCancel)
+  const draftRef = useRef(draft)
+  useEffect(() => {
+    onSaveRef.current = onSave
+    onCancelRef.current = onCancel
+    draftRef.current = draft
+  }, [draft, onCancel, onSave])
+
+  useEffect(() => {
+    setFooterActions(
+      <>
+        <Button
+          destructive
+          onClick={() => onCancelRef.current()}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={() => onSaveRef.current(draftRef.current)}
+          disabled={!canSave}
+        >
+          {isNew ? 'Create new skill' : 'Save skill'}
+        </Button>
+      </>
+    )
+
+    return () => setFooterActions(null)
+  }, [canSave, isNew, setFooterActions])
 
   return (
     <Flex
@@ -249,9 +279,7 @@ function PluralSkillForm({
         <Input2
           placeholder="e.g. skill_math"
           value={draft.name}
-          onChange={(e) =>
-            setDraft((prev) => ({ ...prev, name: e.target.value }))
-          }
+          onChange={(e) => setDraft({ ...draft, name: e.target.value })}
         />
       </FormField>
       <FormField label="Description">
@@ -259,10 +287,10 @@ function PluralSkillForm({
           placeholder="Short summary of what this skill does"
           value={draft.description ?? ''}
           onChange={(e) =>
-            setDraft((prev) => ({
-              ...prev,
+            setDraft({
+              ...draft,
               description: e.target.value || null,
-            }))
+            })
           }
         />
       </FormField>
@@ -274,32 +302,12 @@ function PluralSkillForm({
         <EditableDivWrapperSC>
           <EditableDiv
             initialValue={draft.contents}
-            setValue={(value) =>
-              setDraft((prev) => ({ ...prev, contents: value }))
-            }
+            setValue={(value) => setDraft({ ...draft, contents: value })}
             placeholder="Paste or write the markdown contents of the skill file."
             css={{ minHeight: 200 }}
           />
         </EditableDivWrapperSC>
       </FormField>
-      <Flex
-        justify="flex-end"
-        gap="small"
-      >
-        <Button
-          secondary
-          startIcon={<ReturnIcon />}
-          onClick={onCancel}
-        >
-          Back to all skills
-        </Button>
-        <Button
-          onClick={handleSave}
-          disabled={!canSave}
-        >
-          {isNew ? 'Create new skill' : 'Save skill'}
-        </Button>
-      </Flex>
     </Flex>
   )
 }
