@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Observability.Traces do
   use Console.AI.Tools.Workbench.Base
-  alias Console.AI.Tools.Workbench.Observability.TimeRange
+  alias Console.AI.Tools.Workbench.Observability.{TimeRange, TracesJaegar}
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{
@@ -42,7 +42,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   def json_schema(%{tool: %{tool: :jaeger}}), do: @jaeger_schema
   def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_traces_#{n}"
-  def description(%__MODULE__{tool: %{tool: :jaeger}}), do: "Gather traces from the #{n} Jaeger observability connection, be sure to include required parameters like operation name, duration, and attributes."
+  def description(%__MODULE__{tool: %{tool: :jaeger, name: n}}), do: "Gather traces from the #{n} Jaeger observability connection, be sure to include details like operation name, duration, and attributes if needed."
   def description(%__MODULE__{tool: %{name: n}}), do: "Gather traces from the #{n} observability connection"
 
   def changeset(model, attrs) do
@@ -71,7 +71,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
     |> validate_required([:name, :value])
   end
 
-  def implement(_, %__MODULE__{} = tool) do
+  def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
          {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input),
