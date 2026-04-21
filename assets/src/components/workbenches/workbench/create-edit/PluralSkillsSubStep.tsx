@@ -15,6 +15,7 @@ import { useTheme } from 'styled-components'
 
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
+import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchSkillAttributes } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -32,6 +33,34 @@ const SKILL_FORM_STEPS: { id: SkillFormStep; label: string }[] = [
   { id: 'metadata', label: 'Add metadata' },
   { id: 'contents', label: 'Add content' },
 ]
+const DUPLICATE_SKILL_NAME_ERROR = 'A skill with this name already exists.'
+
+const normalizeSkillName = (name: Nullable<string>) =>
+  (name ?? '').trim().toLowerCase()
+
+const validateSkillName = ({
+  draftName,
+  existingSkillNames,
+  editingName,
+}: {
+  draftName: Nullable<string>
+  existingSkillNames: Nullable<string>[]
+  editingName: Nullable<string>
+}): Nullable<string> => {
+  const normalizedDraftName = normalizeSkillName(draftName)
+  if (!normalizedDraftName) return null
+
+  const normalizedEditingName = normalizeSkillName(editingName)
+  const hasDuplicateName = existingSkillNames.some((name) => {
+    const normalizedExistingName = normalizeSkillName(name)
+    return (
+      normalizedExistingName === normalizedDraftName &&
+      normalizedExistingName !== normalizedEditingName
+    )
+  })
+
+  return hasDuplicateName ? DUPLICATE_SKILL_NAME_ERROR : null
+}
 
 export function PluralSkillsSubStep({
   formState,
@@ -65,9 +94,17 @@ export function PluralSkillsSubStep({
         next as WorkbenchFormStepProps['formState']['workbenchSkills']
     })
 
-  const handleSave = (draft: WorkbenchSkillAttributes) => {
+  const handleSave = (draft: WorkbenchSkillAttributes): Nullable<string> => {
     const canSave = !!draft.contents.trim() && !!draft.name.trim()
-    if (!canSave) return
+    if (!canSave) return 'Skill name and contents are required.'
+
+    const error = validateSkillName({
+      draftName: draft.name,
+      existingSkillNames: skills.map((skill) => skill.name),
+      editingName,
+    })
+    if (error) return error
+
     const normalizedDraft: WorkbenchSkillAttributes = {
       ...draft,
       name: draft.name.trim(),
@@ -86,6 +123,7 @@ export function PluralSkillsSubStep({
         list as WorkbenchFormStepProps['formState']['workbenchSkills']
     })
     setEditingName(null)
+    return null
   }
 
   const handleCancel = () => setEditingName(null)
@@ -94,6 +132,7 @@ export function PluralSkillsSubStep({
     return (
       <PluralSkillForm
         initialSkill={editingSkill}
+        existingSkillNames={skills.map((skill) => skill.name)}
         isNew={editingName === CREATE_MODE_NAME}
         onSave={handleSave}
         onCancel={handleCancel}
@@ -221,13 +260,15 @@ function PluralSkillRow({
 
 function PluralSkillForm({
   initialSkill,
+  existingSkillNames,
   isNew,
   onSave,
   onCancel,
 }: {
   initialSkill: Nullable<WorkbenchSkillAttributes>
+  existingSkillNames: Nullable<string>[]
   isNew: boolean
-  onSave: (skill: WorkbenchSkillAttributes) => void
+  onSave: (skill: WorkbenchSkillAttributes) => Nullable<string>
   onCancel: () => void
 }) {
   const [draft, setDraft] = useState<WorkbenchSkillAttributes>(
@@ -238,10 +279,20 @@ function PluralSkillForm({
         contents: '',
       }
   )
+  const [saveError, setSaveError] = useState<Nullable<string>>(null)
   const [currentStep, setCurrentStep] = useState<SkillFormStep>('metadata')
   const { setFooterActions } = useWorkbenchFormFooterActions()
   const { setRightContent } = useWorkbenchFormCardRightContent()
-  const canContinue = !!draft.name.trim()
+  const error = useMemo(
+    () =>
+      validateSkillName({
+        draftName: draft.name,
+        existingSkillNames,
+        editingName: initialSkill?.name,
+      }),
+    [draft.name, existingSkillNames, initialSkill?.name]
+  )
+  const canContinue = !!draft.name.trim() && !error
   const canSave = canContinue && !!draft.contents.trim()
 
   const onSaveRef = useRef(onSave)
@@ -252,6 +303,10 @@ function PluralSkillForm({
     onCancelRef.current = onCancel
     draftRef.current = draft
   }, [draft, onCancel, onSave])
+
+  useEffect(() => {
+    setSaveError(null)
+  }, [draft.contents, draft.description, draft.name])
 
   useEffect(() => {
     setFooterActions(
@@ -271,7 +326,10 @@ function PluralSkillForm({
           </Button>
         ) : (
           <Button
-            onClick={() => onSaveRef.current(draftRef.current)}
+            onClick={() => {
+              const error = onSaveRef.current(draftRef.current)
+              setSaveError(error)
+            }}
             disabled={!canSave}
           >
             {isNew ? 'Create new skill' : 'Save skill'}
@@ -304,11 +362,14 @@ function PluralSkillForm({
         <>
           <FormField
             required
+            error={!!error}
             label="Skill name"
+            hint={error}
           >
             <Input2
               placeholder="Skill name"
               value={draft.name}
+              error={!!error}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             />
           </FormField>
@@ -340,6 +401,7 @@ function PluralSkillForm({
           />
         </FormField>
       )}
+      {!!saveError && <CaptionP $color="text-danger">{saveError}</CaptionP>}
     </Flex>
   )
 }

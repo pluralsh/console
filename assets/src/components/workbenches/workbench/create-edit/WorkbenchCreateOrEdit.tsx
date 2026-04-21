@@ -453,13 +453,17 @@ const validateForm = (formState: WorkbenchFormState) =>
   )
 
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
+  const sanitizedState = cloneDeep(deepOmitFalsy(state))
   const {
     name,
     readBindings: r,
     writeBindings: w,
     botUser: _botUser,
     ...rest
-  } = cloneDeep(deepOmitFalsy(state))
+  } = sanitizedState
+
+  // Keep explicit empty list so "delete all skills" is persisted.
+  rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
 
   return {
     name: name ?? '',
