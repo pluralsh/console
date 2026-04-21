@@ -58,6 +58,12 @@ query GetSentinelTiny($id: ID!) {
     }
 }
 
+mutation RunSentinel($id: ID!) {
+    runSentinel(id: $id) {
+        ...SentinelRunFragment
+    }
+}
+
 fragment SentinelRunJobFragment on SentinelRunJob {
     id
     check

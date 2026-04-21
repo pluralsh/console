@@ -64,6 +64,7 @@ const (
 	UpgradePlanCalloutReconciler         Reconciler = "upgradeplancallout"
 	WorkbenchReconciler                  Reconciler = "workbench"
 	WorkbenchToolReconciler              Reconciler = "workbenchtool"
+	SentinelTriggerReconciler            Reconciler = "sentineltrigger"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.

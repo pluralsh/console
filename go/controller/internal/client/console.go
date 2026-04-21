@@ -203,6 +203,8 @@ type ConsoleClient interface {
 	GetWorkbenchToolTiny(ctx context.Context, id, name *string) (*console.GetWorkbenchToolTiny_WorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string) error
 	IsWorkbenchToolExists(ctx context.Context, id, name *string) (bool, error)
+	GetSentinelRun(ctx context.Context, id string) (*console.SentinelRunFragment, error)
+	RunSentinel(ctx context.Context, id string) (*string, error)
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {

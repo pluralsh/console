@@ -46,6 +46,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Project](#project)
 - [ScmConnection](#scmconnection)
 - [Sentinel](#sentinel)
+- [SentinelTrigger](#sentineltrigger)
 - [ServiceAccount](#serviceaccount)
 - [ServiceContext](#servicecontext)
 - [ServiceDeployment](#servicedeployment)
@@ -4455,6 +4456,40 @@ _Appears in:_
 | `git` _[GitRef](#gitref)_ | The git location to use for this sentinel. |  |  |
 | `checks` _[SentinelCheck](#sentinelcheck) array_ |  |  |  |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+
+
+#### SentinelTrigger
+
+
+
+SentinelTrigger is the Schema for the sentinel triggers API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `SentinelTrigger` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[SentinelTriggerSpec](#sentineltriggerspec)_ |  |  |  |
+
+
+#### SentinelTriggerSpec
+
+
+
+SentinelTriggerSpec defines the desired state of SentinelTrigger
+
+
+
+_Appears in:_
+- [SentinelTrigger](#sentineltrigger)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef is a reference to the Sentinel resource. |  | Required: \{\} <br /> |
 
 
 #### ServiceAccount
