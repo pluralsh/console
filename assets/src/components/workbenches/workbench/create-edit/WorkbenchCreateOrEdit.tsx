@@ -373,6 +373,8 @@ export const FormCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   flex: 1,
+  minWidth: 0,
+  maxWidth: 750,
   overflow: 'auto',
   height: '100%',
 }))
