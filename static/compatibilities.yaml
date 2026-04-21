@@ -686,42 +686,33 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
-  - version: 3.2.1
+  - version: 3.2.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm upgrade notes (3.2.0 \u2192 3.2.1)\n- **No user-facing\
-        \ values changes called out** in the provided notes.\n- **However:** v3.2.1\
-        \ exists to **fix Helm RBAC permissions for Gateway API\u2019s new `ListenerSet`\
-        \ resources**. If you\u2019re using Gateway API, ensure your Helm release\
-        \ is updated so it deploys the corrected RBAC (don\u2019t keep any pinned/overridden\
-        \ RBAC templates).\n\n## Helm chart-related changes introduced in 3.2.0 (relevant\
-        \ when coming from 3.2.0)\n- Helm chart now **exposes additional max-concurrency\
-        \ flags** (previously missing), and includes **backfilled concurrency controls**.\n\
-        - Helm chart adds **namespace selectors to Service and Ingress webhooks**\
-        \ and **Ingress webhook validator selectors** (new values may exist depending\
-        \ on chart version)."
-      chart_updates: ['v3.2.1: Helm install RBAC fix for Gateway API users: correct
-          permissions for `ListenerSet` resources.', 'v3.2.0: Chart exposes additional
-          max-concurrency flags and backfills concurrency controls.', 'v3.2.0: Webhook
-          configs enhanced with namespace selectors (Service + Ingress) and ingress
-          webhook validator selectors.']
-      features: [Gateway API updated to v1.5.0; controller can autodetect Gateway
-          resources (feature flags still available to disable)., 'Gateway API: introduces
-          `ListenerSet` resources and adds Gateway/GatewayClass-level TargetGroupConfig
-          support.', 'Ingress: adds an annotation for Frontend NLB attributes.', 'Operational:
-          configurable re-queue duration for TargetGroupBinding; improved tag reconciliation
-          (skips `aws:` system tags).']
-      breaking_changes: ["Gateway API version bump 1.3 \u2192 1.5; for NLB Gateway\
-          \ users, `TLSRoute` moves to v1 and is no longer served in alpha\u2014install\
-          \ experimental TLSRoute CRDs to avoid downtime during upgrade.", '`--aws-vpc-tag-key`
-          is deprecated/ignored; VPC lookup now always uses all tags from `--aws-vpc-tags`.
-          If your VPC previously matched only a subset of tags, the controller may
-          now fail to find the VPC unless tags/value are corrected.']
-    chart_version: 3.2.1
-    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.1']
+      helm_changes: "- No Helm values changes are explicitly called out in the provided\
+        \ release notes for **v3.2.2**.\n- Note from **v3.2.0** (already in your starting\
+        \ version): the Helm chart previously **backfilled/exposed concurrency controls**\
+        \ and added **namespace selectors** for Service/Ingress webhooks; ensure your\
+        \ current values don\u2019t conflict if you pinned older chart defaults.\n\
+        - For this upgrade step (**3.2.0 \u2192 3.2.2**), plan for a standard `helm\
+        \ upgrade` with the new image tag and re-apply CRDs as instructed."
+      chart_updates: [No Helm chart-specific changes are described in the v3.2.2 notes
+          you provided (most changes are controller code/docs/CI).]
+      features: ['Ingress-to-Gateway (i2g) translation now supports additional annotations/features:
+          `ssl-redirect`, `auth`, and `jwt-validation` translation.', "ListenerSet\
+          \ handling is safer when Gateway API CRDs are missing: the controller will\
+          \ ignore ListenerSet resources if the CRD isn\u2019t installed (reduces\
+          \ noisy errors in mixed/partial Gateway API installs).", User-Agent override
+          support was added (useful for identifying controller traffic in AWS API
+          logs/metrics).]
+      breaking_changes: ['No breaking changes are called out for v3.2.2 in the provided
+          notes. (The major breaking items in this minor line were introduced in v3.2.0:
+          Gateway API v1.5 move and stricter multi-tag VPC lookup behavior.)']
+    chart_version: 3.2.2
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.2']
   - version: 3.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

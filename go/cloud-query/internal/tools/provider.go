@@ -67,6 +67,8 @@ func newTracesProvider(conn *toolquery.ToolConnection) TracesProvider {
 	switch provider := conn.GetConnection().(type) {
 	case *toolquery.ToolConnection_Tempo:
 		return NewTempoProvider(provider.Tempo)
+	case *toolquery.ToolConnection_Jaeger:
+		return NewJaegerProvider(provider.Jaeger)
 	case *toolquery.ToolConnection_Datadog:
 		return NewDatadogProvider(provider.Datadog)
 	case *toolquery.ToolConnection_Dynatrace:

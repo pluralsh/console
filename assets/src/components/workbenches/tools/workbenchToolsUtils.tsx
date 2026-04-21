@@ -30,6 +30,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Loki,
   WorkbenchToolType.Prometheus,
   WorkbenchToolType.Tempo,
+  WorkbenchToolType.Jaeger,
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Splunk,
@@ -51,6 +52,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Prometheus]: 'prometheus',
   [WorkbenchToolType.Loki]: 'loki',
   [WorkbenchToolType.Tempo]: 'tempo',
+  [WorkbenchToolType.Jaeger]: 'jaeger',
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Atlassian]: 'atlassian',
@@ -89,6 +91,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
   [WorkbenchToolType.Azure]: 'Azure',
+  [WorkbenchToolType.Jaeger]: 'Jaeger',
   [WorkbenchToolType.Cloud]: 'Cloud',
 }
 
@@ -123,6 +126,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
   ],
+  [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
 }
 
@@ -150,6 +154,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Cloudwatch]: 'Query metrics and logs from CloudWatch.',
   [WorkbenchToolType.Azure]:
     'Query Azure Monitor metrics and logs for Azure resources.',
+  [WorkbenchToolType.Jaeger]:
+    'Query distributed traces from Jaeger with structured filters.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -232,4 +238,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
   [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,
   [WorkbenchToolType.Azure]: AzureLogoIcon,
+  [WorkbenchToolType.Jaeger]: ToolsIcon,
 }

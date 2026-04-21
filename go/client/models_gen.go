@@ -10027,6 +10027,8 @@ type WorkbenchToolConfiguration struct {
 	Splunk *WorkbenchToolSplunkConnection `json:"splunk,omitempty"`
 	// tempo connection (no secrets)
 	Tempo *WorkbenchToolTempoConnection `json:"tempo,omitempty"`
+	// jaeger connection (no secrets)
+	Jaeger *WorkbenchToolJaegerConnection `json:"jaeger,omitempty"`
 	// datadog connection (no secrets)
 	Datadog *WorkbenchToolDatadogConnection `json:"datadog,omitempty"`
 	// dynatrace connection (no secrets)
@@ -10054,6 +10056,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Splunk *WorkbenchToolSplunkConnectionAttributes `json:"splunk,omitempty"`
 	// tempo connection (traces)
 	Tempo *WorkbenchToolTempoConnectionAttributes `json:"tempo,omitempty"`
+	// jaeger connection (traces)
+	Jaeger *WorkbenchToolJaegerConnectionAttributes `json:"jaeger,omitempty"`
 	// datadog connection (metrics, logs)
 	Datadog *WorkbenchToolDatadogConnectionAttributes `json:"datadog,omitempty"`
 	// dynatrace connection (metrics, logs, traces)
@@ -10158,6 +10162,24 @@ type WorkbenchToolHTTPHeader struct {
 type WorkbenchToolHTTPHeaderAttributes struct {
 	Name  *string `json:"name,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+type WorkbenchToolJaegerConnection struct {
+	// jaeger base url
+	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+}
+
+type WorkbenchToolJaegerConnectionAttributes struct {
+	// jaeger base url
+	URL string `json:"url"`
+	// bearer token
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 }
 
 type WorkbenchToolLinearConnection struct {
@@ -16439,6 +16461,7 @@ const (
 	WorkbenchToolTypeCloudwatch WorkbenchToolType = "CLOUDWATCH"
 	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
 	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
+	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16457,11 +16480,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeCloudwatch,
 	WorkbenchToolTypeAzure,
 	WorkbenchToolTypeCloud,
+	WorkbenchToolTypeJaeger,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger:
 		return true
 	}
 	return false
