@@ -26,7 +26,7 @@ import {
 } from './WorkbenchFormSteps'
 import { useWorkbenchFormFooterActions } from './WorkbenchCreateOrEdit'
 
-export const CREATE_SKILL_SENTINEL = ''
+export const CREATE_MODE_NAME = ''
 
 export function PluralSkillsSubStep({
   formState,
@@ -47,7 +47,7 @@ export function PluralSkillsSubStep({
     [editingName, skills]
   )
 
-  const handleCreate = () => setEditingName(CREATE_SKILL_SENTINEL)
+  const handleCreate = () => setEditingName(CREATE_MODE_NAME)
 
   const handleEdit = (name: string) => setEditingName(name)
 
@@ -72,10 +72,9 @@ export function PluralSkillsSubStep({
       const list: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? []).filter(
         isNonNullable
       )
-      const idx =
-        editingName !== null && editingName !== CREATE_SKILL_SENTINEL
-          ? list.findIndex((s) => s.name === editingName)
-          : -1
+      const idx = !isEmpty(editingName)
+        ? list.findIndex((s) => s.name === editingName)
+        : -1
       if (idx >= 0) list[idx] = normalizedDraft
       else list.push(normalizedDraft)
       d.workbenchSkills =
@@ -90,7 +89,7 @@ export function PluralSkillsSubStep({
     return (
       <PluralSkillForm
         initialSkill={editingSkill}
-        isNew={editingName === CREATE_SKILL_SENTINEL}
+        isNew={editingName === CREATE_MODE_NAME}
         onSave={handleSave}
         onCancel={handleCancel}
       />
