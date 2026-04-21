@@ -1,11 +1,11 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User, McpServer}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer, CloudConnection}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12, azure: 13
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12, azure: 13, cloud: 14
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -123,8 +123,9 @@ defmodule Console.Schema.WorkbenchTool do
       foreign_key: :policy_id,
       references: :write_policy_id
 
-    belongs_to :project,    Project
-    belongs_to :mcp_server, McpServer
+    belongs_to :project,          Project
+    belongs_to :mcp_server,       McpServer
+    belongs_to :cloud_connection, CloudConnection
 
     timestamps()
   end
@@ -153,7 +154,7 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
-  @valid ~w(tool categories name project_id mcp_server_id)a
+  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -163,6 +164,8 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_assoc(:write_bindings)
     |> then(fn cs -> cast_embed(cs, :configuration, with: &configuration_changeset(&1, &2, get_field(cs, :tool))) end)
     |> foreign_key_constraint(:project_id)
+    |> foreign_key_constraint(:cloud_connection_id)
+    |> foreign_key_constraint(:mcp_server_id)
     |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
@@ -209,7 +212,10 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:sentry), do: [:error_tracking]
   defp categories(:linear), do: [:ticketing]
   defp categories(:atlassian), do: [:ticketing]
+  defp categories(:cloud), do: [:infrastructure]
   defp categories(_), do: [:integration]
+
+  @noconfig [:mcp, :cloud]
 
   defp configuration_changeset(model, attrs, tool) do
     model
@@ -227,7 +233,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
-    |> validate_required(if tool == :mcp, do: [], else: [tool])
+    |> validate_required(if tool in @noconfig, do: [], else: [tool])
   end
 
   defp http_configuration_changeset(model, attrs) do

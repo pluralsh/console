@@ -1331,6 +1331,8 @@ export type AwsCloudAttributes = {
 
 export type AwsCloudConnectionAttributes = {
   accessKeyId: Scalars['String']['input'];
+  /** optional IAM role ARN for the console to assume when using this connection */
+  assumeRoleArn?: InputMaybe<Scalars['String']['input']>;
   region?: InputMaybe<Scalars['String']['input']>;
   regions?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   secretAccessKey: Scalars['String']['input'];
@@ -1347,6 +1349,8 @@ export type AwsConnectionAttributes = {
   __typename?: 'AwsConnectionAttributes';
   /** the access key id for aws */
   accessKeyId: Scalars['String']['output'];
+  /** IAM role ARN for the console to assume when using this connection */
+  assumeRoleArn?: Maybe<Scalars['String']['output']>;
   /** the region for aws */
   region?: Maybe<Scalars['String']['output']>;
   /** the regions for aws */
@@ -14870,6 +14874,8 @@ export type WorkbenchAttributes = {
   systemPrompt?: InputMaybe<Scalars['String']['input']>;
   /** tool ids to associate with this workbench */
   toolAssociations?: InputMaybe<Array<InputMaybe<WorkbenchToolAssociationAttributes>>>;
+  /** skills to include with this workbench */
+  workbenchSkills?: InputMaybe<Array<InputMaybe<WorkbenchSkillAttributes>>>;
   /** users who can modify this workbench */
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -15356,6 +15362,8 @@ export type WorkbenchTool = {
   __typename?: 'WorkbenchTool';
   /** categories for the tool */
   categories?: Maybe<Array<Maybe<WorkbenchToolCategory>>>;
+  /** the cloud connection bound to this tool */
+  cloudConnection?: Maybe<CloudConnection>;
   /** tool configuration */
   configuration?: Maybe<WorkbenchToolConfiguration>;
   /** the id of the tool */
@@ -15397,6 +15405,8 @@ export type WorkbenchToolAtlassianConnectionAttributes = {
 export type WorkbenchToolAttributes = {
   /** categories for the tool */
   categories?: InputMaybe<Array<InputMaybe<WorkbenchToolCategory>>>;
+  /** the cloud connection for this tool (e.g. infrastructure cloud tools) */
+  cloudConnectionId?: InputMaybe<Scalars['ID']['input']>;
   /** tool configuration (e.g. http) */
   configuration?: InputMaybe<WorkbenchToolConfigurationAttributes>;
   /** the mcp server for this tool */
@@ -15432,6 +15442,7 @@ export type WorkbenchToolAzureConnectionAttributes = {
 
 export enum WorkbenchToolCategory {
   ErrorTracking = 'ERROR_TRACKING',
+  Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
   Metrics = 'METRICS',
@@ -15742,6 +15753,7 @@ export type WorkbenchToolTempoConnectionAttributes = {
 export enum WorkbenchToolType {
   Atlassian = 'ATLASSIAN',
   Azure = 'AZURE',
+  Cloud = 'CLOUD',
   Cloudwatch = 'CLOUDWATCH',
   Datadog = 'DATADOG',
   Dynatrace = 'DYNATRACE',

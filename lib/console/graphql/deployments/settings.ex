@@ -219,6 +219,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :secret_access_key, non_null(:string)
     field :region,            :string
     field :regions,           list_of(:string)
+    field :assume_role_arn,   :string, description: "optional IAM role ARN for the console to assume when using this connection"
   end
 
   input_object :gcp_cloud_connection_attributes do
@@ -456,6 +457,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :secret_access_key, non_null(:string), description: "the secret access key for aws"
     field :region,            :string, description: "the region for aws"
     field :regions,           list_of(:string), description: "the regions for aws"
+    field :assume_role_arn,   :string, description: "IAM role ARN for the console to assume when using this connection"
   end
 
   @desc "The configuration for a cloud provider"

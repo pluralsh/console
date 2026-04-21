@@ -2234,6 +2234,7 @@ enum WorkbenchToolType {
   DYNATRACE
   CLOUDWATCH
   AZURE
+  CLOUD
 }
 
 enum WorkbenchToolCategory {
@@ -2243,6 +2244,7 @@ enum WorkbenchToolCategory {
   TICKETING
   TRACES
   ERROR_TRACKING
+  INFRASTRUCTURE
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2333,6 +2335,9 @@ input WorkbenchAttributes {
 
   "tool ids to associate with this workbench"
   toolAssociations: [WorkbenchToolAssociationAttributes]
+
+  "skills to include with this workbench"
+  workbenchSkills: [WorkbenchSkillAttributes]
 }
 
 input WorkbenchConfigurationAttributes {
@@ -2456,6 +2461,9 @@ input WorkbenchToolAttributes {
 
   "the mcp server for this tool"
   mcpServerId: ID
+
+  "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+  cloudConnectionId: ID
 
   "tool configuration (e.g. http)"
   configuration: WorkbenchToolConfigurationAttributes
@@ -3135,6 +3143,9 @@ type WorkbenchTool {
 
   "the mcp server for this tool"
   mcpServer: McpServer
+
+  "the cloud connection bound to this tool"
+  cloudConnection: CloudConnection
 
   insertedAt: DateTime
 
@@ -4709,9 +4720,15 @@ input CloudConnectionConfigurationAttributes {
 
 input AwsCloudConnectionAttributes {
   accessKeyId: String!
+
   secretAccessKey: String!
+
   region: String
+
   regions: [String]
+
+  "optional IAM role ARN for the console to assume when using this connection"
+  assumeRoleArn: String
 }
 
 input GcpCloudConnectionAttributes {
@@ -5115,6 +5132,9 @@ type AwsConnectionAttributes {
 
   "the regions for aws"
   regions: [String]
+
+  "IAM role ARN for the console to assume when using this connection"
+  assumeRoleArn: String
 }
 
 "The configuration for a cloud provider"
