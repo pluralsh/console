@@ -3,6 +3,7 @@ import {
   Card,
   EmptyState,
   Flex,
+  CodeEditor,
   FormField,
   IconFrame,
   Input2,
@@ -12,18 +13,13 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { EditableDiv } from 'components/utils/EditableDiv'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { WorkbenchSkillAttributes } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import {
-  createFormUpdater,
-  EditableDivWrapperSC,
-  WorkbenchFormStepProps,
-} from './WorkbenchFormSteps'
+import { createFormUpdater, WorkbenchFormStepProps } from './WorkbenchFormSteps'
 import {
   useWorkbenchFormCardRightContent,
   useWorkbenchFormFooterActions,
@@ -335,14 +331,13 @@ function PluralSkillForm({
           label="Skills file"
           infoTooltip="Markdown contents of the skill file."
         >
-          <EditableDivWrapperSC>
-            <EditableDiv
-              initialValue={draft.contents}
-              setValue={(value) => setDraft({ ...draft, contents: value })}
-              placeholder="Paste or write the markdown contents of the skill file."
-              css={{ minHeight: 200 }}
-            />
-          </EditableDivWrapperSC>
+          <CodeEditor
+            language="markdown"
+            value={draft.contents}
+            onChange={(value) => setDraft({ ...draft, contents: value ?? '' })}
+            height={350}
+            options={{ minimap: { enabled: false } }}
+          />
         </FormField>
       )}
     </Flex>
