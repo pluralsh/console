@@ -25,7 +25,7 @@ import (
 var _ = Describe("Workbench Tool Controller", Ordered, func() {
 	Context("When reconciling an HTTP tool", func() {
 		const (
-			workbenchToolName = "wt-http"
+			workbenchToolName = "wt_http"
 			namespace         = "default"
 			id                = "123"
 		)
@@ -148,7 +148,7 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 
 			workbenchTool := &v1alpha1.WorkbenchTool{}
 			err = k8sClient.Get(ctx, typeNamespacedName, workbenchTool)
-			Expect(err.Error()).To(Equal("workbenchtools.deployments.plural.sh \"wt-http\" not found"))
+			Expect(err.Error()).To(Equal("workbenchtools.deployments.plural.sh \"wt_http\" not found"))
 		})
 	})
 
