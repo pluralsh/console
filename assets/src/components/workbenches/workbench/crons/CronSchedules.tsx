@@ -98,21 +98,22 @@ export function CronSchedules() {
       overflow="auto"
       padding="large"
     >
-      <StackedText
-        loading={!workbenchData && workbenchLoading}
-        first={workbench?.name}
-        firstPartialType="subtitle2"
-        firstColor="text"
-        second={workbench?.description}
-        secondPartialType="body2"
-        secondColor="text-xlight"
-        gap="xxsmall"
-      />
       <Flex
         direction="column"
+        gap="large"
         width="100%"
-        css={{ maxWidth: 750 }}
+        css={{ maxWidth: 750, marginInline: 'auto' }}
       >
+        <StackedText
+          loading={!workbenchData && workbenchLoading}
+          first={workbench?.name}
+          firstPartialType="subtitle2"
+          firstColor="text"
+          second={workbench?.description}
+          secondPartialType="body2"
+          secondColor="text-xlight"
+          gap="xxsmall"
+        />
         {!!data && isEmpty(crons) ? (
           <Card>
             <EmptyState

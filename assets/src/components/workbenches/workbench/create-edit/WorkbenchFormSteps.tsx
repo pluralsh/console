@@ -1,7 +1,10 @@
 import {
   ArrowTopRightIcon,
+  Avatar,
   Button,
   Card,
+  CardTab,
+  CardTabs,
   Checkbox,
   Chip,
   CloseIcon,
@@ -26,8 +29,15 @@ import {
   useWorkbenchToolsQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
-import styled from 'styled-components'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import styled, { useTheme } from 'styled-components'
 
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector'
 import {
@@ -37,7 +47,9 @@ import {
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { OverlineH3, InlineA } from 'components/utils/typography/Text'
+import { useLogin } from 'components/contexts'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { CaptionP, OverlineH3, InlineA } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -48,7 +60,11 @@ import {
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import { WorkbenchFormState } from './WorkbenchCreateOrEdit'
+import {
+  useWorkbenchFormCardTabs,
+  WorkbenchFormState,
+} from './WorkbenchCreateOrEdit'
+import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
   CardGrid,
   CardGridSkeleton,
@@ -65,8 +81,8 @@ import {
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
 
-type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
-type WorkbenchFormStepProps = {
+export type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
+export type WorkbenchFormStepProps = {
   formState: WorkbenchFormState
   setFormState: FormStateSetter
 }
@@ -82,8 +98,8 @@ export function WorkbenchSetupStep({
     <>
       <FormField
         required
+        infoTooltip="Name must be unique"
         label="Workbench name"
-        caption="Name must be unique"
       >
         <Input2
           placeholder="Enter a name"
@@ -121,9 +137,13 @@ export function WorkbenchSetupStep({
           />
         </EditableDivWrapperSC>
       </FormField>
-      <FormField label="Plural-native Infrastructure Capabilities">
-        <TwoColumnCheckboxGridSC>
+      <FormField
+        infoTooltip="Plural native integration"
+        label="Enable Infrastructure"
+      >
+        <Flex gap="large">
           <Checkbox
+            small
             checked={infra?.stacks ?? false}
             onChange={(e) =>
               update((d) => {
@@ -136,6 +156,7 @@ export function WorkbenchSetupStep({
             Stacks
           </Checkbox>
           <Checkbox
+            small
             checked={infra?.services ?? false}
             onChange={(e) =>
               update((d) => {
@@ -148,6 +169,7 @@ export function WorkbenchSetupStep({
             Services
           </Checkbox>
           <Checkbox
+            small
             checked={infra?.kubernetes ?? false}
             onChange={(e) =>
               update((d) => {
@@ -159,11 +181,15 @@ export function WorkbenchSetupStep({
           >
             Kubernetes
           </Checkbox>
-        </TwoColumnCheckboxGridSC>
+        </Flex>
       </FormField>
-      <FormField label="Plural-native Observability Capabilities">
-        <TwoColumnCheckboxGridSC>
+      <FormField
+        infoTooltip="Plural native integration"
+        label="Enable Observability"
+      >
+        <Flex gap="large">
           <Checkbox
+            small
             checked={observability?.metrics ?? false}
             onChange={(e) =>
               update((d) => {
@@ -176,6 +202,7 @@ export function WorkbenchSetupStep({
             Plural integrated metrics
           </Checkbox>
           <Checkbox
+            small
             checked={observability?.logs ?? false}
             onChange={(e) =>
               update((d) => {
@@ -187,7 +214,7 @@ export function WorkbenchSetupStep({
           >
             Plural integrated logs
           </Checkbox>
-        </TwoColumnCheckboxGridSC>
+        </Flex>
       </FormField>
     </>
   )
@@ -197,6 +224,45 @@ export function WorkbenchSkillsConfigStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
+  const { setTabs } = useWorkbenchFormCardTabs()
+  const [subTab, setSubTab] = useState<'git-skills' | 'plural-skills'>(
+    'plural-skills'
+  )
+
+  useEffect(() => {
+    setTabs(
+      <CardTabs>
+        <CardTab
+          active={subTab === 'plural-skills'}
+          onClick={() => setSubTab('plural-skills')}
+        >
+          Plural skills
+        </CardTab>
+        <CardTab
+          active={subTab === 'git-skills'}
+          onClick={() => setSubTab('git-skills')}
+        >
+          Git skills
+        </CardTab>
+      </CardTabs>
+    )
+    return () => setTabs(null)
+  }, [setTabs, subTab])
+
+  return subTab === 'git-skills' ? (
+    <GitSkillsSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  ) : (
+    <PluralSkillsSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  )
+}
+
+function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const { data: reposData, loading: reposLoading } = useGitRepositoriesQuery({
     variables: { first: 500 },
@@ -277,7 +343,7 @@ export function WorkbenchSkillsConfigStep({
                   })
                 }
                 placeholder={`e.g:\nskill_math.md\nskill_science.md`}
-                css={{ minHeight: 120 }}
+                css={{ minHeight: 75 }}
               />
             </EditableDivWrapperSC>
           </FormField>
@@ -454,15 +520,59 @@ export function WorkbenchCodingAgentStep({
   )
 }
 
+type AccessPolicySubTab = 'policy' | 'webhook-actor'
+
 export function WorkbenchAccessPolicyStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const { setTabs } = useWorkbenchFormCardTabs()
+  const [subTab, setSubTab] = useState<AccessPolicySubTab>('policy')
+
+  // Register this step's tabs on the form's Card. Cleanup clears them
+  // when navigating away so other steps don't inherit stale tabs.
+  useEffect(() => {
+    setTabs(
+      <CardTabs>
+        <CardTab
+          active={subTab === 'policy'}
+          onClick={() => setSubTab('policy')}
+        >
+          Access policy
+        </CardTab>
+        <CardTab
+          active={subTab === 'webhook-actor'}
+          onClick={() => setSubTab('webhook-actor')}
+        >
+          Webhook actor
+        </CardTab>
+      </CardTabs>
+    )
+    return () => setTabs(null)
+  }, [subTab, setTabs])
+
+  if (!formState) return null
+
+  return subTab === 'policy' ? (
+    <AccessPolicySubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  ) : (
+    <WebhookActorSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  )
+}
+
+function AccessPolicySubStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const readBindings = formState.readBindings ?? []
   const writeBindings = formState.writeBindings ?? []
-
-  if (!formState) return null
 
   return (
     <Flex
@@ -506,6 +616,116 @@ export function WorkbenchAccessPolicyStep({
           }}
         />
       </Flex>
+    </Flex>
+  )
+}
+
+function WebhookActorSubStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const theme = useTheme()
+  const { me } = useLogin()
+  const update = createFormUpdater(setFormState)
+
+  const resolvedActor = useMemo(() => {
+    if (formState.overrideBotUser && me) {
+      return {
+        id: me.id,
+        name: me.name ?? '',
+        email: me.email ?? '',
+        profile: me.profile,
+      }
+    }
+    if (formState.botUser) return formState.botUser
+    return null
+  }, [formState.botUser, formState.overrideBotUser, me])
+
+  const showSetMeLink =
+    me &&
+    !!me.roles?.admin &&
+    !formState.overrideBotUser &&
+    (!resolvedActor || resolvedActor.id !== me.id)
+  const showResetLink =
+    me && !!me.roles?.admin && formState.overrideBotUser && !!formState.botUser
+
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+    >
+      <FormField
+        label={
+          <Flex
+            align="center"
+            justify="space-between"
+            width="100%"
+            gap="medium"
+          >
+            <span>Current webhook actor*</span>
+            {showSetMeLink ? (
+              <InlineLink
+                css={{ fontWeight: 400, whiteSpace: 'nowrap' }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  update((d) => {
+                    d.overrideBotUser = true
+                  })
+                }}
+              >
+                Set me as webhook actor
+              </InlineLink>
+            ) : showResetLink ? (
+              <InlineLink
+                css={{ fontWeight: 400, whiteSpace: 'nowrap' }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  update((d) => {
+                    d.overrideBotUser = false
+                  })
+                }}
+              >
+                Reset to original actor
+              </InlineLink>
+            ) : null}
+          </Flex>
+        }
+      >
+        {resolvedActor ? (
+          <Card
+            fillLevel={1}
+            css={{
+              border: theme.borders['fill-one'],
+              borderRadius: theme.borderRadiuses.medium,
+              padding: theme.spacing.medium,
+            }}
+          >
+            <StackedText
+              first={resolvedActor.name}
+              second={resolvedActor.email}
+              firstPartialType="body2"
+              firstColor="text"
+              secondPartialType="caption"
+              secondColor="text-xlight"
+              icon={
+                <Avatar
+                  name={resolvedActor.name}
+                  src={resolvedActor.profile ?? undefined}
+                  css={{ borderRadius: '50%' }}
+                  size={48}
+                />
+              }
+              iconGap="small"
+              css={{ minWidth: 0 }}
+            />
+          </Card>
+        ) : null}
+      </FormField>
+      <CaptionP $color="text-light">
+        For security, webhooks and crons run as a single user. This is set to
+        the workbench creator by default. Admins can take over this role at any
+        time.
+      </CaptionP>
     </Flex>
   )
 }
@@ -700,15 +920,9 @@ export function WorkbenchAttachToolsStep({
   )
 }
 
-const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
+export const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   background: theme.colors['fill-zero'],
-}))
-
-const TwoColumnCheckboxGridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  gap: theme.spacing.medium,
 }))
 
 const skillsFilesToText = (files: Nullable<string>[] | null): string =>
@@ -720,7 +934,7 @@ const textToSkillsFiles = (text: string): (string | null)[] =>
     .map((s) => s.trim())
     .filter(Boolean)
 
-const createFormUpdater =
+export const createFormUpdater =
   (setFormState: FormStateSetter) =>
   (recipe: (draft: WorkbenchFormState) => void) =>
     setFormState(produce(recipe))

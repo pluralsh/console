@@ -64,6 +64,15 @@ fragment Workbench on Workbench {
     }
     files
   }
+  workbenchSkills(first: 500) {
+    edges {
+      node {
+        name
+        description
+        contents
+      }
+    }
+  }
   tools {
     ...WorkbenchTool
   }
@@ -72,6 +81,12 @@ fragment Workbench on Workbench {
   }
   writeBindings {
     ...PolicyBinding
+  }
+  botUser {
+    id
+    name
+    email
+    profile
   }
 }
 

@@ -261,78 +261,74 @@ export function WebhookForm() {
       overflow="auto"
       padding="large"
     >
-      <StackedText
-        loading={!workbenchData && workbenchLoading}
-        first={workbench?.name}
-        firstPartialType="subtitle2"
-        firstColor="text"
-        second={workbench?.description}
-        secondPartialType="body2"
-        secondColor="text-xlight"
-        gap="xxsmall"
-      />
       <Flex
-        gap="medium"
+        direction="column"
+        gap="large"
         width="100%"
+        css={{ maxWidth: 750, marginInline: 'auto' }}
       >
-        <Flex
-          direction="column"
-          width="100%"
-        >
-          <Flex gap="medium">
-            <Flex
-              direction="column"
-              width="100%"
-              css={{ maxWidth: 750 }}
-            >
-              {!workbenchData && workbenchLoading ? (
-                <RectangleSkeleton
-                  $width="100%"
-                  $height={300}
-                />
-              ) : (
-                <FormCardSC>
-                  <CreateWebhookForm
-                    onGuideSelectionChange={setSetupGuideSelection}
-                    onReturn={() =>
-                      navigate(returnPath, {
-                        state: { draftState: routeState?.draftState },
-                      })
-                    }
-                    returnPathIsList={returnPath === listPath}
-                    onCreated={(selectedWebhookKey) => {
-                      navigate(
-                        buildReturnPath({
-                          returnPath,
-                          selectedWebhook: selectedWebhookKey,
-                        }),
-                        {
-                          state: { draftState: routeState?.draftState },
-                        }
-                      )
-                    }}
-                  />
-                </FormCardSC>
-              )}
-            </Flex>
-            {!isOpen && !!setupGuideMarkdownPath && (
-              <div css={{ width: 200 }}>
-                <Button
-                  secondary
-                  startIcon={<SidePanelOpenIcon />}
-                  onClick={() =>
-                    openSetupGuidePanel({
-                      documentationUrl: setupGuideDocumentationUrl,
-                      markdownPath: setupGuideMarkdownPath,
+        <StackedText
+          loading={!workbenchData && workbenchLoading}
+          first={workbench?.name}
+          firstPartialType="subtitle2"
+          firstColor="text"
+          second={workbench?.description}
+          secondPartialType="body2"
+          secondColor="text-xlight"
+          gap="xxsmall"
+        />
+        <Flex gap="medium">
+          <Flex
+            direction="column"
+            width="100%"
+          >
+            {!workbenchData && workbenchLoading ? (
+              <RectangleSkeleton
+                $width="100%"
+                $height={300}
+              />
+            ) : (
+              <FormCardSC>
+                <CreateWebhookForm
+                  onGuideSelectionChange={setSetupGuideSelection}
+                  onReturn={() =>
+                    navigate(returnPath, {
+                      state: { draftState: routeState?.draftState },
                     })
                   }
-                  width="100%"
-                >
-                  Setup Guide
-                </Button>
-              </div>
+                  returnPathIsList={returnPath === listPath}
+                  onCreated={(selectedWebhookKey) => {
+                    navigate(
+                      buildReturnPath({
+                        returnPath,
+                        selectedWebhook: selectedWebhookKey,
+                      }),
+                      {
+                        state: { draftState: routeState?.draftState },
+                      }
+                    )
+                  }}
+                />
+              </FormCardSC>
             )}
           </Flex>
+          {!isOpen && !!setupGuideMarkdownPath && (
+            <div css={{ width: 200 }}>
+              <Button
+                secondary
+                startIcon={<SidePanelOpenIcon />}
+                onClick={() =>
+                  openSetupGuidePanel({
+                    documentationUrl: setupGuideDocumentationUrl,
+                    markdownPath: setupGuideMarkdownPath,
+                  })
+                }
+                width="100%"
+              >
+                Setup Guide
+              </Button>
+            </div>
+          )}
         </Flex>
       </Flex>
     </Flex>
