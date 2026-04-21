@@ -20,6 +20,7 @@ import {
   useWorkbenchQuery,
   WorkbenchAttributes,
   WorkbenchFragment,
+  WorkbenchSkillAttributes,
 } from 'generated/graphql'
 import { cloneDeep } from 'lodash'
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
@@ -60,7 +61,7 @@ export function useWorkbenchFormCardTabs() {
 // use FormBinding[] so BindingInput can show chips (user email / group name).
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
-  'readBindings' | 'writeBindings' | 'projectId' | 'workbenchSkills'
+  'readBindings' | 'writeBindings' | 'projectId'
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
@@ -71,6 +72,7 @@ export type WorkbenchFormState = Omit<
     email: string
     profile?: string | null
   } | null
+  workbenchSkills: WorkbenchSkillAttributes[]
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -478,5 +480,6 @@ function sanitizeInitialForm({
           group: group && { id: group.id, name: group.name },
         },
       ]) ?? [],
+    workbenchSkills: [],
   }
 }

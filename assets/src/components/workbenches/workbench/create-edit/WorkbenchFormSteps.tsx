@@ -64,6 +64,7 @@ import {
   useWorkbenchFormCardTabs,
   WorkbenchFormState,
 } from './WorkbenchCreateOrEdit'
+import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
   CardGrid,
   CardGridSkeleton,
@@ -80,8 +81,8 @@ import {
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
 
-type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
-type WorkbenchFormStepProps = {
+export type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
+export type WorkbenchFormStepProps = {
   formState: WorkbenchFormState
   setFormState: FormStateSetter
 }
@@ -219,47 +220,47 @@ export function WorkbenchSetupStep({
   )
 }
 
-// export function WorkbenchSkillsConfigStep({
-//   formState,
-//   setFormState,
-// }: WorkbenchFormStepProps) {
-//   const { setTabs } = useWorkbenchFormCardTabs()
-//   const [subTab, setSubTab] = useState<'git-skills' | 'plural-skills'>(
-//     'plural-skills'
-//   )
+export function WorkbenchSkillsConfigStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const { setTabs } = useWorkbenchFormCardTabs()
+  const [subTab, setSubTab] = useState<'git-skills' | 'plural-skills'>(
+    'plural-skills'
+  )
 
-//   useEffect(() => {
-//     setTabs(
-//       <CardTabs>
-//         <CardTab
-//           active={subTab === 'plural-skills'}
-//           onClick={() => setSubTab('plural-skills')}
-//         >
-//           Plural skills
-//         </CardTab>
-//         <CardTab
-//           active={subTab === 'git-skills'}
-//           onClick={() => setSubTab('git-skills')}
-//         >
-//           Git skills
-//         </CardTab>
-//       </CardTabs>
-//     )
-//     return () => setTabs(null)
-//   }, [setTabs, subTab])
+  useEffect(() => {
+    setTabs(
+      <CardTabs>
+        <CardTab
+          active={subTab === 'plural-skills'}
+          onClick={() => setSubTab('plural-skills')}
+        >
+          Plural skills
+        </CardTab>
+        <CardTab
+          active={subTab === 'git-skills'}
+          onClick={() => setSubTab('git-skills')}
+        >
+          Git skills
+        </CardTab>
+      </CardTabs>
+    )
+    return () => setTabs(null)
+  }, [setTabs, subTab])
 
-//   return subTab === 'git-skills' ? (
-//     <GitSkillsSubStep
-//       formState={formState}
-//       setFormState={setFormState}
-//     />
-//   ) : (
-//     <PluralSkillsSubStep
-//       formState={formState}
-//       setFormState={setFormState}
-//     />
-//   )
-// }
+  return subTab === 'git-skills' ? (
+    <GitSkillsSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  ) : (
+    <PluralSkillsSubStep
+      formState={formState}
+      setFormState={setFormState}
+    />
+  )
+}
 
 function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
@@ -351,13 +352,6 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
     </>
   )
 }
-
-// function PluralSkillsSubStep({
-//   formState: _formState,
-//   setFormState: _setFormState,
-// }: WorkbenchFormStepProps) {
-//   return <FormField label="Skills">...</FormField>
-// }
 
 export function WorkbenchCodingAgentStep({
   formState,
@@ -926,7 +920,7 @@ export function WorkbenchAttachToolsStep({
   )
 }
 
-const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
+export const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   background: theme.colors['fill-zero'],
 }))
@@ -940,7 +934,7 @@ const textToSkillsFiles = (text: string): (string | null)[] =>
     .map((s) => s.trim())
     .filter(Boolean)
 
-const createFormUpdater =
+export const createFormUpdater =
   (setFormState: FormStateSetter) =>
   (recipe: (draft: WorkbenchFormState) => void) =>
     setFormState(produce(recipe))
@@ -959,7 +953,7 @@ type WorkbenchFormStep = {
 }
 export const workbenchFormSteps: WorkbenchFormStep[] = [
   { label: 'Workbench setup', component: WorkbenchSetupStep },
-  { label: 'Skills configuration', component: GitSkillsSubStep }, // WorkbenchSkillsConfigStep
+  { label: 'Skills configuration', component: WorkbenchSkillsConfigStep },
   { label: 'Coding agent', component: WorkbenchCodingAgentStep },
   { label: 'Access policy', component: WorkbenchAccessPolicyStep },
   { label: 'Attach tools', component: WorkbenchAttachToolsStep },
