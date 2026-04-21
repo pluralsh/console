@@ -1159,6 +1159,7 @@
   versions:
   - version: v1.2.1-eksbuild.1
     compatibilities:
+    - '1.35'
     - '1.34'
     - '1.33'
     - '1.32'
@@ -1168,6 +1169,7 @@
     - '1.28'
   - version: v1.2.0-eksbuild.1
     compatibilities:
+    - '1.35'
     - '1.34'
     - '1.33'
     - '1.32'
