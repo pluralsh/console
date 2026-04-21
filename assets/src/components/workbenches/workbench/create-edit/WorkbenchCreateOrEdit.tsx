@@ -242,6 +242,7 @@ function WorkbenchForm({
         <Flex
           direction="column"
           width={200}
+          flexShrink={0}
         >
           {workbenchFormSteps.map(({ label }) => (
             <SidebarItem
