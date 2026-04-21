@@ -49,7 +49,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     |> validate_required([:name, :value])
   end
 
-  def implement(_, %__MODULE__{} = tool) do
+  def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input),

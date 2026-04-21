@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudSchema do
   def description(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{provider: provider}}}),
     do: "Shows the schema for querying a #{provider} cloud account using sql. Can also search for certain datatypes using the table parameter to save tokens."
 
-  def implement(_, %__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}, table: table}) do
+  def implement(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}, table: table}) do
     with {:ok, client} <- Client.connect(),
          input = %SchemaInput{connection: to_pb(connection), table: table},
          {:ok, output} <- Stub.schema(client, input) do

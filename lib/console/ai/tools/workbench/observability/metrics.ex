@@ -43,7 +43,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     |> validate_required([:query])
   end
 
-  def implement(_, %__MODULE__{} = tool) do
+  def implement(%__MODULE__{} = tool) do
     tool = Map.put_new(tool, :time_range, TimeRange.default())
     with :ok <- TimeRange.safe(tool.time_range),
          {:ok, conn} <- Client.connect(),

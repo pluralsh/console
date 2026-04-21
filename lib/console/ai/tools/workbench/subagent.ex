@@ -24,5 +24,5 @@ defmodule Console.AI.Tools.Workbench.Subagent do
     |> validate_required([:subagent, :prompt])
   end
 
-  def implement(_, result), do: {:ok, result}
+  def implement(result), do: {:ok, result}
 end

@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
   def implement(%__MODULE__{query: q, step: s, time_range: tr}) do
     with {:ok, conn} <- build_tool_connection() do
       metrics = %Metrics{tool: conn, query: q, step: s, time_range: tr}
-      Metrics.implement(metrics, metrics)
+      Metrics.implement(metrics)
     end
   end
 

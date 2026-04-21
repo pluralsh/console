@@ -18,7 +18,7 @@ defmodule Console.AI.Tools.Workbench.Skill do
     |> validate_required([:name])
   end
 
-  def implement(_, %__MODULE__{skills: %{} = skills, name: name}) do
+  def implement(%__MODULE__{skills: %{} = skills, name: name}) do
     case Map.get(skills, name) do
       %Console.AI.Workbench.Skill{contents: contents} -> {:ok, contents}
       _ -> {:error, "Skill #{name} not found"}

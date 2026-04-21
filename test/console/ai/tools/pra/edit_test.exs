@@ -17,7 +17,7 @@ defmodule Console.AI.Tools.Pra.EditTest do
         replacement: "there"
       }
 
-      {:ok, _} = Edit.implement(nil, tool)
+      {:ok, _} = Edit.implement(tool)
       {:ok, result} = File.read(path)
 
       assert String.trim(result) == "hello there"
@@ -33,7 +33,7 @@ defmodule Console.AI.Tools.Pra.EditTest do
         replacement: "there"
       }
 
-      {:error, _} = Edit.implement(nil, tool)
+      {:error, _} = Edit.implement(tool)
     end
   end
 end

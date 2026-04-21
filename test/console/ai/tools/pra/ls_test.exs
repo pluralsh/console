@@ -13,7 +13,7 @@ defmodule Console.AI.Tools.Pra.LsTest do
 
       tool = %Ls{dir: dir, path: "."}
 
-      {:ok, json} = Ls.implement(nil, tool)
+      {:ok, json} = Ls.implement(tool)
       {:ok, paths} = JSON.decode(json)
 
       expected =
@@ -42,7 +42,7 @@ defmodule Console.AI.Tools.Pra.LsTest do
 
       tool = %Ls{dir: priv_dir, path: rel_root, regex: "^BARBAZ$"}
 
-      {:ok, json} = Ls.implement(nil, tool)
+      {:ok, json} = Ls.implement(tool)
       {:ok, paths} = JSON.decode(json)
 
       assert paths == [Path.join([rel_root, "nested", "match.txt"])]
@@ -53,7 +53,7 @@ defmodule Console.AI.Tools.Pra.LsTest do
 
       tool = %Ls{dir: dir, path: "../"}
 
-      {:error, _} = Ls.implement(nil, tool)
+      {:error, _} = Ls.implement(tool)
     end
   end
 end

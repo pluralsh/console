@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudTables do
   def description(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{provider: provider}}}),
     do: "Shows the available tables for querying a #{provider} cloud account using sql. Can also fuzzy search for certain tables using the table parameter to save tokens."
 
-  def implement(_, %__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}, table: table}) do
+  def implement(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}, table: table}) do
     with {:ok, client} <- Client.connect(),
          input = %TablesInput{connection: to_pb(connection), table: table},
          {:ok, output} <- Stub.tables(client, input) do

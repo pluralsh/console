@@ -17,9 +17,9 @@ defmodule Console.AI.Tools.Workbench.FetchNotes do
     |> cast(attrs, [])
   end
 
-  def implement(_, %__MODULE__{job: %WorkbenchJob{result: %WorkbenchJobResult{} = result}}) do
+  def implement(%__MODULE__{job: %WorkbenchJob{result: %WorkbenchJobResult{} = result}}) do
     Console.mapify(result)
     |> Jason.encode()
   end
-  def implement(_, _), do: {:ok, "no notes set up yet"}
+  def implement(_), do: {:ok, "no notes set up yet"}
 end

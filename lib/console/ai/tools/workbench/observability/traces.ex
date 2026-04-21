@@ -15,8 +15,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
 
   embedded_schema do
     field :tool, :map, virtual: true
-    field :query,      :string
-    field :limit,      :integer
+    field :query, :string
+    field :limit, :integer
 
     embeds_one :options, Options, on_replace: :update, primary_key: false do
       embeds_one :jaeger, Jaeger, on_replace: :update, primary_key: false do
@@ -42,6 +42,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   def json_schema(%{tool: %{tool: :jaeger}}), do: @jaeger_schema
   def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_traces_#{n}"
+  def description(%__MODULE__{tool: %{tool: :jaeger}}), do: "Gather traces from the #{n} Jaeger observability connection, be sure to include required parameters like operation name, duration, and attributes."
   def description(%__MODULE__{tool: %{name: n}}), do: "Gather traces from the #{n} observability connection"
 
   def changeset(model, attrs) do
