@@ -208,7 +208,12 @@ export function WorkbenchToolsEditModal({
                   label={tool.name}
                   leftContent={
                     <IconFrame
-                      icon={<WorkbenchToolIcon type={tool.tool} />}
+                      icon={
+                        <WorkbenchToolIcon
+                          type={tool.tool}
+                          provider={tool.cloudConnection?.provider}
+                        />
+                      }
                       size="xsmall"
                     />
                   }
@@ -223,45 +228,48 @@ export function WorkbenchToolsEditModal({
                 gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
               }}
             >
-              {selectedTools.map(({ id, name, tool: type }) => (
-                <Card key={id}>
-                  <WorkbenchToolCardBody>
-                    <Flex
-                      align="center"
-                      justify="space-between"
-                      width="100%"
-                      gap="small"
-                    >
-                      <StackedText
-                        first={name}
-                        firstPartialType="body2Bold"
-                        firstColor="text"
-                        second={TOOL_TYPE_TO_LABEL[type]}
-                        icon={
-                          <IconFrame
-                            circle
-                            type="secondary"
-                            icon={
-                              <WorkbenchToolIcon
-                                size={20}
-                                type={type}
-                              />
-                            }
-                          />
-                        }
-                        css={{ minWidth: 0, flex: 1 }}
-                      />
-                      <IconFrame
-                        circle
-                        clickable
-                        icon={<CloseIcon />}
-                        tooltip="Remove from selection"
-                        onClick={() => handleDeselectTool(id)}
-                      />
-                    </Flex>
-                  </WorkbenchToolCardBody>
-                </Card>
-              ))}
+              {selectedTools.map(
+                ({ id, name, tool: type, cloudConnection }) => (
+                  <Card key={id}>
+                    <WorkbenchToolCardBody>
+                      <Flex
+                        align="center"
+                        justify="space-between"
+                        width="100%"
+                        gap="small"
+                      >
+                        <StackedText
+                          first={name}
+                          firstPartialType="body2Bold"
+                          firstColor="text"
+                          second={TOOL_TYPE_TO_LABEL[type]}
+                          icon={
+                            <IconFrame
+                              circle
+                              type="secondary"
+                              icon={
+                                <WorkbenchToolIcon
+                                  size={20}
+                                  type={type}
+                                  provider={cloudConnection?.provider}
+                                />
+                              }
+                            />
+                          }
+                          css={{ minWidth: 0, flex: 1 }}
+                        />
+                        <IconFrame
+                          circle
+                          clickable
+                          icon={<CloseIcon />}
+                          tooltip="Remove from selection"
+                          onClick={() => handleDeselectTool(id)}
+                        />
+                      </Flex>
+                    </WorkbenchToolCardBody>
+                  </Card>
+                )
+              )}
             </CardGrid>
           )}
         </Flex>

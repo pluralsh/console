@@ -29,7 +29,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
           %Tool{name: "http_integration_example", arguments: %{"input" => %{"hello" => "world"}}, id: "1"}
         ]}
       end)
-      expect(Http, :implement, fn _, %Http{} -> {:ok, "http response: world (status 200)"} end)
+      expect(Http, :implement, fn %Http{} -> {:ok, "http response: world (status 200)"} end)
       expect(Provider, :completion, fn _, _ ->
         {:ok, "complete", [
           %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}

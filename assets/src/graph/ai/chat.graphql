@@ -283,6 +283,7 @@ query CloudConnections(
   $after: String
   $before: String
   $q: String
+  $provider: Provider
 ) {
   cloudConnections(
     first: $first
@@ -290,6 +291,7 @@ query CloudConnections(
     after: $after
     before: $before
     q: $q
+    provider: $provider
   ) {
     pageInfo {
       ...PageInfo
@@ -299,6 +301,12 @@ query CloudConnections(
         ...CloudConnectionTiny
       }
     }
+  }
+}
+
+mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {
+  upsertCloudConnection(attributes: $attributes) {
+    ...CloudConnectionTiny
   }
 }
 

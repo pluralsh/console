@@ -130,7 +130,7 @@ defmodule Console.AI.Tool do
   end
 
   def implement(tool, input) when is_atom(tool), do: tool.implement(input)
-  def implement(%tool{} = t, input), do: tool.implement(t, input)
+  def implement(%tool{}, input), do: tool.implement(input)
 
   def scm_connection() do
     case Settings.cached() do

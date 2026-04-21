@@ -57,7 +57,7 @@ We also have added a set of tools to query live cloud infrastructure configurati
 
 The way to use these tools is relatively simple:
 
-1. You have a `cloud_schema_*` tool to get the schema of the sql tables for that account.  You should use the `table` argument to filter this schema since it can be query large and pollute context.
+1. You have `cloud_schema_*` and `cloud_tables_*` tools to get the schema of the sql tables for that account.  You should use the `table` argument to filter this schema since it can be query large and pollute context, use them efficiently to discover what you need to craft a query.
 2. You have a `cloud_query_*` tool to perform a broad sql query against the cloud account. You should always confirm the tables you are using in this query exist in the schema first before calling it, as a plain guess can be an expensive mistake.
 <% end %>
 

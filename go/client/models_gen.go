@@ -1053,8 +1053,6 @@ type AWSCloudSettings struct {
 type AWSConnectionAttributes struct {
 	// the access key id for aws
 	AccessKeyID string `json:"accessKeyId"`
-	// the secret access key for aws
-	SecretAccessKey string `json:"secretAccessKey"`
 	// the region for aws
 	Region *string `json:"region,omitempty"`
 	// the regions for aws
@@ -1102,8 +1100,6 @@ type AzureConnectionAttributes struct {
 	TenantID string `json:"tenantId"`
 	// the client id for azure
 	ClientID string `json:"clientId"`
-	// the client secret for azure
-	ClientSecret string `json:"clientSecret"`
 }
 
 // Requirements to perform Azure DevOps authentication
@@ -3446,8 +3442,6 @@ type GCPCloudSettings struct {
 
 // The configuration for a cloud provider
 type GCPConnectionAttributes struct {
-	// the service account key for gcp
-	ServiceAccountKey string `json:"serviceAccountKey"`
 	// the project id for gcp
 	ProjectID string `json:"projectId"`
 }

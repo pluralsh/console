@@ -95,6 +95,9 @@ fragment WorkbenchToolTiny on WorkbenchTool {
   name
   tool
   categories
+  cloudConnection {
+    ...CloudConnectionTiny
+  }
 }
 
 fragment WorkbenchTool on WorkbenchTool {
@@ -558,9 +561,7 @@ query WorkbenchTriggersSummary($id: ID!) {
     name
     description
     tools {
-      id
-      name
-      tool
+      ...WorkbenchToolTiny
     }
     crons(first: 30) {
       edges {

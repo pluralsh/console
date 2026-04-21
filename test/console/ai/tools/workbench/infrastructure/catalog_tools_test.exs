@@ -17,7 +17,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
 
       assert {:ok, parsed} = Tool.validate(%ClusterList{user: user}, %{})
-      assert {:ok, json} = ClusterList.implement(nil, parsed)
+      assert {:ok, json} = ClusterList.implement(parsed)
       assert {:ok, list} = Jason.decode(json)
       assert is_list(list)
       assert Enum.any?(list, &(&1["id"] == cluster.id))
@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       insert(:cluster)
 
       assert {:ok, parsed} = Tool.validate(%ClusterList{user: user}, %{})
-      assert {:ok, json} = ClusterList.implement(nil, parsed)
+      assert {:ok, json} = ClusterList.implement(parsed)
       assert {:ok, []} = Jason.decode(json)
     end
   end
@@ -39,7 +39,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
 
       assert {:ok, parsed} = Tool.validate(%Cluster{user: user}, %{"handle" => cluster.handle})
-      assert {:ok, content} = Cluster.implement(nil, parsed)
+      assert {:ok, content} = Cluster.implement(parsed)
       assert is_binary(content)
     end
 
@@ -49,7 +49,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       cluster = insert(:cluster, read_bindings: [%{user_id: owner.id}])
 
       assert {:ok, parsed} = Tool.validate(%Cluster{user: other}, %{"handle" => cluster.handle})
-      assert {:error, _} = Cluster.implement(nil, parsed)
+      assert {:error, _} = Cluster.implement(parsed)
     end
   end
 
@@ -60,7 +60,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       service = insert(:service, cluster: cluster)
 
       assert {:ok, parsed} = Tool.validate(%ClusterServices{user: user}, %{"cluster" => cluster.handle})
-      assert {:ok, json} = ClusterServices.implement(nil, parsed)
+      assert {:ok, json} = ClusterServices.implement(parsed)
       assert {:ok, list} = Jason.decode(json)
       assert Enum.any?(list, &(&1["id"] == service.id))
     end
@@ -72,7 +72,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       insert(:service, cluster: cluster)
 
       assert {:ok, parsed} = Tool.validate(%ClusterServices{user: other}, %{"cluster" => cluster.handle})
-      assert {:error, _} = ClusterServices.implement(nil, parsed)
+      assert {:error, _} = ClusterServices.implement(parsed)
     end
   end
 
@@ -85,7 +85,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:ok, parsed} =
                Tool.validate(%ServiceInspect{user: user}, %{"service_id" => service.id})
 
-      assert {:ok, content} = ServiceInspect.implement(nil, parsed)
+      assert {:ok, content} = ServiceInspect.implement(parsed)
       assert is_binary(content)
     end
 
@@ -98,7 +98,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:ok, parsed} =
                Tool.validate(%ServiceInspect{user: other}, %{"service_id" => service.id})
 
-      assert {:error, _} = ServiceInspect.implement(nil, parsed)
+      assert {:error, _} = ServiceInspect.implement(parsed)
     end
   end
 
@@ -108,7 +108,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       stack = insert(:stack, read_bindings: [%{user_id: user.id}])
 
       assert {:ok, parsed} = Tool.validate(%StackList{user: user}, %{})
-      assert {:ok, json} = StackList.implement(nil, parsed)
+      assert {:ok, json} = StackList.implement(parsed)
       assert {:ok, list} = Jason.decode(json)
       assert Enum.any?(list, &(&1["id"] == stack.id))
     end
@@ -118,7 +118,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       insert(:stack)
 
       assert {:ok, parsed} = Tool.validate(%StackList{user: user}, %{})
-      assert {:ok, json} = StackList.implement(nil, parsed)
+      assert {:ok, json} = StackList.implement(parsed)
       assert {:ok, []} = Jason.decode(json)
     end
   end
@@ -129,7 +129,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       stack = insert(:stack, read_bindings: [%{user_id: user.id}])
 
       assert {:ok, parsed} = Tool.validate(%StackInspect{user: user}, %{"stack_id" => stack.id})
-      assert {:ok, content} = StackInspect.implement(nil, parsed)
+      assert {:ok, content} = StackInspect.implement(parsed)
       assert is_binary(content)
     end
 
@@ -139,7 +139,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       stack = insert(:stack, read_bindings: [%{user_id: owner.id}])
 
       assert {:ok, parsed} = Tool.validate(%StackInspect{user: other}, %{"stack_id" => stack.id})
-      assert {:error, _} = StackInspect.implement(nil, parsed)
+      assert {:error, _} = StackInspect.implement(parsed)
     end
 
     test "when status is failed, includes latest failed run and failing step logs" do
@@ -169,7 +169,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       insert(:run_log, step: step, logs: "Error: something broke")
 
       assert {:ok, parsed} = Tool.validate(%StackInspect{user: user}, %{"stack_id" => stack.id})
-      assert {:ok, content} = StackInspect.implement(nil, parsed)
+      assert {:ok, content} = StackInspect.implement(parsed)
 
       assert content =~ "Latest failed run"
       assert content =~ run.id

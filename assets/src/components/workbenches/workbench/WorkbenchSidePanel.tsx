@@ -79,7 +79,12 @@ export function WorkbenchSidePanel({
                 >
                   <ItemIconContainerSC>
                     <IconFrame
-                      icon={<WorkbenchToolIcon type={tool.tool} />}
+                      icon={
+                        <WorkbenchToolIcon
+                          type={tool.tool}
+                          provider={tool.cloudConnection?.provider}
+                        />
+                      }
                       size="xsmall"
                     />
                   </ItemIconContainerSC>

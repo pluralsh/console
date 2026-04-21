@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackList do
   def name(_), do: "plrl_stacks"
   def description(_), do: "List infrastructure stacks the user can read. Returns compact JSON; use plrl_stack with a stack id for full details."
 
-  def implement(_, %__MODULE__{user: %User{} = user} = args) do
+  def implement(%__MODULE__{user: %User{} = user} = args) do
     Stack.for_user(user)
     |> stack_filters(args)
     |> maybe_search(args.q)

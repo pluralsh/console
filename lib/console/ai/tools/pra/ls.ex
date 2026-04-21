@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Pra.Ls do
     |> validate_required([:path])
   end
 
-  def implement(_, %__MODULE__{dir: dir, path: path, regex: regex}) do
+  def implement(%__MODULE__{dir: dir, path: path, regex: regex}) do
     with {:ok, path} <- relpath(dir, path) do
       maybe_wildcard(path)
       |> maybe_filter(regex)

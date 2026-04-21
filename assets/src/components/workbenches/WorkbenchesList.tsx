@@ -187,6 +187,7 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
                 icon: (
                   <WorkbenchToolIcon
                     type={tool.tool}
+                    provider={tool.cloudConnection?.provider}
                     size={METADATA_ICON_SIZE}
                   />
                 ),

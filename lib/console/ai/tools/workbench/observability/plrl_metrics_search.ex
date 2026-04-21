@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.MetricsSearch do
   def implement(%__MODULE__{query: q, limit: l}) do
     with {:ok, conn} <- build_tool_connection() do
       tool = %MetricsSearch{tool: conn, query: q, limit: l}
-      MetricsSearch.implement(tool, tool)
+      MetricsSearch.implement(tool)
     end
   end
 end

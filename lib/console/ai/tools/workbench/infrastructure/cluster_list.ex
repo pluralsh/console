@@ -29,7 +29,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   def name(_), do: "plrl_clusters"
   def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle for full details."
 
-  def implement(_, %__MODULE__{user: %User{} = user, q: q, distro: distro, tags: tags}) do
+  def implement(%__MODULE__{user: %User{} = user, q: q, distro: distro, tags: tags}) do
     Cluster.ordered()
     |> Cluster.for_user(user)
     |> maybe_distro(distro)
