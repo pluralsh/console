@@ -458,12 +458,11 @@ function PluralSkillFormSteps({
                 width: 18,
                 height: 18,
                 borderRadius: '50%',
-                backgroundColor: isActive
-                  ? theme.colors['fill-three-selected']
-                  : theme.colors['fill-two'],
+                backgroundColor: theme.colors['fill-one'],
+                border: theme.borders.default,
                 color: isActive
                   ? theme.colors['text']
-                  : theme.colors['text-light'],
+                  : theme.colors['text-xlight'],
                 ...theme.partials.text.overline,
               }}
             >
