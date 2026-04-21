@@ -6,7 +6,11 @@ import {
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { Provider, useCloudConnectionsQuery } from 'generated/graphql'
+import {
+  Provider,
+  useCloudConnectionsQuery,
+  WorkbenchToolType,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useEffect, useEffectEvent, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -15,7 +19,7 @@ import {
   WORKBENCHES_TOOLS_CREATE_CLOUD_CONNECTION_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
-import { PROVIDER_TO_ICON, PROVIDER_TO_LABEL } from '../workbenchToolsUtils'
+import { getWorkbenchToolLabel, PROVIDER_TO_ICON } from '../workbenchToolsUtils'
 
 export function CloudConnectionSelectField({
   provider,
@@ -60,7 +64,7 @@ export function CloudConnectionSelectField({
   return (
     <FormField
       required
-      label={`${PROVIDER_TO_LABEL[provider]} connection`}
+      label={`${getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)} connection`}
       hint="Select an existing cloud connection or create a new one."
       caption={
         <InlineLink
@@ -70,7 +74,8 @@ export function CloudConnectionSelectField({
             search: `?provider=${provider}`,
           }}
         >
-          Create new {PROVIDER_TO_LABEL[provider]} connection
+          Create new {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
+          connection
         </InlineLink>
       }
     >
@@ -96,7 +101,9 @@ export function CloudConnectionSelectField({
             : {
                 dropdownFooter: (
                   <ListBoxFooter>
-                    No {PROVIDER_TO_LABEL[provider]} connections found
+                    No{' '}
+                    {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
+                    connections found
                   </ListBoxFooter>
                 ),
               }))}

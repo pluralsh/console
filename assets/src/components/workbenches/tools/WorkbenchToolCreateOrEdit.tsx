@@ -30,10 +30,9 @@ import { getWorkbenchesBreadcrumbs } from '../Workbenches'
 import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
+  getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
   isProvider,
-  PROVIDER_TO_LABEL,
-  TOOL_TYPE_TO_LABEL,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
 
@@ -148,7 +147,7 @@ export function WorkbenchToolCreateOrEdit({
         <StackedText
           first={
             mode === 'create'
-              ? `New ${provider ? PROVIDER_TO_LABEL[provider] : TOOL_TYPE_TO_LABEL[type]} tool`
+              ? `New ${getWorkbenchToolLabel(type, provider)} tool`
               : 'Edit tool'
           }
           firstPartialType="subtitle1"
@@ -174,9 +173,7 @@ export function WorkbenchToolCreateOrEdit({
               textValue={capitalize(provider || type)}
             />
             <Subtitle1H1 as="h3">
-              {type === WorkbenchToolType.Cloud && provider
-                ? PROVIDER_TO_LABEL[provider]
-                : capitalize(type === WorkbenchToolType.Http ? 'Custom' : type)}
+              {getWorkbenchToolLabel(type, provider)}
             </Subtitle1H1>
           </Flex>
         )}

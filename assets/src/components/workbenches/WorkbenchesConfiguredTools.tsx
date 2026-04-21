@@ -24,7 +24,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   categoryToLabel,
-  TOOL_TYPE_TO_LABEL,
+  getWorkbenchToolLabel,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
@@ -75,7 +75,10 @@ export function WorkbenchesConfiguredTools() {
                       first={name}
                       firstPartialType="body2Bold"
                       firstColor="text"
-                      second={TOOL_TYPE_TO_LABEL[type]}
+                      second={getWorkbenchToolLabel(
+                        type,
+                        cloudConnection?.provider
+                      )}
                       icon={
                         <IconFrame
                           circle

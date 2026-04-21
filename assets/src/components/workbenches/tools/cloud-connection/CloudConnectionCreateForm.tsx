@@ -40,7 +40,7 @@ import {
   WORKBENCHES_TOOLS_TYPE_PARAM,
 } from '../WorkbenchToolCreateOrEdit'
 import { EditableDivWrapperSC } from '../WorkbenchToolFormFields'
-import { isProvider, PROVIDER_TO_LABEL } from '../workbenchToolsUtils'
+import { getWorkbenchToolLabel, isProvider } from '../workbenchToolsUtils'
 
 export function CloudConnectionCreateForm() {
   const navigate = useNavigate()
@@ -170,7 +170,8 @@ export function CloudConnectionCreateForm() {
 
       <FormCardSC css={{ maxWidth: 750 }}>
         <OverlineH3 $color="text-xlight">
-          New {PROVIDER_TO_LABEL[provider]} connection
+          New {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
+          connection
         </OverlineH3>
         <FormField
           required

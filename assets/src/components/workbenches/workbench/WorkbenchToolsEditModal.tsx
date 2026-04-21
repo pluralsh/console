@@ -13,24 +13,24 @@ import {
 } from '@pluralsh/design-system'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
-  useWorkbenchToolsQuery,
   useUpdateWorkbenchMutation,
+  useWorkbenchToolsQuery,
   WorkbenchQuery,
 } from 'generated/graphql'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import {
-  TOOL_TYPE_TO_LABEL,
-  WorkbenchToolCardBody,
-  WorkbenchToolIcon,
-  workbenchToolCardGridStyles,
-} from '../tools/workbenchToolsUtils'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { isNonNullable } from 'utils/isNonNullable'
+import {
+  getWorkbenchToolLabel,
+  WorkbenchToolCardBody,
+  workbenchToolCardGridStyles,
+  WorkbenchToolIcon,
+} from '../tools/workbenchToolsUtils'
 
 const ModalActionsRowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -272,7 +272,10 @@ export function WorkbenchToolsEditModal({
                               first={name}
                               firstPartialType="body2Bold"
                               firstColor="text"
-                              second={TOOL_TYPE_TO_LABEL[type]}
+                              second={getWorkbenchToolLabel(
+                                type,
+                                cloudConnection?.provider
+                              )}
                               css={{ minWidth: 0, flex: 1, width: 0 }}
                             />
                           </Flex>
