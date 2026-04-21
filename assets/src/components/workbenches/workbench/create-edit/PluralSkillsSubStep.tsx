@@ -24,9 +24,18 @@ import {
   EditableDivWrapperSC,
   WorkbenchFormStepProps,
 } from './WorkbenchFormSteps'
-import { useWorkbenchFormFooterActions } from './WorkbenchCreateOrEdit'
+import {
+  useWorkbenchFormCardRightContent,
+  useWorkbenchFormFooterActions,
+} from './WorkbenchCreateOrEdit'
 
 export const CREATE_MODE_NAME = ''
+
+type SkillFormStep = 'metadata' | 'contents'
+const SKILL_FORM_STEPS: { id: SkillFormStep; label: string }[] = [
+  { id: 'metadata', label: 'Add metadata' },
+  { id: 'contents', label: 'Add content' },
+]
 
 export function PluralSkillsSubStep({
   formState,
@@ -233,8 +242,11 @@ function PluralSkillForm({
         contents: '',
       }
   )
+  const [currentStep, setCurrentStep] = useState<SkillFormStep>('metadata')
   const { setFooterActions } = useWorkbenchFormFooterActions()
-  const canSave = !!draft.contents.trim() && !!draft.name.trim()
+  const { setRightContent } = useWorkbenchFormCardRightContent()
+  const canContinue = !!draft.name.trim()
+  const canSave = canContinue && !!draft.contents.trim()
 
   const onSaveRef = useRef(onSave)
   const onCancelRef = useRef(onCancel)
@@ -254,59 +266,153 @@ function PluralSkillForm({
         >
           Cancel
         </Button>
-        <Button
-          onClick={() => onSaveRef.current(draftRef.current)}
-          disabled={!canSave}
-        >
-          {isNew ? 'Create new skill' : 'Save skill'}
-        </Button>
+        {currentStep === 'metadata' ? (
+          <Button
+            onClick={() => setCurrentStep('contents')}
+            disabled={!canContinue}
+          >
+            Next
+          </Button>
+        ) : (
+          <Button
+            onClick={() => onSaveRef.current(draftRef.current)}
+            disabled={!canSave}
+          >
+            {isNew ? 'Create new skill' : 'Save skill'}
+          </Button>
+        )}
       </>
     )
 
     return () => setFooterActions(null)
-  }, [canSave, isNew, setFooterActions])
+  }, [canContinue, canSave, currentStep, isNew, setFooterActions])
+
+  useEffect(() => {
+    setRightContent(
+      <PluralSkillFormSteps
+        activeStep={currentStep}
+        canGoToContent={canContinue}
+        onStepSelect={setCurrentStep}
+      />
+    )
+
+    return () => setRightContent(null)
+  }, [canContinue, currentStep, setRightContent])
 
   return (
     <Flex
       direction="column"
       gap="medium"
     >
-      <FormField
-        required
-        label="Name"
-      >
-        <Input2
-          placeholder="e.g. skill_math"
-          value={draft.name}
-          onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-        />
-      </FormField>
-      <FormField label="Description">
-        <Input2
-          placeholder="Short summary of what this skill does"
-          value={draft.description ?? ''}
-          onChange={(e) =>
-            setDraft({
-              ...draft,
-              description: e.target.value || null,
-            })
-          }
-        />
-      </FormField>
-      <FormField
-        required
-        label="Skills file"
-        infoTooltip="Markdown contents of the skill file."
-      >
-        <EditableDivWrapperSC>
-          <EditableDiv
-            initialValue={draft.contents}
-            setValue={(value) => setDraft({ ...draft, contents: value })}
-            placeholder="Paste or write the markdown contents of the skill file."
-            css={{ minHeight: 200 }}
-          />
-        </EditableDivWrapperSC>
-      </FormField>
+      {currentStep === 'metadata' ? (
+        <>
+          <FormField
+            required
+            label="Name"
+          >
+            <Input2
+              placeholder="e.g. skill_math"
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            />
+          </FormField>
+          <FormField label="Description">
+            <Input2
+              placeholder="Short summary of what this skill does"
+              value={draft.description ?? ''}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  description: e.target.value || null,
+                })
+              }
+            />
+          </FormField>
+        </>
+      ) : (
+        <FormField
+          required
+          label="Skills file"
+          infoTooltip="Markdown contents of the skill file."
+        >
+          <EditableDivWrapperSC>
+            <EditableDiv
+              initialValue={draft.contents}
+              setValue={(value) => setDraft({ ...draft, contents: value })}
+              placeholder="Paste or write the markdown contents of the skill file."
+              css={{ minHeight: 200 }}
+            />
+          </EditableDivWrapperSC>
+        </FormField>
+      )}
+    </Flex>
+  )
+}
+
+function PluralSkillFormSteps({
+  activeStep,
+  canGoToContent,
+  onStepSelect,
+}: {
+  activeStep: SkillFormStep
+  canGoToContent: boolean
+  onStepSelect: (step: SkillFormStep) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      align="flex-start"
+      css={{ minWidth: 140 }}
+    >
+      {SKILL_FORM_STEPS.map(({ id, label }, idx) => {
+        const isActive = id === activeStep
+        const isClickable = id === 'metadata' || canGoToContent
+
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => isClickable && onStepSelect(id)}
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.xsmall,
+              border: 'none',
+              background: 'transparent',
+              color: isActive
+                ? theme.colors['text']
+                : theme.colors['text-xlight'],
+              cursor: isClickable ? 'pointer' : 'not-allowed',
+              opacity: isClickable ? 1 : 0.6,
+              padding: 0,
+              ...theme.partials.text.caption,
+            }}
+          >
+            <Flex
+              align="center"
+              justify="center"
+              css={{
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                backgroundColor: isActive
+                  ? theme.colors['fill-three-selected']
+                  : theme.colors['fill-two'],
+                color: isActive
+                  ? theme.colors['text']
+                  : theme.colors['text-light'],
+                ...theme.partials.text.overline,
+              }}
+            >
+              {idx + 1}
+            </Flex>
+            <span>{label}</span>
+          </button>
+        )
+      })}
     </Flex>
   )
 }

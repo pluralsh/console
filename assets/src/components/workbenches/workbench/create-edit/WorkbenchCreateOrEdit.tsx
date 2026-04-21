@@ -30,7 +30,7 @@ import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
@@ -45,6 +45,7 @@ import {
 type WorkbenchFormContextValue = {
   setTabs: (tabs: ReactNode | null) => void
   setFooterActions: (actions: ReactNode | null) => void
+  setRightContent: (content: ReactNode | null) => void
 }
 const WorkbenchFormContext = createContext<WorkbenchFormContextValue | null>(
   null
@@ -66,6 +67,15 @@ export function useWorkbenchFormFooterActions() {
       'useWorkbenchFormFooterActions must be used inside a WorkbenchForm'
     )
   return { setFooterActions: ctx.setFooterActions }
+}
+
+export function useWorkbenchFormCardRightContent() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormCardRightContent must be used inside a WorkbenchForm'
+    )
+  return { setRightContent: ctx.setRightContent }
 }
 
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
@@ -167,6 +177,7 @@ function WorkbenchForm({
   mode: 'create' | 'edit'
   loading: boolean
 }) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const isCreateMode = mode === 'create'
   const [formState, setFormState] =
@@ -175,8 +186,9 @@ function WorkbenchForm({
     useState<WorkbenchStepLabel>('Workbench setup')
   const [cardTabs, setCardTabs] = useState<ReactNode | null>(null)
   const [footerActions, setFooterActions] = useState<ReactNode | null>(null)
+  const [rightContent, setRightContent] = useState<ReactNode | null>(null)
   const formContextValue = useMemo<WorkbenchFormContextValue>(
-    () => ({ setTabs: setCardTabs, setFooterActions }),
+    () => ({ setTabs: setCardTabs, setFooterActions, setRightContent }),
     []
   )
   const [stepStatuses, setStepStatuses] = useState<
@@ -261,50 +273,66 @@ function WorkbenchForm({
           />
         ) : (
           StepComponent && (
-            <FormCardSC tabs={cardTabs}>
-              {mutationError && <GqlError error={mutationError} />}
-              <StepComponent
-                formState={formState}
-                setFormState={setFormState}
-              />
-              <StickyActionsFooterSC>
-                {footerActions ?? (
-                  <>
-                    <Button
-                      destructive
-                      as={Link}
-                      to={
-                        workbenchId
-                          ? getWorkbenchAbsPath(workbenchId)
-                          : WORKBENCHES_ABS_PATH
-                      }
-                    >
-                      Cancel
-                    </Button>
-                    {numUnvisitedSteps < 2 ? (
+            <Flex
+              gap="medium"
+              css={{ minWidth: 0 }}
+            >
+              <FormCardSC tabs={cardTabs}>
+                {mutationError && <GqlError error={mutationError} />}
+                <StepComponent
+                  formState={formState}
+                  setFormState={setFormState}
+                />
+                <StickyActionsFooterSC>
+                  {footerActions ?? (
+                    <>
                       <Button
-                        disabled={!allowSubmit}
-                        loading={mutationLoading}
-                        onClick={onSave}
+                        destructive
+                        as={Link}
+                        to={
+                          workbenchId
+                            ? getWorkbenchAbsPath(workbenchId)
+                            : WORKBENCHES_ABS_PATH
+                        }
                       >
-                        {isCreateMode ? 'Create workbench' : 'Update workbench'}
+                        Cancel
                       </Button>
-                    ) : (
-                      <Button
-                        onClick={() => {
-                          if (!!workbenchFormSteps[curStepIndex + 1])
-                            setCurStep(
-                              workbenchFormSteps[curStepIndex + 1].label
-                            )
-                        }}
-                      >
-                        Next
-                      </Button>
-                    )}
-                  </>
-                )}
-              </StickyActionsFooterSC>
-            </FormCardSC>
+                      {numUnvisitedSteps < 2 ? (
+                        <Button
+                          disabled={!allowSubmit}
+                          loading={mutationLoading}
+                          onClick={onSave}
+                        >
+                          {isCreateMode
+                            ? 'Create workbench'
+                            : 'Update workbench'}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            if (!!workbenchFormSteps[curStepIndex + 1])
+                              setCurStep(
+                                workbenchFormSteps[curStepIndex + 1].label
+                              )
+                          }}
+                        >
+                          Next
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </StickyActionsFooterSC>
+              </FormCardSC>
+              {rightContent && (
+                <Flex
+                  direction="column"
+                  flexShrink={0}
+                  css={{ marginTop: theme.spacing.xlarge, width: 120 }}
+                >
+                  {rightContent}
+                </Flex>
+              )}
+            </Flex>
           )
         )}
       </WorkbenchSplitLayoutSC>
@@ -376,6 +404,7 @@ export const FormCardSC = styled(Card)(({ theme }) => ({
   flex: 1,
   minWidth: 0,
   maxWidth: 750,
+  width: 750,
   overflow: 'auto',
   height: '100%',
 }))
