@@ -24,6 +24,9 @@ import {
   EditableDivWrapperSC,
   WorkbenchFormStepProps,
 } from './WorkbenchFormSteps'
+import { isEmpty } from 'lodash'
+
+export const CREATE_SKILL_SENTINEL = ''
 
 export function PluralSkillsSubStep({
   formState,
@@ -33,15 +36,20 @@ export function PluralSkillsSubStep({
   const skills: WorkbenchSkillAttributes[] = (
     formState.workbenchSkills ?? []
   ).filter(isNonNullable)
-  const [editingName, setEditingName] = useState<string | 'new' | null>(null)
+  const [editingName, setEditingName] = useState<string | null>(null)
 
-  const editingSkill = useMemo(() => {
-    if (editingName === null || editingName === 'new') return null
-    return skills.find((s) => s.name === editingName) ?? null
-  }, [editingName, skills])
+  const editingSkill = useMemo(
+    () =>
+      isEmpty(editingName)
+        ? null
+        : (skills.find((s) => s.name === editingName) ?? null),
+    [editingName, skills]
+  )
 
-  const handleCreate = () => setEditingName('new')
+  const handleCreate = () => setEditingName(CREATE_SKILL_SENTINEL)
+
   const handleEdit = (name: string) => setEditingName(name)
+
   const handleDelete = (name: string) =>
     update((d) => {
       const next: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? [])
@@ -57,7 +65,7 @@ export function PluralSkillsSubStep({
         isNonNullable
       )
       const idx =
-        editingName && editingName !== 'new'
+        editingName !== null && editingName !== CREATE_SKILL_SENTINEL
           ? list.findIndex((s) => s.name === editingName)
           : -1
       if (idx >= 0) list[idx] = draft
@@ -72,7 +80,7 @@ export function PluralSkillsSubStep({
     return (
       <PluralSkillForm
         initialSkill={editingSkill}
-        isNew={editingName === 'new'}
+        isNew={editingName === CREATE_SKILL_SENTINEL}
         onSave={handleSave}
         onCancel={() => setEditingName(null)}
       />
@@ -190,8 +198,13 @@ function PluralSkillForm({
   onSave: (skill: WorkbenchSkillAttributes) => void
   onCancel: () => void
 }) {
-  const [draft, setDraft] = useState<WorkbenchSkillAttributes>(() =>
-    initialSkill ? { ...initialSkill } : createEmptyPluralSkill()
+  const [draft, setDraft] = useState<WorkbenchSkillAttributes>(
+    () =>
+      initialSkill ?? {
+        name: '',
+        description: null,
+        contents: '',
+      }
   )
 
   const canSave = !!draft.contents.trim() && !!draft.name.trim()
@@ -279,12 +292,5 @@ const PluralSkillRowSC = styled(Card).attrs({ fillLevel: 2 })(({ theme }) => ({
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
   border: theme.borders['fill-two'],
+  backgroundColor: theme.colors['fill-zero'],
 }))
-
-function createEmptyPluralSkill(): WorkbenchSkillAttributes {
-  return {
-    name: '',
-    description: null,
-    contents: '',
-  }
-}
