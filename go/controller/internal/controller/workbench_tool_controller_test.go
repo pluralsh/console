@@ -25,9 +25,10 @@ import (
 var _ = Describe("Workbench Tool Controller", Ordered, func() {
 	Context("When reconciling an HTTP tool", func() {
 		const (
-			workbenchToolName = "wt_http"
-			namespace         = "default"
-			id                = "123"
+			workbenchToolName     = "wt-http"
+			workbenchToolSpecName = "wt_http"
+			namespace             = "default"
+			id                    = "123"
 		)
 
 		ctx := context.Background()
@@ -44,7 +45,7 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.WorkbenchToolSpec{
-						Name: lo.ToPtr(workbenchToolName),
+						Name: lo.ToPtr(workbenchToolSpecName),
 						Tool: gqlclient.WorkbenchToolTypeHTTP,
 						Configuration: &v1alpha1.WorkbenchToolConfiguration{
 							HTTP: &v1alpha1.WorkbenchToolHTTPConfig{
@@ -90,7 +91,8 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 			Expect(wt.Status.ID).To(Equal(lo.ToPtr(id)))
 			Expect(wt.Status.SHA).NotTo(BeNil())
 			Expect(common.SanitizeStatusConditions(wt.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
-				ID: lo.ToPtr(id),
+				ID:  lo.ToPtr(id),
+				SHA: wt.Status.SHA,
 				Conditions: []metav1.Condition{
 					{
 						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -148,16 +150,17 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 
 			workbenchTool := &v1alpha1.WorkbenchTool{}
 			err = k8sClient.Get(ctx, typeNamespacedName, workbenchTool)
-			Expect(err.Error()).To(Equal("workbenchtools.deployments.plural.sh \"wt_http\" not found"))
+			Expect(err.Error()).To(Equal("workbenchtools.deployments.plural.sh \"wt-http\" not found"))
 		})
 	})
 
 	Context("When reconciling a Prometheus tool with secret refs", func() {
 		const (
-			workbenchToolName = "wt-prometheus"
-			namespace         = "default"
-			id                = "prometheus-123"
-			secretName        = "prometheus-creds"
+			workbenchToolName     = "wt-prometheus"
+			workbenchToolSpecName = "wt_prometheus"
+			namespace             = "default"
+			id                    = "prometheus-123"
+			secretName            = "prometheus-creds"
 		)
 
 		ctx := context.Background()
@@ -185,7 +188,7 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.WorkbenchToolSpec{
-						Name:       lo.ToPtr(workbenchToolName),
+						Name:       lo.ToPtr(workbenchToolSpecName),
 						Tool:       gqlclient.WorkbenchToolTypePrometheus,
 						Categories: []gqlclient.WorkbenchToolCategory{gqlclient.WorkbenchToolCategoryMetrics},
 						Configuration: &v1alpha1.WorkbenchToolConfiguration{
@@ -246,11 +249,12 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 
 	Context("When reconciling an MCP tool with MCPServerRef", func() {
 		const (
-			workbenchToolName = "wt-mcp"
-			namespace         = "default"
-			id                = "mcp-tool-123"
-			mcpServerName     = "my-mcp-server"
-			mcpServerID       = "mcp-server-id-123"
+			workbenchToolName     = "wt-mcp"
+			workbenchToolSpecName = "wt_mcp"
+			namespace             = "default"
+			id                    = "mcp-tool-123"
+			mcpServerName         = "my-mcp-server"
+			mcpServerID           = "mcp-server-id-123"
 		)
 
 		ctx := context.Background()
@@ -279,7 +283,7 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.WorkbenchToolSpec{
-						Name: lo.ToPtr(workbenchToolName),
+						Name: lo.ToPtr(workbenchToolSpecName),
 						Tool: gqlclient.WorkbenchToolTypeMcp,
 						MCPServerRef: &corev1.ObjectReference{
 							Name:      mcpServerName,
@@ -330,6 +334,7 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 	Context("When reconciling a Cloud tool with CloudConnectionRef", func() {
 		const (
 			workbenchToolName     = "wt-cloud"
+			workbenchToolSpecName = "wt_cloud"
 			namespace             = "default"
 			id                    = "cloud-tool-123"
 			cloudConnectionName   = "my-cloud-connection"
@@ -386,7 +391,7 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.WorkbenchToolSpec{
-						Name: lo.ToPtr(workbenchToolName),
+						Name: lo.ToPtr(workbenchToolSpecName),
 						Tool: gqlclient.WorkbenchToolTypeCloud,
 						CloudConnectionRef: &corev1.ObjectReference{
 							Name:      cloudConnectionName,
