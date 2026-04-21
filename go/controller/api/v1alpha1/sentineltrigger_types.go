@@ -17,7 +17,7 @@ type SentinelTriggerSpec struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Namespaced
 
-// SentinelTrigger is the Schema for the sentineltriggers API
+// SentinelTrigger is the Schema for the sentinel triggers API
 type SentinelTrigger struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

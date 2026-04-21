@@ -42,7 +42,7 @@ func (r *SentinelTriggerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	sentinel := &v1alpha1.Sentinel{}
-	if err := r.Get(ctx, client.ObjectKey{Name: trigger.Spec.SentinelRef.Name, Namespace: trigger.Spec.SentinelRef.Namespace}, sentinel); err != nil {
+	if err := r.Get(ctx, client.ObjectKey{Name: trigger.Spec.SentinelRef.Name, Namespace: lo.CoalesceOrEmpty(trigger.Spec.SentinelRef.Namespace, "default")}, sentinel); err != nil {
 		utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
