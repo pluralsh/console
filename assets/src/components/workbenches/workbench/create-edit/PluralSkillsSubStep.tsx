@@ -308,15 +308,15 @@ function PluralSkillForm({
         <>
           <FormField
             required
-            label="Name"
+            label="Skill name"
           >
             <Input2
-              placeholder="e.g. skill_math"
+              placeholder="Skill name"
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             />
           </FormField>
-          <FormField label="Description">
+          <FormField label="Skill description">
             <Input2
               placeholder="Short summary of what this skill does"
               value={draft.description ?? ''}
