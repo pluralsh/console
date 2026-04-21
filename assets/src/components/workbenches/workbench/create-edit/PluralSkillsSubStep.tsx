@@ -11,7 +11,7 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
-import styled from 'styled-components'
+import { useTheme } from 'styled-components'
 
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -32,6 +32,7 @@ export function PluralSkillsSubStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
+  const theme = useTheme()
   const update = createFormUpdater(setFormState)
   const skills: WorkbenchSkillAttributes[] = (
     formState.workbenchSkills ?? []
@@ -127,19 +128,25 @@ export function PluralSkillsSubStep({
           </EmptyState>
         </Card>
       ) : (
-        <Flex
-          direction="column"
-          gap="xsmall"
+        <Card
+          fillLevel={2}
+          css={{
+            padding: 0,
+            overflow: 'hidden',
+            border: theme.borders['fill-two'],
+            backgroundColor: theme.colors['fill-zero'],
+          }}
         >
-          {skills.map((skill) => (
+          {skills.map((skill, idx) => (
             <PluralSkillRow
               key={skill.name}
               skill={skill}
+              isLast={idx === skills.length - 1}
               onEdit={() => handleEdit(skill.name)}
               onDelete={() => handleDelete(skill.name)}
             />
           ))}
-        </Flex>
+        </Card>
       )}
     </FormField>
   )
@@ -147,21 +154,33 @@ export function PluralSkillsSubStep({
 
 function PluralSkillRow({
   skill,
+  isLast,
   onEdit,
   onDelete,
 }: {
   skill: WorkbenchSkillAttributes
+  isLast: boolean
   onEdit: () => void
   onDelete: () => void
 }) {
+  const theme = useTheme()
   return (
-    <PluralSkillRowSC>
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: theme.spacing.small,
+        padding: theme.spacing.small,
+        borderBottom: isLast ? 'none' : theme.borders['fill-two'],
+      }}
+    >
       <StackedText
         truncate
-        first={skill.name || 'Untitled skill'}
-        second={skill.description || undefined}
-        firstPartialType="body2Bold"
-        firstColor="text"
+        first={skill.name}
+        second={skill.description}
+        firstPartialType="body2LooseLineHeight"
+        firstColor="text-light"
         secondPartialType="caption"
         secondColor="text-xlight"
         css={{ minWidth: 0, flex: 1 }}
@@ -183,7 +202,7 @@ function PluralSkillRow({
           onClick={onDelete}
         />
       </Flex>
-    </PluralSkillRowSC>
+    </div>
   )
 }
 
@@ -214,7 +233,7 @@ function PluralSkillForm({
     onSave({
       ...draft,
       name: draft.name.trim(),
-      description: draft.description?.trim() || null,
+      description: draft.description?.trim(),
     })
   }
 
@@ -284,13 +303,3 @@ function PluralSkillForm({
     </Flex>
   )
 }
-
-const PluralSkillRowSC = styled(Card).attrs({ fillLevel: 2 })(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: theme.spacing.small,
-  padding: theme.spacing.medium,
-  border: theme.borders['fill-two'],
-  backgroundColor: theme.colors['fill-zero'],
-}))

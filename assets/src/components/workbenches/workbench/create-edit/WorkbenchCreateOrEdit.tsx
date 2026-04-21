@@ -430,6 +430,7 @@ function sanitizeInitialForm({
   agentRuntime,
   repository,
   skills,
+  workbenchSkills,
   tools,
   readBindings,
   writeBindings,
@@ -440,6 +441,16 @@ function sanitizeInitialForm({
   const { logs, metrics } = observability ?? {}
   const { mode, repositories } = coding ?? {}
   const { files, ref } = skills ?? {}
+
+  // TODO: Load all skills via pagination instead of first 500.
+  const resolvedWorkbenchSkills = (workbenchSkills?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter(isNonNullable)
+    .map((skill) => ({
+      name: skill.name ?? '',
+      description: skill.description ?? null,
+      contents: skill.contents ?? '',
+    }))
 
   return {
     name,
@@ -480,6 +491,6 @@ function sanitizeInitialForm({
           group: group && { id: group.id, name: group.name },
         },
       ]) ?? [],
-    workbenchSkills: [],
+    workbenchSkills: resolvedWorkbenchSkills,
   }
 }
