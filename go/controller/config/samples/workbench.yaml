@@ -1,3 +1,20 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: workbench-tool-creds
+  namespace: default
+stringData:
+  token: "placeholder"
+  password: "placeholder"
+  apiKey: "placeholder"
+  appKey: "placeholder"
+  platformToken: "placeholder"
+  accessKeyId: "placeholder"
+  secretAccessKey: "placeholder"
+  clientSecret: "placeholder"
+  accessToken: "placeholder"
+  apiToken: "placeholder"
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
 metadata:
@@ -12,6 +29,8 @@ metadata:
 spec:
   name: workbenchtool_sample
   tool: HTTP
+  categories:
+    - INTEGRATION
   configuration:
     http:
       url: https://api.example.com/health
@@ -21,7 +40,6 @@ spec:
         properties:
           endpoint:
             type: string
-            description: API endpoint to check
         required:
           - endpoint
 ---
@@ -30,41 +48,358 @@ kind: WorkbenchTool
 metadata:
   labels:
     app.kubernetes.io/name: workbenchtool
-    app.kubernetes.io/instance: workbenchtool-metrics-sample
+    app.kubernetes.io/instance: workbenchtool-http-post-sample
     app.kubernetes.io/part-of: controller
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
-  name: workbenchtool-metrics-sample
+  name: workbenchtool-http-post-sample
   namespace: default
 spec:
-  name: workbenchtool_metrics_sample
+  name: workbenchtool_http_post_sample
   tool: HTTP
   categories:
     - INTEGRATION
   configuration:
     http:
-      url: https://metrics.example.com/query
+      url: https://api.example.com/query
       method: POST
       headers:
         - name: Content-Type
           value: application/json
+      body: '{"query": "{{ query }}"}'
       inputSchema:
         type: object
         properties:
           query:
             type: string
-            description: Metrics query string
-          timeRange:
-            type: object
-            properties:
-              start:
-                type: string
-                format: date-time
-              end:
-                type: string
-                format: date-time
         required:
           - query
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-prometheus-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-prometheus-sample
+  namespace: default
+spec:
+  name: workbenchtool_prometheus_sample
+  tool: PROMETHEUS
+  categories:
+    - METRICS
+  configuration:
+    prometheus:
+      url: https://prometheus.example.com
+      username: admin
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+      passwordSecretRef:
+        name: workbench-tool-creds
+        key: password
+      tenantId: my-tenant
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-loki-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-loki-sample
+  namespace: default
+spec:
+  name: workbenchtool_loki_sample
+  tool: LOKI
+  categories:
+    - LOGS
+  configuration:
+    loki:
+      url: https://loki.example.com
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+      tenantId: my-tenant
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-elastic-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-elastic-sample
+  namespace: default
+spec:
+  name: workbenchtool_elastic_sample
+  tool: ELASTIC
+  categories:
+    - LOGS
+  configuration:
+    elastic:
+      url: https://elastic.example.com:9200
+      username: elastic
+      passwordSecretRef:
+        name: workbench-tool-creds
+        key: password
+      index: logs-*
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-tempo-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-tempo-sample
+  namespace: default
+spec:
+  name: workbenchtool_tempo_sample
+  tool: TEMPO
+  categories:
+    - TRACES
+  configuration:
+    tempo:
+      url: https://tempo.example.com
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+      tenantId: my-tenant
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-datadog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-datadog-sample
+  namespace: default
+spec:
+  name: workbenchtool_datadog_sample
+  tool: DATADOG
+  categories:
+    - METRICS
+    - LOGS
+  configuration:
+    datadog:
+      site: datadoghq.com
+      apiKeySecretRef:
+        name: workbench-tool-creds
+        key: apiKey
+      appKeySecretRef:
+        name: workbench-tool-creds
+        key: appKey
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-dynatrace-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-dynatrace-sample
+  namespace: default
+spec:
+  name: workbenchtool_dynatrace_sample
+  tool: DYNATRACE
+  categories:
+    - METRICS
+    - LOGS
+    - TRACES
+  configuration:
+    dynatrace:
+      url: https://abc12345.live.dynatrace.com
+      platformTokenSecretRef:
+        name: workbench-tool-creds
+        key: platformToken
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-cloudwatch-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-cloudwatch-sample
+  namespace: default
+spec:
+  name: workbenchtool_cloudwatch_sample
+  tool: CLOUDWATCH
+  categories:
+    - METRICS
+    - LOGS
+  configuration:
+    cloudwatch:
+      region: us-east-1
+      logGroupNames:
+        - /aws/lambda/my-function
+        - /aws/eks/my-cluster
+      accessKeyIdSecretRef:
+        name: workbench-tool-creds
+        key: accessKeyId
+      secretAccessKeySecretRef:
+        name: workbench-tool-creds
+        key: secretAccessKey
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-azure-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-azure-sample
+  namespace: default
+spec:
+  name: workbenchtool_azure_sample
+  tool: AZURE
+  categories:
+    - METRICS
+  configuration:
+    azure:
+      subscriptionId: 00000000-0000-0000-0000-000000000000
+      tenantId: 00000000-0000-0000-0000-000000000001
+      clientId: 00000000-0000-0000-0000-000000000002
+      clientSecretSecretRef:
+        name: workbench-tool-creds
+        key: clientSecret
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-linear-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-linear-sample
+  namespace: default
+spec:
+  name: workbenchtool_linear_sample
+  tool: LINEAR
+  categories:
+    - TICKETING
+  configuration:
+    linear:
+      accessTokenSecretRef:
+        name: workbench-tool-creds
+        key: accessToken
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-atlassian-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-atlassian-sample
+  namespace: default
+spec:
+  name: workbenchtool_atlassian_sample
+  tool: ATLASSIAN
+  categories:
+    - TICKETING
+  configuration:
+    atlassian:
+      apiTokenSecretRef:
+        name: workbench-tool-creds
+        key: apiToken
+      email: user@example.com
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-mcp-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-mcp-sample
+  namespace: default
+spec:
+  name: workbenchtool_mcp_sample
+  tool: MCP
+  mcpServerRef:
+    name: my-mcp-server
+    namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-cloud-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-cloud-sample
+  namespace: default
+spec:
+  name: workbenchtool_cloud_sample
+  tool: CLOUD
+  cloudConnectionRef:
+    name: my-cloud-connection
+    namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: MCPServer
+metadata:
+  labels:
+    app.kubernetes.io/name: mcpserver
+    app.kubernetes.io/instance: my-mcp-server
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: my-mcp-server
+  namespace: default
+spec:
+  name: my-mcp-server
+  url: https://mcp.example.com
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: CloudConnection
+metadata:
+  labels:
+    app.kubernetes.io/name: cloudconnection
+    app.kubernetes.io/instance: my-cloud-connection
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: my-cloud-connection
+  namespace: default
+spec:
+  name: my-cloud-connection
+  provider: aws
+  configuration:
+    aws:
+      accessKeyId: "placeholder"
+      region: us-east-1
+      secretAccessKey:
+        name: workbench-tool-creds
+        key: secretAccessKey
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Workbench
@@ -84,7 +419,7 @@ spec:
   toolRefs:
     - name: workbenchtool-sample
       namespace: default
-    - name: workbenchtool-metrics-sample
+    - name: workbenchtool-prometheus-sample
       namespace: default
 ---
 apiVersion: deployments.plural.sh/v1alpha1
@@ -121,7 +456,7 @@ spec:
     name: workbench-sample
     namespace: default
   name: workbenchwebhook-sample
-  webhookName: test
+  webhookName: my-grafana-webhook
   matches:
     substring: "error"
     caseInsensitive: true
