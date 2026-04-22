@@ -9502,6 +9502,44 @@ type WorkbenchAttributes struct {
 	WorkbenchSkills []*WorkbenchSkillAttributes `json:"workbenchSkills,omitempty"`
 }
 
+type WorkbenchCanvasBlock struct {
+	Identifier *string                      `json:"identifier,omitempty"`
+	Type       *WorkbenchCanvasBlockType    `json:"type,omitempty"`
+	Layout     *WorkbenchCanvasBlockLayout  `json:"layout,omitempty"`
+	Content    *WorkbenchCanvasBlockContent `json:"content,omitempty"`
+}
+
+type WorkbenchCanvasBlockContent struct {
+	Markdown *string                    `json:"markdown,omitempty"`
+	Metrics  *WorkbenchCanvasToolGraph  `json:"metrics,omitempty"`
+	Logs     *WorkbenchCanvasToolGraph  `json:"logs,omitempty"`
+	Pie      *WorkbenchCanvasBlockGraph `json:"pie,omitempty"`
+	Bar      *WorkbenchCanvasBlockGraph `json:"bar,omitempty"`
+}
+
+type WorkbenchCanvasBlockGraph struct {
+	Title *string                     `json:"title,omitempty"`
+	Data  []*WorkbenchCanvasDataPoint `json:"data,omitempty"`
+}
+
+type WorkbenchCanvasBlockLayout struct {
+	X *int64 `json:"x,omitempty"`
+	Y *int64 `json:"y,omitempty"`
+	W *int64 `json:"w,omitempty"`
+	H *int64 `json:"h,omitempty"`
+}
+
+type WorkbenchCanvasDataPoint struct {
+	Label *string  `json:"label,omitempty"`
+	Value *float64 `json:"value,omitempty"`
+}
+
+type WorkbenchCanvasToolGraph struct {
+	Title   *string                 `json:"title,omitempty"`
+	Summary *string                 `json:"summary,omitempty"`
+	Query   *WorkbenchToolQueryData `json:"query,omitempty"`
+}
+
 type WorkbenchCoding struct {
 	// the mode of the coding agent
 	Mode *AgentRunMode `json:"mode,omitempty"`
@@ -9670,9 +9708,11 @@ type WorkbenchJobActivityEdge struct {
 }
 
 type WorkbenchJobActivityJobUpdate struct {
-	Diff          *string `json:"diff,omitempty"`
-	WorkingTheory *string `json:"workingTheory,omitempty"`
-	Conclusion    *string `json:"conclusion,omitempty"`
+	Diff          *string                   `json:"diff,omitempty"`
+	WorkingTheory *string                   `json:"workingTheory,omitempty"`
+	Conclusion    *string                   `json:"conclusion,omitempty"`
+	Topology      *string                   `json:"topology,omitempty"`
+	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
 }
 
 type WorkbenchJobActivityLog struct {
@@ -9695,12 +9735,20 @@ type WorkbenchJobActivityResult struct {
 	Error *string `json:"error,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
+	// dashboard canvas blocks for this activity
+	Canvas []*WorkbenchCanvasBlock `json:"canvas,omitempty"`
 	// metrics emitted by the activity
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
-	// metrics tool query emitted by the activity
+	// metrics tool queries emitted by the activity
+	MetricsQueries []*WorkbenchToolQueryData `json:"metricsQueries,omitempty"`
+	// logs tool queries emitted by the activity
+	LogsQueries []*WorkbenchToolQueryData `json:"logsQueries,omitempty"`
+	// primary metrics tool query for this activity
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
+	// primary logs tool query for this activity
+	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9741,6 +9789,8 @@ type WorkbenchJobResult struct {
 	Topology *string `json:"topology,omitempty"`
 	// todos for this result
 	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+	// dashboard canvas blocks for this job result
+	Canvas []*WorkbenchCanvasBlock `json:"canvas,omitempty"`
 	// metadata for this result
 	Metadata *WorkbenchJobResultMetadata `json:"metadata,omitempty"`
 	// the job this result belongs to
@@ -9756,6 +9806,8 @@ type WorkbenchJobResultMetadata struct {
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 	// metrics tool query for this result
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
+	// logs tool query for this result
+	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -16118,6 +16170,67 @@ func (e VulnUserInteraction) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type WorkbenchCanvasBlockType string
+
+const (
+	WorkbenchCanvasBlockTypeMarkdown WorkbenchCanvasBlockType = "MARKDOWN"
+	WorkbenchCanvasBlockTypeMetrics  WorkbenchCanvasBlockType = "METRICS"
+	WorkbenchCanvasBlockTypeLogs     WorkbenchCanvasBlockType = "LOGS"
+	WorkbenchCanvasBlockTypePie      WorkbenchCanvasBlockType = "PIE"
+	WorkbenchCanvasBlockTypeBar      WorkbenchCanvasBlockType = "BAR"
+)
+
+var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
+	WorkbenchCanvasBlockTypeMarkdown,
+	WorkbenchCanvasBlockTypeMetrics,
+	WorkbenchCanvasBlockTypeLogs,
+	WorkbenchCanvasBlockTypePie,
+	WorkbenchCanvasBlockTypeBar,
+}
+
+func (e WorkbenchCanvasBlockType) IsValid() bool {
+	switch e {
+	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchCanvasBlockType) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchCanvasBlockType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchCanvasBlockType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchCanvasBlockType", str)
+	}
+	return nil
+}
+
+func (e WorkbenchCanvasBlockType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchCanvasBlockType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchCanvasBlockType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type WorkbenchJobActivityStatus string
 
 const (
@@ -16192,6 +16305,7 @@ const (
 	WorkbenchJobActivityTypeUser           WorkbenchJobActivityType = "USER"
 	WorkbenchJobActivityTypeMemory         WorkbenchJobActivityType = "MEMORY"
 	WorkbenchJobActivityTypeConclusion     WorkbenchJobActivityType = "CONCLUSION"
+	WorkbenchJobActivityTypeCanvas         WorkbenchJobActivityType = "CANVAS"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -16205,11 +16319,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeUser,
 	WorkbenchJobActivityTypeMemory,
 	WorkbenchJobActivityTypeConclusion,
+	WorkbenchJobActivityTypeCanvas,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas:
 		return true
 	}
 	return false

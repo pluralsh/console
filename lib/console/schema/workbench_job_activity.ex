@@ -3,7 +3,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
   alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult, WorkbenchJobActivityAgentRun}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
-  defenum Type, coding: 0, observability: 1, integration: 2, ticketing: 3, infrastructure: 4, memo: 5, plan: 6, user: 7, memory: 8, conclusion: 9
+  defenum Type, coding: 0, observability: 1, integration: 2, ticketing: 3, infrastructure: 4, memo: 5, plan: 6, user: 7, memory: 8, conclusion: 9, canvas: 10
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending
@@ -19,6 +19,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     embeds_one :result, WorkbenchJobResult, on_replace: :update, primary_key: false do
       field :output,          :string
       field :error,           :string
+
+      embeds_many :canvas, Console.Schema.WorkbenchJobResult.CanvasBlock, on_replace: :delete
 
       embeds_one :job_update, JobUpdate, on_replace: :update do
         field :diff,            :string
@@ -41,6 +43,9 @@ defmodule Console.Schema.WorkbenchJobActivity do
         field :message,   :string
         field :labels,    :map
       end
+
+      embeds_many :metrics_queries, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :delete
+      embeds_many :logs_queries, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :delete
 
       embeds_one :metrics_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
       embeds_one :logs_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
@@ -104,6 +109,9 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast_embed(:job_update, with: &job_update_changeset/2)
     |> cast_embed(:logs, with: &log_changeset/2)
     |> cast_embed(:metrics_query)
+    |> cast_embed(:metrics_queries)
+    |> cast_embed(:logs_queries)
+    |> cast_embed(:canvas)
   end
 
   defp job_update_changeset(model, attrs) do

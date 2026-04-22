@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_activity_status, Console.Schema.WorkbenchJobActivity.Status
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
+  ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
 
   input_object :workbench_job_attributes do
     field :prompt, :string, description: "the prompt for this job"
@@ -344,18 +345,24 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_activity_result do
-    field :output,        :string, description: "output from the activity"
-    field :error,         :string, description: "error from the activity"
-    field :job_update,    :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
-    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
-    field :logs,          list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
-    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query emitted by the activity"
+    field :output,          :string, description: "output from the activity"
+    field :error,           :string, description: "error from the activity"
+    field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
+    field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
+    field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
+    field :logs,            list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :metrics_queries, list_of(:workbench_tool_query_data), description: "metrics tool queries emitted by the activity"
+    field :logs_queries,    list_of(:workbench_tool_query_data), description: "logs tool queries emitted by the activity"
+    field :metrics_query,   :workbench_tool_query_data, description: "primary metrics tool query for this activity"
+    field :logs_query,      :workbench_tool_query_data, description: "primary logs tool query for this activity"
   end
 
   object :workbench_job_activity_job_update do
-    field :diff,           :string
-    field :working_theory, :string
-    field :conclusion,     :string
+    field :diff,            :string
+    field :working_theory,  :string
+    field :conclusion,      :string
+    field :topology,        :string
+    field :todos,           list_of(:workbench_job_result_todo)
   end
 
   object :workbench_job_activity_metric do
@@ -372,12 +379,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result do
-    field :id,             non_null(:string), description: "the id of the result"
+    field :id,              non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
-    field :conclusion,     :string, description: "the conclusion for this result"
-    field :topology,       :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
-    field :todos,          list_of(:workbench_job_result_todo), description: "todos for this result"
-    field :metadata,       :workbench_job_result_metadata, description: "metadata for this result"
+    field :conclusion,      :string, description: "the conclusion for this result"
+    field :topology,        :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
+    field :todos,           list_of(:workbench_job_result_todo), description: "todos for this result"
+    field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this job result"
+    field :metadata,        :workbench_job_result_metadata, description: "metadata for this result"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this result belongs to"
 
@@ -385,15 +393,54 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result_metadata do
-    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics for this result"
-    field :logs,          list_of(:workbench_job_activity_log), description: "logs for this result"
-    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query for this result"
+    field :metrics,        list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :logs,           list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics_query,  :workbench_tool_query_data, description: "metrics tool query for this result"
+    field :logs_query,     :workbench_tool_query_data, description: "logs tool query for this result"
   end
 
   object :workbench_tool_query_data do
     field :tool_name, :string, description: "the tool name used to run this query"
     field :tool_args, :map, description: "arguments used for this tool query"
     field :summary,   :string, description: "a short summary describing what this query means"
+  end
+
+  object :workbench_canvas_data_point do
+    field :label, :string
+    field :value, :float
+  end
+
+  object :workbench_canvas_block_layout do
+    field :x, :integer
+    field :y, :integer
+    field :w, :integer
+    field :h, :integer
+  end
+
+  object :workbench_canvas_tool_graph do
+    field :title,   :string
+    field :summary, :string
+    field :query,   :workbench_tool_query_data
+  end
+
+  object :workbench_canvas_block_graph do
+    field :title, :string
+    field :data,  list_of(:workbench_canvas_data_point)
+  end
+
+  object :workbench_canvas_block_content do
+    field :markdown, :string
+    field :metrics,  :workbench_canvas_tool_graph
+    field :logs,     :workbench_canvas_tool_graph
+    field :pie,      :workbench_canvas_block_graph
+    field :bar,      :workbench_canvas_block_graph
+  end
+
+  object :workbench_canvas_block do
+    field :identifier, :string
+    field :type,       :workbench_canvas_block_type
+    field :layout,     :workbench_canvas_block_layout
+    field :content,    :workbench_canvas_block_content
   end
 
   object :workbench_job_result_todo do
@@ -1010,6 +1057,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
       config fn %{job_id: job_id}, ctx ->
         with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
           do: {:ok, topic: "workbench_jobs:#{job_id}:text_stream"}
+      end
+    end
+
+    field :workbench_canvas_stream, :workbench_canvas_block do
+      arg :activity_id, :id, description: "stream only events within the given activity"
+      arg :job_id,      non_null(:id), description: "stream all events within the given job"
+
+      config fn
+        %{activity_id: activity_id, job_id: job_id}, ctx when is_binary(activity_id) ->
+          with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+            do: {:ok, topic: "workbench_jobs:#{job_id}:#{activity_id}:canvas_stream"}
+        %{job_id: job_id}, ctx ->
+          with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+            do: {:ok, topic: "workbench_jobs:#{job_id}:canvas_stream"}
       end
     end
   end

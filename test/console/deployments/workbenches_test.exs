@@ -641,6 +641,45 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "save_canvas/2" do
+    test "persists canvas blocks on the activity result and the job result" do
+      job = insert(:workbench_job, result: build(:workbench_job_result))
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :coding, status: :running)
+
+      blocks = [
+        %{
+          identifier: "block-1",
+          type: :markdown,
+          layout: %{x: 0, y: 0, w: 6, h: 4},
+          content: %{markdown: "# Saved canvas"}
+        }
+      ]
+
+      {:ok, updated_job} = Workbenches.save_canvas(blocks, "saved canvas", activity)
+
+      assert updated_job.id == job.id
+
+      activity = refetch(activity)
+      assert [saved_activity] = activity.result.canvas
+      assert activity.result.output == "saved canvas"
+      assert saved_activity.identifier == "block-1"
+      assert saved_activity.type == :markdown
+      assert saved_activity.content.markdown == "# Saved canvas"
+
+      job = Console.Repo.preload(refetch(job), :result)
+      assert [saved_job] = job.result.canvas
+      assert saved_job.identifier == "block-1"
+      assert saved_job.type == :markdown
+      assert saved_job.content.markdown == "# Saved canvas"
+
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: %{id: activity_id}}}
+      assert activity_id == activity.id
+
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: job_id}}}
+      assert job_id == updated_job.id
+    end
+  end
+
   describe "update_job_status/2" do
     test "updates the job result and creates a memo activity" do
       job = insert(:workbench_job, result: %{working_theory: "old theory", conclusion: "old conclusion"})

@@ -30,6 +30,7 @@ You should always return a markdown formatted conclusion based on the investigat
 
 * the time series data that proves that conclusion.  The time series is persisted as the tool name and arguments used to query the most salient graph used in the investigation.
 * the log data that informs that conclusion
+* A list of metrics and logs queries that were used to inform that conclusion, which can be used to draft a full dashboard to explain the system to a given user.
 
 The overarching task is as follows:
 

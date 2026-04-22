@@ -20,7 +20,8 @@ defmodule Console.AI.Workbench.Engine do
     Environment,
     Message,
     Supervisor,
-    Heartbeat
+    Heartbeat,
+    Canvas
   }
   alias Console.AI.Tools.Workbench.{
     Complete,
@@ -29,8 +30,9 @@ defmodule Console.AI.Workbench.Engine do
     Skills,
     Skill,
     Notes,
-    FetchNotes
+    FetchNotes,
   }
+  alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
   require EEx
 
@@ -134,6 +136,22 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
+  defp spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
+    Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
+    with {:ok, activity} <- Workbenches.create_job_activity(%{type: :canvas, prompt: prompt, tool_call: tool_attrs(call)}, job) do
+      Canvas.new(activity, (job.result && job.result.canvas) || [])
+
+      output = Console.safely(fn ->
+        SA.Canvas.run(activity, job, %{environment | activities: activities})
+      end, & "error running subagent: #{inspect(&1)}, feel free to try again if it is still necessary")
+
+      Canvas.canvas()
+      |> Canvas.render()
+      |> Workbenches.save_canvas(output, activity)
+      |> log_error("Failed to update job activity")
+    end
+  end
+
   defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
     Console.mapify(status)
     |> Map.drop([:id])
@@ -184,6 +202,7 @@ defmodule Console.AI.Workbench.Engine do
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Notes,
+      CanvasTool,
       Complete,
     ]
   end

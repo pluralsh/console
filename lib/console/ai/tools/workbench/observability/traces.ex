@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Observability.Traces do
   use Console.AI.Tools.Workbench.Base
-  alias Console.AI.Tools.Workbench.Observability.{TimeRange, TracesJaegar}
+  alias Console.AI.Tools.Workbench.Observability.{TimeRange}
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{

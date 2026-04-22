@@ -527,6 +527,29 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Saves a list of canvas blocks to a job activity.
+  """
+  @spec save_canvas([map], binary,  WorkbenchJobActivity.t()) :: job_resp
+  def save_canvas(blocks, output, %WorkbenchJobActivity{} = activity) when is_list(blocks) do
+    %WorkbenchJobActivity{workbench_job: %WorkbenchJob{} = job} =
+      Repo.preload(activity, workbench_job: :result)
+
+    blocks = Console.mapify(blocks)
+
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      update_job_activity(%{result: %{output: output, canvas: blocks}}, activity)
+    end)
+    |> add_operation(:job, fn _ ->
+      job
+      |> WorkbenchJob.changeset(%{result: %{canvas: blocks}})
+      |> Repo.update()
+    end)
+    |> execute(extract: :job)
+    |> notify(:update)
+  end
+
+  @doc """
   Updates the status of a job, and creates a new recording the change made.
   """
   @spec update_job_status(%{status: map, prompt: binary, output: binary}, WorkbenchJob.t()) :: activity_resp

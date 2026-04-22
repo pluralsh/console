@@ -11987,6 +11987,7 @@ export type RootSubscriptionType = {
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
   toolThoughts?: Maybe<ToolThought>;
+  workbenchCanvasStream?: Maybe<WorkbenchCanvasBlock>;
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
@@ -12025,6 +12026,12 @@ export type RootSubscriptionTypeRunLogsDeltaArgs = {
 
 export type RootSubscriptionTypeToolThoughtsArgs = {
   threadId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootSubscriptionTypeWorkbenchCanvasStreamArgs = {
+  activityId?: InputMaybe<Scalars['ID']['input']>;
+  jobId: Scalars['ID']['input'];
 };
 
 
@@ -14875,6 +14882,58 @@ export type WorkbenchAttributes = {
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
+export type WorkbenchCanvasBlock = {
+  __typename?: 'WorkbenchCanvasBlock';
+  content?: Maybe<WorkbenchCanvasBlockContent>;
+  identifier?: Maybe<Scalars['String']['output']>;
+  layout?: Maybe<WorkbenchCanvasBlockLayout>;
+  type?: Maybe<WorkbenchCanvasBlockType>;
+};
+
+export type WorkbenchCanvasBlockContent = {
+  __typename?: 'WorkbenchCanvasBlockContent';
+  bar?: Maybe<WorkbenchCanvasBlockGraph>;
+  logs?: Maybe<WorkbenchCanvasToolGraph>;
+  markdown?: Maybe<Scalars['String']['output']>;
+  metrics?: Maybe<WorkbenchCanvasToolGraph>;
+  pie?: Maybe<WorkbenchCanvasBlockGraph>;
+};
+
+export type WorkbenchCanvasBlockGraph = {
+  __typename?: 'WorkbenchCanvasBlockGraph';
+  data?: Maybe<Array<Maybe<WorkbenchCanvasDataPoint>>>;
+  title?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchCanvasBlockLayout = {
+  __typename?: 'WorkbenchCanvasBlockLayout';
+  h?: Maybe<Scalars['Int']['output']>;
+  w?: Maybe<Scalars['Int']['output']>;
+  x?: Maybe<Scalars['Int']['output']>;
+  y?: Maybe<Scalars['Int']['output']>;
+};
+
+export enum WorkbenchCanvasBlockType {
+  Bar = 'BAR',
+  Logs = 'LOGS',
+  Markdown = 'MARKDOWN',
+  Metrics = 'METRICS',
+  Pie = 'PIE'
+}
+
+export type WorkbenchCanvasDataPoint = {
+  __typename?: 'WorkbenchCanvasDataPoint';
+  label?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['Float']['output']>;
+};
+
+export type WorkbenchCanvasToolGraph = {
+  __typename?: 'WorkbenchCanvasToolGraph';
+  query?: Maybe<WorkbenchToolQueryData>;
+  summary?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+};
+
 export type WorkbenchCoding = {
   __typename?: 'WorkbenchCoding';
   /** the mode of the coding agent */
@@ -15073,6 +15132,8 @@ export type WorkbenchJobActivityJobUpdate = {
   __typename?: 'WorkbenchJobActivityJobUpdate';
   conclusion?: Maybe<Scalars['String']['output']>;
   diff?: Maybe<Scalars['String']['output']>;
+  todos?: Maybe<Array<Maybe<WorkbenchJobResultTodo>>>;
+  topology?: Maybe<Scalars['String']['output']>;
   workingTheory?: Maybe<Scalars['String']['output']>;
 };
 
@@ -15093,15 +15154,23 @@ export type WorkbenchJobActivityMetric = {
 
 export type WorkbenchJobActivityResult = {
   __typename?: 'WorkbenchJobActivityResult';
+  /** dashboard canvas blocks for this activity */
+  canvas?: Maybe<Array<Maybe<WorkbenchCanvasBlock>>>;
   /** error from the activity */
   error?: Maybe<Scalars['String']['output']>;
   /** job update (diff, theory, conclusion) when present */
   jobUpdate?: Maybe<WorkbenchJobActivityJobUpdate>;
   /** logs emitted by the activity */
   logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
+  /** logs tool queries emitted by the activity */
+  logsQueries?: Maybe<Array<Maybe<WorkbenchToolQueryData>>>;
+  /** primary logs tool query for this activity */
+  logsQuery?: Maybe<WorkbenchToolQueryData>;
   /** metrics emitted by the activity */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
-  /** metrics tool query emitted by the activity */
+  /** metrics tool queries emitted by the activity */
+  metricsQueries?: Maybe<Array<Maybe<WorkbenchToolQueryData>>>;
+  /** primary metrics tool query for this activity */
   metricsQuery?: Maybe<WorkbenchToolQueryData>;
   /** output from the activity */
   output?: Maybe<Scalars['String']['output']>;
@@ -15116,6 +15185,7 @@ export enum WorkbenchJobActivityStatus {
 }
 
 export enum WorkbenchJobActivityType {
+  Canvas = 'CANVAS',
   Coding = 'CODING',
   Conclusion = 'CONCLUSION',
   Infrastructure = 'INFRASTRUCTURE',
@@ -15161,6 +15231,8 @@ export type WorkbenchJobProgress = {
 
 export type WorkbenchJobResult = {
   __typename?: 'WorkbenchJobResult';
+  /** dashboard canvas blocks for this job result */
+  canvas?: Maybe<Array<Maybe<WorkbenchCanvasBlock>>>;
   /** the conclusion for this result */
   conclusion?: Maybe<Scalars['String']['output']>;
   /** the id of the result */
@@ -15183,6 +15255,8 @@ export type WorkbenchJobResultMetadata = {
   __typename?: 'WorkbenchJobResultMetadata';
   /** logs for this result */
   logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
+  /** logs tool query for this result */
+  logsQuery?: Maybe<WorkbenchToolQueryData>;
   /** metrics for this result */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
   /** metrics tool query for this result */
