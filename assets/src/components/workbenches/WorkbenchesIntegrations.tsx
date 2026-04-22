@@ -41,6 +41,7 @@ const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
 }
 const CATEGORIES_ACCORDION_VALUE = 'categories'
 const TYPES_ACCORDION_VALUE = 'types'
+type FilterOption = { key: string; items: number }
 
 export function WorkbenchesIntegrations() {
   const theme = useTheme()
@@ -51,8 +52,18 @@ export function WorkbenchesIntegrations() {
   const [categoryFilterQuery, setCategoryFilterQuery] = useState('')
   const [typeFilterQuery, setTypeFilterQuery] = useState('')
 
-  const categories = useMemo(() => getCategories(WORKBENCH_TOOL_CARDS), [])
-  const types = useMemo(() => getTypes(WORKBENCH_TOOL_CARDS), [])
+  const categories = useMemo(
+    () => getFilterOptions(WORKBENCH_TOOL_CARDS, (card) => card.categoryLabels),
+    []
+  )
+
+  const types = useMemo(
+    () =>
+      getFilterOptions(WORKBENCH_TOOL_CARDS, (card) => [
+        TOOL_TYPE_TO_LABEL[card.type],
+      ]),
+    []
+  )
 
   const filteredCards = useMemo(() => {
     const categorySet = new Set(selectedCategories)
@@ -73,15 +84,7 @@ export function WorkbenchesIntegrations() {
       return true
     })
 
-    const sortedByLabel = [...byFilters].sort((a, b) => {
-      const byLabel = a.label.localeCompare(b.label)
-      if (byLabel !== 0) return byLabel
-
-      const byType = a.type.localeCompare(b.type)
-      if (byType !== 0) return byType
-
-      return (a.provider ?? '').localeCompare(b.provider ?? '')
-    })
+    const sortedByLabel = sortToolCards(byFilters)
 
     if (!query) return sortedByLabel
 
@@ -89,18 +92,15 @@ export function WorkbenchesIntegrations() {
     return fuse.search(query).map(({ item }) => item)
   }, [query, selectedCategories, selectedTypes])
 
-  const visibleTypes = useMemo(() => {
-    if (!typeFilterQuery) return types
+  const visibleTypes = useMemo(
+    () => filterOptionsByQuery(types, typeFilterQuery),
+    [types, typeFilterQuery]
+  )
 
-    const lower = typeFilterQuery.toLowerCase()
-    return types.filter(({ key }) => key.toLowerCase().includes(lower))
-  }, [types, typeFilterQuery])
-  const visibleCategories = useMemo(() => {
-    if (!categoryFilterQuery) return categories
-
-    const lower = categoryFilterQuery.toLowerCase()
-    return categories.filter(({ key }) => key.toLowerCase().includes(lower))
-  }, [categories, categoryFilterQuery])
+  const visibleCategories = useMemo(
+    () => filterOptionsByQuery(categories, categoryFilterQuery),
+    [categories, categoryFilterQuery]
+  )
 
   return (
     <WorkbenchTabWrapper>
@@ -300,11 +300,14 @@ export function WorkbenchesIntegrations() {
   )
 }
 
-function getCategories(cards: WorkbenchToolCard[]) {
+function getFilterOptions(
+  cards: WorkbenchToolCard[],
+  getValues: (card: WorkbenchToolCard) => string[]
+) {
   const counts = new Map<string, { label: string; count: number }>()
 
   cards.forEach((card) => {
-    card.categoryLabels.forEach((value) => {
+    getValues(card).forEach((value) => {
       const normalized = normalizeFilterValue(value)
       const current = counts.get(normalized)
       if (current) {
@@ -320,17 +323,26 @@ function getCategories(cards: WorkbenchToolCard[]) {
     .sort((a, b) => a.key.localeCompare(b.key))
 }
 
-function getTypes(cards: WorkbenchToolCard[]) {
-  const counts = new Map<string, number>()
+function filterOptionsByQuery(
+  options: FilterOption[],
+  query: string
+): FilterOption[] {
+  if (!query) return options
+  const lower = query.toLowerCase()
 
-  cards.forEach((card) => {
-    const label = TOOL_TYPE_TO_LABEL[card.type]
-    counts.set(label, (counts.get(label) ?? 0) + 1)
+  return options.filter(({ key }) => key.toLowerCase().includes(lower))
+}
+
+function sortToolCards(cards: WorkbenchToolCard[]) {
+  return [...cards].sort((a, b) => {
+    const byLabel = a.label.localeCompare(b.label)
+    if (byLabel !== 0) return byLabel
+
+    const byType = a.type.localeCompare(b.type)
+    if (byType !== 0) return byType
+
+    return (a.provider ?? '').localeCompare(b.provider ?? '')
   })
-
-  return Array.from(counts.entries())
-    .map(([key, items]) => ({ key, items }))
-    .sort((a, b) => a.key.localeCompare(b.key))
 }
 
 function normalizeFilterValue(value: string) {
