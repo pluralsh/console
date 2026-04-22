@@ -15,6 +15,7 @@ import {
 } from '@pluralsh/design-system'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
+import { animated, useTransition } from '@react-spring/web'
 import Fuse from 'fuse.js'
 import { useMemo, useState } from 'react'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
@@ -41,6 +42,7 @@ const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
 }
 const CATEGORIES_ACCORDION_VALUE = 'categories'
 const TYPES_ACCORDION_VALUE = 'types'
+
 type FilterOption = { key: string; items: number }
 
 export function WorkbenchesIntegrations() {
@@ -51,6 +53,10 @@ export function WorkbenchesIntegrations() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [categoryFilterQuery, setCategoryFilterQuery] = useState('')
   const [typeFilterQuery, setTypeFilterQuery] = useState('')
+  const [openFilterSections, setOpenFilterSections] = useState<string[]>([
+    CATEGORIES_ACCORDION_VALUE,
+    TYPES_ACCORDION_VALUE,
+  ])
 
   const categories = useMemo(
     () => getFilterOptions(WORKBENCH_TOOL_CARDS, (card) => card.categoryLabels),
@@ -101,6 +107,14 @@ export function WorkbenchesIntegrations() {
     () => filterOptionsByQuery(categories, categoryFilterQuery),
     [categories, categoryFilterQuery]
   )
+  const panelTransitions = useTransition(filtersVisible ? [true] : [], {
+    from: { opacity: 0, width: 0, marginLeft: 0 },
+    enter: { opacity: 1, width: 260, marginLeft: theme.spacing.large },
+    leave: { opacity: 0, width: 0, marginLeft: 0 },
+    config: filtersVisible
+      ? { mass: 0.6, tension: 280, velocity: 0.02 }
+      : { mass: 0.6, tension: 400, velocity: 0.02, restVelocity: 0.1 },
+  })
 
   return (
     <WorkbenchTabWrapper>
@@ -216,85 +230,92 @@ export function WorkbenchesIntegrations() {
             )}
           </CardGrid>
         </Flex>
-        {filtersVisible && (
-          <FiltersPanelSC>
-            <Accordion
-              type="multiple"
-              defaultValue={[CATEGORIES_ACCORDION_VALUE, TYPES_ACCORDION_VALUE]}
-            >
-              <AccordionItem
-                value={CATEGORIES_ACCORDION_VALUE}
-                trigger={`Categories (${categories.length})`}
+        {panelTransitions((styles) => (
+          <AnimatedFiltersPanelSC style={styles}>
+            <FiltersPanelContentSC>
+              <Accordion
+                type="multiple"
+                value={openFilterSections}
+                onValueChange={(value) =>
+                  setOpenFilterSections(value as string[])
+                }
               >
-                <Flex
-                  direction="column"
-                  gap="xsmall"
+                <AccordionItem
+                  value={CATEGORIES_ACCORDION_VALUE}
+                  trigger={`Categories (${categories.length})`}
                 >
-                  <Input
-                    value={categoryFilterQuery}
-                    onChange={(e) =>
-                      setCategoryFilterQuery(e.currentTarget.value)
-                    }
-                    showClearButton
-                    placeholder="Filter categories"
-                    startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                    width="100%"
-                  />
-                  <FilterOptionsSC>
-                    {visibleCategories.map(({ key, items }) => (
-                      <Checkbox
-                        key={key}
-                        small
-                        checked={selectedCategories.includes(key)}
-                        onChange={() =>
-                          setSelectedCategories((current) =>
-                            toggleFilterValue(current, key)
-                          )
-                        }
-                      >
-                        {key} ({items})
-                      </Checkbox>
-                    ))}
-                  </FilterOptionsSC>
-                </Flex>
-              </AccordionItem>
-              <AccordionItem
-                value={TYPES_ACCORDION_VALUE}
-                trigger={`Types (${types.length})`}
-              >
-                <Flex
-                  direction="column"
-                  gap="xsmall"
+                  <Flex
+                    direction="column"
+                    gap="xsmall"
+                  >
+                    <Input
+                      value={categoryFilterQuery}
+                      onChange={(e) =>
+                        setCategoryFilterQuery(e.currentTarget.value)
+                      }
+                      showClearButton
+                      placeholder="Filter categories"
+                      startIcon={<MagnifyingGlassIcon color="icon-light" />}
+                      width="100%"
+                    />
+                    <FilterOptionsSC>
+                      {visibleCategories.map(({ key, items }) => (
+                        <Checkbox
+                          key={key}
+                          small
+                          checked={selectedCategories.includes(key)}
+                          onChange={() =>
+                            setSelectedCategories((current) =>
+                              toggleFilterValue(current, key)
+                            )
+                          }
+                        >
+                          {key} ({items})
+                        </Checkbox>
+                      ))}
+                    </FilterOptionsSC>
+                  </Flex>
+                </AccordionItem>
+                <AccordionItem
+                  value={TYPES_ACCORDION_VALUE}
+                  trigger={`Types (${types.length})`}
                 >
-                  <Input
-                    value={typeFilterQuery}
-                    onChange={(e) => setTypeFilterQuery(e.currentTarget.value)}
-                    showClearButton
-                    placeholder="Filter types"
-                    startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                    width="100%"
-                  />
-                  <FilterOptionsSC>
-                    {visibleTypes.map(({ key, items }) => (
-                      <Checkbox
-                        key={key}
-                        small
-                        checked={selectedTypes.includes(key)}
-                        onChange={() =>
-                          setSelectedTypes((current) =>
-                            toggleFilterValue(current, key)
-                          )
-                        }
-                      >
-                        {key} ({items})
-                      </Checkbox>
-                    ))}
-                  </FilterOptionsSC>
-                </Flex>
-              </AccordionItem>
-            </Accordion>
-          </FiltersPanelSC>
-        )}
+                  <Flex
+                    direction="column"
+                    gap="xsmall"
+                  >
+                    <Input
+                      value={typeFilterQuery}
+                      onChange={(e) =>
+                        setTypeFilterQuery(e.currentTarget.value)
+                      }
+                      showClearButton
+                      placeholder="Filter types"
+                      startIcon={<MagnifyingGlassIcon color="icon-light" />}
+                      width="100%"
+                    />
+                    <FilterOptionsSC>
+                      {visibleTypes.map(({ key, items }) => (
+                        <Checkbox
+                          key={key}
+                          small
+                          checked={selectedTypes.includes(key)}
+                          onChange={() =>
+                            setSelectedTypes((current) =>
+                              toggleFilterValue(current, key)
+                            )
+                          }
+                        >
+                          {key} ({items})
+                        </Checkbox>
+                      ))}
+                    </FilterOptionsSC>
+                  </Flex>
+                </AccordionItem>
+              </Accordion>
+            </FiltersPanelContentSC>
+          </AnimatedFiltersPanelSC>
+        ))}
       </FiltersLayoutSC>
     </WorkbenchTabWrapper>
   )
@@ -367,14 +388,19 @@ const ToolCardSC = styled(Card)(() => ({
   textDecoration: 'none',
 }))
 
-const FiltersLayoutSC = styled.div(({ theme }) => ({
+const FiltersLayoutSC = styled.div({
   display: 'flex',
-  gap: theme.spacing.large,
   width: '100%',
   minHeight: 0,
-}))
+})
 
-const FiltersPanelSC = styled.div(({ theme }) => ({
+const AnimatedFiltersPanelSC = styled(animated.div)({
+  flexShrink: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+})
+
+const FiltersPanelContentSC = styled.div(({ theme }) => ({
   width: 260,
   minWidth: 260,
   maxHeight: '100%',
