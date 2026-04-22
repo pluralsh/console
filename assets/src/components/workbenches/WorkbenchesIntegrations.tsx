@@ -7,6 +7,7 @@ import {
   Card,
   Checkbox,
   Chip,
+  EmptyState,
   FiltersIcon,
   Flex,
   IconFrame,
@@ -107,6 +108,19 @@ export function WorkbenchesIntegrations() {
     () => filterOptionsByQuery(categories, categoryFilterQuery),
     [categories, categoryFilterQuery]
   )
+
+  const hasActiveSearch = query.trim().length > 0
+  const hasActiveFilters =
+    selectedCategories.length > 0 || selectedTypes.length > 0
+  const showEmptyState =
+    filteredCards.length === 0 && (hasActiveSearch || hasActiveFilters)
+
+  const resetSearchAndFilters = () => {
+    setQuery('')
+    setSelectedCategories([])
+    setSelectedTypes([])
+  }
+
   const panelTransitions = useTransition(filtersVisible ? [true] : [], {
     from: { opacity: 0, width: 0, marginLeft: 0 },
     enter: { opacity: 1, width: 260, marginLeft: theme.spacing.large },
@@ -155,80 +169,100 @@ export function WorkbenchesIntegrations() {
               Filters
             </Button>
           </Flex>
-          <CardGrid styles={workbenchToolCardGridStyles(280)}>
-            {filteredCards.map(
-              ({ type, provider, label, description, categoryLabels }) => {
-                const params = new URLSearchParams({
-                  [WORKBENCHES_TOOLS_TYPE_PARAM]: type,
-                })
-                if (provider)
-                  params.set(WORKBENCHES_TOOLS_PROVIDER_PARAM, provider)
-                return (
-                  <ToolCardSC key={`${type}-${provider ?? ''}`}>
-                    <WorkbenchToolCardBody>
-                      <StackedText
-                        first={
-                          <Flex
-                            align="center"
-                            gap="medium"
-                          >
-                            <IconFrame
-                              circle
-                              type="secondary"
-                              icon={
-                                <WorkbenchToolIcon
-                                  size={20}
-                                  type={type}
-                                  provider={provider}
-                                />
-                              }
-                            />
-                            {label}
-                          </Flex>
-                        }
-                        firstPartialType="subtitle1"
-                        firstColor="text"
-                        second={description}
-                        secondPartialType="body2"
-                        secondColor="text-light"
-                        gap="small"
-                      />
-                      <Flex
-                        direction="column"
-                        gap="small"
-                        css={{ marginTop: 'auto' }}
-                      >
-                        <Flex
-                          gap="xsmall"
-                          wrap="wrap"
-                        >
-                          {categoryLabels.map((cat) => (
-                            <Chip
-                              key={cat}
-                              size="small"
-                              css={{ height: 'fit-content' }}
+          {showEmptyState ? (
+            <Card
+              css={{
+                padding: theme.spacing.large,
+                ...(theme.mode === 'light' && {
+                  backgroundColor: theme.colors['fill-zero'],
+                }),
+              }}
+            >
+              <EmptyState message="There are no results with these filters.">
+                <Button
+                  secondary
+                  onClick={resetSearchAndFilters}
+                >
+                  Reset filters
+                </Button>
+              </EmptyState>
+            </Card>
+          ) : (
+            <CardGrid styles={workbenchToolCardGridStyles(280)}>
+              {filteredCards.map(
+                ({ type, provider, label, description, categoryLabels }) => {
+                  const params = new URLSearchParams({
+                    [WORKBENCHES_TOOLS_TYPE_PARAM]: type,
+                  })
+                  if (provider)
+                    params.set(WORKBENCHES_TOOLS_PROVIDER_PARAM, provider)
+                  return (
+                    <ToolCardSC key={`${type}-${provider ?? ''}`}>
+                      <WorkbenchToolCardBody>
+                        <StackedText
+                          first={
+                            <Flex
+                              align="center"
+                              gap="medium"
                             >
-                              {cat}
-                            </Chip>
-                          ))}
-                        </Flex>
-                        <Button
-                          small
-                          floating
-                          as={Link}
-                          to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${params.toString()}`}
-                          style={{ boxShadow: 'none' }}
-                          startIcon={<AddIcon />}
+                              <IconFrame
+                                circle
+                                type="secondary"
+                                icon={
+                                  <WorkbenchToolIcon
+                                    size={20}
+                                    type={type}
+                                    provider={provider}
+                                  />
+                                }
+                              />
+                              {label}
+                            </Flex>
+                          }
+                          firstPartialType="subtitle1"
+                          firstColor="text"
+                          second={description}
+                          secondPartialType="body2"
+                          secondColor="text-light"
+                          gap="small"
+                        />
+                        <Flex
+                          direction="column"
+                          gap="small"
+                          css={{ marginTop: 'auto' }}
                         >
-                          Add tool
-                        </Button>
-                      </Flex>
-                    </WorkbenchToolCardBody>
-                  </ToolCardSC>
-                )
-              }
-            )}
-          </CardGrid>
+                          <Flex
+                            gap="xsmall"
+                            wrap="wrap"
+                          >
+                            {categoryLabels.map((cat) => (
+                              <Chip
+                                key={cat}
+                                size="small"
+                                css={{ height: 'fit-content' }}
+                              >
+                                {cat}
+                              </Chip>
+                            ))}
+                          </Flex>
+                          <Button
+                            small
+                            floating
+                            as={Link}
+                            to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${params.toString()}`}
+                            style={{ boxShadow: 'none' }}
+                            startIcon={<AddIcon />}
+                          >
+                            Add tool
+                          </Button>
+                        </Flex>
+                      </WorkbenchToolCardBody>
+                    </ToolCardSC>
+                  )
+                }
+              )}
+            </CardGrid>
+          )}
         </Flex>
         {panelTransitions((styles) => (
           <AnimatedFiltersPanelSC style={styles}>
