@@ -71,6 +71,7 @@ export function WorkbenchesConfiguredTools() {
                 <ToolCardSC key={id}>
                   <WorkbenchToolCardBody>
                     <StackedText
+                      truncate
                       first={name}
                       firstPartialType="body2Bold"
                       firstColor="text"
@@ -88,6 +89,7 @@ export function WorkbenchesConfiguredTools() {
                           }
                         />
                       }
+                      css={{ minWidth: 0, flex: 1, width: '100%' }}
                     />
                     <WorkbenchesConfiguredToolMetadata
                       toolId={id}

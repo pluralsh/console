@@ -324,6 +324,7 @@ export function WebhookForm() {
                   })
                 }
                 width="100%"
+                css={{ whiteSpace: 'nowrap' }}
               >
                 Setup Guide
               </Button>
