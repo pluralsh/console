@@ -420,7 +420,31 @@ spec:
   toolRefs:
     - name: workbenchtool-sample
       namespace: default
+    - name: workbenchtool-http-post-sample
+      namespace: default
     - name: workbenchtool-prometheus-sample
+      namespace: default
+    - name: workbenchtool-loki-sample
+      namespace: default
+    - name: workbenchtool-elastic-sample
+      namespace: default
+    - name: workbenchtool-tempo-sample
+      namespace: default
+    - name: workbenchtool-datadog-sample
+      namespace: default
+    - name: workbenchtool-dynatrace-sample
+      namespace: default
+    - name: workbenchtool-cloudwatch-sample
+      namespace: default
+    - name: workbenchtool-azure-sample
+      namespace: default
+    - name: workbenchtool-linear-sample
+      namespace: default
+    - name: workbenchtool-atlassian-sample
+      namespace: default
+    - name: workbenchtool-mcp-sample
+      namespace: default
+    - name: workbenchtool-cloud-sample
       namespace: default
 ---
 apiVersion: deployments.plural.sh/v1alpha1
