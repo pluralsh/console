@@ -6,9 +6,13 @@ import {
   Chip,
   Flex,
   IconFrame,
+  Input,
+  MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
+import Fuse from 'fuse.js'
+import { useMemo, useState } from 'react'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { Link } from 'react-router-dom'
@@ -24,8 +28,23 @@ import {
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
+import type { WorkbenchToolCard } from './tools/workbenchToolsUtils'
+
+const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
+  keys: ['label', 'description', 'categoryLabels', 'type', 'provider'],
+  threshold: 0.25,
+}
 
 export function WorkbenchesIntegrations() {
+  const [query, setQuery] = useState('')
+
+  const filteredCards = useMemo(() => {
+    if (!query) return WORKBENCH_TOOL_CARDS
+
+    const fuse = new Fuse(WORKBENCH_TOOL_CARDS, SEARCH_OPTIONS)
+    return fuse.search(query).map(({ item }) => item)
+  }, [query])
+
   return (
     <WorkbenchTabWrapper>
       <WorkbenchTabHeader
@@ -33,8 +52,25 @@ export function WorkbenchesIntegrations() {
         title="Integrations"
         description="Integrate your dev stack, including observability, ticketing, MCP, and Cloud services with Plural."
       />
+      <Flex gap="medium">
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+          showClearButton
+          placeholder="Search workbench connectors"
+          startIcon={<MagnifyingGlassIcon color="icon-light" />}
+          width="100%"
+        />
+        {/* <Button
+          secondary
+          startIcon={<FiltersIcon />}
+          onClick={() => undefined}
+        >
+          Filters
+        </Button> */}
+      </Flex>
       <CardGrid styles={workbenchToolCardGridStyles(280)}>
-        {WORKBENCH_TOOL_CARDS.map(
+        {filteredCards.map(
           ({ type, provider, label, description, categoryLabels }) => {
             const params = new URLSearchParams({
               [WORKBENCHES_TOOLS_TYPE_PARAM]: type,

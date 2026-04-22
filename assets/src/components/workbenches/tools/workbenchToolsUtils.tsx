@@ -170,7 +170,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
 }
 
-type WorkbenchToolCard = {
+export type WorkbenchToolCard = {
   type: WorkbenchToolType
   provider?: Provider
   label: string
