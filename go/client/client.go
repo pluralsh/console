@@ -566,6 +566,7 @@ type AgentRunFragment struct {
 	ID              string                     "json:\"id\" graphql:\"id\""
 	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
 	Repository      string                     "json:\"repository\" graphql:\"repository\""
+	Branch          *string                    "json:\"branch,omitempty\" graphql:\"branch\""
 	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
 	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
@@ -601,6 +602,12 @@ func (t *AgentRunFragment) GetRepository() string {
 		t = &AgentRunFragment{}
 	}
 	return t.Repository
+}
+func (t *AgentRunFragment) GetBranch() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Branch
 }
 func (t *AgentRunFragment) GetMode() *AgentRunMode {
 	if t == nil {
@@ -38160,6 +38167,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -38309,6 +38317,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -38467,6 +38476,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -38672,6 +38682,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -38815,6 +38826,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion

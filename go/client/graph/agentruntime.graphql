@@ -188,6 +188,7 @@ fragment AgentRunFragment on AgentRun {
     id
     prompt
     repository
+    branch
     mode
     language
     languageVersion
