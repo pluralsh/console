@@ -81,21 +81,27 @@ const columns = [
       const { spacing } = theme
       const { pullRequests, result, status } = getValue()
       const prs = pullRequests?.filter(isNonNullable) ?? []
-      const singlePrStatus = prs.length === 1 ? prs[0].status : null
-      const singlePrIcon =
-        singlePrStatus === PrStatus.Merged ? (
-          <PrMergedIcon color={theme.colors['code-block-purple']} />
-        ) : singlePrStatus === PrStatus.Closed ? (
-          <PrClosedIcon color="icon-danger" />
-        ) : (
-          <PrOpenIcon color="icon-success" />
-        )
-      const singlePrTooltip =
-        singlePrStatus === PrStatus.Merged
-          ? 'View merged pull request'
-          : singlePrStatus === PrStatus.Closed
-            ? 'View closed pull request'
-            : 'View open pull request'
+      const singlePrProps =
+        prs.length === 1
+          ? (() => {
+              const singlePrStatus = prs[0].status
+              const icon =
+                singlePrStatus === PrStatus.Merged ? (
+                  <PrMergedIcon color={theme.colors['code-block-purple']} />
+                ) : singlePrStatus === PrStatus.Closed ? (
+                  <PrClosedIcon color="icon-danger" />
+                ) : (
+                  <PrOpenIcon color="icon-success" />
+                )
+              const tooltip =
+                singlePrStatus === PrStatus.Merged
+                  ? 'View merged pull request'
+                  : singlePrStatus === PrStatus.Closed
+                    ? 'View closed pull request'
+                    : 'View open pull request'
+              return { icon, tooltip }
+            })()
+          : null
 
       return (
         <Flex
@@ -108,12 +114,7 @@ const columns = [
             size="small"
             type="tertiary"
             prs={prs}
-            {...(prs.length === 1
-              ? {
-                  icon: singlePrIcon,
-                  tooltip: singlePrTooltip,
-                }
-              : {})}
+            {...(singlePrProps ?? {})}
           />
           {result?.conclusion && (
             <ActivityModalIcon
