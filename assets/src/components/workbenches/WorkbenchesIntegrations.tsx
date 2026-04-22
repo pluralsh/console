@@ -27,7 +27,7 @@ import {
   WORKBENCHES_TOOLS_TYPE_PARAM,
 } from './tools/WorkbenchToolCreateOrEdit'
 import {
-  PROVIDER_TO_LABEL,
+  TOOL_TYPE_TO_LABEL,
   WORKBENCH_TOOL_CARDS,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
@@ -40,23 +40,23 @@ const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
   threshold: 0.25,
 }
 const CATEGORIES_ACCORDION_VALUE = 'categories'
-const PROVIDERS_ACCORDION_VALUE = 'providers'
+const TYPES_ACCORDION_VALUE = 'types'
 
 export function WorkbenchesIntegrations() {
   const theme = useTheme()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(false)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedProviders, setSelectedProviders] = useState<string[]>([])
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [categoryFilterQuery, setCategoryFilterQuery] = useState('')
-  const [providerFilterQuery, setProviderFilterQuery] = useState('')
+  const [typeFilterQuery, setTypeFilterQuery] = useState('')
 
   const categories = useMemo(() => getCategories(WORKBENCH_TOOL_CARDS), [])
-  const providers = useMemo(() => getProviders(WORKBENCH_TOOL_CARDS), [])
+  const types = useMemo(() => getTypes(WORKBENCH_TOOL_CARDS), [])
 
   const filteredCards = useMemo(() => {
     const categorySet = new Set(selectedCategories)
-    const providerSet = new Set(selectedProviders)
+    const typeSet = new Set(selectedTypes)
 
     const byFilters = WORKBENCH_TOOL_CARDS.filter((card) => {
       if (
@@ -66,10 +66,7 @@ export function WorkbenchesIntegrations() {
         return false
       }
 
-      if (
-        providerSet.size > 0 &&
-        !providerSet.has(card.provider ? PROVIDER_TO_LABEL[card.provider] : '')
-      ) {
+      if (typeSet.size > 0 && !typeSet.has(TOOL_TYPE_TO_LABEL[card.type])) {
         return false
       }
 
@@ -90,14 +87,14 @@ export function WorkbenchesIntegrations() {
 
     const fuse = new Fuse(sortedByLabel, SEARCH_OPTIONS)
     return fuse.search(query).map(({ item }) => item)
-  }, [query, selectedCategories, selectedProviders])
+  }, [query, selectedCategories, selectedTypes])
 
-  const visibleProviders = useMemo(() => {
-    if (!providerFilterQuery) return providers
+  const visibleTypes = useMemo(() => {
+    if (!typeFilterQuery) return types
 
-    const lower = providerFilterQuery.toLowerCase()
-    return providers.filter(({ key }) => key.toLowerCase().includes(lower))
-  }, [providers, providerFilterQuery])
+    const lower = typeFilterQuery.toLowerCase()
+    return types.filter(({ key }) => key.toLowerCase().includes(lower))
+  }, [types, typeFilterQuery])
   const visibleCategories = useMemo(() => {
     if (!categoryFilterQuery) return categories
 
@@ -136,7 +133,7 @@ export function WorkbenchesIntegrations() {
                 borderColor:
                   filtersVisible ||
                   selectedCategories.length ||
-                  selectedProviders.length
+                  selectedTypes.length
                     ? theme.colors['border-primary']
                     : undefined,
               }}
@@ -223,10 +220,7 @@ export function WorkbenchesIntegrations() {
           <FiltersPanelSC>
             <Accordion
               type="multiple"
-              defaultValue={[
-                CATEGORIES_ACCORDION_VALUE,
-                PROVIDERS_ACCORDION_VALUE,
-              ]}
+              defaultValue={[CATEGORIES_ACCORDION_VALUE, TYPES_ACCORDION_VALUE]}
             >
               <AccordionItem
                 value={CATEGORIES_ACCORDION_VALUE}
@@ -265,31 +259,29 @@ export function WorkbenchesIntegrations() {
                 </Flex>
               </AccordionItem>
               <AccordionItem
-                value={PROVIDERS_ACCORDION_VALUE}
-                trigger={`Providers (${providers.length})`}
+                value={TYPES_ACCORDION_VALUE}
+                trigger={`Types (${types.length})`}
               >
                 <Flex
                   direction="column"
                   gap="xsmall"
                 >
                   <Input
-                    value={providerFilterQuery}
-                    onChange={(e) =>
-                      setProviderFilterQuery(e.currentTarget.value)
-                    }
+                    value={typeFilterQuery}
+                    onChange={(e) => setTypeFilterQuery(e.currentTarget.value)}
                     showClearButton
-                    placeholder="Filter providers"
+                    placeholder="Filter types"
                     startIcon={<MagnifyingGlassIcon color="icon-light" />}
                     width="100%"
                   />
                   <FilterOptionsSC>
-                    {visibleProviders.map(({ key, items }) => (
+                    {visibleTypes.map(({ key, items }) => (
                       <Checkbox
                         key={key}
                         small
-                        checked={selectedProviders.includes(key)}
+                        checked={selectedTypes.includes(key)}
                         onChange={() =>
-                          setSelectedProviders((current) =>
+                          setSelectedTypes((current) =>
                             toggleFilterValue(current, key)
                           )
                         }
@@ -328,13 +320,11 @@ function getCategories(cards: WorkbenchToolCard[]) {
     .sort((a, b) => a.key.localeCompare(b.key))
 }
 
-function getProviders(cards: WorkbenchToolCard[]) {
+function getTypes(cards: WorkbenchToolCard[]) {
   const counts = new Map<string, number>()
 
   cards.forEach((card) => {
-    if (!card.provider) return
-
-    const label = PROVIDER_TO_LABEL[card.provider]
+    const label = TOOL_TYPE_TO_LABEL[card.type]
     counts.set(label, (counts.get(label) ?? 0) + 1)
   })
 
