@@ -16,4 +16,6 @@ defmodule Console.AI.Tools.Workbench.Canvas do
     |> cast(attrs, [:prompt])
     |> validate_required([:prompt])
   end
+
+  def implement(result), do: {:ok, result}
 end

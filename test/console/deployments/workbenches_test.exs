@@ -660,6 +660,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated_job.id == job.id
 
       activity = refetch(activity)
+      assert activity.status == :successful
       assert [saved_activity] = activity.result.canvas
       assert activity.result.output == "saved canvas"
       assert saved_activity.identifier == "block-1"

@@ -538,7 +538,7 @@ defmodule Console.Deployments.Workbenches do
 
     start_transaction()
     |> add_operation(:activity, fn _ ->
-      update_job_activity(%{result: %{output: output, canvas: blocks}}, activity)
+      update_job_activity(%{status: :successful, result: %{output: output, canvas: blocks}}, activity)
     end)
     |> add_operation(:job, fn _ ->
       job
