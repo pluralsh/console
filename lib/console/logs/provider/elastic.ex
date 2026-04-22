@@ -157,7 +157,7 @@ defmodule Console.Logs.Provider.Elastic do
 
     put_in(resp, ~w(kubernetes node labels), nil)
     |> put_in(~w(kubernetes labels), nil)
-    |> Map.take(~w(kubernetes cloud container cluster))
+    |> Map.take(~w(kubernetes cloud container cluster custom))
     |> Line.flat_map()
     |> Line.facets()
   end
