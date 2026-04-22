@@ -399,6 +399,7 @@ spec:
       region: us-east-1
       secretAccessKey:
         name: workbench-tool-creds
+        namespace: default
         key: secretAccessKey
 ---
 apiVersion: deployments.plural.sh/v1alpha1
