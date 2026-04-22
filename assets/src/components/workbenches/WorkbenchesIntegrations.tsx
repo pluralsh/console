@@ -73,18 +73,23 @@ export function WorkbenchesIntegrations() {
   )
 
   const filteredCards = useMemo(() => {
-    const categorySet = new Set(selectedCategories)
-    const typeSet = new Set(selectedTypes)
+    const categorySet = new Set(selectedCategories.map(normalizeFilterValue))
+    const typeSet = new Set(selectedTypes.map(normalizeFilterValue))
 
     const byFilters = WORKBENCH_TOOL_CARDS.filter((card) => {
       if (
         categorySet.size > 0 &&
-        !card.categoryLabels.some((category) => categorySet.has(category))
+        !card.categoryLabels.some((category) =>
+          categorySet.has(normalizeFilterValue(category))
+        )
       ) {
         return false
       }
 
-      if (typeSet.size > 0 && !typeSet.has(TOOL_TYPE_TO_LABEL[card.type])) {
+      if (
+        typeSet.size > 0 &&
+        !typeSet.has(normalizeFilterValue(TOOL_TYPE_TO_LABEL[card.type]))
+      ) {
         return false
       }
 
