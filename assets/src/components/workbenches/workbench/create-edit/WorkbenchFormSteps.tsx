@@ -870,6 +870,7 @@ export function WorkbenchAttachToolsStep({
                     gap="small"
                   >
                     <StackedText
+                      truncate
                       first={name}
                       firstPartialType="body2Bold"
                       firstColor="text"
