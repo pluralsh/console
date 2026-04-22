@@ -24,7 +24,7 @@ import {
 
 export type SidePanel = 'ai-chat' | 'webhook-setup-guide' | 'workbench-job'
 
-export type SidePanelWidthOverride = {
+type SidePanelWidthOverride = {
   minWidth?: number
   maxWidthVw?: number
   initialWidthVw?: number

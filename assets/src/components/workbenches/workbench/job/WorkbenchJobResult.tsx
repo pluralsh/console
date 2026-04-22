@@ -8,27 +8,23 @@ import {
   prettifyRepoUrl,
   PrOpenIcon,
 } from '@pluralsh/design-system'
+import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
 } from 'generated/graphql'
-import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import {
-  hasWorkbenchMetricsToolQuery,
-  JobActivityMetrics,
-} from './WorkbenchJobActivityResults'
+import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
-import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
-import { StackedText } from 'components/utils/table/StackedText'
-import { isJobRunning } from './WorkbenchJobActivity'
 
 export function WorkbenchJobResult({
   job,
@@ -75,37 +71,6 @@ export function WorkbenchJobResult({
         />
       )}
     </Flex>
-  )
-}
-
-export function WorkbenchJobMetrics({
-  job,
-  loading,
-}: {
-  job: Nullable<WorkbenchJobFragment>
-  loading: boolean
-}) {
-  const metricsQuery = job?.result?.metadata?.metricsQuery
-
-  if (loading)
-    return (
-      <RectangleSkeleton
-        $height={320}
-        $width="100%"
-      />
-    )
-
-  if (!job?.id || !hasWorkbenchMetricsToolQuery(metricsQuery)) return null
-
-  return (
-    <JobActivityMetrics
-      jobId={job.id}
-      metricsQuery={metricsQuery}
-      withLegend
-      css={{ minHeight: 300 }}
-      lineProps={{ margin: { top: 20, right: 40, bottom: 40, left: 40 } }}
-      skeletonHeight={320}
-    />
   )
 }
 

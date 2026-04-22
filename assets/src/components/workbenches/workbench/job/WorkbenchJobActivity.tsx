@@ -50,6 +50,7 @@ import {
   MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
+import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 
 export function WorkbenchJobActivity({
   isOpen,
@@ -210,7 +211,7 @@ function WorkbenchJobActivityResult({
   metricsFetchEnabled: boolean
 }) {
   const { spacing } = useTheme()
-  const { agentRun, agentRuns, result } = activity
+  const { id, agentRun, agentRuns, result } = activity
   const otherAgentRuns = useMemo(
     () =>
       agentRuns?.filter(isNonNullable).filter(({ id }) => id !== agentRun?.id),
@@ -234,6 +235,11 @@ function WorkbenchJobActivityResult({
           <Markdown text={result?.output ?? ''} />
         )}
       </div>
+      <WorkbenchJobCanvas
+        jobId={jobId}
+        activityId={id}
+        canvas={result?.canvas}
+      />
       <JobActivityMetrics
         jobId={jobId}
         fetchWhen={metricsFetchEnabled}

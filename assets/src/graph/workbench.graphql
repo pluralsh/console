@@ -211,6 +211,48 @@ fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
   labels
 }
 
+fragment WorkbenchCanvasBlockGraph on WorkbenchCanvasBlockGraph {
+  title
+  data {
+    label
+    value
+  }
+}
+
+fragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {
+  title
+  summary
+  query {
+    ...WorkbenchToolQueryData
+  }
+}
+
+fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
+  identifier
+  type
+  layout {
+    x
+    y
+    w
+    h
+  }
+  content {
+    markdown
+    metrics {
+      ...WorkbenchCanvasToolGraph
+    }
+    logs {
+      ...WorkbenchCanvasToolGraph
+    }
+    pie {
+      ...WorkbenchCanvasBlockGraph
+    }
+    bar {
+      ...WorkbenchCanvasBlockGraph
+    }
+  }
+}
+
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
@@ -219,10 +261,8 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   todos {
     ...WorkbenchJobResultTodo
   }
-  metadata {
-    metricsQuery {
-      ...WorkbenchToolQueryData
-    }
+  canvas {
+    ...WorkbenchCanvasBlock
   }
 }
 
@@ -239,6 +279,9 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   }
   logs {
     ...WorkbenchJobActivityLog
+  }
+  canvas {
+    ...WorkbenchCanvasBlock
   }
 }
 
@@ -845,5 +888,11 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
 subscription WorkbenchTextStream($jobId: ID!) {
   workbenchTextStream(jobId: $jobId) {
     ...WorkbenchTextStream
+  }
+}
+
+subscription WorkbenchCanvasStream($jobId: ID!, $activityId: ID) {
+  workbenchCanvasStream(jobId: $jobId, activityId: $activityId) {
+    ...WorkbenchCanvasBlock
   }
 }
