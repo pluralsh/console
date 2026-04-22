@@ -22,6 +22,10 @@ fragment WorkbenchFragment on Workbench {
             stacks
             kubernetes
         }
+        observability {
+            logs
+            metrics
+        }
     }
     skills {
         ref {
@@ -33,6 +37,12 @@ fragment WorkbenchFragment on Workbench {
     }
     tools {
         ...WorkbenchToolFragment
+    }
+    readBindings {
+        ...PolicyBindingFragment
+    }
+    writeBindings {
+        ...PolicyBindingFragment
     }
     insertedAt
     updatedAt
@@ -46,6 +56,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
     project {
         ...TinyProjectFragment
     }
+    mcpServer {
+        ...MCPServerFragment
+    }
+    cloudConnection {
+        ...CloudConnectionFragment
+    }
     configuration {
         http {
             url
@@ -56,6 +72,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             }
             body
             inputSchema
+        }
+        elastic {
+            index
+            url
+            username
+        }
+        prometheus {
+            url
+            username
+            tenantId
+        }
+        loki {
+            url
+            username
+            tenantId
+        }
+        splunk {
+            url
+            username
+        }
+        tempo {
+            url
+            username
+            tenantId
+        }
+        jaeger {
+            url
+            username
+        }
+        datadog {
+            site
+        }
+        dynatrace {
+            url
+        }
+        cloudwatch {
+            region
+            logGroupNames
+            roleArn
+            roleSessionName
+        }
+        azure {
+            subscriptionId
+            tenantId
+            clientId
+        }
+        linear {
+            url
+        }
+        atlassian {
+            url
+            email
         }
     }
     insertedAt
