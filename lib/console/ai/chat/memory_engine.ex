@@ -65,8 +65,12 @@ defmodule Console.AI.Chat.MemoryEngine do
         Logger.warning "llm provider failure, retrying: #{inspect(err)}"
         :timer.sleep(10)
         loop(engine, iter + 1)
-      {:error, %ReqLLM.Error.API.Request{response_body: body}} ->
-        {:error, "llm provider failure: #{body}"}
+      {:error, %ReqLLM.Error.API.Request{status: s}} = err when s >= 500 ->
+        Logger.error "llm provider HTTP 500, retrying: #{inspect(err)}"
+        :timer.sleep(10)
+        loop(engine, iter + 1)
+      {:error, %ReqLLM.Error.API.Request{status: status,response_body: body}} ->
+        {:error, "llm provider HTTP #{status} : #{Console.truncate(body, 200)}"}
       err -> err
     end
     |> then(fn
