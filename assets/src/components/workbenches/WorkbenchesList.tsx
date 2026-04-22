@@ -265,7 +265,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
   height: '100%',
-  minHeight: 180,
+  minHeight: 120,
   textDecoration: 'none',
 }))
 
