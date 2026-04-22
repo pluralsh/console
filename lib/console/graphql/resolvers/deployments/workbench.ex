@@ -98,6 +98,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Toolchain.metrics(job, name, args)
   end
 
+  def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
+    Toolchain.logs(job, name, args)
+  end
+
   def workbenches(args, %{context: %{current_user: user}}) do
     Workbench.ordered()
     |> Workbench.for_user(user)

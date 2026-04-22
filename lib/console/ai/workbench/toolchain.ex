@@ -17,7 +17,20 @@ defmodule Console.AI.Workbench.Toolchain do
          {:ok, %mod{} = t} when mod in @metrics_tools <- Tool.validate(tool, args) do
       mod.structured(t)
     else
-      {:error, _} = err -> err
+      {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
+      nil -> {:error, "tool not found"}
+      _ -> {:error, "tool not valid for querying on the fly"}
+    end
+  end
+
+  def logs(%WorkbenchJob{} = job, name, args) do
+    env = env(job)
+    tools = Subagents.Observability.tools(env)
+    with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
+         {:ok, %mod{} = t} when mod in @metrics_tools <- Tool.validate(tool, args) do
+      mod.structured(t)
+    else
+      {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
       nil -> {:error, "tool not found"}
       _ -> {:error, "tool not valid for querying on the fly"}
     end

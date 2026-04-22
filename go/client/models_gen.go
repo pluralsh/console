@@ -9661,6 +9661,7 @@ type WorkbenchJob struct {
 	Issue       *Issue                          `json:"issue,omitempty"`
 	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
+	LogsTool    []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`

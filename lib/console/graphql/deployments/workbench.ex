@@ -305,6 +305,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.metrics_tool/3
     end
 
+    field :logs_tool, list_of(:workbench_job_activity_log) do
+      arg :name,      :string, description: "the name of the logs tool"
+      arg :arguments, :json,   description: "the arguments for the logs tool"
+
+      resolve &Deployments.logs_tool/3
+    end
+
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     timestamps()

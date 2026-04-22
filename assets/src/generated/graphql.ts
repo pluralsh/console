@@ -15050,6 +15050,7 @@ export type WorkbenchJob = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the issue this run was spawned from */
   issue?: Maybe<Issue>;
+  logsTool?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   metricsTool?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
   /** the prompt for this run */
   prompt?: Maybe<Scalars['String']['output']>;
@@ -15076,6 +15077,12 @@ export type WorkbenchJobActivitiesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchJobLogsToolArgs = {
+  arguments?: InputMaybe<Scalars['Json']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 

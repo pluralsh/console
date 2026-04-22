@@ -2840,6 +2840,14 @@ type WorkbenchJob {
     arguments: Json
   ): [WorkbenchJobActivityMetric]
 
+  logsTool(
+    "the name of the logs tool"
+    name: String
+
+    "the arguments for the logs tool"
+    arguments: Json
+  ): [WorkbenchJobActivityLog]
+
   "whimsically describes current progress for you"
   whimsey: String
 
