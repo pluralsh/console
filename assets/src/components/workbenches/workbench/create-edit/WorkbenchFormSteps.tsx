@@ -869,27 +869,31 @@ export function WorkbenchAttachToolsStep({
                     width="100%"
                     gap="small"
                   >
-                    <StackedText
-                      truncate
-                      first={name}
-                      firstPartialType="body2Bold"
-                      firstColor="text"
-                      second={TOOL_TYPE_TO_LABEL[type]}
-                      icon={
-                        <IconFrame
-                          circle
-                          type="secondary"
-                          icon={
-                            <WorkbenchToolIcon
-                              size={20}
-                              type={type}
-                              provider={cloudConnection?.provider}
-                            />
-                          }
-                        />
-                      }
+                    <Flex
+                      align="center"
+                      gap="small"
                       css={{ minWidth: 0, flex: 1 }}
-                    />
+                    >
+                      <IconFrame
+                        circle
+                        type="secondary"
+                        icon={
+                          <WorkbenchToolIcon
+                            size={20}
+                            type={type}
+                            provider={cloudConnection?.provider}
+                          />
+                        }
+                      />
+                      <StackedText
+                        truncate
+                        first={name}
+                        firstPartialType="body2Bold"
+                        firstColor="text"
+                        second={TOOL_TYPE_TO_LABEL[type]}
+                        css={{ minWidth: 0, flex: 1, width: 0 }}
+                      />
+                    </Flex>
                     <IconFrame
                       circle
                       clickable
