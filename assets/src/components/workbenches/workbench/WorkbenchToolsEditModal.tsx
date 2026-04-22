@@ -42,7 +42,7 @@ const ModalActionsRowSC = styled.div(({ theme }) => ({
 
 const ModalContentSC = styled(Flex)(() => ({
   minHeight: 0,
-  height: 'min(70vh, 760px)',
+  maxHeight: 'min(70vh, 760px)',
   overflow: 'hidden',
 }))
 
