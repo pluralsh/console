@@ -71,29 +71,35 @@ export function WorkbenchesIntegrations() {
                     gap="small"
                   />
                   <Flex
-                    gap="xsmall"
-                    wrap="wrap"
+                    direction="column"
+                    gap="small"
+                    css={{ marginTop: 'auto' }}
                   >
-                    {categoryLabels.map((cat) => (
-                      <Chip
-                        key={cat}
-                        size="small"
-                        css={{ height: 'fit-content' }}
-                      >
-                        {cat}
-                      </Chip>
-                    ))}
+                    <Flex
+                      gap="xsmall"
+                      wrap="wrap"
+                    >
+                      {categoryLabels.map((cat) => (
+                        <Chip
+                          key={cat}
+                          size="small"
+                          css={{ height: 'fit-content' }}
+                        >
+                          {cat}
+                        </Chip>
+                      ))}
+                    </Flex>
+                    <Button
+                      small
+                      floating
+                      as={Link}
+                      to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${params.toString()}`}
+                      style={{ boxShadow: 'none' }}
+                      startIcon={<AddIcon />}
+                    >
+                      Add tool
+                    </Button>
                   </Flex>
-                  <Button
-                    small
-                    floating
-                    as={Link}
-                    to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${params.toString()}`}
-                    style={{ boxShadow: 'none', marginTop: 'auto' }}
-                    startIcon={<AddIcon />}
-                  >
-                    Add tool
-                  </Button>
                 </WorkbenchToolCardBody>
               </ToolCardSC>
             )
