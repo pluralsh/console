@@ -78,8 +78,11 @@ export const isConfigurableWorkbenchToolType = (
 ): type is ConfigurableWorkbenchToolType =>
   !!type && CONFIGURABLE_SET.has(type as WorkbenchToolType)
 
-export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
-  [WorkbenchToolType.Http]: 'HTTP',
+const WORKBENCH_TOOL_LABELS: Record<
+  WorkbenchToolType | `${WorkbenchToolType.Cloud}:${Provider}`,
+  string
+> = {
+  [WorkbenchToolType.Http]: 'Custom',
   [WorkbenchToolType.Elastic]: 'Elasticsearch',
   [WorkbenchToolType.Prometheus]: 'Prometheus',
   [WorkbenchToolType.Loki]: 'Loki',
@@ -92,10 +95,21 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Splunk]: 'Splunk',
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
-  [WorkbenchToolType.Azure]: 'Azure',
+  [WorkbenchToolType.Azure]: 'Azure Monitor',
   [WorkbenchToolType.Jaeger]: 'Jaeger',
   [WorkbenchToolType.Cloud]: 'Cloud',
+  [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
+  [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
+  [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
 }
+
+export const getWorkbenchToolLabel = (
+  type: WorkbenchToolType,
+  provider?: Nullable<Provider>
+) =>
+  type === WorkbenchToolType.Cloud && provider
+    ? WORKBENCH_TOOL_LABELS[`${type}:${provider}`]
+    : WORKBENCH_TOOL_LABELS[type]
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
   WorkbenchToolType,
@@ -206,7 +220,7 @@ export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
   ...CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
     type,
     description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
-    label: TOOL_TYPE_TO_LABEL[type],
+    label: getWorkbenchToolLabel(type),
     categoryLabels: TOOL_TYPE_TO_CATEGORIES[type].map(
       (category) => categoryToLabel[category]
     ),
@@ -217,12 +231,6 @@ export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
   [Provider.Aws]: AwsLogoIcon,
   [Provider.Gcp]: GoogleCloudLogoIcon,
   [Provider.Azure]: AzureLogoIcon,
-}
-
-export const PROVIDER_TO_LABEL: Record<Provider, string> = {
-  [Provider.Aws]: 'AWS',
-  [Provider.Gcp]: 'GCP',
-  [Provider.Azure]: 'Azure',
 }
 
 export const isProvider = (value: Nullable<string>): value is Provider =>

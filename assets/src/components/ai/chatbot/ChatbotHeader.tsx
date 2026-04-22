@@ -18,17 +18,15 @@ import {
   useCloudConnectionsQuery,
   useInfraResearchQuery,
 } from 'generated/graphql'
-import { capitalize } from 'lodash'
 import { use } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { AIViewTypes, useChatbot } from '../AIContext'
 import { getResourceLinkPath, TableEntryResourceLink } from '../AITableEntry'
 import { RunStatusChip } from '../infra-research/details/InfraResearch.tsx'
-import { AgentSelect } from './AgentSelect.tsx'
 import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
-import { SIDE_PANEL_HEADER_HEIGHT } from './SidePanelShared.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
+import { SIDE_PANEL_HEADER_HEIGHT } from './SidePanelShared.tsx'
 
 export function ChatbotHeader() {
   const { colors } = useTheme()
@@ -38,7 +36,6 @@ export function ChatbotHeader() {
     currentThread,
     actionsPanelOpen,
     setActionsPanelOpen,
-    agentInitMode,
     closeChatbot,
     createNewThread,
     mutationLoading,
@@ -61,7 +58,7 @@ export function ChatbotHeader() {
   return (
     <Flex direction="column">
       <MainHeaderSC>
-        {currentThread?.session && !agentInitMode && (
+        {currentThread?.session && (
           <div
             css={{
               transition: 'transform 0.16s ease-in-out',
@@ -82,7 +79,6 @@ export function ChatbotHeader() {
         <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
           Plural AI
         </Body2BoldP>
-        <AgentSelect />
         <Flex gap="xsmall">
           {!cloudConnectionsLoading && (
             <IconFrame
@@ -133,10 +129,8 @@ export function ChatbotHeader() {
             <StackedText
               truncate
               first={
-                agentInitMode
-                  ? `New ${capitalize(agentInitMode)} agent session`
-                  : (currentThread?.summary ??
-                    (currentThreadId ? '' : 'New chat with Plural AI'))
+                currentThread?.summary ??
+                (currentThreadId ? '' : 'New chat with Plural AI')
               }
               second={<TableEntryResourceLink {...resourcePath} />}
               firstPartialType="body2Bold"

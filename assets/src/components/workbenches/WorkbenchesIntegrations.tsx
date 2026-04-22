@@ -14,13 +14,13 @@ import {
   Input,
   MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
+import { animated, useTransition } from '@react-spring/web'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
-import { animated, useTransition } from '@react-spring/web'
-import Fuse from 'fuse.js'
-import { useMemo, useState } from 'react'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
+import Fuse from 'fuse.js'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_CREATE_ABS_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -28,14 +28,14 @@ import {
   WORKBENCHES_TOOLS_PROVIDER_PARAM,
   WORKBENCHES_TOOLS_TYPE_PARAM,
 } from './tools/WorkbenchToolCreateOrEdit'
+import type { WorkbenchToolCard } from './tools/workbenchToolsUtils'
 import {
-  TOOL_TYPE_TO_LABEL,
   WORKBENCH_TOOL_CARDS,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
+  getWorkbenchToolLabel,
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
-import type { WorkbenchToolCard } from './tools/workbenchToolsUtils'
 
 const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
   keys: ['label', 'description', 'categoryLabels', 'type', 'provider'],
@@ -67,7 +67,7 @@ export function WorkbenchesIntegrations() {
   const types = useMemo(
     () =>
       getFilterOptions(WORKBENCH_TOOL_CARDS, (card) => [
-        TOOL_TYPE_TO_LABEL[card.type],
+        getWorkbenchToolLabel(card.type, card.provider),
       ]),
     []
   )
@@ -76,25 +76,27 @@ export function WorkbenchesIntegrations() {
     const categorySet = new Set(selectedCategories.map(normalizeFilterValue))
     const typeSet = new Set(selectedTypes.map(normalizeFilterValue))
 
-    const byFilters = WORKBENCH_TOOL_CARDS.filter((card) => {
-      if (
-        categorySet.size > 0 &&
-        !card.categoryLabels.some((category) =>
-          categorySet.has(normalizeFilterValue(category))
+    const byFilters = WORKBENCH_TOOL_CARDS.filter(
+      ({ categoryLabels, type, provider }) => {
+        if (
+          categorySet.size > 0 &&
+          !categoryLabels.some((category) =>
+            categorySet.has(normalizeFilterValue(category))
+          )
         )
-      ) {
-        return false
-      }
+          return false
 
-      if (
-        typeSet.size > 0 &&
-        !typeSet.has(normalizeFilterValue(TOOL_TYPE_TO_LABEL[card.type]))
-      ) {
-        return false
-      }
+        if (
+          typeSet.size > 0 &&
+          !typeSet.has(
+            normalizeFilterValue(getWorkbenchToolLabel(type, provider))
+          )
+        )
+          return false
 
-      return true
-    })
+        return true
+      }
+    )
 
     const sortedByLabel = sortToolCards(byFilters)
 
