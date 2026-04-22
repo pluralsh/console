@@ -4,6 +4,9 @@ import {
   Flex,
   Markdown,
   PaperCheckIcon,
+  PrClosedIcon,
+  PrMergedIcon,
+  PrOpenIcon,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -13,6 +16,7 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
+  PrStatus,
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
@@ -73,8 +77,26 @@ const columns = [
   columnHelper.accessor((job) => job, {
     id: 'actions',
     cell: function Cell({ getValue }) {
-      const { spacing } = useTheme()
+      const theme = useTheme()
+      const { spacing } = theme
       const { pullRequests, result, status } = getValue()
+      const prs = pullRequests?.filter(isNonNullable) ?? []
+      const singlePrStatus = prs.length === 1 ? prs[0].status : null
+      const singlePrIcon =
+        singlePrStatus === PrStatus.Merged ? (
+          <PrMergedIcon color={theme.colors['code-block-purple']} />
+        ) : singlePrStatus === PrStatus.Closed ? (
+          <PrClosedIcon color="icon-danger" />
+        ) : (
+          <PrOpenIcon color="icon-success" />
+        )
+      const singlePrTooltip =
+        singlePrStatus === PrStatus.Merged
+          ? 'View merged pull request'
+          : singlePrStatus === PrStatus.Closed
+            ? 'View closed pull request'
+            : 'View open pull request'
+
       return (
         <Flex
           gap="medium"
@@ -85,7 +107,13 @@ const columns = [
           <PRsModalIcon
             size="small"
             type="tertiary"
-            prs={pullRequests?.filter(isNonNullable) ?? []}
+            prs={prs}
+            {...(prs.length === 1
+              ? {
+                  icon: singlePrIcon,
+                  tooltip: singlePrTooltip,
+                }
+              : {})}
           />
           {result?.conclusion && (
             <ActivityModalIcon
