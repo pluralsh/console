@@ -40,6 +40,18 @@ const ModalActionsRowSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
 }))
 
+const ModalContentSC = styled(Flex)(() => ({
+  minHeight: 0,
+  height: 'min(70vh, 760px)',
+  overflow: 'hidden',
+}))
+
+const CardsScrollAreaSC = styled.div(({ theme }) => ({
+  minHeight: 0,
+  overflowY: 'auto',
+  paddingRight: theme.spacing.xxsmall,
+}))
+
 export function WorkbenchToolsEditModal({
   workbench,
   open,
@@ -172,7 +184,7 @@ export function WorkbenchToolsEditModal({
       {toolsError || saveError ? (
         <GqlError error={toolsError ?? saveError} />
       ) : (
-        <Flex
+        <ModalContentSC
           direction="column"
           gap="medium"
         >
@@ -222,62 +234,64 @@ export function WorkbenchToolsEditModal({
             </Select>
           </FormField>
           {selectedTools.length > 0 && (
-            <CardGrid
-              styles={{
-                ...workbenchToolCardGridStyles(320),
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              }}
-            >
-              {selectedTools.map(
-                ({ id, name, tool: type, cloudConnection }) => (
-                  <Card key={id}>
-                    <WorkbenchToolCardBody>
-                      <Flex
-                        align="center"
-                        justify="space-between"
-                        width="100%"
-                        gap="small"
-                      >
+            <CardsScrollAreaSC>
+              <CardGrid
+                styles={{
+                  ...workbenchToolCardGridStyles(320),
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                }}
+              >
+                {selectedTools.map(
+                  ({ id, name, tool: type, cloudConnection }) => (
+                    <Card key={id}>
+                      <WorkbenchToolCardBody>
                         <Flex
                           align="center"
+                          justify="space-between"
+                          width="100%"
                           gap="small"
-                          css={{ minWidth: 0, flex: 1 }}
                         >
+                          <Flex
+                            align="center"
+                            gap="small"
+                            css={{ minWidth: 0, flex: 1 }}
+                          >
+                            <IconFrame
+                              circle
+                              type="secondary"
+                              icon={
+                                <WorkbenchToolIcon
+                                  size={20}
+                                  type={type}
+                                  provider={cloudConnection?.provider}
+                                />
+                              }
+                            />
+                            <StackedText
+                              truncate
+                              first={name}
+                              firstPartialType="body2Bold"
+                              firstColor="text"
+                              second={TOOL_TYPE_TO_LABEL[type]}
+                              css={{ minWidth: 0, flex: 1, width: 0 }}
+                            />
+                          </Flex>
                           <IconFrame
                             circle
-                            type="secondary"
-                            icon={
-                              <WorkbenchToolIcon
-                                size={20}
-                                type={type}
-                                provider={cloudConnection?.provider}
-                              />
-                            }
-                          />
-                          <StackedText
-                            truncate
-                            first={name}
-                            firstPartialType="body2Bold"
-                            firstColor="text"
-                            second={TOOL_TYPE_TO_LABEL[type]}
-                            css={{ minWidth: 0, flex: 1, width: 0 }}
+                            clickable
+                            icon={<CloseIcon />}
+                            tooltip="Remove from selection"
+                            onClick={() => handleDeselectTool(id)}
                           />
                         </Flex>
-                        <IconFrame
-                          circle
-                          clickable
-                          icon={<CloseIcon />}
-                          tooltip="Remove from selection"
-                          onClick={() => handleDeselectTool(id)}
-                        />
-                      </Flex>
-                    </WorkbenchToolCardBody>
-                  </Card>
-                )
-              )}
-            </CardGrid>
+                      </WorkbenchToolCardBody>
+                    </Card>
+                  )
+                )}
+              </CardGrid>
+            </CardsScrollAreaSC>
           )}
-        </Flex>
+        </ModalContentSC>
       )}
     </Modal>
   )
