@@ -580,6 +580,8 @@ type AgentRunFragment struct {
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
 	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
+	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -683,6 +685,18 @@ func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.PullRequests
+}
+func (t *AgentRunFragment) GetBabysit() *bool {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Babysit
+}
+func (t *AgentRunFragment) GetBabysitInterval() *int64 {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.BabysitInterval
 }
 
 type ScmWebhookFragment struct {
@@ -38181,6 +38195,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -38328,6 +38344,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -38484,6 +38502,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -38687,6 +38707,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -38828,6 +38850,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description

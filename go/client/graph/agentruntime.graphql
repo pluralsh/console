@@ -223,4 +223,6 @@ fragment AgentRunFragment on AgentRun {
     pullRequests {
         ...PullRequestFragment
     }
+    babysit
+    babysitInterval
 }
