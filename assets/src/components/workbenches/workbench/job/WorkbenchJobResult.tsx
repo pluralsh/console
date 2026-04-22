@@ -15,6 +15,7 @@ import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
 } from 'generated/graphql'
+import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -37,6 +38,11 @@ export function WorkbenchJobResult({
   loading: boolean
 }) {
   const { spacing } = useTheme()
+  const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
+  const workingTheory = job?.result?.workingTheory
+
+  useSidePanelWidth(conclusion ? { maxWidthVw: 60, initialWidthVw: 60 } : null)
+
   if (loading)
     return (
       <RectangleSkeleton
@@ -45,8 +51,6 @@ export function WorkbenchJobResult({
         css={{ padding: spacing.large }}
       />
     )
-  const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
-  const workingTheory = job?.result?.workingTheory
 
   return (
     <Flex
