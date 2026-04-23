@@ -59,13 +59,13 @@ spec:
               name: {{ include "console.cloudquery.db.secret" . }}
               key: password
                 {{- end }}
-          {{- if .Values.cloudQuery.aws.configFile }}
+          {{- if and .Values.cloudQuery.database.aws.useLocalCredentials .Values.cloudQuery.database.aws.configFile }}
         - name: AWS_CONFIG_FILE
-          value: {{ .Values.cloudQuery.aws.configFile }}
+          value: {{ .Values.cloudQuery.database.aws.configFile }}
           {{- end }}
-          {{- if .Values.cloudQuery.aws.credentialsFile }}
+          {{- if and .Values.cloudQuery.database.aws.useLocalCredentials .Values.cloudQuery.database.aws.credentialsFile }}
         - name: AWS_SHARED_CREDENTIALS_FILE
-          value: {{ .Values.cloudQuery.aws.credentialsFile }}
+          value: {{ .Values.cloudQuery.database.aws.credentialsFile }}
           {{- end }}
         volumeMounts:
         - name: cloud-query-shared
@@ -104,13 +104,13 @@ spec:
               name: {{ include "console.cloudquery.db.secret" . }}
               key: password
                 {{- end }}
-          {{- if .Values.cloudQuery.aws.configFile }}
+          {{- if and .Values.cloudQuery.database.aws.useLocalCredentials .Values.cloudQuery.database.aws.configFile }}
         - name: AWS_CONFIG_FILE
-          value: {{ .Values.cloudQuery.aws.configFile }}
+          value: {{ .Values.cloudQuery.database.aws.configFile }}
           {{- end }}
-          {{- if .Values.cloudQuery.aws.credentialsFile }}
+          {{- if and .Values.cloudQuery.database.aws.useLocalCredentials .Values.cloudQuery.database.aws.credentialsFile }}
         - name: AWS_SHARED_CREDENTIALS_FILE
-          value: {{ .Values.cloudQuery.aws.credentialsFile }}
+          value: {{ .Values.cloudQuery.database.aws.credentialsFile }}
           {{- end }}
           {{- else }}
         env:
@@ -136,18 +136,18 @@ spec:
         resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or .Values.cloudQuery.database.enabled .Values.cloudQuery.volumeMounts }}
+          {{- if or .Values.cloudQuery.database.aws.useLocalCredentials .Values.cloudQuery.volumeMounts }}
         volumeMounts:
-            {{- if .Values.cloudQuery.database.enabled }}
+            {{- if .Values.cloudQuery.database.aws.useLocalCredentials }}
           - name: cloud-query-shared
-            mountPath: {{ .Values.cloudQuery.aws.mountPath }}
+            mountPath: {{ .Values.cloudQuery.database.aws.mountPath }}
             {{- end }}
             {{- with .Values.cloudQuery.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
       volumes:
-      {{ if .Values.cloudQuery.database.enabled }}
+      {{ if .Values.cloudQuery.database.aws.useLocalCredentials }}
       - name: cloud-query-shared
         emptyDir:
           medium: Memory

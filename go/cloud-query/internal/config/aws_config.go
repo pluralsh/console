@@ -17,16 +17,50 @@ import (
 const (
 	envAWSConfigFile            = "AWS_CONFIG_FILE"
 	envAWSSharedCredentialsFile = "AWS_SHARED_CREDENTIALS_FILE"
-
-	defaultAWSConfigFilePath            = "/shared/.aws/config"
-	defaultAWSSharedCredentialsFilePath = "/shared/.aws/credentials"
 )
 
 var (
+	manager             *awsConfigManager
+	configFilePath      string
+	credentialsFilePath string
+)
+
+func init() {
+	var exists bool
+	configFilePath, exists = os.LookupEnv(envAWSConfigFile)
+	if !exists {
+		klog.V(log.LogLevelInfo).InfoS("AWS config file not set, disabling AWS config manager")
+		return
+	}
+
+	klog.V(log.LogLevelDebug).InfoS(
+		"AWS config file path",
+		"path", configFilePath,
+	)
+
+	credentialsFilePath, exists = os.LookupEnv(envAWSSharedCredentialsFile)
+	if !exists {
+		klog.V(log.LogLevelInfo).InfoS("AWS shared credentials file not set, disabling AWS config manager")
+		return
+	}
+
+	klog.V(log.LogLevelDebug).InfoS(
+		"AWS credentials file path",
+		"path", credentialsFilePath,
+	)
+
+	// Ensure the directories exist
+	if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
+		klog.Fatalf("failed to create config directory: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(credentialsFilePath), 0755); err != nil {
+		klog.Fatalf("failed to create shared credentials directory: %v", err)
+	}
+
 	manager = &awsConfigManager{
 		profiles: make(map[string]AWSProfile),
 	}
-)
+}
 
 // AWSProfile represents a single AWS config file profile entry.
 type AWSProfile struct {
@@ -51,35 +85,11 @@ func GetAWSConfigManager() AWSConfigManager {
 	return manager
 }
 
-func (in *awsConfigManager) configPath() string {
-	path, exists := os.LookupEnv(envAWSConfigFile)
-	if !exists {
-		return defaultAWSConfigFilePath
-	}
-
-	klog.V(log.LogLevelDebug).InfoS(
-		"AWS config path",
-		"path", path,
-	)
-
-	return path
-}
-
-func (in *awsConfigManager) sharedCredentialsPath() string {
-	path, exists := os.LookupEnv(envAWSSharedCredentialsFile)
-	if !exists {
-		return defaultAWSSharedCredentialsFilePath
-	}
-
-	klog.V(log.LogLevelDebug).InfoS(
-		"AWS shared credentials path",
-		"path", path,
-	)
-
-	return path
-}
-
 func (in *awsConfigManager) Add(name string, p AWSProfile) error {
+	if in == nil {
+		return nil
+	}
+
 	in.mu.Lock()
 	defer in.mu.Unlock()
 
@@ -97,6 +107,10 @@ func (in *awsConfigManager) Add(name string, p AWSProfile) error {
 }
 
 func (in *awsConfigManager) Remove(name string) error {
+	if in == nil {
+		return nil
+	}
+
 	in.mu.Lock()
 	defer in.mu.Unlock()
 
@@ -111,18 +125,8 @@ func (in *awsConfigManager) Remove(name string) error {
 // flush serializes all in-memory profiles to disk atomically via a temp file rename.
 // Must be called with m.mu held.
 func (in *awsConfigManager) flush() error {
-	configFilePath := in.configPath()
 	tmpConfigFilePath := configFilePath + ".tmp"
-	sharedCredentialsFilePath := in.sharedCredentialsPath()
-	tmpSharedCredentialsFilePath := sharedCredentialsFilePath + ".tmp"
-
-	// Ensure the directories exist
-	if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
-	}
-	if err := os.MkdirAll(filepath.Dir(sharedCredentialsFilePath), 0755); err != nil {
-		return fmt.Errorf("failed to create shared credentials directory: %w", err)
-	}
+	tmpSharedCredentialsFilePath := credentialsFilePath + ".tmp"
 
 	// Write the config file atomically
 	// 0644 is intentional: this file is shared via a volume between containers
@@ -140,7 +144,7 @@ func (in *awsConfigManager) flush() error {
 	if err := os.WriteFile(tmpSharedCredentialsFilePath, []byte(in.serializeSharedCredentialsFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS shared credentials: %w", err)
 	}
-	if err := os.Rename(tmpSharedCredentialsFilePath, sharedCredentialsFilePath); err != nil {
+	if err := os.Rename(tmpSharedCredentialsFilePath, credentialsFilePath); err != nil {
 		return fmt.Errorf("failed to rename shared credentials temp file: %w", err)
 	}
 
