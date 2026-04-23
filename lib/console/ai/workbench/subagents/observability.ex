@@ -33,8 +33,8 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     |> Enum.concat(plrl_log_tools(job))
     |> Enum.concat(plrl_metric_tools(job))
     |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :observability)},
+      %Skill{skills: Environment.subagent_skills(skills, :observability)},
       ObservabilityResult,
       Time
     ])

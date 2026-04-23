@@ -202,8 +202,8 @@ defmodule Console.AI.Workbench.Engine do
     subagents = Environment.subagents(job) |> maybe_add_memory(activities)
     categories = Environment.categories(job)
     [
-      %Skills{skills: Environment.with_builtins(skills)},
-      %Skill{skills: Environment.with_builtins(skills)},
+      %Skills{skills: Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)},
+      %Skill{skills: Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)},
       %Subagents{subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},

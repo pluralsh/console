@@ -52,8 +52,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(cloud_tools(environment))
     |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
+      %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
       Result
     ])
   end

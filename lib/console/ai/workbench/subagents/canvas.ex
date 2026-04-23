@@ -12,7 +12,8 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     MetricsBlock,
     LogsBlock,
     PieBlock,
-    BarBlock
+    BarBlock,
+    Empty
   }
   alias Console.AI.Workbench.Environment
 
@@ -38,15 +39,16 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
 
   defp tools(%Environment{skills: skills}) do
     [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :canvas)},
+      %Skill{skills: Environment.subagent_skills(skills, :canvas)},
       Result,
       Canvas,
       MarkdownBlock,
       MetricsBlock,
       LogsBlock,
       PieBlock,
-      BarBlock
+      BarBlock,
+      Empty
     ]
   end
 

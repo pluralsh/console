@@ -30,6 +30,12 @@ defmodule Console.AI.Workbench.Environment do
     |> Map.merge(skills)
   end
 
+  def subagent_skills(%__MODULE__{skills: %{} = skills}, subagent), do: subagent_skills(skills, subagent)
+  def subagent_skills(%{} = skills, subagent) do
+    Enum.filter(skills, fn {_, skill} -> Skill.subagent?(skill, subagent) end)
+    |> Map.new()
+  end
+
   def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench}) do
     tool_agents(tools)
     |> Enum.concat(coding_agents(bench))

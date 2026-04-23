@@ -20,6 +20,8 @@ You can also query the current state of the canvas at any time using the `show_c
 Once the canvas is to your liking, call the subagent_result tool and we'll ensure the canvas is saved.  The results will be streamed to the frontend, so
 you should focus on modifying from top-left to bottom-right, as the canvas is scrollable vertically.
 
+If the canvas is in a substantially misconfigured state, you can use the `recreate_canvas` tool to reset it to a fresh state. And then recreate the blocks you wish to use.
+
 ## Ideal output
 
 There is a clear heirarchy of information that is most useful for a user in the context of an investigation.  They are:

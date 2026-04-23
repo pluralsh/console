@@ -1,5 +1,10 @@
 defmodule Console.AI.Workbench.Skill do
-  defstruct [:name, :description, :contents]
+  defstruct [:name, :description, :contents, subagents: []]
+
+  def subagent?(%__MODULE__{subagents: [_ | _] = subagents}, subagent) do
+    Enum.map(subagents, &String.downcase/1)
+    |> Enum.member?("#{subagent}")
+  end
 end
 
 defmodule Console.AI.Workbench.Skills.Builtins do
@@ -8,7 +13,12 @@ defmodule Console.AI.Workbench.Skills.Builtins do
 
   def builtins() do
     [
-      %Skill{name: "canvas", description: "guidance on how to use the canvas tool to build a dashboard", contents: @canvas}
+      %Skill{
+        name: "canvas",
+        description: "guidance on how to use the canvas tool to build a dashboard",
+        contents: @canvas,
+        subagents: [:canvas, :orchestrator]
+      }
     ]
   end
 end
@@ -75,11 +85,12 @@ defmodule Console.AI.Workbench.Skills do
 
   def parse_skill(file, skill) when is_binary(skill) do
     with {:regex, [_, meta, contents]} <- {:regex, Regex.run(@regex, skill)},
-         {:yaml, {:ok, %{"name" => name, "description" => description}}} <- {:yaml, YamlElixir.read_from_string(meta)} do
+         {:yaml, {:ok, %{"name" => name, "description" => description} = meta}} <- {:yaml, YamlElixir.read_from_string(meta)} do
       {:ok, %Skill{
         name: String.trim(name),
         description: String.trim(description),
-        contents: String.trim(contents)
+        contents: String.trim(contents),
+        subagents: meta["subagents"] || []
       }}
     else
       {:regex, _} ->

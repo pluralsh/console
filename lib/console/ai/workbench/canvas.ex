@@ -15,6 +15,12 @@ defmodule Console.AI.Workbench.Canvas do
 
   def canvas(), do: Process.get(@key)
 
+  def empty() do
+    canvas()
+    |> Map.put(:blocks, %{})
+    |> save()
+  end
+
   def insert(%__MODULE__{activity: activity} = canvas, %CanvasBlock{identifier: id} = block) do
     put_in(canvas.blocks[id], block)
     |> validate()
