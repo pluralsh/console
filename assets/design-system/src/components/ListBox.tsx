@@ -102,10 +102,10 @@ function propsToTextValue(props: Record<string, unknown> | null | undefined) {
   return typeof textValue === 'string' && textValue
     ? textValue
     : typeof label === 'string' && label
-      ? label
-      : typeof children === 'string' && children
-        ? children
-        : ''
+    ? label
+    : typeof children === 'string' && children
+    ? children
+    : ''
 }
 
 function useItemWrappedChildren(
