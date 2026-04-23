@@ -70,6 +70,10 @@ func (c *AWSConfiguration) hasCredentials() bool {
 
 func (c *AWSConfiguration) getRegions() string {
 	filtered := lo.Filter(c.regions, func(item string, _ int) bool { return len(item) > 0 })
+	if len(filtered) == 0 {
+		filtered = append(filtered, "us-east-1")
+	}
+
 	quoted := make([]string, len(filtered))
 
 	for i, item := range filtered {
