@@ -21,6 +21,10 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 		return "", fmt.Errorf("aws configuration is nil")
 	}
 
+	if len(lo.FromPtr(c.accessKeyId)) == 0 && len(lo.FromPtr(c.secretAccessKey)) == 0 {
+		return c.podIdentityQuery(connectionName)
+	}
+
 	if len(lo.FromPtr(c.roleArn)) > 0 {
 		return c.profileQuery(connectionName)
 	}
@@ -30,6 +34,21 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 
 func (c *AWSConfiguration) Cleanup(connectionName string) error {
 	return GetAWSConfigManager().Remove(connectionName)
+}
+
+func (c *AWSConfiguration) podIdentityQuery(connectionName string) (string, error) {
+	return fmt.Sprintf(`
+			DROP SERVER IF EXISTS %[2]s;
+			CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
+				config '
+					regions=[%[3]s]
+			');
+			IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
+		`,
+		pq.QuoteIdentifier(connectionName),
+		pq.QuoteIdentifier("steampipe_"+connectionName),
+		c.getRegions(),
+	), nil
 }
 
 func (c *AWSConfiguration) profileQuery(connectionName string) (string, error) {
