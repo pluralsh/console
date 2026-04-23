@@ -147,10 +147,13 @@ defmodule Console.AI.Workbench.Engine do
         SA.Canvas.run(activity, job, %{environment | activities: activities})
       end, & "error running subagent: #{inspect(&1)}, feel free to try again if it is still necessary")
 
-      blocks = Canvas.canvas() |> Canvas.render()
-
-      with {:ok, _} <- Workbenches.save_canvas(blocks, output, activity) |> log_error("Failed to update job activity") do
-        {:ok, Repo.get!(WorkbenchJobActivity, activity.id)}
+      Canvas.canvas()
+      |> Canvas.render()
+      |> Workbenches.save_canvas(output, activity)
+      |> log_error("failed to save canvas")
+      |> case do
+        {:ok, activity, _} -> {:ok, activity}
+        err -> err
       end
     end
   end

@@ -655,23 +655,21 @@ defmodule Console.Deployments.WorkbenchesTest do
         }
       ]
 
-      {:ok, updated_job} = Workbenches.save_canvas(blocks, "saved canvas", activity)
+      {:ok, activity, updated_job} = Workbenches.save_canvas(blocks, "saved canvas", activity)
 
       assert updated_job.id == job.id
 
-      activity = refetch(activity)
       assert activity.status == :successful
-      assert [saved_activity] = activity.result.canvas
+      assert [block] = activity.result.canvas
       assert activity.result.output == "saved canvas"
-      assert saved_activity.identifier == "block-1"
-      assert saved_activity.type == :markdown
-      assert saved_activity.content.markdown == "# Saved canvas"
+      assert block.identifier == "block-1"
+      assert block.type == :markdown
+      assert block.content.markdown == "# Saved canvas"
 
-      job = Console.Repo.preload(refetch(job), :result)
-      assert [saved_job] = job.result.canvas
-      assert saved_job.identifier == "block-1"
-      assert saved_job.type == :markdown
-      assert saved_job.content.markdown == "# Saved canvas"
+      assert [block] = updated_job.result.canvas
+      assert block.identifier == "block-1"
+      assert block.type == :markdown
+      assert block.content.markdown == "# Saved canvas"
 
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: %{id: activity_id}}}
       assert activity_id == activity.id

@@ -529,7 +529,7 @@ defmodule Console.Deployments.Workbenches do
   @doc """
   Saves a list of canvas blocks to a job activity.
   """
-  @spec save_canvas([map], binary,  WorkbenchJobActivity.t()) :: job_resp
+  @spec save_canvas([map], binary,  WorkbenchJobActivity.t()) :: {:ok, WorkbenchJobActivity.t(), WorkbenchJob.t()} | {:error, any()}
   def save_canvas(blocks, output, %WorkbenchJobActivity{} = activity) when is_list(blocks) do
     %WorkbenchJobActivity{workbench_job: %WorkbenchJob{} = job} =
       Repo.preload(activity, workbench_job: :result)
@@ -545,8 +545,13 @@ defmodule Console.Deployments.Workbenches do
       |> WorkbenchJob.changeset(%{result: %{canvas: blocks}})
       |> Repo.update()
     end)
-    |> execute(extract: :job)
-    |> notify(:update)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, job: job}} ->
+        notify({:ok, job}, :update)
+        {:ok, activity, job}
+      err -> err
+    end
   end
 
   @doc """
