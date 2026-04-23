@@ -19652,6 +19652,15 @@ export type WorkbenchJobMetricsToolQueryVariables = Exact<{
 
 export type WorkbenchJobMetricsToolQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, metricsTool?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
+export type WorkbenchJobLogsToolQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  arguments?: InputMaybe<Scalars['Json']['input']>;
+}>;
+
+
+export type WorkbenchJobLogsToolQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, logsTool?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null } | null };
+
 export type WorkbenchJobActivitiesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -41346,6 +41355,54 @@ export type WorkbenchJobMetricsToolQueryHookResult = ReturnType<typeof useWorkbe
 export type WorkbenchJobMetricsToolLazyQueryHookResult = ReturnType<typeof useWorkbenchJobMetricsToolLazyQuery>;
 export type WorkbenchJobMetricsToolSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobMetricsToolSuspenseQuery>;
 export type WorkbenchJobMetricsToolQueryResult = Apollo.QueryResult<WorkbenchJobMetricsToolQuery, WorkbenchJobMetricsToolQueryVariables>;
+export const WorkbenchJobLogsToolDocument = gql`
+    query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    logsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityLog
+    }
+  }
+}
+    ${WorkbenchJobActivityLogFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobLogsToolQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchJobLogsToolQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobLogsToolQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobLogsToolQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *      arguments: // value for 'arguments'
+ *   },
+ * });
+ */
+export function useWorkbenchJobLogsToolQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables> & ({ variables: WorkbenchJobLogsToolQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>(WorkbenchJobLogsToolDocument, options);
+      }
+export function useWorkbenchJobLogsToolLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>(WorkbenchJobLogsToolDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchJobLogsToolSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>;
+export function useWorkbenchJobLogsToolSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobLogsToolQuery | undefined, WorkbenchJobLogsToolQueryVariables>;
+export function useWorkbenchJobLogsToolSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>(WorkbenchJobLogsToolDocument, options);
+        }
+export type WorkbenchJobLogsToolQueryHookResult = ReturnType<typeof useWorkbenchJobLogsToolQuery>;
+export type WorkbenchJobLogsToolLazyQueryHookResult = ReturnType<typeof useWorkbenchJobLogsToolLazyQuery>;
+export type WorkbenchJobLogsToolSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobLogsToolSuspenseQuery>;
+export type WorkbenchJobLogsToolQueryResult = Apollo.QueryResult<WorkbenchJobLogsToolQuery, WorkbenchJobLogsToolQueryVariables>;
 export const WorkbenchJobActivitiesDocument = gql`
     query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
@@ -42660,6 +42717,7 @@ export const namedOperations = {
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobMetricsTool: 'WorkbenchJobMetricsTool',
+    WorkbenchJobLogsTool: 'WorkbenchJobLogsTool',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
     WorkbenchJobWhimseyText: 'WorkbenchJobWhimseyText',
     WorkbenchJobActivityWhimseyText: 'WorkbenchJobActivityWhimseyText',

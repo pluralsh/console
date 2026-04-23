@@ -1877,6 +1877,11 @@
          "name": "WorkbenchJobMetricsTool",
          "body": "query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {\n  workbenchJob(id: $id) {\n    id\n    metricsTool(name: $name, arguments: $arguments) {\n      ...WorkbenchJobActivityMetric\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {\n  timestamp\n  name\n  value\n  labels\n  __typename\n}"
       },
+      "sha256:cc3fc48393a95ad5edab4148c992fec0c24edd75d36c4675283867c3665224b7": {
+         "type": "query",
+         "name": "WorkbenchJobLogsTool",
+         "body": "query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {\n  workbenchJob(id: $id) {\n    id\n    logsTool(name: $name, arguments: $arguments) {\n      ...WorkbenchJobActivityLog\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {\n  timestamp\n  message\n  labels\n  __typename\n}"
+      },
       "sha256:8015b5d7456c647d802efc1204149602618179596c3c9fe71579c548d609bccd": {
          "type": "query",
          "name": "WorkbenchJobActivities",

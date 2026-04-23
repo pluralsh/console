@@ -1,7 +1,7 @@
 import { useApolloClient } from '@apollo/client'
 import { Card, Markdown } from '@pluralsh/design-system'
 import { PieChart } from 'components/utils/PieChart'
-import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchCanvasStreamSubscription,
   WorkbenchCanvasBlockFragment,
@@ -17,7 +17,7 @@ import { COLORS } from 'utils/color'
 import { updateFragment } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
-  JobActivityLogs,
+  JobActivityLogsFromTool,
   JobActivityMetrics,
 } from './WorkbenchJobActivityResults'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
@@ -137,7 +137,12 @@ function CanvasBlockRenderer({
         />
       )
     case WorkbenchCanvasBlockType.Logs:
-      return <LogsBlock graph={content?.logs} />
+      return (
+        <LogsBlock
+          jobId={jobId}
+          graph={content?.logs}
+        />
+      )
     case WorkbenchCanvasBlockType.Pie:
       return <PieBlock graph={content?.pie} />
     case WorkbenchCanvasBlockType.Bar:
@@ -175,20 +180,23 @@ function MetricsBlock({
   )
 }
 
-function LogsBlock({ graph }: { graph: Nullable<WorkbenchCanvasToolGraph> }) {
-  // TODO: no logsTool backend query yet — surface the tool target + summary.
+function LogsBlock({
+  jobId,
+  graph,
+}: {
+  jobId: string
+  graph: Nullable<WorkbenchCanvasToolGraph>
+}) {
   return (
     <BlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
-      <JobActivityLogs logs={[]} />
+      <div css={{ flex: 1, minHeight: 120, minWidth: 0, overflow: 'auto' }}>
+        <JobActivityLogsFromTool
+          jobId={jobId}
+          logsQuery={graph?.query}
+        />
+      </div>
       {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-      {!graph?.summary && (
-        <CaptionP $color="text-xlight">
-          {graph?.query?.toolName
-            ? `Logs from ${graph.query.toolName}`
-            : 'No logs available.'}
-        </CaptionP>
-      )}
     </BlockCardSC>
   )
 }

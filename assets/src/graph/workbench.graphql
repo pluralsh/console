@@ -654,6 +654,15 @@ query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
   }
 }
 
+query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    logsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityLog
+    }
+  }
+}
+
 query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
