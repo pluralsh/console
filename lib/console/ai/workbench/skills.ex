@@ -91,7 +91,7 @@ defmodule Console.AI.Workbench.Skills do
         name: String.trim(name),
         description: String.trim(description),
         contents: String.trim(contents),
-        subagents: meta["subagents"] || []
+        subagents: parse_subagents(meta["subagents"])
       }}
     else
       {:regex, _} ->
@@ -101,4 +101,12 @@ defmodule Console.AI.Workbench.Skills do
       {:yaml, _} -> {:error, "could not parse skill in file #{file}, invalid yaml block"}
     end
   end
+
+  defp parse_subagents(subagents) when is_list(subagents), do: subagents
+  defp parse_subagents(subagents) when is_binary(subagents) do
+    String.split(subagents, ",")
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&String.downcase/1)
+  end
+  defp parse_subagents(_), do: []
 end
