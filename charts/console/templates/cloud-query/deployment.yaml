@@ -67,9 +67,11 @@ spec:
         - name: AWS_SHARED_CREDENTIALS_FILE
           value: {{ .Values.cloudQuery.database.aws.credentialsFile }}
           {{- end }}
+        {{- if .Values.cloudQuery.database.aws.useLocalCredentials }}
         volumeMounts:
         - name: cloud-query-shared
           mountPath: /shared
+        {{- end }}
         readinessProbe:
           exec:
             command:
