@@ -5,7 +5,7 @@ defmodule Console.AI.Workbench.Skill do
     Enum.map(subagents, & String.downcase("#{&1}"))
     |> Enum.member?("#{subagent}")
   end
-  def subagent?(_, _), do: false
+  def subagent?(_, _), do: true
 end
 
 defmodule Console.AI.Workbench.Skills.Builtins do
