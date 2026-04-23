@@ -8,7 +8,6 @@ import {
   prettifyRepoUrl,
   PrOpenIcon,
 } from '@pluralsh/design-system'
-import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -36,8 +35,6 @@ export function WorkbenchJobResult({
   const { spacing } = useTheme()
   const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
   const workingTheory = job?.result?.workingTheory
-
-  useSidePanelWidth(conclusion ? { maxWidthVw: 60, initialWidthVw: 60 } : null)
 
   if (loading)
     return (

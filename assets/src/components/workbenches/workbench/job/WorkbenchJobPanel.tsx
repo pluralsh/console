@@ -14,6 +14,7 @@ import {
 } from 'components/ai/chatbot/SidePanelShared'
 import {
   SidePanel,
+  useSidePanelWidth,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
 import { useWorkbenchJobQuery, WorkbenchJobFragment } from 'generated/graphql'
@@ -56,6 +57,12 @@ export function WorkbenchJobPanelContent() {
   })
   const job = data?.workbenchJob
   const isLoading = loading && !job
+
+  const hasConclusionWhileSettled =
+    Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
+  useSidePanelWidth(
+    hasConclusionWhileSettled ? { maxWidthVw: 60, initialWidthVw: 60 } : null
+  )
 
   const tabs = getPanelTabs(job)
 

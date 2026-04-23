@@ -20,7 +20,6 @@ import {
   JobActivityLogsFromTool,
   JobActivityMetrics,
 } from './WorkbenchJobActivityResults'
-import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 
 const COLUMNS = 3
 const ROW_HEIGHT_PX = 40
@@ -35,7 +34,6 @@ export function WorkbenchJobCanvas({
   activityId?: string
   canvas: Nullable<Nullable<WorkbenchCanvasBlockFragment>[]>
 }) {
-  useSidePanelWidth({ maxWidthVw: 60, initialWidthVw: 60 })
   const client = useApolloClient()
   useWorkbenchCanvasStreamSubscription({
     variables: { jobId, activityId },
