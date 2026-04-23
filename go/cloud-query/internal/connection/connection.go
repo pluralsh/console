@@ -51,6 +51,10 @@ func (in *connection) Configure() error {
 }
 
 func (in *connection) Close() error {
+	if in.config == nil {
+		return in.db.Close()
+	}
+
 	if err := in.config.Cleanup(in.name); err != nil {
 		return fmt.Errorf("failed to cleanup configuration for provider %s: %w", in.provider(), err)
 	}
