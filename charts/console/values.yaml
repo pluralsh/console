@@ -478,10 +478,6 @@ cloudQuery:
     # aws config is used to configure the cloud-query to use AWS credentials for querying AWS resources.
     # It is required by the cloud-query AWS provider to allow usage of the assume role functionality.
     aws:
-      # If set, cloud-query will use config file and credentials file to store AWS credentials
-      # on the local filesystem instead of the default AWS credential chain.
-      # NOTE: Does not work with EKS Pod Identity/IRSA.
-      useLocalCredentials: true
       ### The below options are only used if useLocalCredentials is set to true ###
       # If set, AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE will be mounted into both cloud-query containers under /shared
       mountPath: /shared
