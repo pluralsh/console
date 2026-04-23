@@ -8,7 +8,18 @@ versions:
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['From 1.30.0 release notes: otel-collector deployment fix to allow
+        external OTEL URL without requiring a cloud provider.', 'NetworkPolicy fixes:
+        prometheus-exporter egress + storage ingress rules corrected.', NetworkPolicy
+        fix to allow Prometheus ServiceMonitor traffic to kubescape., 'Feature added:
+        image-based capability (per PR ''Feat/image based'').', No specific changelog
+        items were provided for 1.30.7 in the notes you shared (release exists but
+        has no listed changes).]
+    features: ['Adds an image-based mode/capability (details depend on chart values;
+        see PR #770 in kubescape/helm-charts).']
+    breaking_changes: []
   chart_version: 1.30.7
   images: []
 - version: 1.30.0

@@ -12636,7 +12636,7 @@ addons:
           apply/diff (SSA, server-side dry-run, apply-out-of-sync-only, replace/force
           options) can alter sync outcomes; validate sync options and test against
           critical apps before rolling out broadly.']
-    chart_version: 9.5.3
+    chart_version: 9.5.4
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.3.8']
   - version: 3.3.0
@@ -13088,9 +13088,9 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.10
+    chart_version: 1.0.11
     images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
-      'registry.k8s.io/kubectl:v1.35.4']
+      'registry.k8s.io/kubectl:v1.36.0']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -13245,6 +13245,36 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.55.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['New `windows_event_log` source for collecting Windows Event Log
+          channels via the native Windows Event Log API, including pull-mode subscriptions,
+          bookmark-based checkpointing, and configurable field filtering.', '`aws_s3`
+          sink supports Apache Parquet batch encoding, with auto-generated or supplied
+          schema and configurable compression (Snappy/ZSTD/GZIP/LZ4/none).', '`azure_blob`
+          sink restores first-class Azure authentication support (Azure CLI, Managed
+          Identity, Workload Identity, and Managed Identity-based Client Assertion).',
+        '`datadog_metrics` sink defaults to Series v2 endpoint (`/api/v2/series`)
+          and uses `zstd` compression for Series v2 and Sketches; includes `series_api_version`
+          option to switch back to v1.', '`vector top` output accounting is corrected
+          for multi-output components and it now reports Memory Used as disabled when
+          allocation tracing is not enabled.', 'Improved internal metrics: new source-send
+          latency distributions, more accurate transform utilization (excludes downstream
+          waiting), and fixes to buffer utilization tracking; also fixes CPU regression
+          in `file` and `kubernetes_logs` sources introduced in 0.50.0.']
+      breaking_changes: [Observability API has moved from GraphQL to gRPC; clients
+          and tooling that used `/graphql` or `/playground` (including `vector top`/`vector
+          tap` integrations) must be updated. `GET /health` is unchanged for Kubernetes
+          probes., Top-level `headers` option on `http` and `opentelemetry` sinks
+          has been removed; configurations must be adjusted accordingly., '`azure_logs_ingestion`
+          sink using Client Secret credentials now requires explicitly setting `azure_credential_kind`.']
+    chart_version: 0.52.0
+    images: ['docker.io/timberio/vector:0.55.0-distroless-libc']
   - version: 0.54.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -16428,7 +16458,18 @@ addons:
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['From 1.30.0 release notes: otel-collector deployment fix to
+          allow external OTEL URL without requiring a cloud provider.', 'NetworkPolicy
+          fixes: prometheus-exporter egress + storage ingress rules corrected.', NetworkPolicy
+          fix to allow Prometheus ServiceMonitor traffic to kubescape., 'Feature added:
+          image-based capability (per PR ''Feat/image based'').', No specific changelog
+          items were provided for 1.30.7 in the notes you shared (release exists but
+          has no listed changes).]
+      features: ['Adds an image-based mode/capability (details depend on chart values;
+          see PR #770 in kubescape/helm-charts).']
+      breaking_changes: []
     chart_version: 1.30.7
     images: []
   - version: 1.30.0
