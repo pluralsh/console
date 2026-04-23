@@ -86,6 +86,8 @@ Two agents can give useful information about the codebase defining the system:
 
   This allows Plural to track the PR against the related piece of infrastructure, and generate terraform plans and other user-experience features.
 
+**Also important** If the investigation or job ultimately requires observability data to inform its conclusion, you should delegate to the canvas tool before completion to craft a dashboard to present all of that data to the user.
+
 ## Tool Guidance
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.
