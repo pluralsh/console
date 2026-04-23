@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -115,6 +116,15 @@ func (in *awsConfigManager) flush() error {
 	sharedCredentialsFilePath := in.sharedCredentialsPath()
 	tmpSharedCredentialsFilePath := sharedCredentialsFilePath + ".tmp"
 
+	// Ensure the directories exist
+	if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(sharedCredentialsFilePath), 0755); err != nil {
+		return fmt.Errorf("failed to create shared credentials directory: %w", err)
+	}
+
+	// Write the config file atomically
 	if err := os.WriteFile(tmpConfigFilePath, []byte(in.serializeConfigFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS config: %w", err)
 	}
@@ -122,6 +132,7 @@ func (in *awsConfigManager) flush() error {
 		return fmt.Errorf("failed to rename config temp file: %w", err)
 	}
 
+	// Write the shared credentials file atomically
 	if err := os.WriteFile(tmpSharedCredentialsFilePath, []byte(in.serializeSharedCredentialsFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS shared credentials: %w", err)
 	}
