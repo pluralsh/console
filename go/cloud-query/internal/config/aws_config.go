@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -23,16 +22,10 @@ const (
 )
 
 var (
-	manager AWSConfigManager
-)
-
-func init() {
-	var err error
-	manager, err = newAWSConfigManager()
-	if err != nil {
-		klog.Fatalf("failed to initialize AWS config manager: %v", err)
+	manager = &awsConfigManager{
+		profiles: make(map[string]AWSProfile),
 	}
-}
+)
 
 // AWSProfile represents a single AWS config file profile entry.
 type AWSProfile struct {
@@ -57,18 +50,6 @@ type awsConfigManager struct {
 
 func GetAWSConfigManager() AWSConfigManager {
 	return manager
-}
-
-func newAWSConfigManager() (AWSConfigManager, error) {
-	m := &awsConfigManager{
-		profiles: make(map[string]AWSProfile),
-	}
-
-	if err := m.load(); err != nil {
-		return nil, err
-	}
-
-	return m, nil
 }
 
 func (in *awsConfigManager) configPath() (string, error) {
@@ -126,49 +107,6 @@ func (in *awsConfigManager) Remove(name string) error {
 
 	delete(in.profiles, name)
 	return in.flush()
-}
-
-// load parses existing profiles from the config file into the in-memory map.
-// A missing file is treated as empty and is not an error.
-func (in *awsConfigManager) load() error {
-	configFilePath, err := in.configPath()
-	if err != nil {
-		return fmt.Errorf("failed to get AWS config path: %w", err)
-	}
-	in.configFilePath = configFilePath
-
-	if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
-		return fmt.Errorf("failed to create AWS config directory: %w", err)
-	}
-
-	sharedCredentialsPath, err := in.sharedCredentialsPath()
-	if err != nil {
-		return fmt.Errorf("failed to get AWS shared credentials path: %w", err)
-	}
-	in.sharedCredentialsFilePath = sharedCredentialsPath
-
-	if err := os.MkdirAll(filepath.Dir(sharedCredentialsPath), 0755); err != nil {
-		return fmt.Errorf("failed to create AWS shared credentials directory: %w", err)
-	}
-
-	data, err := os.ReadFile(configFilePath)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("failed to read AWS config file: %w", err)
-	}
-
-	data, err = os.ReadFile(sharedCredentialsPath)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("failed to read AWS shared credentials file: %w", err)
-	}
-
-	in.profiles = in.parseProfiles(string(data))
-	return nil
 }
 
 // flush serializes all in-memory profiles to disk atomically via a temp file rename.

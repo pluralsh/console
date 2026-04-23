@@ -124,7 +124,7 @@ func WithAWSRegions(regions ...string) func(*Configuration) {
 	}
 }
 
-func WithRoleArn(roleArn string) func(*Configuration) {
+func WithAWSRoleArn(roleArn string) func(*Configuration) {
 	return func(c *Configuration) {
 		c.aws.roleArn = &roleArn
 	}
