@@ -42,14 +42,11 @@ const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
 }
 const CATEGORIES_ACCORDION_VALUE = 'categories'
 
-type FilterOption = { key: string; items: number }
-
 export function WorkbenchesIntegrations() {
   const theme = useTheme()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [categoryFilterQuery, setCategoryFilterQuery] = useState('')
   const [openFilterSections, setOpenFilterSections] = useState<string[]>([
     CATEGORIES_ACCORDION_VALUE,
   ])
@@ -81,11 +78,6 @@ export function WorkbenchesIntegrations() {
     const fuse = new Fuse(sortedByLabel, SEARCH_OPTIONS)
     return fuse.search(query).map(({ item }) => item)
   }, [query, selectedCategories])
-
-  const visibleCategories = useMemo(
-    () => filterOptionsByQuery(categories, categoryFilterQuery),
-    [categories, categoryFilterQuery]
-  )
 
   const hasActiveSearch = query.trim().length > 0
   const hasActiveFilters = selectedCategories.length > 0
@@ -132,18 +124,8 @@ export function WorkbenchesIntegrations() {
                     direction="column"
                     gap="xsmall"
                   >
-                    <Input
-                      value={categoryFilterQuery}
-                      onChange={(e) =>
-                        setCategoryFilterQuery(e.currentTarget.value)
-                      }
-                      showClearButton
-                      placeholder="Filter categories"
-                      startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                      width="100%"
-                    />
                     <FilterOptionsSC>
-                      {visibleCategories.map(({ key, items }) => (
+                      {categories.map(({ key, items }) => (
                         <Checkbox
                           key={key}
                           small
@@ -316,16 +298,6 @@ function getFilterOptions(
   return Array.from(counts.entries())
     .map(([, { label, count }]) => ({ key: label, items: count }))
     .sort((a, b) => a.key.localeCompare(b.key))
-}
-
-function filterOptionsByQuery(
-  options: FilterOption[],
-  query: string
-): FilterOption[] {
-  if (!query) return options
-  const lower = query.toLowerCase()
-
-  return options.filter(({ key }) => key.toLowerCase().includes(lower))
 }
 
 function sortToolCards(cards: WorkbenchToolCard[]) {
