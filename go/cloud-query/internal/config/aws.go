@@ -33,10 +33,10 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 	schemaName := pq.QuoteIdentifier(connectionName)
 
 	query := strings.Builder{}
-	query.WriteString(fmt.Sprintf("DROP SERVER IF EXISTS %s;\n", serverName))
-	query.WriteString(fmt.Sprintf("CREATE SERVER %s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (\n", serverName))
+	fmt.Fprintf(&query, "DROP SERVER IF EXISTS %s;\n", serverName)
+	fmt.Fprintf(&query, "CREATE SERVER %s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (\n", serverName)
 	query.WriteString("	config '\n")
-	query.WriteString(fmt.Sprintf("		regions=[%s]\n", c.getRegions()))
+	fmt.Fprintf(&query, "		regions=[%s]\n", c.getRegions())
 
 	if c.hasRoleArn() {
 		// sync aws config file
@@ -48,14 +48,14 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 			return "", fmt.Errorf("failed to sync AWS config file: %w", err)
 		}
 
-		query.WriteString(fmt.Sprintf("		profile=%s\n", schemaName))
+		fmt.Fprintf(&query, "		profile=%s\n", schemaName)
 	} else if c.hasCredentials() {
-		query.WriteString(fmt.Sprintf("		access_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.accessKeyId))))
-		query.WriteString(fmt.Sprintf("		secret_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey))))
+		fmt.Fprintf(&query, "		access_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.accessKeyId)))
+		fmt.Fprintf(&query, "		secret_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey)))
 	}
 
 	query.WriteString("');\n")
-	query.WriteString(fmt.Sprintf("IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;\n", schemaName, serverName))
+	fmt.Fprintf(&query, "IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;\n", schemaName, serverName)
 
 	return query.String(), nil
 }
