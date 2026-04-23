@@ -182,6 +182,12 @@ func (in *awsConfigManager) serializeSharedCredentialsFile() string {
 
 	for _, name := range sortedKeys {
 		p := in.profiles[name]
+
+		// Skip empty profiles
+		if len(p.AccessKeyId) == 0 || len(p.SecretAccessKey) == 0 {
+			continue
+		}
+
 		fmt.Fprintf(&sb, "[%s]\n", name)
 		fmt.Fprintf(&sb, "aws_access_key_id = %s\n", p.AccessKeyId)
 		fmt.Fprintf(&sb, "aws_secret_access_key = %s\n", p.SecretAccessKey)
