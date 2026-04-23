@@ -70,7 +70,7 @@ spec:
         {{- if .Values.cloudQuery.database.aws.useLocalCredentials }}
         volumeMounts:
         - name: cloud-query-shared
-          mountPath: /shared
+          mountPath: {{ .Values.cloudQuery.database.aws.mountPath }}
         {{- end }}
         readinessProbe:
           exec:
