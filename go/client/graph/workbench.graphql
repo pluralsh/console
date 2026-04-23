@@ -222,6 +222,10 @@ fragment WorkbenchCronFragment on WorkbenchCron {
     id
     crontab
     prompt
+    workbench {
+        id
+        name
+    }
 }
 
 fragment WorkbenchWebhookFragment on WorkbenchWebhook {
@@ -232,6 +236,18 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
         regex
         substring
         caseInsensitive
+    }
+    webhook {
+        id
+        name
+    }
+    issueWebhook {
+        id
+        name
+    }
+    workbench {
+        id
+        name
     }
 }
 
