@@ -42,20 +42,18 @@ type AWSConfigManager interface {
 // AWSConfigManager maintains an in-memory copy of ~/.aws/config and writes
 // through to disk on every mutation.
 type awsConfigManager struct {
-	mu                        sync.RWMutex
-	profiles                  map[string]AWSProfile
-	configFilePath            string
-	sharedCredentialsFilePath string
+	mu       sync.RWMutex
+	profiles map[string]AWSProfile
 }
 
 func GetAWSConfigManager() AWSConfigManager {
 	return manager
 }
 
-func (in *awsConfigManager) configPath() (string, error) {
+func (in *awsConfigManager) configPath() string {
 	path, exists := os.LookupEnv(envAWSConfigFile)
 	if !exists {
-		return defaultAWSConfigFilePath, nil
+		return defaultAWSConfigFilePath
 	}
 
 	klog.V(log.LogLevelDebug).InfoS(
@@ -63,13 +61,13 @@ func (in *awsConfigManager) configPath() (string, error) {
 		"path", path,
 	)
 
-	return path, nil
+	return path
 }
 
-func (in *awsConfigManager) sharedCredentialsPath() (string, error) {
+func (in *awsConfigManager) sharedCredentialsPath() string {
 	path, exists := os.LookupEnv(envAWSSharedCredentialsFile)
 	if !exists {
-		return defaultAWSSharedCredentialsFilePath, nil
+		return defaultAWSSharedCredentialsFilePath
 	}
 
 	klog.V(log.LogLevelDebug).InfoS(
@@ -77,7 +75,7 @@ func (in *awsConfigManager) sharedCredentialsPath() (string, error) {
 		"path", path,
 	)
 
-	return path, nil
+	return path
 }
 
 func (in *awsConfigManager) Add(name string, p AWSProfile) error {
@@ -112,20 +110,23 @@ func (in *awsConfigManager) Remove(name string) error {
 // flush serializes all in-memory profiles to disk atomically via a temp file rename.
 // Must be called with m.mu held.
 func (in *awsConfigManager) flush() error {
-	tmp := in.configFilePath + ".tmp"
-	if err := os.WriteFile(tmp, []byte(in.serializeConfigFile()), 0644); err != nil {
+	configFilePath := in.configPath()
+	tmpConfigFilePath := configFilePath + ".tmp"
+	sharedCredentialsFilePath := in.sharedCredentialsPath()
+	tmpSharedCredentialsFilePath := sharedCredentialsFilePath + ".tmp"
+
+	if err := os.WriteFile(tmpConfigFilePath, []byte(in.serializeConfigFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS config: %w", err)
 	}
-	if err := os.Rename(tmp, in.configFilePath); err != nil {
-		return fmt.Errorf("failed to rename temp file: %w", err)
+	if err := os.Rename(tmpConfigFilePath, configFilePath); err != nil {
+		return fmt.Errorf("failed to rename config temp file: %w", err)
 	}
 
-	tmp = in.sharedCredentialsFilePath + ".tmp"
-	if err := os.WriteFile(tmp, []byte(in.serializeSharedCredentialsFile()), 0644); err != nil {
+	if err := os.WriteFile(tmpSharedCredentialsFilePath, []byte(in.serializeSharedCredentialsFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS shared credentials: %w", err)
 	}
-	if err := os.Rename(tmp, in.sharedCredentialsFilePath); err != nil {
-		return fmt.Errorf("failed to rename temp file: %w", err)
+	if err := os.Rename(tmpSharedCredentialsFilePath, sharedCredentialsFilePath); err != nil {
+		return fmt.Errorf("failed to rename shared credentials temp file: %w", err)
 	}
 
 	return nil
@@ -166,48 +167,4 @@ func (in *awsConfigManager) serializeSharedCredentialsFile() string {
 	}
 
 	return sb.String()
-}
-
-// parseProfiles parses AWS INI config file content into a profiles map.
-func (in *awsConfigManager) parseProfiles(content string) map[string]AWSProfile {
-	profiles := make(map[string]AWSProfile)
-	var currentName string
-	var current AWSProfile
-
-	for _, line := range strings.Split(content, "\n") {
-		line = strings.TrimSpace(line)
-
-		if strings.HasPrefix(line, "[profile ") && strings.HasSuffix(line, "]") {
-			if currentName != "" {
-				profiles[currentName] = current
-			}
-			currentName = line[len("[profile ") : len(line)-1]
-			current = AWSProfile{}
-			continue
-		}
-
-		if currentName == "" {
-			continue
-		}
-
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			continue
-		}
-
-		switch strings.TrimSpace(key) {
-		case "aws_access_key_id":
-			current.AccessKeyId = strings.TrimSpace(value)
-		case "aws_secret_access_key":
-			current.SecretAccessKey = strings.TrimSpace(value)
-		case "role_arn":
-			current.RoleArn = strings.TrimSpace(value)
-		}
-	}
-
-	if currentName != "" {
-		profiles[currentName] = current
-	}
-
-	return profiles
 }
