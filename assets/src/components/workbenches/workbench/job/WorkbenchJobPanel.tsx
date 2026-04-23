@@ -60,9 +60,10 @@ export function WorkbenchJobPanelContent() {
 
   const hasConclusionWhileSettled =
     Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
-  useSidePanelWidth(
-    hasConclusionWhileSettled ? { maxWidthVw: 60, initialWidthVw: 60 } : null
-  )
+  useSidePanelWidth({
+    maxWidthVw: 60,
+    initialWidthVw: hasConclusionWhileSettled ? 60 : undefined,
+  })
 
   const tabs = getPanelTabs(job)
 

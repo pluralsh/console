@@ -1,7 +1,7 @@
 import { useResizeObserver } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { clamp, isNil } from 'lodash'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'chatbot-panel-width'
 
@@ -29,24 +29,16 @@ export function useResizablePane(
     setPanelWidth(calculatedPanelWidth)
   )
 
-  // Snap to programmatic width only when entering wide mode (undefined → defined).
-  // Clearing initialWidthVw keeps the user's current width; max clamping handles limits.
-  const prevInitialWidthVwRef = useRef<number | undefined>(undefined)
+  const prevWidth = useRef<number>(calculatedPanelWidth)
+  const jumpToWidth = useEffectEvent((width: number) => {
+    prevWidth.current = calculatedPanelWidth
+    setPanelWidth(width)
+  })
+  // snap to initial when provided, otherwise return to previous width before initial was set
   useEffect(() => {
-    const prevInitial = prevInitialWidthVwRef.current
-    prevInitialWidthVwRef.current = initialWidthVw
-
-    if (!isNil(initialWidthVw) && isNil(prevInitial)) {
-      setPanelWidth(vwToPx(initialWidthVw))
-    }
+    if (!isNil(initialWidthVw)) jumpToWidth(vwToPx(initialWidthVw))
+    else setPanelWidth(prevWidth.current)
   }, [initialWidthVw, setPanelWidth])
-
-  useEffect(() => {
-    const maxPx = Math.max(minWidthPx, vwToPx(maxWidthVw))
-    if (calculatedPanelWidth > maxPx) {
-      setPanelWidth(maxPx)
-    }
-  }, [minWidthPx, maxWidthVw, calculatedPanelWidth, setPanelWidth])
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault()
