@@ -136,14 +136,12 @@ spec:
         resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.cloudQuery.volumeMounts }}
         volumeMounts:
           - name: cloud-query-shared
             mountPath: {{ .Values.cloudQuery.database.aws.mountPath }}
             {{- with .Values.cloudQuery.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- end }}
       volumes:
       - name: cloud-query-shared
         emptyDir:
