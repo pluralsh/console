@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Environment do
   alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity, User}
-  alias Console.AI.Workbench.Skill
+  alias Console.AI.Workbench.{Skill, Skills.Builtins}
 
   @type t :: %__MODULE__{
     user: User.t,
@@ -22,6 +22,12 @@ defmodule Console.AI.Workbench.Environment do
       skills: to_map(skills)
     }
     |> save()
+  end
+
+  def with_builtins(skills) when is_map(skills) do
+    Builtins.builtins()
+    |> Map.new(fn %Skill{name: name} = skill -> {name, skill} end)
+    |> Map.merge(skills)
   end
 
   def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench}) do

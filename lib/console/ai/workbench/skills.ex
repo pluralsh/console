@@ -2,6 +2,17 @@ defmodule Console.AI.Workbench.Skill do
   defstruct [:name, :description, :contents]
 end
 
+defmodule Console.AI.Workbench.Skills.Builtins do
+  alias Console.AI.Workbench.Skill
+  @canvas File.read!(Console.priv_filename(["prompts", "workbench", "skills", "canvas.md"]))
+
+  def builtins() do
+    [
+      %Skill{name: "canvas", description: "guidance on how to use the canvas tool to build a dashboard", contents: @canvas}
+    ]
+  end
+end
+
 defmodule Console.AI.Workbench.Skills do
   alias Console.Schema.{Workbench, GitRepository, WorkbenchSkill}
   alias Console.Deployments.Git

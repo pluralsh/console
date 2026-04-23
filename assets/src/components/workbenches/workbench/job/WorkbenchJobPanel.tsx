@@ -36,7 +36,7 @@ import {
 } from './WorkbenchJobResult'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab = 'Result' | 'Canvas' | 'Topology' | 'PRs'
+type JobPanelTab = 'Result' | 'Dashboard' | 'Topology' | 'PRs'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -109,7 +109,7 @@ export function WorkbenchJobPanelContent() {
               loading={isLoading}
             />
           )}
-          {selectedTab === 'Canvas' && job?.id && (
+          {selectedTab === 'Dashboard' && job?.id && (
             <WorkbenchJobCanvas
               jobId={job.id}
               canvas={job?.result?.canvas}
@@ -172,7 +172,7 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
   [
     { label: 'Result', icon: <PaperCheckIcon size={12} /> },
     !isEmpty(job?.result?.canvas) && {
-      label: 'Canvas',
+      label: 'Dashboard',
       icon: <DashboardIcon size={12} />,
     },
     !!job?.result?.topology && {
