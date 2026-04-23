@@ -33,7 +33,6 @@ import {
   WORKBENCH_TOOL_CARDS,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
-  getWorkbenchToolLabel,
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
 
@@ -42,21 +41,17 @@ const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
   threshold: 0.25,
 }
 const CATEGORIES_ACCORDION_VALUE = 'categories'
-const TYPES_ACCORDION_VALUE = 'types'
 
 type FilterOption = { key: string; items: number }
 
 export function WorkbenchesIntegrations() {
   const theme = useTheme()
   const [query, setQuery] = useState('')
-  const [filtersVisible, setFiltersVisible] = useState(false)
+  const [filtersVisible, setFiltersVisible] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [categoryFilterQuery, setCategoryFilterQuery] = useState('')
-  const [typeFilterQuery, setTypeFilterQuery] = useState('')
   const [openFilterSections, setOpenFilterSections] = useState<string[]>([
     CATEGORIES_ACCORDION_VALUE,
-    TYPES_ACCORDION_VALUE,
   ])
 
   const categories = useMemo(
@@ -64,39 +59,20 @@ export function WorkbenchesIntegrations() {
     []
   )
 
-  const types = useMemo(
-    () =>
-      getFilterOptions(WORKBENCH_TOOL_CARDS, (card) => [
-        getWorkbenchToolLabel(card.type, card.provider),
-      ]),
-    []
-  )
-
   const filteredCards = useMemo(() => {
     const categorySet = new Set(selectedCategories.map(normalizeFilterValue))
-    const typeSet = new Set(selectedTypes.map(normalizeFilterValue))
 
-    const byFilters = WORKBENCH_TOOL_CARDS.filter(
-      ({ categoryLabels, type, provider }) => {
-        if (
-          categorySet.size > 0 &&
-          !categoryLabels.some((category) =>
-            categorySet.has(normalizeFilterValue(category))
-          )
+    const byFilters = WORKBENCH_TOOL_CARDS.filter(({ categoryLabels }) => {
+      if (
+        categorySet.size > 0 &&
+        !categoryLabels.some((category) =>
+          categorySet.has(normalizeFilterValue(category))
         )
-          return false
+      )
+        return false
 
-        if (
-          typeSet.size > 0 &&
-          !typeSet.has(
-            normalizeFilterValue(getWorkbenchToolLabel(type, provider))
-          )
-        )
-          return false
-
-        return true
-      }
-    )
+      return true
+    })
 
     const sortedByLabel = sortToolCards(byFilters)
 
@@ -104,12 +80,7 @@ export function WorkbenchesIntegrations() {
 
     const fuse = new Fuse(sortedByLabel, SEARCH_OPTIONS)
     return fuse.search(query).map(({ item }) => item)
-  }, [query, selectedCategories, selectedTypes])
-
-  const visibleTypes = useMemo(
-    () => filterOptionsByQuery(types, typeFilterQuery),
-    [types, typeFilterQuery]
-  )
+  }, [query, selectedCategories])
 
   const visibleCategories = useMemo(
     () => filterOptionsByQuery(categories, categoryFilterQuery),
@@ -117,21 +88,19 @@ export function WorkbenchesIntegrations() {
   )
 
   const hasActiveSearch = query.trim().length > 0
-  const hasActiveFilters =
-    selectedCategories.length > 0 || selectedTypes.length > 0
+  const hasActiveFilters = selectedCategories.length > 0
   const showEmptyState =
     filteredCards.length === 0 && (hasActiveSearch || hasActiveFilters)
 
   const resetSearchAndFilters = () => {
     setQuery('')
     setSelectedCategories([])
-    setSelectedTypes([])
   }
 
   const panelTransitions = useTransition(filtersVisible ? [true] : [], {
-    from: { opacity: 0, width: 0, marginLeft: 0 },
-    enter: { opacity: 1, width: 260, marginLeft: theme.spacing.large },
-    leave: { opacity: 0, width: 0, marginLeft: 0 },
+    from: { opacity: 0, width: 0, marginRight: 0 },
+    enter: { opacity: 1, width: 260, marginRight: theme.spacing.large },
+    leave: { opacity: 0, width: 0, marginRight: 0 },
     config: filtersVisible
       ? { mass: 0.6, tension: 280, velocity: 0.02 }
       : { mass: 0.6, tension: 400, velocity: 0.02, restVelocity: 0.1 },
@@ -145,6 +114,56 @@ export function WorkbenchesIntegrations() {
         description="Integrate your dev stack, including observability, ticketing, MCP, and Cloud services with Plural."
       />
       <FiltersLayoutSC>
+        {panelTransitions((styles) => (
+          <AnimatedFiltersPanelSC style={styles}>
+            <FiltersPanelContentSC>
+              <Accordion
+                type="multiple"
+                value={openFilterSections}
+                onValueChange={(value) =>
+                  setOpenFilterSections(value as string[])
+                }
+              >
+                <AccordionItem
+                  value={CATEGORIES_ACCORDION_VALUE}
+                  trigger={`Categories (${categories.length})`}
+                >
+                  <Flex
+                    direction="column"
+                    gap="xsmall"
+                  >
+                    <Input
+                      value={categoryFilterQuery}
+                      onChange={(e) =>
+                        setCategoryFilterQuery(e.currentTarget.value)
+                      }
+                      showClearButton
+                      placeholder="Filter categories"
+                      startIcon={<MagnifyingGlassIcon color="icon-light" />}
+                      width="100%"
+                    />
+                    <FilterOptionsSC>
+                      {visibleCategories.map(({ key, items }) => (
+                        <Checkbox
+                          key={key}
+                          small
+                          checked={selectedCategories.includes(key)}
+                          onChange={() =>
+                            setSelectedCategories((current) =>
+                              toggleFilterValue(current, key)
+                            )
+                          }
+                        >
+                          {key} ({items})
+                        </Checkbox>
+                      ))}
+                    </FilterOptionsSC>
+                  </Flex>
+                </AccordionItem>
+              </Accordion>
+            </FiltersPanelContentSC>
+          </AnimatedFiltersPanelSC>
+        ))}
         <Flex
           direction="column"
           gap="medium"
@@ -168,7 +187,7 @@ export function WorkbenchesIntegrations() {
                 borderColor:
                   filtersVisible ||
                   selectedCategories.length ||
-                  selectedTypes.length
+                  selectedCategories.length
                     ? theme.colors['border-primary']
                     : undefined,
               }}
@@ -271,92 +290,6 @@ export function WorkbenchesIntegrations() {
             </CardGrid>
           )}
         </Flex>
-        {panelTransitions((styles) => (
-          <AnimatedFiltersPanelSC style={styles}>
-            <FiltersPanelContentSC>
-              <Accordion
-                type="multiple"
-                value={openFilterSections}
-                onValueChange={(value) =>
-                  setOpenFilterSections(value as string[])
-                }
-              >
-                <AccordionItem
-                  value={CATEGORIES_ACCORDION_VALUE}
-                  trigger={`Categories (${categories.length})`}
-                >
-                  <Flex
-                    direction="column"
-                    gap="xsmall"
-                  >
-                    <Input
-                      value={categoryFilterQuery}
-                      onChange={(e) =>
-                        setCategoryFilterQuery(e.currentTarget.value)
-                      }
-                      showClearButton
-                      placeholder="Filter categories"
-                      startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                      width="100%"
-                    />
-                    <FilterOptionsSC>
-                      {visibleCategories.map(({ key, items }) => (
-                        <Checkbox
-                          key={key}
-                          small
-                          checked={selectedCategories.includes(key)}
-                          onChange={() =>
-                            setSelectedCategories((current) =>
-                              toggleFilterValue(current, key)
-                            )
-                          }
-                        >
-                          {key} ({items})
-                        </Checkbox>
-                      ))}
-                    </FilterOptionsSC>
-                  </Flex>
-                </AccordionItem>
-                <AccordionItem
-                  value={TYPES_ACCORDION_VALUE}
-                  trigger={`Types (${types.length})`}
-                >
-                  <Flex
-                    direction="column"
-                    gap="xsmall"
-                  >
-                    <Input
-                      value={typeFilterQuery}
-                      onChange={(e) =>
-                        setTypeFilterQuery(e.currentTarget.value)
-                      }
-                      showClearButton
-                      placeholder="Filter types"
-                      startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                      width="100%"
-                    />
-                    <FilterOptionsSC>
-                      {visibleTypes.map(({ key, items }) => (
-                        <Checkbox
-                          key={key}
-                          small
-                          checked={selectedTypes.includes(key)}
-                          onChange={() =>
-                            setSelectedTypes((current) =>
-                              toggleFilterValue(current, key)
-                            )
-                          }
-                        >
-                          {key} ({items})
-                        </Checkbox>
-                      ))}
-                    </FilterOptionsSC>
-                  </Flex>
-                </AccordionItem>
-              </Accordion>
-            </FiltersPanelContentSC>
-          </AnimatedFiltersPanelSC>
-        ))}
       </FiltersLayoutSC>
     </WorkbenchTabWrapper>
   )

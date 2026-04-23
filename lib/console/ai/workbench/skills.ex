@@ -2,9 +2,10 @@ defmodule Console.AI.Workbench.Skill do
   defstruct [:name, :description, :contents, subagents: []]
 
   def subagent?(%__MODULE__{subagents: [_ | _] = subagents}, subagent) do
-    Enum.map(subagents, &String.downcase/1)
+    Enum.map(subagents, & String.downcase("#{&1}"))
     |> Enum.member?("#{subagent}")
   end
+  def subagent?(_, _), do: false
 end
 
 defmodule Console.AI.Workbench.Skills.Builtins do
