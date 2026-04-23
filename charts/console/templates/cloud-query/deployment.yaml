@@ -67,10 +67,6 @@ spec:
         - name: AWS_SHARED_CREDENTIALS_FILE
           value: {{ .Values.cloudQuery.aws.credentialsFile }}
           {{- end }}
-          {{- if or .Values.cloudQuery.aws.configFile .Values.cloudQuery.aws.credentialsFile }}
-        - name: AWS_SDK_LOAD_CONFIG
-          value: "1"
-          {{- end }}
         volumeMounts:
         - name: cloud-query-shared
           mountPath: /shared
