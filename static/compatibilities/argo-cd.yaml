@@ -27,7 +27,7 @@ versions:
         (SSA, server-side dry-run, apply-out-of-sync-only, replace/force options)
         can alter sync outcomes; validate sync options and test against critical apps
         before rolling out broadly.']
-  chart_version: 9.5.3
+  chart_version: 9.5.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.3.8']
 - version: 3.3.0

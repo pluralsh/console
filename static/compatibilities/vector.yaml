@@ -3,6 +3,36 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.55.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['New `windows_event_log` source for collecting Windows Event Log channels
+        via the native Windows Event Log API, including pull-mode subscriptions, bookmark-based
+        checkpointing, and configurable field filtering.', '`aws_s3` sink supports
+        Apache Parquet batch encoding, with auto-generated or supplied schema and
+        configurable compression (Snappy/ZSTD/GZIP/LZ4/none).', '`azure_blob` sink
+        restores first-class Azure authentication support (Azure CLI, Managed Identity,
+        Workload Identity, and Managed Identity-based Client Assertion).', '`datadog_metrics`
+        sink defaults to Series v2 endpoint (`/api/v2/series`) and uses `zstd` compression
+        for Series v2 and Sketches; includes `series_api_version` option to switch
+        back to v1.', '`vector top` output accounting is corrected for multi-output
+        components and it now reports Memory Used as disabled when allocation tracing
+        is not enabled.', 'Improved internal metrics: new source-send latency distributions,
+        more accurate transform utilization (excludes downstream waiting), and fixes
+        to buffer utilization tracking; also fixes CPU regression in `file` and `kubernetes_logs`
+        sources introduced in 0.50.0.']
+    breaking_changes: [Observability API has moved from GraphQL to gRPC; clients and
+        tooling that used `/graphql` or `/playground` (including `vector top`/`vector
+        tap` integrations) must be updated. `GET /health` is unchanged for Kubernetes
+        probes., Top-level `headers` option on `http` and `opentelemetry` sinks has
+        been removed; configurations must be adjusted accordingly., '`azure_logs_ingestion`
+        sink using Client Secret credentials now requires explicitly setting `azure_credential_kind`.']
+  chart_version: 0.52.0
+  images: ['docker.io/timberio/vector:0.55.0-distroless-libc']
 - version: 0.54.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
