@@ -161,7 +161,10 @@ func (in *awsConfigManager) serializeConfigFile() string {
 	for _, name := range sortedKeys {
 		p := in.profiles[name]
 		fmt.Fprintf(&sb, "[profile %s]\n", name)
-		fmt.Fprintf(&sb, "source_profile = %s\n", name)
+		if len(p.SecretAccessKey) > 0 && len(p.AccessKeyId) > 0 {
+			fmt.Fprintf(&sb, "source_profile = %s\n", name)
+		}
+
 		if p.RoleArn != "" {
 			fmt.Fprintf(&sb, "role_arn = %s\n", p.RoleArn)
 		}

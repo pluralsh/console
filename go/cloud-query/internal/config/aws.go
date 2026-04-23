@@ -38,11 +38,7 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 	query.WriteString("	config '\n")
 	query.WriteString(fmt.Sprintf("		regions=[%s]\n", c.getRegions()))
 
-	// Either profile or access_key and secret_key must be set
-	// otherwise, instead of using credentials from the profile in the
-	// shared credentials file, the default static credentials provider chain
-	// will be used.
-	if len(lo.FromPtr(c.roleArn)) > 0 {
+	if c.hasRoleArn() {
 		// sync aws config file
 		if err := GetAWSConfigManager().Add(connectionName, AWSProfile{
 			AccessKeyId:     lo.FromPtr(c.accessKeyId),
@@ -53,7 +49,7 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 		}
 
 		query.WriteString(fmt.Sprintf("		profile=%s\n", schemaName))
-	} else if len(lo.FromPtr(c.accessKeyId)) > 0 && len(lo.FromPtr(c.secretAccessKey)) > 0 {
+	} else if c.hasCredentials() {
 		query.WriteString(fmt.Sprintf("		access_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.accessKeyId))))
 		query.WriteString(fmt.Sprintf("		secret_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey))))
 	}
@@ -62,6 +58,14 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 	query.WriteString(fmt.Sprintf("IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;\n", schemaName, serverName))
 
 	return query.String(), nil
+}
+
+func (c *AWSConfiguration) hasRoleArn() bool {
+	return len(lo.FromPtr(c.roleArn)) > 0
+}
+
+func (c *AWSConfiguration) hasCredentials() bool {
+	return len(lo.FromPtr(c.accessKeyId)) > 0 && len(lo.FromPtr(c.secretAccessKey)) > 0
 }
 
 func (c *AWSConfiguration) getRegions() string {
