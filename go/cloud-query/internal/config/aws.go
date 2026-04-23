@@ -21,79 +21,47 @@ func (c *AWSConfiguration) Query(connectionName string) (string, error) {
 		return "", fmt.Errorf("aws configuration is nil")
 	}
 
-	if len(lo.FromPtr(c.accessKeyId)) == 0 && len(lo.FromPtr(c.secretAccessKey)) == 0 {
-		return c.podIdentityQuery(connectionName)
-	}
-
-	if len(lo.FromPtr(c.roleArn)) > 0 {
-		return c.profileQuery(connectionName)
-	}
-
-	return c.credentialsQuery(connectionName)
+	return c.buildQuery(connectionName)
 }
 
 func (c *AWSConfiguration) Cleanup(connectionName string) error {
 	return GetAWSConfigManager().Remove(connectionName)
 }
 
-func (c *AWSConfiguration) podIdentityQuery(connectionName string) (string, error) {
-	return fmt.Sprintf(`
-			DROP SERVER IF EXISTS %[2]s;
-			CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
-				config '
-					regions=[%[3]s]
-			');
-			IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
-		`,
-		pq.QuoteIdentifier(connectionName),
-		pq.QuoteIdentifier("steampipe_"+connectionName),
-		c.getRegions(),
-	), nil
-}
+func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
+	serverName := pq.QuoteIdentifier("steampipe_" + connectionName)
+	schemaName := pq.QuoteIdentifier(connectionName)
 
-func (c *AWSConfiguration) profileQuery(connectionName string) (string, error) {
-	// sync aws config file
-	if err := GetAWSConfigManager().Add(connectionName, AWSProfile{
-		AccessKeyId:     lo.FromPtr(c.accessKeyId),
-		SecretAccessKey: lo.FromPtr(c.secretAccessKey),
-		RoleArn:         lo.FromPtr(c.roleArn),
-	}); err != nil {
-		return "", fmt.Errorf("failed to sync AWS config file: %w", err)
+	query := strings.Builder{}
+	query.WriteString(fmt.Sprintf("DROP SERVER IF EXISTS %s;\n", serverName))
+	query.WriteString(fmt.Sprintf("CREATE SERVER %s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (\n", serverName))
+	query.WriteString(fmt.Sprintf("	config '\n"))
+	query.WriteString(fmt.Sprintf("		regions=[%s]\n", c.getRegions()))
+
+	// Either profile or access_key and secret_key must be set
+	// otherwise, instead of using credentials from the profile in the
+	// shared credentials file, the default static credentials provider chain
+	// will be used.
+	if len(lo.FromPtr(c.roleArn)) > 0 {
+		// sync aws config file
+		if err := GetAWSConfigManager().Add(connectionName, AWSProfile{
+			AccessKeyId:     lo.FromPtr(c.accessKeyId),
+			SecretAccessKey: lo.FromPtr(c.secretAccessKey),
+			RoleArn:         lo.FromPtr(c.roleArn),
+		}); err != nil {
+			return "", fmt.Errorf("failed to sync AWS config file: %w", err)
+		}
+
+		query.WriteString(fmt.Sprintf("		profile=%s\n", schemaName))
+	} else if len(lo.FromPtr(c.accessKeyId)) > 0 && len(lo.FromPtr(c.secretAccessKey)) > 0 {
+		query.WriteString(fmt.Sprintf("		access_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.accessKeyId))))
+		query.WriteString(fmt.Sprintf("		secret_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey))))
 	}
 
-	return fmt.Sprintf(`
-			DROP SERVER IF EXISTS %[2]s;
-			CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
-				config '
-					profile=%[3]s
-					regions=[%[4]s]
-			');
-			IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
-		`,
-		pq.QuoteIdentifier(connectionName),
-		pq.QuoteIdentifier("steampipe_"+connectionName),
-		pq.QuoteIdentifier(connectionName),
-		c.getRegions(),
-	), nil
-}
+	query.WriteString(fmt.Sprintf("');\n"))
+	query.WriteString(fmt.Sprintf("IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;\n", schemaName, serverName))
 
-func (c *AWSConfiguration) credentialsQuery(connectionName string) (string, error) {
-	return fmt.Sprintf(`
-		DROP SERVER IF EXISTS %[2]s;
-		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (
-			config '
-				access_key=%[3]s
-				secret_key=%[4]s
-				regions=[%[5]s]
-		');
-		IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;
-	`,
-		pq.QuoteIdentifier(connectionName),
-		pq.QuoteIdentifier("steampipe_"+connectionName),
-		pq.QuoteIdentifier(lo.FromPtr(c.accessKeyId)),
-		pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey)),
-		c.getRegions(),
-	), nil
+	return query.String(), nil
 }
 
 func (c *AWSConfiguration) getRegions() string {

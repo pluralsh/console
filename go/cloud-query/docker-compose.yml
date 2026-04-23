@@ -11,7 +11,6 @@ services:
       STEAMPIPE_LOG_LEVEL: debug
       AWS_CONFIG_FILE: /shared/.aws/config
       AWS_SHARED_CREDENTIALS_FILE: /shared/.aws/credentials
-      AWS_SDK_LOAD_CONFIG: 1
     volumes:
       - shared:/shared
     ports:
