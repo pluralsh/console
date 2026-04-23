@@ -1,5 +1,5 @@
 import { useApolloClient } from '@apollo/client'
-import { Card, Markdown } from '@pluralsh/design-system'
+import { Markdown } from '@pluralsh/design-system'
 import { PieChart } from 'components/utils/PieChart'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
@@ -277,7 +277,7 @@ const BlockCellSC = styled.div<{
   display: 'flex',
 }))
 
-const BlockCardSC = styled(Card)(({ theme }) => ({
+const BlockCardSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   display: 'flex',
   flexDirection: 'column',
@@ -287,6 +287,9 @@ const BlockCardSC = styled(Card)(({ theme }) => ({
   minWidth: 0,
   minHeight: 0,
   overflow: 'auto',
+  background: 'transparent',
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.large,
 }))
 
 const BarListSC = styled.div(({ theme }) => ({
