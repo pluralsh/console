@@ -77,7 +77,9 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 		return config.NewAWSConfiguration(
 			config.WithAWSAccessKeyId(connection.GetAws().GetAccessKeyId()),
 			config.WithAWSSecretAccessKey(connection.GetAws().GetSecretAccessKey()),
-			config.WithAWSRegion(connection.GetAws().GetRegion()),
+			config.WithAWSRegions(connection.GetAws().GetRegion()),
+			config.WithAWSRegions(connection.GetAws().GetRegions()...),
+			config.WithRoleArn(connection.GetAws().GetAssumeRoleArn()),
 		), nil
 	case config.ProviderAzure:
 		return config.NewAzureConfiguration(

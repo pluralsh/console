@@ -13,10 +13,9 @@ import (
 
 	"github.com/pluralsh/console/go/cloud-query/cmd/args"
 	"github.com/pluralsh/console/go/cloud-query/internal/common"
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
-
 	"github.com/pluralsh/console/go/cloud-query/internal/config"
 	"github.com/pluralsh/console/go/cloud-query/internal/connection"
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 )
 
 type ConnectionPool struct {
@@ -29,7 +28,7 @@ type ConnectionPool struct {
 }
 
 func NewConnectionPool(ttl time.Duration) (*ConnectionPool, error) {
-	admin, err := connection.NewConnection("admin", "")
+	admin, err := connection.NewConnection("admin", "", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create admin connection: %w", err)
 	}
@@ -87,7 +86,7 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 		GRANT  ALL ON ALL TABLES IN SCHEMA %[1]s TO %[1]s;
 
 		-- Allow accessing to shared extensions
-		GRANT ALL ON SCHEMA extensions TO %[1]s; 
+		GRANT ALL ON SCHEMA extensions TO %[1]s;
 
 		-- Grant usage on foreign data wrapper and servers
 		GRANT USAGE ON FOREIGN DATA WRAPPER %[3]s TO %[1]s;
@@ -118,7 +117,7 @@ func (c *ConnectionPool) cleanup(connection string) error {
 	}
 
 	klog.V(log.LogLevelExtended).InfoS("cleaned up connection", "connection", connection)
-	return err
+	return nil
 }
 
 func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connection, error) {
@@ -165,12 +164,13 @@ func (c *ConnectionPool) connect(config config.Configuration) (connection.Connec
 		conn, err := connection.NewConnection(
 			connectionName,
 			common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), connectionName, connectionName),
+			&config,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		if err = conn.Configure(config); err != nil {
+		if err = conn.Configure(); err != nil {
 			_ = conn.Close()
 			return nil, err
 		}
@@ -216,8 +216,4 @@ func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) error {
 	c.pool.Remove(t.Key)
 	klog.V(log.LogLevelExtended).InfoS("removed connection", "connection", t.Val.uuid)
 	return nil
-}
-
-func (c *ConnectionPool) Wipe() {
-	c.pool.Clear()
 }

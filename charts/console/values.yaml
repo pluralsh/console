@@ -472,6 +472,16 @@ cloudQuery:
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
+  # aws config is used to configure the cloud-query to use AWS credentials for querying AWS resources.
+  # It is required by the cloud-query AWS provider to allow usage of the assume role functionality.
+  aws:
+    # If set, AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE will be mounted into both cloud-query containers under /shared
+    mountPath: /shared
+    # If set, AWS_CONFIG_FILE env var will be injected into both cloud-query containers
+    configFile: /shared/.aws/config
+    # If set, AWS_SHARED_CREDENTIALS_FILE env var will be injected into both cloud-query containers
+    credentialsFile: /shared/.aws/credentials
+
   database:
     enabled: true
     image:

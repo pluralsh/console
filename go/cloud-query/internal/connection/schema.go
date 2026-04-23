@@ -14,9 +14,9 @@ import (
 func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 	klog.V(log.LogLevelDebug).InfoS("running schema query", "table", table)
 
-	prefix := fmt.Sprintf("%s_", in.provider)
+	prefix := fmt.Sprintf("%s_", in.provider())
 	if table != "" && !strings.HasPrefix(table, prefix) {
-		return nil, fmt.Errorf("table name must start with '%s_' prefix", in.provider)
+		return nil, fmt.Errorf("table name must start with '%s_' prefix", in.provider())
 	}
 
 	qResponse, err := in.db.Query(`
