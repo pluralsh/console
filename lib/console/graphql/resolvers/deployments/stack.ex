@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   use Console.GraphQl.Resolvers.Deployments.Base
+  import Ecto.Query
   alias Console.Deployments.{Stacks, Services, Settings}
   alias Console.Schema.{
     Stack,
@@ -8,6 +9,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     CustomStackRun,
     DeploymentSettings,
     StackDefinition,
+    StackInfracostResource,
     AgentSession
   }
 
@@ -89,6 +91,36 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def list_custom_runs(stack, args, _) do
     CustomStackRun.for_stack(stack.id)
     |> paginate(args)
+  end
+
+  def list_stack_infracost_resources(%Stack{id: stack_id} = stack, args, ctx) do
+    case safe_stack_field(stack, true, ctx) do
+      {:error, _} = err ->
+        err
+
+      _ ->
+        StackInfracostResource
+        |> where([r], r.stack_id == ^stack_id)
+        |> order_by([r], desc: r.inserted_at)
+        |> maybe_limit_infracost(args)
+        |> Console.Repo.all()
+        |> ok()
+    end
+  end
+
+  def list_stack_run_infracost_resources(%StackRun{id: run_id} = run, args, ctx) do
+    case safe_stack_field(run, true, ctx) do
+      {:error, _} = err ->
+        err
+
+      _ ->
+        StackInfracostResource
+        |> where([r], r.stack_run_id == ^run_id)
+        |> order_by([r], desc: r.inserted_at)
+        |> maybe_limit_infracost(args)
+        |> Console.Repo.all()
+        |> ok()
+    end
   end
 
   def stack_runs_for_cluster(args, %{context: %{cluster: cluster}}) do
@@ -213,4 +245,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     do: Stacks.stack_files(id, user)
 
   def plural_creds(run, _, ctx), do: Stacks.plural_creds(run, actor(ctx))
+
+  defp maybe_limit_infracost(query, %{limit: limit}) when is_integer(limit) and limit > 0,
+    do: limit(query, ^limit)
+
+  defp maybe_limit_infracost(query, _), do: query
 end

@@ -15,7 +15,8 @@ defmodule Console.Schema.StackRun do
     ServiceError,
     PullRequest,
     AiInsight,
-    StackPolicyViolation
+    StackPolicyViolation,
+    StackInfracostResource
   }
 
   defenum ApprovalResult, approved: 0, rejected: 1, indeterminate: 2
@@ -78,6 +79,10 @@ defmodule Console.Schema.StackRun do
     has_many :violations, StackPolicyViolation,
       on_replace: :delete,
       foreign_key: :run_id
+
+    has_many :infracost_resources, StackInfracostResource,
+      foreign_key: :stack_run_id,
+      on_replace: :delete
 
     has_many :errors, ServiceError, on_replace: :delete
 
@@ -167,6 +172,9 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:state)
     |> cast_assoc(:errors)
     |> cast_assoc(:violations)
+    |> cast_assoc(:infracost_resources, with: fn struct, resource_attrs ->
+      StackInfracostResource.changeset(struct, Map.put(resource_attrs, :stack_id, model.stack_id))
+    end)
     |> cast_embed(:approval_result, with: &approval_result_changeset/2)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
     |> cast_embed(:scm_state, with: &scm_state_changeset/2)
@@ -180,6 +188,9 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:output)
     |> cast_assoc(:errors)
     |> cast_assoc(:violations)
+    |> cast_assoc(:infracost_resources, with: fn struct, resource_attrs ->
+      StackInfracostResource.changeset(struct, Map.put(resource_attrs, :stack_id, model.stack_id))
+    end)
     |> validate_required(~w(status)a)
   end
 

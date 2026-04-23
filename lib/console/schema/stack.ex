@@ -20,7 +20,8 @@ defmodule Console.Schema.Stack do
     Service,
     Project,
     StackDefinition,
-    AiInsight
+    AiInsight,
+    StackInfracostResource
   }
 
   defenum Type, terraform: 0, ansible: 1, custom: 2
@@ -186,6 +187,7 @@ defmodule Console.Schema.Stack do
     has_many :files,       StackFile, on_replace: :delete
     has_many :output,      StackOutput, on_replace: :delete
     has_many :runs,        StackRun
+    has_many :infracost_resources, StackInfracostResource, foreign_key: :stack_id
     has_many :tags,        Tag, on_replace: :delete
 
     has_many :observable_metrics, ObservableMetric, on_replace: :delete
