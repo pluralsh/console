@@ -1,6 +1,6 @@
 defmodule Console.Schema.StackState do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Stack, StackRun, AiInsight}
+  alias Console.Schema.{Stack, StackRun, AiInsight, StackInfracostResource}
 
   schema "stack_states" do
     field :plan, :binary
@@ -16,6 +16,8 @@ defmodule Console.Schema.StackState do
     belongs_to :stack,   Stack
     belongs_to :run,     StackRun
     belongs_to :insight, AiInsight, on_replace: :update
+
+    has_many :infracost_resources, StackInfracostResource, foreign_key: :stack_state_id
 
     timestamps()
   end

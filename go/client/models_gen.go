@@ -4091,11 +4091,13 @@ type InfrastructureStack struct {
 	Actor           *User                     `json:"actor,omitempty"`
 	CustomStackRuns *CustomStackRunConnection `json:"customStackRuns,omitempty"`
 	// key/value tags to filter stacks
-	Tags          []*Tag           `json:"tags,omitempty"`
-	ReadBindings  []*PolicyBinding `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
-	InsertedAt    *string          `json:"insertedAt,omitempty"`
-	UpdatedAt     *string          `json:"updatedAt,omitempty"`
+	Tags []*Tag `json:"tags,omitempty"`
+	// Infracost resource rows attached to this stack (newest first)
+	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
+	ReadBindings       []*PolicyBinding          `json:"readBindings,omitempty"`
+	WriteBindings      []*PolicyBinding          `json:"writeBindings,omitempty"`
+	InsertedAt         *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
 }
 
 type InfrastructureStackConnection struct {
@@ -8532,6 +8534,37 @@ type StackHookAttributes struct {
 	AfterStage StepStage `json:"afterStage"`
 }
 
+type StackInfracostResource struct {
+	ID string `json:"id"`
+	// breakdown | past_breakdown | diff | free
+	ResourceScope string `json:"resourceScope"`
+	// Infracost project name this resource belongs to
+	ProjectName      *string        `json:"projectName,omitempty"`
+	Name             string         `json:"name"`
+	ResourceType     *string        `json:"resourceType,omitempty"`
+	HourlyCost       *string        `json:"hourlyCost,omitempty"`
+	MonthlyCost      *string        `json:"monthlyCost,omitempty"`
+	MonthlyUsageCost *string        `json:"monthlyUsageCost,omitempty"`
+	RawResource      map[string]any `json:"rawResource,omitempty"`
+	StackRun         *StackRun      `json:"stackRun,omitempty"`
+	StackState       *StackState    `json:"stackState,omitempty"`
+	InsertedAt       *string        `json:"insertedAt,omitempty"`
+	UpdatedAt        *string        `json:"updatedAt,omitempty"`
+}
+
+type StackInfracostResourceAttributes struct {
+	// breakdown | past_breakdown | diff | free
+	ResourceScope string `json:"resourceScope"`
+	// Infracost project name this resource belongs to
+	ProjectName      *string `json:"projectName,omitempty"`
+	Name             string  `json:"name"`
+	ResourceType     *string `json:"resourceType,omitempty"`
+	HourlyCost       *string `json:"hourlyCost,omitempty"`
+	MonthlyCost      *string `json:"monthlyCost,omitempty"`
+	MonthlyUsageCost *string `json:"monthlyUsageCost,omitempty"`
+	RawResource      *string `json:"rawResource,omitempty"`
+}
+
 type StackOutput struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
@@ -8649,8 +8682,10 @@ type StackRun struct {
 	Repository *GitRepository `json:"repository,omitempty"`
 	// policy violations for this stack
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
-	InsertedAt *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+	// Infracost resource rows attached to this run (newest first)
+	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
+	InsertedAt         *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
 }
 
 type StackRunApprovalResult struct {
@@ -8675,6 +8710,10 @@ type StackRunAttributes struct {
 	CancellationReason *string `json:"cancellationReason,omitempty"`
 	// the violations detected by the policy engine
 	Violations []*StackPolicyViolationAttributes `json:"violations,omitempty"`
+	// Infracost resource rows to persist for this run
+	InfracostResources []*StackInfracostResourceAttributes `json:"infracostResources,omitempty"`
+	// Optional stack state row this estimate is tied to
+	InfracostStackStateID *string `json:"infracostStackStateId,omitempty"`
 }
 
 type StackRunConnection struct {

@@ -5909,6 +5909,32 @@ input StackRunAttributes {
 
   "the violations detected by the policy engine"
   violations: [StackPolicyViolationAttributes]
+
+  "Infracost resource rows to persist for this run"
+  infracostResources: [StackInfracostResourceAttributes]
+
+  "Optional stack state row this estimate is tied to"
+  infracostStackStateId: ID
+}
+
+input StackInfracostResourceAttributes {
+  "breakdown | past_breakdown | diff | free"
+  resourceScope: String!
+
+  "Infracost project name this resource belongs to"
+  projectName: String
+
+  name: String!
+
+  resourceType: String
+
+  hourlyCost: String
+
+  monthlyCost: String
+
+  monthlyUsageCost: String
+
+  rawResource: Json
 }
 
 input RunStepAttributes {
@@ -6125,6 +6151,9 @@ type InfrastructureStack {
 
   "key\/value tags to filter stacks"
   tags: [Tag]
+
+  "Infracost resource rows attached to this stack (newest first)"
+  infracostResources(limit: Int): [StackInfracostResource]
 
   readBindings: [PolicyBinding]
 
@@ -6384,6 +6413,39 @@ type StackRun {
 
   "policy violations for this stack"
   violations: [StackPolicyViolation]
+
+  "Infracost resource rows attached to this run (newest first)"
+  infracostResources(limit: Int): [StackInfracostResource]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type StackInfracostResource {
+  id: ID!
+
+  "breakdown | past_breakdown | diff | free"
+  resourceScope: String!
+
+  "Infracost project name this resource belongs to"
+  projectName: String
+
+  name: String!
+
+  resourceType: String
+
+  hourlyCost: String
+
+  monthlyCost: String
+
+  monthlyUsageCost: String
+
+  rawResource: Map
+
+  stackRun: StackRun
+
+  stackState: StackState
 
   insertedAt: DateTime
 

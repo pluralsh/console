@@ -5357,27 +5357,28 @@ func (t *PolicyEngineFragment) GetCustomPolicies() *bool {
 }
 
 type InfrastructureStackFragment struct {
-	ID            *string                     "json:\"id,omitempty\" graphql:\"id\""
-	Name          string                      "json:\"name\" graphql:\"name\""
-	Type          StackType                   "json:\"type\" graphql:\"type\""
-	Variables     map[string]any              "json:\"variables,omitempty\" graphql:\"variables\""
-	Approval      *bool                       "json:\"approval,omitempty\" graphql:\"approval\""
-	Workdir       *string                     "json:\"workdir,omitempty\" graphql:\"workdir\""
-	ManageState   *bool                       "json:\"manageState,omitempty\" graphql:\"manageState\""
-	DeletedAt     *string                     "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Git           GitRefFragment              "json:\"git\" graphql:\"git\""
-	JobSpec       *JobSpecFragment            "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
-	Configuration StackConfigurationFragment  "json:\"configuration\" graphql:\"configuration\""
-	Cluster       *TinyClusterFragment        "json:\"cluster,omitempty\" graphql:\"cluster\""
-	Project       *TinyProjectFragment        "json:\"project,omitempty\" graphql:\"project\""
-	Files         []*StackFileFragment        "json:\"files,omitempty\" graphql:\"files\""
-	Environment   []*StackEnvironmentFragment "json:\"environment,omitempty\" graphql:\"environment\""
-	Output        []*StackOutputFragment      "json:\"output,omitempty\" graphql:\"output\""
-	State         *StackStateFragment         "json:\"state,omitempty\" graphql:\"state\""
-	Repository    *GitRepositoryFragment      "json:\"repository,omitempty\" graphql:\"repository\""
-	WriteBindings []*PolicyBindingFragment    "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
-	ReadBindings  []*PolicyBindingFragment    "json:\"readBindings,omitempty\" graphql:\"readBindings\""
-	PolicyEngine  *PolicyEngineFragment       "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
+	ID                 *string                           "json:\"id,omitempty\" graphql:\"id\""
+	Name               string                            "json:\"name\" graphql:\"name\""
+	Type               StackType                         "json:\"type\" graphql:\"type\""
+	Variables          map[string]any                    "json:\"variables,omitempty\" graphql:\"variables\""
+	Approval           *bool                             "json:\"approval,omitempty\" graphql:\"approval\""
+	Workdir            *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
+	ManageState        *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
+	DeletedAt          *string                           "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	Git                GitRefFragment                    "json:\"git\" graphql:\"git\""
+	JobSpec            *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
+	Configuration      StackConfigurationFragment        "json:\"configuration\" graphql:\"configuration\""
+	Cluster            *TinyClusterFragment              "json:\"cluster,omitempty\" graphql:\"cluster\""
+	Project            *TinyProjectFragment              "json:\"project,omitempty\" graphql:\"project\""
+	Files              []*StackFileFragment              "json:\"files,omitempty\" graphql:\"files\""
+	Environment        []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
+	Output             []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
+	State              *StackStateFragment               "json:\"state,omitempty\" graphql:\"state\""
+	Repository         *GitRepositoryFragment            "json:\"repository,omitempty\" graphql:\"repository\""
+	WriteBindings      []*PolicyBindingFragment          "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings       []*PolicyBindingFragment          "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	PolicyEngine       *PolicyEngineFragment             "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
+	InfracostResources []*StackInfracostResourceFragment "json:\"infracostResources,omitempty\" graphql:\"infracostResources\""
 }
 
 func (t *InfrastructureStackFragment) GetID() *string {
@@ -5506,6 +5507,12 @@ func (t *InfrastructureStackFragment) GetPolicyEngine() *PolicyEngineFragment {
 	}
 	return t.PolicyEngine
 }
+func (t *InfrastructureStackFragment) GetInfracostResources() []*StackInfracostResourceFragment {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.InfracostResources
+}
 
 type StackRunIDFragment struct {
 	ID string "json:\"id\" graphql:\"id\""
@@ -5519,33 +5526,34 @@ func (t *StackRunIDFragment) GetID() string {
 }
 
 type StackRunFragment struct {
-	ID            string                          "json:\"id\" graphql:\"id\""
-	Type          StackType                       "json:\"type\" graphql:\"type\""
-	Status        StackStatus                     "json:\"status\" graphql:\"status\""
-	Approval      *bool                           "json:\"approval,omitempty\" graphql:\"approval\""
-	ApprovedAt    *string                         "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
-	Tarball       string                          "json:\"tarball\" graphql:\"tarball\""
-	Workdir       *string                         "json:\"workdir,omitempty\" graphql:\"workdir\""
-	ManageState   *bool                           "json:\"manageState,omitempty\" graphql:\"manageState\""
-	Variables     map[string]any                  "json:\"variables,omitempty\" graphql:\"variables\""
-	DryRun        bool                            "json:\"dryRun\" graphql:\"dryRun\""
-	StateUrls     *StackRunFragment_StateUrls     "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
-	PluralCreds   *StackRunFragment_PluralCreds   "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Actor         *UserFragment                   "json:\"actor,omitempty\" graphql:\"actor\""
-	Stack         *InfrastructureStackFragment    "json:\"stack,omitempty\" graphql:\"stack\""
-	State         *StackStateFragment             "json:\"state,omitempty\" graphql:\"state\""
-	Steps         []*RunStepFragment              "json:\"steps,omitempty\" graphql:\"steps\""
-	Files         []*StackFileFragment            "json:\"files,omitempty\" graphql:\"files\""
-	Git           GitRefFragment                  "json:\"git\" graphql:\"git\""
-	Repository    *GitRepositoryFragment          "json:\"repository,omitempty\" graphql:\"repository\""
-	JobSpec       *JobSpecFragment                "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
-	Configuration StackConfigurationFragment      "json:\"configuration\" graphql:\"configuration\""
-	Environment   []*StackEnvironmentFragment     "json:\"environment,omitempty\" graphql:\"environment\""
-	Output        []*StackOutputFragment          "json:\"output,omitempty\" graphql:\"output\""
-	Errors        []*ServiceErrorFragment         "json:\"errors,omitempty\" graphql:\"errors\""
-	Violations    []*StackPolicyViolationFragment "json:\"violations,omitempty\" graphql:\"violations\""
-	PolicyEngine  *PolicyEngineFragment           "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
-	Approver      *UserFragment                   "json:\"approver,omitempty\" graphql:\"approver\""
+	ID                 string                            "json:\"id\" graphql:\"id\""
+	Type               StackType                         "json:\"type\" graphql:\"type\""
+	Status             StackStatus                       "json:\"status\" graphql:\"status\""
+	Approval           *bool                             "json:\"approval,omitempty\" graphql:\"approval\""
+	ApprovedAt         *string                           "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
+	Tarball            string                            "json:\"tarball\" graphql:\"tarball\""
+	Workdir            *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
+	ManageState        *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
+	Variables          map[string]any                    "json:\"variables,omitempty\" graphql:\"variables\""
+	DryRun             bool                              "json:\"dryRun\" graphql:\"dryRun\""
+	StateUrls          *StackRunFragment_StateUrls       "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
+	PluralCreds        *StackRunFragment_PluralCreds     "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Actor              *UserFragment                     "json:\"actor,omitempty\" graphql:\"actor\""
+	Stack              *InfrastructureStackFragment      "json:\"stack,omitempty\" graphql:\"stack\""
+	State              *StackStateFragment               "json:\"state,omitempty\" graphql:\"state\""
+	Steps              []*RunStepFragment                "json:\"steps,omitempty\" graphql:\"steps\""
+	Files              []*StackFileFragment              "json:\"files,omitempty\" graphql:\"files\""
+	Git                GitRefFragment                    "json:\"git\" graphql:\"git\""
+	Repository         *GitRepositoryFragment            "json:\"repository,omitempty\" graphql:\"repository\""
+	JobSpec            *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
+	Configuration      StackConfigurationFragment        "json:\"configuration\" graphql:\"configuration\""
+	Environment        []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
+	Output             []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
+	Errors             []*ServiceErrorFragment           "json:\"errors,omitempty\" graphql:\"errors\""
+	Violations         []*StackPolicyViolationFragment   "json:\"violations,omitempty\" graphql:\"violations\""
+	PolicyEngine       *PolicyEngineFragment             "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
+	Approver           *UserFragment                     "json:\"approver,omitempty\" graphql:\"approver\""
+	InfracostResources []*StackInfracostResourceFragment "json:\"infracostResources,omitempty\" graphql:\"infracostResources\""
 }
 
 func (t *StackRunFragment) GetID() string {
@@ -5710,6 +5718,12 @@ func (t *StackRunFragment) GetApprover() *UserFragment {
 	}
 	return t.Approver
 }
+func (t *StackRunFragment) GetInfracostResources() []*StackInfracostResourceFragment {
+	if t == nil {
+		t = &StackRunFragment{}
+	}
+	return t.InfracostResources
+}
 
 type StackRunMinimalFragment struct {
 	ID            string                     "json:\"id\" graphql:\"id\""
@@ -5786,32 +5800,33 @@ func (t *StackRunMinimalFragment) GetConfiguration() *StackConfigurationFragment
 }
 
 type StackRunBaseFragment struct {
-	ID            string                            "json:\"id\" graphql:\"id\""
-	Type          StackType                         "json:\"type\" graphql:\"type\""
-	Status        StackStatus                       "json:\"status\" graphql:\"status\""
-	Approval      *bool                             "json:\"approval,omitempty\" graphql:\"approval\""
-	ApprovedAt    *string                           "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
-	Tarball       string                            "json:\"tarball\" graphql:\"tarball\""
-	Workdir       *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
-	ManageState   *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
-	Variables     map[string]any                    "json:\"variables,omitempty\" graphql:\"variables\""
-	DryRun        bool                              "json:\"dryRun\" graphql:\"dryRun\""
-	StateUrls     *StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
-	PluralCreds   *StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Actor         *UserFragment                     "json:\"actor,omitempty\" graphql:\"actor\""
-	Stack         *InfrastructureStackFragment      "json:\"stack,omitempty\" graphql:\"stack\""
-	State         *StackStateFragment               "json:\"state,omitempty\" graphql:\"state\""
-	Steps         []*RunStepFragment                "json:\"steps,omitempty\" graphql:\"steps\""
-	Files         []*StackFileFragment              "json:\"files,omitempty\" graphql:\"files\""
-	Git           GitRefFragment                    "json:\"git\" graphql:\"git\""
-	Repository    *GitRepositoryFragment            "json:\"repository,omitempty\" graphql:\"repository\""
-	JobSpec       *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
-	Configuration StackConfigurationFragment        "json:\"configuration\" graphql:\"configuration\""
-	Environment   []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
-	Output        []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
-	Errors        []*ServiceErrorFragment           "json:\"errors,omitempty\" graphql:\"errors\""
-	Violations    []*StackPolicyViolationFragment   "json:\"violations,omitempty\" graphql:\"violations\""
-	PolicyEngine  *PolicyEngineFragment             "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
+	ID                 string                            "json:\"id\" graphql:\"id\""
+	Type               StackType                         "json:\"type\" graphql:\"type\""
+	Status             StackStatus                       "json:\"status\" graphql:\"status\""
+	Approval           *bool                             "json:\"approval,omitempty\" graphql:\"approval\""
+	ApprovedAt         *string                           "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
+	Tarball            string                            "json:\"tarball\" graphql:\"tarball\""
+	Workdir            *string                           "json:\"workdir,omitempty\" graphql:\"workdir\""
+	ManageState        *bool                             "json:\"manageState,omitempty\" graphql:\"manageState\""
+	Variables          map[string]any                    "json:\"variables,omitempty\" graphql:\"variables\""
+	DryRun             bool                              "json:\"dryRun\" graphql:\"dryRun\""
+	StateUrls          *StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
+	PluralCreds        *StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Actor              *UserFragment                     "json:\"actor,omitempty\" graphql:\"actor\""
+	Stack              *InfrastructureStackFragment      "json:\"stack,omitempty\" graphql:\"stack\""
+	State              *StackStateFragment               "json:\"state,omitempty\" graphql:\"state\""
+	Steps              []*RunStepFragment                "json:\"steps,omitempty\" graphql:\"steps\""
+	Files              []*StackFileFragment              "json:\"files,omitempty\" graphql:\"files\""
+	Git                GitRefFragment                    "json:\"git\" graphql:\"git\""
+	Repository         *GitRepositoryFragment            "json:\"repository,omitempty\" graphql:\"repository\""
+	JobSpec            *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
+	Configuration      StackConfigurationFragment        "json:\"configuration\" graphql:\"configuration\""
+	Environment        []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
+	Output             []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
+	Errors             []*ServiceErrorFragment           "json:\"errors,omitempty\" graphql:\"errors\""
+	Violations         []*StackPolicyViolationFragment   "json:\"violations,omitempty\" graphql:\"violations\""
+	PolicyEngine       *PolicyEngineFragment             "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
+	InfracostResources []*StackInfracostResourceFragment "json:\"infracostResources,omitempty\" graphql:\"infracostResources\""
 }
 
 func (t *StackRunBaseFragment) GetID() string {
@@ -5969,6 +5984,79 @@ func (t *StackRunBaseFragment) GetPolicyEngine() *PolicyEngineFragment {
 		t = &StackRunBaseFragment{}
 	}
 	return t.PolicyEngine
+}
+func (t *StackRunBaseFragment) GetInfracostResources() []*StackInfracostResourceFragment {
+	if t == nil {
+		t = &StackRunBaseFragment{}
+	}
+	return t.InfracostResources
+}
+
+type StackInfracostResourceFragment struct {
+	ID               string         "json:\"id\" graphql:\"id\""
+	ResourceScope    string         "json:\"resourceScope\" graphql:\"resourceScope\""
+	ProjectName      *string        "json:\"projectName,omitempty\" graphql:\"projectName\""
+	Name             string         "json:\"name\" graphql:\"name\""
+	ResourceType     *string        "json:\"resourceType,omitempty\" graphql:\"resourceType\""
+	HourlyCost       *string        "json:\"hourlyCost,omitempty\" graphql:\"hourlyCost\""
+	MonthlyCost      *string        "json:\"monthlyCost,omitempty\" graphql:\"monthlyCost\""
+	MonthlyUsageCost *string        "json:\"monthlyUsageCost,omitempty\" graphql:\"monthlyUsageCost\""
+	RawResource      map[string]any "json:\"rawResource,omitempty\" graphql:\"rawResource\""
+}
+
+func (t *StackInfracostResourceFragment) GetID() string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.ID
+}
+func (t *StackInfracostResourceFragment) GetResourceScope() string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.ResourceScope
+}
+func (t *StackInfracostResourceFragment) GetProjectName() *string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.ProjectName
+}
+func (t *StackInfracostResourceFragment) GetName() string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.Name
+}
+func (t *StackInfracostResourceFragment) GetResourceType() *string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.ResourceType
+}
+func (t *StackInfracostResourceFragment) GetHourlyCost() *string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.HourlyCost
+}
+func (t *StackInfracostResourceFragment) GetMonthlyCost() *string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.MonthlyCost
+}
+func (t *StackInfracostResourceFragment) GetMonthlyUsageCost() *string {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.MonthlyUsageCost
+}
+func (t *StackInfracostResourceFragment) GetRawResource() map[string]any {
+	if t == nil {
+		t = &StackInfracostResourceFragment{}
+	}
+	return t.RawResource
 }
 
 type StackPolicyViolationFragment struct {
@@ -55373,6 +55461,9 @@ fragment StackRunFragment on StackRun {
 	approver {
 		... UserFragment
 	}
+	infracostResources(limit: 10) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -55426,6 +55517,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	}
 	policyEngine {
 		... PolicyEngineFragment
+	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
 	}
 }
 fragment GitRefFragment on GitRef {
@@ -55571,6 +55665,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -55873,6 +55978,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -56022,6 +56130,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 `
 
@@ -56250,6 +56369,9 @@ fragment StackRunFragment on StackRun {
 	approver {
 		... UserFragment
 	}
+	infracostResources(limit: 10) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -56303,6 +56425,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	}
 	policyEngine {
 		... PolicyEngineFragment
+	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
 	}
 }
 fragment GitRefFragment on GitRef {
@@ -56448,6 +56573,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -56579,6 +56715,9 @@ fragment StackRunBaseFragment on StackRun {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 10) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -56632,6 +56771,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	}
 	policyEngine {
 		... PolicyEngineFragment
+	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
 	}
 }
 fragment GitRefFragment on GitRef {
@@ -56777,6 +56919,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -56908,6 +57061,9 @@ fragment StackRunBaseFragment on StackRun {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 10) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -56961,6 +57117,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	}
 	policyEngine {
 		... PolicyEngineFragment
+	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
 	}
 }
 fragment GitRefFragment on GitRef {
@@ -57106,6 +57265,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -57249,6 +57419,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -57398,6 +57571,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 `
 
@@ -57471,6 +57655,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -57620,6 +57807,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 `
 
@@ -57748,6 +57946,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -57897,6 +58098,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 `
 
@@ -58388,6 +58600,9 @@ fragment StackRunFragment on StackRun {
 	approver {
 		... UserFragment
 	}
+	infracostResources(limit: 10) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -58441,6 +58656,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	}
 	policyEngine {
 		... PolicyEngineFragment
+	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
 	}
 }
 fragment GitRefFragment on GitRef {
@@ -58586,6 +58804,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 fragment RunStepFragment on RunStep {
 	id
@@ -58721,6 +58950,9 @@ fragment StackRunBaseFragment on StackRun {
 	policyEngine {
 		... PolicyEngineFragment
 	}
+	infracostResources(limit: 10) {
+		... StackInfracostResourceFragment
+	}
 }
 fragment UserFragment on User {
 	name
@@ -58774,6 +59006,9 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	}
 	policyEngine {
 		... PolicyEngineFragment
+	}
+	infracostResources(limit: 5) {
+		... StackInfracostResourceFragment
 	}
 }
 fragment GitRefFragment on GitRef {
@@ -58919,6 +59154,17 @@ fragment PolicyEngineFragment on PolicyEngine {
 	type
 	maxSeverity
 	customPolicies
+}
+fragment StackInfracostResourceFragment on StackInfracostResource {
+	id
+	resourceScope
+	projectName
+	name
+	resourceType
+	hourlyCost
+	monthlyCost
+	monthlyUsageCost
+	rawResource
 }
 fragment RunStepFragment on RunStep {
 	id

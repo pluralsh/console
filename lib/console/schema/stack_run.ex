@@ -15,7 +15,8 @@ defmodule Console.Schema.StackRun do
     ServiceError,
     PullRequest,
     AiInsight,
-    StackPolicyViolation
+    StackPolicyViolation,
+    StackInfracostResource
   }
 
   defenum ApprovalResult, approved: 0, rejected: 1, indeterminate: 2
@@ -78,6 +79,9 @@ defmodule Console.Schema.StackRun do
     has_many :violations, StackPolicyViolation,
       on_replace: :delete,
       foreign_key: :run_id
+
+    has_many :infracost_resources, StackInfracostResource,
+      foreign_key: :stack_run_id
 
     has_many :errors, ServiceError, on_replace: :delete
 

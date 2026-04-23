@@ -110,6 +110,19 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :errors,              list_of(:service_error_attributes), description: "Any errors detected when trying to run this stack"
     field :cancellation_reason, :string, description: "Why you decided to cancel this run"
     field :violations,          list_of(:stack_policy_violation_attributes), description: "the violations detected by the policy engine"
+    field :infracost_resources, list_of(:stack_infracost_resource_attributes), description: "Infracost resource rows to persist for this run"
+    field :infracost_stack_state_id, :id, description: "Optional stack state row this estimate is tied to"
+  end
+
+  input_object :stack_infracost_resource_attributes do
+    field :resource_scope,      non_null(:string), description: "breakdown | past_breakdown | diff | free"
+    field :project_name,        :string,           description: "Infracost project name this resource belongs to"
+    field :name,                non_null(:string)
+    field :resource_type,       :string
+    field :hourly_cost,         :string
+    field :monthly_cost,        :string
+    field :monthly_usage_cost,  :string
+    field :raw_resource,        :json
   end
 
   input_object :run_step_attributes do
@@ -270,6 +283,12 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter stacks"
 
+    field :infracost_resources, list_of(:stack_infracost_resource),
+      description: "Infracost resource rows attached to this stack (newest first)" do
+      arg :limit, :integer
+      resolve &Deployments.list_stack_infracost_resources/3
+    end
+
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
 
@@ -429,8 +448,37 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :repository,      :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
     field :violations,      list_of(:stack_policy_violation), resolve: dataloader(Deployments), description: "policy violations for this stack"
 
+    field :infracost_resources, list_of(:stack_infracost_resource),
+      description: "Infracost resource rows attached to this run (newest first)" do
+      arg :limit, :integer
+      resolve &Deployments.list_stack_run_infracost_resources/3
+    end
+
     timestamps()
   end
+
+  object :stack_infracost_resource do
+    field :id,             non_null(:id)
+    field :resource_scope, non_null(:string), description: "breakdown | past_breakdown | diff | free"
+    field :project_name,   :string,           description: "Infracost project name this resource belongs to"
+    field :name,           non_null(:string)
+    field :resource_type,  :string
+
+    field :hourly_cost,        :string, resolve: fn p, _, _ -> {:ok, decimal_string(p.hourly_cost)} end
+    field :monthly_cost,       :string, resolve: fn p, _, _ -> {:ok, decimal_string(p.monthly_cost)} end
+    field :monthly_usage_cost, :string, resolve: fn p, _, _ -> {:ok, decimal_string(p.monthly_usage_cost)} end
+
+    field :raw_resource, :map
+
+    field :stack_run,   :stack_run,   resolve: dataloader(Deployments)
+    field :stack_state, :stack_state, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  defp decimal_string(nil), do: nil
+  defp decimal_string(%Decimal{} = d), do: Decimal.to_string(d)
+  defp decimal_string(_), do: nil
 
   object :run_step do
     field :id,               non_null(:id)
