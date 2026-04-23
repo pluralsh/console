@@ -119,87 +119,99 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
   const RuntimeIcon =
     runtimeToIcon[agentRuntime?.type ?? AgentRuntimeType.Custom]
 
+  const hasCodingAgent = Boolean(agentRuntime?.name)
+  const hasWebhooks = webhooks.length > 0
+  const hasTools = tools.length > 0
+  const hasAnyMetadata = hasCodingAgent || hasWebhooks || hasTools
+
   return (
-    <CardSC
+    <WorkbenchCardSC
       clickable
       forwardedAs={Link}
       to={id}
     >
       <Body2BoldP>{name}</Body2BoldP>
-      <Body2P
-        css={{
-          color: theme.colors['text-light'],
-          display: '-webkit-box',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 3,
-          overflow: 'hidden',
-        }}
-      >
-        {description}
-      </Body2P>
-      <Flex
-        gap="small"
-        align="flex-end"
-        justify="space-between"
-      >
+      {description && (
+        <Body2P
+          css={{
+            color: theme.colors['text-light'],
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 3,
+            overflow: 'hidden',
+          }}
+        >
+          {description}
+        </Body2P>
+      )}
+      {hasAnyMetadata && (
         <MetadataGridSC>
-          <MetadataLabelSC>coding agent</MetadataLabelSC>
-          <MetadataValueSC>
-            {agentRuntime?.name ? (
-              <Flex
-                align="center"
-                gap="xxsmall"
-                minWidth={0}
-              >
-                <RuntimeIcon
-                  fullColor
-                  size={12}
-                />
-                <CaptionP
-                  $color="text-xlight"
-                  css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+          {hasCodingAgent && (
+            <>
+              <MetadataLabelSC>coding agent</MetadataLabelSC>
+              <MetadataValueSC>
+                <Flex
+                  align="center"
+                  gap="xxsmall"
+                  minWidth={0}
                 >
-                  {agentRuntime.name}
-                </CaptionP>
-              </Flex>
-            ) : (
-              <CaptionP $color="text-xlight">-</CaptionP>
-            )}
-          </MetadataValueSC>
-
-          <MetadataLabelSC>webhooks</MetadataLabelSC>
-          <MetadataValueSC>
-            <MetadataIcons
-              items={webhooks.map((webhook) => ({
-                id: webhook.id,
-                label: webhook.name ?? 'Webhook',
-                icon: <span>{withIconSize(getWebhookIcon(webhook))}</span>,
-              }))}
-            />
-          </MetadataValueSC>
-
-          <MetadataLabelSC>bound tools</MetadataLabelSC>
-          <MetadataValueSC>
-            <MetadataIcons
-              items={tools.map((tool) => ({
-                id: tool.id,
-                label: tool.name,
-                icon: (
-                  <WorkbenchToolIcon
-                    type={tool.tool}
-                    size={METADATA_ICON_SIZE}
+                  <RuntimeIcon
+                    fullColor
+                    size={12}
                   />
-                ),
-              }))}
-            />
-          </MetadataValueSC>
+                  <CaptionP
+                    $color="text-xlight"
+                    css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+                  >
+                    {agentRuntime?.name}
+                  </CaptionP>
+                </Flex>
+              </MetadataValueSC>
+            </>
+          )}
+          {hasWebhooks && (
+            <>
+              <MetadataLabelSC>webhooks</MetadataLabelSC>
+              <MetadataValueSC>
+                <MetadataIcons
+                  items={webhooks.map((webhook) => ({
+                    id: webhook.id,
+                    label: webhook.name ?? 'Webhook',
+                    icon: <span>{withIconSize(getWebhookIcon(webhook))}</span>,
+                  }))}
+                />
+              </MetadataValueSC>
+            </>
+          )}
+          {hasTools && (
+            <>
+              <MetadataLabelSC>bound tools</MetadataLabelSC>
+              <MetadataValueSC>
+                <MetadataIcons
+                  items={tools.map((tool) => ({
+                    id: tool.id,
+                    label: tool.name,
+                    icon: (
+                      <WorkbenchToolIcon
+                        type={tool.tool}
+                        provider={tool.cloudConnection?.provider}
+                        size={METADATA_ICON_SIZE}
+                      />
+                    ),
+                  }))}
+                />
+              </MetadataValueSC>
+            </>
+          )}
         </MetadataGridSC>
+      )}
+      <CardArrowSC>
         <ArrowRightIcon
           color="icon-xlight"
           marginRight="xsmall"
         />
-      </Flex>
-    </CardSC>
+      </CardArrowSC>
+    </WorkbenchCardSC>
   )
 }
 
@@ -208,8 +220,6 @@ function MetadataIcons({
 }: {
   items: Array<{ id: string; label: string; icon: ReactNode }>
 }) {
-  if (!items.length) return <CaptionP $color="text-xlight">-</CaptionP>
-
   const visibleItems = items.slice(0, MAX_VISIBLE_METADATA_ITEMS)
   const hiddenItems = items.slice(MAX_VISIBLE_METADATA_ITEMS)
   const hiddenItemsLabel = hiddenItems.map(({ label }) => label).join(', ')
@@ -255,8 +265,20 @@ const CardSC = styled(Card)(({ theme }) => ({
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
   height: '100%',
-  minHeight: 180,
+  minHeight: 120,
   textDecoration: 'none',
+}))
+
+const WorkbenchCardSC = styled(CardSC)(({ theme }) => ({
+  position: 'relative',
+  paddingRight: `calc(${theme.spacing.medium} + 28px)`,
+}))
+
+const CardArrowSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  right: theme.spacing.medium,
+  bottom: theme.spacing.medium,
+  lineHeight: 0,
 }))
 
 const MetadataGridSC = styled.div(({ theme }) => ({
@@ -265,7 +287,6 @@ const MetadataGridSC = styled.div(({ theme }) => ({
   columnGap: theme.spacing.small,
   rowGap: theme.spacing.xxsmall,
   alignItems: 'center',
-  flex: 1,
   minWidth: 0,
 }))
 

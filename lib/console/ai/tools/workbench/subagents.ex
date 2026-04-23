@@ -15,7 +15,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   def changeset(model, attrs), do: cast(model, attrs, [])
 
-  def implement(_, %__MODULE__{subagents: subagents, categories: categories}) do
+  def implement(%__MODULE__{subagents: subagents, categories: categories}) do
     Enum.map(subagents, fn subagent -> %{
       name: subagent,
       description: subagent_description(subagent, categories)

@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Pra.Read do
     |> validate_required([:path])
   end
 
-  def implement(_, %__MODULE__{dir: dir, path: path}) do
+  def implement(%__MODULE__{dir: dir, path: path}) do
     with {:ok, path} <- relpath(dir, path) do
       File.read(path)
     end

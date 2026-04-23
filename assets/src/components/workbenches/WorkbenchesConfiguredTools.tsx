@@ -24,7 +24,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   categoryToLabel,
-  TOOL_TYPE_TO_LABEL,
+  getWorkbenchToolLabel,
   WorkbenchToolCardBody,
   WorkbenchToolIcon,
   workbenchToolCardGridStyles,
@@ -66,56 +66,64 @@ export function WorkbenchesConfiguredTools() {
             }
             styles={workbenchToolCardGridStyles(320)}
           >
-            {tools.map(({ id, name, tool: type, categories }) => (
-              <ToolCardSC key={id}>
-                <WorkbenchToolCardBody>
-                  <StackedText
-                    first={name}
-                    firstPartialType="body2Bold"
-                    firstColor="text"
-                    second={TOOL_TYPE_TO_LABEL[type]}
-                    icon={
-                      <IconFrame
-                        circle
-                        type="secondary"
-                        icon={
-                          <WorkbenchToolIcon
-                            size={20}
-                            type={type}
-                          />
-                        }
-                      />
-                    }
-                  />
-                  <WorkbenchesConfiguredToolMetadata
-                    toolId={id}
-                    toolType={type}
-                  />
-                  <Flex
-                    gap="xsmall"
-                    wrap="wrap"
+            {tools.map(
+              ({ id, name, tool: type, categories, cloudConnection }) => (
+                <ToolCardSC key={id}>
+                  <WorkbenchToolCardBody>
+                    <StackedText
+                      truncate
+                      first={name}
+                      firstPartialType="body2Bold"
+                      firstColor="text"
+                      second={getWorkbenchToolLabel(
+                        type,
+                        cloudConnection?.provider
+                      )}
+                      icon={
+                        <IconFrame
+                          circle
+                          type="secondary"
+                          icon={
+                            <WorkbenchToolIcon
+                              size={20}
+                              type={type}
+                              provider={cloudConnection?.provider}
+                            />
+                          }
+                        />
+                      }
+                      css={{ minWidth: 0, flex: 1, width: '100%' }}
+                    />
+                    <WorkbenchesConfiguredToolMetadata
+                      toolId={id}
+                      toolType={type}
+                    />
+                    <Flex
+                      gap="xsmall"
+                      wrap="wrap"
+                    >
+                      {categories?.filter(isNonNullable).map((cat, i) => (
+                        <Chip
+                          key={i}
+                          size="small"
+                        >
+                          {categoryToLabel[cat]}
+                        </Chip>
+                      ))}
+                    </Flex>
+                  </WorkbenchToolCardBody>
+                  <Divider backgroundColor="border" />
+                  <EditButtonSC
+                    endIcon={<ArrowRightIcon size={14} />}
+                    small
+                    tertiary
+                    onClick={() => navigate(getWorkbenchToolEditAbsPath(id))}
                   >
-                    {categories?.filter(isNonNullable).map((cat, i) => (
-                      <Chip
-                        key={i}
-                        size="small"
-                      >
-                        {categoryToLabel[cat]}
-                      </Chip>
-                    ))}
-                  </Flex>
-                </WorkbenchToolCardBody>
-                <Divider backgroundColor="border" />
-                <EditButtonSC
-                  endIcon={<ArrowRightIcon size={14} />}
-                  small
-                  tertiary
-                  onClick={() => navigate(getWorkbenchToolEditAbsPath(id))}
-                >
-                  Edit configuration
-                </EditButtonSC>
-              </ToolCardSC>
-            ))}
+                    Edit configuration
+                  </EditButtonSC>
+                </ToolCardSC>
+              )
+            )}
           </CardGrid>
         )
       )}

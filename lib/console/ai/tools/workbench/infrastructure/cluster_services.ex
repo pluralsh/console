@@ -24,7 +24,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterServices do
   def name(_), do: "plrl_cluster_services"
   def description(_), do: "List Plural services deployed to a cluster. Pass the cluster handle from plrl_clusters; use plrl_service with a service id for details."
 
-  def implement(_, %__MODULE__{user: %User{} = user, cluster: handle, q: q}) do
+  def implement(%__MODULE__{user: %User{} = user, cluster: handle, q: q}) do
     with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
          {:ok, _} <- Policies.allow(cluster, user, :read) do
       Service.for_user(user)

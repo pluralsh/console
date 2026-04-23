@@ -22,6 +22,10 @@ fragment WorkbenchFragment on Workbench {
             stacks
             kubernetes
         }
+        observability {
+            logs
+            metrics
+        }
     }
     skills {
         ref {
@@ -33,6 +37,12 @@ fragment WorkbenchFragment on Workbench {
     }
     tools {
         ...WorkbenchToolFragment
+    }
+    readBindings {
+        ...PolicyBindingFragment
+    }
+    writeBindings {
+        ...PolicyBindingFragment
     }
     insertedAt
     updatedAt
@@ -46,6 +56,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
     project {
         ...TinyProjectFragment
     }
+    mcpServer {
+        ...MCPServerFragment
+    }
+    cloudConnection {
+        ...CloudConnectionFragment
+    }
     configuration {
         http {
             url
@@ -56,6 +72,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             }
             body
             inputSchema
+        }
+        elastic {
+            index
+            url
+            username
+        }
+        prometheus {
+            url
+            username
+            tenantId
+        }
+        loki {
+            url
+            username
+            tenantId
+        }
+        splunk {
+            url
+            username
+        }
+        tempo {
+            url
+            username
+            tenantId
+        }
+        jaeger {
+            url
+            username
+        }
+        datadog {
+            site
+        }
+        dynatrace {
+            url
+        }
+        cloudwatch {
+            region
+            logGroupNames
+            roleArn
+            roleSessionName
+        }
+        azure {
+            subscriptionId
+            tenantId
+            clientId
+        }
+        linear {
+            url
+        }
+        atlassian {
+            url
+            email
         }
     }
     insertedAt
@@ -147,5 +215,86 @@ query GetWorkbenchToolTiny($id: ID, $name: String) {
     workbenchTool(id: $id, name: $name) {
         id
         name
+    }
+}
+
+fragment WorkbenchCronFragment on WorkbenchCron {
+    id
+    crontab
+    prompt
+    workbench {
+        id
+        name
+    }
+}
+
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+    id
+    name
+    prompt
+    matches {
+        regex
+        substring
+        caseInsensitive
+    }
+    webhook {
+        id
+        name
+    }
+    issueWebhook {
+        id
+        name
+    }
+    workbench {
+        id
+        name
+    }
+}
+
+mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+    createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+    updateWorkbenchCron(id: $id, attributes: $attributes) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation DeleteWorkbenchCron($id: ID!) {
+    deleteWorkbenchCron(id: $id) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation GetWorkbenchCron($id: ID!) {
+    workbenchCron(id: $id) {
+        ...WorkbenchCronFragment
+    }
+}
+
+mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+    createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+        ...WorkbenchWebhookFragment
+    }
+}
+
+mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+    updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+        ...WorkbenchWebhookFragment
+    }
+}
+
+mutation DeleteWorkbenchWebhook($id: ID!) {
+    deleteWorkbenchWebhook(id: $id) {
+        ...WorkbenchWebhookFragment
+    }
+}
+
+mutation GetWorkbenchWebhook($id: ID!) {
+    getWorkbenchWebhook(id: $id) {
+        ...WorkbenchWebhookFragment
     }
 }

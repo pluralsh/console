@@ -26,18 +26,20 @@ type BaseCardProps = {
     headerProps?: ComponentProps<'div'>
     outerProps?: ComponentProps<'div'>
   }
+  tabs?: ReactNode
+  tabsOuterProps?: ComponentProps<'div'>
 }
 
 type CardProps = DivProps & BaseCardProps
 
-const fillToNeutralBgC = {
+export const fillToNeutralBgC = {
   0: 'fill-one',
   1: 'fill-one',
   2: 'fill-two',
   3: 'fill-three',
 } as const satisfies Record<FillLevel, keyof DefaultTheme['colors']>
 
-const fillToNeutralBorderC = {
+export const fillToNeutralBorderC = {
   0: 'border',
   1: 'border',
   2: 'border-fill-two',
@@ -103,6 +105,7 @@ const HeaderSC = styled.div<{
 
 const CardSC = styled(Div)<{
   $hasHeader: boolean
+  $hasTabs: boolean
   $fillLevel: CardFillLevel
   $cornerSize: CornerSize
   $selected: boolean
@@ -112,6 +115,7 @@ const CardSC = styled(Div)<{
   ({
     theme,
     $hasHeader,
+    $hasTabs,
     $fillLevel: fillLevel,
     $cornerSize: cornerSize,
     $selected: selected,
@@ -129,6 +133,9 @@ const CardSC = styled(Div)<{
     borderRadius: $hasHeader
       ? `0 0 ${theme.borderRadiuses[cornerSize]}px ${theme.borderRadiuses[cornerSize]}px`
       : theme.borderRadiuses[cornerSize],
+    ...($hasTabs && {
+      borderTopLeftRadius: 0, // TODO: It should be applied only if first tab is active.
+    }),
     backgroundColor:
       theme.colors[
         selected
@@ -156,17 +163,21 @@ const CardSC = styled(Div)<{
   })
 )
 
-const OuterWrapSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  width: '100%',
-  height: '100%',
-})
+const OuterWrapSC = styled.div<{ $overflowVisible: boolean }>(
+  ({ $overflowVisible: overflowVisible }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: overflowVisible ? 'visible' : 'hidden',
+    width: '100%',
+    height: '100%',
+  })
+)
 
 function Card({
   ref,
   header,
+  tabs,
+  tabsOuterProps,
   cornerSize = 'large',
   fillLevel,
   selected = false,
@@ -176,6 +187,7 @@ function Card({
   ...props
 }: CardProps) {
   const hasHeader = !!header
+  const hasTabs = !!tabs
   const { size, content: headerContent, headerProps, outerProps } = header ?? {}
 
   const mainFillLevel = useDecideFillLevel({ fillLevel })
@@ -184,10 +196,16 @@ function Card({
   return (
     <FillLevelProvider value={mainFillLevel}>
       <WrapWithIf
-        condition={hasHeader}
-        wrapper={<OuterWrapSC {...outerProps} />}
+        condition={hasHeader || hasTabs}
+        wrapper={
+          <OuterWrapSC
+            $overflowVisible={hasTabs}
+            {...(hasTabs ? tabsOuterProps : outerProps)}
+          />
+        }
       >
-        {header && (
+        {hasTabs && tabs}
+        {hasHeader && (
           <HeaderSC
             $fillLevel={headerFillLevel}
             $selected={selected}
@@ -205,6 +223,7 @@ function Card({
           $selected={selected}
           $clickable={clickable}
           $hasHeader={hasHeader}
+          $hasTabs={hasTabs}
           {...(clickable && {
             forwardedAs: 'button',
             type: 'button',

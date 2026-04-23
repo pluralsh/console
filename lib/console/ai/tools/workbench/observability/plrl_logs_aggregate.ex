@@ -40,7 +40,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
     |> validate_required([:name, :value])
   end
 
-  def implement(_, %__MODULE__{user: user} = logs) do
+  def implement(%__MODULE__{user: user} = logs) do
     query = Logs.logs_query(logs)
     with {:ok, query} <- Query.accessible(query, user),
          {:ok, logs} <- Provider.aggregate(query) do

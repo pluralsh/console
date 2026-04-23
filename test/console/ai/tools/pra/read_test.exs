@@ -12,7 +12,7 @@ defmodule Console.AI.Tools.Pra.ReadTest do
 
       tool = %Read{dir: dir, path: "file.txt"}
 
-      {:ok, "hello world"} = Read.implement(nil, tool)
+      {:ok, "hello world"} = Read.implement(tool)
     end
 
     test "rejects paths that escape the provided dir" do
@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Pra.ReadTest do
 
       tool = %Read{dir: dir, path: "../outside.txt"}
 
-      {:error, _} = Read.implement(nil, tool)
+      {:error, _} = Read.implement(tool)
     end
   end
 end

@@ -183,6 +183,7 @@ export function WorkbenchJob() {
                         >
                           <WorkbenchToolIcon
                             type={tool.tool}
+                            provider={tool.cloudConnection?.provider}
                             size={12}
                           />
                         </Tooltip>

@@ -20,7 +20,6 @@ import { SelectedProjectProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
-import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgentSessions'
 import { useChatbot } from 'components/ai/AIContext'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
@@ -85,7 +84,7 @@ function ConsoleContent() {
 
   // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
   const wrapperRef = useRef<HTMLDivElement>(null)
-  useNativeDomEvent(wrapperRef, CLOSE_CHAT_ACTION_PANEL_EVENT, () => {
+  useNativeDomEvent(wrapperRef, 'pointerdown', () => {
     setActionsPanelOpen(false)
   })
 

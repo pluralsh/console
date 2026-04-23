@@ -45,9 +45,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
           }
         ]}
       end)
-      expect(Metrics, :implement, fn _tool, _input ->
-        {:ok, "{\"metrics\":[]}"}
-      end)
+      expect(Metrics, :implement, fn _input -> {:ok, "{\"metrics\":[]}"} end)
       expect(Provider, :completion, fn _, _ ->
         {:ok, "summarizing", [
           %Tool{

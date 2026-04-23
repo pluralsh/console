@@ -26,7 +26,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
   def name(_), do: "plrl_service"
   def description(_), do: "Get detailed information about a Plural service by id (from plrl_cluster_services)."
 
-  def implement(_, %__MODULE__{user: %User{} = user, service_id: id}) do
+  def implement(%__MODULE__{user: %User{} = user, service_id: id}) do
     Services.get_service(id)
     |> Repo.preload([:repository, :cluster, :errors, owner: [parent: :cluster], parent: [:cluster]])
     |> Policies.allow(user, :read)

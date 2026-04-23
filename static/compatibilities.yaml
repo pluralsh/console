@@ -147,6 +147,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.59.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.59.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.4',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.4',
+      'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.59.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260414-5a49ebcf1f-master']
   - version: 1.58.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -686,42 +697,33 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
-  - version: 3.2.1
+  - version: 3.2.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm upgrade notes (3.2.0 \u2192 3.2.1)\n- **No user-facing\
-        \ values changes called out** in the provided notes.\n- **However:** v3.2.1\
-        \ exists to **fix Helm RBAC permissions for Gateway API\u2019s new `ListenerSet`\
-        \ resources**. If you\u2019re using Gateway API, ensure your Helm release\
-        \ is updated so it deploys the corrected RBAC (don\u2019t keep any pinned/overridden\
-        \ RBAC templates).\n\n## Helm chart-related changes introduced in 3.2.0 (relevant\
-        \ when coming from 3.2.0)\n- Helm chart now **exposes additional max-concurrency\
-        \ flags** (previously missing), and includes **backfilled concurrency controls**.\n\
-        - Helm chart adds **namespace selectors to Service and Ingress webhooks**\
-        \ and **Ingress webhook validator selectors** (new values may exist depending\
-        \ on chart version)."
-      chart_updates: ['v3.2.1: Helm install RBAC fix for Gateway API users: correct
-          permissions for `ListenerSet` resources.', 'v3.2.0: Chart exposes additional
-          max-concurrency flags and backfills concurrency controls.', 'v3.2.0: Webhook
-          configs enhanced with namespace selectors (Service + Ingress) and ingress
-          webhook validator selectors.']
-      features: [Gateway API updated to v1.5.0; controller can autodetect Gateway
-          resources (feature flags still available to disable)., 'Gateway API: introduces
-          `ListenerSet` resources and adds Gateway/GatewayClass-level TargetGroupConfig
-          support.', 'Ingress: adds an annotation for Frontend NLB attributes.', 'Operational:
-          configurable re-queue duration for TargetGroupBinding; improved tag reconciliation
-          (skips `aws:` system tags).']
-      breaking_changes: ["Gateway API version bump 1.3 \u2192 1.5; for NLB Gateway\
-          \ users, `TLSRoute` moves to v1 and is no longer served in alpha\u2014install\
-          \ experimental TLSRoute CRDs to avoid downtime during upgrade.", '`--aws-vpc-tag-key`
-          is deprecated/ignored; VPC lookup now always uses all tags from `--aws-vpc-tags`.
-          If your VPC previously matched only a subset of tags, the controller may
-          now fail to find the VPC unless tags/value are corrected.']
-    chart_version: 3.2.1
-    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.1']
+      helm_changes: "- No Helm values changes are explicitly called out in the provided\
+        \ release notes for **v3.2.2**.\n- Note from **v3.2.0** (already in your starting\
+        \ version): the Helm chart previously **backfilled/exposed concurrency controls**\
+        \ and added **namespace selectors** for Service/Ingress webhooks; ensure your\
+        \ current values don\u2019t conflict if you pinned older chart defaults.\n\
+        - For this upgrade step (**3.2.0 \u2192 3.2.2**), plan for a standard `helm\
+        \ upgrade` with the new image tag and re-apply CRDs as instructed."
+      chart_updates: [No Helm chart-specific changes are described in the v3.2.2 notes
+          you provided (most changes are controller code/docs/CI).]
+      features: ['Ingress-to-Gateway (i2g) translation now supports additional annotations/features:
+          `ssl-redirect`, `auth`, and `jwt-validation` translation.', "ListenerSet\
+          \ handling is safer when Gateway API CRDs are missing: the controller will\
+          \ ignore ListenerSet resources if the CRD isn\u2019t installed (reduces\
+          \ noisy errors in mixed/partial Gateway API installs).", User-Agent override
+          support was added (useful for identifying controller traffic in AWS API
+          logs/metrics).]
+      breaking_changes: ['No breaking changes are called out for v3.2.2 in the provided
+          notes. (The major breaking items in this minor line were introduced in v3.2.0:
+          Gateway API v1.5 move and stricter multi-tag VPC lookup behavior.)']
+    chart_version: 3.2.2
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.2']
   - version: 3.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -7568,6 +7570,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 83.7.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Updated bundled kubernetes-mixin content to digest `afc9733`
+          (Prometheus rules, alerts, recording rules, and Grafana dashboards derived
+          from the mixin).']
+      features: ['Refreshes the upstream kubernetes-mixin bundle, which may add/adjust
+          dashboards and Prometheus rules shipped with the chart.']
+      breaking_changes: []
+    chart_version: 83.7.0
+    images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+      'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+      'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 83.6.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -12593,35 +12613,32 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.3.7
+  - version: 3.3.8
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Argo CD 3.3.0 introduces/expands Server-Side Apply (SSA) capabilities,
-          including server-side diffs, SSA manager configuration, and automatic migration
-          from client-side apply field managers.', 'New sync and lifecycle controls
-          were added, such as ApplyOutOfSyncOnly, Replace=true, sync delete/cascade
-          options, reverse-order pruning, and PreDelete hook support.', 'App actions
-          and integrations were expanded (e.g., GitHub PR merge action, CloudNativePG
-          actions, KEDA pause actions), and UI received improvements like custom icons
-          and better sync warnings.', 'Operational and scale improvements include
-          better cluster cache behavior (retries, resync tuning, concurrency limits),
-          shallow git clone support, and additional health checks for more CRDs/operators.']
-      breaking_changes: ['When Argo CD manages its own installation, upgrades to 3.3.x
-          require enabling the Application sync option `ServerSideApply=true`; otherwise
-          the upgrade may fail.', 'Some environments may hit a client-side apply migration
-          failure during self-management; a temporary workaround is setting `ClientSideApplyMigration=false`,
-          but this is not recommended long-term due to potential field-manager conflicts.',
-        'Argo CD 3.3.7 includes a known issue where the application controller may
-          fail to refresh applications (apps may not sync or show OutOfSync); review
-          issue #27344 and consider delaying or adding monitoring/rollback plans if
-          affected.']
-    chart_version: 9.5.2
+      features: ['Server-Side Apply (SSA) becomes a central part of the 3.3 line,
+          including SSA diffs and automatic migration away from the legacy kubectl
+          client-side apply field manager.', 'ApplicationSet improvements include
+          new pprof endpoints, Progressive Sync maturity, status/resource count controls,
+          and multiple reconciliation/finalizer fixes.', 'New/expanded custom actions
+          and health checks (e.g., CloudNativePG actions, PR merge action, more KEDA/Ceph/Crossplane/GatewayAPI-related
+          health logic) improve operational workflows and UI feedback.', Repository
+          integration enhancements such as GitHub App auth without installation ID
+          and optional shallow clones reduce friction and improve performance.]
+      breaking_changes: ['If Argo CD is managing its own installation (app-of-apps/self-managed),
+          the upgrade may fail unless the managing Application uses `ServerSideApply=true`;
+          some environments may also need the temporary workaround `ClientSideApplyMigration=false`
+          to avoid a client-side apply migration error.', 'Behavior changes around
+          apply/diff (SSA, server-side dry-run, apply-out-of-sync-only, replace/force
+          options) can alter sync outcomes; validate sync options and test against
+          critical apps before rolling out broadly.']
+    chart_version: 9.5.4
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.3.7']
+      'quay.io/argoproj/argocd:v3.3.8']
   - version: 3.3.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -13071,9 +13088,9 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.10
+    chart_version: 1.0.11
     images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
-      'registry.k8s.io/kubectl:v1.35.4']
+      'registry.k8s.io/kubectl:v1.36.0']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -13093,7 +13110,17 @@ addons:
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["v3.6.3 was explicitly marked as \u201CDo not use\u201D; the main\
+          \ actionable change is to move off 3.6.3 to a later patch (3.6.4+) and proceed\
+          \ to 3.6.5.", 'v3.6.5 provides updated controller/server manifests (install.yaml)
+          and updated CLI binaries for all supported platforms (same install process,
+          newer artifacts).']
+      breaking_changes: ["No breaking changes were listed in the provided notes for\
+          \ 3.6.3\u21923.6.5; however 3.6.3 is a known-bad release and should not\
+          \ be deployed."]
     chart_version: 0.45.12
     images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
   - version: 3.6.3
@@ -13218,6 +13245,36 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.55.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['New `windows_event_log` source for collecting Windows Event Log
+          channels via the native Windows Event Log API, including pull-mode subscriptions,
+          bookmark-based checkpointing, and configurable field filtering.', '`aws_s3`
+          sink supports Apache Parquet batch encoding, with auto-generated or supplied
+          schema and configurable compression (Snappy/ZSTD/GZIP/LZ4/none).', '`azure_blob`
+          sink restores first-class Azure authentication support (Azure CLI, Managed
+          Identity, Workload Identity, and Managed Identity-based Client Assertion).',
+        '`datadog_metrics` sink defaults to Series v2 endpoint (`/api/v2/series`)
+          and uses `zstd` compression for Series v2 and Sketches; includes `series_api_version`
+          option to switch back to v1.', '`vector top` output accounting is corrected
+          for multi-output components and it now reports Memory Used as disabled when
+          allocation tracing is not enabled.', 'Improved internal metrics: new source-send
+          latency distributions, more accurate transform utilization (excludes downstream
+          waiting), and fixes to buffer utilization tracking; also fixes CPU regression
+          in `file` and `kubernetes_logs` sources introduced in 0.50.0.']
+      breaking_changes: [Observability API has moved from GraphQL to gRPC; clients
+          and tooling that used `/graphql` or `/playground` (including `vector top`/`vector
+          tap` integrations) must be updated. `GET /health` is unchanged for Kubernetes
+          probes., Top-level `headers` option on `http` and `opentelemetry` sinks
+          has been removed; configurations must be adjusted accordingly., '`azure_logs_ingestion`
+          sink using Client Secret credentials now requires explicitly setting `azure_credential_kind`.']
+    chart_version: 0.52.0
+    images: ['docker.io/timberio/vector:0.55.0-distroless-libc']
   - version: 0.54.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -16397,12 +16454,23 @@ addons:
   helm_repository_url: https://kubescape.github.io/helm-charts
   helm_values: clusterName=example,account=example
   versions:
-  - version: 1.30.6
+  - version: 1.30.7
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary: null
-    chart_version: 1.30.6
+    summary:
+      helm_changes: ''
+      chart_updates: ['From 1.30.0 release notes: otel-collector deployment fix to
+          allow external OTEL URL without requiring a cloud provider.', 'NetworkPolicy
+          fixes: prometheus-exporter egress + storage ingress rules corrected.', NetworkPolicy
+          fix to allow Prometheus ServiceMonitor traffic to kubescape., 'Feature added:
+          image-based capability (per PR ''Feat/image based'').', No specific changelog
+          items were provided for 1.30.7 in the notes you shared (release exists but
+          has no listed changes).]
+      features: ['Adds an image-based mode/capability (details depend on chart values;
+          see PR #770 in kubescape/helm-charts).']
+      breaking_changes: []
+    chart_version: 1.30.7
     images: []
   - version: 1.30.0
     kube: ['1.35', '1.34', '1.33']
@@ -16830,7 +16898,11 @@ addons:
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: []
+      breaking_changes: []
     chart_version: 1.16.0
     images: []
   - version: 1.15.0

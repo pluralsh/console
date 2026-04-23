@@ -5,6 +5,7 @@ import {
   DatadogLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
+  GoogleCloudLogoIcon,
   IconProps,
   LinearLogoIcon,
   LokiLogoIcon,
@@ -15,6 +16,7 @@ import {
   ToolsIcon,
 } from '@pluralsh/design-system'
 import {
+  Provider,
   WorkbenchToolCategory,
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolType,
@@ -76,8 +78,11 @@ export const isConfigurableWorkbenchToolType = (
 ): type is ConfigurableWorkbenchToolType =>
   !!type && CONFIGURABLE_SET.has(type as WorkbenchToolType)
 
-export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
-  [WorkbenchToolType.Http]: 'HTTP',
+const WORKBENCH_TOOL_LABELS: Record<
+  WorkbenchToolType | `${WorkbenchToolType.Cloud}:${Provider}`,
+  string
+> = {
+  [WorkbenchToolType.Http]: 'Custom',
   [WorkbenchToolType.Elastic]: 'Elasticsearch',
   [WorkbenchToolType.Prometheus]: 'Prometheus',
   [WorkbenchToolType.Loki]: 'Loki',
@@ -90,10 +95,21 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Splunk]: 'Splunk',
   [WorkbenchToolType.Dynatrace]: 'Dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
-  [WorkbenchToolType.Azure]: 'Azure',
+  [WorkbenchToolType.Azure]: 'Azure Monitor',
   [WorkbenchToolType.Jaeger]: 'Jaeger',
   [WorkbenchToolType.Cloud]: 'Cloud',
+  [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
+  [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
+  [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
 }
+
+export const getWorkbenchToolLabel = (
+  type: WorkbenchToolType,
+  provider?: Nullable<Provider>
+) =>
+  type === WorkbenchToolType.Cloud && provider
+    ? WORKBENCH_TOOL_LABELS[`${type}:${provider}`]
+    : WORKBENCH_TOOL_LABELS[type]
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
   WorkbenchToolType,
@@ -168,31 +184,75 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
 }
 
-export const TOOL_TYPE_CARDS: {
-  type: ConfigurableWorkbenchToolType
-  description: string
+export type WorkbenchToolCard = {
+  type: WorkbenchToolType
+  provider?: Provider
   label: string
+  description: string
   categoryLabels: string[]
-}[] = CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
-  type,
-  description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
-  label: TOOL_TYPE_TO_LABEL[type],
-  categoryLabels: TOOL_TYPE_TO_CATEGORIES[type].map(
-    (category) => categoryToLabel[category]
-  ),
-}))
+}
+
+export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Aws,
+    label: 'AWS',
+    description:
+      'Query AWS infrastructure (EC2, S3, RDS, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Gcp,
+    label: 'GCP',
+    description:
+      'Query Google Cloud infrastructure (Compute, Storage, BigQuery, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Azure,
+    label: 'Azure',
+    description:
+      'Query Azure infrastructure (VMs, storage accounts, resource groups, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  ...CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
+    type,
+    description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
+    label: getWorkbenchToolLabel(type),
+    categoryLabels: TOOL_TYPE_TO_CATEGORIES[type].map(
+      (category) => categoryToLabel[category]
+    ),
+  })),
+]
+
+export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
+  [Provider.Aws]: AwsLogoIcon,
+  [Provider.Gcp]: GoogleCloudLogoIcon,
+  [Provider.Azure]: AzureLogoIcon,
+}
+
+export const isProvider = (value: Nullable<string>): value is Provider =>
+  !!value && (Object.values(Provider) as string[]).includes(value)
 
 export function WorkbenchToolIcon({
   type,
+  provider,
   fullColor = true,
   ...props
-}: { type: Nullable<string> } & IconProps) {
+}: {
+  type: Nullable<string>
+  provider?: Nullable<Provider>
+} & IconProps) {
   const Icon =
-    type === WorkbenchToolType.Sentry
-      ? SentryLogoIcon
-      : isConfigurableWorkbenchToolType(type)
-        ? toolToIcon[type]
-        : ToolsIcon
+    type === WorkbenchToolType.Cloud && provider
+      ? PROVIDER_TO_ICON[provider]
+      : type === WorkbenchToolType.Sentry
+        ? SentryLogoIcon
+        : isConfigurableWorkbenchToolType(type)
+          ? toolToIcon[type]
+          : ToolsIcon
   return (
     <Icon
       fullColor={fullColor}

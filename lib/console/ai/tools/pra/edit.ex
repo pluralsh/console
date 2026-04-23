@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Pra.Edit do
     |> validate_required([:path, :previous, :replacement])
   end
 
-  def implement(_, %__MODULE__{dir: dir, path: path, previous: previous, replacement: replacement}) do
+  def implement(%__MODULE__{dir: dir, path: path, previous: previous, replacement: replacement}) do
     with {:ok, path} <- relpath(dir, path),
          :ok <- Editor.replace(path, previous, replacement),
       do: {:ok, "Successfully edited file #{path} with replacement #{replacement} in place of #{previous}"}

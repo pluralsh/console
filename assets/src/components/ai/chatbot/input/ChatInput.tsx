@@ -5,7 +5,6 @@ import {
   CaretDownIcon,
   Chip,
   Flex,
-  RobotIcon,
   SemanticColorKey,
   SendMessageIcon,
   ServersIcon,
@@ -60,7 +59,7 @@ export function ChatInput({
   onValueChange?: Dispatch<string>
   stateless?: boolean
 } & Partial<ComponentPropsWithRef<typeof EditableDiv>>) {
-  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
+  const { mcpPanelOpen, setMcpPanelOpen } = useChatbot()
 
   const [localMessage, setLocalMessage] = useState<string>('')
   const [persistedMessage, setPersistedMessage] =
@@ -119,10 +118,7 @@ export function ChatInput({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC
-        $agent={!!selectedAgent}
-        $bgColor="fill-zero"
-      >
+      <EditableContentWrapperSC $bgColor="fill-zero">
         <EditableDiv
           placeholder={placeholder}
           setValue={(value) => {
@@ -156,25 +152,21 @@ export function ChatInput({
                 onClick={() => setMcpPanelOpen(!mcpPanelOpen)}
               />
             )}
-            {/* {!selectedAgent && currentThread && (
-              <ChatInputCloudSelect currentThread={currentThread} />
-            )} */}
-            {!selectedAgent && !!currentThread?.session?.id && (
+            {!!currentThread?.session?.id && (
               <ChatInputRuntimeSelect currentThread={currentThread} />
             )}
-            {!selectedAgent && !!currentThread?.session?.id && (
+            {!!currentThread?.session?.id && (
               <ChatInputClusterSelect currentThread={currentThread} />
             )}
           </Flex>
           <Button
+            small
+            secondary
             disabled={!newMessage.trim()}
             endIcon={<SendMessageIcon />}
             onClick={() => formRef.current?.requestSubmit()}
-            secondary={!selectedAgent}
-            small
-            startIcon={selectedAgent ? <RobotIcon /> : undefined}
           >
-            {selectedAgent ? 'Agent' : 'Chat'}
+            Chat
           </Button>
         </Flex>
       </EditableContentWrapperSC>
@@ -219,7 +211,6 @@ export function ChatInputSimple({
   )
   return (
     <EditableContentWrapperSC
-      $agent={false}
       $bgColor={bgColor}
       css={{ position: 'relative', minHeight: 130, ...wrapperStyles }}
     >
@@ -305,9 +296,8 @@ const SendMessageFormSC = styled.form(({ theme }) => ({
 }))
 
 const EditableContentWrapperSC = styled.div<{
-  $agent: boolean
   $bgColor: SemanticColorKey
-}>(({ theme, $agent: agent, $bgColor }) => ({
+}>(({ theme, $bgColor }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
@@ -320,12 +310,7 @@ const EditableContentWrapperSC = styled.div<{
   '&:has(div:focus)': {
     backgroundColor: theme.colors['fill-zero-selected'],
     transition: 'box-shadow 0.16s ease-in-out, border 0.16s ease-in-out',
-    boxShadow: agent
-      ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
-      : undefined,
-    border: agent
-      ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}`
-      : theme.borders['outline-focused'],
+    border: theme.borders['outline-focused'],
   },
 }))
 

@@ -469,4 +469,33 @@ func init() {
 			CredentialsCache: credentialsCache,
 		}
 	})
+
+	types.RegisterController(types.WorkbenchCronReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.WorkbenchCronReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	})
+
+	types.RegisterController(types.WorkbenchWebhookReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.WorkbenchWebhookReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	})
+
+	types.RegisterController(types.SentinelTriggerReconciler, func(mgr ctrl.Manager,
+		consoleClient client.ConsoleClient, credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.SentinelTriggerReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
 }

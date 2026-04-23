@@ -33,7 +33,7 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
     |> validate_required([:name, :previous, :replacement, :branch_name, :pr_title, :pr_description])
   end
 
-  def implement(_, %__MODULE__{} = model), do: {:ok, model}
+  def implement(%__MODULE__{} = model), do: {:ok, model}
 
   def execute(%__MODULE__{job: job, name: name, previous: previous, replacement: replacement} = model) do
     case Skills.plural?(name, job.workbench) do

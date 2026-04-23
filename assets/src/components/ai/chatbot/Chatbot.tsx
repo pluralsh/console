@@ -7,15 +7,14 @@ import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { AIViewTypes, useChatbot, useChatbotContext } from '../AIContext.tsx'
-import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { MainChatbotButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
-import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { ChatbotPanelInfraResearch } from './ChatbotPanelInfraResearch.tsx'
+import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { SidePanelContent } from './SidePanelShared.tsx'
+import { McpServerShelf } from './tools/McpServerShelf.tsx'
 
 export function ChatbotLauncher() {
   const { open, setOpen } = useChatbotContext()
@@ -27,8 +26,7 @@ export function ChatbotLauncher() {
 }
 
 export function ChatbotPanelContent() {
-  const { currentThread, currentThreadId, agentInitMode, viewType } =
-    useChatbot()
+  const { currentThread, currentThreadId, viewType } = useChatbot()
   const { data, loading, error, fetchNextPage, pageInfo, refetch } =
     useFetchPaginatedData(
       {
@@ -57,7 +55,7 @@ export function ChatbotPanelContent() {
   return (
     <>
       {!isEmpty(currentThread?.tools) && <McpServerShelf zIndex={2} />}
-      {currentThread?.session && !agentInitMode && (
+      {currentThread?.session && (
         <ChatbotActionsPanel
           zIndex={1}
           messages={messages}
@@ -65,9 +63,7 @@ export function ChatbotPanelContent() {
       )}
       <SidePanelContent>
         <ChatbotHeader />
-        {!!agentInitMode ? (
-          <ChatbotAgentInit />
-        ) : viewType === AIViewTypes.InfraResearch ? (
+        {viewType === AIViewTypes.InfraResearch ? (
           <ChatbotPanelInfraResearch />
         ) : (
           <ChatbotPanelThread

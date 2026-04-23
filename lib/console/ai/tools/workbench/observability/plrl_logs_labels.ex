@@ -41,7 +41,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
     |> validate_required([:name, :value])
   end
 
-  def implement(_, %__MODULE__{user: user, field: field} = logs) do
+  def implement(%__MODULE__{user: user, field: field} = logs) do
     query = Logs.logs_query(logs) |> Map.put(:field, field)
     with {:ok, query} <- Query.accessible(query, user),
          {:ok, labels} <- Provider.labels(query) do
