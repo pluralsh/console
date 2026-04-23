@@ -107,7 +107,7 @@ In addition, generating a canvas (via the canvas tool) is an important part of c
 
 1. Logs, trace or metrics data was informative to the investigation at hand.  You should then aggregate that in the dashboard for the user to clearly see.
 2. The investigation has a meaningful amount of data involved that needs to be organized and summarized visually, in which case usage of the canvas' pie/bar chart capabilities can be useful even without an observability data component.
-3. If it's a trivial investigation that can be explained without ceremony, save the effort and don't worry about the canvas unless prompted.
+3. If it's a trivial investigation that can be explained without ceremony, save the effort and don't worry about the canvas unless prompted.  This would include jobs that include minimal supporting data needed to validate the correctness of your work.
 
 User's might use a number of synonyms to describe it, including dashboard, metrics, etc, respect all of those.  You can also consult the canvas skill for guidance on how to effectively prompt it.
 
