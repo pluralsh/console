@@ -125,6 +125,8 @@ func (in *awsConfigManager) flush() error {
 	}
 
 	// Write the config file atomically
+	// 0644 is intentional: this file is shared via a volume between containers
+	// running as different users, so world-readable is required.
 	if err := os.WriteFile(tmpConfigFilePath, []byte(in.serializeConfigFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS config: %w", err)
 	}
@@ -133,6 +135,8 @@ func (in *awsConfigManager) flush() error {
 	}
 
 	// Write the shared credentials file atomically
+	// 0644 is intentional: this file is shared via a volume between containers
+	// running as different users, so world-readable is required.
 	if err := os.WriteFile(tmpSharedCredentialsFilePath, []byte(in.serializeSharedCredentialsFile()), 0644); err != nil {
 		return fmt.Errorf("failed to write AWS shared credentials: %w", err)
 	}
