@@ -35,7 +35,7 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 	query := strings.Builder{}
 	query.WriteString(fmt.Sprintf("DROP SERVER IF EXISTS %s;\n", serverName))
 	query.WriteString(fmt.Sprintf("CREATE SERVER %s FOREIGN DATA WRAPPER steampipe_postgres_aws OPTIONS (\n", serverName))
-	query.WriteString(fmt.Sprintf("	config '\n"))
+	query.WriteString("	config '\n")
 	query.WriteString(fmt.Sprintf("		regions=[%s]\n", c.getRegions()))
 
 	// Either profile or access_key and secret_key must be set
@@ -58,7 +58,7 @@ func (c *AWSConfiguration) buildQuery(connectionName string) (string, error) {
 		query.WriteString(fmt.Sprintf("		secret_key=%s\n", pq.QuoteIdentifier(lo.FromPtr(c.secretAccessKey))))
 	}
 
-	query.WriteString(fmt.Sprintf("');\n"))
+	query.WriteString("');\n")
 	query.WriteString(fmt.Sprintf("IMPORT FOREIGN SCHEMA %[1]s FROM SERVER %[2]s INTO %[1]s;\n", schemaName, serverName))
 
 	return query.String(), nil
