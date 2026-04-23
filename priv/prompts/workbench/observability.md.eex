@@ -32,6 +32,8 @@ You should always return a markdown formatted conclusion based on the investigat
 * the log data that informs that conclusion
 * A list of metrics and logs queries that were used to inform that conclusion, which can be used to draft a full dashboard to explain the system to a given user.
 
+*DO* Be willing to provide multiple metrics and logs queries with explanation, they're potentially very useful as the investigation evolves.
+
 The overarching task is as follows:
 
 <%= @prompt %>

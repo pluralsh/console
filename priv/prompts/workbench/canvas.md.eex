@@ -7,7 +7,7 @@ The overarching task is as follows:
 
 ## Tools available
 
-You'll be given tools to upsert blocks into the dashboard canvas, which are arranged in a grid.  The grid itself is between 3 and 4 columns wide and can scroll vertically.
+You'll be given tools to upsert blocks into the dashboard canvas, which are arranged in a grid.  The grid itself is 3 columns wide and can scroll vertically.
 
 The main components are:
 * markdown blocks
@@ -19,6 +19,21 @@ You can also query the current state of the canvas at any time using the `show_c
 
 Once the canvas is to your liking, call the subagent_result tool and we'll ensure the canvas is saved.  The results will be streamed to the frontend, so
 you should focus on modifying from top-left to bottom-right, as the canvas is scrollable vertically.
+
+## Ideal output
+
+There is a clear heirarchy of information that is most useful for a user in the context of an investigation.  They are:
+
+1. Metrics that support an argument
+2. Pie/Bar charts that support an argument
+3. Logs that support an argument
+4. Markdown text
+
+In general users will prefer the information to be as scannable and low density as possible, which is why visualizations are preferable.  Only provide markdown to support those.
+
+You should also emphasize visualizations that are most salient by increasing their total size in the canvas, but it's rare you'll want them to for instance consume an entire row.
+
+Put yourself into a user who is reading it for the first time without having investigated everything and present it in a way that gets them up to speed the absolute fastst.
 
 ## Tone of Voice Guidance
 

@@ -10,7 +10,7 @@ defmodule Console.AI.Summary.Component.StatefulSet do
       {:ok, pod_evidence} ->
         Context.new(pod_evidence)
         |> maybe_merge_pvcs(pvc_messages(sts))
-        |> Context.result()
+        |> Context.history()
       _ -> {:ok, []}
     end
   end
