@@ -217,6 +217,7 @@ function WorkbenchJobActivityResult({
       agentRuns?.filter(isNonNullable).filter(({ id }) => id !== agentRun?.id),
     [agentRun?.id, agentRuns]
   )
+  const hasCanvasBlocks = !isEmpty((result?.canvas ?? []).filter(isNonNullable))
   return (
     <Flex
       direction="column"
@@ -228,13 +229,15 @@ function WorkbenchJobActivityResult({
           css={{ wordBreak: 'break-word' }}
         />
       )}
-      <div>
-        {markdownType === 'simplified' ? (
-          <SimplifiedMarkdown text={result?.output ?? ''} />
-        ) : (
-          <Markdown text={result?.output ?? ''} />
-        )}
-      </div>
+      {!hasCanvasBlocks && (
+        <div>
+          {markdownType === 'simplified' ? (
+            <SimplifiedMarkdown text={result?.output ?? ''} />
+          ) : (
+            <Markdown text={result?.output ?? ''} />
+          )}
+        </div>
+      )}
       <WorkbenchJobCanvas
         jobId={jobId}
         activityId={id}

@@ -58,13 +58,16 @@ defmodule Console.AI.Summary.Component.Resource do
   end
 
   def hydrate(resource) do
-    do_hydrate(resource)
-    |> as_history()
+    case do_hydrate(resource) do
+      {:ok, hydration} -> {:ok, hydration}
+      {:ok, hydration, _} -> {:ok, hydration}
+      error -> error
+    end
   end
 
   def generate(resource) do
     with {:ok, events} <- events(resource),
-         {:ok, hydration, _} <- hydrate(resource) do
+         {:ok, hydration} <- hydrate(resource) do
       {:ok, [{:user, """
           The kubernetes component #{description(resource)} could also be related.
 
