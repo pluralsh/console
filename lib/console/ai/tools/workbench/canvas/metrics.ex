@@ -26,14 +26,18 @@ defmodule Console.AI.Tools.Workbench.Canvas.MetricsBlock do
   end
 
   def implement(%__MODULE__{layout: layout, props: props} = model) do
-    Canvas.canvas()
-    |> Canvas.insert(%CanvasBlock{
-      identifier: model.identifier,
-      type: :metrics,
-      layout: layout,
-      content: %CanvasBlock.Content{metrics: props}
-    })
+    case Canvas.insert(Canvas.canvas(), %CanvasBlock{
+           identifier: model.identifier,
+           type: :metrics,
+           layout: layout,
+           content: %CanvasBlock.Content{metrics: props}
+         }) do
+      {:ok, canvas} ->
+        Canvas.save(canvas)
+        {:ok, "added metrics block #{model.identifier} to canvas"}
 
-    {:ok, "added metrics block #{model.identifier} to canvas"}
+      {:error, _} = error ->
+        error
+    end
   end
 end

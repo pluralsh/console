@@ -26,14 +26,18 @@ defmodule Console.AI.Tools.Workbench.Canvas.MarkdownBlock do
   end
 
   def implement(%__MODULE__{layout: layout, markdown: markdown} = model) do
-    Canvas.canvas()
-    |> Canvas.insert(%CanvasBlock{
-      identifier: model.identifier,
-      type: :markdown,
-      layout: layout,
-      content: %CanvasBlock.Content{markdown: markdown}
-    })
+    case Canvas.insert(Canvas.canvas(), %CanvasBlock{
+           identifier: model.identifier,
+           type: :markdown,
+           layout: layout,
+           content: %CanvasBlock.Content{markdown: markdown}
+         }) do
+      {:ok, canvas} ->
+        Canvas.save(canvas)
+        {:ok, "added markdown block #{model.identifier} to canvas"}
 
-    {:ok, "added markdown block #{model.identifier} to canvas"}
+      {:error, _} = error ->
+        error
+    end
   end
 end
