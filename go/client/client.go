@@ -6801,9 +6801,10 @@ func (t *WorkbenchToolFragment) GetUpdatedAt() *string {
 }
 
 type WorkbenchCronFragment struct {
-	ID      string  "json:\"id\" graphql:\"id\""
-	Crontab *string "json:\"crontab,omitempty\" graphql:\"crontab\""
-	Prompt  *string "json:\"prompt,omitempty\" graphql:\"prompt\""
+	ID        string                           "json:\"id\" graphql:\"id\""
+	Crontab   *string                          "json:\"crontab,omitempty\" graphql:\"crontab\""
+	Prompt    *string                          "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Workbench *WorkbenchCronFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
 func (t *WorkbenchCronFragment) GetID() string {
@@ -6824,12 +6825,21 @@ func (t *WorkbenchCronFragment) GetPrompt() *string {
 	}
 	return t.Prompt
 }
+func (t *WorkbenchCronFragment) GetWorkbench() *WorkbenchCronFragment_Workbench {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.Workbench
+}
 
 type WorkbenchWebhookFragment struct {
-	ID      string                            "json:\"id\" graphql:\"id\""
-	Name    *string                           "json:\"name,omitempty\" graphql:\"name\""
-	Prompt  *string                           "json:\"prompt,omitempty\" graphql:\"prompt\""
-	Matches *WorkbenchWebhookFragment_Matches "json:\"matches,omitempty\" graphql:\"matches\""
+	ID           string                                 "json:\"id\" graphql:\"id\""
+	Name         *string                                "json:\"name,omitempty\" graphql:\"name\""
+	Prompt       *string                                "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Matches      *WorkbenchWebhookFragment_Matches      "json:\"matches,omitempty\" graphql:\"matches\""
+	Webhook      *WorkbenchWebhookFragment_Webhook      "json:\"webhook,omitempty\" graphql:\"webhook\""
+	IssueWebhook *WorkbenchWebhookFragment_IssueWebhook "json:\"issueWebhook,omitempty\" graphql:\"issueWebhook\""
+	Workbench    *WorkbenchWebhookFragment_Workbench    "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
 func (t *WorkbenchWebhookFragment) GetID() string {
@@ -6855,6 +6865,24 @@ func (t *WorkbenchWebhookFragment) GetMatches() *WorkbenchWebhookFragment_Matche
 		t = &WorkbenchWebhookFragment{}
 	}
 	return t.Matches
+}
+func (t *WorkbenchWebhookFragment) GetWebhook() *WorkbenchWebhookFragment_Webhook {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Webhook
+}
+func (t *WorkbenchWebhookFragment) GetIssueWebhook() *WorkbenchWebhookFragment_IssueWebhook {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.IssueWebhook
+}
+func (t *WorkbenchWebhookFragment) GetWorkbench() *WorkbenchWebhookFragment_Workbench {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Workbench
 }
 
 type TinyAgentRuntimeFragment_Cluster struct {
@@ -13848,6 +13876,24 @@ func (t *WorkbenchToolFragment_Configuration) GetTempo() *WorkbenchToolFragment_
 	return t.Tempo
 }
 
+type WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
 type WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -13871,6 +13917,60 @@ func (t *WorkbenchWebhookFragment_Matches) GetSubstring() *string {
 		t = &WorkbenchWebhookFragment_Matches{}
 	}
 	return t.Substring
+}
+
+type WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
 }
 
 type DeleteAgentRuntime_DeleteAgentRuntime struct {
@@ -34345,6 +34445,78 @@ func (t *GetWorkbenchToolTiny_WorkbenchTool) GetName() string {
 	return t.Name
 }
 
+type CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
 type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -34368,6 +34540,60 @@ func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_
 		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
 	}
 	return t.Substring
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
 }
 
 type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
@@ -34395,6 +34621,60 @@ func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_
 	return t.Substring
 }
 
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
+}
+
 type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -34420,6 +34700,60 @@ func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_
 	return t.Substring
 }
 
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
+}
+
 type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -34443,6 +34777,60 @@ func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matche
 		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
 	}
 	return t.Substring
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
 }
 
 type GetAgentRuntime struct {
@@ -61303,6 +61691,10 @@ fragment WorkbenchCronFragment on WorkbenchCron {
 	id
 	crontab
 	prompt
+	workbench {
+		id
+		name
+	}
 }
 `
 
@@ -61333,6 +61725,10 @@ fragment WorkbenchCronFragment on WorkbenchCron {
 	id
 	crontab
 	prompt
+	workbench {
+		id
+		name
+	}
 }
 `
 
@@ -61363,6 +61759,10 @@ fragment WorkbenchCronFragment on WorkbenchCron {
 	id
 	crontab
 	prompt
+	workbench {
+		id
+		name
+	}
 }
 `
 
@@ -61392,6 +61792,10 @@ fragment WorkbenchCronFragment on WorkbenchCron {
 	id
 	crontab
 	prompt
+	workbench {
+		id
+		name
+	}
 }
 `
 
@@ -61425,6 +61829,18 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 		regex
 		substring
 		caseInsensitive
+	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
 	}
 }
 `
@@ -61461,6 +61877,18 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 		substring
 		caseInsensitive
 	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
 }
 `
 
@@ -61496,6 +61924,18 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 		substring
 		caseInsensitive
 	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
 }
 `
 
@@ -61529,6 +61969,18 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 		regex
 		substring
 		caseInsensitive
+	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
 	}
 }
 `
