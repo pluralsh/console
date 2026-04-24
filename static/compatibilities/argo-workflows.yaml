@@ -4,13 +4,13 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.0.4
+- version: 4.0.5
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
-  chart_version: 1.0.11
-  images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
+  chart_version: 1.0.12
+  images: ['quay.io/argoproj/argocli:v4.0.5', 'quay.io/argoproj/workflow-controller:v4.0.5',
     'registry.k8s.io/kubectl:v1.36.0']
 - version: 4.0.2
   kube: ['1.33', '1.32', '1.31']

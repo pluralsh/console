@@ -79,7 +79,15 @@ versions:
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [No explicit chart/values changes are described in the provided
+        notes for `kubescape-operator-1.29.0` (release entry contains only metadata).,
+      'From `1.28.0`, the chart added **kubelet directory support** in the node-agent
+        configuration (PR #707).']
+    features: ['(From 1.28.0 notes) Node agent configuration gained support for specifying/handling
+        the kubelet directory, improving compatibility across node layouts/distributions.']
+    breaking_changes: []
   chart_version: 1.29.0
   images: []
 - version: 1.28.0

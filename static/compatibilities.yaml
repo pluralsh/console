@@ -7570,6 +7570,32 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 84.0.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **Grafana subchart bumped to major v12** (`[kube-prometheus-stack]
+        Update Helm release grafana to v12`). Review any **Grafana-related values**
+        you override (admin credentials, persistence, sidecars/dashboards/datasources,
+        ingress, service, resources, plugins) against the Grafana chart v12 values
+        schema before upgrading.
+
+        '
+      chart_updates: [Updated the bundled Grafana Helm dependency to **Grafana chart
+          v12**.]
+      features: ['Grafana is now deployed via the Grafana Helm chart v12, bringing
+          whatever new defaults/fixes that chart version includes.']
+      breaking_changes: [Potential breaking changes may come from the **Grafana Helm
+          chart major version bump (v12)**; existing `values.yaml` overrides for Grafana
+          may no longer be valid or may change behavior. Validate your Grafana configuration
+          and run a dry-run/templating diff before applying.]
+    chart_version: 84.0.0
+    images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+      'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+      'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 83.7.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -9875,6 +9901,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.149.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.148.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -13083,13 +13115,13 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.0.4
+  - version: 4.0.5
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.11
-    images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
+    chart_version: 1.0.12
+    images: ['quay.io/argoproj/argocli:v4.0.5', 'quay.io/argoproj/workflow-controller:v4.0.5',
       'registry.k8s.io/kubectl:v1.36.0']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']
@@ -15396,7 +15428,7 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     chart_version: 1.10.0
-    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
+    images: []
     incompatibilities: []
   - version: 1.9.1
     kube: ['1.26', '1.25', '1.24']
@@ -16531,7 +16563,16 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [No explicit chart/values changes are described in the provided
+          notes for `kubescape-operator-1.29.0` (release entry contains only metadata).,
+        'From `1.28.0`, the chart added **kubelet directory support** in the node-agent
+          configuration (PR #707).']
+      features: ['(From 1.28.0 notes) Node agent configuration gained support for
+          specifying/handling the kubelet directory, improving compatibility across
+          node layouts/distributions.']
+      breaking_changes: []
     chart_version: 1.29.0
     images: []
   - version: 1.28.0
