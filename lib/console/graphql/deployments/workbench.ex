@@ -308,6 +308,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+    field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
 
     field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"

@@ -571,6 +571,37 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["result"]["conclusion"] == "done"
     end
 
+    test "it can fetch eval result for a workbench job (has_one)" do
+      workbench = insert(:workbench)
+      eval = insert(:workbench_eval, workbench: workbench)
+      job = insert(:workbench_job, workbench: workbench)
+      eval_result =
+        insert(:workbench_eval_result,
+          workbench_eval: eval,
+          workbench_job: job,
+          grade: 9,
+          feedback: %{summary: "strong result", prompt: "p", result: "r", logic: "l"}
+        )
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            evalResult {
+              id
+              grade
+              feedback { summary }
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["evalResult"]["id"] == eval_result.id
+      assert found["evalResult"]["grade"] == 9
+      assert found["evalResult"]["feedback"]["summary"] == "strong result"
+    end
+
     test "it resolves metricsTool using the generated observability metrics tool name and parses GraphQL output" do
       workbench = insert(:workbench)
       tool = insert(:workbench_tool,

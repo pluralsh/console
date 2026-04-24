@@ -2867,6 +2867,9 @@ type WorkbenchJob {
   "the result for this job (sideloadable)"
   result: WorkbenchJobResult
 
+  "the eval result for this job (sideloadable)"
+  evalResult: WorkbenchEvalResult
+
   "pull requests associated with this workbench job"
   pullRequests: [PullRequest]
 

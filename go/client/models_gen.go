@@ -9727,6 +9727,8 @@ type WorkbenchJob struct {
 	User *User `json:"user,omitempty"`
 	// the result for this job (sideloadable)
 	Result *WorkbenchJobResult `json:"result,omitempty"`
+	// the eval result for this job (sideloadable)
+	EvalResult *WorkbenchEvalResult `json:"evalResult,omitempty"`
 	// pull requests associated with this workbench job
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	// the alert this run was spawned from

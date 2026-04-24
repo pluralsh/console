@@ -15188,6 +15188,8 @@ export type WorkbenchJob = {
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** error message when the job failed */
   error?: Maybe<Scalars['String']['output']>;
+  /** the eval result for this job (sideloadable) */
+  evalResult?: Maybe<WorkbenchEvalResult>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
