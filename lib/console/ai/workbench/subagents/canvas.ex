@@ -37,15 +37,15 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     end
   end
 
-  defp tools(%Environment{skills: skills}) do
+  defp tools(%Environment{skills: skills} = env) do
     [
       %Skills{skills: Environment.subagent_skills(skills, :canvas)},
       %Skill{skills: Environment.subagent_skills(skills, :canvas)},
       Result,
       Canvas,
       MarkdownBlock,
-      MetricsBlock,
-      LogsBlock,
+      %MetricsBlock{env: env},
+      %LogsBlock{env: env},
       PieBlock,
       BarBlock,
       Empty
