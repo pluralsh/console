@@ -11,7 +11,8 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityFragmentDoc,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import { groupBy, isEmpty } from 'lodash'
+import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { updateFragment } from 'utils/graphql'
@@ -24,6 +25,8 @@ import {
 const COLUMNS = 3
 const ROW_HEIGHT_PX = 40
 const MIN_GRID_WIDTH_PX = 600
+/** Nivo `ResponsivePie` needs a sized parent; without this the chart measures 0×0 in the flex canvas layout. */
+const PIE_CHART_HEIGHT_PX = 200
 
 export function WorkbenchJobCanvas({
   jobId,
@@ -89,29 +92,38 @@ function CanvasGrid({
   jobId: string
   blocks: WorkbenchCanvasBlockFragment[]
 }) {
-  const sorted = [...blocks].sort((a, b) => {
-    const ay = a.layout?.y ?? 0
-    const by = b.layout?.y ?? 0
-    if (ay !== by) return ay - by
-    return (a.layout?.x ?? 0) - (b.layout?.x ?? 0)
-  })
+  const rows = useMemo(() => {
+    const grouped = groupBy(blocks, (b) => b.layout?.y ?? 0)
+    return Object.entries(grouped)
+      .map(([yKey, rowBlocks]) => ({
+        y: Number(yKey),
+        blocks: [...rowBlocks].sort(
+          (a, b) => (a.layout?.x ?? 0) - (b.layout?.x ?? 0)
+        ),
+      }))
+      .sort((a, b) => a.y - b.y)
+  }, [blocks])
+
   return (
-    <GridSC>
-      {sorted.map((block, i) => (
-        <BlockCellSC
-          key={block.identifier ?? i}
-          $x={block.layout?.x ?? 0}
-          $y={block.layout?.y ?? i}
-          $w={block.layout?.w ?? COLUMNS}
-          $h={block.layout?.h ?? 4}
-        >
-          <CanvasBlockRenderer
-            jobId={jobId}
-            block={block}
-          />
-        </BlockCellSC>
+    <CanvasStackSC>
+      {rows.map(({ y, blocks: rowBlocks }) => (
+        <CanvasRowSC key={y}>
+          {rowBlocks.map((block, i) => (
+            <BlockCellSC
+              key={block.identifier ?? `${y}-${i}`}
+              $x={block.layout?.x ?? 0}
+              $w={block.layout?.w ?? COLUMNS}
+              $h={block.layout?.h ?? 4}
+            >
+              <CanvasBlockRenderer
+                jobId={jobId}
+                block={block}
+              />
+            </BlockCellSC>
+          ))}
+        </CanvasRowSC>
       ))}
-    </GridSC>
+    </CanvasStackSC>
   )
 }
 
@@ -152,9 +164,9 @@ function CanvasBlockRenderer({
 
 function MarkdownBlock({ text }: { text: string }) {
   return (
-    <BlockCardSC>
+    <MarkdownBlockSC>
       <Markdown text={text || '_No content._'} />
-    </BlockCardSC>
+    </MarkdownBlockSC>
   )
 }
 
@@ -166,15 +178,15 @@ function MetricsBlock({
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
   return (
-    <BlockCardSC>
+    <VizBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
       <JobActivityMetrics
         jobId={jobId}
         metricsQuery={graph?.query}
-        css={{ flex: 1, minHeight: 120 }}
+        css={{ flex: '0 0 auto', minHeight: 120 }}
       />
       {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-    </BlockCardSC>
+    </VizBlockCardSC>
   )
 }
 
@@ -186,16 +198,16 @@ function LogsBlock({
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
   return (
-    <BlockCardSC>
+    <VizBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
-      <div css={{ flex: 1, minHeight: 120, minWidth: 0, overflow: 'auto' }}>
+      <div css={{ flex: '0 0 auto', minHeight: 120, minWidth: 0 }}>
         <JobActivityLogsFromTool
           jobId={jobId}
           logsQuery={graph?.query}
         />
       </div>
       {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-    </BlockCardSC>
+    </VizBlockCardSC>
   )
 }
 
@@ -208,12 +220,16 @@ function PieBlock({ graph }: { graph: Nullable<WorkbenchCanvasBlockGraph> }) {
     color: COLORS[i % COLORS.length],
   }))
   return (
-    <BlockCardSC>
+    <VizBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
-      <div css={{ flex: 1, minHeight: 0, minWidth: 0 }}>
-        <PieChart data={data} />
+      <div css={{ flex: '0 0 auto', minWidth: 0, width: '100%' }}>
+        <PieChart
+          data={data}
+          height={PIE_CHART_HEIGHT_PX}
+          width="100%"
+        />
       </div>
-    </BlockCardSC>
+    </VizBlockCardSC>
   )
 }
 
@@ -221,7 +237,7 @@ function BarBlock({ graph }: { graph: Nullable<WorkbenchCanvasBlockGraph> }) {
   const points = (graph?.data ?? []).filter(isNonNullable)
   const max = Math.max(...points.map((p) => p.value ?? 0), 1)
   return (
-    <BlockCardSC>
+    <VizBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
       <BarListSC>
         {points.map((p, i) => (
@@ -237,7 +253,7 @@ function BarBlock({ graph }: { graph: Nullable<WorkbenchCanvasBlockGraph> }) {
           </BarRowSC>
         ))}
       </BarListSC>
-    </BlockCardSC>
+    </VizBlockCardSC>
   )
 }
 
@@ -253,26 +269,48 @@ const GridScrollAreaSC = styled.div(() => ({
   overflowX: 'auto',
 }))
 
-const GridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: `repeat(${COLUMNS}, minmax(0, 1fr))`,
-  gridAutoRows: `${ROW_HEIGHT_PX}px`,
+const CanvasStackSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
   gap: theme.spacing.small,
   width: '100%',
   minWidth: MIN_GRID_WIDTH_PX,
 }))
 
+/** One canvas row (`layout.y`): a single grid track tall enough for the tallest block; siblings stretch like table cells. */
+const CanvasRowSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: `repeat(${COLUMNS}, minmax(0, 1fr))`,
+  gap: theme.spacing.small,
+  width: '100%',
+  alignItems: 'stretch',
+}))
+
 const BlockCellSC = styled.div<{
   $x: number
-  $y: number
   $w: number
   $h: number
-}>(({ $x, $y, $w, $h }) => ({
+}>(({ $x, $w, $h }) => ({
   gridColumn: `${Math.max(1, $x + 1)} / span ${Math.max(1, Math.min($w, COLUMNS))}`,
-  gridRow: `${Math.max(1, $y + 1)} / span ${Math.max(1, $h)}`,
   minWidth: 0,
-  minHeight: 0,
   display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  // `h` is a hint from tools; row height still grows with content, but empty/loading blocks keep a sensible floor.
+  minHeight: Math.max(1, $h) * ROW_HEIGHT_PX,
+}))
+
+const MarkdownBlockSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.medium,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  flex: 1,
+  width: '100%',
+  minWidth: 0,
+  overflowX: 'auto',
+  overflowY: 'visible',
+  background: 'transparent',
 }))
 
 const BlockCardSC = styled.div(({ theme }) => ({
@@ -280,23 +318,27 @@ const BlockCardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
+  flex: 1,
   width: '100%',
-  height: '100%',
   minWidth: 0,
-  minHeight: 0,
-  overflow: 'auto',
+  overflowX: 'auto',
+  overflowY: 'visible',
   background: 'transparent',
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
+}))
+
+/** Metrics / logs / charts: center the block content vertically when the canvas row is taller than this cell. */
+const VizBlockCardSC = styled(BlockCardSC)(() => ({
+  justifyContent: 'center',
 }))
 
 const BarListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
-  flex: 1,
-  minHeight: 0,
-  overflowY: 'auto',
+  flex: '0 0 auto',
+  overflow: 'visible',
 }))
 
 const BarRowSC = styled.div(({ theme }) => ({
