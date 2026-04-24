@@ -1077,6 +1077,120 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "create_workbench_eval/3" do
+    test "users with write access to the workbench can create an eval" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, eval} =
+        Workbenches.create_workbench_eval(
+          %{
+            conclusion_rules: "c1",
+            prompt_rules: "p1",
+            progress_rules: "g1"
+          },
+          workbench.id,
+          user
+        )
+
+      assert eval.workbench_id == workbench.id
+      assert eval.conclusion_rules == "c1"
+      assert eval.prompt_rules == "p1"
+      assert eval.progress_rules == "g1"
+      assert_receive {:event, %PubSub.WorkbenchEvalCreated{item: ^eval}}
+    end
+
+    test "users with read access cannot create an eval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, _} =
+        Workbenches.create_workbench_eval(
+          %{conclusion_rules: "x", prompt_rules: "y", progress_rules: "z"},
+          workbench.id,
+          user
+        )
+    end
+
+    test "users without workbench access cannot create an eval" do
+      user = insert(:user)
+      workbench = insert(:workbench)
+
+      {:error, _} =
+        Workbenches.create_workbench_eval(
+          %{conclusion_rules: "x", prompt_rules: "y", progress_rules: "z"},
+          workbench.id,
+          user
+        )
+    end
+  end
+
+  describe "update_workbench_eval/3" do
+    test "users with write access can update an eval" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: workbench, conclusion_rules: "old")
+
+      {:ok, updated} =
+        Workbenches.update_workbench_eval(
+          %{conclusion_rules: "new", prompt_rules: "np", progress_rules: "ng"},
+          eval.id,
+          user
+        )
+
+      assert updated.id == eval.id
+      assert updated.conclusion_rules == "new"
+      assert updated.prompt_rules == "np"
+      assert updated.progress_rules == "ng"
+      assert_receive {:event, %PubSub.WorkbenchEvalUpdated{item: ^updated}}
+    end
+
+    test "users without write access cannot update an eval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: workbench, conclusion_rules: "secret")
+
+      {:error, _} =
+        Workbenches.update_workbench_eval(
+          %{conclusion_rules: "hacked", prompt_rules: "h", progress_rules: "h"},
+          eval.id,
+          user
+        )
+
+      assert refetch(eval).conclusion_rules == "secret"
+    end
+  end
+
+  describe "delete_workbench_eval/2" do
+    test "users with write access can delete an eval" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_eval(eval.id, user)
+
+      assert deleted.id == eval.id
+      refute refetch(eval)
+      assert_receive {:event, %PubSub.WorkbenchEvalDeleted{item: ^deleted}}
+    end
+
+    test "users without write access cannot delete an eval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: workbench)
+
+      {:error, _} = Workbenches.delete_workbench_eval(eval.id, user)
+
+      assert refetch(eval)
+    end
+  end
+
   describe "create_workbench_webhook/3" do
     test "project writers can create a webhook with observability webhook" do
       user = insert(:user)

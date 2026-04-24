@@ -10,6 +10,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
+  enum :eval_results_period do
+    value :day
+    value :week
+    value :month
+  end
 
   input_object :workbench_job_attributes do
     field :prompt, :string, description: "the prompt for this job"
@@ -84,6 +89,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,        non_null(:string), description: "the saved skill name"
     field :description, :string, description: "the saved skill description"
     field :contents,    non_null(:string), description: "the saved skill contents"
+  end
+
+  input_object :workbench_eval_attributes do
+    field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
+    field :prompt_rules,     :string, description: "rules for evaluating job prompts"
+    field :progress_rules,   :string, description: "rules for evaluating job progress"
   end
 
   input_object :workbench_webhook_matches_attributes do
@@ -261,6 +272,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :workbench_skills, node_type: :workbench_skill do
       resolve &Deployments.list_workbench_skills/3
+    end
+
+    field :eval, :workbench_eval,
+      description: "eval configuration for this workbench (at most one; null if none configured)",
+      resolve: dataloader(Deployments)
+
+    connection field :eval_results, node_type: :workbench_eval_result do
+      resolve &Deployments.list_eval_results/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
@@ -515,6 +534,59 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_eval do
+    field :id, non_null(:string), description: "the id of the eval configuration"
+
+    field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
+    field :prompt_rules,     :string, description: "rules for evaluating job prompts"
+    field :progress_rules,   :string, description: "rules for evaluating job progress"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this eval belongs to"
+
+    timestamps()
+  end
+
+  object :workbench_eval_feedback do
+    field :summary, :string, description: "high-level eval summary"
+    field :prompt,  :string, description: "prompt used for grading"
+    field :result,  :string, description: "evaluator outcome text"
+    field :logic,   :string, description: "evaluator rationale"
+  end
+
+  object :workbench_eval_result do
+    field :id, non_null(:string), description: "the id of this eval result row"
+    field :grade, :integer, description: "numeric grade for the job (0–10 scale)"
+
+    field :feedback, :workbench_eval_feedback, description: "structured feedback for this run"
+
+    field :workbench_eval, :workbench_eval, resolve: dataloader(Deployments), description: "the eval configuration this row belongs to"
+    field :workbench_job,  :workbench_job, resolve: dataloader(Deployments), description: "the workbench job that was graded"
+
+    timestamps()
+  end
+
+  object :workbench_eval_results_average do
+    field :timestamp, :datetime
+    field :average, :float
+  end
+
+  object :workbench_eval_results_workbench_average do
+    field :workbench, :workbench
+    field :timestamp, :datetime
+    field :average, :float
+  end
+
+  object :workbench_pr_merge_rate_entry do
+    field :timestamp, :datetime, description: "UTC bucket start for this merge rate sample"
+    field :merge_rate, :float, description: "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  end
+
+  object :workbench_pr_merge_rate_by_workbench_entry do
+    field :workbench, :workbench, description: "workbench this bucket applies to"
+    field :timestamp, :datetime, description: "UTC bucket start for this merge rate sample"
+    field :merge_rate, :float, description: "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  end
+
   object :workbench_webhook_matches do
     field :regex,            :string, description: "regex pattern to match"
     field :substring,        :string, description: "substring to match"
@@ -663,6 +735,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_cron
   connection node_type: :workbench_prompt
   connection node_type: :workbench_skill
+  connection node_type: :workbench_eval_result
   connection node_type: :workbench_webhook
 
   delta :workbench_job
@@ -750,6 +823,55 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
 
       resolve &Deployments.all_workbench_issues/2
+    end
+
+    field :average_workbench_eval_results, list_of(:workbench_eval_results_workbench_average) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.average_workbench_eval_results/2
+    end
+
+    field :average_eval_results, list_of(:workbench_eval_results_average) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.average_eval_results/2
+    end
+
+    field :workbench_pull_requests, non_null(:integer) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+
+      resolve &Deployments.workbench_pull_requests/2
+    end
+
+    field :workbench_pr_merge_rates, list_of(:workbench_pr_merge_rate_entry) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.workbench_pr_merge_rate/2
+    end
+
+    field :workbench_pr_merge_rates_by_workbench, list_of(:workbench_pr_merge_rate_by_workbench_entry) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.workbench_pr_merge_rate_by_workbench/2
     end
 
   end
@@ -928,6 +1050,41 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_skill/2
+    end
+
+    @desc "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
+    field :create_workbench_eval, :workbench_eval do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to create an eval for"
+      arg :attributes, non_null(:workbench_eval_attributes)
+
+      resolve &Deployments.create_workbench_eval/2
+    end
+
+    @desc "Updates the eval configuration for a workbench. Requires write access to the workbench."
+    field :update_workbench_eval, :workbench_eval do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_eval_attributes)
+
+      resolve &Deployments.update_workbench_eval/2
+    end
+
+    @desc "Deletes the eval configuration for a workbench. Requires write access to the workbench."
+    field :delete_workbench_eval, :workbench_eval do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_eval/2
     end
 
     field :create_workbench_webhook, :workbench_webhook do

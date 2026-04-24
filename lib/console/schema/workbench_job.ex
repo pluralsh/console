@@ -2,6 +2,8 @@ defmodule Console.Schema.WorkbenchJob do
   use Console.Schema.Base
   alias Console.Schema.{
     Workbench,
+    WorkbenchEval,
+    WorkbenchEvalResult,
     WorkbenchJobResult,
     WorkbenchJobActivity,
     User,
@@ -83,6 +85,19 @@ defmodule Console.Schema.WorkbenchJob do
       left_join: pr in ^PullRequest.for_status(:merged),
         on: pr.workbench_job_id == j.id,
       where: not is_nil(pr.id),
+      select: j,
+      distinct: true
+    )
+  end
+
+  def missing_evals(query \\ __MODULE__) do
+    from(j in query,
+      join: e in WorkbenchEval,
+        on: e.workbench_id == j.workbench_id,
+      left_join: r in WorkbenchEvalResult,
+        on: r.workbench_eval_id == e.id and r.workbench_job_id == j.id,
+      where: j.inserted_at >= e.inserted_at,
+      where: is_nil(r.id),
       select: j,
       distinct: true
     )

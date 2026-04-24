@@ -12,6 +12,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
+    WorkbenchEval,
     WorkbenchWebhook,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
@@ -29,6 +30,7 @@ defmodule Console.Deployments.Workbenches do
   @type cron_resp :: {:ok, WorkbenchCron.t()} | error
   @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
   @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
+  @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -59,6 +61,9 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
+
+  def get_workbench_eval!(id), do: Repo.get!(WorkbenchEval, id)
+  def get_workbench_eval(id), do: Repo.get(WorkbenchEval, id)
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.
@@ -255,6 +260,51 @@ defmodule Console.Deployments.Workbenches do
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates a workbench eval configuration for a workbench. Requires write access to the workbench.
+  At most one eval exists per workbench (enforced by a unique index).
+  """
+  @spec create_workbench_eval(map, binary, User.t()) :: eval_resp
+  def create_workbench_eval(attrs, workbench_id, %User{} = user) do
+    %WorkbenchEval{workbench_id: workbench_id}
+    |> WorkbenchEval.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a workbench eval. Requires write access to the workbench.
+  """
+  @spec update_workbench_eval(map, binary, User.t()) :: eval_resp
+  def update_workbench_eval(attrs, id, %User{} = user) do
+    get_workbench_eval!(id)
+    |> WorkbenchEval.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a workbench eval. Requires write access to the workbench.
+  """
+  @spec delete_workbench_eval(binary, User.t()) :: eval_resp
+  def delete_workbench_eval(id, %User{} = user) do
+    get_workbench_eval!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Fetches a workbench eval by id. Requires read permission on the workbench.
+  """
+  @spec fetch_workbench_eval(binary, User.t()) :: eval_resp
+  def fetch_workbench_eval(id, %User{} = user) do
+    get_workbench_eval!(id)
+    |> allow(user, :read)
   end
 
   @doc """
@@ -672,6 +722,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchSkillUpdated, skill, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :delete, user),
     do: handle_notify(PubSub.WorkbenchSkillDeleted, skill, actor: user)
+  defp notify({:ok, %WorkbenchEval{} = eval}, :create, user),
+    do: handle_notify(PubSub.WorkbenchEvalCreated, eval, actor: user)
+  defp notify({:ok, %WorkbenchEval{} = eval}, :update, user),
+    do: handle_notify(PubSub.WorkbenchEvalUpdated, eval, actor: user)
+  defp notify({:ok, %WorkbenchEval{} = eval}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchEvalDeleted, eval, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :create, user),
     do: handle_notify(PubSub.WorkbenchWebhookCreated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :update, user),

@@ -3981,6 +3981,12 @@ export type EnvFromAttributes = {
   secret: Scalars['String']['input'];
 };
 
+export enum EvalResultsPeriod {
+  Day = 'DAY',
+  Month = 'MONTH',
+  Week = 'WEEK'
+}
+
 export type Event = {
   __typename?: 'Event';
   action?: Maybe<Scalars['String']['output']>;
@@ -8668,6 +8674,8 @@ export type RootMutationType = {
   createUser?: Maybe<User>;
   createWorkbench?: Maybe<Workbench>;
   createWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench. */
+  createWorkbenchEval?: Maybe<WorkbenchEval>;
   /** Creates a new workbench job. Requires read access to the workbench. */
   createWorkbenchJob?: Maybe<WorkbenchJob>;
   createWorkbenchMessage?: Maybe<WorkbenchJobActivity>;
@@ -8738,6 +8746,8 @@ export type RootMutationType = {
   deleteVirtualCluster?: Maybe<Cluster>;
   deleteWorkbench?: Maybe<Workbench>;
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Deletes the eval configuration for a workbench. Requires write access to the workbench. */
+  deleteWorkbenchEval?: Maybe<WorkbenchEval>;
   /** Deletes a saved workbench prompt. Requires read access to the workbench. */
   deleteWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   /** Deletes a saved workbench skill. Requires write access to the workbench. */
@@ -8866,6 +8876,8 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   updateWorkbench?: Maybe<Workbench>;
   updateWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Updates the eval configuration for a workbench. Requires write access to the workbench. */
+  updateWorkbenchEval?: Maybe<WorkbenchEval>;
   /** Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update. */
   updateWorkbenchJob?: Maybe<WorkbenchJob>;
   /** Updates a saved workbench prompt. Requires read access to the workbench. */
@@ -9297,6 +9309,12 @@ export type RootMutationTypeCreateWorkbenchCronArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchEvalArgs = {
+  attributes: WorkbenchEvalAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchJobArgs = {
   attributes: WorkbenchJobAttributes;
   workbenchId: Scalars['ID']['input'];
@@ -9625,6 +9643,11 @@ export type RootMutationTypeDeleteWorkbenchArgs = {
 
 
 export type RootMutationTypeDeleteWorkbenchCronArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchEvalArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10189,6 +10212,12 @@ export type RootMutationTypeUpdateWorkbenchCronArgs = {
 };
 
 
+export type RootMutationTypeUpdateWorkbenchEvalArgs = {
+  attributes: WorkbenchEvalAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateWorkbenchJobArgs = {
   attributes: WorkbenchJobUpdateAttributes;
   jobId: Scalars['ID']['input'];
@@ -10352,6 +10381,8 @@ export type RootQueryType = {
   argoRollout?: Maybe<ArgoRollout>;
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;
   audits?: Maybe<AuditConnection>;
+  averageEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsAverage>>>;
+  averageWorkbenchEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsWorkbenchAverage>>>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
@@ -10564,6 +10595,9 @@ export type RootQueryType = {
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
+  workbenchPrMergeRates?: Maybe<Array<Maybe<WorkbenchPrMergeRateEntry>>>;
+  workbenchPrMergeRatesByWorkbench?: Maybe<Array<Maybe<WorkbenchPrMergeRateByWorkbenchEntry>>>;
+  workbenchPullRequests: Scalars['Int']['output'];
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
   workbenches?: Maybe<WorkbenchConnection>;
@@ -10685,6 +10719,16 @@ export type RootQueryTypeAuditsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   repo?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeAverageEvalResultsArgs = {
+  period?: InputMaybe<EvalResultsPeriod>;
+};
+
+
+export type RootQueryTypeAverageWorkbenchEvalResultsArgs = {
+  period?: InputMaybe<EvalResultsPeriod>;
 };
 
 
@@ -11948,6 +11992,16 @@ export type RootQueryTypeWorkbenchJobArgs = {
 
 export type RootQueryTypeWorkbenchJobActivityArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeWorkbenchPrMergeRatesArgs = {
+  period?: InputMaybe<EvalResultsPeriod>;
+};
+
+
+export type RootQueryTypeWorkbenchPrMergeRatesByWorkbenchArgs = {
+  period?: InputMaybe<EvalResultsPeriod>;
 };
 
 
@@ -14768,6 +14822,9 @@ export type Workbench = {
   crons?: Maybe<WorkbenchCronConnection>;
   /** the description of the workbench */
   description?: Maybe<Scalars['String']['output']>;
+  /** eval configuration for this workbench (at most one; null if none configured) */
+  eval?: Maybe<WorkbenchEval>;
+  evalResults?: Maybe<WorkbenchEvalResultConnection>;
   /** the id of the workbench */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -14805,6 +14862,14 @@ export type WorkbenchAlertsArgs = {
 
 
 export type WorkbenchCronsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchEvalResultsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -15015,6 +15080,84 @@ export type WorkbenchEdge = {
   __typename?: 'WorkbenchEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Workbench>;
+};
+
+export type WorkbenchEval = {
+  __typename?: 'WorkbenchEval';
+  /** rules for evaluating job conclusions */
+  conclusionRules?: Maybe<Scalars['String']['output']>;
+  /** the id of the eval configuration */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** rules for evaluating job progress */
+  progressRules?: Maybe<Scalars['String']['output']>;
+  /** rules for evaluating job prompts */
+  promptRules?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench this eval belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchEvalAttributes = {
+  /** rules for evaluating job conclusions */
+  conclusionRules?: InputMaybe<Scalars['String']['input']>;
+  /** rules for evaluating job progress */
+  progressRules?: InputMaybe<Scalars['String']['input']>;
+  /** rules for evaluating job prompts */
+  promptRules?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchEvalFeedback = {
+  __typename?: 'WorkbenchEvalFeedback';
+  /** evaluator rationale */
+  logic?: Maybe<Scalars['String']['output']>;
+  /** prompt used for grading */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** evaluator outcome text */
+  result?: Maybe<Scalars['String']['output']>;
+  /** high-level eval summary */
+  summary?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchEvalResult = {
+  __typename?: 'WorkbenchEvalResult';
+  /** structured feedback for this run */
+  feedback?: Maybe<WorkbenchEvalFeedback>;
+  /** numeric grade for the job (0–10 scale) */
+  grade?: Maybe<Scalars['Int']['output']>;
+  /** the id of this eval result row */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the eval configuration this row belongs to */
+  workbenchEval?: Maybe<WorkbenchEval>;
+  /** the workbench job that was graded */
+  workbenchJob?: Maybe<WorkbenchJob>;
+};
+
+export type WorkbenchEvalResultConnection = {
+  __typename?: 'WorkbenchEvalResultConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchEvalResultEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchEvalResultEdge = {
+  __typename?: 'WorkbenchEvalResultEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchEvalResult>;
+};
+
+export type WorkbenchEvalResultsAverage = {
+  __typename?: 'WorkbenchEvalResultsAverage';
+  average?: Maybe<Scalars['Float']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type WorkbenchEvalResultsWorkbenchAverage = {
+  __typename?: 'WorkbenchEvalResultsWorkbenchAverage';
+  average?: Maybe<Scalars['Float']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  workbench?: Maybe<Workbench>;
 };
 
 export type WorkbenchInfrastructure = {
@@ -15340,6 +15483,24 @@ export type WorkbenchObservabilityAttributes = {
   logs?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable metrics capability */
   metrics?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type WorkbenchPrMergeRateByWorkbenchEntry = {
+  __typename?: 'WorkbenchPrMergeRateByWorkbenchEntry';
+  /** fraction of workbench PRs merged in this bucket (0.0–1.0) */
+  mergeRate?: Maybe<Scalars['Float']['output']>;
+  /** UTC bucket start for this merge rate sample */
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  /** workbench this bucket applies to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchPrMergeRateEntry = {
+  __typename?: 'WorkbenchPrMergeRateEntry';
+  /** fraction of workbench PRs merged in this bucket (0.0–1.0) */
+  mergeRate?: Maybe<Scalars['Float']['output']>;
+  /** UTC bucket start for this merge rate sample */
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type WorkbenchPrompt = {

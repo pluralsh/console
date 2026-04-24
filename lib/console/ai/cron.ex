@@ -182,6 +182,17 @@ defmodule Console.AI.Cron do
     |> Flow.run()
   end
 
+  def workbench_job_eval() do
+    WorkbenchJob.missing_evals()
+    |> WorkbenchJob.ordered(asc: :id)
+    |> WorkbenchJob.preloaded([:activities, workbench: :eval])
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle()
+    |> Flow.from_enumerable(stages: 5)
+    |> Flow.map(&Workbench.Eval.evaluate/1)
+    |> Flow.run()
+  end
+
   defp batch_insight(event, chunk) do
     Stream.map(chunk, & {&1, Worker.generate(&1)})
     |> Stream.map(fn {res, t} -> {res, Worker.await(t)} end)

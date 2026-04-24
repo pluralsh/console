@@ -12,7 +12,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
-    WorkbenchWebhook
+    WorkbenchEvalResult,
+    WorkbenchWebhook,
+    PullRequest
   }
 
   def workbench(%{id: id}, ctx) when is_binary(id) do
@@ -76,6 +78,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def list_eval_results(%Workbench{id: id}, args, _) do
+    WorkbenchEvalResult.for_workbench(id)
+    |> WorkbenchEvalResult.ordered()
+    |> paginate(args)
+  end
+
   def list_workbench_job_activities(job, args, _) do
     WorkbenchJobActivity.for_workbench_job(job.id)
     |> WorkbenchJobActivity.ordered()
@@ -92,6 +100,48 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Issue.for_user(user)
     |> Issue.ordered()
     |> paginate(args)
+  end
+
+  def average_workbench_eval_results(args, %{context: %{current_user: user}}) do
+    period = args[:period] || :day
+
+    Workbench.ordered()
+    |> Workbench.for_user(user)
+    |> WorkbenchEvalResult.workbench_grades(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def average_eval_results(args, _ctx) do
+    period = args[:period] || :day
+
+    WorkbenchEvalResult.average_grades(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def workbench_pull_requests(_args, _ctx) do
+    PullRequest.with_workbench()
+    |> Console.Repo.aggregate(:count, :id)
+    |> ok()
+  end
+
+  def workbench_pr_merge_rate(args, _ctx) do
+    period = args[:period] || :day
+
+    PullRequest.merge_rates(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def workbench_pr_merge_rate_by_workbench(args, %{context: %{current_user: user}}) do
+    period = args[:period] || :day
+
+    Workbench.ordered()
+    |> Workbench.for_user(user)
+    |> PullRequest.workbench_merge_rates(period)
+    |> Console.Repo.all()
+    |> ok()
   end
 
   def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
@@ -171,6 +221,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_skill(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_skill(id, user)
+
+  def create_workbench_eval(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_eval(attrs, workbench_id, user)
+
+  def update_workbench_eval(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_eval(attrs, id, user)
+
+  def delete_workbench_eval(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_eval(id, user)
 
   def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)

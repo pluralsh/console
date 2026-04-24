@@ -9461,16 +9461,19 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings   []*PolicyBinding            `json:"writeBindings,omitempty"`
-	Runs            *WorkbenchJobConnection     `json:"runs,omitempty"`
-	Crons           *WorkbenchCronConnection    `json:"crons,omitempty"`
-	Prompts         *WorkbenchPromptConnection  `json:"prompts,omitempty"`
-	WorkbenchSkills *WorkbenchSkillConnection   `json:"workbenchSkills,omitempty"`
-	Webhooks        *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
-	Alerts          *AlertConnection            `json:"alerts,omitempty"`
-	Issues          *IssueConnection            `json:"issues,omitempty"`
-	InsertedAt      *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt       *string                     `json:"updatedAt,omitempty"`
+	WriteBindings   []*PolicyBinding           `json:"writeBindings,omitempty"`
+	Runs            *WorkbenchJobConnection    `json:"runs,omitempty"`
+	Crons           *WorkbenchCronConnection   `json:"crons,omitempty"`
+	Prompts         *WorkbenchPromptConnection `json:"prompts,omitempty"`
+	WorkbenchSkills *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	// eval configuration for this workbench (at most one; null if none configured)
+	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
+	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
+	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
+	Alerts      *AlertConnection               `json:"alerts,omitempty"`
+	Issues      *IssueConnection               `json:"issues,omitempty"`
+	InsertedAt  *string                        `json:"insertedAt,omitempty"`
+	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -9614,6 +9617,77 @@ type WorkbenchCronEdge struct {
 type WorkbenchEdge struct {
 	Node   *Workbench `json:"node,omitempty"`
 	Cursor *string    `json:"cursor,omitempty"`
+}
+
+type WorkbenchEval struct {
+	// the id of the eval configuration
+	ID string `json:"id"`
+	// rules for evaluating job conclusions
+	ConclusionRules *string `json:"conclusionRules,omitempty"`
+	// rules for evaluating job prompts
+	PromptRules *string `json:"promptRules,omitempty"`
+	// rules for evaluating job progress
+	ProgressRules *string `json:"progressRules,omitempty"`
+	// the workbench this eval belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchEvalAttributes struct {
+	// rules for evaluating job conclusions
+	ConclusionRules *string `json:"conclusionRules,omitempty"`
+	// rules for evaluating job prompts
+	PromptRules *string `json:"promptRules,omitempty"`
+	// rules for evaluating job progress
+	ProgressRules *string `json:"progressRules,omitempty"`
+}
+
+type WorkbenchEvalFeedback struct {
+	// high-level eval summary
+	Summary *string `json:"summary,omitempty"`
+	// prompt used for grading
+	Prompt *string `json:"prompt,omitempty"`
+	// evaluator outcome text
+	Result *string `json:"result,omitempty"`
+	// evaluator rationale
+	Logic *string `json:"logic,omitempty"`
+}
+
+type WorkbenchEvalResult struct {
+	// the id of this eval result row
+	ID string `json:"id"`
+	// numeric grade for the job (0–10 scale)
+	Grade *int64 `json:"grade,omitempty"`
+	// structured feedback for this run
+	Feedback *WorkbenchEvalFeedback `json:"feedback,omitempty"`
+	// the eval configuration this row belongs to
+	WorkbenchEval *WorkbenchEval `json:"workbenchEval,omitempty"`
+	// the workbench job that was graded
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchEvalResultConnection struct {
+	PageInfo PageInfo                   `json:"pageInfo"`
+	Edges    []*WorkbenchEvalResultEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchEvalResultEdge struct {
+	Node   *WorkbenchEvalResult `json:"node,omitempty"`
+	Cursor *string              `json:"cursor,omitempty"`
+}
+
+type WorkbenchEvalResultsAverage struct {
+	Timestamp *string  `json:"timestamp,omitempty"`
+	Average   *float64 `json:"average,omitempty"`
+}
+
+type WorkbenchEvalResultsWorkbenchAverage struct {
+	Workbench *Workbench `json:"workbench,omitempty"`
+	Timestamp *string    `json:"timestamp,omitempty"`
+	Average   *float64   `json:"average,omitempty"`
 }
 
 type WorkbenchInfrastructure struct {
@@ -9868,6 +9942,22 @@ type WorkbenchObservabilityAttributes struct {
 	Logs *bool `json:"logs,omitempty"`
 	// enable metrics capability
 	Metrics *bool `json:"metrics,omitempty"`
+}
+
+type WorkbenchPrMergeRateByWorkbenchEntry struct {
+	// workbench this bucket applies to
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// UTC bucket start for this merge rate sample
+	Timestamp *string `json:"timestamp,omitempty"`
+	// fraction of workbench PRs merged in this bucket (0.0–1.0)
+	MergeRate *float64 `json:"mergeRate,omitempty"`
+}
+
+type WorkbenchPrMergeRateEntry struct {
+	// UTC bucket start for this merge rate sample
+	Timestamp *string `json:"timestamp,omitempty"`
+	// fraction of workbench PRs merged in this bucket (0.0–1.0)
+	MergeRate *float64 `json:"mergeRate,omitempty"`
 }
 
 type WorkbenchPrompt struct {
@@ -12117,6 +12207,63 @@ func (e *Delta) UnmarshalJSON(b []byte) error {
 }
 
 func (e Delta) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type EvalResultsPeriod string
+
+const (
+	EvalResultsPeriodDay   EvalResultsPeriod = "DAY"
+	EvalResultsPeriodWeek  EvalResultsPeriod = "WEEK"
+	EvalResultsPeriodMonth EvalResultsPeriod = "MONTH"
+)
+
+var AllEvalResultsPeriod = []EvalResultsPeriod{
+	EvalResultsPeriodDay,
+	EvalResultsPeriodWeek,
+	EvalResultsPeriodMonth,
+}
+
+func (e EvalResultsPeriod) IsValid() bool {
+	switch e {
+	case EvalResultsPeriodDay, EvalResultsPeriodWeek, EvalResultsPeriodMonth:
+		return true
+	}
+	return false
+}
+
+func (e EvalResultsPeriod) String() string {
+	return string(e)
+}
+
+func (e *EvalResultsPeriod) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EvalResultsPeriod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EvalResultsPeriod", str)
+	}
+	return nil
+}
+
+func (e EvalResultsPeriod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EvalResultsPeriod) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EvalResultsPeriod) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

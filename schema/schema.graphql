@@ -535,6 +535,16 @@ type RootQueryType {
 
   workbenchIssues(after: String, first: Int, before: String, last: Int): IssueConnection
 
+  averageWorkbenchEvalResults(period: EvalResultsPeriod): [WorkbenchEvalResultsWorkbenchAverage]
+
+  averageEvalResults(period: EvalResultsPeriod): [WorkbenchEvalResultsAverage]
+
+  workbenchPullRequests: Int!
+
+  workbenchPrMergeRates(period: EvalResultsPeriod): [WorkbenchPrMergeRateEntry]
+
+  workbenchPrMergeRatesByWorkbench(period: EvalResultsPeriod): [WorkbenchPrMergeRateByWorkbenchEntry]
+
   sharedAgentRun(id: ID!): AgentRun
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
@@ -1263,6 +1273,20 @@ type RootMutationType {
 
   "Deletes a saved workbench skill. Requires write access to the workbench."
   deleteWorkbenchSkill(id: ID!): WorkbenchSkill
+
+  "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
+  createWorkbenchEval(
+    "the workbench to create an eval for"
+    workbenchId: ID!
+
+    attributes: WorkbenchEvalAttributes!
+  ): WorkbenchEval
+
+  "Updates the eval configuration for a workbench. Requires write access to the workbench."
+  updateWorkbenchEval(id: ID!, attributes: WorkbenchEvalAttributes!): WorkbenchEval
+
+  "Deletes the eval configuration for a workbench. Requires write access to the workbench."
+  deleteWorkbenchEval(id: ID!): WorkbenchEval
 
   createWorkbenchWebhook(
     "the workbench to create a webhook for"
@@ -2302,6 +2326,12 @@ enum WorkbenchCanvasBlockType {
   BAR
 }
 
+enum EvalResultsPeriod {
+  DAY
+  WEEK
+  MONTH
+}
+
 input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
@@ -2431,6 +2461,17 @@ input WorkbenchSkillAttributes {
 
   "the saved skill contents"
   contents: String!
+}
+
+input WorkbenchEvalAttributes {
+  "rules for evaluating job conclusions"
+  conclusionRules: String
+
+  "rules for evaluating job prompts"
+  promptRules: String
+
+  "rules for evaluating job progress"
+  progressRules: String
 }
 
 input WorkbenchWebhookMatchesAttributes {
@@ -2781,6 +2822,11 @@ type Workbench {
   prompts(after: String, first: Int, before: String, last: Int): WorkbenchPromptConnection
 
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
+
+  "eval configuration for this workbench (at most one; null if none configured)"
+  eval: WorkbenchEval
+
+  evalResults(after: String, first: Int, before: String, last: Int): WorkbenchEvalResultConnection
 
   webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
 
@@ -3182,6 +3228,92 @@ type WorkbenchSkill {
   updatedAt: DateTime
 }
 
+type WorkbenchEval {
+  "the id of the eval configuration"
+  id: String!
+
+  "rules for evaluating job conclusions"
+  conclusionRules: String
+
+  "rules for evaluating job prompts"
+  promptRules: String
+
+  "rules for evaluating job progress"
+  progressRules: String
+
+  "the workbench this eval belongs to"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchEvalFeedback {
+  "high-level eval summary"
+  summary: String
+
+  "prompt used for grading"
+  prompt: String
+
+  "evaluator outcome text"
+  result: String
+
+  "evaluator rationale"
+  logic: String
+}
+
+type WorkbenchEvalResult {
+  "the id of this eval result row"
+  id: String!
+
+  "numeric grade for the job (0–10 scale)"
+  grade: Int
+
+  "structured feedback for this run"
+  feedback: WorkbenchEvalFeedback
+
+  "the eval configuration this row belongs to"
+  workbenchEval: WorkbenchEval
+
+  "the workbench job that was graded"
+  workbenchJob: WorkbenchJob
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchEvalResultsAverage {
+  timestamp: DateTime
+  average: Float
+}
+
+type WorkbenchEvalResultsWorkbenchAverage {
+  workbench: Workbench
+  timestamp: DateTime
+  average: Float
+}
+
+type WorkbenchPrMergeRateEntry {
+  "UTC bucket start for this merge rate sample"
+  timestamp: DateTime
+
+  "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  mergeRate: Float
+}
+
+type WorkbenchPrMergeRateByWorkbenchEntry {
+  "workbench this bucket applies to"
+  workbench: Workbench
+
+  "UTC bucket start for this merge rate sample"
+  timestamp: DateTime
+
+  "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  mergeRate: Float
+}
+
 type WorkbenchWebhookMatches {
   "regex pattern to match"
   regex: String
@@ -3469,6 +3601,11 @@ type WorkbenchPromptConnection {
 type WorkbenchSkillConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchSkillEdge]
+}
+
+type WorkbenchEvalResultConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchEvalResultEdge]
 }
 
 type WorkbenchWebhookConnection {
@@ -15083,6 +15220,11 @@ type SentinelEdge {
 
 type WorkbenchWebhookEdge {
   node: WorkbenchWebhook
+  cursor: String
+}
+
+type WorkbenchEvalResultEdge {
+  node: WorkbenchEvalResult
   cursor: String
 }
 
