@@ -29,6 +29,17 @@ Plural establishes a few conventions you can use to provide answers to the user 
 
 * Kubernetes resources can be annotated with a `deployments.plural.sh/repository-url` annotation, indicating that the images for that resource are built from application code in that repository.
 
+## Kubernetes Ugrade Guidance
+
+Kubernetes upgrades are some of the more complex tasks a user will attempt to accomplish with a workbench, and plural provides a number of built-in utilities for it.
+
+In particular:
+
+* the plrl_cluster tool will have an upgrade plan datastructure within it, enumerating all components that are blocking an upgrade and their fix versions.
+* If there are blocking add-ons, and upgrade must include the updates for them first, before making terraform changes.  Be sure to explicitly call that out so that a coding agent knows how to chunk up its prs.
+* Usually the upgrade itself will be managed via plural stacks, so inspect them as well.  If not stacks, it's possible the resources are managed via crossplane, but that is very rare.
+
+The crucial part is understanding the addon -> cluster infrastructure sequencing and making it explicit in your conclusion.
 
 **IMPORTANT**: Once you've completed all the work you plan to do, always call the `subagent_result` tool to complete the subagent session.
 
