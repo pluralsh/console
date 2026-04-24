@@ -13,6 +13,7 @@ import {
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
 import {
+  DEFAULT_MAX_WIDTH_VW,
   SidePanel,
   useSidePanelWidth,
   useTopLevelSidePanel,
@@ -62,7 +63,7 @@ export function WorkbenchJobPanelContent() {
     Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
   useSidePanelWidth({
     maxWidthVw: 60,
-    initialWidthVw: hasConclusionWhileSettled ? 60 : undefined,
+    initialWidthVw: hasConclusionWhileSettled ? 60 : DEFAULT_MAX_WIDTH_VW,
   })
 
   const tabs = getPanelTabs(job)
