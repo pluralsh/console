@@ -76,8 +76,8 @@ defmodule Console.AI.Workbench.Skills do
   def skill_file(_, _), do: {:error, "this workbench doesn't have git based skills configured"}
 
   defp convert_db_skills(db_skills) when is_list(db_skills) do
-    Enum.map(db_skills, fn %WorkbenchSkill{name: name, description: description, contents: contents} ->
-      %Skill{name: name, description: description, contents: contents}
+    Enum.map(db_skills, fn %WorkbenchSkill{name: name, subagents: subagents, description: description, contents: contents} ->
+      %Skill{name: name, subagents: subagents, description: description, contents: contents}
     end)
   end
   defp convert_db_skills(_), do: []

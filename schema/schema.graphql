@@ -2326,6 +2326,14 @@ enum WorkbenchCanvasBlockType {
   BAR
 }
 
+enum WorkbenchSkillSubagent {
+  CODING
+  INFRASTRUCTURE
+  OBSERVABILITY
+  INTEGRATION
+  ORCHESTRATOR
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -2461,6 +2469,9 @@ input WorkbenchSkillAttributes {
 
   "the saved skill contents"
   contents: String!
+
+  "subagent roles this skill applies to"
+  subagents: [WorkbenchSkillSubagent]
 }
 
 input WorkbenchEvalAttributes {
@@ -3222,6 +3233,9 @@ type WorkbenchSkill {
 
   "the saved skill contents"
   contents: String
+
+  "subagent roles this skill applies to"
+  subagents: [WorkbenchSkillSubagent]
 
   "the workbench this skill belongs to"
   workbench: Workbench

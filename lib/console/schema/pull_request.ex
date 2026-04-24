@@ -24,6 +24,7 @@ defmodule Console.Schema.PullRequest do
     field :creator,            :string
     field :labels,             {:array, :string}
     field :ref,                :string
+    field :base,               :string
     field :sha,                :string
     field :polled_sha,         :string
     field :commit_sha,         :string
@@ -200,6 +201,7 @@ defmodule Console.Schema.PullRequest do
   @valid ~w(
     url
     ref
+    base
     sha
     commit_sha
     approver

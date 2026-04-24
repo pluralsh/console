@@ -45,7 +45,8 @@ defmodule Console.Deployments.Pr.Impl.Azure do
         description: body,
       })
       |> case do
-        {:ok, pr} -> {:ok, %{title: title, ref: branch, body: body, url: web_url(pr), owner: owner(pr)}}
+        {:ok, pr} ->
+          {:ok, %{title: title, ref: branch, body: body, url: web_url(pr), base: pra.branch || "main", owner: owner(pr)}}
         err -> err
       end
     end
@@ -58,6 +59,7 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["sourceRefName"],
+      base: ref_to_branch_name(pr["targetRefName"]),
       title: pr["title"],
       body: pr["description"],
       commit_sha: get_in(pr, ["lastMergeCommit", "commitId"])
@@ -177,6 +179,10 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   defp owner(_), do: nil
 
   defp pr_content(pr), do: "#{pr["sourceRefName"]}\n#{pr["title"]}\n#{pr["description"]}"
+
+  defp ref_to_branch_name("refs/heads/" <> name), do: name
+  defp ref_to_branch_name(name) when is_binary(name), do: name
+  defp ref_to_branch_name(_), do: nil
 
   defp approval(%{"reviewers" => [_ | _] = reviewers}) do
     approver = Enum.max_by(reviewers, & &1["vote"] || 0)

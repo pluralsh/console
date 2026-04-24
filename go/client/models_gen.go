@@ -10002,6 +10002,8 @@ type WorkbenchSkill struct {
 	Description *string `json:"description,omitempty"`
 	// the saved skill contents
 	Contents *string `json:"contents,omitempty"`
+	// subagent roles this skill applies to
+	Subagents []*WorkbenchSkillSubagent `json:"subagents,omitempty"`
 	// the workbench this skill belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10015,6 +10017,8 @@ type WorkbenchSkillAttributes struct {
 	Description *string `json:"description,omitempty"`
 	// the saved skill contents
 	Contents string `json:"contents"`
+	// subagent roles this skill applies to
+	Subagents []*WorkbenchSkillSubagent `json:"subagents,omitempty"`
 }
 
 type WorkbenchSkillConnection struct {
@@ -16571,6 +16575,67 @@ func (e *WorkbenchJobStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e WorkbenchJobStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchSkillSubagent string
+
+const (
+	WorkbenchSkillSubagentCoding         WorkbenchSkillSubagent = "CODING"
+	WorkbenchSkillSubagentInfrastructure WorkbenchSkillSubagent = "INFRASTRUCTURE"
+	WorkbenchSkillSubagentObservability  WorkbenchSkillSubagent = "OBSERVABILITY"
+	WorkbenchSkillSubagentIntegration    WorkbenchSkillSubagent = "INTEGRATION"
+	WorkbenchSkillSubagentOrchestrator   WorkbenchSkillSubagent = "ORCHESTRATOR"
+)
+
+var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
+	WorkbenchSkillSubagentCoding,
+	WorkbenchSkillSubagentInfrastructure,
+	WorkbenchSkillSubagentObservability,
+	WorkbenchSkillSubagentIntegration,
+	WorkbenchSkillSubagentOrchestrator,
+}
+
+func (e WorkbenchSkillSubagent) IsValid() bool {
+	switch e {
+	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchSkillSubagent) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchSkillSubagent) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchSkillSubagent(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchSkillSubagent", str)
+	}
+	return nil
+}
+
+func (e WorkbenchSkillSubagent) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchSkillSubagent) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchSkillSubagent) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

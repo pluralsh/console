@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
+  ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
   enum :eval_results_period do
     value :day
     value :week
@@ -89,6 +90,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,        non_null(:string), description: "the saved skill name"
     field :description, :string, description: "the saved skill description"
     field :contents,    non_null(:string), description: "the saved skill contents"
+    field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
   end
 
   input_object :workbench_eval_attributes do
@@ -529,6 +531,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,        :string, description: "the saved skill name"
     field :description, :string, description: "the saved skill description"
     field :contents,    :string, description: "the saved skill contents"
+    field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this skill belongs to"
 

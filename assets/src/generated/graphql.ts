@@ -15550,6 +15550,8 @@ export type WorkbenchSkill = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the saved skill name */
   name?: Maybe<Scalars['String']['output']>;
+  /** subagent roles this skill applies to */
+  subagents?: Maybe<Array<Maybe<WorkbenchSkillSubagent>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the workbench this skill belongs to */
   workbench?: Maybe<Workbench>;
@@ -15562,6 +15564,8 @@ export type WorkbenchSkillAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   /** the saved skill name */
   name: Scalars['String']['input'];
+  /** subagent roles this skill applies to */
+  subagents?: InputMaybe<Array<InputMaybe<WorkbenchSkillSubagent>>>;
 };
 
 export type WorkbenchSkillConnection = {
@@ -15575,6 +15579,14 @@ export type WorkbenchSkillEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchSkill>;
 };
+
+export enum WorkbenchSkillSubagent {
+  Coding = 'CODING',
+  Infrastructure = 'INFRASTRUCTURE',
+  Integration = 'INTEGRATION',
+  Observability = 'OBSERVABILITY',
+  Orchestrator = 'ORCHESTRATOR'
+}
 
 export type WorkbenchSkills = {
   __typename?: 'WorkbenchSkills';

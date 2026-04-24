@@ -29,6 +29,7 @@ The coding agent completed its task.  Here are the results:
 ## Details
 
 Head Branch: <%= pr.ref || "not available" %>
+Base Branch: <%= pr.base || "not available" %>
 Commit SHA: <%= pr.commit_sha || "not available" %>
 
 <% end %>
