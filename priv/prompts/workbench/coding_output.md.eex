@@ -26,4 +26,9 @@ The coding agent completed its task.  Here are the results:
 ## PR URL
 <%= pr.url %>
 
+## Details
+
+Head Branch: <%= pr.ref || "not available" %>
+Commit SHA: <%= pr.commit_sha || "not available" %>
+
 <% end %>
