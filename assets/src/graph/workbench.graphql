@@ -102,6 +102,12 @@ fragment WorkbenchToolTiny on WorkbenchTool {
 
 fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
   configuration {
     http {
       url

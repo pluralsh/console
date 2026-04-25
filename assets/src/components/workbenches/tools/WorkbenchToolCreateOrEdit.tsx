@@ -5,6 +5,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
 import {
   Provider,
   useCreateWorkbenchToolMutation,
@@ -227,8 +228,21 @@ function formStateToAttributes(
   state: WorkbenchToolFormState,
   type: WorkbenchToolType
 ): WorkbenchToolAttributes {
-  const { name, categories, configuration, cloudConnectionId } = state
-  const base: WorkbenchToolAttributes = { tool: type, name, categories }
+  const {
+    name,
+    categories,
+    configuration,
+    cloudConnectionId,
+    readBindings,
+    writeBindings,
+  } = state
+  const base: WorkbenchToolAttributes = {
+    tool: type,
+    name,
+    categories,
+    readBindings: readBindings.map(bindingToBindingAttributes),
+    writeBindings: writeBindings.map(bindingToBindingAttributes),
+  }
 
   if (type === WorkbenchToolType.Cloud)
     return { ...base, cloudConnectionId: cloudConnectionId ?? null }
