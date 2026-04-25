@@ -125,6 +125,10 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: not is_nil(pr.workbench_job_id))
   end
 
+  def for_workbench_job(query \\ __MODULE__, workbench_job_id) do
+    from(pr in query, where: pr.workbench_job_id == ^workbench_job_id)
+  end
+
   def pending_governance(query \\ __MODULE__) do
     from(pr in query, where:
       not is_nil(pr.governance_id) and not pr.approved and pr.status == ^:open and
