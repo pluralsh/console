@@ -195,7 +195,7 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   chart_version: 1.10.0
-  images: []
+  images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
   incompatibilities: []
 - version: 1.9.1
   kube: ['1.26', '1.25', '1.24']
