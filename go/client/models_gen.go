@@ -10061,6 +10061,10 @@ type WorkbenchTool struct {
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
 	// the project of this tool
 	Project *Project `json:"project,omitempty"`
+	// read policy for this tool
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this tool
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// tool configuration
 	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
 	// the mcp server for this tool
@@ -10105,6 +10109,10 @@ type WorkbenchToolAttributes struct {
 	McpServerID *string `json:"mcpServerId,omitempty"`
 	// the cloud connection for this tool (e.g. infrastructure cloud tools)
 	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
+	// users who can read and execute this tool
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// users who can modify this tool
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// tool configuration (e.g. http)
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }

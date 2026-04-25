@@ -15626,9 +15626,13 @@ export type WorkbenchTool = {
   name: Scalars['String']['output'];
   /** the project of this tool */
   project?: Maybe<Project>;
+  /** read policy for this tool */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the type of tool */
   tool: WorkbenchToolType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy for this tool */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 export type WorkbenchToolAssociationAttributes = {
@@ -15666,8 +15670,12 @@ export type WorkbenchToolAttributes = {
   name: Scalars['String']['input'];
   /** the project for this tool */
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** users who can read and execute this tool */
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** the type of tool */
   tool: WorkbenchToolType;
+  /** users who can modify this tool */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type WorkbenchToolAzureConnection = {

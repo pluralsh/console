@@ -121,6 +121,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project_id,           :id, description: "the project for this tool"
     field :mcp_server_id,        :id, description: "the mcp server for this tool"
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+    field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
+    field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
   end
 
@@ -617,6 +619,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
     field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
+    field :read_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this tool"
+    field :write_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this tool"
     field :configuration,    :workbench_tool_configuration, description: "tool configuration"
     field :mcp_server,       :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
     field :cloud_connection, :cloud_connection, resolve: dataloader(Deployments), description: "the cloud connection bound to this tool"

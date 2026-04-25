@@ -8,7 +8,8 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  @model "gpt-4.1-mini"
+  @model "gpt-5.4-mini"
+  @tool_model "gpt-5.4"
   @embedding_model "text-embedding-3-large"
 
   def default_model(), do: @model
@@ -24,7 +25,7 @@ defmodule Console.AI.OpenAI do
     %__MODULE__{
       access_key: Map.get(opts, :access_token),
       model: Map.get(opts, :model) || @model,
-      tool_model: Map.get(opts, :tool_model) || @model,
+      tool_model: Map.get(opts, :tool_model) || @tool_model,
       base_url: Map.get(opts, :base_url),
       embedding_model: Map.get(opts, :embedding_model) || @embedding_model,
       azure_token: Map.get(opts, :azure_token),

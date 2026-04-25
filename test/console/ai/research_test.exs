@@ -38,7 +38,7 @@ defmodule Console.AI.ResearchTest do
       research = insert(:infra_research, user: user, diagram: "diagram")
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
 
-      expect(ReqLLM, :generate_text, fn %{provider: :openai, model: "gpt-4.1-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{provider: :openai, model: "gpt-5.4"}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [%{

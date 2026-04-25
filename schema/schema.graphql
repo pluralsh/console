@@ -2535,6 +2535,12 @@ input WorkbenchToolAttributes {
   "the cloud connection for this tool (e.g. infrastructure cloud tools)"
   cloudConnectionId: ID
 
+  "users who can read and execute this tool"
+  readBindings: [PolicyBindingAttributes]
+
+  "users who can modify this tool"
+  writeBindings: [PolicyBindingAttributes]
+
   "tool configuration (e.g. http)"
   configuration: WorkbenchToolConfigurationAttributes
 }
@@ -3387,6 +3393,12 @@ type WorkbenchTool {
 
   "the project of this tool"
   project: Project
+
+  "read policy for this tool"
+  readBindings: [PolicyBinding]
+
+  "write policy for this tool"
+  writeBindings: [PolicyBinding]
 
   "tool configuration"
   configuration: WorkbenchToolConfiguration

@@ -297,6 +297,42 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         }
       """, %{"attributes" => attrs}, %{current_user: user})
     end
+
+    test "it persists read and write bindings on create" do
+      project = insert(:project)
+      reader = insert(:user)
+      writer = insert(:user)
+
+      attrs =
+        @http_tool_attrs
+        |> Map.put("projectId", project.id)
+        |> Map.put("readBindings", [%{"userId" => reader.id}])
+        |> Map.put("writeBindings", [%{"userId" => writer.id}])
+
+      {:ok, %{data: %{"createWorkbenchTool" => tool}}} = run_query("""
+        mutation WorkbenchToolCreate($attributes: WorkbenchToolAttributes!) {
+          createWorkbenchTool(attributes: $attributes) {
+            id
+            readBindings { user { id } }
+            writeBindings { user { id } }
+          }
+        }
+      """, %{"attributes" => attrs}, %{current_user: admin_user()})
+
+      assert [read_binding] = tool["readBindings"]
+      assert [write_binding] = tool["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
+
+      persisted =
+        Console.Repo.get(Console.Schema.WorkbenchTool, tool["id"])
+        |> Console.Repo.preload([:read_bindings, :write_bindings])
+
+      assert [db_read] = persisted.read_bindings
+      assert [db_write] = persisted.write_bindings
+      assert db_read.user_id == reader.id
+      assert db_write.user_id == writer.id
+    end
   end
 
   describe "updateWorkbenchTool" do
