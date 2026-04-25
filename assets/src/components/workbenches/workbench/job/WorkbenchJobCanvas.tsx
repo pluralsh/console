@@ -27,6 +27,8 @@ const ROW_HEIGHT_PX = 40
 const MIN_GRID_WIDTH_PX = 600
 /** Nivo `ResponsivePie` needs a sized parent; without this the chart measures 0×0 in the flex canvas layout. */
 const PIE_CHART_HEIGHT_PX = 200
+/** Cap log body height so huge streams do not stretch the whole canvas row. */
+const CANVAS_LOGS_MAX_HEIGHT_PX = 360
 
 export function WorkbenchJobCanvas({
   jobId,
@@ -200,7 +202,15 @@ function LogsBlock({
   return (
     <VizBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
-      <div css={{ flex: '0 0 auto', minHeight: 120, minWidth: 0 }}>
+      <div
+        css={{
+          flex: '0 0 auto',
+          minHeight: 120,
+          maxHeight: CANVAS_LOGS_MAX_HEIGHT_PX,
+          minWidth: 0,
+          overflowY: 'auto',
+        }}
+      >
         <JobActivityLogsFromTool
           jobId={jobId}
           logsQuery={graph?.query}
