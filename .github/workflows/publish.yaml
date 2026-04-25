@@ -13,6 +13,7 @@ jobs:
         with:
           version-file: .tool-versions
           version-type: strict
+      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v3
         with:
           version: latest

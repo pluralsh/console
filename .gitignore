@@ -66,3 +66,6 @@ secrets/
 data/
 
 # config/pubkey.pem
+
+# Rust binary artifacts
+/target/

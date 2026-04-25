@@ -45,6 +45,8 @@ As work is being done, you can use the `working_theory` field to record the curr
 Also, there's a topology field, which accepts a mermaid formatted diagram.  Use this to express the current state of the system in question, including all main components at issue.  It will make it much easier for users to
 understand the correctness of any theory by visualizing what is at play.  You can modify this as work is being done, and also at completion to ensure your final conclusions are reflected in the diagram.
 
+The mermaid syntax will be validated by an internal syntax checker.  If you repeatedly get errors, feel free to ignore, no topology is better than an invalid one.
+
 If the task requires cross-referencing meaningful observability data, you should delegate to the observability agent to gather the info and collect the needed metrics and logs queries to present them,
 and then delegate to the dashboard agent to craft a dashboard to explain the system in question.  A functional dashboard is a very useful end artifact for users to have in those scenarios.
 
@@ -55,7 +57,7 @@ Only call `workbench_complete` if you believe all work has been completed, we ca
 
 You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
 
-Once work is done, wrap up all todos, write a final conclusion, and if relevant, finalize the topology diagram for this investigation.
+Once work is done, wrap up all todos, write a final conclusion.
 
 ## Parallelism Guidance
 

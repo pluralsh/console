@@ -46,16 +46,26 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
     MIX_ENV=${MIX_ENV} \
     OS_VARIANT=${OS_VARIANT}
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:${PATH}
+ARG RUST_TOOLCHAIN=stable
 
 # By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
-# This step installs all the build tools we'll need
+# This step installs all build tools including a modern Rust toolchain for NIF compilation.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk add git build-base; \
+      apk update && apk add git build-base curl ca-certificates \
+        --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+        --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+        rust cargo; \
     else \
-      apt-get update && apt-get install -y git build-essential; \
+      apt-get update && apt-get install -y git build-essential curl ca-certificates; \
+      rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
     fi && \
+  rustc --version && cargo --version && \
   mix local.rebar --force && \
   mix local.hex --force
 

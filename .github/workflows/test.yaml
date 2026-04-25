@@ -105,6 +105,7 @@ jobs:
         with:
           version-file: .tool-versions
           version-type: strict
+      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v3
         with:
           version: latest
@@ -123,14 +124,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
+          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-5
       - name: Restore _build
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
+          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-5
       - run: mix deps.get
       - run: mix test
       - name: Verify Changed files
@@ -155,6 +156,7 @@ jobs:
         with:
           version-file: .tool-versions
           version-type: strict
+      - uses: dtolnay/rust-toolchain@stable
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -164,14 +166,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
+          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-5
       - name: Restore _build
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
+          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-5
       - name: get dependencies
         run: mix deps.get
       - name: update schema
