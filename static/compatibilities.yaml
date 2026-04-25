@@ -7570,6 +7570,27 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 84.0.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Bumped kube-prometheus-stack dependency versions with non-major
+          updates (Renovate PR #6863).', 'In 84.0.0, updated the Grafana Helm subchart/release
+          to v12 (Renovate PR #6848).']
+      features: [No new user-facing features called out; this is primarily dependency
+          maintenance., Grafana subchart major version bump to v12 is included starting
+          in 84.0.0 (may bring new Grafana/chart behavior).]
+      breaking_changes: [Potential breaking change inherited from upgrading the Grafana
+          Helm chart to major version v12 (introduced in 84.0.0). Review Grafana chart
+          v12 upgrade notes for value changes/deprecations.]
+    chart_version: 84.0.1
+    images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+      'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+      'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 84.0.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -13120,7 +13141,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.12
+    chart_version: 1.0.13
     images: ['quay.io/argoproj/argocli:v4.0.5', 'quay.io/argoproj/workflow-controller:v4.0.5',
       'registry.k8s.io/kubectl:v1.36.0']
   - version: 4.0.2
@@ -15428,7 +15449,7 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     chart_version: 1.10.0
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
     incompatibilities: []
   - version: 1.9.1
     kube: ['1.26', '1.25', '1.24']
