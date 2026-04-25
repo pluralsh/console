@@ -124,14 +124,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-5
-      - name: Restore _build
+          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-deps-v2-
+      - name: Restore NIF cache
+        uses: actions/cache@v3
+        with:
+          path: priv/native
+          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
+          restore-keys: ${{ runner.os }}-nif-v2-
+      - name: Restore _build cache
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-5
+          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'config/**/*.exs', 'native/**') }}
       - run: mix deps.get
       - run: mix test
       - name: Verify Changed files
@@ -166,14 +171,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-5
-      - name: Restore _build
+          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-deps-v2-
+      - name: Restore NIF cache
+        uses: actions/cache@v3
+        with:
+          path: priv/native
+          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
+          restore-keys: ${{ runner.os }}-nif-v2-
+      - name: Restore _build cache
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-5-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-5
+          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
       - name: get dependencies
         run: mix deps.get
       - name: update schema
