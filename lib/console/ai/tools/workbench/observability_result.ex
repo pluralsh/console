@@ -8,6 +8,9 @@ defmodule Console.AI.Tools.Workbench.ObservabilityResult do
 
     embeds_one :metrics_query, ToolQuery, on_replace: :update
     embeds_many :logs, Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Log, on_replace: :delete
+
+    embeds_many :metrics_queries, ToolQuery, on_replace: :delete
+    embeds_many :logs_queries, ToolQuery, on_replace: :delete
   end
 
   @json_schema Console.priv_file!("tools/workbench/observability_result.json") |> Jason.decode!()
@@ -21,6 +24,8 @@ defmodule Console.AI.Tools.Workbench.ObservabilityResult do
     |> cast(attrs, [:output])
     |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
     |> cast_embed(:metrics_query)
+    |> cast_embed(:logs_queries)
+    |> cast_embed(:metrics_queries)
     |> validate_required([:output])
   end
 

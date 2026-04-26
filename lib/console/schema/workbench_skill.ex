@@ -2,10 +2,13 @@ defmodule Console.Schema.WorkbenchSkill do
   use Console.Schema.Base
   alias Console.Schema.Workbench
 
+  defenum Subagent, coding: 0, infrastructure: 1, observability: 2, integration: 3, orchestrator: 4
+
   schema "workbench_skills" do
     field :name, :string
     field :description, :string
     field :contents, :binary
+    field :subagents, {:array, Subagent}
 
     belongs_to :workbench, Workbench
 
@@ -20,7 +23,7 @@ defmodule Console.Schema.WorkbenchSkill do
     from(s in query, where: s.workbench_id == ^workbench_id)
   end
 
-  @valid ~w(name description contents workbench_id)a
+  @valid ~w(name description contents workbench_id subagents)a
 
   def changeset(model, attrs \\ %{}) do
     model

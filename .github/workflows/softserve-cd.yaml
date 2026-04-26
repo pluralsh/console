@@ -18,8 +18,51 @@ env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
+  test-softserve-docker:
+    name: Test softserve container
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build softserve image for local test
+        uses: docker/build-push-action@v6
+        with:
+          context: "./dockerfiles"
+          file: "./dockerfiles/Dockerfile.softserve"
+          load: true
+          tags: softserve-local:test
+          platforms: linux/amd64
+          cache-from: type=gha
+      - name: Run softserve container
+        run: |
+          docker run -d --name softserve-test \
+            -p 23232:23232 \
+            softserve-local:test
+      - name: Wait for softserve HTTP endpoint
+        run: |
+          for i in {1..30}; do
+            if git ls-remote "http://localhost:23232/deployment-operator.git" >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "softserve did not become ready in time"
+          docker logs softserve-test
+          exit 1
+      - name: Ensure deployment-operator repo is clonable
+        run: |
+          git clone "http://localhost:23232/deployment-operator.git" /tmp/deployment-operator
+          test -d /tmp/deployment-operator/.git
+
   publish-softserve-docker:
     name: Build and push softserve
+    needs: test-softserve-docker
     runs-on: ubuntu-latest
     defaults:
       run:

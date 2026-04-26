@@ -297,6 +297,42 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         }
       """, %{"attributes" => attrs}, %{current_user: user})
     end
+
+    test "it persists read and write bindings on create" do
+      project = insert(:project)
+      reader = insert(:user)
+      writer = insert(:user)
+
+      attrs =
+        @http_tool_attrs
+        |> Map.put("projectId", project.id)
+        |> Map.put("readBindings", [%{"userId" => reader.id}])
+        |> Map.put("writeBindings", [%{"userId" => writer.id}])
+
+      {:ok, %{data: %{"createWorkbenchTool" => tool}}} = run_query("""
+        mutation WorkbenchToolCreate($attributes: WorkbenchToolAttributes!) {
+          createWorkbenchTool(attributes: $attributes) {
+            id
+            readBindings { user { id } }
+            writeBindings { user { id } }
+          }
+        }
+      """, %{"attributes" => attrs}, %{current_user: admin_user()})
+
+      assert [read_binding] = tool["readBindings"]
+      assert [write_binding] = tool["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
+
+      persisted =
+        Console.Repo.get(Console.Schema.WorkbenchTool, tool["id"])
+        |> Console.Repo.preload([:read_bindings, :write_bindings])
+
+      assert [db_read] = persisted.read_bindings
+      assert [db_write] = persisted.write_bindings
+      assert db_read.user_id == reader.id
+      assert db_write.user_id == writer.id
+    end
   end
 
   describe "updateWorkbenchTool" do
@@ -931,6 +967,126 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => skill.id}, %{current_user: user})
 
       assert refetch(skill)
+    end
+  end
+
+  describe "createWorkbenchEval" do
+    test "it can create an eval with write access to the workbench" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createWorkbenchEval" => eval}}} = run_query("""
+        mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {
+          createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            conclusionRules
+            promptRules
+            progressRules
+            workbench { id }
+          }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{
+          "conclusionRules" => "c1",
+          "promptRules" => "p1",
+          "progressRules" => "g1"
+        }
+      }, %{current_user: admin_user()})
+
+      assert eval["workbench"]["id"] == workbench.id
+      assert eval["conclusionRules"] == "c1"
+      assert eval["promptRules"] == "p1"
+      assert eval["progressRules"] == "g1"
+    end
+
+    test "project readers cannot create an eval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {
+          createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"conclusionRules" => "x"}}, %{current_user: user})
+    end
+  end
+
+  describe "updateWorkbenchEval" do
+    test "it can update an eval" do
+      workbench = insert(:workbench)
+      eval = insert(:workbench_eval, workbench: workbench, conclusion_rules: "old")
+
+      {:ok, %{data: %{"updateWorkbenchEval" => updated}}} = run_query("""
+        mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
+          updateWorkbenchEval(id: $id, attributes: $attributes) {
+            id
+            conclusionRules
+            promptRules
+          }
+        }
+      """, %{
+        "id" => eval.id,
+        "attributes" => %{"conclusionRules" => "new", "promptRules" => "np"}
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == eval.id
+      assert updated["conclusionRules"] == "new"
+      assert updated["promptRules"] == "np"
+    end
+
+    test "project readers cannot update an eval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: workbench, conclusion_rules: "secret")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
+          updateWorkbenchEval(id: $id, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{"id" => eval.id, "attributes" => %{"conclusionRules" => "hacked"}}, %{current_user: user})
+
+      assert refetch(eval).conclusion_rules == "secret"
+    end
+  end
+
+  describe "deleteWorkbenchEval" do
+    test "it can delete an eval" do
+      workbench = insert(:workbench)
+      eval = insert(:workbench_eval, workbench: workbench)
+
+      {:ok, %{data: %{"deleteWorkbenchEval" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchEval($id: ID!) {
+          deleteWorkbenchEval(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => eval.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == eval.id
+      refute refetch(eval)
+    end
+
+    test "project readers cannot delete an eval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchEval($id: ID!) {
+          deleteWorkbenchEval(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => eval.id}, %{current_user: user})
+
+      assert refetch(eval)
     end
   end
 

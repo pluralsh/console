@@ -8,8 +8,10 @@ import {
   prettifyRepoUrl,
   PrOpenIcon,
 } from '@pluralsh/design-system'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   PullRequestBasicFragment,
@@ -18,16 +20,10 @@ import {
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import {
-  hasWorkbenchMetricsToolQuery,
-  JobActivityMetrics,
-} from './WorkbenchJobActivityResults'
+import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
-import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
-import { StackedText } from 'components/utils/table/StackedText'
-import { isJobRunning } from './WorkbenchJobActivity'
 
 export function WorkbenchJobResult({
   job,
@@ -37,6 +33,9 @@ export function WorkbenchJobResult({
   loading: boolean
 }) {
   const { spacing } = useTheme()
+  const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
+  const workingTheory = job?.result?.workingTheory
+
   if (loading)
     return (
       <RectangleSkeleton
@@ -45,8 +44,6 @@ export function WorkbenchJobResult({
         css={{ padding: spacing.large }}
       />
     )
-  const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
-  const workingTheory = job?.result?.workingTheory
 
   return (
     <Flex
@@ -71,37 +68,6 @@ export function WorkbenchJobResult({
         />
       )}
     </Flex>
-  )
-}
-
-export function WorkbenchJobMetrics({
-  job,
-  loading,
-}: {
-  job: Nullable<WorkbenchJobFragment>
-  loading: boolean
-}) {
-  const metricsQuery = job?.result?.metadata?.metricsQuery
-
-  if (loading)
-    return (
-      <RectangleSkeleton
-        $height={320}
-        $width="100%"
-      />
-    )
-
-  if (!job?.id || !hasWorkbenchMetricsToolQuery(metricsQuery)) return null
-
-  return (
-    <JobActivityMetrics
-      jobId={job.id}
-      metricsQuery={metricsQuery}
-      withLegend
-      css={{ minHeight: 300 }}
-      lineProps={{ margin: { top: 20, right: 40, bottom: 40, left: 40 } }}
-      skeletonHeight={320}
-    />
   )
 }
 
@@ -153,12 +119,14 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
             firstColor="text"
             second={pr.title}
           />
-          <PrStatusChip status={pr.status} />
-          <IconFrame
-            size="small"
-            tooltip="View PR"
-            icon={<ArrowTopRightIcon color="icon-light" />}
-          />
+          <RightActionsSC>
+            <PrStatusChip status={pr.status} />
+            <IconFrame
+              size="small"
+              tooltip="View PR"
+              icon={<ArrowTopRightIcon color="icon-light" />}
+            />
+          </RightActionsSC>
         </WrapperCardSC>
       ))}
     </>
@@ -167,10 +135,17 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
 
 const WrapperCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
-  justifyContent: 'space-between',
   alignItems: 'center',
   gap: theme.spacing.large,
   padding: theme.spacing.medium,
   textDecoration: 'none',
   '&:hover span[id^="link-"]': { textDecoration: 'underline' },
+}))
+
+const RightActionsSC = styled.div(({ theme }) => ({
+  marginLeft: 'auto',
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  flexShrink: 0,
 }))

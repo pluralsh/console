@@ -29,7 +29,7 @@
                 },
                 "topology": {
                     "type": "string",
-                    "description": "A mermaid diagram of the topology of the system in question in this investigation"
+                    "description": "A mermaid diagram of the topology of the system in question in this investigation. We will validate mermaid syntax and reply with an error if invalid."
                 },
                 "working_theory": {
                     "type": "string",

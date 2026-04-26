@@ -1,5 +1,27 @@
 defmodule Console.AI.Workbench.Skill do
-  defstruct [:name, :description, :contents]
+  defstruct [:name, :description, :contents, subagents: []]
+
+  def subagent?(%__MODULE__{subagents: [_ | _] = subagents}, subagent) do
+    Enum.map(subagents, & String.downcase("#{&1}"))
+    |> Enum.member?("#{subagent}")
+  end
+  def subagent?(_, _), do: true
+end
+
+defmodule Console.AI.Workbench.Skills.Builtins do
+  alias Console.AI.Workbench.Skill
+  @canvas File.read!(Console.priv_filename(["prompts", "workbench", "skills", "canvas.md"]))
+
+  def builtins() do
+    [
+      %Skill{
+        name: "canvas",
+        description: "guidance on how to use the canvas tool to build a dashboard",
+        contents: @canvas,
+        subagents: [:canvas, :orchestrator]
+      }
+    ]
+  end
 end
 
 defmodule Console.AI.Workbench.Skills do
@@ -54,8 +76,8 @@ defmodule Console.AI.Workbench.Skills do
   def skill_file(_, _), do: {:error, "this workbench doesn't have git based skills configured"}
 
   defp convert_db_skills(db_skills) when is_list(db_skills) do
-    Enum.map(db_skills, fn %WorkbenchSkill{name: name, description: description, contents: contents} ->
-      %Skill{name: name, description: description, contents: contents}
+    Enum.map(db_skills, fn %WorkbenchSkill{name: name, subagents: subagents, description: description, contents: contents} ->
+      %Skill{name: name, subagents: subagents, description: description, contents: contents}
     end)
   end
   defp convert_db_skills(_), do: []
@@ -64,11 +86,12 @@ defmodule Console.AI.Workbench.Skills do
 
   def parse_skill(file, skill) when is_binary(skill) do
     with {:regex, [_, meta, contents]} <- {:regex, Regex.run(@regex, skill)},
-         {:yaml, {:ok, %{"name" => name, "description" => description}}} <- {:yaml, YamlElixir.read_from_string(meta)} do
+         {:yaml, {:ok, %{"name" => name, "description" => description} = meta}} <- {:yaml, YamlElixir.read_from_string(meta)} do
       {:ok, %Skill{
         name: String.trim(name),
         description: String.trim(description),
-        contents: String.trim(contents)
+        contents: String.trim(contents),
+        subagents: parse_subagents(meta["subagents"])
       }}
     else
       {:regex, _} ->
@@ -78,4 +101,12 @@ defmodule Console.AI.Workbench.Skills do
       {:yaml, _} -> {:error, "could not parse skill in file #{file}, invalid yaml block"}
     end
   end
+
+  defp parse_subagents(subagents) when is_list(subagents), do: subagents
+  defp parse_subagents(subagents) when is_binary(subagents) do
+    String.split(subagents, ",")
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&String.downcase/1)
+  end
+  defp parse_subagents(_), do: []
 end

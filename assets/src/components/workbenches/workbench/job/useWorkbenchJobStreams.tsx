@@ -1,13 +1,17 @@
 import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
+  useWorkbenchCanvasStreamSubscription,
   useWorkbenchJobActivityDeltaSubscription,
   useWorkbenchJobDeltaSubscription,
   useWorkbenchJobThoughtDeltaSubscription,
   useWorkbenchTextStreamSubscription,
+  WorkbenchCanvasBlockFragment,
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityWithThoughtsFragmentDoc,
+  WorkbenchJobFragment,
+  WorkbenchJobFragmentDoc,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -16,6 +20,7 @@ import {
   updateFragment,
   appendConnectionToEnd,
 } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 import { isActivityTerminal } from './WorkbenchJobActivities'
 import { produce } from 'immer'
 
@@ -82,6 +87,16 @@ export function useWorkbenchJobStreams(
       )
     },
   })
+  useWorkbenchCanvasStreamSubscription({
+    variables: { jobId: jobId ?? '' },
+    skip: !jobId,
+    ignoreResults: true,
+    onData: ({ data: { data } }) => {
+      const block = data?.workbenchCanvasStream
+      if (!block || !jobId) return
+      upsertCanvasBlockInJobCache(client.cache, jobId, block)
+    },
+  })
 
   return textStreamMap
 }
@@ -119,5 +134,28 @@ const appendThoughtToActivityCache = (
       const thoughts = prev.thoughts ?? []
       if (thoughts.some((t) => t?.id === thought.id)) return prev
       return { ...prev, thoughts: [...thoughts, thought] }
+    },
+  })
+
+const upsertCanvasBlockInJobCache = (
+  cache: ApolloCache<object>,
+  jobId: string,
+  block: WorkbenchCanvasBlockFragment
+) =>
+  updateFragment(cache, {
+    id: cache.identify({ __typename: 'WorkbenchJob', id: jobId }),
+    fragment: WorkbenchJobFragmentDoc,
+    fragmentName: 'WorkbenchJob',
+    update: (prev: WorkbenchJobFragment) => {
+      if (!prev.result) return prev
+      const existing = (prev.result.canvas ?? []).filter(isNonNullable)
+      const idx = block.identifier
+        ? existing.findIndex((b) => b.identifier === block.identifier)
+        : -1
+      const canvas =
+        idx >= 0
+          ? existing.map((b, i) => (i === idx ? block : b))
+          : [...existing, block]
+      return { ...prev, result: { ...prev.result, canvas } }
     },
   })

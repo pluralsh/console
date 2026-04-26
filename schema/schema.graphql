@@ -535,6 +535,16 @@ type RootQueryType {
 
   workbenchIssues(after: String, first: Int, before: String, last: Int): IssueConnection
 
+  averageWorkbenchEvalResults(period: EvalResultsPeriod): [WorkbenchEvalResultsWorkbenchAverage]
+
+  averageEvalResults(period: EvalResultsPeriod): [WorkbenchEvalResultsAverage]
+
+  workbenchPullRequests: Int!
+
+  workbenchPrMergeRates(period: EvalResultsPeriod): [WorkbenchPrMergeRateEntry]
+
+  workbenchPrMergeRatesByWorkbench(period: EvalResultsPeriod): [WorkbenchPrMergeRateByWorkbenchEntry]
+
   sharedAgentRun(id: ID!): AgentRun
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
@@ -1264,6 +1274,20 @@ type RootMutationType {
   "Deletes a saved workbench skill. Requires write access to the workbench."
   deleteWorkbenchSkill(id: ID!): WorkbenchSkill
 
+  "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
+  createWorkbenchEval(
+    "the workbench to create an eval for"
+    workbenchId: ID!
+
+    attributes: WorkbenchEvalAttributes!
+  ): WorkbenchEval
+
+  "Updates the eval configuration for a workbench. Requires write access to the workbench."
+  updateWorkbenchEval(id: ID!, attributes: WorkbenchEvalAttributes!): WorkbenchEval
+
+  "Deletes the eval configuration for a workbench. Requires write access to the workbench."
+  deleteWorkbenchEval(id: ID!): WorkbenchEval
+
   createWorkbenchWebhook(
     "the workbench to create a webhook for"
     workbenchId: ID!
@@ -1472,6 +1496,14 @@ type RootSubscriptionType {
   workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
 
   workbenchTextStream(jobId: ID!): WorkbenchTextStream
+
+  workbenchCanvasStream(
+    "stream only events within the given activity"
+    activityId: ID
+
+    "stream all events within the given job"
+    jobId: ID!
+  ): WorkbenchCanvasBlock
 
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
@@ -2283,6 +2315,29 @@ enum WorkbenchJobActivityType {
   USER
   MEMORY
   CONCLUSION
+  CANVAS
+}
+
+enum WorkbenchCanvasBlockType {
+  MARKDOWN
+  METRICS
+  LOGS
+  PIE
+  BAR
+}
+
+enum WorkbenchSkillSubagent {
+  CODING
+  INFRASTRUCTURE
+  OBSERVABILITY
+  INTEGRATION
+  ORCHESTRATOR
+}
+
+enum EvalResultsPeriod {
+  DAY
+  WEEK
+  MONTH
 }
 
 input WorkbenchJobAttributes {
@@ -2414,6 +2469,20 @@ input WorkbenchSkillAttributes {
 
   "the saved skill contents"
   contents: String!
+
+  "subagent roles this skill applies to"
+  subagents: [WorkbenchSkillSubagent]
+}
+
+input WorkbenchEvalAttributes {
+  "rules for evaluating job conclusions"
+  conclusionRules: String
+
+  "rules for evaluating job prompts"
+  promptRules: String
+
+  "rules for evaluating job progress"
+  progressRules: String
 }
 
 input WorkbenchWebhookMatchesAttributes {
@@ -2465,6 +2534,12 @@ input WorkbenchToolAttributes {
 
   "the cloud connection for this tool (e.g. infrastructure cloud tools)"
   cloudConnectionId: ID
+
+  "users who can read and execute this tool"
+  readBindings: [PolicyBindingAttributes]
+
+  "users who can modify this tool"
+  writeBindings: [PolicyBindingAttributes]
 
   "tool configuration (e.g. http)"
   configuration: WorkbenchToolConfigurationAttributes
@@ -2765,6 +2840,11 @@ type Workbench {
 
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
 
+  "eval configuration for this workbench (at most one; null if none configured)"
+  eval: WorkbenchEval
+
+  evalResults(after: String, first: Int, before: String, last: Int): WorkbenchEvalResultConnection
+
   webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
@@ -2804,6 +2884,9 @@ type WorkbenchJob {
   "the result for this job (sideloadable)"
   result: WorkbenchJobResult
 
+  "the eval result for this job (sideloadable)"
+  evalResult: WorkbenchEvalResult
+
   "pull requests associated with this workbench job"
   pullRequests: [PullRequest]
 
@@ -2822,6 +2905,14 @@ type WorkbenchJob {
     "the arguments for the metrics tool"
     arguments: Json
   ): [WorkbenchJobActivityMetric]
+
+  logsTool(
+    "the name of the logs tool"
+    name: String
+
+    "the arguments for the logs tool"
+    arguments: Json
+  ): [WorkbenchJobActivityLog]
 
   "whimsically describes current progress for you"
   whimsey: String
@@ -2909,20 +3000,34 @@ type WorkbenchJobActivityResult {
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
 
+  "dashboard canvas blocks for this activity"
+  canvas: [WorkbenchCanvasBlock]
+
   "metrics emitted by the activity"
   metrics: [WorkbenchJobActivityMetric]
 
   "logs emitted by the activity"
   logs: [WorkbenchJobActivityLog]
 
-  "metrics tool query emitted by the activity"
+  "metrics tool queries emitted by the activity"
+  metricsQueries: [WorkbenchToolQueryData]
+
+  "logs tool queries emitted by the activity"
+  logsQueries: [WorkbenchToolQueryData]
+
+  "primary metrics tool query for this activity"
   metricsQuery: WorkbenchToolQueryData
+
+  "primary logs tool query for this activity"
+  logsQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchJobActivityJobUpdate {
   diff: String
   workingTheory: String
   conclusion: String
+  topology: String
+  todos: [WorkbenchJobResultTodo]
 }
 
 type WorkbenchJobActivityMetric {
@@ -2954,6 +3059,9 @@ type WorkbenchJobResult {
   "todos for this result"
   todos: [WorkbenchJobResultTodo]
 
+  "dashboard canvas blocks for this job result"
+  canvas: [WorkbenchCanvasBlock]
+
   "metadata for this result"
   metadata: WorkbenchJobResultMetadata
 
@@ -2974,6 +3082,9 @@ type WorkbenchJobResultMetadata {
 
   "metrics tool query for this result"
   metricsQuery: WorkbenchToolQueryData
+
+  "logs tool query for this result"
+  logsQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchToolQueryData {
@@ -2985,6 +3096,44 @@ type WorkbenchToolQueryData {
 
   "a short summary describing what this query means"
   summary: String
+}
+
+type WorkbenchCanvasDataPoint {
+  label: String
+  value: Float
+}
+
+type WorkbenchCanvasBlockLayout {
+  x: Int
+  y: Int
+  w: Int
+  h: Int
+}
+
+type WorkbenchCanvasToolGraph {
+  title: String
+  summary: String
+  query: WorkbenchToolQueryData
+}
+
+type WorkbenchCanvasBlockGraph {
+  title: String
+  data: [WorkbenchCanvasDataPoint]
+}
+
+type WorkbenchCanvasBlockContent {
+  markdown: String
+  metrics: WorkbenchCanvasToolGraph
+  logs: WorkbenchCanvasToolGraph
+  pie: WorkbenchCanvasBlockGraph
+  bar: WorkbenchCanvasBlockGraph
+}
+
+type WorkbenchCanvasBlock {
+  identifier: String
+  type: WorkbenchCanvasBlockType
+  layout: WorkbenchCanvasBlockLayout
+  content: WorkbenchCanvasBlockContent
 }
 
 type WorkbenchJobResultTodo {
@@ -3091,12 +3240,101 @@ type WorkbenchSkill {
   "the saved skill contents"
   contents: String
 
+  "subagent roles this skill applies to"
+  subagents: [WorkbenchSkillSubagent]
+
   "the workbench this skill belongs to"
   workbench: Workbench
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchEval {
+  "the id of the eval configuration"
+  id: String!
+
+  "rules for evaluating job conclusions"
+  conclusionRules: String
+
+  "rules for evaluating job prompts"
+  promptRules: String
+
+  "rules for evaluating job progress"
+  progressRules: String
+
+  "the workbench this eval belongs to"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchEvalFeedback {
+  "high-level eval summary"
+  summary: String
+
+  "prompt used for grading"
+  prompt: String
+
+  "evaluator outcome text"
+  result: String
+
+  "evaluator rationale"
+  logic: String
+}
+
+type WorkbenchEvalResult {
+  "the id of this eval result row"
+  id: String!
+
+  "numeric grade for the job (0–10 scale)"
+  grade: Int
+
+  "structured feedback for this run"
+  feedback: WorkbenchEvalFeedback
+
+  "the eval configuration this row belongs to"
+  workbenchEval: WorkbenchEval
+
+  "the workbench job that was graded"
+  workbenchJob: WorkbenchJob
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchEvalResultsAverage {
+  timestamp: DateTime
+  average: Float
+}
+
+type WorkbenchEvalResultsWorkbenchAverage {
+  workbench: Workbench
+  timestamp: DateTime
+  average: Float
+}
+
+type WorkbenchPrMergeRateEntry {
+  "UTC bucket start for this merge rate sample"
+  timestamp: DateTime
+
+  "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  mergeRate: Float
+}
+
+type WorkbenchPrMergeRateByWorkbenchEntry {
+  "workbench this bucket applies to"
+  workbench: Workbench
+
+  "UTC bucket start for this merge rate sample"
+  timestamp: DateTime
+
+  "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  mergeRate: Float
 }
 
 type WorkbenchWebhookMatches {
@@ -3155,6 +3393,12 @@ type WorkbenchTool {
 
   "the project of this tool"
   project: Project
+
+  "read policy for this tool"
+  readBindings: [PolicyBinding]
+
+  "write policy for this tool"
+  writeBindings: [PolicyBinding]
 
   "tool configuration"
   configuration: WorkbenchToolConfiguration
@@ -3386,6 +3630,11 @@ type WorkbenchPromptConnection {
 type WorkbenchSkillConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchSkillEdge]
+}
+
+type WorkbenchEvalResultConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchEvalResultEdge]
 }
 
 type WorkbenchWebhookConnection {
@@ -15000,6 +15249,11 @@ type SentinelEdge {
 
 type WorkbenchWebhookEdge {
   node: WorkbenchWebhook
+  cursor: String
+}
+
+type WorkbenchEvalResultEdge {
+  node: WorkbenchEvalResult
   cursor: String
 }
 

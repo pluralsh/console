@@ -8,39 +8,79 @@ import {
   WebhookSetupGuidePanelContent,
   WebhookSetupGuidePanelProvider,
 } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
-import { ReactNode, createContext, use, useMemo, useState } from 'react'
+import {
+  ReactNode,
+  createContext,
+  use,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { matchPath, useLocation } from 'react-router-dom'
 import {
   WORKBENCH_JOBS_PATH_MATCHER_ABS,
+  WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
+  WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
   WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
 } from 'routes/workbenchesRoutesConsts'
 
 export type SidePanel = 'ai-chat' | 'webhook-setup-guide' | 'workbench-job'
 
-const MIN_WIDTH = 500
-const MAX_WIDTH_VW = 40
+type SidePanelWidthOverride = {
+  minWidth?: number
+  maxWidthVw?: number
+  initialWidthVw?: number
+}
+
+export const DEFAULT_MIN_WIDTH = 500
+export const DEFAULT_MAX_WIDTH_VW = 40
 
 const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
-  'webhook-setup-guide': [WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS],
+  'webhook-setup-guide': [
+    WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
+    WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
+    WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
+  ],
   'workbench-job': [WORKBENCH_JOBS_PATH_MATCHER_ABS],
 }
 
 const TopLevelSidePanelContext = createContext<{
   sidePanel: SidePanel | null
   setSidePanel: (panel: SidePanel | null) => void
+  widthOverride: SidePanelWidthOverride | null
+  setWidthOverride: (override: SidePanelWidthOverride | null) => void
 }>({
   sidePanel: null,
   setSidePanel: () => {},
+  widthOverride: null,
+  setWidthOverride: () => {},
 })
 
 export function useTopLevelSidePanel() {
   return use(TopLevelSidePanelContext)
 }
 
+// only one instance of this should be called at a time
+// removes override when caller is unmounted
+export function useSidePanelWidth(override: SidePanelWidthOverride | null) {
+  const { setWidthOverride } = useTopLevelSidePanel()
+  const { minWidth, maxWidthVw, initialWidthVw } = override ?? {}
+  const hasOverride = !!override
+  useEffect(() => {
+    if (!hasOverride) return
+    setWidthOverride({ minWidth, maxWidthVw, initialWidthVw })
+    return () => setWidthOverride(null)
+  }, [setWidthOverride, hasOverride, minWidth, maxWidthVw, initialWidthVw])
+}
+
 export function TopLevelSidePanel() {
-  const { sidePanel } = useTopLevelSidePanel()
+  const { sidePanel, widthOverride } = useTopLevelSidePanel()
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
-    useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
+    useResizablePane(
+      widthOverride?.minWidth ?? DEFAULT_MIN_WIDTH,
+      widthOverride?.maxWidthVw ?? DEFAULT_MAX_WIDTH_VW,
+      widthOverride?.initialWidthVw
+    )
 
   return (
     <Accordion
@@ -107,6 +147,8 @@ export function TopLevelSidePanelProviders({
 
 function TopLevelSidePanelProvider({ children }: { children: ReactNode }) {
   const [requested, setRequested] = useState<SidePanel | null>(null)
+  const [widthOverride, setWidthOverride] =
+    useState<SidePanelWidthOverride | null>(null)
   const { pathname } = useLocation()
 
   const sidePanel: SidePanel | null = useMemo(() => {
@@ -120,8 +162,13 @@ function TopLevelSidePanelProvider({ children }: { children: ReactNode }) {
   }, [requested, pathname])
 
   const ctx = useMemo(
-    () => ({ sidePanel, setSidePanel: setRequested }),
-    [sidePanel]
+    () => ({
+      sidePanel,
+      setSidePanel: setRequested,
+      widthOverride,
+      setWidthOverride,
+    }),
+    [sidePanel, widthOverride]
   )
 
   return (

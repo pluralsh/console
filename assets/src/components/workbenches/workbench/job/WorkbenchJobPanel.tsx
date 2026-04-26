@@ -1,6 +1,6 @@
 import {
-  ChartIcon,
   CloseIcon,
+  DashboardIcon,
   GraphIcon,
   IconFrame,
   PaperCheckIcon,
@@ -13,7 +13,9 @@ import {
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
 import {
+  DEFAULT_MAX_WIDTH_VW,
   SidePanel,
+  useSidePanelWidth,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
 import { useWorkbenchJobQuery, WorkbenchJobFragment } from 'generated/graphql'
@@ -26,17 +28,16 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { hasWorkbenchMetricsToolQuery } from './WorkbenchJobActivityResults'
+import { isJobRunning } from './WorkbenchJobActivity'
+import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import {
-  WorkbenchJobMetrics,
   WorkbenchJobPrs,
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
-import { isJobRunning } from './WorkbenchJobActivity'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab = 'Result' | 'Topology' | 'PRs' | 'Metrics'
+type JobPanelTab = 'Result' | 'Dashboard' | 'Topology' | 'PRs'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -57,6 +58,13 @@ export function WorkbenchJobPanelContent() {
   })
   const job = data?.workbenchJob
   const isLoading = loading && !job
+
+  const hasConclusionWhileSettled =
+    Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
+  useSidePanelWidth({
+    maxWidthVw: 60,
+    initialWidthVw: hasConclusionWhileSettled ? 60 : DEFAULT_MAX_WIDTH_VW,
+  })
 
   const tabs = getPanelTabs(job)
 
@@ -103,10 +111,10 @@ export function WorkbenchJobPanelContent() {
               loading={isLoading}
             />
           )}
-          {selectedTab === 'Metrics' && (
-            <WorkbenchJobMetrics
-              job={job}
-              loading={isLoading}
+          {selectedTab === 'Dashboard' && job?.id && (
+            <WorkbenchJobCanvas
+              jobId={job.id}
+              canvas={job?.result?.canvas}
             />
           )}
           {selectedTab === 'Topology' && (
@@ -165,6 +173,10 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
 const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
   [
     { label: 'Result', icon: <PaperCheckIcon size={12} /> },
+    !isEmpty(job?.result?.canvas) && {
+      label: 'Dashboard',
+      icon: <DashboardIcon size={12} />,
+    },
     !!job?.result?.topology && {
       label: 'Topology',
       icon: <GraphIcon size={12} />,
@@ -172,10 +184,6 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
     !isEmpty(job?.pullRequests) && {
       label: 'PRs',
       icon: <PrOpenIcon size={12} />,
-    },
-    hasWorkbenchMetricsToolQuery(job?.result?.metadata?.metricsQuery) && {
-      label: 'Metrics',
-      icon: <ChartIcon size={12} />,
     },
   ].filter((tab): tab is { label: JobPanelTab; icon: ReactElement } =>
     Boolean(tab)

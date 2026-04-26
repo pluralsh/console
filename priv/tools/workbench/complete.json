@@ -7,7 +7,7 @@
         },
         "topology": {
             "type": "string",
-            "description": "A mermaid diagram of the topology of the system in question in this investigation.  Pass the old topology if no changes are needed."
+            "description": "A mermaid diagram of the topology of the system in question in this investigation.  Pass the old topology if no changes are needed.  We will validate mermaid syntax and reply with an error if invalid."
         },
         "todos": {
             "type": "array",

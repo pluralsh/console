@@ -46,6 +46,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
             ref: branch,
             body: body,
             url: to_url(conn, project, slug, id),
+            base: base_branch,
             owner: owner(mr)
           }}
         err -> err
@@ -59,6 +60,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["source"]["branch"]["name"],
+      base: bbdc_pr_base(pr),
       title: pr["title"],
       body: pr["summary"]["raw"]
     }, pr_associations(pr_content(pr)))
@@ -69,6 +71,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   def pr(_), do: :ignore
 
   defp pr_content(pr), do: "#{pr["fromRef"]["displayId"]}\n#{pr["title"]}\n#{pr["description"]}"
+
+  defp bbdc_pr_base(pr) do
+    get_in(pr, ["toRef", "displayId"]) ||
+      get_in(pr, ["destination", "branch", "name"])
+  end
 
   def review(conn, %PullRequest{url: url} = pr, body) do
     with {:ok, project, slug, number} <- get_pull_id(url),

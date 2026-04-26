@@ -23,6 +23,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body2P } from 'components/utils/typography/Text'
 import {
+  useWorkbenchJobLogsToolQuery,
   useWorkbenchJobMetricsToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
@@ -134,11 +135,72 @@ export type WorkbenchMetricsToolQueryInput = Pick<
   'toolName' | 'toolArgs' | 'summary'
 >
 
+/** Used for `metricsTool` / `logsTool` when the canvas or activity includes tool name + args. */
 export function hasWorkbenchMetricsToolQuery(
   q: Nullable<Pick<WorkbenchToolQueryData, 'toolName' | 'toolArgs'>>
 ): boolean {
   if (!q?.toolName?.trim()) return false
   return q.toolArgs != null && typeof q.toolArgs === 'object'
+}
+
+/**
+ * Loads log lines via `logsTool` when `logsQuery` is present (e.g. canvas logs block).
+ */
+export function JobActivityLogsFromTool({
+  jobId,
+  logsQuery,
+  fetchWhen = true,
+  cardWrapper = false,
+}: {
+  jobId: string
+  logsQuery: Nullable<WorkbenchMetricsToolQueryInput>
+  fetchWhen?: boolean
+  cardWrapper?: boolean
+}) {
+  const shouldRunQuery =
+    !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(logsQuery)
+
+  const { data, loading, error } = useWorkbenchJobLogsToolQuery({
+    variables: {
+      id: jobId,
+      name: logsQuery?.toolName?.trim(),
+      arguments: logsQuery?.toolArgs
+        ? JSON.stringify(logsQuery?.toolArgs)
+        : undefined,
+    },
+    skip: !shouldRunQuery,
+  })
+
+  if (!hasWorkbenchMetricsToolQuery(logsQuery)) return null
+
+  if (!fetchWhen) return null
+
+  if (error)
+    return (
+      <GqlError
+        error={error}
+        css={{ wordBreak: 'break-word' }}
+      />
+    )
+
+  if (loading || !data)
+    return (
+      <RectangleSkeleton
+        $height={120}
+        $width="100%"
+      />
+    )
+
+  const logs = data?.workbenchJob?.logsTool?.filter(isNonNullable) ?? []
+
+  if (isEmpty(logs)) return null
+
+  return (
+    <JobActivityLogs
+      logs={logs}
+      cardWrapper={cardWrapper}
+    />
+  )
 }
 
 /** Renders pre-fetched metric points (e.g. thought tool attributes). */

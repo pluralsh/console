@@ -5,6 +5,7 @@ import {
   FormField,
   Input2,
   ReturnIcon,
+  SidePanelOpenIcon,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { GqlError } from 'components/utils/Alert'
@@ -29,7 +30,7 @@ import {
   useUpsertCloudConnectionMutation,
   WorkbenchToolType,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
@@ -41,6 +42,11 @@ import {
 } from '../WorkbenchToolCreateOrEdit'
 import { EditableDivWrapperSC } from '../WorkbenchToolFormFields'
 import { getWorkbenchToolLabel, isProvider } from '../workbenchToolsUtils'
+import {
+  getCloudConnectionSetupGuideDocumentationUrl,
+  getCloudConnectionSetupGuideMarkdownPath,
+} from './cloudConnectionSetupGuides'
+import { useWebhookSetupGuidePanel } from '../../workbench/webhooks/WebhookSetupGuidePanel'
 
 export function CloudConnectionCreateForm() {
   const navigate = useNavigate()
@@ -49,6 +55,14 @@ export function CloudConnectionCreateForm() {
 
   const providerParam = searchParams.get('provider')
   const provider = isProvider(providerParam) ? providerParam : null
+  const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
+    useWebhookSetupGuidePanel()
+  const setupGuideMarkdownPath = provider
+    ? getCloudConnectionSetupGuideMarkdownPath(provider)
+    : null
+  const setupGuideDocumentationUrl = provider
+    ? getCloudConnectionSetupGuideDocumentationUrl(provider)
+    : undefined
 
   const returnParams = useMemo(() => {
     const params = new URLSearchParams({
@@ -140,6 +154,25 @@ export function CloudConnectionCreateForm() {
     awaitRefetchQueries: true,
   })
 
+  useEffect(() => {
+    if (!isOpen) return
+    if (!setupGuideMarkdownPath) {
+      closeSetupGuidePanel()
+      return
+    }
+
+    openSetupGuidePanel({
+      documentationUrl: setupGuideDocumentationUrl,
+      markdownPath: setupGuideMarkdownPath,
+    })
+  }, [
+    isOpen,
+    setupGuideMarkdownPath,
+    setupGuideDocumentationUrl,
+    openSetupGuidePanel,
+    closeSetupGuidePanel,
+  ])
+
   if (!provider)
     return (
       <EmptyState message="Missing or invalid cloud provider">
@@ -163,80 +196,102 @@ export function CloudConnectionCreateForm() {
       direction="column"
       gap="medium"
       padding="large"
-      maxWidth={750}
+      maxWidth={980}
       minHeight={0}
     >
       {error && <GqlError error={error} />}
 
-      <FormCardSC css={{ maxWidth: 750 }}>
-        <OverlineH3 $color="text-xlight">
-          New {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
-          connection
-        </OverlineH3>
-        <FormField
-          required
-          label="Name"
-        >
-          <Input2
-            placeholder="Connection name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </FormField>
-
-        {provider === Provider.Aws && (
-          <AwsFields
-            state={aws}
-            setState={setAws}
-          />
-        )}
-        {provider === Provider.Gcp && (
-          <GcpFields
-            state={gcp}
-            setState={setGcp}
-          />
-        )}
-        {provider === Provider.Azure && (
-          <AzureFields
-            state={azure}
-            setState={setAzure}
-          />
-        )}
-
-        <Flex
-          direction="column"
-          gap="xsmall"
-        >
-          <OverlineH3 $color="text-xlight">Read permissions</OverlineH3>
-          <FormBindings
-            bindings={readBindings}
-            setBindings={(next: PolicyBindingFragment[]) =>
-              setReadBindings(next)
-            }
-            hints={{
-              user: 'Users with read permissions for this connection',
-              group: 'Groups with read permissions for this connection',
-            }}
-          />
-        </Flex>
-        <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
-          <Button
-            secondary
-            as={Link}
-            to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
-            disabled={loading}
+      <Flex gap="medium">
+        <FormCardSC css={{ maxWidth: 750, width: '100%' }}>
+          <OverlineH3 $color="text-xlight">
+            New {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
+            connection
+          </OverlineH3>
+          <FormField
+            required
+            label="Name"
           >
-            Back
-          </Button>
-          <Button
-            onClick={() => attributes && upsert({ variables: { attributes } })}
-            loading={loading}
-            disabled={!canSave}
+            <Input2
+              placeholder="Connection name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </FormField>
+
+          {provider === Provider.Aws && (
+            <AwsFields
+              state={aws}
+              setState={setAws}
+            />
+          )}
+          {provider === Provider.Gcp && (
+            <GcpFields
+              state={gcp}
+              setState={setGcp}
+            />
+          )}
+          {provider === Provider.Azure && (
+            <AzureFields
+              state={azure}
+              setState={setAzure}
+            />
+          )}
+
+          <Flex
+            direction="column"
+            gap="xsmall"
           >
-            Save
-          </Button>
-        </StickyActionsFooterSC>
-      </FormCardSC>
+            <OverlineH3 $color="text-xlight">Read permissions</OverlineH3>
+            <FormBindings
+              bindings={readBindings}
+              setBindings={(next: PolicyBindingFragment[]) =>
+                setReadBindings(next)
+              }
+              hints={{
+                user: 'Users with read permissions for this connection',
+                group: 'Groups with read permissions for this connection',
+              }}
+            />
+          </Flex>
+          <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
+            <Button
+              secondary
+              as={Link}
+              to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
+              disabled={loading}
+            >
+              Back
+            </Button>
+            <Button
+              onClick={() =>
+                attributes && upsert({ variables: { attributes } })
+              }
+              loading={loading}
+              disabled={!canSave}
+            >
+              Save
+            </Button>
+          </StickyActionsFooterSC>
+        </FormCardSC>
+        {!isOpen && !!setupGuideMarkdownPath && (
+          <div css={{ width: 200 }}>
+            <Button
+              secondary
+              startIcon={<SidePanelOpenIcon />}
+              width="100%"
+              css={{ whiteSpace: 'nowrap' }}
+              onClick={() =>
+                openSetupGuidePanel({
+                  documentationUrl: setupGuideDocumentationUrl,
+                  markdownPath: setupGuideMarkdownPath,
+                })
+              }
+            >
+              Setup guide
+            </Button>
+          </div>
+        )}
+      </Flex>
     </Flex>
   )
 }

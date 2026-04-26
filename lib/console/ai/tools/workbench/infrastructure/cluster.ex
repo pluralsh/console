@@ -50,7 +50,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   defp simplify_addon(%{current: curr, fix: fix} = addon) do
     %{
       current: Map.take(curr, [:version, :summary])
-               |> Map.put(:name, curr.addon.name)
+               |> Map.put(:name, curr.addon && curr.addon.name)
                |> Map.put(:addon_details, Map.drop(curr, [:addon])),
       fix: fix,
       callout: Map.get(addon, :callout)

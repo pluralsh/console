@@ -28,8 +28,8 @@ defmodule Console.AI.Workbench.Subagents.Memory do
 
   defp tools(%Environment{skills: skills, activities: activities}) do
     [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :memory)},
+      %Skill{skills: Environment.subagent_skills(skills, :memory)},
       %Search{activities: activities},
       Result
     ]

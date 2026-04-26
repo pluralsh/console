@@ -30,8 +30,8 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     workbench_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :integration), job))
     |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :integration)},
+      %Skill{skills: Environment.subagent_skills(skills, :integration)},
       Result
     ])
   end

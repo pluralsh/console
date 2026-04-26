@@ -1,12 +1,19 @@
 import {
   Button,
   Checkbox,
+  Divider,
   Flex,
   FormField,
+  GearTrainIcon,
   Input2,
+  ShieldOutlineIcon,
+  Stepper,
+  StepperSteps,
 } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
+import { FormBindings } from 'components/utils/bindings'
 import {
+  PolicyBindingFragment,
   Provider,
   WorkbenchToolAttributes,
   WorkbenchToolConfigurationAttributes,
@@ -33,10 +40,36 @@ import {
 } from './workbenchToolsUtils'
 import { Link } from 'react-router-dom'
 
-export type WorkbenchToolFormState = Pick<
-  WorkbenchToolAttributes,
-  'name' | 'categories' | 'configuration' | 'cloudConnectionId'
->
+export type WorkbenchToolFormState = Omit<
+  Pick<
+    WorkbenchToolAttributes,
+    | 'name'
+    | 'categories'
+    | 'configuration'
+    | 'cloudConnectionId'
+    | 'readBindings'
+    | 'writeBindings'
+  >,
+  'readBindings' | 'writeBindings'
+> & {
+  readBindings: PolicyBindingFragment[]
+  writeBindings: PolicyBindingFragment[]
+}
+
+type WorkbenchToolFormStep = 'configuration' | 'access-policy'
+
+const TOOL_FORM_STEPS = [
+  {
+    key: 'configuration',
+    stepTitle: 'Configuration',
+    IconComponent: GearTrainIcon,
+  },
+  {
+    key: 'access-policy',
+    stepTitle: 'Access policy',
+    IconComponent: ShieldOutlineIcon,
+  },
+] as const satisfies StepperSteps
 
 export function WorkbenchToolForm({
   type,
@@ -56,12 +89,17 @@ export function WorkbenchToolForm({
   onToolDeleted?: () => void
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [currentStep, setCurrentStep] =
+    useState<WorkbenchToolFormStep>('configuration')
   const { state, update, hasUpdates } = useUpdateState<WorkbenchToolFormState>({
     name: tool?.name ?? '',
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
     cloudConnectionId: tool?.cloudConnection?.id,
+    readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
+    writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
+  const stepIndex = TOOL_FORM_STEPS.findIndex((s) => s.key === currentStep)
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
   const allowSave =
     hasUpdates &&
@@ -69,65 +107,82 @@ export function WorkbenchToolForm({
     (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId)
   return (
     <FormCardSC>
-      <FormField
-        required
-        label="Name"
-        value={state.name}
-        onChange={(e) => update({ name: e.target.value })}
-      >
-        <Input2
-          placeholder="Enter a name for the tool"
-          value={state.name}
-          onChange={(e) => update({ name: e.target.value })}
+      <Flex css={{ paddingTop: 2 }}>
+        <Stepper
+          compact
+          steps={TOOL_FORM_STEPS}
+          stepIndex={stepIndex}
         />
-      </FormField>
-      {type === WorkbenchToolType.Cloud && provider ? (
-        <CloudConnectionSelectField
-          provider={provider}
-          selectedId={state.cloudConnectionId ?? null}
-          onChange={(id) => update({ cloudConnectionId: id })}
-        />
+      </Flex>
+      {currentStep === 'configuration' ? (
+        <>
+          <FormField
+            required
+            label="Name"
+            value={state.name}
+            onChange={(e) => update({ name: e.target.value })}
+          >
+            <Input2
+              placeholder="Enter a name for the tool"
+              value={state.name}
+              onChange={(e) => update({ name: e.target.value })}
+            />
+          </FormField>
+          {type === WorkbenchToolType.Cloud && provider ? (
+            <CloudConnectionSelectField
+              provider={provider}
+              selectedId={state.cloudConnectionId ?? null}
+              onChange={(id) => update({ cloudConnectionId: id })}
+            />
+          ) : (
+            <WorkbenchToolFormFields
+              type={type}
+              state={state}
+              update={update}
+            />
+          )}
+          {categories.length > 1 && (
+            <FormField label="Allowed capabilities (must select at least one)">
+              <Flex
+                direction="column"
+                gap="xsmall"
+              >
+                {categories.map((category) => {
+                  const selected = (state.categories ?? []).filter(Boolean)
+                  const isChecked = selected.includes(category)
+                  const canUncheck = selected.length > 1
+                  return (
+                    <Checkbox
+                      key={category}
+                      small
+                      checked={isChecked}
+                      onChange={(e) => {
+                        const checked = e.target.checked
+                        if (checked) {
+                          update({
+                            categories: [...selected, category].filter(Boolean),
+                          })
+                        } else if (canUncheck) {
+                          update({
+                            categories: selected.filter((c) => c !== category),
+                          })
+                        }
+                      }}
+                    >
+                      {categoryToLabel[category]}
+                    </Checkbox>
+                  )
+                })}
+              </Flex>
+            </FormField>
+          )}
+        </>
       ) : (
-        <WorkbenchToolFormFields
-          type={type}
-          state={state}
+        <ToolAccessPolicyStep
+          readBindings={state.readBindings?.filter(isNonNullable) ?? []}
+          writeBindings={state.writeBindings?.filter(isNonNullable) ?? []}
           update={update}
         />
-      )}
-      {categories.length > 1 && (
-        <FormField label="Allowed capabilities (must select at least one)">
-          <Flex
-            direction="column"
-            gap="xsmall"
-          >
-            {categories.map((category) => {
-              const selected = (state.categories ?? []).filter(Boolean)
-              const isChecked = selected.includes(category)
-              const canUncheck = selected.length > 1
-              return (
-                <Checkbox
-                  key={category}
-                  small
-                  checked={isChecked}
-                  onChange={(e) => {
-                    const checked = e.target.checked
-                    if (checked) {
-                      update({
-                        categories: [...selected, category].filter(Boolean),
-                      })
-                    } else if (canUncheck) {
-                      update({
-                        categories: selected.filter((c) => c !== category),
-                      })
-                    }
-                  }}
-                >
-                  {categoryToLabel[category]}
-                </Checkbox>
-              )
-            })}
-          </Flex>
-        </FormField>
       )}
       <StickyActionsFooterSC>
         {tool?.id ? (
@@ -151,11 +206,17 @@ export function WorkbenchToolForm({
             {hasUpdates ? 'Cancel' : 'Back'}
           </Button>
           <Button
-            disabled={!allowSave}
-            loading={mutationLoading}
-            onClick={() => onSave(state)}
+            disabled={currentStep === 'configuration' ? false : !allowSave}
+            loading={currentStep === 'access-policy' && mutationLoading}
+            onClick={() => {
+              if (currentStep === 'configuration') {
+                setCurrentStep('access-policy')
+                return
+              }
+              onSave(state)
+            }}
           >
-            Save
+            {currentStep === 'configuration' ? 'Next' : 'Save'}
           </Button>
         </Flex>
       </StickyActionsFooterSC>
@@ -166,6 +227,59 @@ export function WorkbenchToolForm({
         onDeleted={onToolDeleted}
       />
     </FormCardSC>
+  )
+}
+
+function ToolAccessPolicyStep({
+  readBindings,
+  writeBindings,
+  update,
+}: {
+  readBindings: PolicyBindingFragment[]
+  writeBindings: PolicyBindingFragment[]
+  update: (next: Partial<WorkbenchToolFormState>) => void
+}) {
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      <Flex
+        direction="column"
+        gap="xsmall"
+      >
+        <FormField label="Read permissions">
+          <FormBindings
+            bindings={readBindings}
+            setBindings={(next: PolicyBindingFragment[]) =>
+              update({ readBindings: next })
+            }
+            hints={{
+              user: 'Users with read permissions for this tool',
+              group: 'Groups with read permissions for this tool',
+            }}
+          />
+        </FormField>
+      </Flex>
+      <Divider backgroundColor="border" />
+      <Flex
+        direction="column"
+        gap="xsmall"
+      >
+        <FormField label="Write permissions">
+          <FormBindings
+            bindings={writeBindings}
+            setBindings={(next: PolicyBindingFragment[]) =>
+              update({ writeBindings: next })
+            }
+            hints={{
+              user: 'Users with write permissions for this tool',
+              group: 'Groups with write permissions for this tool',
+            }}
+          />
+        </FormField>
+      </Flex>
+    </Flex>
   )
 }
 

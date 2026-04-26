@@ -298,7 +298,7 @@ defmodule Console.AI.ChatTest do
       expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
       expect(File, :write, fn _, "first" -> :ok end)
       expect(File, :write, fn _, "second" -> :ok end)
-      expect(ReqLLM, :generate_text, fn %{model: "gpt-4.1-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{model: "gpt-5.4"}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [

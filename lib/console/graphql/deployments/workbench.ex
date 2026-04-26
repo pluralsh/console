@@ -9,6 +9,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_activity_status, Console.Schema.WorkbenchJobActivity.Status
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
+  ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
+  ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
+  enum :eval_results_period do
+    value :day
+    value :week
+    value :month
+  end
 
   input_object :workbench_job_attributes do
     field :prompt, :string, description: "the prompt for this job"
@@ -83,6 +90,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,        non_null(:string), description: "the saved skill name"
     field :description, :string, description: "the saved skill description"
     field :contents,    non_null(:string), description: "the saved skill contents"
+    field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
+  end
+
+  input_object :workbench_eval_attributes do
+    field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
+    field :prompt_rules,     :string, description: "rules for evaluating job prompts"
+    field :progress_rules,   :string, description: "rules for evaluating job progress"
   end
 
   input_object :workbench_webhook_matches_attributes do
@@ -107,6 +121,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project_id,           :id, description: "the project for this tool"
     field :mcp_server_id,        :id, description: "the mcp server for this tool"
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+    field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
+    field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
   end
 
@@ -262,6 +278,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_skills/3
     end
 
+    field :eval, :workbench_eval,
+      description: "eval configuration for this workbench (at most one; null if none configured)",
+      resolve: dataloader(Deployments)
+
+    connection field :eval_results, node_type: :workbench_eval_result do
+      resolve &Deployments.list_eval_results/3
+    end
+
     connection field :webhooks, node_type: :workbench_webhook do
       resolve &Deployments.list_workbench_webhooks/3
     end
@@ -288,6 +312,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+    field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
 
     field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"
@@ -302,6 +327,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the metrics tool"
 
       resolve &Deployments.metrics_tool/3
+    end
+
+    field :logs_tool, list_of(:workbench_job_activity_log) do
+      arg :name,      :string, description: "the name of the logs tool"
+      arg :arguments, :json,   description: "the arguments for the logs tool"
+
+      resolve &Deployments.logs_tool/3
     end
 
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
@@ -344,18 +376,24 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_activity_result do
-    field :output,        :string, description: "output from the activity"
-    field :error,         :string, description: "error from the activity"
-    field :job_update,    :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
-    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
-    field :logs,          list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
-    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query emitted by the activity"
+    field :output,          :string, description: "output from the activity"
+    field :error,           :string, description: "error from the activity"
+    field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
+    field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
+    field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
+    field :logs,            list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :metrics_queries, list_of(:workbench_tool_query_data), description: "metrics tool queries emitted by the activity"
+    field :logs_queries,    list_of(:workbench_tool_query_data), description: "logs tool queries emitted by the activity"
+    field :metrics_query,   :workbench_tool_query_data, description: "primary metrics tool query for this activity"
+    field :logs_query,      :workbench_tool_query_data, description: "primary logs tool query for this activity"
   end
 
   object :workbench_job_activity_job_update do
-    field :diff,           :string
-    field :working_theory, :string
-    field :conclusion,     :string
+    field :diff,            :string
+    field :working_theory,  :string
+    field :conclusion,      :string
+    field :topology,        :string
+    field :todos,           list_of(:workbench_job_result_todo)
   end
 
   object :workbench_job_activity_metric do
@@ -372,12 +410,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result do
-    field :id,             non_null(:string), description: "the id of the result"
+    field :id,              non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
-    field :conclusion,     :string, description: "the conclusion for this result"
-    field :topology,       :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
-    field :todos,          list_of(:workbench_job_result_todo), description: "todos for this result"
-    field :metadata,       :workbench_job_result_metadata, description: "metadata for this result"
+    field :conclusion,      :string, description: "the conclusion for this result"
+    field :topology,        :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
+    field :todos,           list_of(:workbench_job_result_todo), description: "todos for this result"
+    field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this job result"
+    field :metadata,        :workbench_job_result_metadata, description: "metadata for this result"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this result belongs to"
 
@@ -385,15 +424,54 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_result_metadata do
-    field :metrics,       list_of(:workbench_job_activity_metric), description: "metrics for this result"
-    field :logs,          list_of(:workbench_job_activity_log), description: "logs for this result"
-    field :metrics_query, :workbench_tool_query_data, description: "metrics tool query for this result"
+    field :metrics,        list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :logs,           list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :metrics_query,  :workbench_tool_query_data, description: "metrics tool query for this result"
+    field :logs_query,     :workbench_tool_query_data, description: "logs tool query for this result"
   end
 
   object :workbench_tool_query_data do
     field :tool_name, :string, description: "the tool name used to run this query"
     field :tool_args, :map, description: "arguments used for this tool query"
     field :summary,   :string, description: "a short summary describing what this query means"
+  end
+
+  object :workbench_canvas_data_point do
+    field :label, :string
+    field :value, :float
+  end
+
+  object :workbench_canvas_block_layout do
+    field :x, :integer
+    field :y, :integer
+    field :w, :integer
+    field :h, :integer
+  end
+
+  object :workbench_canvas_tool_graph do
+    field :title,   :string
+    field :summary, :string
+    field :query,   :workbench_tool_query_data
+  end
+
+  object :workbench_canvas_block_graph do
+    field :title, :string
+    field :data,  list_of(:workbench_canvas_data_point)
+  end
+
+  object :workbench_canvas_block_content do
+    field :markdown, :string
+    field :metrics,  :workbench_canvas_tool_graph
+    field :logs,     :workbench_canvas_tool_graph
+    field :pie,      :workbench_canvas_block_graph
+    field :bar,      :workbench_canvas_block_graph
+  end
+
+  object :workbench_canvas_block do
+    field :identifier, :string
+    field :type,       :workbench_canvas_block_type
+    field :layout,     :workbench_canvas_block_layout
+    field :content,    :workbench_canvas_block_content
   end
 
   object :workbench_job_result_todo do
@@ -455,10 +533,64 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,        :string, description: "the saved skill name"
     field :description, :string, description: "the saved skill description"
     field :contents,    :string, description: "the saved skill contents"
+    field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this skill belongs to"
 
     timestamps()
+  end
+
+  object :workbench_eval do
+    field :id, non_null(:string), description: "the id of the eval configuration"
+
+    field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
+    field :prompt_rules,     :string, description: "rules for evaluating job prompts"
+    field :progress_rules,   :string, description: "rules for evaluating job progress"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this eval belongs to"
+
+    timestamps()
+  end
+
+  object :workbench_eval_feedback do
+    field :summary, :string, description: "high-level eval summary"
+    field :prompt,  :string, description: "prompt used for grading"
+    field :result,  :string, description: "evaluator outcome text"
+    field :logic,   :string, description: "evaluator rationale"
+  end
+
+  object :workbench_eval_result do
+    field :id, non_null(:string), description: "the id of this eval result row"
+    field :grade, :integer, description: "numeric grade for the job (0–10 scale)"
+
+    field :feedback, :workbench_eval_feedback, description: "structured feedback for this run"
+
+    field :workbench_eval, :workbench_eval, resolve: dataloader(Deployments), description: "the eval configuration this row belongs to"
+    field :workbench_job,  :workbench_job, resolve: dataloader(Deployments), description: "the workbench job that was graded"
+
+    timestamps()
+  end
+
+  object :workbench_eval_results_average do
+    field :timestamp, :datetime
+    field :average, :float
+  end
+
+  object :workbench_eval_results_workbench_average do
+    field :workbench, :workbench
+    field :timestamp, :datetime
+    field :average, :float
+  end
+
+  object :workbench_pr_merge_rate_entry do
+    field :timestamp, :datetime, description: "UTC bucket start for this merge rate sample"
+    field :merge_rate, :float, description: "fraction of workbench PRs merged in this bucket (0.0–1.0)"
+  end
+
+  object :workbench_pr_merge_rate_by_workbench_entry do
+    field :workbench, :workbench, description: "workbench this bucket applies to"
+    field :timestamp, :datetime, description: "UTC bucket start for this merge rate sample"
+    field :merge_rate, :float, description: "fraction of workbench PRs merged in this bucket (0.0–1.0)"
   end
 
   object :workbench_webhook_matches do
@@ -487,6 +619,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
     field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
+    field :read_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this tool"
+    field :write_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this tool"
     field :configuration,    :workbench_tool_configuration, description: "tool configuration"
     field :mcp_server,       :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
     field :cloud_connection, :cloud_connection, resolve: dataloader(Deployments), description: "the cloud connection bound to this tool"
@@ -609,6 +743,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_cron
   connection node_type: :workbench_prompt
   connection node_type: :workbench_skill
+  connection node_type: :workbench_eval_result
   connection node_type: :workbench_webhook
 
   delta :workbench_job
@@ -696,6 +831,55 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
 
       resolve &Deployments.all_workbench_issues/2
+    end
+
+    field :average_workbench_eval_results, list_of(:workbench_eval_results_workbench_average) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.average_workbench_eval_results/2
+    end
+
+    field :average_eval_results, list_of(:workbench_eval_results_average) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.average_eval_results/2
+    end
+
+    field :workbench_pull_requests, non_null(:integer) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+
+      resolve &Deployments.workbench_pull_requests/2
+    end
+
+    field :workbench_pr_merge_rates, list_of(:workbench_pr_merge_rate_entry) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.workbench_pr_merge_rate/2
+    end
+
+    field :workbench_pr_merge_rates_by_workbench, list_of(:workbench_pr_merge_rate_by_workbench_entry) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period, :eval_results_period
+
+      resolve &Deployments.workbench_pr_merge_rate_by_workbench/2
     end
 
   end
@@ -876,6 +1060,41 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.delete_workbench_skill/2
     end
 
+    @desc "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
+    field :create_workbench_eval, :workbench_eval do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to create an eval for"
+      arg :attributes, non_null(:workbench_eval_attributes)
+
+      resolve &Deployments.create_workbench_eval/2
+    end
+
+    @desc "Updates the eval configuration for a workbench. Requires write access to the workbench."
+    field :update_workbench_eval, :workbench_eval do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_eval_attributes)
+
+      resolve &Deployments.update_workbench_eval/2
+    end
+
+    @desc "Deletes the eval configuration for a workbench. Requires write access to the workbench."
+    field :delete_workbench_eval, :workbench_eval do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_eval/2
+    end
+
     field :create_workbench_webhook, :workbench_webhook do
       middleware Authenticated
       middleware Scope,
@@ -1010,6 +1229,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
       config fn %{job_id: job_id}, ctx ->
         with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
           do: {:ok, topic: "workbench_jobs:#{job_id}:text_stream"}
+      end
+    end
+
+    field :workbench_canvas_stream, :workbench_canvas_block do
+      arg :activity_id, :id, description: "stream only events within the given activity"
+      arg :job_id,      non_null(:id), description: "stream all events within the given job"
+
+      config fn
+        %{activity_id: activity_id, job_id: job_id}, ctx when is_binary(activity_id) ->
+          with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+            do: {:ok, topic: "workbench_jobs:#{job_id}:#{activity_id}:canvas_stream"}
+        %{job_id: job_id}, ctx ->
+          with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+            do: {:ok, topic: "workbench_jobs:#{job_id}:canvas_stream"}
       end
     end
   end
