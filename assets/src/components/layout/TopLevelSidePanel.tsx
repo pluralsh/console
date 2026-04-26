@@ -19,6 +19,8 @@ import {
 import { matchPath, useLocation } from 'react-router-dom'
 import {
   WORKBENCH_JOBS_PATH_MATCHER_ABS,
+  WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
+  WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
   WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
 } from 'routes/workbenchesRoutesConsts'
 
@@ -34,7 +36,11 @@ export const DEFAULT_MIN_WIDTH = 500
 export const DEFAULT_MAX_WIDTH_VW = 40
 
 const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
-  'webhook-setup-guide': [WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS],
+  'webhook-setup-guide': [
+    WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
+    WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
+    WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
+  ],
   'workbench-job': [WORKBENCH_JOBS_PATH_MATCHER_ABS],
 }
 

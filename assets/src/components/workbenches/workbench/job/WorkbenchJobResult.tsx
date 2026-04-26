@@ -119,12 +119,14 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
             firstColor="text"
             second={pr.title}
           />
-          <PrStatusChip status={pr.status} />
-          <IconFrame
-            size="small"
-            tooltip="View PR"
-            icon={<ArrowTopRightIcon color="icon-light" />}
-          />
+          <RightActionsSC>
+            <PrStatusChip status={pr.status} />
+            <IconFrame
+              size="small"
+              tooltip="View PR"
+              icon={<ArrowTopRightIcon color="icon-light" />}
+            />
+          </RightActionsSC>
         </WrapperCardSC>
       ))}
     </>
@@ -133,10 +135,17 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
 
 const WrapperCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
-  justifyContent: 'space-between',
   alignItems: 'center',
   gap: theme.spacing.large,
   padding: theme.spacing.medium,
   textDecoration: 'none',
   '&:hover span[id^="link-"]': { textDecoration: 'underline' },
+}))
+
+const RightActionsSC = styled.div(({ theme }) => ({
+  marginLeft: 'auto',
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  flexShrink: 0,
 }))
