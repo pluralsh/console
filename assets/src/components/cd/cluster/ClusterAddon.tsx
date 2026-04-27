@@ -108,7 +108,13 @@ export default function ClusterAddon() {
     )
   )
 
-  if (!addOn && !isLoading) return null
+  if (!addOn && !isLoading)
+    return addOnError ? (
+      <GqlError
+        error={addOnError}
+        css={{ height: 'fit-content', width: '100%' }}
+      />
+    ) : null
 
   return (
     <Flex
@@ -118,7 +124,6 @@ export default function ClusterAddon() {
       height="100%"
       width="100%"
     >
-      {addOnError && <GqlError error={addOnError} />}
       <div
         css={{
           display: 'grid',
