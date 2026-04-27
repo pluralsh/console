@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Workbench Evals — Design Prototype</title>
+<style>
+:root {
+  --fill-zero: #111318;
+  --fill-one: #1C1F28;
+  --fill-two: #252830;
+  --fill-three: #2E3140;
+  --fill-hover: #2a2d38;
+  --border: #333748;
+  --border-focus: #6366f1;
+  --text: #E4E6EE;
+  --text-light: #9EA3B5;
+  --text-xlight: #5E6478;
+  --text-accent: #818CF8;
+  --danger: #F87171;
+  --warning: #FBBF24;
+  --success: #34D399;
+  --info: #60A5FA;
+  --purple: #A78BFA;
+  --chip-danger-bg: rgba(248,113,113,.12);
+  --chip-success-bg: rgba(52,211,153,.12);
+  --chip-info-bg: rgba(96,165,250,.12);
+  --chip-neutral-bg: rgba(158,163,181,.1);
+  --r: 6px; --rl: 8px;
+  font-size: 13px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--fill-zero);color:var(--text);font-family:'Inter',-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* variation selector bar */
+.var-bar{background:var(--fill-one);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;z-index:100}
+.var-bar span{color:var(--text-xlight);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+.vbtn{padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text-light);cursor:pointer;font-size:12px;transition:all .14s;white-space:nowrap}
+.vbtn:hover{background:var(--fill-three);color:var(--text)}
+.vbtn.active{background:var(--border-focus);border-color:var(--border-focus);color:#fff}
+
+/* shell */
+.shell{display:flex;flex:1;overflow:hidden}
+.sidebar{width:196px;background:var(--fill-one);border-right:1px solid var(--border);padding:12px 0;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+.sb-sec{padding:14px 14px 5px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-xlight)}
+.sb-item{padding:6px 12px;color:var(--text-light);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:4px;margin:0 6px;transition:background .12s}
+.sb-item:hover,.sb-item.active{background:var(--fill-three);color:var(--text)}
+.main-area{flex:1;overflow:hidden;position:relative}
+
+/* pages */
+.page{display:none;flex-direction:column;height:100%;overflow:hidden;position:absolute;inset:0}
+.page.active{display:flex}
+
+/* shared header */
+.flow-hdr{padding:16px 24px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.flow-icon{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.back-btn{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px}
+.flow-meta{flex:1}
+.flow-meta .fname{font-weight:600;font-size:14px}
+.flow-meta .fdesc{color:var(--text-xlight);font-size:12px;margin-top:2px}
+
+/* buttons */
+.btn{padding:6px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:5px;transition:background .12s;white-space:nowrap;font-family:inherit}
+.btn:hover{background:var(--fill-three)}
+.btn.primary{background:var(--border-focus);border-color:var(--border-focus);color:#fff}
+.btn.primary:hover{background:#4f52d9}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-light)}
+.btn.ghost:hover{background:var(--fill-two);color:var(--text)}
+.btn.success-outline{border-color:rgba(52,211,153,.5);color:var(--success);background:var(--chip-success-bg)}
+.btn-icon{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:background .12s;flex-shrink:0}
+.btn-icon:hover{background:var(--fill-three);color:var(--text)}
+
+/* tabs */
+.tabs-row{padding:0 24px;border-bottom:1px solid var(--border);display:flex;flex-shrink:0}
+.tab{padding:9px 14px;font-size:12px;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--border-focus)}
+.bdg{border-radius:10px;padding:1px 6px;font-size:10px;background:var(--chip-danger-bg);color:var(--danger)}
+.bdg.info{background:var(--chip-info-bg);color:var(--info)}
+.bdg.ai{background:rgba(129,140,248,.15);color:var(--text-accent)}
+.bdg.n{background:var(--chip-neutral-bg);color:var(--text-light)}
+.bdg.success{background:var(--chip-success-bg);color:var(--success)}
+
+/* tab panes */
+.tab-pane{display:none;flex-direction:column;gap:14px;padding:20px 24px;overflow-y:auto}
+.tab-pane.active{display:flex}
+.content-area{display:flex;flex:1;overflow:hidden}
+.content-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* chips */
+.chip{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.chip.danger{background:var(--chip-danger-bg);color:var(--danger)}
+.chip.success{background:var(--chip-success-bg);color:var(--success)}
+.chip.info{background:var(--chip-info-bg);color:var(--info)}
+.chip.neutral{background:var(--chip-neutral-bg);color:var(--text-light)}
+.chip.warning{background:rgba(251,191,36,.12);color:var(--warning)}
+.chip.purple{background:rgba(167,139,250,.12);color:var(--purple)}
+.chip.ai{background:rgba(129,140,248,.12);color:var(--text-accent)}
+
+/* status dots */
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot.done{background:var(--success)}
+.dot.idle{background:var(--text-xlight)}
+.dot.warn{background:var(--warning)}
+
+/* table */
+.tbl-wrap{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:7px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-xlight);font-weight:500;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;font-size:12px;border-bottom:1px solid rgba(51,55,72,.5);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--fill-hover)}
+
+/* card */
+.card{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.card-hdr{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.card-body{padding:14px 16px}
+
+/* section header */
+.sec-head{display:flex;align-items:center;gap:8px}
+.sec-head .lbl{font-size:12px;font-weight:600;flex:1}
+.sec-head .sub{font-size:11px;color:var(--text-xlight)}
+.divider{border:none;border-top:1px solid var(--border)}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .18s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--fill-one);border:1px solid var(--border);border-radius:10px;width:520px;max-height:80vh;display:flex;flex-direction:column;transform:translateY(10px);transition:transform .18s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr .mtitle{font-weight:600;font-size:14px}
+.modal-body{padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* form */
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;color:var(--text-light);font-weight:500}
+.prompt-area{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:12px;min-height:72px;color:var(--text);resize:none;width:100%;font-family:inherit;outline:none;transition:border-color .12s}
+.prompt-area:focus{border-color:var(--border-focus)}
+.code-area{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--text-light);font-family:'SF Mono','Cascadia Mono',monospace;resize:none;width:100%;font-family:monospace;outline:none;transition:border-color .12s;line-height:1.6}
+.code-area:focus{border-color:var(--border-focus)}
+
+/* helpers */
+.flex{display:flex}.aic{align-items:center}.gap2{gap:8px}.gap3{gap:12px}.f1{flex:1}
+.mt1{margin-top:4px}.mt2{margin-top:8px}.mb2{margin-bottom:8px}.mb3{margin-bottom:12px}
+.text-light{color:var(--text-light)}.text-xlight{color:var(--text-xlight)}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.semibold{font-weight:600}
+
+/* ─── Grade badge ──────────────────────────────────────── */
+.grade-ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;border:3px solid}
+.grade-ring.high{border-color:var(--success);color:var(--success);background:var(--chip-success-bg)}
+.grade-ring.mid{border-color:var(--warning);color:var(--warning);background:rgba(251,191,36,.1)}
+.grade-ring.low{border-color:var(--danger);color:var(--danger);background:var(--chip-danger-bg)}
+.grade-sm{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid;flex-shrink:0}
+.grade-sm.high{border-color:var(--success);color:var(--success)}
+.grade-sm.mid{border-color:var(--warning);color:var(--warning)}
+.grade-sm.low{border-color:var(--danger);color:var(--danger)}
+
+/* ─── Sub-eval bar ─────────────────────────────────────── */
+.sub-eval-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(51,55,72,.4)}
+.sub-eval-row:last-child{border-bottom:none}
+.sub-eval-label{font-size:12px;color:var(--text-light);width:100px;flex-shrink:0}
+.sub-eval-bar-wrap{flex:1;height:6px;background:var(--fill-three);border-radius:3px;overflow:hidden}
+.sub-eval-bar{height:100%;border-radius:3px;transition:width .4s ease}
+.sub-eval-score{font-size:12px;font-weight:600;width:28px;text-align:right;flex-shrink:0}
+
+/* ─── Eval list sidebar ────────────────────────────────── */
+.eval-sidebar{width:220px;flex-shrink:0;background:var(--fill-one);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.eval-sidebar-hdr{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.eval-sidebar-body{flex:1;overflow-y:auto;padding:8px 0}
+.eval-item{padding:9px 14px;cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:10px;border-left:2px solid transparent}
+.eval-item:hover{background:var(--fill-hover)}
+.eval-item.active{background:var(--fill-two);border-left-color:var(--border-focus)}
+.eval-item .ei-date{font-size:11px;font-weight:600;color:var(--text)}
+.eval-item .ei-sub{font-size:10px;color:var(--text-xlight);margin-top:2px}
+
+/* ─── Eval detail ──────────────────────────────────────── */
+.eval-detail{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.eval-layout{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ─── Timeseries chart ─────────────────────────────────── */
+.chart-wrap{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.chart-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.chart-hdr .ctitle{font-size:13px;font-weight:600;flex:1}
+.chart-body{padding:14px 16px 10px}
+.chart-legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-light)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.window-btns{display:flex;gap:4px}
+.wbtn{padding:3px 9px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text-xlight);cursor:pointer;font-size:11px;transition:all .12s}
+.wbtn:hover{background:var(--fill-three);color:var(--text)}
+.wbtn.active{background:var(--fill-three);color:var(--text);border-color:var(--border-focus)}
+
+/* grid layouts */
+.chart-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* stat card */
+.stat-card{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.stat-card .sv{font-size:24px;font-weight:700}
+.stat-card .sl{font-size:11px;color:var(--text-xlight)}
+.stat-card .sd{font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:4px;margin-top:2px}
+.stat-card .trend-up{color:var(--success)}
+.stat-card .trend-dn{color:var(--danger)}
+
+/* workbench grade row in grouped chart */
+.wb-grade-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(51,55,72,.4)}
+.wb-grade-row:last-child{border-bottom:none}
+.wb-name-cell{width:130px;flex-shrink:0;font-size:12px}
+.wb-bar-wrap{flex:1;height:8px;background:var(--fill-three);border-radius:4px;overflow:hidden}
+.wb-bar{height:100%;border-radius:4px}
+.wb-score-cell{font-size:12px;font-weight:600;width:30px;text-align:right;flex-shrink:0}
+
+/* dropdown */
+.dropdown{position:relative;display:inline-flex}
+.dropdown-menu{display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--fill-two);border:1px solid var(--border);border-radius:var(--rl);z-index:50;min-width:160px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.dropdown-menu.open{display:block}
+.dd-item{padding:8px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}
+.dd-item:hover{background:var(--fill-three)}
+
+/* empty */
+.empty{padding:48px;text-align:center;color:var(--text-xlight);font-size:12px}
+
+/* skill add panel */
+.skill-panel{background:rgba(129,140,248,.06);border:1px solid rgba(129,140,248,.2);border-radius:var(--rl);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+
+/* run log */
+.run-log{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:11px;font-family:'SF Mono','Cascadia Mono',monospace;display:flex;flex-direction:column;gap:4px;max-height:130px;overflow-y:auto}
+.log-line{display:flex;gap:8px}
+.log-time{color:var(--text-xlight);flex-shrink:0;min-width:36px}
+.log-msg{color:var(--text-light)}
+
+/* tooltip-style info */
+.info-banner{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--r);padding:9px 13px;font-size:11px;color:var(--text-light);display:flex;align-items:flex-start;gap:8px}
+.info-banner strong{color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- variation bar -->
+<div class="var-bar">
+  <span>View:</span>
+  <button class="vbtn active" onclick="showVar(1,this)">1 · Global Evals Dashboard</button>
+  <button class="vbtn" onclick="showVar(2,this)">2 · Workbench Evals Tab</button>
+  <button class="vbtn" onclick="showVar(3,this)">3 · Eval Detail + Add Memory</button>
+  <button class="vbtn" onclick="showVar(4,this)">4 · Eval Config / Settings</button>
+</div>
+
+<div class="shell">
+  <!-- shared sidebar -->
+  <div class="sidebar">
+    <div class="sb-sec">Platform</div>
+    <div class="sb-item active">◎ Dashboard</div>
+    <div class="sb-item">⟳ CD</div>
+    <div class="sb-item">⊞ Flows</div>
+    <div class="sb-item">⚙ Workbenches</div>
+    <div class="sb-sec">Infrastructure</div>
+    <div class="sb-item">⎈ Kubernetes</div>
+    <div class="sb-item">⬡ Stacks</div>
+    <div class="sb-item">⊛ Security</div>
+  </div>
+
+  <div class="main-area">
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 1 — Global Evals Dashboard
+  ════════════════════════════════════════════════════ -->
+  <div class="page active" id="v1">
+    <div class="flow-hdr">
+      <div class="flow-icon">◎</div>
+      <div class="flow-meta">
+        <div class="fname">Global Dashboard</div>
+        <div class="fdesc">Organization-wide overview</div>
+      </div>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v1','overview',this)">Overview</div>
+      <div class="tab" onclick="st('v1','prs',this)">PRs</div>
+      <div class="tab" onclick="st('v1','alerts',this)">Alerts</div>
+      <div class="tab active" onclick="st('v1','evals',this)">✦ Evals <span class="bdg ai">new</span></div>
+    </div>
+
+    <div class="content-area"><div class="content-main">
+      <div class="tab-pane" id="v1-overview"><div class="empty">Organization overview would appear here</div></div>
+      <div class="tab-pane" id="v1-prs"><div class="empty">PR overview would appear here</div></div>
+      <div class="tab-pane" id="v1-alerts"><div class="empty">Alerts overview would appear here</div></div>
+
+      <!-- EVALS TAB -->
+      <div class="tab-pane active" id="v1-evals">
+
+        <!-- stat row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div class="stat-card">
+            <div class="sl">Avg Workbench Grade</div>
+            <div class="sv" style="color:var(--success)">7.8</div>
+            <div class="sd"><span class="trend-up">↑ 0.4</span> vs last week</div>
+          </div>
+          <div class="stat-card">
+            <div class="sl">Evals Run (7d)</div>
+            <div class="sv">142</div>
+            <div class="sd"><span class="trend-up">↑ 12</span> vs prior 7d</div>
+          </div>
+          <div class="stat-card">
+            <div class="sl">PR Merge Rate (7d)</div>
+            <div class="sv">74%</div>
+            <div class="sd"><span class="trend-dn">↓ 3%</span> vs prior 7d</div>
+          </div>
+          <div class="stat-card">
+            <div class="sl">Workbenches Evaluated</div>
+            <div class="sv">6</div>
+            <div class="sd text-xlight">of 8 with evals enabled</div>
+          </div>
+        </div>
+
+        <!-- PR Merge Rate chart -->
+        <div class="chart-wrap">
+          <div class="chart-hdr">
+            <div class="ctitle">PR Merge Rate</div>
+            <div class="window-btns">
+              <button class="wbtn active" onclick="setWindow(this,'pr')">Day</button>
+              <button class="wbtn" onclick="setWindow(this,'pr')">Week</button>
+              <button class="wbtn" onclick="setWindow(this,'pr')">Month</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--info)"></div>Merge rate %</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--text-xlight)"></div>PRs opened</div>
+            </div>
+            <svg width="100%" height="110" viewBox="0 0 700 110" preserveAspectRatio="none" style="display:block">
+              <!-- grid lines -->
+              <line x1="0" y1="27" x2="700" y2="27" stroke="#2E3140" stroke-width="1"/>
+              <line x1="0" y1="55" x2="700" y2="55" stroke="#2E3140" stroke-width="1"/>
+              <line x1="0" y1="83" x2="700" y2="83" stroke="#2E3140" stroke-width="1"/>
+              <!-- y-axis labels -->
+              <text x="2" y="25" font-size="9" fill="#5E6478">100%</text>
+              <text x="2" y="53" font-size="9" fill="#5E6478">50%</text>
+              <text x="2" y="81" font-size="9" fill="#5E6478">0%</text>
+              <!-- PR opened area (bars) -->
+              <rect x="30" y="65" width="28" height="38" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="90" y="60" width="28" height="43" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="150" y="68" width="28" height="35" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="210" y="55" width="28" height="48" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="270" y="62" width="28" height="41" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="330" y="58" width="28" height="45" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="390" y="52" width="28" height="51" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="450" y="60" width="28" height="43" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="510" y="50" width="28" height="53" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="570" y="57" width="28" height="46" rx="2" fill="rgba(94,100,120,.25)"/>
+              <rect x="630" y="48" width="28" height="55" rx="2" fill="rgba(94,100,120,.25)"/>
+              <!-- merge rate line -->
+              <polyline points="44,45 104,38 164,48 224,35 284,40 344,32 404,28 464,35 524,30 584,38 644,32" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- dots -->
+              <circle cx="44" cy="45" r="3.5" fill="var(--info)"/>
+              <circle cx="104" cy="38" r="3.5" fill="var(--info)"/>
+              <circle cx="164" cy="48" r="3.5" fill="var(--info)"/>
+              <circle cx="224" cy="35" r="3.5" fill="var(--info)"/>
+              <circle cx="284" cy="40" r="3.5" fill="var(--info)"/>
+              <circle cx="344" cy="32" r="3.5" fill="var(--info)"/>
+              <circle cx="404" cy="28" r="3.5" fill="var(--info)"/>
+              <circle cx="464" cy="35" r="3.5" fill="var(--info)"/>
+              <circle cx="524" cy="30" r="3.5" fill="var(--info)"/>
+              <circle cx="584" cy="38" r="3.5" fill="var(--info)"/>
+              <circle cx="644" cy="32" r="3.5" fill="var(--info)"/>
+              <!-- x-axis labels -->
+              <text x="30" y="108" font-size="9" fill="#5E6478">Apr 17</text>
+              <text x="90" y="108" font-size="9" fill="#5E6478">Apr 18</text>
+              <text x="150" y="108" font-size="9" fill="#5E6478">Apr 19</text>
+              <text x="210" y="108" font-size="9" fill="#5E6478">Apr 20</text>
+              <text x="270" y="108" font-size="9" fill="#5E6478">Apr 21</text>
+              <text x="330" y="108" font-size="9" fill="#5E6478">Apr 22</text>
+              <text x="390" y="108" font-size="9" fill="#5E6478">Apr 23</text>
+              <text x="450" y="108" font-size="9" fill="#5E6478">Apr 24</text>
+              <text x="510" y="108" font-size="9" fill="#5E6478">Apr 25</text>
+              <text x="570" y="108" font-size="9" fill="#5E6478">Apr 26</text>
+              <text x="630" y="108" font-size="9" fill="#5E6478">Apr 27</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- two-col: aggregate grade + grouped by workbench -->
+        <div class="chart-grid-2">
+
+          <!-- Aggregate avg grade -->
+          <div class="chart-wrap">
+            <div class="chart-hdr">
+              <div class="ctitle">Aggregate Avg Grade</div>
+              <div class="window-btns">
+                <button class="wbtn active" onclick="setWindow(this,'ag')">Day</button>
+                <button class="wbtn" onclick="setWindow(this,'ag')">Week</button>
+                <button class="wbtn" onclick="setWindow(this,'ag')">Month</button>
+              </div>
+            </div>
+            <div class="chart-body">
+              <div class="chart-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Avg grade (0–10)</div>
+              </div>
+              <svg width="100%" height="100" viewBox="0 0 400 100" preserveAspectRatio="none" style="display:block">
+                <!-- grid lines -->
+                <line x1="0" y1="10" x2="400" y2="10" stroke="#2E3140" stroke-width="1"/>
+                <line x1="0" y1="40" x2="400" y2="40" stroke="#2E3140" stroke-width="1"/>
+                <line x1="0" y1="70" x2="400" y2="70" stroke="#2E3140" stroke-width="1"/>
+                <text x="2" y="10" font-size="9" fill="#5E6478">10</text>
+                <text x="2" y="40" font-size="9" fill="#5E6478">5</text>
+                <text x="2" y="70" font-size="9" fill="#5E6478">0</text>
+                <!-- shaded area under line -->
+                <polygon points="30,50 80,40 130,44 180,32 230,36 280,28 330,30 380,26 380,80 30,80" fill="rgba(167,139,250,.1)"/>
+                <!-- grade line -->
+                <polyline points="30,50 80,40 130,44 180,32 230,36 280,28 330,30 380,26" fill="none" stroke="var(--purple)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                <circle cx="30" cy="50" r="3" fill="var(--purple)"/>
+                <circle cx="80" cy="40" r="3" fill="var(--purple)"/>
+                <circle cx="130" cy="44" r="3" fill="var(--purple)"/>
+                <circle cx="180" cy="32" r="3" fill="var(--purple)"/>
+                <circle cx="230" cy="36" r="3" fill="var(--purple)"/>
+                <circle cx="280" cy="28" r="3" fill="var(--purple)"/>
+                <circle cx="330" cy="30" r="3" fill="var(--purple)"/>
+                <circle cx="380" cy="26" r="3" fill="var(--purple)"/>
+                <text x="22" y="96" font-size="9" fill="#5E6478">Apr 20</text>
+                <text x="370" y="96" font-size="9" fill="#5E6478">Apr 27</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Avg grades by workbench -->
+          <div class="chart-wrap">
+            <div class="chart-hdr">
+              <div class="ctitle">Avg Grade by Workbench</div>
+              <div class="window-btns">
+                <button class="wbtn active" onclick="setWindow(this,'wb')">Day</button>
+                <button class="wbtn" onclick="setWindow(this,'wb')">Week</button>
+                <button class="wbtn" onclick="setWindow(this,'wb')">Month</button>
+              </div>
+            </div>
+            <div class="chart-body">
+              <div style="display:flex;flex-direction:column;gap:0">
+                <div class="wb-grade-row">
+                  <div class="wb-name-cell"><span class="chip purple text-xs">infra-debugger</span></div>
+                  <div class="wb-bar-wrap"><div class="wb-bar" style="width:88%;background:var(--success)"></div></div>
+                  <div class="wb-score-cell" style="color:var(--success)">8.8</div>
+                </div>
+                <div class="wb-grade-row">
+                  <div class="wb-name-cell"><span class="chip purple text-xs">deploy-assistant</span></div>
+                  <div class="wb-bar-wrap"><div class="wb-bar" style="width:79%;background:var(--success)"></div></div>
+                  <div class="wb-score-cell" style="color:var(--success)">7.9</div>
+                </div>
+                <div class="wb-grade-row">
+                  <div class="wb-name-cell"><span class="chip purple text-xs">code-reviewer</span></div>
+                  <div class="wb-bar-wrap"><div class="wb-bar" style="width:74%;background:var(--warning)"></div></div>
+                  <div class="wb-score-cell" style="color:var(--warning)">7.4</div>
+                </div>
+                <div class="wb-grade-row">
+                  <div class="wb-name-cell"><span class="chip purple text-xs">sec-scanner</span></div>
+                  <div class="wb-bar-wrap"><div class="wb-bar" style="width:62%;background:var(--warning)"></div></div>
+                  <div class="wb-score-cell" style="color:var(--warning)">6.2</div>
+                </div>
+                <div class="wb-grade-row">
+                  <div class="wb-name-cell"><span class="chip purple text-xs">ops-toolkit</span></div>
+                  <div class="wb-bar-wrap"><div class="wb-bar" style="width:51%;background:var(--warning)"></div></div>
+                  <div class="wb-score-cell" style="color:var(--warning)">5.1</div>
+                </div>
+                <div class="wb-grade-row">
+                  <div class="wb-name-cell"><span class="chip purple text-xs">db-tuner</span></div>
+                  <div class="wb-bar-wrap"><div class="wb-bar" style="width:38%;background:var(--danger)"></div></div>
+                  <div class="wb-score-cell" style="color:var(--danger)">3.8</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- recent evals table -->
+        <div class="sec-head">
+          <div class="lbl">Recent Evals</div>
+          <div class="sub">All workbenches · daily eval snapshot</div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Workbench</th><th>Date</th><th>Grade</th><th>Prompt</th><th>Conclusion</th><th>Logic</th><th>Summary</th><th></th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="chip purple text-xs">infra-debugger</span></td>
+              <td class="text-light">Apr 27</td>
+              <td><span class="grade-sm high">9</span></td>
+              <td><span class="chip success text-xs">9.2</span></td>
+              <td><span class="chip success text-xs">8.8</span></td>
+              <td><span class="chip success text-xs">9.0</span></td>
+              <td class="text-light text-xs" style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Excellent prompt clarity and logical trace. Minor gaps in edge case coverage.</td>
+              <td><button class="btn text-xs" style="padding:2px 7px" onclick="showVar(3,null)">View →</button></td>
+            </tr>
+            <tr>
+              <td><span class="chip purple text-xs">deploy-assistant</span></td>
+              <td class="text-light">Apr 27</td>
+              <td><span class="grade-sm high">8</span></td>
+              <td><span class="chip success text-xs">7.8</span></td>
+              <td><span class="chip success text-xs">8.5</span></td>
+              <td><span class="chip success text-xs">7.9</span></td>
+              <td class="text-light text-xs" style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Strong overall. Could improve intermediate reasoning visibility.</td>
+              <td><button class="btn text-xs" style="padding:2px 7px" onclick="showVar(3,null)">View →</button></td>
+            </tr>
+            <tr>
+              <td><span class="chip purple text-xs">db-tuner</span></td>
+              <td class="text-light">Apr 27</td>
+              <td><span class="grade-sm low">4</span></td>
+              <td><span class="chip danger text-xs">3.5</span></td>
+              <td><span class="chip danger text-xs">4.0</span></td>
+              <td><span class="chip warning text-xs">5.2</span></td>
+              <td class="text-light text-xs" style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Prompts are ambiguous. Conclusions lack justification. Needs improvement.</td>
+              <td><button class="btn text-xs" style="padding:2px 7px" onclick="showVar(3,null)">View →</button></td>
+            </tr>
+          </tbody>
+        </table></div>
+
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 2 — Workbench: Evals Tab
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v2">
+    <div class="flow-hdr">
+      <div class="back-btn" onclick="showVar(1,null)">←</div>
+      <div class="flow-icon">⚙</div>
+      <div class="flow-meta">
+        <div class="fname">infra-debugger</div>
+        <div class="fdesc">Debug Kubernetes infra issues across clusters</div>
+      </div>
+      <button class="btn">⚙ Settings</button>
+      <button class="btn primary">+ New Job</button>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v2','jobs',this)">Jobs</div>
+      <div class="tab" onclick="st('v2','runs',this)">Runs</div>
+      <div class="tab active" onclick="st('v2','evals',this)">✦ Evals <span class="bdg ai">14</span></div>
+      <div class="tab" onclick="st('v2','memory',this)">Memory</div>
+      <div class="tab" onclick="st('v2','settings',this)">Settings</div>
+    </div>
+
+    <div class="content-area"><div class="content-main">
+      <div class="tab-pane" id="v2-jobs"><div class="empty">Jobs would appear here</div></div>
+      <div class="tab-pane" id="v2-runs"><div class="empty">Runs would appear here</div></div>
+      <div class="tab-pane" id="v2-memory"><div class="empty">Memory & skills would appear here</div></div>
+      <div class="tab-pane" id="v2-settings"><div class="empty">Settings would appear here</div></div>
+
+      <!-- EVALS TAB CONTENT -->
+      <div class="tab-pane active" id="v2-evals" style="padding:0;overflow:hidden;flex:1;display:flex;flex-direction:column">
+        <div class="eval-layout" style="flex:1">
+
+          <!-- LEFT: eval list -->
+          <div class="eval-sidebar">
+            <div class="eval-sidebar-hdr">
+              <div class="semibold text-sm">Eval History</div>
+              <div class="text-xs text-xlight mt1">Daily · 14 evals</div>
+            </div>
+            <div class="eval-sidebar-body">
+              <div class="eval-item active" onclick="selEval(this,9)">
+                <div class="grade-sm high" style="width:28px;height:28px;font-size:12px">9</div>
+                <div>
+                  <div class="ei-date">Apr 27, 2026</div>
+                  <div class="ei-sub">Today's eval</div>
+                </div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,8)">
+                <div class="grade-sm high" style="width:28px;height:28px;font-size:12px">8</div>
+                <div><div class="ei-date">Apr 26, 2026</div><div class="ei-sub">Yesterday</div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,9)">
+                <div class="grade-sm high" style="width:28px;height:28px;font-size:12px">9</div>
+                <div><div class="ei-date">Apr 25, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,7)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">7</div>
+                <div><div class="ei-date">Apr 24, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,8)">
+                <div class="grade-sm high" style="width:28px;height:28px;font-size:12px">8</div>
+                <div><div class="ei-date">Apr 23, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,6)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">6</div>
+                <div><div class="ei-date">Apr 22, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,7)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">7</div>
+                <div><div class="ei-date">Apr 21, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,5)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">5</div>
+                <div><div class="ei-date">Apr 20, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,8)">
+                <div class="grade-sm high" style="width:28px;height:28px;font-size:12px">8</div>
+                <div><div class="ei-date">Apr 19, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,9)">
+                <div class="grade-sm high" style="width:28px;height:28px;font-size:12px">9</div>
+                <div><div class="ei-date">Apr 18, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,7)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">7</div>
+                <div><div class="ei-date">Apr 17, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,4)">
+                <div class="grade-sm low" style="width:28px;height:28px;font-size:12px">4</div>
+                <div><div class="ei-date">Apr 16, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,6)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">6</div>
+                <div><div class="ei-date">Apr 15, 2026</div><div class="ei-sub"></div></div>
+              </div>
+              <div class="eval-item" onclick="selEval(this,7)">
+                <div class="grade-sm mid" style="width:28px;height:28px;font-size:12px">7</div>
+                <div><div class="ei-date">Apr 14, 2026</div><div class="ei-sub"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: eval detail (click-through to v3 for full detail) -->
+          <div class="eval-detail" id="v2-eval-detail">
+            <!-- rendered by selEval() or static default below -->
+            <div class="flex aic gap3">
+              <div class="grade-ring high">9</div>
+              <div>
+                <div class="semibold" style="font-size:15px">Apr 27, 2026 — Daily Eval</div>
+                <div class="text-sm text-light mt1">infra-debugger · 23 runs evaluated</div>
+                <div class="flex aic gap2 mt2">
+                  <span class="chip success text-xs">● Above threshold</span>
+                  <button class="btn success-outline text-xs" style="padding:3px 9px" onclick="openModal('add-memory-modal')">✦ Add Memory</button>
+                  <button class="btn text-xs" style="padding:3px 9px" onclick="showVar(3,null)">Full detail →</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hdr">Holistic Summary</div>
+              <div class="card-body text-sm text-light" style="line-height:1.7">
+                The workbench demonstrated strong overall performance today. Prompt construction was clear and well-scoped in most runs. Logical reasoning was coherent and traceable, with the agent following a sensible troubleshooting path in 20 of 23 runs. Conclusions were actionable and referenced relevant evidence. Minor weaknesses observed in 3 runs where intermediate steps skipped validation before escalating to a fix.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hdr">Sub-Eval Scores</div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:0">
+                <div class="sub-eval-row">
+                  <div class="sub-eval-label">Prompt</div>
+                  <div class="sub-eval-bar-wrap"><div class="sub-eval-bar" style="width:92%;background:var(--success)"></div></div>
+                  <div class="sub-eval-score" style="color:var(--success)">9.2</div>
+                </div>
+                <div class="sub-eval-row">
+                  <div class="sub-eval-label">Conclusion</div>
+                  <div class="sub-eval-bar-wrap"><div class="sub-eval-bar" style="width:88%;background:var(--success)"></div></div>
+                  <div class="sub-eval-score" style="color:var(--success)">8.8</div>
+                </div>
+                <div class="sub-eval-row">
+                  <div class="sub-eval-label">Logic / Thought</div>
+                  <div class="sub-eval-bar-wrap"><div class="sub-eval-bar" style="width:90%;background:var(--success)"></div></div>
+                  <div class="sub-eval-score" style="color:var(--success)">9.0</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hdr">Grade Trend <span class="text-xs text-xlight" style="font-weight:400">14 days</span></div>
+              <div class="card-body">
+                <svg width="100%" height="60" viewBox="0 0 400 60" preserveAspectRatio="none" style="display:block">
+                  <polygon points="20,46 55,37 90,42 125,30 160,35 195,25 230,28 265,22 300,40 335,48 370,17 400,16 400,60 20,60" fill="rgba(167,139,250,.08)"/>
+                  <polyline points="20,46 55,37 90,42 125,30 160,35 195,25 230,28 265,22 300,40 335,48 370,17 400,16" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linejoin="round"/>
+                  <circle cx="400" cy="16" r="4" fill="var(--purple)"/>
+                  <line x1="0" y1="30" x2="400" y2="30" stroke="#2E3140" stroke-width="1" stroke-dasharray="3,3"/>
+                  <text x="2" y="28" font-size="9" fill="#5E6478">5</text>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 3 — Full Eval Detail + Add Memory Flow
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v3">
+    <div class="flow-hdr">
+      <div class="back-btn" onclick="showVar(2,null)">←</div>
+      <div class="flow-icon">⚙</div>
+      <div class="flow-meta">
+        <div class="fname">infra-debugger — Eval · Apr 27, 2026</div>
+        <div class="fdesc">Daily workbench evaluation</div>
+      </div>
+      <button class="btn success-outline" onclick="openModal('add-memory-modal')">✦ Add Memory</button>
+    </div>
+    <div class="tabs-row">
+      <div class="tab active" onclick="st('v3','summary',this)">Summary</div>
+      <div class="tab" onclick="st('v3','runs',this)">Evaluated Runs <span class="bdg n">23</span></div>
+    </div>
+    <div class="content-area"><div class="content-main">
+      <div class="tab-pane active" id="v3-summary">
+
+        <!-- top grade section -->
+        <div class="card" style="border-color:rgba(52,211,153,.3)">
+          <div class="card-body" style="display:flex;gap:20px;align-items:flex-start">
+            <div class="grade-ring high">9</div>
+            <div style="flex:1">
+              <div class="semibold" style="font-size:15px">Overall Grade: 9 / 10</div>
+              <div class="text-sm text-light mt1">23 runs evaluated · Generated Apr 27, 2026 at 06:00 UTC</div>
+              <div class="text-sm text-light mt2" style="line-height:1.6">
+                The workbench demonstrated strong overall performance today. Prompt construction was clear and well-scoped in most runs. Logical reasoning was coherent and traceable, with the agent following a sensible troubleshooting path in 20 of 23 runs. Conclusions were actionable and referenced relevant evidence. Minor weaknesses observed in 3 runs where intermediate steps skipped validation before escalating.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- sub-evals -->
+        <div class="card">
+          <div class="card-hdr">Sub-Eval Breakdown</div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0">
+            <div class="sub-eval-row">
+              <div class="sub-eval-label">Prompt Quality</div>
+              <div class="sub-eval-bar-wrap"><div class="sub-eval-bar" style="width:92%;background:var(--success)"></div></div>
+              <div class="sub-eval-score" style="color:var(--success)">9.2</div>
+            </div>
+            <div style="padding:6px 0 10px;color:var(--text-xlight);font-size:11px;line-height:1.6">
+              Prompts were specific, relevant to the triggering alert, and provided sufficient context. Most prompts included clear goal statements. 2 prompts were overly terse.
+            </div>
+            <div class="sub-eval-row">
+              <div class="sub-eval-label">Conclusion</div>
+              <div class="sub-eval-bar-wrap"><div class="sub-eval-bar" style="width:88%;background:var(--success)"></div></div>
+              <div class="sub-eval-score" style="color:var(--success)">8.8</div>
+            </div>
+            <div style="padding:6px 0 10px;color:var(--text-xlight);font-size:11px;line-height:1.6">
+              Conclusions were well-reasoned and directly addressed the stated goal. Remediation steps were concrete. 3 conclusions lacked explicit confidence or uncertainty statements.
+            </div>
+            <div class="sub-eval-row">
+              <div class="sub-eval-label">Logic / Thought</div>
+              <div class="sub-eval-bar-wrap"><div class="sub-eval-bar" style="width:90%;background:var(--success)"></div></div>
+              <div class="sub-eval-score" style="color:var(--success)">9.0</div>
+            </div>
+            <div style="padding:6px 0 0;color:var(--text-xlight);font-size:11px;line-height:1.6">
+              Logical trace through tool calls was mostly coherent. Progress steps were well-ordered. Agent correctly escalated uncertain cases. Minor issue: 2 runs made redundant API calls.
+            </div>
+          </div>
+        </div>
+
+        <!-- representative run highlights -->
+        <div class="sec-head">
+          <div class="lbl">Representative Run Highlights</div>
+          <div class="sub">Top-scoring and lowest-scoring runs from today</div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Run</th><th>Grade</th><th>Prompt</th><th>Conclusion</th><th>Logic</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="semibold text-sm">analyze-oom-crash</td>
+              <td><span class="grade-sm high" style="width:24px;height:24px;font-size:11px">10</span></td>
+              <td><span class="chip success text-xs">9.8</span></td>
+              <td><span class="chip success text-xs">10</span></td>
+              <td><span class="chip success text-xs">9.9</span></td>
+              <td class="text-xlight text-xs">Best run · exemplary reasoning chain</td>
+            </tr>
+            <tr>
+              <td class="semibold text-sm">latency-root-cause</td>
+              <td><span class="grade-sm high" style="width:24px;height:24px;font-size:11px">9</span></td>
+              <td><span class="chip success text-xs">9.1</span></td>
+              <td><span class="chip success text-xs">8.9</span></td>
+              <td><span class="chip success text-xs">9.2</span></td>
+              <td class="text-xlight text-xs">Strong; slightly verbose thought trace</td>
+            </tr>
+            <tr>
+              <td class="semibold text-sm">disk-alert-scan</td>
+              <td><span class="grade-sm mid" style="width:24px;height:24px;font-size:11px">6</span></td>
+              <td><span class="chip warning text-xs">5.5</span></td>
+              <td><span class="chip warning text-xs">6.2</span></td>
+              <td><span class="chip warning text-xs">6.0</span></td>
+              <td class="text-xlight text-xs">Prompt too vague; conclusion lacked specifics</td>
+            </tr>
+            <tr>
+              <td class="semibold text-sm">deploy-drift-check</td>
+              <td><span class="grade-sm low" style="width:24px;height:24px;font-size:11px">4</span></td>
+              <td><span class="chip danger text-xs">3.5</span></td>
+              <td><span class="chip danger text-xs">4.1</span></td>
+              <td><span class="chip warning text-xs">5.0</span></td>
+              <td class="text-xlight text-xs">Lowest run · missed validation steps</td>
+            </tr>
+          </tbody>
+        </table></div>
+
+        <!-- add memory CTA -->
+        <div class="skill-panel">
+          <div class="flex aic gap2">
+            <div class="f1">
+              <div class="semibold text-sm">✦ Add Memory from this Eval</div>
+              <div class="text-xs text-light mt1">Use this eval and its top run to generate a reusable skill for the workbench.</div>
+            </div>
+            <button class="btn primary text-sm" onclick="openModal('add-memory-modal')">✦ Add Memory</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tab-pane" id="v3-runs">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Run</th><th>Started</th><th>Grade</th><th>Prompt</th><th>Conclusion</th><th>Logic</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="semibold text-sm">analyze-oom-crash</td><td class="text-light">Apr 27 04:12</td><td><span class="grade-sm high" style="width:24px;height:24px;font-size:11px">10</span></td><td><span class="chip success text-xs">9.8</span></td><td><span class="chip success text-xs">10</span></td><td><span class="chip success text-xs">9.9</span></td><td><button class="btn text-xs" style="padding:2px 7px">View run</button></td></tr>
+            <tr><td class="semibold text-sm">latency-root-cause</td><td class="text-light">Apr 27 02:44</td><td><span class="grade-sm high" style="width:24px;height:24px;font-size:11px">9</span></td><td><span class="chip success text-xs">9.1</span></td><td><span class="chip success text-xs">8.9</span></td><td><span class="chip success text-xs">9.2</span></td><td><button class="btn text-xs" style="padding:2px 7px">View run</button></td></tr>
+            <tr><td class="semibold text-sm">hpa-check-api</td><td class="text-light">Apr 27 01:30</td><td><span class="grade-sm high" style="width:24px;height:24px;font-size:11px">9</span></td><td><span class="chip success text-xs">8.8</span></td><td><span class="chip success text-xs">9.0</span></td><td><span class="chip success text-xs">9.1</span></td><td><button class="btn text-xs" style="padding:2px 7px">View run</button></td></tr>
+            <tr><td class="semibold text-sm">disk-alert-scan</td><td class="text-light">Apr 26 23:15</td><td><span class="grade-sm mid" style="width:24px;height:24px;font-size:11px">6</span></td><td><span class="chip warning text-xs">5.5</span></td><td><span class="chip warning text-xs">6.2</span></td><td><span class="chip warning text-xs">6.0</span></td><td><button class="btn text-xs" style="padding:2px 7px">View run</button></td></tr>
+            <tr><td class="semibold text-sm">deploy-drift-check</td><td class="text-light">Apr 26 22:00</td><td><span class="grade-sm low" style="width:24px;height:24px;font-size:11px">4</span></td><td><span class="chip danger text-xs">3.5</span></td><td><span class="chip danger text-xs">4.1</span></td><td><span class="chip warning text-xs">5.0</span></td><td><button class="btn text-xs" style="padding:2px 7px">View run</button></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 4 — Eval Configuration (Workbench Settings)
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v4">
+    <div class="flow-hdr">
+      <div class="back-btn" onclick="showVar(2,null)">←</div>
+      <div class="flow-icon">⚙</div>
+      <div class="flow-meta">
+        <div class="fname">infra-debugger — Settings</div>
+        <div class="fdesc">Workbench configuration</div>
+      </div>
+      <button class="btn primary">Save Changes</button>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v4','general',this)">General</div>
+      <div class="tab" onclick="st('v4','mcp',this)">MCP Connections</div>
+      <div class="tab" onclick="st('v4','skills',this)">Skills & Memory</div>
+      <div class="tab active" onclick="st('v4','evals',this)">✦ Evals</div>
+    </div>
+    <div class="content-area"><div class="content-main">
+      <div class="tab-pane" id="v4-general"><div class="empty">General settings would appear here</div></div>
+      <div class="tab-pane" id="v4-mcp"><div class="empty">MCP settings would appear here</div></div>
+      <div class="tab-pane" id="v4-skills"><div class="empty">Skills & memory settings would appear here</div></div>
+
+      <div class="tab-pane active" id="v4-evals">
+
+        <!-- enable toggle -->
+        <div class="card">
+          <div class="card-body" style="display:flex;align-items:center;gap:14px">
+            <div style="flex:1">
+              <div class="semibold text-sm">Enable Daily Evals</div>
+              <div class="text-xs text-light mt1">When enabled, the AI will automatically generate a daily evaluation of all workbench runs. Evals are generated once per day, scoring each run on a 0–10 scale.</div>
+            </div>
+            <div id="eval-toggle" onclick="toggleEval()" style="width:44px;height:24px;border-radius:12px;background:var(--border-focus);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+              <div style="position:absolute;top:3px;left:22px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- info banner -->
+        <div class="info-banner">
+          <span style="font-size:14px;flex-shrink:0">ℹ</span>
+          <span>Evals are generated daily at <strong>06:00 UTC</strong> and cover all runs from the prior 24h. You can configure the evaluation criteria below. Leave any section blank to use the default heuristic for that category.</span>
+        </div>
+
+        <!-- eval rules sections -->
+        <div class="sec-head">
+          <div class="lbl">Evaluation Rules</div>
+          <div class="sub">Markdown — describe what good looks like for each dimension</div>
+        </div>
+
+        <div class="form-field">
+          <div class="form-label">Prompt Quality Rules</div>
+          <textarea class="code-area" rows="5" placeholder="# Prompt Quality&#10;&#10;A good prompt should:&#10;- Be specific about the issue being investigated&#10;- Include the relevant service name and triggering alert&#10;- Specify any desired output format or action (e.g. open a PR)&#10;&#10;Deduct points if the prompt is vague, missing context, or duplicates a recent run."></textarea>
+        </div>
+
+        <div class="form-field">
+          <div class="form-label">Conclusion / Output Rules</div>
+          <textarea class="code-area" rows="5" placeholder="# Conclusion Quality&#10;&#10;A good conclusion should:&#10;- Directly address the original prompt goal&#10;- Cite specific evidence from tool outputs (logs, metrics)&#10;- Provide a concrete action or recommendation&#10;- State confidence level if uncertain&#10;&#10;Deduct points if the conclusion is vague, unsupported, or does not address the prompt."></textarea>
+        </div>
+
+        <div class="form-field">
+          <div class="form-label">Progress / Thought Process Rules</div>
+          <textarea class="code-area" rows="5" placeholder="# Logic &amp; Thought Process&#10;&#10;The agent's reasoning chain should:&#10;- Follow a logical, stepwise investigation&#10;- Avoid redundant or circular tool calls&#10;- Validate hypotheses before acting&#10;- Escalate appropriately when blocked&#10;&#10;Deduct points for skipped validation, redundant steps, or unexplained jumps in reasoning."></textarea>
+        </div>
+
+        <!-- grade threshold -->
+        <div class="card">
+          <div class="card-hdr">Alerting Threshold</div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <div class="text-sm text-light">Receive a notification when the daily avg grade drops below this value.</div>
+            <div class="flex aic gap3">
+              <input type="range" min="0" max="10" value="6" style="flex:1;accent-color:var(--border-focus)" oninput="document.getElementById('thresh-val').textContent=this.value"/>
+              <div class="semibold" id="thresh-val" style="width:24px;text-align:center">6</div>
+              <span class="text-xlight text-xs">/ 10</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex" style="justify-content:flex-end;gap:8px">
+          <button class="btn ghost">Reset to defaults</button>
+          <button class="btn primary">Save Eval Config</button>
+        </div>
+
+      </div>
+    </div></div>
+  </div>
+
+  </div><!-- /main-area -->
+</div><!-- /shell -->
+
+<!-- ─── Add Memory Modal ──────────────────────────────── -->
+<div class="modal-overlay" id="add-memory-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="mtitle">✦ Add Memory from Eval</div>
+      <button class="btn-icon" onclick="closeModal('add-memory-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-banner" style="font-size:11px">
+        <span>The AI will analyze the <strong>Apr 27 eval</strong> and the top-scoring run (<strong>analyze-oom-crash</strong>) to generate a reusable skill. You can optionally guide what to focus on.</span>
+      </div>
+      <div class="flex gap2" style="background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;align-items:center">
+        <div>
+          <div class="text-xs semibold">infra-debugger · Apr 27 Eval</div>
+          <div class="text-xs text-xlight mt1">Grade: 9/10 · 23 runs · Top run: analyze-oom-crash</div>
+        </div>
+        <div class="f1"></div>
+        <span class="chip ai text-xs">✦ Will be used</span>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Focus prompt <span class="text-xlight" style="font-weight:400">(optional)</span></div>
+        <textarea class="prompt-area" rows="3" placeholder="e.g. Focus on the OOM debugging pattern — specifically how the agent correlated memory limits with HPA config. This should become a reusable skill for similar alerts."></textarea>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Skill name <span class="text-xlight" style="font-weight:400">(auto-suggested)</span></div>
+        <input class="prompt-area" style="min-height:unset" value="oom-investigation-pattern" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('add-memory-modal')">Cancel</button>
+      <button class="btn primary" onclick="closeModal('add-memory-modal');alert('Skill generation queued! You\'ll be notified when it\'s ready.')">✦ Generate Skill</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showVar(n, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('v'+n).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    // find the right vbtn
+    document.querySelectorAll('.vbtn').forEach((b,i) => {
+      b.classList.toggle('active', i === n-1);
+    });
+  }
+}
+
+function st(page, tab, el) {
+  // hide all panes for page
+  document.querySelectorAll('#'+page+'-'+page.split('-').pop()+', [id^="'+page+'-"]').forEach(p => {
+    if(p.classList.contains('tab-pane')) p.classList.remove('active');
+  });
+  // deactivate tabs
+  el.closest('.tabs-row').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  // activate
+  const pane = document.getElementById(page+'-'+tab);
+  if(pane) pane.classList.add('active');
+  el.classList.add('active');
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+function setWindow(btn, group) {
+  btn.closest('.window-btns').querySelectorAll('.wbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selEval(el, grade) {
+  document.querySelectorAll('.eval-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  // update grade ring
+  const ring = document.getElementById('v2-eval-detail').querySelector('.grade-ring');
+  if(ring) {
+    ring.textContent = grade;
+    ring.className = 'grade-ring ' + (grade >= 8 ? 'high' : grade >= 6 ? 'mid' : 'low');
+  }
+}
+
+function toggleEval() {
+  const t = document.getElementById('eval-toggle');
+  const thumb = t.querySelector('div');
+  const isOn = thumb.style.left === '22px' || thumb.style.left === '';
+  if(isOn) {
+    thumb.style.left = '3px';
+    t.style.background = 'var(--fill-three)';
+  } else {
+    thumb.style.left = '22px';
+    t.style.background = 'var(--border-focus)';
+  }
+}
+</script>
+</body>
+</html>

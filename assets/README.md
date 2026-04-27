@@ -12,9 +12,15 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
 
+### `yarn prototype:start`
+
+Runs a UI-only prototype environment with mocked data and no backend dependencies.<br />
+Use this mode for quick mockups and UX flow iteration while still using the design system.
+
 #### Environment variables
 
 - BASE_URL - `optional` - used to override the default `https://console.kubeflow-aws.com` used for proxying the API requests. Configuration can be found in `src/setupProxy.js` file.
+- VITE_UI_PROTOTYPE - `optional` - when set to `true`, boots the lightweight prototype app instead of the full console app.
 
 ### `yarn build`
 

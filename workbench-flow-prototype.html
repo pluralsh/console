@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flow + Workbench — Design Variations</title>
+<style>
+:root {
+  --fill-zero: #111318;
+  --fill-one: #1C1F28;
+  --fill-two: #252830;
+  --fill-three: #2E3140;
+  --fill-hover: #2a2d38;
+  --border: #333748;
+  --border-focus: #6366f1;
+  --text: #E4E6EE;
+  --text-light: #9EA3B5;
+  --text-xlight: #5E6478;
+  --text-accent: #818CF8;
+  --danger: #F87171;
+  --warning: #FBBF24;
+  --success: #34D399;
+  --info: #60A5FA;
+  --purple: #A78BFA;
+  --chip-danger-bg: rgba(248,113,113,.12);
+  --chip-success-bg: rgba(52,211,153,.12);
+  --chip-info-bg: rgba(96,165,250,.12);
+  --chip-neutral-bg: rgba(158,163,181,.1);
+  --r: 6px; --rl: 8px;
+  font-size: 13px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--fill-zero);color:var(--text);font-family:'Inter',-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* variation selector bar */
+.var-bar{background:var(--fill-one);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;z-index:100}
+.var-bar span{color:var(--text-xlight);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+.vbtn{padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text-light);cursor:pointer;font-size:12px;transition:all .14s;white-space:nowrap}
+.vbtn:hover{background:var(--fill-three);color:var(--text)}
+.vbtn.active{background:var(--border-focus);border-color:var(--border-focus);color:#fff}
+.vbtn.new-badge::after{content:'★';margin-left:5px;font-size:10px;color:#fbbf24}
+
+/* shell */
+.shell{display:flex;flex:1;overflow:hidden}
+.sidebar{width:196px;background:var(--fill-one);border-right:1px solid var(--border);padding:12px 0;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+.sb-sec{padding:14px 14px 5px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-xlight)}
+.sb-item{padding:6px 12px;color:var(--text-light);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:4px;margin:0 6px;transition:background .12s}
+.sb-item:hover,.sb-item.active{background:var(--fill-three);color:var(--text)}
+.main-area{flex:1;overflow:hidden;position:relative}
+
+/* pages */
+.page{display:none;flex-direction:column;height:100%;overflow:hidden;position:absolute;inset:0}
+.page.active{display:flex}
+
+/* shared flow header */
+.flow-hdr{padding:16px 24px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.back-btn{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px}
+.flow-icon{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.flow-meta{flex:1}
+.flow-meta .fname{font-weight:600;font-size:14px}
+.flow-meta .fdesc{color:var(--text-xlight);font-size:12px;margin-top:2px}
+
+/* buttons */
+.btn{padding:6px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:5px;transition:background .12s;white-space:nowrap;font-family:inherit}
+.btn:hover{background:var(--fill-three)}
+.btn.primary{background:var(--border-focus);border-color:var(--border-focus);color:#fff}
+.btn.primary:hover{background:#4f52d9}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-light)}
+.btn.ghost:hover{background:var(--fill-two);color:var(--text)}
+.btn.dang{background:transparent;border-color:transparent;color:var(--danger)}
+.btn.dang:hover{background:var(--chip-danger-bg)}
+.btn.dang-outline{border-color:var(--danger);color:var(--danger);background:transparent}
+.btn-icon{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:background .12s;flex-shrink:0}
+.btn-icon:hover{background:var(--fill-three);color:var(--text)}
+
+/* tabs */
+.tabs-row{padding:0 24px;border-bottom:1px solid var(--border);display:flex;flex-shrink:0}
+.tab{padding:9px 14px;font-size:12px;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--border-focus)}
+.bdg{border-radius:10px;padding:1px 6px;font-size:10px;background:var(--chip-danger-bg);color:var(--danger)}
+.bdg.info{background:var(--chip-info-bg);color:var(--info)}
+.bdg.ai{background:rgba(129,140,248,.15);color:var(--text-accent)}
+.bdg.n{background:var(--chip-neutral-bg);color:var(--text-light)}
+
+/* tab panes */
+.tab-pane{display:none;flex-direction:column;gap:14px;padding:20px 24px;overflow-y:auto}
+.tab-pane.active{display:flex}
+.content-area{display:flex;flex:1;overflow:hidden}
+.content-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* chips */
+.chip{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.chip.danger{background:var(--chip-danger-bg);color:var(--danger)}
+.chip.success{background:var(--chip-success-bg);color:var(--success)}
+.chip.info{background:var(--chip-info-bg);color:var(--info)}
+.chip.neutral{background:var(--chip-neutral-bg);color:var(--text-light)}
+.chip.warning{background:rgba(251,191,36,.12);color:var(--warning)}
+.chip.purple{background:rgba(167,139,250,.12);color:var(--purple)}
+.chip.ai{background:rgba(129,140,248,.12);color:var(--text-accent)}
+
+/* status dots */
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot.run{background:var(--info);animation:pulse 2s infinite}
+.dot.done{background:var(--success)}
+.dot.idle{background:var(--text-xlight)}
+.dot.fail{background:var(--danger)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.status-row{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-light)}
+
+/* table */
+.tbl-wrap{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:7px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-xlight);font-weight:500;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;font-size:12px;border-bottom:1px solid rgba(51,55,72,.5);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--fill-hover)}
+
+/* card */
+.card{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.card-hdr{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.card-body{padding:14px 16px}
+
+/* workbench card grid */
+.wb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.wb-card{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:border-color .14s}
+.wb-card:hover{border-color:var(--border-focus)}
+.wb-card .wb-body{padding:14px}
+.wb-card .wb-name{font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px}
+.wb-card .wb-desc{color:var(--text-light);font-size:12px;margin-top:4px}
+.wb-card .wb-foot{padding:8px 14px;border-top:1px solid var(--border);background:var(--fill-one);display:flex;justify-content:space-between;align-items:center}
+.wb-icon{width:24px;height:24px;border-radius:4px;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.wb-icon.locked{background:var(--fill-three)}
+
+/* drawer */
+.drawer{width:0;flex-shrink:0;background:var(--fill-one);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .22s ease}
+.drawer.open{width:380px}
+.drawer-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.drawer-title{font-weight:600;font-size:13px;flex:1}
+.drawer-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+
+/* workbench select */
+.wb-pick-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--fill-two);border:1px solid var(--border);border-radius:var(--rl);cursor:pointer;transition:border-color .12s}
+.wb-pick-item:hover{border-color:var(--border-focus)}
+.wb-pick-item.locked{opacity:.45;cursor:not-allowed}
+.wb-info{flex:1}
+.wb-info .wbn{font-size:12px;font-weight:500}
+.wb-info .wbd{font-size:11px;color:var(--text-xlight);margin-top:2px}
+.perm-tag{padding:1px 7px;border-radius:10px;font-size:10px;border:1px solid;display:inline-flex;align-items:center;gap:3px}
+.perm-tag.ok{border-color:rgba(52,211,153,.4);color:var(--success);background:var(--chip-success-bg)}
+.perm-tag.no{border-color:rgba(248,113,113,.3);color:var(--danger);background:var(--chip-danger-bg)}
+
+/* prompt */
+.prompt-area{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:12px;min-height:72px;color:var(--text);resize:none;width:100%;font-family:inherit;outline:none;transition:border-color .12s}
+.prompt-area:focus{border-color:var(--border-focus)}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;color:var(--text-light);font-weight:500}
+.example-card{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;font-size:11px;color:var(--text-light);cursor:pointer;transition:border-color .12s}
+.example-card:hover{border-color:var(--border-focus);color:var(--text)}
+
+/* step nav in drawer */
+.step-nav{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-xlight)}
+.step-nav .back{cursor:pointer;color:var(--text-light)}
+.step-nav .back:hover{color:var(--text)}
+
+/* activity log */
+.act-log{background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:11px;font-family:'SF Mono','Cascadia Mono',monospace;display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto}
+.act-line{display:flex;gap:8px}
+.act-time{color:var(--text-xlight);flex-shrink:0;min-width:36px}
+.act-msg{color:var(--text-light)}
+.act-msg.run{color:var(--info)}
+.act-msg.done{color:var(--success)}
+
+/* section header inside tab */
+.sec-head{display:flex;align-items:center;gap:8px}
+.sec-head .lbl{font-size:12px;font-weight:600;flex:1}
+.sec-head .sub{font-size:11px;color:var(--text-xlight)}
+.divider{border:none;border-top:1px solid var(--border)}
+
+/* workbench full-page layout (v3) */
+.wb-page-layout{display:flex;flex:1;overflow:hidden;min-height:0}
+.wb-jobs-list{width:210px;flex-shrink:0;background:var(--fill-one);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.wb-jobs-list .list-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-xlight);margin-bottom:2px}
+.job-item{padding:7px 10px;border-radius:var(--r);border:1px solid transparent;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .12s}
+.job-item:hover{background:var(--fill-three)}
+.job-item.active{background:var(--fill-three);border-color:var(--border)}
+.job-item .jname{font-size:12px;flex:1}
+.wb-job-detail{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+
+/* context banner */
+.ctx-banner{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:var(--r);padding:9px 13px;display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text-light)}
+.ctx-banner strong{color:var(--text)}
+
+/* v4 split */
+.v4-wb-bar{background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.v4-wb-cell{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s}
+.v4-wb-cell:hover{background:var(--fill-hover)}
+.v4-wb-cell:not(:last-child){border-right:1px solid var(--border)}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .18s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--fill-one);border:1px solid var(--border);border-radius:10px;width:500px;max-height:80vh;display:flex;flex-direction:column;transform:translateY(10px);transition:transform .18s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr .mtitle{font-weight:600;font-size:14px}
+.modal-body{padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.modal-wb-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r)}
+.modal-sec{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-xlight);margin-top:2px}
+.search-input{width:100%;padding:7px 11px;background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:12px;outline:none;font-family:inherit}
+.search-input:focus{border-color:var(--border-focus)}
+
+/* dropdown */
+.dropdown{position:relative;display:inline-flex}
+.dropdown-menu{display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--fill-two);border:1px solid var(--border);border-radius:var(--rl);z-index:50;min-width:200px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.dropdown-menu.open{display:block}
+.dd-item{padding:8px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}
+.dd-item:hover{background:var(--fill-three)}
+.dd-sep{font-size:10px;color:var(--text-xlight);padding:8px 14px 4px;text-transform:uppercase;letter-spacing:.07em}
+
+/* empty */
+.empty{padding:48px;text-align:center;color:var(--text-xlight);font-size:12px}
+
+/* helpers */
+.flex{display:flex}.aic{align-items:center}.gap2{gap:8px}.gap3{gap:12px}.f1{flex:1}
+.mt1{margin-top:4px}.mt2{margin-top:8px}.mb2{margin-bottom:8px}
+.text-light{color:var(--text-light)}.text-xlight{color:var(--text-xlight)}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.semibold{font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- variation bar -->
+<div class="var-bar">
+  <span>Variation:</span>
+  <button class="vbtn active" onclick="showVar(1,this)">1 · Workbench Tab</button>
+  <button class="vbtn" onclick="showVar(2,this)">2 · Drawer</button>
+  <button class="vbtn" onclick="showVar(3,this)">3 · Full Page + Banner</button>
+  <button class="vbtn" onclick="showVar(4,this)">4 · AI Tab Hub</button>
+  <button class="vbtn new-badge" onclick="showVar(5,this)">5 · Drawer + Permissions</button>
+</div>
+
+<div class="shell">
+  <!-- sidebar (shared) -->
+  <div class="sidebar">
+    <div class="sb-sec">Platform</div>
+    <div class="sb-item">⬡ Overview</div>
+    <div class="sb-item">⟳ CD</div>
+    <div class="sb-item active">⊞ Flows</div>
+    <div class="sb-item">✦ Plural AI</div>
+    <div class="sb-sec">Infrastructure</div>
+    <div class="sb-item">⎈ Kubernetes</div>
+    <div class="sb-item">⬡ Stacks</div>
+    <div class="sb-item">⊛ Security</div>
+  </div>
+
+  <div class="main-area">
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 1 — Workbench Tab + Header Dropdown
+  ════════════════════════════════════════════════════ -->
+  <div class="page active" id="v1">
+    <div class="flow-hdr">
+      <div class="back-btn">←</div>
+      <div class="flow-icon">⊞</div>
+      <div class="flow-meta">
+        <div class="fname">my-service-flow</div>
+        <div class="fdesc">Core microservice ownership flow</div>
+      </div>
+      <button class="btn">👥 Permissions</button>
+      <div class="dropdown">
+        <button class="btn primary" onclick="toggleDD('v1-dd')">⚙ Launch Workbench ▾</button>
+        <div class="dropdown-menu" id="v1-dd">
+          <div class="dd-sep">Attached workbenches</div>
+          <div class="dd-item" onclick="showVar(3,null);closeDD('v1-dd')">
+            <div class="wb-icon" style="width:18px;height:18px;font-size:9px">⚙</div>
+            <div class="f1">
+              <div class="text-sm semibold">infra-debugger</div>
+              <div class="status-row"><div class="dot run"></div>1 running</div>
+            </div>
+          </div>
+          <div class="dd-item" onclick="showVar(3,null);closeDD('v1-dd')">
+            <div class="wb-icon" style="width:18px;height:18px;font-size:9px">⚙</div>
+            <div class="f1">
+              <div class="text-sm semibold">deploy-assistant</div>
+              <div class="status-row"><div class="dot idle"></div>idle</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v1','services',this)">Services</div>
+      <div class="tab" onclick="st('v1','pipelines',this)">Pipelines</div>
+      <div class="tab" onclick="st('v1','prs',this)">PRs</div>
+      <div class="tab" onclick="st('v1','alerts',this)">Alerts <span class="bdg">3</span></div>
+      <div class="tab active" onclick="st('v1','workbenches',this)">Workbenches <span class="bdg info">2</span></div>
+      <div class="tab" onclick="st('v1','mcp',this)">MCP Connections</div>
+      <div class="tab" onclick="st('v1','vulns',this)">Vulnerabilities</div>
+    </div>
+    <div class="content-area"><div class="content-main">
+      <div class="tab-pane" id="v1-services"><div class="empty">Services table would appear here</div></div>
+      <div class="tab-pane" id="v1-pipelines"><div class="empty">Pipelines table would appear here</div></div>
+      <div class="tab-pane" id="v1-prs"><div class="empty">PRs table would appear here</div></div>
+      <div class="tab-pane" id="v1-alerts">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Severity</th><th>Alert</th><th>Status</th><th>Workbench Job</th></tr></thead>
+          <tbody>
+            <tr><td><span class="chip danger">● HIGH</span></td><td>OOMKilled: api-pod-7f4bc</td><td><span class="chip danger">Firing</span></td>
+              <td><button class="btn text-sm" style="padding:3px 8px" onclick="showVar(3,null)">Run in infra-debugger ↗</button></td></tr>
+            <tr><td><span class="chip warning">● MED</span></td><td>High latency p99 &gt; 2s</td><td><span class="chip success">Resolved</span></td>
+              <td><span class="status-row"><div class="dot done"></div>job-a4bc (infra-debugger)</span></td></tr>
+            <tr><td><span class="chip info">● LOW</span></td><td>Disk usage &gt; 80%</td><td><span class="chip danger">Firing</span></td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn text-sm" style="padding:3px 8px" onclick="toggleDD('v1-alert-dd')">Run in Workbench ▾</button>
+                  <div class="dropdown-menu" id="v1-alert-dd">
+                    <div class="dd-item" onclick="showVar(3,null);closeDD('v1-alert-dd')">infra-debugger</div>
+                    <div class="dd-item" onclick="showVar(3,null);closeDD('v1-alert-dd')">deploy-assistant</div>
+                  </div>
+                </div>
+              </td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="tab-pane active" id="v1-workbenches">
+        <div class="flex aic gap2">
+          <div class="f1"><div class="semibold">Attached Workbenches</div><div class="text-sm text-light mt1">Select a workbench to launch. It will receive this flow's context.</div></div>
+          <button class="btn primary" onclick="openModal('v1-attach-modal')">+ Attach Workbench</button>
+        </div>
+        <div class="wb-grid">
+          <div class="wb-card" onclick="showVar(3,null)">
+            <div class="wb-body">
+              <div class="wb-name"><div class="wb-icon">⚙</div> infra-debugger</div>
+              <div class="wb-desc mt1">Debug Kubernetes infra issues across clusters</div>
+              <div class="status-row mt2"><div class="dot run"></div>1 active job</div>
+            </div>
+            <div class="wb-foot">
+              <button class="btn dang-outline text-sm" style="padding:3px 8px" onclick="event.stopPropagation()">Detach</button>
+              <button class="btn primary text-sm" style="padding:4px 10px" onclick="event.stopPropagation();showVar(3,null)">Open →</button>
+            </div>
+          </div>
+          <div class="wb-card" onclick="showVar(3,null)">
+            <div class="wb-body">
+              <div class="wb-name"><div class="wb-icon">⚙</div> deploy-assistant</div>
+              <div class="wb-desc mt1">CD automation helper and deployment advisor</div>
+              <div class="status-row mt2"><div class="dot idle"></div>No active jobs</div>
+            </div>
+            <div class="wb-foot">
+              <button class="btn dang-outline text-sm" style="padding:3px 8px" onclick="event.stopPropagation()">Detach</button>
+              <button class="btn text-sm" style="padding:4px 10px" onclick="event.stopPropagation();showVar(3,null)">Open →</button>
+            </div>
+          </div>
+          <div class="wb-card" style="border-style:dashed;background:transparent;min-height:120px;display:flex;align-items:center;justify-content:center" onclick="openModal('v1-attach-modal')">
+            <div style="text-align:center;color:var(--text-xlight)"><div style="font-size:22px;margin-bottom:6px">+</div><div class="text-sm">Attach workbench</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane" id="v1-mcp"><div class="empty">MCP Connections would appear here</div></div>
+      <div class="tab-pane" id="v1-vulns"><div class="empty">Vulnerability reports would appear here</div></div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 2 — In-Page Drawer (select → workbench)
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v2">
+    <div class="flow-hdr">
+      <div class="back-btn">←</div>
+      <div class="flow-icon">⊞</div>
+      <div class="flow-meta"><div class="fname">my-service-flow</div><div class="fdesc">Core microservice ownership flow</div></div>
+      <button class="btn">👥 Permissions</button>
+      <button class="btn primary" onclick="v2Toggle()">⚙ Open AI Workbench →</button>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v2','services',this)">Services</div>
+      <div class="tab" onclick="st('v2','pipelines',this)">Pipelines</div>
+      <div class="tab" onclick="st('v2','prs',this)">PRs</div>
+      <div class="tab active" onclick="st('v2','alerts',this)">Alerts <span class="bdg">3</span></div>
+      <div class="tab" onclick="st('v2','mcp',this)">MCP</div>
+    </div>
+    <div class="content-area">
+      <div class="content-main">
+        <div class="tab-pane" id="v2-services"><div class="empty">Services table would appear here</div></div>
+        <div class="tab-pane" id="v2-pipelines"><div class="empty">Pipelines table would appear here</div></div>
+        <div class="tab-pane" id="v2-prs"><div class="empty">PRs table would appear here</div></div>
+        <div class="tab-pane active" id="v2-alerts">
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Severity</th><th>Alert</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip danger">● HIGH</span></td><td>OOMKilled: api-pod-7f4bc</td><td><span class="chip danger">Firing</span></td>
+                <td><button class="btn primary text-sm" style="padding:3px 8px" onclick="v2OpenWithWb()">Investigate in Workbench →</button></td></tr>
+              <tr><td><span class="chip warning">● MED</span></td><td>High latency p99 &gt; 2s</td><td><span class="chip success">Resolved</span></td>
+                <td><button class="btn text-sm" style="padding:3px 8px" onclick="v2Open()">View job ↗</button></td></tr>
+              <tr><td><span class="chip info">● LOW</span></td><td>Disk &gt; 80%</td><td><span class="chip danger">Firing</span></td>
+                <td><button class="btn text-sm" style="padding:3px 8px" onclick="v2Open()">Investigate →</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="tab-pane" id="v2-mcp"><div class="empty">MCP Connections would appear here</div></div>
+      </div>
+
+      <!-- v2 drawer -->
+      <div class="drawer" id="v2-drawer">
+        <!-- select screen -->
+        <div id="v2-s-select" style="display:flex;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div class="drawer-title">AI Workbench</div>
+            <button class="btn-icon" onclick="v2Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div class="ctx-banner"><span style="color:var(--text-accent)">📌</span><span><strong>my-service-flow</strong> · 3 alerts · pipeline: staging→prod</span></div>
+            <div class="form-label">Select workbench</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="wb-pick-item" onclick="v2GoWb()">
+                <div class="wb-icon">⚙</div>
+                <div class="wb-info"><div class="wbn">infra-debugger</div><div class="wbd">Debug k8s infra issues</div></div>
+                <div style="text-align:right"><div class="status-row"><div class="dot run"></div>1 running</div></div>
+                <button class="btn primary text-sm" style="padding:4px 9px" onclick="event.stopPropagation();v2GoWb()">Use</button>
+              </div>
+              <div class="wb-pick-item" onclick="v2GoWb()">
+                <div class="wb-icon">⚙</div>
+                <div class="wb-info"><div class="wbn">deploy-assistant</div><div class="wbd">CD automation helper</div></div>
+                <div style="text-align:right"><div class="status-row"><div class="dot idle"></div>idle</div></div>
+                <button class="btn text-sm" style="padding:4px 9px" onclick="event.stopPropagation();v2GoWb()">Use</button>
+              </div>
+            </div>
+            <button class="btn text-sm" style="justify-content:center" onclick="openModal('v1-attach-modal')">+ Attach another workbench</button>
+          </div>
+        </div>
+        <!-- workbench open screen -->
+        <div id="v2-s-wb" style="display:none;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div style="flex:1">
+              <div class="step-nav"><span class="back" onclick="v2Back()">← Workbenches</span></div>
+              <div class="drawer-title flex aic gap2 mt1"><div class="wb-icon" style="width:18px;height:18px;font-size:9px">⚙</div> infra-debugger</div>
+            </div>
+            <button class="btn-icon" onclick="v2Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div style="background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;flex-direction:column;gap:6px">
+              <div class="form-label">Jobs</div>
+              <div class="job-item active"><div class="dot run"></div><div class="jname">analyze-oom-crash</div><span class="chip info text-xs">running</span></div>
+              <div class="job-item"><div class="dot done"></div><div class="jname">check-deploys</div><span class="chip success text-xs">done</span></div>
+              <button class="btn text-sm" style="justify-content:center;margin-top:4px">+ New Job</button>
+            </div>
+            <div class="act-log">
+              <div class="form-label" style="font-family:inherit;margin-bottom:2px">Activity · analyze-oom-crash</div>
+              <div class="act-line"><span class="act-time">00:03</span><span class="act-msg run">▶ Fetching pod logs for api-pod…</span></div>
+              <div class="act-line"><span class="act-time">00:07</span><span class="act-msg run">▶ Analyzing memory allocation…</span></div>
+              <div class="act-line"><span class="act-time">00:12</span><span class="act-msg">  Container limit: 256Mi, usage: 254Mi</span></div>
+              <div class="act-line"><span class="act-time">00:15</span><span class="act-msg run">▶ Checking HPA configuration…</span></div>
+            </div>
+            <button class="btn primary text-sm" style="justify-content:center" onclick="showVar(3,null)">Open full workbench ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 3 — Full Workbench Page + Flow Banner
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v3">
+    <!-- context banner -->
+    <div style="padding:10px 24px;background:var(--fill-one);border-bottom:1px solid var(--border);flex-shrink:0">
+      <div class="ctx-banner">
+        <span style="color:var(--text-accent)">📌</span>
+        <span><strong>Flow context: my-service-flow</strong></span>
+        <span class="chip danger text-xs">● 3 alerts</span>
+        <span class="chip info text-xs">▶ pipeline: staging→prod</span>
+        <div class="f1"></div>
+        <button class="btn text-sm" style="padding:3px 9px" onclick="showVar(1,null)">View flow →</button>
+        <button class="btn primary text-sm" style="padding:3px 9px" onclick="v3PrefillCtx()">Pre-fill with flow context</button>
+        <button class="btn ghost text-sm" style="padding:3px 8px">×</button>
+      </div>
+    </div>
+    <!-- workbench header -->
+    <div style="padding:13px 24px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:12px">
+      <div class="back-btn" onclick="showVar(1,null)">←</div>
+      <div class="wb-icon">⚙</div>
+      <div class="f1"><div class="semibold">infra-debugger</div><div class="text-xs text-xlight">Debug Kubernetes infra issues across clusters</div></div>
+      <button class="btn primary" onclick="alert('New job dialog')">+ New Job</button>
+    </div>
+    <!-- jobs sidebar + detail -->
+    <div class="wb-page-layout">
+      <div class="wb-jobs-list">
+        <div class="list-title">Jobs</div>
+        <div class="job-item active" onclick="v3Sel(this)"><div class="dot run"></div><div class="jname">analyze-oom-crash</div></div>
+        <div class="job-item" onclick="v3Sel(this)"><div class="dot done"></div><div class="jname">check-deploys</div></div>
+        <div class="job-item" onclick="v3Sel(this)"><div class="dot done"></div><div class="jname">latency-root-cause</div></div>
+        <hr class="divider" style="margin:8px 0">
+        <button class="btn text-sm" style="justify-content:center">+ New Job</button>
+      </div>
+      <div class="wb-job-detail">
+        <div class="flex aic gap2">
+          <div class="semibold" style="font-size:15px">analyze-oom-crash</div>
+          <span class="chip info"><div class="dot run" style="margin-right:3px"></div>Running</span>
+        </div>
+        <div class="card">
+          <div class="card-hdr">Activity <span class="chip info text-xs">Live</span></div>
+          <div class="act-log" style="border:none;border-radius:0" id="v3-act-log">
+            <div class="act-line"><span class="act-time">00:01</span><span class="act-msg">  Job started with flow context: my-service-flow</span></div>
+            <div class="act-line"><span class="act-time">00:03</span><span class="act-msg run">▶ Fetching pod logs for api-pod-7f4bc…</span></div>
+            <div class="act-line"><span class="act-time">00:07</span><span class="act-msg run">▶ Analyzing memory allocation patterns…</span></div>
+            <div class="act-line"><span class="act-time">00:12</span><span class="act-msg">  Container limit: 256Mi, peak: 254Mi (99.2%)</span></div>
+            <div class="act-line"><span class="act-time">00:15</span><span class="act-msg run">▶ Checking HPA configuration…</span></div>
+            <div class="act-line"><span class="act-time">00:19</span><span class="act-msg">  HPA min: 1, max: 3, current: 1</span></div>
+            <div class="act-line"><span class="act-time">00:23</span><span class="act-msg run">▶ Generating remediation plan…</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">Result (partial)</div>
+          <div class="card-body text-sm text-light">
+            <strong style="color:var(--text)">Root cause:</strong> Container memory limit (256Mi) too low for current traffic. Recommend increasing to 512Mi and tuning HPA to scale at 2 replicas under current load.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 4 — AI Tab Hub (split view)
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v4">
+    <div class="flow-hdr">
+      <div class="back-btn">←</div>
+      <div class="flow-icon">⊞</div>
+      <div class="flow-meta"><div class="fname">my-service-flow</div><div class="fdesc">Core microservice ownership flow</div></div>
+      <button class="btn">👥 Permissions</button>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v4','services',this)">Services</div>
+      <div class="tab" onclick="st('v4','pipelines',this)">Pipelines</div>
+      <div class="tab" onclick="st('v4','prs',this)">PRs</div>
+      <div class="tab" onclick="st('v4','alerts',this)">Alerts <span class="bdg">3</span></div>
+      <div class="tab active" onclick="st('v4','ai',this)">✦ AI <span class="bdg ai">2</span></div>
+      <div class="tab" onclick="st('v4','mcp',this)">MCP</div>
+    </div>
+    <div class="content-area"><div class="content-main">
+      <div class="tab-pane" id="v4-services"><div class="empty">Services would appear here</div></div>
+      <div class="tab-pane" id="v4-pipelines"><div class="empty">Pipelines would appear here</div></div>
+      <div class="tab-pane" id="v4-prs"><div class="empty">PRs would appear here</div></div>
+      <div class="tab-pane" id="v4-mcp"><div class="empty">MCP would appear here</div></div>
+      <div class="tab-pane" id="v4-alerts">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Severity</th><th>Alert</th><th>Status</th><th>Workbench Jobs</th></tr></thead>
+          <tbody>
+            <tr><td><span class="chip danger">● HIGH</span></td><td>OOMKilled: api-pod-7f4bc</td><td><span class="chip danger">Firing</span></td>
+              <td><span class="status-row"><div class="dot run"></div>analyze-oom [infra-debugger]</span></td></tr>
+            <tr><td><span class="chip warning">● MED</span></td><td>High latency p99</td><td><span class="chip success">Resolved</span></td>
+              <td><span class="status-row"><div class="dot done"></div>latency-check [infra-debugger]</span></td></tr>
+            <tr><td><span class="chip info">● LOW</span></td><td>Disk &gt; 80%</td><td><span class="chip danger">Firing</span></td>
+              <td><div class="dropdown"><button class="btn text-sm" style="padding:3px 8px" onclick="toggleDD('v4-dd')">+ Run in Workbench ▾</button><div class="dropdown-menu" id="v4-dd"><div class="dd-item">infra-debugger</div><div class="dd-item">deploy-assistant</div></div></div></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="tab-pane active" id="v4-ai">
+        <div class="flex aic gap2 mb2">
+          <div class="semibold f1">Attached Workbenches</div>
+          <button class="btn" onclick="openModal('v4-manage-modal')">Manage Workbenches</button>
+          <button class="btn primary" onclick="showVar(3,null)">+ New Workbench Job</button>
+        </div>
+        <div class="v4-wb-bar">
+          <div class="v4-wb-cell" onclick="showVar(3,null)">
+            <div class="wb-icon">⚙</div>
+            <div class="f1"><div class="semibold text-sm">infra-debugger</div><div class="status-row mt1"><div class="dot run"></div>1 running</div></div>
+            <button class="btn primary text-sm" style="padding:4px 9px" onclick="event.stopPropagation();showVar(3,null)">Open →</button>
+          </div>
+          <div class="v4-wb-cell" onclick="showVar(3,null)">
+            <div class="wb-icon">⚙</div>
+            <div class="f1"><div class="semibold text-sm">deploy-assistant</div><div class="status-row mt1"><div class="dot idle"></div>idle</div></div>
+            <button class="btn text-sm" style="padding:4px 9px" onclick="event.stopPropagation();showVar(3,null)">Open →</button>
+          </div>
+        </div>
+        <div class="sec-head mt2"><div class="lbl">Recent Jobs</div><div class="sub">All workbenches, scoped to this flow</div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Job</th><th>Workbench</th><th>Status</th><th>Started</th><th>Triggered</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="semibold text-sm">analyze-oom-crash</td><td><span class="chip purple text-xs">infra-debugger</span></td><td><span class="chip info"><div class="dot run" style="margin-right:3px"></div>Running</span></td><td class="text-light">3m ago</td><td><span class="chip danger text-xs">Alert: OOMKilled</span></td><td><button class="btn text-xs" style="padding:2px 7px">View ↗</button></td></tr>
+            <tr><td class="semibold text-sm">deploy-check-staging</td><td><span class="chip purple text-xs">deploy-assistant</span></td><td><span class="chip success">Done</span></td><td class="text-light">2h ago</td><td><span class="chip n text-xs">Manual</span></td><td><button class="btn text-xs" style="padding:2px 7px">View ↗</button></td></tr>
+            <tr><td class="semibold text-sm">latency-root-cause</td><td><span class="chip purple text-xs">infra-debugger</span></td><td><span class="chip success">Done</span></td><td class="text-light">5h ago</td><td><span class="chip warning text-xs">Alert: Latency</span></td><td><button class="btn text-xs" style="padding:2px 7px">View ↗</button></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       VARIATION 5 ★ — Drawer + Permission Model + Split Alerts/PRs
+       (updated design based on product clarifications)
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v5">
+    <div class="flow-hdr">
+      <div class="back-btn">←</div>
+      <div class="flow-icon">⊞</div>
+      <div class="flow-meta"><div class="fname">my-service-flow</div><div class="fdesc">Core microservice ownership flow</div></div>
+      <button class="btn" onclick="openModal('perm-modal')">👥 Permissions</button>
+      <!-- PRIMARY ACTION: like CreateAgentRunButton — no chat button -->
+      <button class="btn primary" onclick="v5Open('wb-select')">✦ Run AI Job</button>
+    </div>
+    <div class="tabs-row">
+      <div class="tab" onclick="st('v5','services',this)">Services</div>
+      <div class="tab" onclick="st('v5','pipelines',this)">Pipelines</div>
+      <div class="tab active" onclick="st('v5','prs',this)">PRs <span class="bdg n">5</span></div>
+      <div class="tab" onclick="st('v5','alerts',this)">Alerts <span class="bdg">3</span></div>
+      <div class="tab" onclick="st('v5','jobs',this)">AI Jobs <span class="bdg ai">2</span></div>
+      <div class="tab" onclick="st('v5','mcp',this)">MCP</div>
+      <div class="tab" onclick="st('v5','vulns',this)">Vulnerabilities</div>
+    </div>
+
+    <div class="content-area">
+      <div class="content-main">
+        <div class="tab-pane" id="v5-services"><div class="empty">Services table would appear here</div></div>
+        <div class="tab-pane" id="v5-pipelines"><div class="empty">Pipelines table would appear here</div></div>
+        <div class="tab-pane" id="v5-mcp"><div class="empty">MCP Connections would appear here</div></div>
+        <div class="tab-pane" id="v5-vulns"><div class="empty">Vulnerability reports would appear here</div></div>
+
+        <!-- PRs: split normal vs workbench-generated -->
+        <div class="tab-pane active" id="v5-prs">
+          <div class="sec-head"><div class="lbl">Pull Requests</div><div class="sub">From your repositories</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Title</th><th>Repo</th><th>Status</th><th>Opened</th></tr></thead>
+            <tbody>
+              <tr><td class="semibold">feat: add retry logic to payment-svc</td><td class="text-light">payment-svc</td><td><span class="chip info">Open</span></td><td class="text-light">2h ago</td></tr>
+              <tr><td class="semibold">fix: null pointer in auth handler</td><td class="text-light">auth-svc</td><td><span class="chip success">Merged</span></td><td class="text-light">1d ago</td></tr>
+              <tr><td class="semibold">chore: bump dependencies</td><td class="text-light">api-gateway</td><td><span class="chip info">Open</span></td><td class="text-light">3d ago</td></tr>
+            </tbody>
+          </table></div>
+          <hr class="divider">
+          <div class="sec-head"><div class="lbl flex aic gap2"><span class="chip ai text-xs">✦ AI-Generated</span> Workbench PRs</div><div class="sub">Created by workbench jobs</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Title</th><th>Repo</th><th>Workbench Job</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody>
+              <tr><td class="semibold">fix: increase api-pod memory limit to 512Mi</td><td class="text-light">api-svc</td>
+                <td><span class="chip purple text-xs">infra-debugger</span> <span class="text-xlight text-xs">analyze-oom-crash</span></td>
+                <td><span class="chip info">Open</span></td><td class="text-light">5m ago</td></tr>
+              <tr><td class="semibold">feat: add HPA config for api-svc</td><td class="text-light">api-svc</td>
+                <td><span class="chip purple text-xs">infra-debugger</span> <span class="text-xlight text-xs">analyze-oom-crash</span></td>
+                <td><span class="chip n">Draft</span></td><td class="text-light">5m ago</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <!-- Alerts: split monitoring vs workbench-generated -->
+        <div class="tab-pane" id="v5-alerts">
+          <div class="sec-head"><div class="lbl">Monitoring Alerts</div><div class="sub">From your observability stack</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Severity</th><th>Alert</th><th>Status</th><th>Since</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip danger">● HIGH</span></td><td>OOMKilled: api-pod-7f4bc</td><td><span class="chip danger">Firing</span></td><td class="text-light">12m</td>
+                <td><button class="btn text-xs" style="padding:3px 8px" onclick="v5Open('wb-select')">✦ Run AI Job</button></td></tr>
+              <tr><td><span class="chip warning">● MED</span></td><td>High latency p99 &gt; 2s</td><td><span class="chip danger">Firing</span></td><td class="text-light">1h</td>
+                <td><button class="btn text-xs" style="padding:3px 8px" onclick="v5Open('wb-select')">✦ Run AI Job</button></td></tr>
+              <tr><td><span class="chip info">● LOW</span></td><td>Disk &gt; 80%</td><td><span class="chip success">Resolved</span></td><td class="text-light">3h</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+          <hr class="divider">
+          <div class="sec-head"><div class="lbl flex aic gap2"><span class="chip ai text-xs">✦ AI-Generated</span> Workbench Alerts</div><div class="sub">Detected by workbench monitoring jobs</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Severity</th><th>Alert</th><th>Workbench</th><th>Status</th><th>Detected</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip warning">● MED</span></td><td>api-svc has insufficient resource requests</td><td><span class="chip purple text-xs">infra-debugger</span></td><td><span class="chip warning">Open</span></td><td class="text-light">5m ago</td></tr>
+              <tr><td><span class="chip info">● LOW</span></td><td>Missing readiness probe on payment-svc</td><td><span class="chip purple text-xs">infra-debugger</span></td><td><span class="chip info">Open</span></td><td class="text-light">5m ago</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <!-- AI Jobs tab — prompt-first like agent runs -->
+        <div class="tab-pane" id="v5-jobs">
+          <div style="background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div class="semibold" style="font-size:14px;margin-bottom:3px">Run an AI Job</div>
+              <div class="text-sm text-light">Invoke a workbench to analyze your flow, investigate alerts, or make infrastructure changes. You can use workbenches matching your access tier on this flow.</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <div class="example-card" onclick="v5Open('prompt-infra')">Why is api-pod OOMKilling?</div>
+              <div class="example-card" onclick="v5Open('prompt-infra')">Check resource requests across all services</div>
+              <div class="example-card" onclick="v5Open('prompt-infra')">Scan for missing readiness probes</div>
+            </div>
+            <button class="btn primary" style="width:fit-content" onclick="v5Open('wb-select')">✦ Run AI Job</button>
+          </div>
+          <div class="sec-head"><div class="lbl">Active</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Job</th><th>Workbench</th><th>Status</th><th>Started</th><th>Triggered</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="semibold text-sm">analyze-oom-crash</td><td><span class="chip purple text-xs">infra-debugger</span></td><td><span class="chip info"><div class="dot run" style="margin-right:3px"></div>Running</span></td><td class="text-light">3m</td><td><span class="chip danger text-xs">Alert: OOMKilled</span></td>
+                <td><button class="btn text-xs" style="padding:2px 7px" onclick="v5Open('job-running')">View →</button></td></tr>
+            </tbody>
+          </table></div>
+          <div class="sec-head"><div class="lbl">Completed</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Job</th><th>Workbench</th><th>Status</th><th>Started</th><th>Triggered</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="semibold text-sm">latency-root-cause</td><td><span class="chip purple text-xs">infra-debugger</span></td><td><span class="chip success">Done</span></td><td class="text-light">2h</td><td><span class="chip warning text-xs">Alert: Latency</span></td>
+                <td><button class="btn text-xs" style="padding:2px 7px" onclick="v5Open('job-done')">View →</button></td></tr>
+              <tr><td class="semibold text-sm">deploy-check-staging</td><td><span class="chip purple text-xs">deploy-assistant</span></td><td><span class="chip success">Done</span></td><td class="text-light">5h</td><td><span class="chip n text-xs">Manual</span></td>
+                <td><button class="btn text-xs" style="padding:2px 7px" onclick="v5Open('job-done')">View →</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- V5 DRAWER -->
+      <div class="drawer" id="v5-drawer">
+
+        <!-- SCREEN: workbench select (permission-filtered) -->
+        <div id="v5-scr-wb-select" style="display:flex;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div class="drawer-title">✦ Run AI Job</div>
+            <button class="btn-icon" onclick="v5Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div class="text-sm text-light">Select a workbench. You can access workbenches where your permissions satisfy both the flow and workbench requirements.</div>
+            <div class="form-field">
+              <div class="form-label">Available Workbenches</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <!-- accessible -->
+                <div class="wb-pick-item" onclick="v5Scr('prompt-infra')">
+                  <div class="wb-icon">⚙</div>
+                  <div class="wb-info"><div class="wbn">infra-debugger</div><div class="wbd">Debug Kubernetes infra issues</div></div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+                    <span class="perm-tag ok">✓ Access</span>
+                    <div class="status-row"><div class="dot run"></div>1 running</div>
+                  </div>
+                </div>
+                <div class="wb-pick-item" onclick="v5Scr('prompt-deploy')">
+                  <div class="wb-icon">⚙</div>
+                  <div class="wb-info"><div class="wbn">deploy-assistant</div><div class="wbd">CD automation and deployment advisor</div></div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+                    <span class="perm-tag ok">✓ Access</span>
+                    <div class="status-row"><div class="dot idle"></div>Idle</div>
+                  </div>
+                </div>
+                <!-- locked: permission mismatch -->
+                <div class="wb-pick-item locked" title="Requires platform engineer tier">
+                  <div class="wb-icon locked">⚙</div>
+                  <div class="wb-info"><div class="wbn" style="color:var(--text-xlight)">ops-toolkit</div><div class="wbd">Requires platform tier</div></div>
+                  <span class="perm-tag no">✗ No access</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN: prompt for infra-debugger -->
+        <div id="v5-scr-prompt-infra" style="display:none;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div style="flex:1">
+              <div class="step-nav"><span class="back" onclick="v5Scr('wb-select')">← Workbenches</span><span style="color:var(--text-xlight)">/</span><span style="color:var(--text-xlight)">New Job</span></div>
+              <div class="drawer-title flex aic gap2 mt1"><div class="wb-icon" style="width:18px;height:18px;font-size:9px">⚙</div> infra-debugger</div>
+            </div>
+            <button class="btn-icon" onclick="v5Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div class="text-sm text-light">Describe what you want the workbench to investigate. It will have access to this flow's services, alerts, and context.</div>
+            <div class="form-field">
+              <div class="form-label">Example prompts</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div class="example-card" onclick="document.getElementById('v5-prompt-infra').value=this.textContent">Why is api-pod OOMKilling? Recommend a fix and open a PR.</div>
+                <div class="example-card" onclick="document.getElementById('v5-prompt-infra').value=this.textContent">Check resource requests across all services and flag anything too low.</div>
+                <div class="example-card" onclick="document.getElementById('v5-prompt-infra').value=this.textContent">Scan for missing readiness and liveness probes.</div>
+              </div>
+            </div>
+            <div class="form-field">
+              <div class="form-label">Prompt</div>
+              <textarea id="v5-prompt-infra" class="prompt-area" rows="4" placeholder="Describe what you want the AI to do…"></textarea>
+            </div>
+            <div class="ctx-banner" style="font-size:11px">
+              <span style="color:var(--text-accent)">📌</span>
+              <span><strong>Flow context included automatically:</strong> services list, recent alerts, pipeline status for <em>my-service-flow</em></span>
+            </div>
+            <div class="flex aic gap2" style="margin-top:4px">
+              <button class="btn ghost" onclick="v5Scr('wb-select')">Cancel</button>
+              <div class="f1"></div>
+              <button class="btn primary" onclick="v5Scr('job-running')">Run Job →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN: prompt for deploy-assistant -->
+        <div id="v5-scr-prompt-deploy" style="display:none;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div style="flex:1">
+              <div class="step-nav"><span class="back" onclick="v5Scr('wb-select')">← Workbenches</span><span style="color:var(--text-xlight)">/</span><span style="color:var(--text-xlight)">New Job</span></div>
+              <div class="drawer-title flex aic gap2 mt1"><div class="wb-icon" style="width:18px;height:18px;font-size:9px">⚙</div> deploy-assistant</div>
+            </div>
+            <button class="btn-icon" onclick="v5Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div class="form-field">
+              <div class="form-label">Example prompts</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div class="example-card" onclick="document.getElementById('v5-prompt-deploy').value=this.textContent">Is the current pipeline healthy? Show blocked stages.</div>
+                <div class="example-card" onclick="document.getElementById('v5-prompt-deploy').value=this.textContent">Check deployment drift between staging and prod.</div>
+              </div>
+            </div>
+            <div class="form-field">
+              <div class="form-label">Prompt</div>
+              <textarea id="v5-prompt-deploy" class="prompt-area" rows="4" placeholder="Describe what you want the AI to do…"></textarea>
+            </div>
+            <div class="ctx-banner" style="font-size:11px"><span style="color:var(--text-accent)">📌</span><span><strong>Flow context included automatically</strong></span></div>
+            <div class="flex aic gap2" style="margin-top:4px">
+              <button class="btn ghost" onclick="v5Scr('wb-select')">Cancel</button>
+              <div class="f1"></div>
+              <button class="btn primary" onclick="v5Scr('job-running')">Run Job →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN: job running -->
+        <div id="v5-scr-job-running" style="display:none;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div style="flex:1">
+              <div class="step-nav"><span class="back" onclick="v5Scr('wb-select')">← Workbenches</span><span style="color:var(--text-xlight)">/</span><span style="color:var(--text-xlight)">analyze-oom-new</span></div>
+              <div class="drawer-title flex aic gap2 mt1"><span class="chip info text-xs"><div class="dot run" style="margin-right:3px"></div>Running</span> analyze-oom-new</div>
+            </div>
+            <button class="btn-icon" onclick="v5Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--text-light)">
+              <strong style="color:var(--text)">Prompt:</strong> Why is api-pod OOMKilling? Recommend a fix and open a PR.
+            </div>
+            <div class="form-field">
+              <div class="form-label">Activity</div>
+              <div class="act-log">
+                <div class="act-line"><span class="act-time">00:01</span><span class="act-msg done">✓ Flow context loaded: my-service-flow (3 services, 3 alerts)</span></div>
+                <div class="act-line"><span class="act-time">00:03</span><span class="act-msg run">▶ Fetching pod logs for api-pod-7f4bc…</span></div>
+                <div class="act-line"><span class="act-time">00:07</span><span class="act-msg run">▶ Analyzing memory allocation patterns…</span></div>
+                <div class="act-line"><span class="act-time">00:12</span><span class="act-msg">  Limit: 256Mi, peak: 254Mi (99.2%)</span></div>
+                <div class="act-line"><span class="act-time">00:15</span><span class="act-msg run">▶ Checking HPA configuration…</span></div>
+                <div class="act-line"><span class="act-time">00:19</span><span class="act-msg">  HPA min:1, max:3, current:1 — needs tuning</span></div>
+                <div class="act-line"><span class="act-time">00:23</span><span class="act-msg run">▶ Generating PRs…</span></div>
+              </div>
+            </div>
+            <div style="background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;font-size:12px;color:var(--text-light)">
+              <div class="semibold" style="color:var(--text);margin-bottom:5px">Result (partial)</div>
+              Memory limit (256Mi) too low. Recommending 512Mi + HPA tuning.
+              <div style="margin-top:8px;display:flex;gap:6px">
+                <span class="chip info text-xs">PR: fix memory limit</span>
+                <span class="chip n text-xs">PR: HPA config</span>
+              </div>
+            </div>
+            <div class="flex aic gap2" style="margin-top:auto;padding-top:8px">
+              <button class="btn ghost text-sm" onclick="st('v5','jobs',document.querySelectorAll('#v5 .tab')[4]);v5Close()">View in Jobs tab</button>
+              <div class="f1"></div>
+              <button class="btn text-sm" onclick="v5Scr('wb-select')">New Job</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN: completed job detail -->
+        <div id="v5-scr-job-done" style="display:none;flex-direction:column;height:100%">
+          <div class="drawer-hdr">
+            <div style="flex:1">
+              <div class="step-nav"><span class="back" onclick="v5Close()">← Close</span></div>
+              <div class="drawer-title flex aic gap2 mt1"><span class="chip success text-xs">Done</span> latency-root-cause</div>
+            </div>
+            <button class="btn-icon" onclick="v5Close()">×</button>
+          </div>
+          <div class="drawer-body">
+            <div class="text-sm text-light flex aic gap2">
+              <strong style="color:var(--text)">Workbench:</strong><span class="chip purple text-xs">infra-debugger</span>
+              <strong style="color:var(--text)">Triggered:</strong><span class="chip warning text-xs">Alert: Latency</span>
+            </div>
+            <div class="act-log">
+              <div class="act-line"><span class="act-time">00:01</span><span class="act-msg done">✓ Flow context loaded</span></div>
+              <div class="act-line"><span class="act-time">00:04</span><span class="act-msg done">✓ Queried metrics for checkout-svc</span></div>
+              <div class="act-line"><span class="act-time">00:09</span><span class="act-msg done">✓ Found slow DB query in /checkout</span></div>
+              <div class="act-line"><span class="act-time">00:14</span><span class="act-msg done">✓ Generated index recommendation</span></div>
+              <div class="act-line"><span class="act-time">00:18</span><span class="act-msg done">✓ Job completed</span></div>
+            </div>
+            <div style="background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;font-size:12px;color:var(--text-light)">
+              <div class="semibold" style="color:var(--text);margin-bottom:5px">Result</div>
+              Slow query on <code>checkout_items</code> — missing index on <code>(order_id, status)</code>. Est. 10× improvement. No PR generated — requires DBA review.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /v5 drawer -->
+    </div><!-- /content-area -->
+  </div><!-- /v5 -->
+
+  </div><!-- /main-area -->
+</div><!-- /shell -->
+
+<!-- ── Modals ── -->
+<!-- Attach workbench (shared by v1/v2) -->
+<div class="modal-overlay" id="v1-attach-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="mtitle">Attach Workbenches · my-service-flow</div><button class="btn" onclick="closeModal('v1-attach-modal')" style="padding:3px 8px">×</button></div>
+    <div class="modal-body">
+      <input class="search-input" placeholder="Search available workbenches…" />
+      <div class="modal-sec">ATTACHED</div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">infra-debugger</div><div class="text-xs text-xlight">Debug k8s infra issues</div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">deploy-assistant</div><div class="text-xs text-xlight">CD automation helper</div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+      <hr class="divider" style="margin:6px 0">
+      <div class="modal-sec">AVAILABLE</div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">ops-toolkit</div><div class="text-xs text-xlight">General operations automation</div></div><button class="btn primary text-xs" style="padding:3px 8px">Add</button></div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">compliance-scanner</div><div class="text-xs text-xlight">Security and compliance checks</div></div><button class="btn primary text-xs" style="padding:3px 8px">Add</button></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('v1-attach-modal')">Cancel</button><button class="btn primary" onclick="closeModal('v1-attach-modal')">Save</button></div>
+  </div>
+</div>
+
+<!-- V4 manage -->
+<div class="modal-overlay" id="v4-manage-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="mtitle">Manage Workbenches · my-service-flow</div><button class="btn" onclick="closeModal('v4-manage-modal')" style="padding:3px 8px">×</button></div>
+    <div class="modal-body">
+      <input class="search-input" placeholder="Search available workbenches…" />
+      <div class="modal-sec">ATTACHED</div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">infra-debugger</div><div class="text-xs text-xlight"><div class="status-row" style="display:inline-flex"><div class="dot run"></div>1 running</div></div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">deploy-assistant</div><div class="text-xs text-xlight">idle</div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+      <hr class="divider" style="margin:6px 0">
+      <div class="modal-sec">AVAILABLE TO ATTACH</div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">ops-toolkit</div></div><button class="btn primary text-xs" style="padding:3px 8px">Add</button></div>
+      <div class="modal-wb-row"><div class="wb-icon">⚙</div><div class="f1"><div class="text-sm semibold">compliance-scanner</div></div><button class="btn primary text-xs" style="padding:3px 8px">Add</button></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('v4-manage-modal')">Cancel</button><button class="btn primary" onclick="closeModal('v4-manage-modal')">Save</button></div>
+  </div>
+</div>
+
+<!-- V5 permissions modal -->
+<div class="modal-overlay" id="perm-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="mtitle">Flow Permissions · my-service-flow</div><button class="btn" onclick="closeModal('perm-modal')" style="padding:3px 8px">×</button></div>
+    <div class="modal-body">
+      <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--text-light)">
+        Workbench access requires satisfying <strong style="color:var(--text)">both</strong> the flow read binding and the workbench read binding. Neither alone is sufficient.
+      </div>
+      <div class="modal-sec">READ — can view flow + invoke workbenches</div>
+      <div class="modal-wb-row"><div style="width:22px;height:22px;border-radius:50%;background:var(--border-focus);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">AE</div><div class="f1"><div class="text-sm semibold">app-engineers</div><div class="text-xs text-xlight">Group · 8 members</div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+      <div class="modal-wb-row"><div style="width:22px;height:22px;border-radius:50%;background:var(--fill-three);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">AJ</div><div class="f1"><div class="text-sm semibold">anna.j@company.com</div><div class="text-xs text-xlight">User</div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+      <div class="modal-sec">WRITE — can modify flow configuration</div>
+      <div class="modal-wb-row"><div style="width:22px;height:22px;border-radius:50%;background:var(--fill-three);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">PE</div><div class="f1"><div class="text-sm semibold">platform-engineers</div><div class="text-xs text-xlight">Group · 3 members</div></div><button class="btn dang text-xs" style="padding:3px 8px">Remove</button></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('perm-modal')">Cancel</button><button class="btn primary" onclick="closeModal('perm-modal')">Save</button></div>
+  </div>
+</div>
+
+<script>
+// ── variation switching ──
+function showVar(n, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.getElementById('v' + n).classList.add('active')
+  document.querySelectorAll('.vbtn').forEach((b, i) => b.classList.toggle('active', i === n - 1))
+  // close any open drawers
+  document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'))
+}
+
+// ── generic tab switch ──
+function st(varId, tabId, el) {
+  const page = document.getElementById(varId)
+  page.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'))
+  page.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  const pane = document.getElementById(varId + '-' + tabId)
+  if (pane) pane.classList.add('active')
+  if (el) el.classList.add('active')
+}
+
+// ── dropdowns ──
+function toggleDD(id) {
+  const el = document.getElementById(id)
+  const open = el.classList.contains('open')
+  document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'))
+  if (!open) el.classList.add('open')
+}
+function closeDD(id) { document.getElementById(id).classList.remove('open') }
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown')) document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'))
+})
+
+// ── v2 drawer ──
+let v2DrawerOpen = false
+function v2Open() { v2DrawerOpen = true; document.getElementById('v2-drawer').classList.add('open'); v2ShowScr('select') }
+function v2OpenWithWb() { v2Open(); setTimeout(() => v2GoWb(), 300) }
+function v2Toggle() { v2DrawerOpen ? v2Close() : v2Open() }
+function v2Close() { v2DrawerOpen = false; document.getElementById('v2-drawer').classList.remove('open') }
+function v2ShowScr(name) {
+  document.querySelectorAll('#v2-drawer > div').forEach(s => s.style.display = 'none')
+  document.getElementById('v2-s-' + name).style.display = 'flex'
+}
+function v2GoWb() { v2ShowScr('wb') }
+function v2Back() { v2ShowScr('select') }
+
+// ── v3 ──
+function v3Sel(el) { el.closest('.wb-jobs-list').querySelectorAll('.job-item').forEach(j => j.classList.remove('active')); el.classList.add('active') }
+function v3PrefillCtx() {
+  const log = document.getElementById('v3-act-log')
+  if (!log.querySelector('.injected')) {
+    const e = document.createElement('div'); e.className = 'act-line injected'
+    e.innerHTML = '<span class="act-time">now</span><span class="act-msg done">✓ Flow context injected: 3 services, 3 alerts, pipeline status</span>'
+    log.insertBefore(e, log.children[1])
+  }
+}
+
+// ── v5 drawer ──
+function v5Open(screen) { document.getElementById('v5-drawer').classList.add('open'); v5Scr(screen || 'wb-select') }
+function v5Close() { document.getElementById('v5-drawer').classList.remove('open') }
+function v5Scr(name) {
+  document.querySelectorAll('#v5-drawer > div').forEach(s => s.style.display = 'none')
+  const el = document.getElementById('v5-scr-' + name)
+  if (el) el.style.display = 'flex'
+}
+
+// ── modals ──
+function openModal(id) { document.getElementById(id).classList.add('open') }
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open') }))
+</script>
+</body>
+</html>

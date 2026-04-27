@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/react'
 import { StrictMode } from 'react'
 
 import App from './App'
+import PrototypeApp from './prototype/PrototypeApp'
 
 const container = document.getElementById('root') as Element
 const root = createRoot(container, {
@@ -18,6 +19,6 @@ const root = createRoot(container, {
 
 root.render(
   <StrictMode>
-    <App />
+    {import.meta.env.VITE_UI_PROTOTYPE === 'true' ? <PrototypeApp /> : <App />}
   </StrictMode>
 )

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Dashboard trace visualization prototype — DUMMY DATA ONLY. No backend.
+  Aligns loosely with TraceSpan fields in toolquery.proto:
+  trace_id, span_id, parent_id, name, service, start/end (here: start_ms/end_ms from trace start), tags.
+
+  Open this file directly in a browser. Team can swap SPANS for real API data later.
+-->
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trace viz prototype (dummy data)</title>
+<style>
+:root {
+  --bg: #111318;
+  --panel: #1c1f28;
+  --panel2: #252830;
+  --border: #333748;
+  --text: #e4e6ee;
+  --muted: #9ea3b5;
+  --dim: #5e6478;
+  --accent: #6366f1;
+  --warn: #fbbf24;
+  --ok: #34d399;
+  --r: 6px;
+  font-size: 13px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.banner {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 11px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.banner strong { color: var(--muted); }
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  flex-wrap: wrap;
+}
+.trace-pill {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--muted);
+}
+.stat { font-size: 11px; color: var(--dim); }
+.stat b { color: var(--muted); font-weight: 600; }
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 6px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tab:hover { background: var(--panel2); color: var(--text); }
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.view {
+  display: none;
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px 24px;
+}
+.view.active { display: block; }
+
+/* Gantt */
+.gantt {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  min-height: 280px;
+}
+.gantt-labels, .gantt-chart { display: flex; flex-direction: column; }
+.gantt-head {
+  height: 28px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background: var(--panel);
+}
+.gantt-axis {
+  position: relative;
+  height: 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-left: 1px solid var(--panel2);
+  font-size: 9px;
+  color: var(--dim);
+  padding-left: 3px;
+}
+.gantt-row {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(51, 55, 72, 0.5);
+  font-size: 11px;
+}
+.gantt-row:last-child { border-bottom: none; }
+.label-cell {
+  padding: 0 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.tree-gutter { flex-shrink: 0; color: var(--dim); }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dur { font-family: monospace; font-size: 10px; color: var(--dim); margin-left: auto; flex-shrink: 0; }
+.bar-cell { position: relative; height: 32px; }
+.bar {
+  position: absolute;
+  top: 7px;
+  height: 18px;
+  border-radius: 3px;
+  min-width: 3px;
+  border-left: 3px solid;
+  opacity: 0.9;
+}
+.bar.warn { outline: 1px solid var(--warn); }
+
+/* Flame (depth lanes) */
+.flame {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.flame-axis {
+  position: relative;
+  height: 26px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.flame-lane {
+  position: relative;
+  height: 36px;
+  border-bottom: 1px solid rgba(51, 55, 72, 0.45);
+}
+.flame-lane:last-child { border-bottom: none; }
+.flame-lane-label {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--dim);
+  width: 56px;
+}
+.flame-bar {
+  position: absolute;
+  top: 6px;
+  height: 24px;
+  border-radius: 3px;
+  border-left: 3px solid;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Graphs */
+.graph-host {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--panel);
+  padding: 16px;
+  overflow: auto;
+}
+.graph-host svg { display: block; max-width: 100%; height: auto; }
+.legend {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--dim);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.5;
+  max-width: 720px;
+}
+pre.data {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: #0d0f14;
+  color: var(--muted);
+  font-size: 10px;
+  overflow: auto;
+  max-height: 180px;
+}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <strong>Prototype only</strong>
+    <span>Dummy spans · no API · replace <code style="color:var(--accent)">SPANS</code> when wiring dashboard results.</span>
+  </div>
+
+  <div class="toolbar">
+    <span class="trace-pill">trace_id · <span id="tid"></span></span>
+    <span class="stat">duration <b id="tdur"></b></span>
+    <span class="stat">spans <b id="tcount"></b></span>
+    <span class="stat">services <b id="tsvc"></b></span>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-view="gantt">Gantt</button>
+      <button type="button" class="tab" data-view="flame">Flame</button>
+      <button type="button" class="tab" data-view="span">Span graph</button>
+      <button type="button" class="tab" data-view="service">Service graph</button>
+      <button type="button" class="tab" data-view="json">Raw JSON</button>
+    </div>
+  </div>
+
+  <div id="view-gantt" class="view active"></div>
+  <div id="view-flame" class="view"></div>
+  <div id="view-span" class="view"></div>
+  <div id="view-service" class="view"></div>
+  <div id="view-json" class="view"></div>
+
+<script>
+/** ---------- Dummy trace (edit freely) ---------- */
+const TRACE_ID = '7f3a9c2b-d8e1-4f90-a3c5-b2e94d7c1f8e';
+
+/** Times are milliseconds from trace start (0 = root start). Matches TraceSpan timeline shape. */
+const SPANS = [
+  { trace_id: TRACE_ID, span_id: '01', parent_id: null, name: 'workbench.run', service: 'Workbench', start_ms: 0, end_ms: 4210, tags: { 'wb.job': 'analyze-oom-crash' } },
+  { trace_id: TRACE_ID, span_id: '02', parent_id: '01', name: 'agent.turn', service: 'Agent', start_ms: 12, end_ms: 4192, tags: {} },
+  { trace_id: TRACE_ID, span_id: '03', parent_id: '02', name: 'llm.invoke', service: 'Claude API', start_ms: 55, end_ms: 2335, tags: { phase: 'plan', model: 'claude-opus-4-5' } },
+  { trace_id: TRACE_ID, span_id: '04', parent_id: '03', name: 'tool:get_pod_logs', service: 'Kubernetes API', start_ms: 420, end_ms: 795, tags: { 'k8s.resource': 'pods' } },
+  { trace_id: TRACE_ID, span_id: '05', parent_id: '03', name: 'tool:kubectl_describe', service: 'Kubernetes API', start_ms: 835, end_ms: 1130, tags: { warn: 'retry' } },
+  { trace_id: TRACE_ID, span_id: '06', parent_id: '03', name: 'tool:analyze_memory', service: 'File System', start_ms: 1215, end_ms: 2600, tags: {} },
+  { trace_id: TRACE_ID, span_id: '07', parent_id: '02', name: 'llm.invoke', service: 'Claude API', start_ms: 2720, end_ms: 4100, tags: { phase: 'act', model: 'claude-opus-4-5' } },
+  { trace_id: TRACE_ID, span_id: '08', parent_id: '07', name: 'tool:create_pr', service: 'GitHub API', start_ms: 3010, end_ms: 3800, tags: { 'http.status_code': '201' } },
+  { trace_id: TRACE_ID, span_id: '09', parent_id: '07', name: 'tool:write_file', service: 'File System', start_ms: 3920, end_ms: 4165, tags: {} },
+  { trace_id: TRACE_ID, span_id: '0a', parent_id: '02', name: 'agent.conclusion', service: 'Agent', start_ms: 4115, end_ms: 4210, tags: {} },
+];
+
+const SERVICE_COLORS = {
+  Workbench: '#6366f1',
+  Agent: '#a78bfa',
+  'Claude API': '#60a5fa',
+  'Kubernetes API': '#34d399',
+  'File System': '#2dd4bf',
+  'GitHub API': '#fb923c',
+};
+const colorFor = (svc) => SERVICE_COLORS[svc] || '#818cf8';
+
+/** ---------- Helpers ---------- */
+function traceDurationMs(spans) {
+  const ends = spans.map((s) => s.end_ms);
+  const starts = spans.map((s) => s.start_ms);
+  return Math.max(...ends) - Math.min(...starts);
+}
+
+function spanDuration(s) {
+  return s.end_ms - s.start_ms;
+}
+
+/** Pre-order tree walk for Gantt rows */
+function orderSpansTree(spans) {
+  const byParent = new Map();
+  for (const s of spans) {
+    const p = s.parent_id || '__root__';
+    if (!byParent.has(p)) byParent.set(p, []);
+    byParent.get(p).push(s);
+  }
+  for (const [, arr] of byParent) arr.sort((a, b) => a.start_ms - b.start_ms || a.name.localeCompare(b.name));
+
+  const out = [];
+  function walk(pid, depth) {
+    const kids = byParent.get(pid || '__root__') || [];
+    for (const s of kids) {
+      out.push({ span: s, depth });
+      walk(s.span_id, depth + 1);
+    }
+  }
+  walk(null, 0);
+  return out;
+}
+
+function depthOf(spans, id, cache = new Map()) {
+  const byId = Object.fromEntries(spans.map((s) => [s.span_id, s]));
+  function d(i) {
+    if (cache.has(i)) return cache.get(i);
+    const s = byId[i];
+    if (!s || !s.parent_id) {
+      cache.set(i, 0);
+      return 0;
+    }
+    const v = 1 + d(s.parent_id);
+    cache.set(i, v);
+    return v;
+  }
+  return d(id);
+}
+
+/** ---------- Gantt ---------- */
+function renderGantt(spans, totalMs) {
+  const rows = orderSpansTree(spans);
+  const ticks = 5;
+  let html = '<div class="gantt">';
+  html += '<div class="gantt-labels">';
+  html += '<div class="gantt-head">Span</div>';
+  for (const { span, depth } of rows) {
+    const ind = depth * 14;
+    const c = colorFor(span.service);
+    const warn = span.tags?.warn ? ' ⚠' : '';
+    html += `<div class="gantt-row label-cell" style="padding-left:${10 + ind}px">`;
+    html += `<span class="tree-gutter">${depth ? '·' : ''}</span>`;
+    html += `<span class="dot" style="background:${c}"></span>`;
+    html += `<span class="name" title="${span.name}">${span.name}${warn}</span>`;
+    html += `<span class="dur">${spanDuration(span)}ms</span>`;
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="gantt-chart">';
+  html += '<div class="gantt-axis">';
+  for (let i = 0; i <= ticks; i++) {
+    const pct = (i / ticks) * 100;
+    const ms = Math.round((i / ticks) * totalMs);
+    html += `<div class="tick" style="left:${pct}%">${ms}ms</div>`;
+  }
+  html += '</div>';
+
+  for (const { span, depth } of rows) {
+    const left = (span.start_ms / totalMs) * 100;
+    const w = (spanDuration(span) / totalMs) * 100;
+    const c = colorFor(span.service);
+    const cls = span.tags?.warn ? ' bar warn' : ' bar';
+    html += `<div class="gantt-row bar-cell">`;
+    html += `<div class="${cls.trim()}" style="left:${left}%;width:${Math.max(w, 0.4)}%;background:rgba(${hexToRgb(c)},.35);border-left-color:${c}"></div>`;
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  html +=
+    '<p class="note">Gantt / waterfall: absolute start/end on one timeline — good for latency and ordering (Coralogix-style “go-to”).</p>';
+  return html;
+}
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h, 16);
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+}
+
+/** ---------- Flame: one lane per depth, bars positioned by absolute time ---------- */
+function renderFlame(spans, totalMs) {
+  const maxD = Math.max(...spans.map((s) => depthOf(spans, s.span_id)));
+  let html = '<div class="flame">';
+  html += '<div class="flame-axis">';
+  for (let i = 0; i <= 5; i++) {
+    const pct = (i / 5) * 100;
+    html += `<div class="tick" style="left:${pct}%">${Math.round((i / 5) * totalMs)}ms</div>`;
+  }
+  html += '</div>';
+
+  for (let d = 0; d <= maxD; d++) {
+    html += `<div class="flame-lane"><span class="flame-lane-label">depth ${d}</span>`;
+    const atDepth = spans.filter((s) => depthOf(spans, s.span_id) === d);
+    atDepth.sort((a, b) => a.start_ms - b.start_ms);
+    for (const s of atDepth) {
+      const left = (s.start_ms / totalMs) * 100;
+      const w = (spanDuration(s) / totalMs) * 100;
+      const c = colorFor(s.service);
+      html += `<div class="flame-bar" style="left:${left}%;width:${Math.max(w, 0.35)}%;background:rgba(${hexToRgb(c)},.4);border-left-color:${c}" title="${s.name}">${s.name}</div>`;
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  html +=
+    '<p class="note">Flame / icicle lanes: same absolute timeline, grouped by nesting depth — highlights heavy spans and hierarchy without tree indentation.</p>';
+  return html;
+}
+
+/** ---------- Span DAG (simple layered layout) ---------- */
+function renderSpanGraph(spans) {
+  const byId = Object.fromEntries(spans.map((s) => [s.span_id, s]));
+  const levels = new Map();
+  function levelOf(id) {
+    if (levels.has(id)) return levels.get(id);
+    const s = byId[id];
+    if (!s || !s.parent_id) {
+      levels.set(id, 0);
+      return 0;
+    }
+    const L = 1 + levelOf(s.parent_id);
+    levels.set(id, L);
+    return L;
+  }
+  for (const s of spans) levelOf(s.span_id);
+
+  const maxLevel = Math.max(...levels.values());
+  const colW = 200;
+  const rowH = 52;
+  const pad = 24;
+  const nodesAt = [];
+  for (let L = 0; L <= maxLevel; L++) nodesAt[L] = [];
+  for (const s of spans) nodesAt[levelOf(s.span_id)].push(s);
+  for (const arr of nodesAt) arr.sort((a, b) => a.start_ms - b.start_ms);
+
+  const W = pad * 2 + colW * (maxLevel + 1);
+  const H = pad * 2 + rowH * Math.max(...nodesAt.map((a) => a.length), 1);
+
+  const pos = new Map();
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += '<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#4b5170"/></marker></defs>';
+
+  nodesAt.forEach((nodes, L) => {
+    nodes.forEach((s, i) => {
+      const x = pad + L * colW;
+      const y = pad + i * rowH;
+      pos.set(s.span_id, { x: x + colW / 2, y: y + 22, x0: x, y0: y });
+      const c = colorFor(s.service);
+      const wbox = colW - 16;
+      svg += `<g>`;
+      svg += `<rect x="${x}" y="${y}" width="${wbox}" height="44" rx="5" fill="#1c1f28" stroke="#333748"/>`;
+      svg += `<rect x="${x}" y="${y}" width="4" height="44" rx="2" fill="${c}"/>`;
+      svg += `<text x="${x + 12}" y="${y + 18}" font-size="10" fill="#e4e6ee" font-family="Inter,sans-serif">${escapeXml(s.name)}</text>`;
+      svg += `<text x="${x + 12}" y="${y + 34}" font-size="9" fill="#5e6478" font-family="Inter,sans-serif">${spanDuration(s)}ms · ${escapeXml(s.service)}</text>`;
+      svg += `</g>`;
+    });
+  });
+
+  for (const s of spans) {
+    if (!s.parent_id) continue;
+    const p = pos.get(s.parent_id);
+    const c = pos.get(s.span_id);
+    if (!p || !c) continue;
+    const x1 = p.x0 + colW - 16;
+    const y1 = p.y + 22;
+    const x2 = c.x0;
+    const y2 = c.y + 22;
+    const mx = (x1 + x2) / 2;
+    svg += `<path d="M ${x1},${y1} C ${mx},${y1} ${mx},${y2} ${x2},${y2}" fill="none" stroke="#4b5170" stroke-width="1.5" marker-end="url(#arr)"/>`;
+  }
+  svg += '</svg>';
+
+  let legend = '<div class="legend">';
+  for (const svc of [...new Set(spans.map((s) => s.service))]) {
+    legend += `<span><span class="dot" style="background:${colorFor(svc)}"></span>${escapeXml(svc)}</span>`;
+  }
+  legend += '</div>';
+
+  return (
+    '<div class="graph-host">' +
+    svg +
+    '</div>' +
+    legend +
+    '<p class="note">Span graph: one node per span — shows granular call graph (Coralogix “Span Node Graph”). Layout here is layered by parent depth (dummy algorithm).</p>'
+  );
+}
+
+function escapeXml(t) {
+  return String(t)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function escapeHtmlText(t) {
+  return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** ---------- Service graph ---------- */
+function renderServiceGraph(spans) {
+  const svcStats = new Map();
+  for (const s of spans) {
+    if (!svcStats.has(s.service))
+      svcStats.set(s.service, { count: 0, dur: 0 });
+    const z = svcStats.get(s.service);
+    z.count += 1;
+    z.dur += spanDuration(s);
+  }
+
+  const edges = new Map();
+  for (const s of spans) {
+    if (!s.parent_id) continue;
+    const parent = spans.find((p) => p.span_id === s.parent_id);
+    if (!parent) continue;
+    const a = parent.service;
+    const b = s.service;
+    if (a === b) continue;
+    const k = `${a}→${b}`;
+    edges.set(k, (edges.get(k) || 0) + 1);
+  }
+
+  const services = [...svcStats.keys()];
+  const cx = 140;
+  const positions = {};
+  services.forEach((svc, i) => {
+    positions[svc] = { x: 40 + (i % 3) * 260, y: 40 + Math.floor(i / 3) * 140 };
+  });
+
+  let svg = `<svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg">`;
+  svg += '<defs><marker id="arrS" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#4b5170"/></marker></defs>';
+
+  const drawn = new Set();
+  for (const [k, cnt] of edges) {
+    const [from, to] = k.split('→');
+    const A = positions[from];
+    const B = positions[to];
+    if (!A || !B) continue;
+    const x1 = A.x + cx;
+    const y1 = A.y + 35;
+    const x2 = B.x;
+    const y2 = B.y + 35;
+    const mx = (x1 + x2) / 2;
+    svg += `<path d="M ${x1},${y1} C ${mx},${y1} ${mx},${y2} ${x2},${y2}" fill="none" stroke="#4b5170" stroke-width="2" marker-end="url(#arrS)"/>`;
+    const lx = (x1 + x2) / 2 - 28;
+    const ly = (y1 + y2) / 2 - 16;
+    svg += `<rect x="${lx}" y="${ly}" width="56" height="18" rx="3" fill="#1c1f28" stroke="#333748"/>`;
+    svg += `<text x="${lx + 28}" y="${ly + 12}" font-size="9" fill="#5e6478" text-anchor="middle" font-family="Inter,sans-serif">${cnt} call${cnt > 1 ? 's' : ''}</text>`;
+  }
+
+  for (const svc of services) {
+    const { x, y } = positions[svc];
+    const c = colorFor(svc);
+    const st = svcStats.get(svc);
+    svg += `<g>`;
+    svg += `<rect class="node-bg" x="${x}" y="${y}" width="${cx * 2 - 20}" height="70" rx="8" fill="#1c1f28" stroke="#333748"/>`;
+    svg += `<rect x="${x}" y="${y}" width="5" height="70" rx="4" fill="${c}"/>`;
+    svg += `<text x="${x + 16}" y="${y + 22}" font-size="12" font-weight="600" fill="#e4e6ee" font-family="Inter,sans-serif">${escapeXml(svc)}</text>`;
+    svg += `<text x="${x + 16}" y="${y + 42}" font-size="10" fill="#9ea3b5" font-family="Inter,sans-serif">${st.count} span${st.count > 1 ? 's' : ''} · ${st.dur}ms total</text>`;
+    svg += `</g>`;
+  }
+  svg += '</svg>';
+
+  return (
+    '<div class="graph-host">' +
+    svg +
+    '</div>' +
+    '<p class="note">Service graph: nodes are services; edges aggregate cross-service child spans (Coralogix “Service Node Graph”). Good for big traces / microservice hops.</p>'
+  );
+}
+
+/** ---------- Boot ---------- */
+function renderAll() {
+  const totalMs = traceDurationMs(SPANS);
+  document.getElementById('tid').textContent = TRACE_ID.slice(0, 8) + '…';
+  document.getElementById('tdur').textContent = `${totalMs}ms`;
+  document.getElementById('tcount').textContent = String(SPANS.length);
+  document.getElementById('tsvc').textContent = String(new Set(SPANS.map((s) => s.service)).size);
+
+  document.getElementById('view-gantt').innerHTML = renderGantt(SPANS, totalMs);
+  document.getElementById('view-flame').innerHTML = renderFlame(SPANS, totalMs);
+  document.getElementById('view-span').innerHTML = renderSpanGraph(SPANS);
+  document.getElementById('view-service').innerHTML = renderServiceGraph(SPANS);
+  document.getElementById('view-json').innerHTML =
+    '<pre class="data">' +
+    escapeHtmlText(JSON.stringify({ trace_id: TRACE_ID, spans: SPANS }, null, 2)) +
+    '</pre><p class="note">Payload shape for handoff: array of spans with parent_id edges: enough to render all four views server- or client-side.</p>';
+}
+
+document.querySelectorAll('.tab').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+    btn.classList.add('active');
+    const v = btn.getAttribute('data-view');
+    document.getElementById('view-' + v).classList.add('active');
+  });
+});
+
+renderAll();
+</script>
+</body>
+</html>

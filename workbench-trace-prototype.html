@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trace Visualization — Workbench Prototype</title>
+<style>
+:root {
+  --fill-zero: #111318;
+  --fill-one: #1C1F28;
+  --fill-two: #252830;
+  --fill-three: #2E3140;
+  --fill-hover: #2a2d38;
+  --border: #333748;
+  --border-focus: #6366f1;
+  --text: #E4E6EE;
+  --text-light: #9EA3B5;
+  --text-xlight: #5E6478;
+  --text-accent: #818CF8;
+  --danger: #F87171;
+  --warning: #FBBF24;
+  --success: #34D399;
+  --info: #60A5FA;
+  --purple: #A78BFA;
+  --chip-danger-bg: rgba(248,113,113,.12);
+  --chip-success-bg: rgba(52,211,153,.12);
+  --chip-info-bg: rgba(96,165,250,.12);
+  --chip-neutral-bg: rgba(158,163,181,.1);
+  --r: 6px; --rl: 8px;
+  font-size: 13px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--fill-zero);color:var(--text);font-family:'Inter',-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ─── variation bar ─── */
+.var-bar{background:var(--fill-one);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;z-index:100}
+.var-bar > span{color:var(--text-xlight);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+.vbtn{padding:4px 11px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text-light);cursor:pointer;font-size:12px;transition:all .14s;white-space:nowrap}
+.vbtn:hover{background:var(--fill-three);color:var(--text)}
+.vbtn.active{background:var(--border-focus);border-color:var(--border-focus);color:#fff}
+
+/* ─── shell ─── */
+.shell{display:flex;flex:1;overflow:hidden}
+.sidebar{width:192px;background:var(--fill-one);border-right:1px solid var(--border);padding:12px 0;flex-shrink:0;display:flex;flex-direction:column;gap:2px}
+.sb-sec{padding:14px 14px 5px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-xlight)}
+.sb-item{padding:6px 12px;color:var(--text-light);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:4px;margin:0 6px;transition:background .12s}
+.sb-item:hover,.sb-item.active{background:var(--fill-three);color:var(--text)}
+.main-area{flex:1;overflow:hidden;position:relative}
+
+/* ─── pages ─── */
+.page{display:none;flex-direction:column;height:100%;overflow:hidden;position:absolute;inset:0}
+.page.active{display:flex}
+
+/* ─── header ─── */
+.page-hdr{padding:13px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.wb-icon{width:26px;height:26px;border-radius:var(--r);background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.back-btn{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:13px}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-xlight);flex:1}
+.breadcrumb .crumb{cursor:pointer;transition:color .1s}
+.breadcrumb .crumb:hover{color:var(--text)}
+.breadcrumb .sep{font-size:10px}
+.breadcrumb .cur{color:var(--text);font-weight:600}
+
+/* ─── buttons ─── */
+.btn{padding:5px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:5px;transition:background .12s;white-space:nowrap;font-family:inherit}
+.btn:hover{background:var(--fill-three)}
+.btn.primary{background:var(--border-focus);border-color:var(--border-focus);color:#fff}
+.btn.primary:hover{background:#4f52d9}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-light)}
+.btn.ghost:hover{background:var(--fill-two);color:var(--text)}
+.btn-icon{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--border);background:var(--fill-two);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:background .12s;flex-shrink:0}
+.btn-icon:hover{background:var(--fill-three);color:var(--text)}
+
+/* ─── tabs ─── */
+.tabs-row{padding:0 20px;border-bottom:1px solid var(--border);display:flex;flex-shrink:0}
+.tab{padding:8px 13px;font-size:12px;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--border-focus)}
+.bdg{border-radius:10px;padding:1px 5px;font-size:10px;background:var(--chip-neutral-bg);color:var(--text-light)}
+.bdg.ai{background:rgba(129,140,248,.15);color:var(--text-accent)}
+
+/* ─── chips ─── */
+.chip{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.chip.success{background:var(--chip-success-bg);color:var(--success)}
+.chip.danger{background:var(--chip-danger-bg);color:var(--danger)}
+.chip.info{background:var(--chip-info-bg);color:var(--info)}
+.chip.neutral{background:var(--chip-neutral-bg);color:var(--text-light)}
+.chip.warning{background:rgba(251,191,36,.12);color:var(--warning)}
+
+/* ─── helpers ─── */
+.flex{display:flex}.aic{align-items:center}.gap1{gap:4px}.gap2{gap:8px}.gap3{gap:12px}.f1{flex:1}
+.mt1{margin-top:4px}.mt2{margin-top:8px}.mb1{margin-bottom:4px}.mb2{margin-bottom:8px}
+.text-light{color:var(--text-light)}.text-xlight{color:var(--text-xlight)}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.text-2xs{font-size:10px}.semibold{font-weight:600}
+.mono{font-family:'SF Mono','Cascadia Mono',monospace}
+.empty{padding:40px;text-align:center;color:var(--text-xlight);font-size:12px}
+.tab-pane{display:none;flex-direction:column;gap:12px;padding:16px 20px;overflow-y:auto;flex:1}
+.tab-pane.active{display:flex}
+.divider{border:none;border-top:1px solid var(--border)}
+
+/* ═══════════════════════════════════════════════════════
+   TRACE-SPECIFIC STYLES
+═══════════════════════════════════════════════════════ */
+
+/* ─── trace toolbar (inside trace view) ─── */
+.trace-toolbar{padding:9px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--fill-one)}
+.trace-id{font-family:'SF Mono',monospace;font-size:11px;color:var(--text-light);background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);padding:3px 8px;display:flex;align-items:center;gap:6px}
+.trace-stat{font-size:11px;color:var(--text-xlight);display:flex;align-items:center;gap:4px}
+.trace-stat strong{color:var(--text-light);font-weight:600}
+.stat-sep{width:1px;height:14px;background:var(--border)}
+
+/* ─── view mode toggle (Gantt | Span Graph | Service Graph) ─── */
+.mode-toggle{display:flex;background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.mode-btn{padding:4px 12px;font-size:11px;color:var(--text-xlight);cursor:pointer;transition:all .12s;white-space:nowrap;border:none;background:transparent;font-family:inherit;display:flex;align-items:center;gap:5px}
+.mode-btn:not(:last-child){border-right:1px solid var(--border)}
+.mode-btn:hover{color:var(--text);background:var(--fill-three)}
+.mode-btn.active{color:var(--text);background:var(--fill-three)}
+
+/* ─── GANTT / WATERFALL ─── */
+.gantt-wrap{display:flex;flex:1;overflow:hidden;position:relative}
+.gantt-labels{width:238px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.gantt-labels-head{height:30px;border-bottom:1px solid var(--border);padding:0 10px;display:flex;align-items:center;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-xlight);flex-shrink:0}
+.gantt-labels-body{flex:1;overflow-y:auto;overflow-x:hidden}
+.gantt-timeline-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.gantt-axis{height:30px;border-bottom:1px solid var(--border);position:relative;flex-shrink:0;overflow:hidden}
+.axis-tick{position:absolute;top:0;height:100%;display:flex;flex-direction:column;align-items:flex-start}
+.axis-tick-line{width:1px;flex:1;background:var(--fill-three)}
+.axis-tick-label{font-size:9px;color:var(--text-xlight);padding:2px 3px;white-space:nowrap}
+.gantt-bars-body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+
+/* span row */
+.gantt-row{height:36px;display:flex;align-items:center;border-bottom:1px solid rgba(51,55,72,.35);cursor:pointer;transition:background .1s}
+.gantt-row:hover{background:var(--fill-hover)}
+.gantt-row.selected{background:rgba(99,102,241,.08)}
+.gantt-row:last-child{border-bottom:none}
+
+/* label column */
+.span-label-row{height:36px;display:flex;align-items:center;padding-right:8px;border-bottom:1px solid rgba(51,55,72,.35);cursor:pointer;transition:background .1s;gap:0}
+.span-label-row:hover{background:var(--fill-hover)}
+.span-label-row.selected{background:rgba(99,102,241,.08)}
+.span-label-row:last-child{border-bottom:none}
+.span-indent{flex-shrink:0;display:flex;align-items:center}
+.span-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.span-svc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px}
+.span-status{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-left:4px}
+.span-dur-label{font-size:10px;color:var(--text-xlight);flex-shrink:0;margin-left:4px;font-family:monospace;min-width:38px;text-align:right}
+
+/* bar area */
+.bar-row{height:36px;display:flex;align-items:center;border-bottom:1px solid rgba(51,55,72,.35);position:relative;cursor:pointer}
+.bar-row:last-child{border-bottom:none}
+.span-bar{position:absolute;height:18px;border-radius:3px;display:flex;align-items:center;padding:0 5px;min-width:4px;overflow:hidden;transition:opacity .1s}
+.span-bar:hover{opacity:.85}
+.span-bar-inner-label{font-size:9px;white-space:nowrap;overflow:hidden;font-weight:500;color:rgba(255,255,255,.85)}
+/* status decorations */
+.gantt-row.warn-row .span-bar{outline:1px solid var(--warning);outline-offset:0}
+.warn-badge{position:absolute;right:-2px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:var(--warning);font-size:7px;display:flex;align-items:center;justify-content:center;color:#000;font-weight:700;z-index:2}
+
+/* ─── DETAIL PANEL (right) ─── */
+.detail-panel{width:0;flex-shrink:0;background:var(--fill-one);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s ease}
+.detail-panel.open{width:310px}
+.detail-panel-hdr{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.detail-panel-title{font-weight:600;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detail-panel-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+
+.detail-section{display:flex;flex-direction:column;gap:5px}
+.detail-section-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-xlight);font-weight:500;margin-bottom:2px}
+.kv-row{display:flex;align-items:flex-start;gap:6px;font-size:11px}
+.kv-key{color:var(--text-xlight);width:96px;flex-shrink:0;font-family:monospace;font-size:10px;padding-top:1px}
+.kv-val{color:var(--text-light);flex:1;word-break:break-all;font-family:monospace;font-size:10px}
+.kv-val.ok{color:var(--success)}
+.kv-val.warn{color:var(--warning)}
+.kv-val.err{color:var(--danger)}
+.dur-big{font-size:20px;font-weight:700;color:var(--text)}
+.dur-sub{font-size:11px;color:var(--text-xlight)}
+.svc-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500}
+
+/* ─── GRAPH VIEW ─── */
+.graph-wrap{flex:1;display:flex;overflow:hidden;position:relative}
+.graph-canvas{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 50%, rgba(99,102,241,.03) 0%, transparent 70%)}
+.graph-legend{position:absolute;bottom:14px;left:14px;background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:9px 12px;display:flex;flex-direction:column;gap:5px}
+.legend-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-light)}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.graph-hint{position:absolute;bottom:14px;right:14px;font-size:10px;color:var(--text-xlight);display:flex;align-items:center;gap:5px;background:var(--fill-one);border:1px solid var(--border);border-radius:var(--r);padding:5px 9px}
+/* graph sub-toggle (Span / Service) */
+.sub-toggle{display:flex;background:var(--fill-two);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
+.sub-btn{padding:3px 10px;font-size:11px;color:var(--text-xlight);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .12s;white-space:nowrap}
+.sub-btn:not(:last-child){border-right:1px solid var(--border)}
+.sub-btn:hover{color:var(--text);background:var(--fill-three)}
+.sub-btn.active{color:var(--text);background:var(--fill-three)}
+
+/* ─── span node in graph ─── */
+.span-node{cursor:pointer;transition:filter .15s}
+.span-node:hover rect{filter:brightness(1.2)}
+.span-node.selected rect.node-bg{stroke:#818CF8!important;stroke-width:2}
+/* service node */
+.svc-node{cursor:pointer;transition:filter .15s}
+.svc-node:hover rect{filter:brightness(1.15)}
+.svc-node.selected rect.node-bg{stroke:#818CF8!important;stroke-width:2}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .18s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--fill-one);border:1px solid var(--border);border-radius:10px;width:460px;max-height:80vh;display:flex;flex-direction:column;transform:translateY(10px);transition:transform .18s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr .mtitle{font-weight:600;font-size:13px}
+.modal-body{padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--text-light);line-height:1.6}
+.modal-foot{padding:11px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+</style>
+</head>
+<body>
+
+<!-- ─── variation / mode bar ─────────────────────────────────── -->
+<div class="var-bar">
+  <span>View:</span>
+  <button class="vbtn active" onclick="showVar(1,this)">1 · Entry — Run Detail</button>
+  <button class="vbtn" onclick="showVar(2,this)">2 · Gantt / Waterfall</button>
+  <button class="vbtn" onclick="showVar(3,this)">3 · Span Graph (DAG)</button>
+  <button class="vbtn" onclick="showVar(4,this)">4 · Service Graph (DAG)</button>
+</div>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="sb-sec">Platform</div>
+    <div class="sb-item">◎ Overview</div>
+    <div class="sb-item">⟳ CD</div>
+    <div class="sb-item">⊞ Flows</div>
+    <div class="sb-item active">⚙ Workbenches</div>
+    <div class="sb-sec">Infrastructure</div>
+    <div class="sb-item">⎈ Kubernetes</div>
+    <div class="sb-item">⬡ Stacks</div>
+    <div class="sb-item">⊛ Security</div>
+  </div>
+
+  <div class="main-area">
+
+  <!-- ════════════════════════════════════════════════════
+       VAR 1 — Entry point: Workbench Run Detail (Traces tab)
+  ════════════════════════════════════════════════════ -->
+  <div class="page active" id="v1">
+    <div class="page-hdr">
+      <div class="back-btn">←</div>
+      <div class="wb-icon">⚙</div>
+      <div class="breadcrumb">
+        <span class="crumb">Workbenches</span>
+        <span class="sep">/</span>
+        <span class="crumb">infra-debugger</span>
+        <span class="sep">/</span>
+        <span class="cur">analyze-oom-crash</span>
+      </div>
+      <span class="chip success text-xs">● Done</span>
+      <span class="text-xs text-xlight">Apr 27, 2026 · 4:12 AM</span>
+    </div>
+    <div class="tabs-row">
+      <div class="tab active" onclick="st('v1','overview',this)">Overview</div>
+      <div class="tab" onclick="st('v1','logs',this)">Logs</div>
+      <div class="tab" onclick="st('v1','traces',this);showVar(2,null)" style="cursor:pointer">Traces <span class="bdg ai">23</span></div>
+      <div class="tab" onclick="st('v1','artifacts',this)">Artifacts</div>
+    </div>
+    <div class="content-area" style="display:flex;flex:1;overflow:hidden">
+      <div class="content-main" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+        <div class="tab-pane active" id="v1-overview">
+          <!-- run summary -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+            <div style="background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px">
+              <div class="text-2xs text-xlight mb1">Status</div>
+              <div class="flex aic gap1"><div style="width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0"></div><span class="semibold text-sm">Done</span></div>
+            </div>
+            <div style="background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px">
+              <div class="text-2xs text-xlight mb1">Duration</div>
+              <div class="semibold text-sm">4.2s</div>
+            </div>
+            <div style="background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px">
+              <div class="text-2xs text-xlight mb1">LLM Calls</div>
+              <div class="semibold text-sm">2</div>
+            </div>
+            <div style="background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px">
+              <div class="text-2xs text-xlight mb1">Tool Calls</div>
+              <div class="semibold text-sm">5</div>
+            </div>
+          </div>
+          <!-- conclusion -->
+          <div style="background:var(--fill-one);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden">
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px">Conclusion</div>
+            <div style="padding:12px 14px;font-size:12px;color:var(--text-light);line-height:1.7">
+              <strong style="color:var(--text)">Root cause:</strong> Container memory limit (256Mi) is too low for current traffic. The api-pod is hitting 99.2% of its memory limit before being OOMKilled. kubectl describe confirmed HPA is under-configured (min:1, max:3, current:1).<br><br>
+              <strong style="color:var(--text)">Recommendation:</strong> Increase memory limit to 512Mi and tune HPA to trigger at 70% CPU, scaling to a minimum of 2 replicas. PR opened: <span class="chip info text-xs">#4892 — fix: increase api-pod memory limit</span>
+            </div>
+          </div>
+          <!-- traces CTA -->
+          <div style="background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);border-radius:var(--rl);padding:12px 14px;display:flex;align-items:center;gap:12px">
+            <div style="font-size:18px">⌛</div>
+            <div>
+              <div class="semibold text-sm">23 spans traced across 4 services</div>
+              <div class="text-xs text-light mt1">View the full execution trace to inspect every LLM call, tool invocation, and their timing.</div>
+            </div>
+            <button class="btn primary text-xs" style="margin-left:auto;flex-shrink:0" onclick="showVar(2,null)">View Traces →</button>
+          </div>
+        </div>
+        <div class="tab-pane" id="v1-logs"><div class="empty">Logs would appear here</div></div>
+        <div class="tab-pane" id="v1-traces"><div class="empty">Loading traces…</div></div>
+        <div class="tab-pane" id="v1-artifacts"><div class="empty">Artifacts would appear here</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       VAR 2 — Gantt / Waterfall View
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v2">
+    <div class="page-hdr">
+      <div class="back-btn" onclick="showVar(1,null)">←</div>
+      <div class="wb-icon">⚙</div>
+      <div class="breadcrumb">
+        <span class="crumb">infra-debugger</span>
+        <span class="sep">/</span>
+        <span class="crumb" onclick="showVar(1,null)">analyze-oom-crash</span>
+        <span class="sep">/</span>
+        <span class="cur">Traces</span>
+      </div>
+    </div>
+
+    <!-- trace toolbar -->
+    <div class="trace-toolbar">
+      <div class="trace-id">
+        <span style="color:var(--text-xlight)">Trace</span>
+        <span>7f3a9c2b…e4d1</span>
+        <span style="color:var(--text-xlight);cursor:pointer" title="Copy">⎘</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>4.21s</strong> total</div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>10</strong> spans</div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>4</strong> services</div>
+      <div class="stat-sep"></div>
+      <span class="chip success text-xs">0 errors</span>
+      <span class="chip warning text-xs">1 warning</span>
+      <div class="f1"></div>
+      <!-- view mode toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" onclick="switchMode('gantt',this)">⠿ Gantt</button>
+        <button class="mode-btn" onclick="showVar(3,null)">◈ Span Graph</button>
+        <button class="mode-btn" onclick="showVar(4,null)">⬡ Service Graph</button>
+      </div>
+      <button class="btn text-xs" onclick="openModal('trace-info-modal')">ⓘ Trace Info</button>
+    </div>
+
+    <!-- gantt body -->
+    <div class="gantt-wrap" id="v2-gantt" style="flex:1;overflow:hidden;display:flex">
+      <!-- ── label column ── -->
+      <div class="gantt-labels">
+        <div class="gantt-labels-head">Span</div>
+        <div class="gantt-labels-body" id="v2-label-body">
+          <!-- rows synced with bar rows -->
+          <!-- level × 14px indent, then svc dot, then name -->
+          <!-- L0 -->
+          <div class="span-label-row" onclick="selSpan('workbench.run','#6366f1','Workbench','4210ms','0ms','workbench.run',null,'ok',0)">
+            <div class="span-indent" style="width:4px"></div>
+            <div class="span-svc-dot" style="background:#6366f1"></div>
+            <div class="span-name semibold text-xs">workbench.run</div>
+            <div class="span-dur-label">4.21s</div>
+          </div>
+          <!-- L1 -->
+          <div class="span-label-row" onclick="selSpan('agent.turn','#A78BFA','Agent','4.18s','+12ms','workbench.run',null,'ok',1)">
+            <div class="span-indent" style="width:14px;display:flex;align-items:center">
+              <svg width="14" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="7" y1="18" x2="14" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#A78BFA"></div>
+            <div class="span-name text-xs">agent.turn</div>
+            <div class="span-dur-label">4.18s</div>
+          </div>
+          <!-- L2 llm plan -->
+          <div class="span-label-row" onclick="selSpan('llm.invoke','#60A5FA','Claude API','2.28s','+55ms','agent.turn','claude-opus-4-5','ok',2)">
+            <div class="span-indent" style="width:28px;display:flex;align-items:center">
+              <svg width="28" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="18" x2="28" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#60A5FA"></div>
+            <div class="span-name text-xs">llm.invoke</div>
+            <div class="span-dur-label">2.28s</div>
+          </div>
+          <!-- L3 tools under plan -->
+          <div class="span-label-row" onclick="selSpan('tool:get_pod_logs','#34D399','Kubernetes API','375ms','+420ms','llm.invoke','kubectl get pods','ok',3)">
+            <div class="span-indent" style="width:42px;display:flex;align-items:center">
+              <svg width="42" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="36" stroke="#333748" stroke-width="1"/><line x1="35" y1="0" x2="35" y2="36" stroke="#333748" stroke-width="1"/><line x1="35" y1="18" x2="42" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#34D399"></div>
+            <div class="span-name text-xs">tool:get_pod_logs</div>
+            <div class="span-dur-label">375ms</div>
+          </div>
+          <div class="span-label-row warn-row-label" onclick="selSpan('tool:kubectl_describe','#34D399','Kubernetes API','295ms','+835ms','llm.invoke','kubectl describe pod','warn',3)">
+            <div class="span-indent" style="width:42px;display:flex;align-items:center">
+              <svg width="42" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="36" stroke="#333748" stroke-width="1"/><line x1="35" y1="0" x2="35" y2="36" stroke="#333748" stroke-width="1"/><line x1="35" y1="18" x2="42" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#34D399"></div>
+            <div class="span-name text-xs">tool:kubectl_describe</div>
+            <div style="font-size:9px;color:var(--warning);margin-left:3px;flex-shrink:0">⚠</div>
+            <div class="span-dur-label">295ms</div>
+          </div>
+          <div class="span-label-row" onclick="selSpan('tool:analyze_memory','#2DD4BF','File System','1.39s','+1215ms','llm.invoke','memory profile read','ok',3)">
+            <div class="span-indent" style="width:42px;display:flex;align-items:center">
+              <svg width="42" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="36" stroke="#333748" stroke-width="1"/><line x1="35" y1="0" x2="35" y2="18" stroke="#333748" stroke-width="1"/><line x1="35" y1="18" x2="42" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#2DD4BF"></div>
+            <div class="span-name text-xs">tool:analyze_memory</div>
+            <div class="span-dur-label">1.39s</div>
+          </div>
+          <!-- L2 llm act -->
+          <div class="span-label-row" onclick="selSpan('llm.invoke','#60A5FA','Claude API','1.38s','+2720ms','agent.turn','claude-opus-4-5','ok',2)">
+            <div class="span-indent" style="width:28px;display:flex;align-items:center">
+              <svg width="28" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="18" stroke="#333748" stroke-width="1"/><line x1="21" y1="18" x2="28" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#60A5FA"></div>
+            <div class="span-name text-xs">llm.invoke <span style="color:var(--text-xlight)">#2</span></div>
+            <div class="span-dur-label">1.38s</div>
+          </div>
+          <!-- L3 tools under act -->
+          <div class="span-label-row" onclick="selSpan('tool:create_pr','#FB923C','GitHub API','790ms','+3010ms','llm.invoke #2','POST /repos/.../pulls','ok',3)">
+            <div class="span-indent" style="width:42px;display:flex;align-items:center">
+              <svg width="42" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="18" stroke="#333748" stroke-width="1"/><line x1="35" y1="0" x2="35" y2="36" stroke="#333748" stroke-width="1"/><line x1="35" y1="18" x2="42" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#FB923C"></div>
+            <div class="span-name text-xs">tool:create_pr</div>
+            <div class="span-dur-label">790ms</div>
+          </div>
+          <div class="span-label-row" onclick="selSpan('tool:write_file','#2DD4BF','File System','245ms','+3920ms','llm.invoke #2','remediation.md','ok',3)">
+            <div class="span-indent" style="width:42px;display:flex;align-items:center">
+              <svg width="42" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="36" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="18" stroke="#333748" stroke-width="1"/><line x1="35" y1="0" x2="35" y2="18" stroke="#333748" stroke-width="1"/><line x1="35" y1="18" x2="42" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#2DD4BF"></div>
+            <div class="span-name text-xs">tool:write_file</div>
+            <div class="span-dur-label">245ms</div>
+          </div>
+          <!-- L2 conclusion -->
+          <div class="span-label-row" onclick="selSpan('agent.conclusion','#A78BFA','Agent','95ms','+4115ms','agent.turn',null,'ok',2)">
+            <div class="span-indent" style="width:28px;display:flex;align-items:center">
+              <svg width="28" height="36" style="flex-shrink:0"><line x1="7" y1="0" x2="7" y2="18" stroke="#333748" stroke-width="1"/><line x1="21" y1="0" x2="21" y2="18" stroke="#333748" stroke-width="1"/><line x1="21" y1="18" x2="28" y2="18" stroke="#333748" stroke-width="1"/></svg>
+            </div>
+            <div class="span-svc-dot" style="background:#A78BFA"></div>
+            <div class="span-name text-xs">agent.conclusion</div>
+            <div class="span-dur-label">95ms</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── timeline area ── -->
+      <div class="gantt-timeline-area">
+        <!-- time axis -->
+        <div class="gantt-axis">
+          <div class="axis-tick" style="left:0%"><div class="axis-tick-label">0</div><div class="axis-tick-line"></div></div>
+          <div class="axis-tick" style="left:23.75%"><div class="axis-tick-label">1s</div><div class="axis-tick-line"></div></div>
+          <div class="axis-tick" style="left:47.5%"><div class="axis-tick-label">2s</div><div class="axis-tick-line"></div></div>
+          <div class="axis-tick" style="left:71.25%"><div class="axis-tick-label">3s</div><div class="axis-tick-line"></div></div>
+          <div class="axis-tick" style="left:95%"><div class="axis-tick-label">4s</div><div class="axis-tick-line"></div></div>
+        </div>
+        <!-- bar rows -->
+        <div class="gantt-bars-body" id="v2-bar-body">
+          <!-- Row 0: workbench.run left=0% w=100% -->
+          <div class="bar-row" onclick="selSpan('workbench.run','#6366f1','Workbench','4210ms','0ms','workbench.run',null,'ok',0)">
+            <div class="span-bar" style="left:0.5%;width:99%;background:rgba(99,102,241,.35);border-left:3px solid #6366f1">
+              <span class="span-bar-inner-label" style="color:var(--text-xlight)">workbench.run</span>
+            </div>
+          </div>
+          <!-- Row 1: agent.turn left=0.29% w=99.4% -->
+          <div class="bar-row" onclick="selSpan('agent.turn','#A78BFA','Agent','4180ms','+12ms','workbench.run',null,'ok',1)">
+            <div class="span-bar" style="left:0.8%;width:98.6%;background:rgba(167,139,250,.3);border-left:3px solid #A78BFA">
+              <span class="span-bar-inner-label" style="color:var(--text-xlight)">agent.turn</span>
+            </div>
+          </div>
+          <!-- Row 2: llm.invoke(plan) left=1.31% w=54.3% -->
+          <div class="bar-row" onclick="selSpan('llm.invoke','#60A5FA','Claude API','2280ms','+55ms','agent.turn','claude-opus-4-5','ok',2)">
+            <div class="span-bar" style="left:1.5%;width:54%;background:rgba(96,165,250,.45);border-left:3px solid #60A5FA">
+              <span class="span-bar-inner-label">llm.invoke</span>
+            </div>
+          </div>
+          <!-- Row 3: get_pod_logs left=10% w=8.93% -->
+          <div class="bar-row" onclick="selSpan('tool:get_pod_logs','#34D399','Kubernetes API','375ms','+420ms','llm.invoke','kubectl get pods','ok',3)">
+            <div class="span-bar" style="left:10%;width:9%;background:rgba(52,211,153,.5);border-left:3px solid #34D399">
+              <span class="span-bar-inner-label" style="font-size:8px">logs</span>
+            </div>
+          </div>
+          <!-- Row 4: kubectl_describe left=19.88% w=7.02% — warn -->
+          <div class="bar-row warn-row" onclick="selSpan('tool:kubectl_describe','#34D399','Kubernetes API','295ms','+835ms','llm.invoke','kubectl describe pod','warn',3)">
+            <div class="span-bar" style="left:19.9%;width:7%;background:rgba(52,211,153,.5);border-left:3px solid #34D399;outline:1px solid rgba(251,191,36,.6);outline-offset:0">
+              <span class="span-bar-inner-label" style="font-size:8px">desc</span>
+            </div>
+            <div class="warn-badge" style="left:calc(19.9% + 7% + 1px)">⚠</div>
+          </div>
+          <!-- Row 5: analyze_memory left=28.93% w=32.98% -->
+          <div class="bar-row" onclick="selSpan('tool:analyze_memory','#2DD4BF','File System','1385ms','+1215ms','llm.invoke','memory profile read','ok',3)">
+            <div class="span-bar" style="left:28.9%;width:33%;background:rgba(45,212,191,.45);border-left:3px solid #2DD4BF">
+              <span class="span-bar-inner-label">tool:analyze_memory</span>
+            </div>
+          </div>
+          <!-- Row 6: llm.invoke(act) left=64.76% w=32.86% -->
+          <div class="bar-row" onclick="selSpan('llm.invoke','#60A5FA','Claude API','1380ms','+2720ms','agent.turn','claude-opus-4-5','ok',2)">
+            <div class="span-bar" style="left:64.8%;width:32.8%;background:rgba(96,165,250,.45);border-left:3px solid #60A5FA">
+              <span class="span-bar-inner-label">llm.invoke #2</span>
+            </div>
+          </div>
+          <!-- Row 7: create_pr left=71.67% w=18.81% -->
+          <div class="bar-row" onclick="selSpan('tool:create_pr','#FB923C','GitHub API','790ms','+3010ms','llm.invoke #2','POST /repos/.../pulls','ok',3)">
+            <div class="span-bar" style="left:71.7%;width:18.8%;background:rgba(251,146,60,.45);border-left:3px solid #FB923C">
+              <span class="span-bar-inner-label">create_pr</span>
+            </div>
+          </div>
+          <!-- Row 8: write_file left=93.33% w=5.83% -->
+          <div class="bar-row" onclick="selSpan('tool:write_file','#2DD4BF','File System','245ms','+3920ms','llm.invoke #2','remediation.md','ok',3)">
+            <div class="span-bar" style="left:93.3%;width:5.8%;background:rgba(45,212,191,.45);border-left:3px solid #2DD4BF">
+            </div>
+          </div>
+          <!-- Row 9: agent.conclusion left=97.62% w=2.26% -->
+          <div class="bar-row" onclick="selSpan('agent.conclusion','#A78BFA','Agent','95ms','+4115ms','agent.turn',null,'ok',2)">
+            <div class="span-bar" style="left:97.6%;width:2.3%;background:rgba(167,139,250,.5);border-left:3px solid #A78BFA">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── detail panel ── -->
+      <div class="detail-panel" id="v2-detail">
+        <div class="detail-panel-hdr">
+          <div class="detail-panel-title" id="v2-detail-title">Select a span</div>
+          <button class="btn-icon" onclick="closeDetail('v2-detail')">×</button>
+        </div>
+        <div class="detail-panel-body" id="v2-detail-body">
+          <div style="color:var(--text-xlight);font-size:12px">Click any span to inspect its details.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       VAR 3 — Span Node Graph
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v3">
+    <div class="page-hdr">
+      <div class="back-btn" onclick="showVar(1,null)">←</div>
+      <div class="wb-icon">⚙</div>
+      <div class="breadcrumb">
+        <span class="crumb">infra-debugger</span>
+        <span class="sep">/</span>
+        <span class="crumb" onclick="showVar(1,null)">analyze-oom-crash</span>
+        <span class="sep">/</span>
+        <span class="cur">Traces</span>
+      </div>
+    </div>
+    <div class="trace-toolbar">
+      <div class="trace-id">
+        <span style="color:var(--text-xlight)">Trace</span>
+        <span>7f3a9c2b…e4d1</span>
+        <span style="color:var(--text-xlight);cursor:pointer">⎘</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>4.21s</strong> total</div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>10</strong> spans</div>
+      <div class="f1"></div>
+      <div class="mode-toggle">
+        <button class="mode-btn" onclick="showVar(2,null)">⠿ Gantt</button>
+        <button class="mode-btn active" onclick="switchMode('span',this)">◈ Span Graph</button>
+        <button class="mode-btn" onclick="showVar(4,null)">⬡ Service Graph</button>
+      </div>
+      <!-- span / service sub-toggle (visible on graph modes) -->
+      <div class="sub-toggle">
+        <button class="sub-btn active" id="v3-span-btn" onclick="v3SetSub('span',this)">Span</button>
+        <button class="sub-btn" id="v3-svc-btn" onclick="showVar(4,null)">Service</button>
+      </div>
+    </div>
+
+    <div class="graph-wrap" id="v3-graph-wrap">
+      <div class="graph-canvas">
+        <!-- ── Span DAG SVG ── -->
+        <svg viewBox="0 0 1080 370" width="1080" height="370" style="display:block;max-width:100%">
+          <defs>
+            <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <polygon points="0 0, 7 3.5, 0 7" fill="#4B5170"/>
+            </marker>
+            <marker id="arrow-sel" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <polygon points="0 0, 7 3.5, 0 7" fill="#818CF8"/>
+            </marker>
+          </defs>
+
+          <!-- ── edges ── -->
+          <!-- workbench.run → agent.turn -->
+          <path d="M 170,186 C 200,186 220,186 220,186" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- agent.turn → llm.invoke:plan -->
+          <path d="M 380,186 C 410,186 440,104 440,104" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- agent.turn → llm.invoke:act -->
+          <path d="M 380,186 C 410,186 440,268 440,268" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- agent.turn → agent.conclusion (long arc) -->
+          <path d="M 380,186 C 635,170 635,178 880,186" fill="none" stroke="#4B5170" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+          <!-- llm.invoke:plan → tool:get_pod_logs -->
+          <path d="M 600,104 C 630,104 660,36 660,36" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- llm.invoke:plan → tool:kubectl_describe -->
+          <path d="M 600,104 C 630,104 660,97 660,97" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- llm.invoke:plan → tool:analyze_memory -->
+          <path d="M 600,104 C 630,104 660,158 660,158" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- llm.invoke:act → tool:create_pr -->
+          <path d="M 600,268 C 630,268 660,247 660,247" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <!-- llm.invoke:act → tool:write_file -->
+          <path d="M 600,268 C 630,268 660,312 660,312" fill="none" stroke="#4B5170" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+          <!-- ── nodes ── -->
+
+          <!-- workbench.run: x=10 y=168 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'workbench.run','Workbench','4210ms','0ms',null,'ok','#6366f1')">
+            <rect class="node-bg" x="10" y="168" width="160" height="36" rx="5" fill="#1C1F28" stroke="#6366f1" stroke-width="1.5"/>
+            <rect x="10" y="168" width="4" height="36" rx="2" fill="#6366f1"/>
+            <text x="24" y="183" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">workbench.run</text>
+            <text x="24" y="197" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">4.21s · Workbench</text>
+          </g>
+
+          <!-- agent.turn: x=220 y=168 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'agent.turn','Agent','4180ms','+12ms','workbench.run','ok','#A78BFA')">
+            <rect class="node-bg" x="220" y="168" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="220" y="168" width="4" height="36" rx="2" fill="#A78BFA"/>
+            <text x="234" y="183" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">agent.turn</text>
+            <text x="234" y="197" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">4.18s · Agent</text>
+          </g>
+
+          <!-- llm.invoke:plan x=440 y=86 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'llm.invoke','Claude API','2280ms','+55ms','agent.turn','ok','#60A5FA')">
+            <rect class="node-bg" x="440" y="86" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="440" y="86" width="4" height="36" rx="2" fill="#60A5FA"/>
+            <text x="454" y="101" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">llm.invoke</text>
+            <text x="454" y="115" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">2.28s · Claude API</text>
+          </g>
+
+          <!-- llm.invoke:act x=440 y=250 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'llm.invoke #2','Claude API','1380ms','+2720ms','agent.turn','ok','#60A5FA')">
+            <rect class="node-bg" x="440" y="250" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="440" y="250" width="4" height="36" rx="2" fill="#60A5FA"/>
+            <text x="454" y="265" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">llm.invoke <tspan fill="#5E6478">#2</tspan></text>
+            <text x="454" y="279" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">1.38s · Claude API</text>
+          </g>
+
+          <!-- tool:get_pod_logs x=660 y=18 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'tool:get_pod_logs','Kubernetes API','375ms','+420ms','llm.invoke','ok','#34D399')">
+            <rect class="node-bg" x="660" y="18" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="660" y="18" width="4" height="36" rx="2" fill="#34D399"/>
+            <text x="674" y="33" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">tool:get_pod_logs</text>
+            <text x="674" y="47" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">375ms · K8s API</text>
+          </g>
+
+          <!-- tool:kubectl_describe x=660 y=79 w=160 h=36 — warn -->
+          <g class="span-node" onclick="selNode(this,'tool:kubectl_describe','Kubernetes API','295ms','+835ms','llm.invoke','warn','#34D399')">
+            <rect class="node-bg" x="660" y="79" width="160" height="36" rx="5" fill="#1C1F28" stroke="rgba(251,191,36,.5)" stroke-width="1.5"/>
+            <rect x="660" y="79" width="4" height="36" rx="2" fill="#34D399"/>
+            <text x="674" y="94" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">tool:kubectl_describe</text>
+            <text x="674" y="108" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">295ms · K8s API</text>
+            <!-- warn badge -->
+            <circle cx="808" cy="79" r="8" fill="#FBBF24"/>
+            <text x="808" y="83" font-size="9" fill="#000" font-weight="700" text-anchor="middle" font-family="sans-serif">!</text>
+          </g>
+
+          <!-- tool:analyze_memory x=660 y=140 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'tool:analyze_memory','File System','1385ms','+1215ms','llm.invoke','ok','#2DD4BF')">
+            <rect class="node-bg" x="660" y="140" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="660" y="140" width="4" height="36" rx="2" fill="#2DD4BF"/>
+            <text x="674" y="155" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">tool:analyze_memory</text>
+            <text x="674" y="169" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">1.39s · File System</text>
+          </g>
+
+          <!-- tool:create_pr x=660 y=229 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'tool:create_pr','GitHub API','790ms','+3010ms','llm.invoke #2','ok','#FB923C')">
+            <rect class="node-bg" x="660" y="229" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="660" y="229" width="4" height="36" rx="2" fill="#FB923C"/>
+            <text x="674" y="244" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">tool:create_pr</text>
+            <text x="674" y="258" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">790ms · GitHub API</text>
+          </g>
+
+          <!-- tool:write_file x=660 y=294 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'tool:write_file','File System','245ms','+3920ms','llm.invoke #2','ok','#2DD4BF')">
+            <rect class="node-bg" x="660" y="294" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="660" y="294" width="4" height="36" rx="2" fill="#2DD4BF"/>
+            <text x="674" y="309" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">tool:write_file</text>
+            <text x="674" y="323" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">245ms · File System</text>
+          </g>
+
+          <!-- agent.conclusion x=880 y=168 w=160 h=36 -->
+          <g class="span-node" onclick="selNode(this,'agent.conclusion','Agent','95ms','+4115ms','agent.turn','ok','#A78BFA')">
+            <rect class="node-bg" x="880" y="168" width="160" height="36" rx="5" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="880" y="168" width="4" height="36" rx="2" fill="#A78BFA"/>
+            <text x="894" y="183" font-size="10" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">agent.conclusion</text>
+            <text x="894" y="197" font-size="9" fill="#5E6478" font-family="Inter,-apple-system,sans-serif">95ms · Agent</text>
+          </g>
+
+          <!-- column labels -->
+          <text x="90" y="355" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">Root</text>
+          <text x="300" y="355" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">Agent</text>
+          <text x="520" y="355" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">LLM Calls</text>
+          <text x="740" y="355" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">Tool Calls</text>
+          <text x="960" y="355" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">Output</text>
+          <!-- column dividers -->
+          <line x1="200" y1="340" x2="200" y2="360" stroke="#2E3140" stroke-width="1"/>
+          <line x1="420" y1="340" x2="420" y2="360" stroke="#2E3140" stroke-width="1"/>
+          <line x1="640" y1="340" x2="640" y2="360" stroke="#2E3140" stroke-width="1"/>
+          <line x1="860" y1="340" x2="860" y2="360" stroke="#2E3140" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- legend -->
+      <div class="graph-legend">
+        <div class="text-2xs text-xlight semibold mb1">Services</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#6366f1"></div>Workbench</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#A78BFA"></div>Agent</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#60A5FA"></div>Claude API</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#34D399"></div>Kubernetes API</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#2DD4BF"></div>File System</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#FB923C"></div>GitHub API</div>
+        <div class="divider" style="margin:4px 0"></div>
+        <div class="legend-row"><div style="width:18px;height:1.5px;background:#4B5170;flex-shrink:0"></div>Child span</div>
+        <div class="legend-row"><div style="width:18px;height:1.5px;background:#4B5170;flex-shrink:0;border-top:1.5px dashed #4B5170;background:none"></div>Async</div>
+      </div>
+      <div class="graph-hint">Click nodes to inspect · Scroll to zoom</div>
+
+      <!-- detail panel -->
+      <div class="detail-panel" id="v3-detail">
+        <div class="detail-panel-hdr">
+          <div class="detail-panel-title" id="v3-detail-title">Select a node</div>
+          <button class="btn-icon" onclick="closeDetail('v3-detail')">×</button>
+        </div>
+        <div class="detail-panel-body" id="v3-detail-body">
+          <div style="color:var(--text-xlight);font-size:12px">Click any node to inspect its details.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       VAR 4 — Service Graph (DAG)
+  ════════════════════════════════════════════════════ -->
+  <div class="page" id="v4">
+    <div class="page-hdr">
+      <div class="back-btn" onclick="showVar(1,null)">←</div>
+      <div class="wb-icon">⚙</div>
+      <div class="breadcrumb">
+        <span class="crumb">infra-debugger</span>
+        <span class="sep">/</span>
+        <span class="crumb" onclick="showVar(1,null)">analyze-oom-crash</span>
+        <span class="sep">/</span>
+        <span class="cur">Traces</span>
+      </div>
+    </div>
+    <div class="trace-toolbar">
+      <div class="trace-id">
+        <span style="color:var(--text-xlight)">Trace</span>
+        <span>7f3a9c2b…e4d1</span>
+        <span style="color:var(--text-xlight);cursor:pointer">⎘</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>4.21s</strong> total</div>
+      <div class="stat-sep"></div>
+      <div class="trace-stat"><strong>4</strong> services</div>
+      <div class="f1"></div>
+      <div class="mode-toggle">
+        <button class="mode-btn" onclick="showVar(2,null)">⠿ Gantt</button>
+        <button class="mode-btn" onclick="showVar(3,null)">◈ Span Graph</button>
+        <button class="mode-btn active">⬡ Service Graph</button>
+      </div>
+      <div class="sub-toggle">
+        <button class="sub-btn" onclick="showVar(3,null)">Span</button>
+        <button class="sub-btn active">Service</button>
+      </div>
+    </div>
+
+    <div class="graph-wrap" id="v4-graph-wrap">
+      <div class="graph-canvas">
+        <!-- ── Service DAG SVG ── -->
+        <svg viewBox="0 0 820 340" width="820" height="340" style="display:block;max-width:100%">
+          <defs>
+            <marker id="arrowS" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <polygon points="0 0, 7 3.5, 0 7" fill="#4B5170"/>
+            </marker>
+          </defs>
+
+          <!-- edges with labels -->
+          <!-- Workbench → Claude API -->
+          <path d="M 215,155 C 245,155 270,155 270,155" fill="none" stroke="#4B5170" stroke-width="2" marker-end="url(#arrowS)"/>
+          <rect x="222" y="130" width="54" height="18" rx="3" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+          <text x="249" y="143" font-size="9" fill="#5E6478" text-anchor="middle" font-family="Inter,sans-serif">2 calls</text>
+
+          <!-- Claude API → K8s API -->
+          <path d="M 480,143 C 518,143 545,88 545,88" fill="none" stroke="#4B5170" stroke-width="2" marker-end="url(#arrowS)"/>
+          <rect x="484" y="96" width="82" height="18" rx="3" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+          <text x="525" y="109" font-size="9" fill="#5E6478" text-anchor="middle" font-family="Inter,sans-serif">2 calls · 340ms avg</text>
+
+          <!-- Claude API → File System -->
+          <path d="M 480,162 C 513,162 545,162 545,162" fill="none" stroke="#4B5170" stroke-width="2" marker-end="url(#arrowS)"/>
+          <rect x="481" y="138" width="82" height="18" rx="3" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+          <text x="522" y="151" font-size="9" fill="#5E6478" text-anchor="middle" font-family="Inter,sans-serif">2 calls · 820ms avg</text>
+
+          <!-- Claude API → GitHub API -->
+          <path d="M 480,177 C 518,177 545,240 545,240" fill="none" stroke="#4B5170" stroke-width="2" marker-end="url(#arrowS)"/>
+          <rect x="482" y="205" width="68" height="18" rx="3" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+          <text x="516" y="218" font-size="9" fill="#5E6478" text-anchor="middle" font-family="Inter,sans-serif">1 call · 790ms</text>
+
+          <!-- ── service nodes (larger, 180×60, rx=8) ── -->
+
+          <!-- Workbench Agent x=30 y=130 -->
+          <g class="svc-node" onclick="selSvcNode(this,'Workbench Agent','#6366f1','1 span','4.21s','0% errors')">
+            <rect class="node-bg" x="30" y="130" width="185" height="60" rx="8" fill="#1C1F28" stroke="#6366f1" stroke-width="1.5"/>
+            <rect x="30" y="130" width="5" height="60" rx="4" fill="#6366f1"/>
+            <text x="48" y="149" font-size="11" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">Workbench Agent</text>
+            <text x="48" y="165" font-size="10" fill="#9EA3B5" font-family="Inter,sans-serif">1 span · 4.21s</text>
+            <rect x="48" y="173" width="36" height="12" rx="3" fill="rgba(52,211,153,.12)"/>
+            <text x="66" y="182" font-size="8" fill="#34D399" text-anchor="middle" font-family="Inter,sans-serif">0 errors</text>
+          </g>
+
+          <!-- Claude API x=270 y=130 -->
+          <g class="svc-node" onclick="selSvcNode(this,'Claude API','#60A5FA','2 spans','3.66s avg','0% errors')">
+            <rect class="node-bg" x="270" y="130" width="210" height="60" rx="8" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="270" y="130" width="5" height="60" rx="4" fill="#60A5FA"/>
+            <text x="288" y="149" font-size="11" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">Claude API</text>
+            <text x="288" y="165" font-size="10" fill="#9EA3B5" font-family="Inter,sans-serif">2 spans · 1.83s avg · claude-opus-4-5</text>
+            <rect x="288" y="173" width="36" height="12" rx="3" fill="rgba(52,211,153,.12)"/>
+            <text x="306" y="182" font-size="8" fill="#34D399" text-anchor="middle" font-family="Inter,sans-serif">0 errors</text>
+          </g>
+
+          <!-- K8s API x=545 y=55 -->
+          <g class="svc-node" onclick="selSvcNode(this,'Kubernetes API','#34D399','2 spans','335ms avg','1 warning')">
+            <rect class="node-bg" x="545" y="55" width="195" height="60" rx="8" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="545" y="55" width="5" height="60" rx="4" fill="#34D399"/>
+            <text x="563" y="74" font-size="11" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">Kubernetes API</text>
+            <text x="563" y="90" font-size="10" fill="#9EA3B5" font-family="Inter,sans-serif">2 spans · 335ms avg</text>
+            <rect x="563" y="98" width="52" height="12" rx="3" fill="rgba(251,191,36,.12)"/>
+            <text x="589" y="107" font-size="8" fill="#FBBF24" text-anchor="middle" font-family="Inter,sans-serif">1 warning</text>
+          </g>
+
+          <!-- File System x=545 y=132 -->
+          <g class="svc-node" onclick="selSvcNode(this,'File System','#2DD4BF','2 spans','815ms avg','0% errors')">
+            <rect class="node-bg" x="545" y="132" width="195" height="60" rx="8" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="545" y="132" width="5" height="60" rx="4" fill="#2DD4BF"/>
+            <text x="563" y="151" font-size="11" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">File System</text>
+            <text x="563" y="167" font-size="10" fill="#9EA3B5" font-family="Inter,sans-serif">2 spans · 815ms avg</text>
+            <rect x="563" y="175" width="36" height="12" rx="3" fill="rgba(52,211,153,.12)"/>
+            <text x="581" y="184" font-size="8" fill="#34D399" text-anchor="middle" font-family="Inter,sans-serif">0 errors</text>
+          </g>
+
+          <!-- GitHub API x=545 y=210 -->
+          <g class="svc-node" onclick="selSvcNode(this,'GitHub API','#FB923C','1 span','790ms','0% errors')">
+            <rect class="node-bg" x="545" y="210" width="195" height="60" rx="8" fill="#1C1F28" stroke="#333748" stroke-width="1"/>
+            <rect x="545" y="210" width="5" height="60" rx="4" fill="#FB923C"/>
+            <text x="563" y="229" font-size="11" font-weight="600" fill="#E4E6EE" font-family="Inter,-apple-system,sans-serif">GitHub API</text>
+            <text x="563" y="245" font-size="10" fill="#9EA3B5" font-family="Inter,sans-serif">1 span · 790ms</text>
+            <rect x="563" y="253" width="36" height="12" rx="3" fill="rgba(52,211,153,.12)"/>
+            <text x="581" y="262" font-size="8" fill="#34D399" text-anchor="middle" font-family="Inter,sans-serif">0 errors</text>
+          </g>
+
+          <!-- column labels -->
+          <text x="123" y="315" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">Origin</text>
+          <text x="375" y="315" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">LLM</text>
+          <text x="642" y="315" font-size="9" fill="#3C4158" text-anchor="middle" font-family="Inter,sans-serif">External Services</text>
+          <line x1="240" y1="300" x2="240" y2="320" stroke="#2E3140" stroke-width="1"/>
+          <line x1="520" y1="300" x2="520" y2="320" stroke="#2E3140" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- legend -->
+      <div class="graph-legend">
+        <div class="text-2xs text-xlight semibold mb1">Services</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#6366f1"></div>Workbench</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#60A5FA"></div>Claude API</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#34D399"></div>Kubernetes API</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#2DD4BF"></div>File System</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#FB923C"></div>GitHub API</div>
+      </div>
+      <div class="graph-hint">Click nodes to inspect · Scroll to zoom</div>
+
+      <!-- detail panel -->
+      <div class="detail-panel" id="v4-detail">
+        <div class="detail-panel-hdr">
+          <div class="detail-panel-title" id="v4-detail-title">Select a service</div>
+          <button class="btn-icon" onclick="closeDetail('v4-detail')">×</button>
+        </div>
+        <div class="detail-panel-body" id="v4-detail-body">
+          <div style="color:var(--text-xlight);font-size:12px">Click any service node to inspect aggregate details.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /main-area -->
+</div><!-- /shell -->
+
+<!-- ─── Trace Info Modal ─────────────────────────────────── -->
+<div class="modal-overlay" id="trace-info-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="mtitle">Trace Details</div>
+      <button class="btn-icon" onclick="closeModal('trace-info-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Trace ID</span><span class="mono">7f3a9c2b-d8e1-4f90-a3c5-b2e94d7c1f8e</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Run</span><span class="mono">analyze-oom-crash</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Start time</span><span class="mono">2026-04-27T04:12:00.000Z</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Duration</span><span class="mono">4210ms</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Span count</span><span class="mono">10</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Services</span><span class="mono">4</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Status</span><span class="chip success text-xs" style="font-size:10px">OK</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">Warnings</span><span class="chip warning text-xs" style="font-size:10px">1 (tool:kubectl_describe)</span></div>
+        <div class="flex gap2 text-xs"><span class="text-xlight mono" style="width:110px">SDK</span><span class="mono">opentelemetry-elixir 1.4.0</span></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('trace-info-modal')">Close</button>
+      <button class="btn">Export OTLP JSON</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── variation switching ─── */
+function showVar(n, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('v'+n).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    document.querySelectorAll('.vbtn').forEach((b,i) => {
+      b.classList.toggle('active', i === n-1);
+    });
+  }
+}
+
+/* ─── tab switching ─── */
+function st(page, tab, el) {
+  document.querySelectorAll('[id^="'+page+'-"]').forEach(p => {
+    if(p.classList.contains('tab-pane')) p.classList.remove('active');
+  });
+  el.closest('.tabs-row').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const pane = document.getElementById(page+'-'+tab);
+  if(pane) pane.classList.add('active');
+  el.classList.add('active');
+}
+
+/* ─── modal ─── */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+/* ─── mode button ─── */
+function switchMode(m, btn) {
+  if(btn) {
+    btn.closest('.mode-toggle').querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+/* ─── span detail (gantt) ─── */
+function selSpan(name, color, svc, dur, start, parent, detail, status, level) {
+  const panel = document.getElementById('v2-detail');
+  const title = document.getElementById('v2-detail-title');
+  const body  = document.getElementById('v2-detail-body');
+
+  panel.classList.add('open');
+  title.textContent = name;
+
+  const statusHtml = status === 'ok'
+    ? '<span class="chip success" style="font-size:10px">OK</span>'
+    : '<span class="chip warning" style="font-size:10px">⚠ Warning</span>';
+
+  const warnNote = status === 'warn'
+    ? '<div class="detail-section"><div class="detail-section-title">Warning</div><div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:5px;padding:8px 10px;font-size:11px;color:var(--warning);line-height:1.5">Connection reset — retried successfully after 45ms. This may indicate intermittent network issues to the K8s API server.</div></div>'
+    : '';
+
+  const attrs = getAttrs(name);
+
+  body.innerHTML = `
+    <div class="detail-section">
+      <div class="dur-big">${dur}</div>
+      <div class="dur-sub">offset ${start} from root</div>
+    </div>
+    <hr class="divider">
+    <div class="detail-section">
+      <div class="detail-section-title">Span</div>
+      <div class="kv-row"><div class="kv-key">name</div><div class="kv-val">${name}</div></div>
+      <div class="kv-row"><div class="kv-key">service</div><div class="kv-val"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>${svc}</span></div></div>
+      <div class="kv-row"><div class="kv-key">status</div><div class="kv-val">${statusHtml}</div></div>
+      ${parent ? `<div class="kv-row"><div class="kv-key">parent</div><div class="kv-val" style="color:var(--text-accent)">${parent}</div></div>` : ''}
+    </div>
+    ${warnNote}
+    <hr class="divider">
+    <div class="detail-section">
+      <div class="detail-section-title">Attributes</div>
+      ${attrs}
+    </div>
+  `;
+
+  // highlight selected rows
+  document.querySelectorAll('.gantt-row, .span-label-row, .bar-row').forEach(r => r.classList.remove('selected'));
+}
+
+function getAttrs(name) {
+  const map = {
+    'workbench.run':     [['wb.id','wb-infra-debugger'],['wb.job','analyze-oom-crash'],['span.kind','INTERNAL']],
+    'agent.turn':        [['agent.model','claude-opus-4-5'],['agent.tools','5'],['span.kind','INTERNAL']],
+    'llm.invoke':        [['llm.model','claude-opus-4-5'],['llm.input_tokens','1842'],['llm.output_tokens','763'],['llm.temperature','1.0'],['span.kind','CLIENT']],
+    'tool:get_pod_logs': [['k8s.namespace','production'],['k8s.resource','pods'],['k8s.verb','get'],['http.status_code','200'],['span.kind','CLIENT']],
+    'tool:kubectl_describe':[['k8s.namespace','production'],['k8s.resource','pods/api-pod'],['k8s.verb','describe'],['http.status_code','200'],['net.retry_count','1'],['span.kind','CLIENT']],
+    'tool:analyze_memory':[['file.path','/tmp/mem-profile.json'],['file.bytes_read','142820'],['span.kind','INTERNAL']],
+    'tool:create_pr':    [['http.method','POST'],['http.url','api.github.com/repos/acme/api-svc/pulls'],['http.status_code','201'],['gh.pr_number','4892'],['span.kind','CLIENT']],
+    'tool:write_file':   [['file.path','remediation.md'],['file.bytes_written','1842'],['span.kind','INTERNAL']],
+    'agent.conclusion':  [['agent.conclusion_length','728'],['span.kind','INTERNAL']],
+  };
+  const attrs = map[name] || [['span.kind','INTERNAL']];
+  return attrs.map(([k,v]) => `<div class="kv-row"><div class="kv-key">${k}</div><div class="kv-val">${v}</div></div>`).join('');
+}
+
+/* ─── node detail (span graph) ─── */
+function selNode(el, name, svc, dur, start, parent, status, color) {
+  document.querySelectorAll('.span-node').forEach(n => n.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const panel = document.getElementById('v3-detail');
+  const title = document.getElementById('v3-detail-title');
+  const body  = document.getElementById('v3-detail-body');
+  panel.classList.add('open');
+  title.textContent = name;
+
+  const warnNote = status === 'warn'
+    ? '<div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:5px;padding:8px 10px;font-size:11px;color:var(--warning);line-height:1.5;margin-top:4px">⚠ Connection reset on first attempt. Retried after 45ms and succeeded. Consider investigating K8s API server stability.</div>'
+    : '';
+
+  const statusChip = status === 'ok'
+    ? '<span class="chip success" style="font-size:10px">OK</span>'
+    : '<span class="chip warning" style="font-size:10px">⚠ Warning</span>';
+
+  body.innerHTML = `
+    <div class="detail-section">
+      <div class="dur-big">${dur}</div>
+      <div class="dur-sub">offset ${start} from root</div>
+    </div>
+    <hr class="divider">
+    <div class="detail-section">
+      <div class="detail-section-title">Span</div>
+      <div class="kv-row"><div class="kv-key">name</div><div class="kv-val">${name}</div></div>
+      <div class="kv-row"><div class="kv-key">service</div><div class="kv-val"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>${svc}</span></div></div>
+      <div class="kv-row"><div class="kv-key">status</div><div class="kv-val">${statusChip}</div></div>
+      ${parent ? `<div class="kv-row"><div class="kv-key">parent</div><div class="kv-val" style="color:var(--text-accent)">${parent}</div></div>` : ''}
+    </div>
+    ${warnNote}
+    <hr class="divider">
+    <div class="detail-section">
+      <div class="detail-section-title">Attributes</div>
+      ${getAttrs(name)}
+    </div>
+    <button class="btn text-xs" style="justify-content:center" onclick="showVar(2,null)">View in Gantt →</button>
+  `;
+}
+
+/* ─── service node detail ─── */
+function selSvcNode(el, name, color, spans, dur, errors) {
+  document.querySelectorAll('.svc-node').forEach(n => n.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const panel = document.getElementById('v4-detail');
+  const title = document.getElementById('v4-detail-title');
+  const body  = document.getElementById('v4-detail-body');
+  panel.classList.add('open');
+  title.textContent = name;
+
+  const svcData = {
+    'Workbench Agent': { calls:1, avg:'4.21s', p99:'4.21s', errs:'0', warn:'0', attrs:[['wb.id','wb-infra-debugger'],['span.kind','INTERNAL']] },
+    'Claude API':      { calls:2, avg:'1.83s', p99:'2.28s', errs:'0', warn:'0', attrs:[['llm.model','claude-opus-4-5'],['llm.total_input_tokens','3684'],['llm.total_output_tokens','1526']] },
+    'Kubernetes API':  { calls:2, avg:'335ms', p99:'375ms', errs:'0', warn:'1', attrs:[['k8s.namespace','production'],['net.peer.name','k8s-api.prod.cluster'],['net.peer.port','6443']] },
+    'File System':     { calls:2, avg:'815ms', p99:'1385ms',errs:'0', warn:'0', attrs:[['file.fs_type','ext4']] },
+    'GitHub API':      { calls:1, avg:'790ms', p99:'790ms', errs:'0', warn:'0', attrs:[['http.host','api.github.com'],['http.scheme','https'],['net.peer.port','443']] },
+  };
+  const d = svcData[name] || { calls:1, avg:'—', p99:'—', errs:'0', warn:'0', attrs:[] };
+
+  const warnBadge = d.warn !== '0'
+    ? `<span class="chip warning text-xs" style="font-size:10px">⚠ ${d.warn} warning</span>`
+    : `<span class="chip success text-xs" style="font-size:10px">0 errors</span>`;
+
+  body.innerHTML = `
+    <div class="detail-section">
+      <div class="flex aic gap2">
+        <span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>
+        <span class="semibold">${name}</span>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="detail-section">
+      <div class="detail-section-title">Aggregate</div>
+      <div class="kv-row"><div class="kv-key">calls</div><div class="kv-val">${d.calls}</div></div>
+      <div class="kv-row"><div class="kv-key">avg duration</div><div class="kv-val">${d.avg}</div></div>
+      <div class="kv-row"><div class="kv-key">p99 duration</div><div class="kv-val">${d.p99}</div></div>
+      <div class="kv-row"><div class="kv-key">errors</div><div class="kv-val">${d.errs === '0' ? '<span style="color:var(--success)">0</span>' : `<span style="color:var(--danger)">${d.errs}</span>`}</div></div>
+      <div class="kv-row"><div class="kv-key">warnings</div><div class="kv-val">${d.warn === '0' ? '<span style="color:var(--text-xlight)">0</span>' : `<span style="color:var(--warning)">${d.warn}</span>`}</div></div>
+    </div>
+    <hr class="divider">
+    <div class="detail-section">
+      <div class="detail-section-title">Common Attributes</div>
+      ${d.attrs.map(([k,v]) => `<div class="kv-row"><div class="kv-key">${k}</div><div class="kv-val">${v}</div></div>`).join('')}
+    </div>
+    <button class="btn text-xs" style="justify-content:center" onclick="showVar(3,null)">View spans →</button>
+  `;
+}
+
+/* ─── close detail panel ─── */
+function closeDetail(id) {
+  document.getElementById(id).classList.remove('open');
+  document.querySelectorAll('.span-node,.svc-node').forEach(n => n.classList.remove('selected'));
+}
+</script>
+</body>
+</html>
