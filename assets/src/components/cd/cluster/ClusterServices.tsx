@@ -84,7 +84,9 @@ export default function ClusterServices() {
       setRefetch,
       clusterId,
       q,
-      setQ: (newQ: string) => setSearchParams({ ...(newQ && { q: newQ }) }),
+      setQ: (newQ: string) =>
+        (newQ || null) !== q &&
+        setSearchParams({ ...(newQ && { q: newQ }) }, { replace: true }),
     }),
     [setRefetch, clusterId, q, setSearchParams]
   )

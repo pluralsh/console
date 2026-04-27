@@ -1,5 +1,4 @@
-import { Chip, SubTab, TabList } from '@pluralsh/design-system'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { Chip, Flex, SubTab, TabList } from '@pluralsh/design-system'
 import {
   RuntimeServiceDetailsFragment,
   useRuntimeServiceQuery,
@@ -9,8 +8,8 @@ import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   CLUSTER_ADDONS_COMPATIBILITY_PATH,
-  CLUSTER_ADDONS_RELEASES_PATH,
   CLUSTER_ADDONS_PARAM_ID,
+  CLUSTER_ADDONS_RELEASES_PATH,
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
 } from '../../../routes/cdRoutesConsts'
@@ -20,6 +19,8 @@ import PropCard from '../../utils/PropCard.tsx'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { useSetPageHeaderContent } from '../ContinuousDeployment'
 import { useAddonsContext } from './ClusterAddOns.tsx'
 
@@ -33,13 +34,12 @@ export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 const directory = [
   { path: CLUSTER_ADDONS_COMPATIBILITY_PATH, label: 'Compatibility' },
   { path: CLUSTER_ADDONS_RELEASES_PATH, label: 'Releases' },
-  // { path: 'readme', label: 'README' },
 ]
 
 export default function ClusterAddon() {
-  const theme = useTheme()
-  const { cluster } = useAddonsContext()
-  const kubeVersion = getClusterKubeVersion(cluster)
+  const { spacing } = useTheme()
+  const { cluster, loading } = useAddonsContext()
+  const kubeVersion = getClusterKubeVersion(cluster) ?? ''
   const tabStateRef = useRef<any>(null)
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
@@ -54,8 +54,12 @@ export default function ClusterAddon() {
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data: addOnData, error: addOnError } = useRuntimeServiceQuery({
-    skip: !addOnId,
+  const {
+    data: addOnData,
+    loading: addOnLoading,
+    error: addOnError,
+  } = useRuntimeServiceQuery({
+    skip: !addOnId || !cluster,
     variables: {
       id: addOnId,
       version: versionPlaceholder,
@@ -64,17 +68,11 @@ export default function ClusterAddon() {
     },
   })
 
-  const addOn = useMemo(
-    () => addOnData?.runtimeService,
-    [addOnData?.runtimeService]
-  )
+  const addOn = addOnData?.runtimeService
+  const isLoading = !addOn && (addOnLoading || loading)
 
-  const context = useMemo(
-    () =>
-      ({
-        addOn,
-        kubeVersion,
-      }) as ClusterAddOnOutletContextT,
+  const context: ClusterAddOnOutletContextT = useMemo(
+    () => ({ addOn, kubeVersion }),
     [addOn, kubeVersion]
   )
 
@@ -82,95 +80,87 @@ export default function ClusterAddon() {
     useMemo(
       () =>
         addOnId ? (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'end',
-              gap: theme.spacing.small,
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
             }}
           >
-            <TabList
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-            >
-              {directory.map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
+            {directory.map(({ label, path }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                textValue={label}
+                to={`${pathPrefix}/${path}`}
+              >
+                <SubTab
                   key={path}
                   textValue={label}
-                  to={`${pathPrefix}/${path}`}
                 >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    {label}
-                  </SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-          </div>
+                  {label}
+                </SubTab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
         ) : undefined,
-      [addOnId, currentTab?.path, pathPrefix, theme.spacing.small]
+      [addOnId, currentTab?.path, pathPrefix]
     )
   )
 
-  if (addOnError) return <GqlError error={addOnError} />
-
-  if (!addOn) return <LoadingIndicator />
+  if (!addOn && !isLoading) return null
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        height: '100%',
-        overflow: 'hidden',
-        width: '100%',
-      }}
+    <Flex
+      direction="column"
+      gap="medium"
+      overflow="hidden"
+      height="100%"
+      width="100%"
     >
+      {addOnError && <GqlError error={addOnError} />}
       <div
         css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.medium,
-          overflow: 'hidden',
-          width: '100%',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridAutoRows: 'min-content',
+          gridGap: spacing.small,
         }}
       >
-        <div
-          css={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gridAutoRows: 'min-content',
-            gridGap: theme.spacing.small,
-          }}
+        <PropCard
+          title="Add-on"
+          loading={isLoading}
         >
-          <PropCard title="Add-on">{addOn?.name}</PropCard>
-          <PropCard title="Add-on version">
-            <div
-              css={{
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
+          {addOn?.name}
+        </PropCard>
+        <PropCard
+          title="Add-on version"
+          loading={isLoading}
+        >
+          <StretchedFlex>
+            {toNiceVersion(addOn?.addonVersion?.version)}
+            <Chip
+              severity={addOn?.addonVersion?.blocking ? 'danger' : 'success'}
             >
-              {toNiceVersion(addOn?.addonVersion?.version)}
-              <Chip
-                severity={addOn?.addonVersion?.blocking ? 'danger' : 'success'}
-              >
-                {addOn?.addonVersion?.blocking ? 'Blocking' : 'Not blocking'}
-              </Chip>
-            </div>
-          </PropCard>
-          <PropCard title="Kubernetes version">
-            {toNiceVersion(kubeVersion)}
-          </PropCard>
-        </div>
-        <Outlet context={context} />
+              {addOn?.addonVersion?.blocking ? 'Blocking' : 'Not blocking'}
+            </Chip>
+          </StretchedFlex>
+        </PropCard>
+        <PropCard
+          title="Kubernetes version"
+          loading={isLoading}
+        >
+          {toNiceVersion(kubeVersion)}
+        </PropCard>
       </div>
-    </div>
+      {isLoading ? (
+        <RectangleSkeleton
+          $width="100%"
+          $height="100%"
+        />
+      ) : (
+        <Outlet context={context} />
+      )}
+    </Flex>
   )
 }
