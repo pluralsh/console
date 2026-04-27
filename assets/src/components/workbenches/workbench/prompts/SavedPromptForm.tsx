@@ -93,8 +93,7 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
   const handleCompleted = () => {
     navigate(getWorkbenchSavedPromptsAbsPath(workbenchId))
     popToast({
-      name: 'prompt',
-      action: savedPrompt ? 'updated' : 'created',
+      content: `prompt ${savedPrompt ? 'updated' : 'created'}`,
       severity: 'success',
     })
   }

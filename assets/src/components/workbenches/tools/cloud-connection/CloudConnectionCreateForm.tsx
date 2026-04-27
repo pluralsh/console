@@ -140,8 +140,7 @@ export function CloudConnectionCreateForm() {
     onCompleted: ({ upsertCloudConnection }) => {
       if (!upsertCloudConnection) return
       popToast({
-        name: upsertCloudConnection.name,
-        action: 'created',
+        content: `${upsertCloudConnection.name} created`,
         severity: 'success',
       })
       returnParams.set(

@@ -78,7 +78,7 @@ export function WorkbenchJob() {
       ],
       onCompleted: () => {
         setCancelModalOpen(false)
-        popToast({ name: 'job', action: 'cancelled', severity: 'danger' })
+        popToast({ content: 'job cancelled', severity: 'danger' })
       },
     })
 

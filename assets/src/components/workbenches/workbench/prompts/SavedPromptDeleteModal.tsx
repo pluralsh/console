@@ -21,8 +21,7 @@ export function SavedPromptDeleteModal({
     variables: { id: savedPrompt?.id ?? '' },
     onCompleted: () => {
       popToast({
-        name: savedPrompt?.prompt ?? '',
-        action: 'deleted',
+        content: `${savedPrompt?.prompt ?? 'saved prompt'} deleted`,
         severity: 'danger',
       })
       onClose()

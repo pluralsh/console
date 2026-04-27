@@ -94,8 +94,7 @@ const cols = [
         awaitRefetchQueries: true,
         onCompleted: ({ deleteGroupMember }) =>
           popToast?.({
-            name: deleteGroupMember?.user?.name ?? 'Group member',
-            action: 'removed',
+            content: `${deleteGroupMember?.user?.name ?? 'Group member'} removed`,
             severity: 'danger',
           }),
       })

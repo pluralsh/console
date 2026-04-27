@@ -12,12 +12,7 @@ import {
 type ToastSeverity = ComponentProps<typeof Toast>['severity']
 
 export type SimpleToastPayload = {
-  /** Custom content; if omitted, name/action are used to render default action text */
-  content?: ReactNode
-  prefix?: ReactNode
-  suffix?: string
-  name?: Nullable<string>
-  action?: string
+  content: ReactNode
   severity?: ToastSeverity
   delayTimeout?: number | 'none'
   clickable?: boolean
@@ -60,10 +55,6 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
   const show = !!toast
   const {
     content,
-    name,
-    action,
-    prefix,
-    suffix,
     severity,
     delayTimeout = DEFAULT_DELAY_TIMEOUT,
     clickable = false,
@@ -92,14 +83,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
             },
           })}
         >
-          {content || (
-            <>
-              {prefix && <span>{prefix} </span>}
-              {name && <span>{name} </span>}
-              {action}
-              {suffix && <span> {suffix}</span>}
-            </>
-          )}
+          {content}
         </span>
       </Toast>
     </SimpleToastContext>

@@ -106,8 +106,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const handleCompleted = () => {
     navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
     popToast({
-      name: truncate(prompt, { length: 30 }),
-      action: cron ? 'updated' : 'created',
+      content: `${truncate(prompt, { length: 30 })} ${cron ? 'updated' : 'created'}`,
       severity: 'success',
     })
   }

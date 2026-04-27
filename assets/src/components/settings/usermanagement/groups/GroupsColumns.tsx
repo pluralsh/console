@@ -45,7 +45,7 @@ const ColActions = columnHelper.accessor((group) => group, {
     const [mutation, { loading, error }] = useDeleteGroupMutation({
       variables: { id: group.id },
       onCompleted: () => {
-        popToast({ name: group.name, action: 'deleted', severity: 'danger' })
+        popToast({ content: `${group.name} deleted`, severity: 'danger' })
         setDialogKey('')
       },
       refetchQueries: ['Groups'],

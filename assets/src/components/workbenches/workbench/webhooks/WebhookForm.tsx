@@ -414,8 +414,7 @@ function CreateWebhookForm({
 
       setNewWebHook(createdWebhook)
       popToast({
-        name: createdWebhook.name,
-        action: 'created',
+        content: `${createdWebhook.name} created`,
         severity: 'success',
       })
 
@@ -439,8 +438,7 @@ function CreateWebhookForm({
 
     setNewWebHook(createdWebhook)
     popToast({
-      name: createdWebhook.name,
-      action: 'created',
+      content: `${createdWebhook.name} created`,
       severity: 'success',
     })
   }

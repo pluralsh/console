@@ -82,9 +82,7 @@ export function Logs({
       const alreadyAdded = labels.some((l) => l.key === key)
       if (!alreadyAdded) setLabels([...labels, { key, value }])
       popToast({
-        prefix: 'Filter',
-        name: key,
-        action: alreadyAdded ? 'already added' : 'added',
+        content: `Filter ${key} ${alreadyAdded ? 'already added' : 'added'}`,
         severity: alreadyAdded ? 'danger' : 'success',
         delayTimeout: 2000,
       })

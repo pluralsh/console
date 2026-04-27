@@ -234,8 +234,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 
   const handleCompleted = () => {
     popToast({
-      name: label,
-      action: editing ? 'updated' : 'created',
+      content: `${label} ${editing ? 'updated' : 'created'}`,
       severity: 'success',
     })
 
