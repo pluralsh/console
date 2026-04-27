@@ -381,7 +381,7 @@ function SidebarItem({
 
 export const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
   ({ theme, $active }) => ({
-    ...theme.partials.text.caption,
+    ...theme.partials.text.body2,
     justifyContent: 'space-between',
     color: theme.colors.text,
     textDecoration: 'none',
