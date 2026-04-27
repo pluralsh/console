@@ -3,6 +3,7 @@ import styled, { DefaultTheme } from 'styled-components'
 
 import {
   Flex,
+  FlexProps,
   SemanticColorKey,
   SemanticSpacingKey,
   WrapWithIf,
@@ -62,6 +63,7 @@ export const StackedText = memo(
     loading = false,
     icon,
     iconGap,
+    iconFlexProps,
     ...props
   }: {
     first: ReactNode
@@ -75,6 +77,7 @@ export const StackedText = memo(
     loading?: boolean
     icon?: ReactNode
     iconGap?: SemanticSpacingKey
+    iconFlexProps?: ComponentProps<typeof Flex>
   } & ComponentProps<typeof StackedTextSC>) => {
     const first = typeof firstProp === 'number' ? `${firstProp}` : firstProp
     const second = typeof secondProp === 'number' ? `${secondProp}` : secondProp
@@ -86,6 +89,7 @@ export const StackedText = memo(
           <IconWrapper
             icon={icon}
             gap={iconGap}
+            {...iconFlexProps}
           />
         }
       >
@@ -120,15 +124,17 @@ function IconWrapper({
   icon,
   children,
   gap,
+  ...props
 }: {
   icon: ReactNode
   children?: ReactNode
   gap?: SemanticSpacingKey
-}) {
+} & FlexProps) {
   return (
     <Flex
       gap={gap ?? 'small'}
       align="center"
+      {...props}
     >
       {icon}
       {children}

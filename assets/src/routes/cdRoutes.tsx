@@ -42,10 +42,7 @@ import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnRel
 import { Cluster } from '../components/cd/cluster/Cluster'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
 import { ClusterInsightComponent } from '../components/cd/cluster/ClusterInsightComponent.tsx'
-import {
-  ClusterInsights,
-  ClusterInsightsSummary,
-} from '../components/cd/cluster/ClusterInsights.tsx'
+import { ClusterInsights } from '../components/cd/cluster/ClusterInsights.tsx'
 import { ClusterInsightsComponents } from '../components/cd/cluster/ClusterInsightsComponents.tsx'
 import { ClusterMetadata } from '../components/cd/cluster/ClusterMetadata'
 import { ClusterNodes } from '../components/cd/cluster/ClusterNodes'
@@ -81,6 +78,8 @@ import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
 import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ClusterUpgradePlan } from 'components/cd/cluster/upgrade-plan/ClusterUpgradePlan.tsx'
+import { ServiceMonitorCreateOrEdit } from 'components/cd/services/service/monitors/create-edit/ServiceMonitorCreateOrEdit.tsx'
+import { ServiceMonitors } from 'components/cd/services/service/monitors/ServiceMonitors.tsx'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ServiceContexts } from 'components/cd/services/service/ServiceContexts.tsx'
 import {
@@ -89,6 +88,7 @@ import {
   ServiceMetricsTimeseries,
 } from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
+import { ServiceObservability } from 'components/cd/services/service/ServiceObservability.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
 import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings.tsx'
 import { ServiceSettings } from 'components/cd/services/service/settings/ServiceSettings.tsx'
@@ -115,7 +115,6 @@ import {
   CLUSTER_DETAILS_PATH,
   CLUSTER_INSIGHTS_COMPONENTS_PATH,
   CLUSTER_INSIGHTS_PATH,
-  CLUSTER_INSIGHTS_SUMMARY_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_METRICS_PATH,
@@ -158,9 +157,6 @@ import {
 } from './cdRoutesConsts'
 import { FLOW_PARAM_ID_OR_NAME } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
-import { ServiceObservability } from 'components/cd/services/service/ServiceObservability.tsx'
-import { ServiceMonitors } from 'components/cd/services/service/monitors/ServiceMonitors.tsx'
-import { ServiceMonitorCreateOrEdit } from 'components/cd/services/service/monitors/create-edit/ServiceMonitorCreateOrEdit.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -365,13 +361,9 @@ const clusterDetailsRoutes = [
         element={
           <Navigate
             replace
-            to={CLUSTER_INSIGHTS_SUMMARY_PATH}
+            to={CLUSTER_INSIGHTS_COMPONENTS_PATH}
           />
         }
-      />
-      <Route
-        path={CLUSTER_INSIGHTS_SUMMARY_PATH}
-        element={<ClusterInsightsSummary />}
       />
       <Route
         path={CLUSTER_INSIGHTS_COMPONENTS_PATH}
