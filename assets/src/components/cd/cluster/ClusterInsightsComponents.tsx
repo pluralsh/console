@@ -48,23 +48,28 @@ export function ClusterInsightsComponents() {
   const loading = !cluster && clusterLoading
 
   useSetNavigationContent(
-    <StackedText
-      first={
-        <Flex
-          gap="xsmall"
-          align="center"
-          height={40}
-        >
-          <ComponentsIcon />
-          <span>Component insights</span>
-        </Flex>
-      }
-      firstPartialType="body2Bold"
-      firstColor="text"
-      second="Real-time visibility into the health, resources, and configuration of every application deployed."
-      secondPartialType="body2"
-      secondColor="text-light"
-    />
+    useMemo(
+      () => (
+        <StackedText
+          first={
+            <Flex
+              gap="xsmall"
+              align="center"
+              height={40}
+            >
+              <ComponentsIcon />
+              <span>Component insights</span>
+            </Flex>
+          }
+          firstPartialType="body2Bold"
+          firstColor="text"
+          second="Real-time visibility into the health, resources, and configuration of every application deployed."
+          secondPartialType="body2"
+          secondColor="text-light"
+        />
+      ),
+      []
+    )
   )
 
   useSetActionContent(
