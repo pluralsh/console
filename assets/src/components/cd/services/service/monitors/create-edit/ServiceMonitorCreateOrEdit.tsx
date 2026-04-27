@@ -126,7 +126,7 @@ function ServiceMonitorCreateOrEditInner({
       name: state.name,
       action: mode === 'create' ? 'created' : 'updated',
       suffix: 'successfully',
-      color: 'icon-success',
+      severity: 'success',
     })
   }
   const [createMonitor, { loading: createLoading, error: createError }] =

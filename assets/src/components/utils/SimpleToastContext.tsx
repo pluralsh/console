@@ -1,17 +1,24 @@
-import type { SemanticColorKey } from '@pluralsh/design-system'
-import { createContext, ReactNode, use, useMemo, useRef, useState } from 'react'
+import { Toast } from '@pluralsh/design-system'
+import {
+  ComponentProps,
+  createContext,
+  ReactNode,
+  use,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
-import { SimpleToastChip } from 'components/utils/SimpleToastChip'
-import { Body2P, StrongSC } from 'components/utils/typography/Text'
+type ToastSeverity = ComponentProps<typeof Toast>['severity']
 
 export type SimpleToastPayload = {
-  /** Custom content; if omitted, name/action/color are used to render default action text */
+  /** Custom content; if omitted, name/action are used to render default action text */
   content?: ReactNode
   prefix?: ReactNode
   suffix?: string
   name?: Nullable<string>
   action?: string
-  color?: SemanticColorKey
+  severity?: ToastSeverity
   delayTimeout?: number | 'none'
   clickable?: boolean
   onClick?: () => void
@@ -57,7 +64,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
     action,
     prefix,
     suffix,
-    color = 'text',
+    severity,
     delayTimeout = DEFAULT_DELAY_TIMEOUT,
     clickable = false,
     onClick,
@@ -66,23 +73,35 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
   return (
     <SimpleToastContext value={value}>
       {children}
-      <SimpleToastChip
+      <Toast
         key={toast?.id}
         show={show}
-        delayTimeout={delayTimeout}
+        closeTimeout={delayTimeout}
         onClose={value.clearToast}
-        clickable={clickable}
-        onClick={onClick}
+        position="bottom-right"
+        margin="large"
+        severity={severity}
       >
-        {content || (
-          <Body2P $color="text-light">
-            {prefix && <span>{prefix} </span>}
-            {name && <StrongSC $color="text">{name} </StrongSC>}
-            <StrongSC $color={color}>{action}</StrongSC>
-            {suffix && <span> {suffix}</span>}
-          </Body2P>
-        )}
-      </SimpleToastChip>
+        <span
+          {...(clickable && {
+            role: 'button',
+            tabIndex: 0,
+            onClick,
+            onKeyDown: (e) => {
+              if (e.key === 'Enter' || e.key === ' ') onClick?.()
+            },
+          })}
+        >
+          {content || (
+            <>
+              {prefix && <span>{prefix} </span>}
+              {name && <span>{name} </span>}
+              {action}
+              {suffix && <span> {suffix}</span>}
+            </>
+          )}
+        </span>
+      </Toast>
     </SimpleToastContext>
   )
 }

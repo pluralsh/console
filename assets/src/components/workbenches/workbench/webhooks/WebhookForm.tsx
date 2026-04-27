@@ -416,7 +416,7 @@ function CreateWebhookForm({
       popToast({
         name: createdWebhook.name,
         action: 'created',
-        color: 'icon-success',
+        severity: 'success',
       })
 
       return
@@ -441,7 +441,7 @@ function CreateWebhookForm({
     popToast({
       name: createdWebhook.name,
       action: 'created',
-      color: 'icon-success',
+      severity: 'success',
     })
   }
 

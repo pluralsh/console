@@ -95,7 +95,7 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     popToast({
       name: 'prompt',
       action: savedPrompt ? 'updated' : 'created',
-      color: 'icon-success',
+      severity: 'success',
     })
   }
 

@@ -156,7 +156,7 @@ export function WorkbenchToolCreateOrEdit({
     useCreateWorkbenchToolMutation({
       onCompleted: ({ createWorkbenchTool }) => {
         const name = createWorkbenchTool?.name ?? 'Tool'
-        popToast({ name, action: 'created', color: 'icon-success' })
+        popToast({ name, action: 'created', severity: 'success' })
         navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)
       },
     })
@@ -164,7 +164,7 @@ export function WorkbenchToolCreateOrEdit({
     useUpdateWorkbenchToolMutation({
       onCompleted: ({ updateWorkbenchTool }) => {
         const name = updateWorkbenchTool?.name ?? 'Tool'
-        popToast({ name, action: 'updated', color: 'icon-success' })
+        popToast({ name, action: 'updated', severity: 'success' })
       },
     })
   const mutationLoading = createLoading || updateLoading

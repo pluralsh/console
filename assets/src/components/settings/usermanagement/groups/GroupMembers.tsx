@@ -96,7 +96,7 @@ const cols = [
           popToast?.({
             name: deleteGroupMember?.user?.name ?? 'Group member',
             action: 'removed',
-            color: 'icon-danger',
+            severity: 'danger',
           }),
       })
 

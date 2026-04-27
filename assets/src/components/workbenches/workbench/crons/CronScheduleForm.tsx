@@ -108,7 +108,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
     popToast({
       name: truncate(prompt, { length: 30 }),
       action: cron ? 'updated' : 'created',
-      color: 'icon-success',
+      severity: 'success',
     })
   }
   const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation({

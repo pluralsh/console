@@ -142,7 +142,7 @@ export function CloudConnectionCreateForm() {
       popToast({
         name: upsertCloudConnection.name,
         action: 'created',
-        color: 'icon-success',
+        severity: 'success',
       })
       returnParams.set(
         CLOUD_CONNECTION_SELECTED_QUERY_PARAM,

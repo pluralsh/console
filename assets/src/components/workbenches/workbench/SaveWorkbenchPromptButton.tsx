@@ -64,13 +64,13 @@ function SaveWorkbenchPromptButtonInner({
       refetchQueries: ['WorkbenchPrompts'],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        popToast({ name: 'prompt', action: 'saved', color: 'icon-success' })
+        popToast({ name: 'prompt', action: 'saved', severity: 'success' })
       },
       onError: () => {
         popToast({
           name: 'prompt',
           action: 'failed to save',
-          color: 'icon-danger',
+          severity: 'danger',
         })
       },
     })
@@ -81,13 +81,13 @@ function SaveWorkbenchPromptButtonInner({
       refetchQueries: ['WorkbenchPrompts'],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        popToast({ name: 'prompt', action: 'removed', color: 'icon-danger' })
+        popToast({ name: 'prompt', action: 'removed', severity: 'danger' })
       },
       onError: () => {
         popToast({
           name: 'prompt',
           action: 'failed to remove',
-          color: 'icon-danger',
+          severity: 'danger',
         })
       },
     })

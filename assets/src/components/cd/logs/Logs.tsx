@@ -85,7 +85,7 @@ export function Logs({
         prefix: 'Filter',
         name: key,
         action: alreadyAdded ? 'already added' : 'added',
-        color: alreadyAdded ? 'icon-danger' : 'icon-success',
+        severity: alreadyAdded ? 'danger' : 'success',
         delayTimeout: 2000,
       })
     },

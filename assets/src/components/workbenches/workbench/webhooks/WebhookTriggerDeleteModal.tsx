@@ -22,7 +22,7 @@ export function WebhookTriggerDeleteModal({
       popToast({
         name: webhook?.name ?? '',
         action: 'deleted',
-        color: 'icon-danger',
+        severity: 'danger',
       })
       onClose()
     },

@@ -23,7 +23,7 @@ export function SavedPromptDeleteModal({
       popToast({
         name: savedPrompt?.prompt ?? '',
         action: 'deleted',
-        color: 'icon-danger',
+        severity: 'danger',
       })
       onClose()
     },

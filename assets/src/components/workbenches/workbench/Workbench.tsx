@@ -126,7 +126,7 @@ export function Workbench() {
         popToast({
           name: workbench?.name,
           action: 'deleted',
-          color: 'icon-danger',
+          severity: 'danger',
         })
       },
     })

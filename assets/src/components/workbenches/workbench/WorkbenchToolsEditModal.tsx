@@ -114,7 +114,7 @@ export function WorkbenchToolsEditModal({
         popToast({
           name: workbench?.name ?? 'workbench tools',
           action: 'updated',
-          color: 'icon-success',
+          severity: 'success',
         })
         onClose()
       },

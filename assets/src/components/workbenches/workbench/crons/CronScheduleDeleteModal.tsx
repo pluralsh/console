@@ -23,7 +23,7 @@ export function CronScheduleDeleteModal({
       popToast({
         name: cron?.prompt ?? '',
         action: 'deleted',
-        color: 'icon-danger',
+        severity: 'danger',
       })
       onClose()
     },
