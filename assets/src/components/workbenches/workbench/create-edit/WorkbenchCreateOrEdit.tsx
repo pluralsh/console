@@ -255,6 +255,7 @@ function WorkbenchForm({
           direction="column"
           width={200}
           flexShrink={0}
+          gap="xxxsmall"
         >
           {workbenchFormSteps.map(({ label }) => (
             <SidebarItem
@@ -359,17 +360,17 @@ function SidebarItem({
         status === null ? null : status === 'visited' ? (
           <CheckOutlineIcon
             color="icon-success"
-            size={10}
+            size={16}
           />
         ) : status === 'error' ? (
           <ErrorOutlineIcon
             color="icon-danger"
-            size={10}
+            size={16}
           />
         ) : (
           <CircleDashIcon
             color="icon-light"
-            size={10}
+            size={16}
           />
         )
       }
