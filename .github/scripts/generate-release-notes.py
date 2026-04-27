@@ -383,12 +383,32 @@ def generate(current_tag, limit=None):
     return "\n".join(lines)
 
 
+def update_changelog(tag, notes, changelog_path="CHANGELOG.md"):
+    """Prepend release notes to the changelog file."""
+    from datetime import date
+
+    header = f"# {tag} ({date.today().isoformat()})\n\n"
+    entry = header + notes + "\n\n"
+
+    existing = ""
+    if os.path.exists(changelog_path):
+        with open(changelog_path, "r") as f:
+            existing = f.read()
+
+    with open(changelog_path, "w") as f:
+        f.write(entry + existing)
+
+    print(f"Updated {changelog_path}", file=sys.stderr)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate release notes")
     parser.add_argument("tag", nargs="?", default=os.environ.get("GITHUB_REF_NAME", ""),
                         help="Git tag to generate notes for")
     parser.add_argument("--limit", type=int, default=None,
                         help="Max number of PRs to process (most recent first)")
+    parser.add_argument("--changelog", default=None,
+                        help="Path to CHANGELOG.md to prepend notes to")
     args = parser.parse_args()
 
     if not args.tag:
@@ -399,5 +419,9 @@ if __name__ == "__main__":
     out_path = os.environ.get("RELEASE_NOTES_FILE", "release-notes.md")
     with open(out_path, "w") as f:
         f.write(notes)
+
+    changelog_path = args.changelog or os.environ.get("CHANGELOG_FILE")
+    if changelog_path:
+        update_changelog(args.tag, notes, changelog_path)
 
     print(notes)
