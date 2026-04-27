@@ -15,8 +15,6 @@ export type SimpleToastPayload = {
   content: ReactNode
   severity?: ToastSeverity
   delayTimeout?: number | 'none'
-  clickable?: boolean
-  onClick?: () => void
 }
 
 type SimpleToastContextT = {
@@ -57,8 +55,6 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
     content,
     severity,
     delayTimeout = DEFAULT_DELAY_TIMEOUT,
-    clickable = false,
-    onClick,
   } = toast?.payload ?? {}
 
   return (
@@ -73,18 +69,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
         margin="large"
         severity={severity}
       >
-        <span
-          {...(clickable && {
-            role: 'button',
-            tabIndex: 0,
-            onClick,
-            onKeyDown: (e) => {
-              if (e.key === 'Enter' || e.key === ' ') onClick?.()
-            },
-          })}
-        >
-          {content}
-        </span>
+        {content}
       </Toast>
     </SimpleToastContext>
   )
