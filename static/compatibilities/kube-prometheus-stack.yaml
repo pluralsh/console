@@ -5,6 +5,24 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 84.1.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumps the bundled Grafana Helm chart release to **v12.1.2** (dependency
+        update)., '(From 84.1.0, just before your target) adds a `jobNameOverride`
+        option for the `kubeApiServer` scrape config.']
+    features: [New `kubeApiServer.jobNameOverride` support (added in 84.1.0) to control
+        the Prometheus job name for the kube-apiserver scrape target.]
+    breaking_changes: []
+  chart_version: 84.1.1
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 84.1.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
