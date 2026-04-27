@@ -28,6 +28,9 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(:observability, categories), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
   defp subagent_description(:integration, _), do: "Invoke an integration subagent to interact with enterprise systems, usually not directly related to devops infrastructure. Often Task tracking tools, knowledge bases or internal compliance software that's not SRE related."
   defp subagent_description(:memory, _), do: "Invoke a memory subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
+  defp subagent_description(:skill, _), do: "Invoke a skill subagent to update the skills for the current workbench.  This subagent will use the skills API to update the skills for the current workbench."
+  defp subagent_description(:history, _), do: "Invoke a history subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
+  defp subagent_description(:search, _), do: "Invoke a search subagent to search the web for information.  Useful to find information that is not already in the workbench environment."
   defp subagent_description(_, _), do: "Unknown subagent"
 
   defp observability_categories(cats) when is_list(cats) do

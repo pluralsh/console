@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
+    field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -223,6 +224,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :service_account, :string, description: "encrypted service account JSON (alternative to api_token + email)"
     field :api_token,       :string, description: "atlassian API token (required if not using service_account)"
     field :email,           :string, description: "atlassian account email (required if not using service_account)"
+  end
+
+  input_object :workbench_tool_exa_connection_attributes do
+    field :api_key, :string, description: "exa API key"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -642,6 +647,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
+    field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -708,6 +714,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.atlassian.com/v1/mcp"} end,
       description: "static MCP URL for Atlassian/Jira (credentials never exposed)"
     field :email, :string, description: "atlassian account email for use with PAT authentication"
+  end
+
+  object :workbench_tool_exa_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://api.exa.ai"} end,
+      description: "static API URL for Exa (credentials never exposed)"
   end
 
   object :workbench_tool_http_configuration do
@@ -1093,6 +1104,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_eval/2
+    end
+
+    field :workbench_eval_skill, :workbench_job do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id,     non_null(:id), description: "the id of the eval result to generate a memory for"
+      arg :prompt, :string, description: "optional custom prompt to guide the memory generation"
+
+      resolve &Deployments.workbench_eval_skill/2
     end
 
     field :create_workbench_webhook, :workbench_webhook do

@@ -13,6 +13,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchPrompt,
     WorkbenchSkill,
     WorkbenchEval,
+    WorkbenchEvalResult,
     WorkbenchWebhook,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
@@ -64,6 +65,9 @@ defmodule Console.Deployments.Workbenches do
 
   def get_workbench_eval!(id), do: Repo.get!(WorkbenchEval, id)
   def get_workbench_eval(id), do: Repo.get(WorkbenchEval, id)
+
+  def get_workbench_eval_result!(id), do: Repo.get!(WorkbenchEvalResult, id)
+  def get_workbench_eval_result(id), do: Repo.get(WorkbenchEvalResult, id)
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.
@@ -305,6 +309,41 @@ defmodule Console.Deployments.Workbenches do
   def fetch_workbench_eval(id, %User{} = user) do
     get_workbench_eval!(id)
     |> allow(user, :read)
+  end
+
+  @doc """
+  Runs an agent on an eval result to update the workbench skills as necessary based on its findings.
+  """
+  @spec workbench_eval_skill(binary | WorkbenchEvalResult.t(), prompt :: binary | nil, User.t()) :: job_resp
+  def workbench_eval_skill(%WorkbenchEvalResult{workbench_job_id: job_id} = eval, prompt, %User{} = user) do
+    eval = Repo.preload(eval, [:workbench_job])
+    create_workbench_job(%{
+      prompt: prompt || "No specific guidance provided, update the skills as necessary",
+      referenced_job_id: job_id,
+      type: :skill
+    }, eval.workbench_job.workbench_id, user)
+  end
+
+  def workbench_eval_skill(result_id, prompt, %User{} = user) when is_binary(result_id) do
+    get_workbench_eval_result!(result_id)
+    |> workbench_eval_skill(prompt, user)
+  end
+
+  @doc """
+  Infers a skill for a job based on the job's conclusion and prompt.
+  """
+  @spec infer_skill(WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def infer_skill(%WorkbenchJob{} = job, %User{} = user) do
+    create_workbench_job(%{
+      prompt: "No specific guidance provided, update the skills as necessary",
+      referenced_job_id: job.id,
+      type: :skill
+    }, job.workbench_id, Console.Services.Rbac.preload(user))
+  end
+
+  def infer_skill(job_id, user) when is_binary(job_id) do
+    get_workbench_job!(job_id)
+    |> infer_skill(user)
   end
 
   @doc """

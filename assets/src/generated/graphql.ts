@@ -4061,6 +4061,7 @@ export type Flow = {
   services?: Maybe<ServiceDeploymentConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
+  workbenchJobs?: Maybe<WorkbenchJobConnection>;
   /** workbenches associated with this flow */
   workbenches?: Maybe<Array<Maybe<Workbench>>>;
   /** write policy for this flow */
@@ -4129,6 +4130,16 @@ export type FlowVulnerabilityReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowWorkbenchJobsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  alert?: InputMaybe<Scalars['Boolean']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  issue?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -8910,6 +8921,7 @@ export type RootMutationType = {
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
   /** Fetches a workbench cron by id. Requires read access to the workbench. */
   workbenchCron?: Maybe<WorkbenchCron>;
+  workbenchEvalSkill?: Maybe<WorkbenchJob>;
 };
 
 
@@ -10357,6 +10369,12 @@ export type RootMutationTypeUpsertVulnerabilitiesArgs = {
 
 export type RootMutationTypeWorkbenchCronArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeWorkbenchEvalSkillArgs = {
+  id: Scalars['ID']['input'];
+  prompt?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type RootQueryType = {
@@ -12305,6 +12323,8 @@ export type ScmConnectionEdge = {
 
 export type ScmCreds = {
   __typename?: 'ScmCreds';
+  /** the base url of the scm connection */
+  baseUrl?: Maybe<Scalars['String']['output']>;
   token: Scalars['String']['output'];
   /** the type of the scm connection */
   type?: Maybe<ScmType>;
@@ -15340,12 +15360,14 @@ export enum WorkbenchJobActivityType {
   Canvas = 'CANVAS',
   Coding = 'CODING',
   Conclusion = 'CONCLUSION',
+  History = 'HISTORY',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Memo = 'MEMO',
   Memory = 'MEMORY',
   Observability = 'OBSERVABILITY',
   Plan = 'PLAN',
+  Skill = 'SKILL',
   Ticketing = 'TICKETING',
   User = 'USER'
 }
@@ -15705,6 +15727,7 @@ export enum WorkbenchToolCategory {
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
   Metrics = 'METRICS',
+  Search = 'SEARCH',
   Ticketing = 'TICKETING',
   Traces = 'TRACES'
 }
@@ -15752,6 +15775,8 @@ export type WorkbenchToolConfiguration = {
   dynatrace?: Maybe<WorkbenchToolDynatraceConnection>;
   /** elasticsearch connection (no secrets) */
   elastic?: Maybe<WorkbenchToolElasticConnection>;
+  /** exa connection (no secrets) */
+  exa?: Maybe<WorkbenchToolExaConnection>;
   /** http tool configuration */
   http?: Maybe<WorkbenchToolHttpConfiguration>;
   /** jaeger connection (no secrets) */
@@ -15781,6 +15806,8 @@ export type WorkbenchToolConfigurationAttributes = {
   dynatrace?: InputMaybe<WorkbenchToolDynatraceConnectionAttributes>;
   /** elasticsearch connection (logs) */
   elastic?: InputMaybe<WorkbenchToolElasticConnectionAttributes>;
+  /** exa connection (search) */
+  exa?: InputMaybe<WorkbenchToolExaConnectionAttributes>;
   /** http tool configuration */
   http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
   /** jaeger connection (traces) */
@@ -15856,6 +15883,17 @@ export type WorkbenchToolElasticConnectionAttributes = {
   url: Scalars['String']['input'];
   /** basic auth username */
   username: Scalars['String']['input'];
+};
+
+export type WorkbenchToolExaConnection = {
+  __typename?: 'WorkbenchToolExaConnection';
+  /** static API URL for Exa (credentials never exposed) */
+  url: Scalars['String']['output'];
+};
+
+export type WorkbenchToolExaConnectionAttributes = {
+  /** exa API key */
+  apiKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolHttpConfiguration = {
@@ -16040,6 +16078,7 @@ export enum WorkbenchToolType {
   Datadog = 'DATADOG',
   Dynatrace = 'DYNATRACE',
   Elastic = 'ELASTIC',
+  Exa = 'EXA',
   Http = 'HTTP',
   Jaeger = 'JAEGER',
   Linear = 'LINEAR',

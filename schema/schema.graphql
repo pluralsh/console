@@ -1288,6 +1288,14 @@ type RootMutationType {
   "Deletes the eval configuration for a workbench. Requires write access to the workbench."
   deleteWorkbenchEval(id: ID!): WorkbenchEval
 
+  workbenchEvalSkill(
+    "the id of the eval result to generate a memory for"
+    id: ID!
+
+    "optional custom prompt to guide the memory generation"
+    prompt: String
+  ): WorkbenchJob
+
   createWorkbenchWebhook(
     "the workbench to create a webhook for"
     workbenchId: ID!
@@ -2073,6 +2081,9 @@ type ScmCreds {
   "the type of the scm connection"
   type: ScmType
 
+  "the base url of the scm connection"
+  baseUrl: String
+
   username: String!
 
   token: String!
@@ -2268,6 +2279,7 @@ enum WorkbenchToolType {
   AZURE
   CLOUD
   JAEGER
+  EXA
 }
 
 enum WorkbenchToolCategory {
@@ -2278,6 +2290,7 @@ enum WorkbenchToolCategory {
   TRACES
   ERROR_TRACKING
   INFRASTRUCTURE
+  SEARCH
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2316,6 +2329,8 @@ enum WorkbenchJobActivityType {
   MEMORY
   CONCLUSION
   CANVAS
+  SKILL
+  HISTORY
 }
 
 enum WorkbenchCanvasBlockType {
@@ -2584,6 +2599,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
+
+  "exa connection (search)"
+  exa: WorkbenchToolExaConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2749,6 +2767,11 @@ input WorkbenchToolAtlassianConnectionAttributes {
 
   "atlassian account email (required if not using service_account)"
   email: String
+}
+
+input WorkbenchToolExaConnectionAttributes {
+  "exa API key"
+  apiKey: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -3453,6 +3476,9 @@ type WorkbenchToolConfiguration {
 
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
+
+  "exa connection (no secrets)"
+  exa: WorkbenchToolExaConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -3561,6 +3587,11 @@ type WorkbenchToolAtlassianConnection {
 
   "atlassian account email for use with PAT authentication"
   email: String
+}
+
+type WorkbenchToolExaConnection {
+  "static API URL for Exa (credentials never exposed)"
+  url: String!
 }
 
 type WorkbenchToolHttpConfiguration {
@@ -4447,6 +4478,22 @@ type Flow {
     "filter issues by status (e.g. open, in_progress, completed)"
     status: IssueStatus
   ): IssueConnection
+
+  workbenchJobs(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "show runs spawned from alerts"
+    alert: Boolean
+
+    "show runs spawned from issues"
+    issue: Boolean
+  ): WorkbenchJobConnection
 
   insertedAt: DateTime
 

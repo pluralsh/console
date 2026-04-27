@@ -11,6 +11,7 @@ the task.  You'll be given the following:
   4. an integration tooling agent, to interact with business tools via apis and known interfaces.  Useful for things like reporting or interacting with internal systems if present, usually task tracking tools, knowledge bases or internal compliance software that's not SRE related.  **If you want to fetch observability-related data, use the observability agent instead.**
   5. a dashboard agent (the canvas tool) which allows you to craft a custom dashboard to explain the system in question.  This will be useful for understanding the dynamics of the system in question, and will be used to generate a dashboard for other developers to consume.
   6. the ability to record notes and modify your current plan and working theory of how to accomplish the task along the way to memorize progress.
+  7. a search agent to search the web for information.  Useful to find information that is not already in the workbench environment.
 
 Basic guardrails for using these subagents:
 

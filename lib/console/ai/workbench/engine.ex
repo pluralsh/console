@@ -35,12 +35,12 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
   require EEx
+  require Logger
 
   defstruct [:job, :user, :environment, activities: [], iterations: 0, max: 200]
 
   def new(%WorkbenchJob{} = job) do
-    %{user: user, workbench: workbench} = job =
-      Repo.preload(job, [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]])
+    %{user: user, workbench: workbench} = job = preload_job(job)
 
     user = Console.Services.Rbac.preload(user)
     with {:ok, _} <- Heartbeat.start_link(job),
@@ -70,11 +70,7 @@ defmodule Console.AI.Workbench.Engine do
     messages = Enum.map(activities, &Message.to_message/1)
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(20,
-      system_prompt: &String.trim(system_prompt(prompt: job.prompt, engine: &1)),
-      acc: %{},
-      tool_fmt: &tool_fmt/1
-    )
+    |> MemoryEngine.new(20, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1)
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics_query: metrics_query, logs: logs, todos: todos, topology: topology}} ->
@@ -116,18 +112,21 @@ defmodule Console.AI.Workbench.Engine do
     |> Enum.reduce(engine, fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}}, engine ->
         %{engine | activities: [activity | engine.activities]}
+      {:ok, {:error, error}}, engine ->
+        Logger.error("Error spawning activity: #{inspect(error)}")
+        engine
       _, engine -> engine
     end)
     |> then(& %{&1 | iterations: &1.iterations + 1, job: refresh_job(&1.job)})
     |> loop()
   end
 
-  @supported_subagents ~w(infrastructure integration coding observability memory)a
+  @supported_subagents ~w(infrastructure integration coding observability memory skill history search)a
 
   defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
     module = subagent_module(type)
-    Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
+    Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
       Console.safely(fn ->
@@ -184,6 +183,9 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:coding), do: SA.Coding
   defp subagent_module(:observability), do: SA.Observability
   defp subagent_module(:memory), do: SA.Memory
+  defp subagent_module(:history), do: SA.History
+  defp subagent_module(:skill), do: SA.Skill
+  defp subagent_module(:search), do: SA.Search
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}
@@ -198,27 +200,40 @@ defmodule Console.AI.Workbench.Engine do
 
   defp refresh_job(%WorkbenchJob{id: id}) do
     Console.Repo.get!(WorkbenchJob, id)
-    |> Repo.preload([:user, :result, workbench: [:tools, :repository, :agent_runtime]])
+    |> preload_job()
   end
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}, activities) do
     subagents = Environment.subagents(job) |> maybe_add_memory(activities)
     categories = Environment.categories(job)
+    skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
+
     [
-      %Skills{skills: Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)},
-      %Skill{skills: Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       %Subagents{subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Notes,
-      CanvasTool,
       Complete,
-    ]
+    ] ++ type_tools(job)
   end
+
+  defp type_tools(%WorkbenchJob{type: :skill}), do: []
+  defp type_tools(_), do: [CanvasTool]
+
+  defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
+  defp sysprompt(%WorkbenchJob{prompt: prompt}, engine), do: String.trim(system_prompt(prompt: prompt, engine: engine))
+
+  @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]]
+
+  defp preload_job(%WorkbenchJob{type: :skill} = job), do: Repo.preload(job, @preloads ++ [referenced_job: [activities: :thoughts]])
+  defp preload_job(job), do: Repo.preload(job, @preloads)
 
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
   defp maybe_add_memory(subagents, _), do: subagents
 
+  EEx.function_from_file(:defp, :skill_system_prompt, Console.priv_filename(["prompts", "workbench", "eval_skill.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns])

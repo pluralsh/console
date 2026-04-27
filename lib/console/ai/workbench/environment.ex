@@ -36,11 +36,17 @@ defmodule Console.AI.Workbench.Environment do
     |> Map.new()
   end
 
-  def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench}) do
+  def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench} = job) do
     tool_agents(tools)
+    |> Enum.concat(type_subagents(job))
     |> Enum.concat(coding_agents(bench))
     |> Enum.concat(infra_agents(bench))
+    |> Enum.filter(&allow_subagent?(job, &1))
   end
+
+  defp allow_subagent?(%WorkbenchJob{type: :skill}, :canvas), do: false
+  defp allow_subagent?(%WorkbenchJob{type: :skill}, :coding), do: false
+  defp allow_subagent?(_, _), do: true
 
   def categories(%WorkbenchJob{workbench: %Workbench{tools: tools}}) when is_list(tools) do
     Enum.flat_map(tools, & (&1.categories || []))
@@ -102,6 +108,9 @@ defmodule Console.AI.Workbench.Environment do
   end
   defp infra_agents(_), do: []
 
+  defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
+  defp type_subagents(_), do: []
+
   defp tool_agents(tools) do
     Enum.flat_map(tools || [], fn
       %{categories: [_ | _] = categories} -> categories
@@ -118,5 +127,6 @@ defmodule Console.AI.Workbench.Environment do
   defp category_to_subagent(:error_tracking), do: :observability
   defp category_to_subagent(:integration), do: :integration
   defp category_to_subagent(:ticketing), do: :integration
+  defp category_to_subagent(:search), do: :search
   defp category_to_subagent(_), do: :integration
 end

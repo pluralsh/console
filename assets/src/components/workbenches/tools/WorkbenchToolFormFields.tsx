@@ -81,6 +81,8 @@ export function WorkbenchToolFormFields({
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
+    case WorkbenchToolType.Exa:
+      return render(type, ExaFormFields)
     case WorkbenchToolType.Splunk:
       return render(type, SplunkFormFields)
     case WorkbenchToolType.Cloudwatch:
@@ -361,6 +363,21 @@ function LinearFormFields({
       revealer
       value={c.accessToken ?? ''}
       onChange={(e) => set({ ...c, accessToken: e.target.value })}
+    />
+  )
+}
+
+function ExaFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Exa>) {
+  return (
+    <InputField
+      label="API key (optional)"
+      hint="Leave blank to use the server-side Exa API key if configured."
+      revealer
+      value={c.apiKey ?? ''}
+      onChange={(e) => set({ ...c, apiKey: e.target.value || undefined })}
     />
   )
 }

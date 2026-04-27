@@ -3337,6 +3337,7 @@ type Flow struct {
 	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
 	VulnerabilityReports        *VulnerabilityReportConnection        `json:"vulnerabilityReports,omitempty"`
 	Issues                      *IssueConnection                      `json:"issues,omitempty"`
+	WorkbenchJobs               *WorkbenchJobConnection               `json:"workbenchJobs,omitempty"`
 	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
 	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
@@ -7313,9 +7314,11 @@ type ScmConnectionEdge struct {
 
 type ScmCreds struct {
 	// the type of the scm connection
-	Type     *ScmType `json:"type,omitempty"`
-	Username string   `json:"username"`
-	Token    string   `json:"token"`
+	Type *ScmType `json:"type,omitempty"`
+	// the base url of the scm connection
+	BaseURL  *string `json:"baseUrl,omitempty"`
+	Username string  `json:"username"`
+	Token    string  `json:"token"`
 }
 
 type ScmWebhook struct {
@@ -10192,6 +10195,8 @@ type WorkbenchToolConfiguration struct {
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// atlassian connection (no secrets)
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
+	// exa connection (no secrets)
+	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -10221,6 +10226,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// atlassian/jira connection (ticketing)
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
+	// exa connection (search)
+	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -10277,6 +10284,16 @@ type WorkbenchToolElasticConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// elasticsearch index
 	Index string `json:"index"`
+}
+
+type WorkbenchToolExaConnection struct {
+	// static API URL for Exa (credentials never exposed)
+	URL string `json:"url"`
+}
+
+type WorkbenchToolExaConnectionAttributes struct {
+	// exa API key
+	APIKey *string `json:"apiKey,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -16468,6 +16485,8 @@ const (
 	WorkbenchJobActivityTypeMemory         WorkbenchJobActivityType = "MEMORY"
 	WorkbenchJobActivityTypeConclusion     WorkbenchJobActivityType = "CONCLUSION"
 	WorkbenchJobActivityTypeCanvas         WorkbenchJobActivityType = "CANVAS"
+	WorkbenchJobActivityTypeSkill          WorkbenchJobActivityType = "SKILL"
+	WorkbenchJobActivityTypeHistory        WorkbenchJobActivityType = "HISTORY"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -16482,11 +16501,13 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeMemory,
 	WorkbenchJobActivityTypeConclusion,
 	WorkbenchJobActivityTypeCanvas,
+	WorkbenchJobActivityTypeSkill,
+	WorkbenchJobActivityTypeHistory,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory:
 		return true
 	}
 	return false
@@ -16659,6 +16680,7 @@ const (
 	WorkbenchToolCategoryTraces         WorkbenchToolCategory = "TRACES"
 	WorkbenchToolCategoryErrorTracking  WorkbenchToolCategory = "ERROR_TRACKING"
 	WorkbenchToolCategoryInfrastructure WorkbenchToolCategory = "INFRASTRUCTURE"
+	WorkbenchToolCategorySearch         WorkbenchToolCategory = "SEARCH"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -16669,11 +16691,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryTraces,
 	WorkbenchToolCategoryErrorTracking,
 	WorkbenchToolCategoryInfrastructure,
+	WorkbenchToolCategorySearch,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch:
 		return true
 	}
 	return false
@@ -16794,6 +16817,7 @@ const (
 	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
 	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
 	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
+	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16813,11 +16837,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeAzure,
 	WorkbenchToolTypeCloud,
 	WorkbenchToolTypeJaeger,
+	WorkbenchToolTypeExa,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa:
 		return true
 	}
 	return false
