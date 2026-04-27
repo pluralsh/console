@@ -41,3 +41,6 @@ names:
 - kserve
 - kubescape-operator
 - dynatrace-operator
+- wiz-sensor
+- wiz-admission-controller
+- wiz-network-analyzer
