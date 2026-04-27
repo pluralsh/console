@@ -13,7 +13,7 @@ import (
 func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 	klog.V(log.LogLevelDebug).InfoS("running schema query", "table", table)
 
-	prefix := fmt.Sprintf("%s_", in.provider)
+	prefix := fmt.Sprintf("%s_", in.provider())
 
 	qResponse, err := in.db.Query(`
 		SELECT table_name, column_name, data_type
@@ -58,7 +58,7 @@ func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 func (in *connection) Tables(table string) ([]string, error) {
 	klog.V(log.LogLevelDebug).InfoS("running tables query", "table", table)
 
-	prefix := fmt.Sprintf("%s_", in.provider)
+	prefix := fmt.Sprintf("%s_", in.provider())
 
 	qResponse, err := in.db.Query(`
 		SELECT table_name

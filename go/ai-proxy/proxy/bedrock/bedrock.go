@@ -344,7 +344,7 @@ func buildBedrockToolSchema(tool ollamaapi.Tool) map[string]interface{} {
 	}
 
 	propsMap := make(map[string]interface{})
-	for fieldName, fieldDef := range tool.Function.Parameters.Properties {
+	for fieldName, fieldDef := range tool.Function.Parameters.Properties.ToMap() {
 		prop := map[string]interface{}{
 			"type":        fieldDef.Type,
 			"description": fieldDef.Description,

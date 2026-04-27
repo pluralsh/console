@@ -19,7 +19,7 @@ const driverName = "postgres"
 var defaultDataSource = common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), args.DatabaseUser(), args.DatabasePassword())
 
 type Connection interface {
-	Configure(config config.Configuration) error
+	Configure() error
 	Schema(table string) ([]cloudquery.SchemaResult, error)
 	Tables(table string) ([]string, error)
 	Query(q string, args ...any) (columns []string, rows [][]any, err error)
@@ -30,36 +30,47 @@ type Connection interface {
 }
 
 type connection struct {
-	name     string
-	provider config.Provider
-	db       *sql.DB
+	name   string
+	config *config.Configuration
+	db     *sql.DB
 }
 
-func (in *connection) Configure(config config.Configuration) error {
-	q, err := config.Query(in.name)
+func (in *connection) Configure() error {
+	q, err := in.config.Query(in.name)
 	if err != nil {
-		return fmt.Errorf("failed to get config query for provider %s: %w", config.Provider(), err)
+		return fmt.Errorf("failed to get config query for provider %s: %w", in.provider(), err)
 	}
 
 	_, err = in.db.Exec(q)
 	if err != nil {
-		return fmt.Errorf("failed to configure provider %s: %w", config.Provider(), err)
+		return fmt.Errorf("failed to configure provider %s: %w", in.provider(), err)
 	}
 
-	in.provider = config.Provider()
-	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", config.Provider())
+	klog.V(log.LogLevelDebug).InfoS("configured provider", "provider", in.provider(), "query", q)
 	return nil
 }
 
 func (in *connection) Close() error {
+	if in.config == nil {
+		return in.db.Close()
+	}
+
+	if err := in.config.Cleanup(in.name); err != nil {
+		return fmt.Errorf("failed to cleanup configuration for provider %s: %w", in.provider(), err)
+	}
+
 	return in.db.Close()
 }
 
-func NewConnection(name, dataSource string) (Connection, error) {
+func (in *connection) provider() config.Provider {
+	return lo.Ternary(in.config == nil, config.ProviderUnknown, in.config.Provider())
+}
+
+func NewConnection(name, dataSource string, config *config.Configuration) (Connection, error) {
 	db, err := sql.Open(driverName, lo.Ternary(lo.IsEmpty(dataSource), defaultDataSource, dataSource))
 	if err != nil {
 		return nil, err
 	}
 
-	return &connection{name: name, db: db}, nil
+	return &connection{name: name, db: db, config: config}, nil
 }
