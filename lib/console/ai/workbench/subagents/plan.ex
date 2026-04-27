@@ -33,8 +33,8 @@ defmodule Console.AI.Workbench.Subagents.Plan do
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}) do
     [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :plan)},
+      %Skill{skills: Environment.subagent_skills(skills, :plan)},
       %Subagents{
         subagents: Environment.subagents(job),
         categories: Environment.categories(job)

@@ -54,6 +54,8 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
+    WorkbenchEval,
+    WorkbenchEvalResult,
     WorkbenchWebhook,
     IssueWebhook,
     Monitor
@@ -150,6 +152,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(prompt, user, action, & &1.workbench)
   def evaluate(%WorkbenchSkill{} = skill, user, action),
     do: recurse(skill, user, action, & &1.workbench)
+  def evaluate(%WorkbenchEval{} = eval, user, action),
+    do: recurse(eval, user, action, & &1.workbench)
+  def evaluate(%WorkbenchEvalResult{} = result, user, action),
+    do: recurse(result, user, action, & &1.workbench_eval)
   def evaluate(%WorkbenchWebhook{} = webhook, user, action),
     do: recurse(webhook, user, action, & &1.workbench)
   def evaluate(%Monitor{} = monitor, %User{} = user, action),
@@ -293,6 +299,14 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(prompt, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchSkill{} = skill),
     do: Repo.preload(skill, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchEval{} = eval),
+    do: Repo.preload(eval, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchEvalResult{} = result),
+    do:
+      Repo.preload(result, [
+        workbench_eval: [workbench: [:read_bindings, :write_bindings, project: @bindings]],
+        workbench_job: [workbench: [:read_bindings, :write_bindings, project: @bindings]]
+      ])
   def preload(%WorkbenchWebhook{} = webhook),
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%Monitor{} = monitor),

@@ -11,6 +11,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
+    WorkbenchEval,
     PolicyBinding,
     User,
     AgentRun,
@@ -70,6 +71,7 @@ defmodule Console.Schema.Workbench do
     has_many :crons,            WorkbenchCron,    on_replace: :delete
     has_many :prompts,          WorkbenchPrompt,  on_replace: :delete
     has_many :workbench_skills, WorkbenchSkill, on_replace: :delete
+    has_one :eval,              WorkbenchEval
     has_many :alerts,           Alert
 
     timestamps()

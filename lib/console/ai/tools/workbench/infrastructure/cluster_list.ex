@@ -64,7 +64,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
       upgrade_plan: upgrade_plan_brief(c.upgrade_plan),
       extended_support: extended_support_brief(Clusters.extended_support(c)),
       project: c.project && %{id: c.project.id, name: c.project.name},
-      tags: Enum.map(c.tags || [], &%{name: &1.name, value: &1.value})
+      tags: Enum.map(c.tags || [], & %{name: &1.name, value: &1.value})
     }
   end
 

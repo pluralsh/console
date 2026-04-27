@@ -1,0 +1,28 @@
+{
+    "type": "object",
+    "properties": {
+        "grade": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Numeric score from 0 (poor) to 10 (excellent) for overall job quality."
+        },
+        "summary": {
+            "type": "string",
+            "description": "Short verdict in one or two sentences: state the main strengths and weaknesses that drive the grade."
+        },
+        "prompt": {
+            "type": "string",
+            "description": "One or two sentences on whether the original prompt was clear, scoped, and actionable for the agent."
+        },
+        "result": {
+            "type": "string",
+            "description": "One or two sentences on whether the final answer or conclusion was correct, complete, and well supported."
+        },
+        "logic": {
+            "type": "string",
+            "description": "One or two sentences explaining the key reasoning behind the grade, citing prompt, analysis, and conclusion quality."
+        }
+    },
+    "required": ["grade", "summary"]
+}

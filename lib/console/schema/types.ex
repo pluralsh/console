@@ -3,7 +3,12 @@ defmodule Console.Schema.MapJson do
   def type, do: :map
 
   def cast(""), do: {:ok, %{}}
-  def cast(uri) when is_binary(uri), do: Jason.decode(uri)
+  def cast(blob) when is_binary(blob) do
+    case Jason.decode(blob) do
+      {:ok, v} -> {:ok, v}
+      _ -> {:error, message: "unable to decode json string"}
+    end
+  end
   def cast(%{} = m), do: {:ok, m}
   def cast(_), do: :error
 
@@ -13,6 +18,11 @@ defmodule Console.Schema.MapJson do
 
   def dump(""), do: {:ok, %{}}
   def dump(%{} = m), do: {:ok, m}
-  def dump(m) when is_binary(m), do: Jason.encode(m)
+  def dump(m) when is_binary(m) do
+    case Jason.decode(m) do
+      {:ok, v} -> {:ok, v}
+      _ -> {:error, message: "unable to decode json string"}
+    end
+  end
   def dump(_), do: :error
 end

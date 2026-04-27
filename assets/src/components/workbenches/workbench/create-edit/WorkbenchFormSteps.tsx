@@ -45,11 +45,11 @@ import {
   ServiceGitFolderField,
   ServiceGitRefField,
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
+import { useLogin } from 'components/contexts'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { useLogin } from 'components/contexts'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { CaptionP, OverlineH3, InlineA } from 'components/utils/typography/Text'
+import { CaptionP, InlineA, OverlineH3 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -61,25 +61,25 @@ import {
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import {
-  useWorkbenchFormCardTabs,
-  WorkbenchFormState,
-} from './WorkbenchCreateOrEdit'
-import { PluralSkillsSubStep } from './PluralSkillsSubStep'
-import {
   CardGrid,
   CardGridSkeleton,
 } from '../../../self-service/catalog/CatalogsGrid'
 import { GqlError } from '../../../utils/Alert'
 import { StackedText } from '../../../utils/table/StackedText'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import {
   categoryToLabel,
-  TOOL_TYPE_TO_LABEL,
+  getWorkbenchToolLabel,
   WorkbenchToolCardBody,
-  WorkbenchToolIcon,
   workbenchToolCardGridStyles,
+  WorkbenchToolIcon,
 } from '../../tools/workbenchToolsUtils'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
+import { PluralSkillsSubStep } from './PluralSkillsSubStep'
+import {
+  useWorkbenchFormCardTabs,
+  WorkbenchFormState,
+} from './WorkbenchCreateOrEdit'
 
 export type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
 export type WorkbenchFormStepProps = {
@@ -869,26 +869,34 @@ export function WorkbenchAttachToolsStep({
                     width="100%"
                     gap="small"
                   >
-                    <StackedText
-                      first={name}
-                      firstPartialType="body2Bold"
-                      firstColor="text"
-                      second={TOOL_TYPE_TO_LABEL[type]}
-                      icon={
-                        <IconFrame
-                          circle
-                          type="secondary"
-                          icon={
-                            <WorkbenchToolIcon
-                              size={20}
-                              type={type}
-                              provider={cloudConnection?.provider}
-                            />
-                          }
-                        />
-                      }
+                    <Flex
+                      align="center"
+                      gap="small"
                       css={{ minWidth: 0, flex: 1 }}
-                    />
+                    >
+                      <IconFrame
+                        circle
+                        type="secondary"
+                        icon={
+                          <WorkbenchToolIcon
+                            size={20}
+                            type={type}
+                            provider={cloudConnection?.provider}
+                          />
+                        }
+                      />
+                      <StackedText
+                        truncate
+                        first={name}
+                        firstPartialType="body2Bold"
+                        firstColor="text"
+                        second={getWorkbenchToolLabel(
+                          type,
+                          cloudConnection?.provider
+                        )}
+                        css={{ minWidth: 0, flex: 1, width: 0 }}
+                      />
+                    </Flex>
                     <IconFrame
                       circle
                       clickable

@@ -1,10 +1,15 @@
-import { Flex, IconFrame, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  IconFrame,
+  SidePanelOpenIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { StackedText } from 'components/utils/table/StackedText'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { Body1P, Subtitle1H1 } from 'components/utils/typography/Text'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
 import {
   Provider,
   useCreateWorkbenchToolMutation,
@@ -30,12 +35,16 @@ import { getWorkbenchesBreadcrumbs } from '../Workbenches'
 import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
+  getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
   isProvider,
-  PROVIDER_TO_LABEL,
-  TOOL_TYPE_TO_LABEL,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
+import {
+  getWorkbenchToolSetupGuideDocumentationUrl,
+  getWorkbenchToolSetupGuideMarkdownPath,
+} from './workbenchToolSetupGuides'
+import { useWebhookSetupGuidePanel } from '../workbench/webhooks/WebhookSetupGuidePanel'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 export const WORKBENCHES_TOOLS_PROVIDER_PARAM = 'provider'
@@ -94,6 +103,11 @@ export function WorkbenchToolCreateOrEdit({
     type === WorkbenchToolType.Cloud && isProvider(providerParam)
       ? providerParam
       : null
+  const setupGuideMarkdownPath = getWorkbenchToolSetupGuideMarkdownPath(type)
+  const setupGuideDocumentationUrl =
+    getWorkbenchToolSetupGuideDocumentationUrl(type)
+  const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
+    useWebhookSetupGuidePanel()
 
   useLayoutEffect(() => {
     if (isLoading) return
@@ -117,6 +131,25 @@ export function WorkbenchToolCreateOrEdit({
     }
   }, [id, searchParams, setSearchParams, tool, isLoading, providerParam, type])
 
+  useLayoutEffect(() => {
+    if (!isOpen) return
+    if (!setupGuideMarkdownPath) {
+      closeSetupGuidePanel()
+      return
+    }
+
+    openSetupGuidePanel({
+      documentationUrl: setupGuideDocumentationUrl,
+      markdownPath: setupGuideMarkdownPath,
+    })
+  }, [
+    isOpen,
+    setupGuideMarkdownPath,
+    setupGuideDocumentationUrl,
+    openSetupGuidePanel,
+    closeSetupGuidePanel,
+  ])
+
   const { popToast } = useSimpleToast()
 
   const [create, { loading: createLoading, error: createError }] =
@@ -136,6 +169,7 @@ export function WorkbenchToolCreateOrEdit({
     })
   const mutationLoading = createLoading || updateLoading
   const mutationError = createError || updateError
+  const toolLabel = getWorkbenchToolLabel(type, provider)
   const onSave = (state: WorkbenchToolFormState) => {
     const attributes = formStateToAttributes(state, type)
     if (mode === 'create') create({ variables: { attributes } })
@@ -144,43 +178,30 @@ export function WorkbenchToolCreateOrEdit({
 
   return (
     <WrapperSC>
-      <StretchedFlex>
-        <StackedText
-          first={
-            mode === 'create'
-              ? `New ${provider ? PROVIDER_TO_LABEL[provider] : TOOL_TYPE_TO_LABEL[type]} tool`
-              : 'Edit tool'
-          }
-          firstPartialType="subtitle1"
-          firstColor="text"
-          second="Integrate external tools with your workbenches"
-          secondPartialType="body1"
+      {!isLoading && (
+        <Flex
           gap="xsmall"
-        />
-        {!isLoading && (
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            <IconFrame
-              circle
-              type="secondary"
-              icon={
-                <WorkbenchToolIcon
-                  type={type}
-                  provider={provider}
-                />
-              }
-              textValue={capitalize(provider || type)}
-            />
-            <Subtitle1H1 as="h3">
-              {type === WorkbenchToolType.Cloud && provider
-                ? PROVIDER_TO_LABEL[provider]
-                : capitalize(type === WorkbenchToolType.Http ? 'Custom' : type)}
-            </Subtitle1H1>
-          </Flex>
-        )}
-      </StretchedFlex>
+          align="center"
+        >
+          <IconFrame
+            circle
+            type="secondary"
+            icon={
+              <WorkbenchToolIcon
+                type={type}
+                provider={provider}
+              />
+            }
+            textValue={capitalize(provider || type)}
+          />
+          <Subtitle1H1 as="h3">{toolLabel}</Subtitle1H1>
+        </Flex>
+      )}
+      {!isLoading && (
+        <Body1P $color="text-xlight">
+          {`${mode === 'create' ? 'Create' : 'Edit'} this integration with ${toolLabel}`}
+        </Body1P>
+      )}
       {error && <GqlError error={error} />}
       {mutationError && <GqlError error={mutationError} />}
       {isLoading ? (
@@ -208,18 +229,24 @@ export function WorkbenchToolCreateOrEdit({
             onSave={onSave}
             onToolDeleted={() => navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)}
           />
-          {/* TODO */}
-          {/* <Button
-            secondary
-            startIcon={<SidePanelOpenIcon />}
-            css={{
-              alignSelf: 'flex-start',
-              border: borders.default,
-              borderRadius: borderRadiuses.large,
-            }}
-          >
-            Setup guide
-          </Button> */}
+          {!isOpen && !!setupGuideMarkdownPath && (
+            <div css={{ width: 200 }}>
+              <Button
+                secondary
+                startIcon={<SidePanelOpenIcon />}
+                width="100%"
+                css={{ whiteSpace: 'nowrap' }}
+                onClick={() =>
+                  openSetupGuidePanel({
+                    documentationUrl: setupGuideDocumentationUrl,
+                    markdownPath: setupGuideMarkdownPath,
+                  })
+                }
+              >
+                Setup guide
+              </Button>
+            </div>
+          )}
         </Flex>
       )}
     </WrapperSC>
@@ -230,8 +257,21 @@ function formStateToAttributes(
   state: WorkbenchToolFormState,
   type: WorkbenchToolType
 ): WorkbenchToolAttributes {
-  const { name, categories, configuration, cloudConnectionId } = state
-  const base: WorkbenchToolAttributes = { tool: type, name, categories }
+  const {
+    name,
+    categories,
+    configuration,
+    cloudConnectionId,
+    readBindings,
+    writeBindings,
+  } = state
+  const base: WorkbenchToolAttributes = {
+    tool: type,
+    name,
+    categories,
+    readBindings: readBindings.map(bindingToBindingAttributes),
+    writeBindings: writeBindings.map(bindingToBindingAttributes),
+  }
 
   if (type === WorkbenchToolType.Cloud)
     return { ...base, cloudConnectionId: cloudConnectionId ?? null }
@@ -255,4 +295,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   width: '100%',
   minHeight: 0,
   maxWidth: 800,
+  margin: '0 auto',
 }))

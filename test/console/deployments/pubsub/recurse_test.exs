@@ -596,7 +596,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
         configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
       )
       insert(:stack_state, plan: "terraform plan", run: stack_run)
-      expect(ReqLLM, :generate_text, fn %{model: "gpt-4.1-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{model: "gpt-5.4"}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [

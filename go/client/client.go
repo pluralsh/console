@@ -35,6 +35,7 @@ type ConsoleClient interface {
 	GetObservabilityWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityWebhook, error)
 	UpsertObservabilityWebhook(ctx context.Context, attributes ObservabilityWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityWebhook, error)
 	DeleteObservabilityWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityWebhook, error)
+	GetIssueWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetIssueWebhook, error)
 	CreateClusterBackup(ctx context.Context, attributes BackupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterBackup, error)
 	GetClusterBackup(ctx context.Context, id *string, clusterID *string, namespace *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterBackup, error)
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
@@ -308,6 +309,14 @@ type ConsoleClient interface {
 	ListWorkbenchTools(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ListWorkbenchTools, error)
 	GetWorkbenchTool(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTool, error)
 	GetWorkbenchToolTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchToolTiny, error)
+	CreateWorkbenchCron(ctx context.Context, workbenchID string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchCron, error)
+	UpdateWorkbenchCron(ctx context.Context, id string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchCron, error)
+	DeleteWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchCron, error)
+	GetWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchCron, error)
+	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error)
+	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error)
+	DeleteWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchWebhook, error)
+	GetWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchWebhook, error)
 }
 
 type Client struct {
@@ -557,6 +566,7 @@ type AgentRunFragment struct {
 	ID              string                     "json:\"id\" graphql:\"id\""
 	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
 	Repository      string                     "json:\"repository\" graphql:\"repository\""
+	Branch          *string                    "json:\"branch,omitempty\" graphql:\"branch\""
 	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
 	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
@@ -571,6 +581,8 @@ type AgentRunFragment struct {
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
 	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
+	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -590,6 +602,12 @@ func (t *AgentRunFragment) GetRepository() string {
 		t = &AgentRunFragment{}
 	}
 	return t.Repository
+}
+func (t *AgentRunFragment) GetBranch() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Branch
 }
 func (t *AgentRunFragment) GetMode() *AgentRunMode {
 	if t == nil {
@@ -674,6 +692,18 @@ func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.PullRequests
+}
+func (t *AgentRunFragment) GetBabysit() *bool {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Babysit
+}
+func (t *AgentRunFragment) GetBabysitInterval() *int64 {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.BabysitInterval
 }
 
 type ScmWebhookFragment struct {
@@ -773,6 +803,31 @@ func (t *ObservabilityWebhookFragment) GetURL() string {
 		t = &ObservabilityWebhookFragment{}
 	}
 	return t.URL
+}
+
+type IssueWebhookFragment struct {
+	ID       string               "json:\"id\" graphql:\"id\""
+	Name     string               "json:\"name\" graphql:\"name\""
+	Provider IssueWebhookProvider "json:\"provider\" graphql:\"provider\""
+}
+
+func (t *IssueWebhookFragment) GetID() string {
+	if t == nil {
+		t = &IssueWebhookFragment{}
+	}
+	return t.ID
+}
+func (t *IssueWebhookFragment) GetName() string {
+	if t == nil {
+		t = &IssueWebhookFragment{}
+	}
+	return t.Name
+}
+func (t *IssueWebhookFragment) GetProvider() *IssueWebhookProvider {
+	if t == nil {
+		t = &IssueWebhookFragment{}
+	}
+	return &t.Provider
 }
 
 type ClusterBackupFragment struct {
@@ -6580,6 +6635,8 @@ type WorkbenchFragment struct {
 	Configuration *WorkbenchFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
 	Skills        *WorkbenchFragment_Skills        "json:\"skills,omitempty\" graphql:\"skills\""
 	Tools         []*WorkbenchToolFragment         "json:\"tools,omitempty\" graphql:\"tools\""
+	ReadBindings  []*PolicyBindingFragment         "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	WriteBindings []*PolicyBindingFragment         "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 	InsertedAt    *string                          "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
 	UpdatedAt     *string                          "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
 }
@@ -6644,6 +6701,18 @@ func (t *WorkbenchFragment) GetTools() []*WorkbenchToolFragment {
 	}
 	return t.Tools
 }
+func (t *WorkbenchFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &WorkbenchFragment{}
+	}
+	return t.ReadBindings
+}
+func (t *WorkbenchFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &WorkbenchFragment{}
+	}
+	return t.WriteBindings
+}
 func (t *WorkbenchFragment) GetInsertedAt() *string {
 	if t == nil {
 		t = &WorkbenchFragment{}
@@ -6658,14 +6727,16 @@ func (t *WorkbenchFragment) GetUpdatedAt() *string {
 }
 
 type WorkbenchToolFragment struct {
-	ID            string                               "json:\"id\" graphql:\"id\""
-	Name          string                               "json:\"name\" graphql:\"name\""
-	Tool          WorkbenchToolType                    "json:\"tool\" graphql:\"tool\""
-	Categories    []*WorkbenchToolCategory             "json:\"categories,omitempty\" graphql:\"categories\""
-	Project       *TinyProjectFragment                 "json:\"project,omitempty\" graphql:\"project\""
-	Configuration *WorkbenchToolFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
-	InsertedAt    *string                              "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	UpdatedAt     *string                              "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	ID              string                               "json:\"id\" graphql:\"id\""
+	Name            string                               "json:\"name\" graphql:\"name\""
+	Tool            WorkbenchToolType                    "json:\"tool\" graphql:\"tool\""
+	Categories      []*WorkbenchToolCategory             "json:\"categories,omitempty\" graphql:\"categories\""
+	Project         *TinyProjectFragment                 "json:\"project,omitempty\" graphql:\"project\""
+	McpServer       *MCPServerFragment                   "json:\"mcpServer,omitempty\" graphql:\"mcpServer\""
+	CloudConnection *CloudConnectionFragment             "json:\"cloudConnection,omitempty\" graphql:\"cloudConnection\""
+	Configuration   *WorkbenchToolFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
+	InsertedAt      *string                              "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt       *string                              "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
 }
 
 func (t *WorkbenchToolFragment) GetID() string {
@@ -6698,6 +6769,18 @@ func (t *WorkbenchToolFragment) GetProject() *TinyProjectFragment {
 	}
 	return t.Project
 }
+func (t *WorkbenchToolFragment) GetMcpServer() *MCPServerFragment {
+	if t == nil {
+		t = &WorkbenchToolFragment{}
+	}
+	return t.McpServer
+}
+func (t *WorkbenchToolFragment) GetCloudConnection() *CloudConnectionFragment {
+	if t == nil {
+		t = &WorkbenchToolFragment{}
+	}
+	return t.CloudConnection
+}
 func (t *WorkbenchToolFragment) GetConfiguration() *WorkbenchToolFragment_Configuration {
 	if t == nil {
 		t = &WorkbenchToolFragment{}
@@ -6715,6 +6798,91 @@ func (t *WorkbenchToolFragment) GetUpdatedAt() *string {
 		t = &WorkbenchToolFragment{}
 	}
 	return t.UpdatedAt
+}
+
+type WorkbenchCronFragment struct {
+	ID        string                           "json:\"id\" graphql:\"id\""
+	Crontab   *string                          "json:\"crontab,omitempty\" graphql:\"crontab\""
+	Prompt    *string                          "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Workbench *WorkbenchCronFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *WorkbenchCronFragment) GetID() string {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.ID
+}
+func (t *WorkbenchCronFragment) GetCrontab() *string {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.Crontab
+}
+func (t *WorkbenchCronFragment) GetPrompt() *string {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.Prompt
+}
+func (t *WorkbenchCronFragment) GetWorkbench() *WorkbenchCronFragment_Workbench {
+	if t == nil {
+		t = &WorkbenchCronFragment{}
+	}
+	return t.Workbench
+}
+
+type WorkbenchWebhookFragment struct {
+	ID           string                                 "json:\"id\" graphql:\"id\""
+	Name         *string                                "json:\"name,omitempty\" graphql:\"name\""
+	Prompt       *string                                "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Matches      *WorkbenchWebhookFragment_Matches      "json:\"matches,omitempty\" graphql:\"matches\""
+	Webhook      *WorkbenchWebhookFragment_Webhook      "json:\"webhook,omitempty\" graphql:\"webhook\""
+	IssueWebhook *WorkbenchWebhookFragment_IssueWebhook "json:\"issueWebhook,omitempty\" graphql:\"issueWebhook\""
+	Workbench    *WorkbenchWebhookFragment_Workbench    "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *WorkbenchWebhookFragment) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment) GetName() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Name
+}
+func (t *WorkbenchWebhookFragment) GetPrompt() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Prompt
+}
+func (t *WorkbenchWebhookFragment) GetMatches() *WorkbenchWebhookFragment_Matches {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Matches
+}
+func (t *WorkbenchWebhookFragment) GetWebhook() *WorkbenchWebhookFragment_Webhook {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Webhook
+}
+func (t *WorkbenchWebhookFragment) GetIssueWebhook() *WorkbenchWebhookFragment_IssueWebhook {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.IssueWebhook
+}
+func (t *WorkbenchWebhookFragment) GetWorkbench() *WorkbenchWebhookFragment_Workbench {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Workbench
 }
 
 type TinyAgentRuntimeFragment_Cluster struct {
@@ -12758,9 +12926,28 @@ func (t *WorkbenchFragment_Configuration_Infrastructure) GetStacks() *bool {
 	return t.Stacks
 }
 
+type WorkbenchFragment_Configuration_Observability struct {
+	Logs    *bool "json:\"logs,omitempty\" graphql:\"logs\""
+	Metrics *bool "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *WorkbenchFragment_Configuration_Observability) GetLogs() *bool {
+	if t == nil {
+		t = &WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Logs
+}
+func (t *WorkbenchFragment_Configuration_Observability) GetMetrics() *bool {
+	if t == nil {
+		t = &WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Metrics
+}
+
 type WorkbenchFragment_Configuration struct {
 	Coding         *WorkbenchFragment_Configuration_Coding         "json:\"coding,omitempty\" graphql:\"coding\""
 	Infrastructure *WorkbenchFragment_Configuration_Infrastructure "json:\"infrastructure,omitempty\" graphql:\"infrastructure\""
+	Observability  *WorkbenchFragment_Configuration_Observability  "json:\"observability,omitempty\" graphql:\"observability\""
 }
 
 func (t *WorkbenchFragment_Configuration) GetCoding() *WorkbenchFragment_Configuration_Coding {
@@ -12774,6 +12961,12 @@ func (t *WorkbenchFragment_Configuration) GetInfrastructure() *WorkbenchFragment
 		t = &WorkbenchFragment_Configuration{}
 	}
 	return t.Infrastructure
+}
+func (t *WorkbenchFragment_Configuration) GetObservability() *WorkbenchFragment_Configuration_Observability {
+	if t == nil {
+		t = &WorkbenchFragment_Configuration{}
+	}
+	return t.Observability
 }
 
 type WorkbenchFragment_Skills_Ref struct {
@@ -12817,6 +13010,42 @@ func (t *WorkbenchFragment_Skills) GetRef() *WorkbenchFragment_Skills_Ref {
 		t = &WorkbenchFragment_Skills{}
 	}
 	return t.Ref
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -12876,15 +13105,379 @@ func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP) GetUR
 	return t.URL
 }
 
-type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
-	HTTP *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAzure() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetCloudwatch() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDatadog() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDynatrace() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetJaeger() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLinear() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLoki() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetPrometheus() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetSplunk() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
+}
+
+type WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                       "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -12944,15 +13537,440 @@ func (t *WorkbenchToolFragment_Configuration_HTTP) GetURL() *string {
 	return t.URL
 }
 
-type WorkbenchToolFragment_Configuration struct {
-	HTTP *WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type WorkbenchToolFragment_Configuration struct {
+	Atlassian  *WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *WorkbenchToolFragment_Configuration) GetAtlassian() *WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *WorkbenchToolFragment_Configuration) GetAzure() *WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *WorkbenchToolFragment_Configuration) GetCloudwatch() *WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *WorkbenchToolFragment_Configuration) GetDatadog() *WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *WorkbenchToolFragment_Configuration) GetDynatrace() *WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *WorkbenchToolFragment_Configuration) GetElastic() *WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *WorkbenchToolFragment_Configuration) GetHTTP() *WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *WorkbenchToolFragment_Configuration) GetJaeger() *WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *WorkbenchToolFragment_Configuration) GetLinear() *WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *WorkbenchToolFragment_Configuration) GetLoki() *WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *WorkbenchToolFragment_Configuration) GetPrometheus() *WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *WorkbenchToolFragment_Configuration) GetSplunk() *WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *WorkbenchToolFragment_Configuration) GetTempo() *WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
+}
+
+type WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
 }
 
 type DeleteAgentRuntime_DeleteAgentRuntime struct {
@@ -28311,9 +29329,28 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrast
 	return t.Stacks
 }
 
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability struct {
+	Logs    *bool "json:\"logs,omitempty\" graphql:\"logs\""
+	Metrics *bool "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability) GetLogs() *bool {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Logs
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability) GetMetrics() *bool {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Metrics
+}
+
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration struct {
 	Coding         *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Coding         "json:\"coding,omitempty\" graphql:\"coding\""
 	Infrastructure *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure "json:\"infrastructure,omitempty\" graphql:\"infrastructure\""
+	Observability  *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability  "json:\"observability,omitempty\" graphql:\"observability\""
 }
 
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration) GetCoding() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Coding {
@@ -28327,6 +29364,12 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration) GetInf
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration{}
 	}
 	return t.Infrastructure
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration) GetObservability() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Observability {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration{}
+	}
+	return t.Observability
 }
 
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Skills_Ref struct {
@@ -28370,6 +29413,42 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Skills) GetRef() *Cre
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Skills{}
 	}
 	return t.Ref
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -28429,15 +29508,343 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.URL
 }
 
-type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
-	HTTP *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAzure() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetCloudwatch() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDatadog() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDynatrace() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetJaeger() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLinear() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLoki() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetPrometheus() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetSplunk() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
@@ -28508,9 +29915,28 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrast
 	return t.Stacks
 }
 
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability struct {
+	Logs    *bool "json:\"logs,omitempty\" graphql:\"logs\""
+	Metrics *bool "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability) GetLogs() *bool {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Logs
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability) GetMetrics() *bool {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Metrics
+}
+
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration struct {
 	Coding         *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Coding         "json:\"coding,omitempty\" graphql:\"coding\""
 	Infrastructure *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure "json:\"infrastructure,omitempty\" graphql:\"infrastructure\""
+	Observability  *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability  "json:\"observability,omitempty\" graphql:\"observability\""
 }
 
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration) GetCoding() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Coding {
@@ -28524,6 +29950,12 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration) GetInf
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration{}
 	}
 	return t.Infrastructure
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration) GetObservability() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Observability {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration{}
+	}
+	return t.Observability
 }
 
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Skills_Ref struct {
@@ -28567,6 +29999,42 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Skills) GetRef() *Upd
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Skills{}
 	}
 	return t.Ref
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -28626,15 +30094,343 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.URL
 }
 
-type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
-	HTTP *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAzure() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetCloudwatch() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDatadog() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDynatrace() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetJaeger() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLinear() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLoki() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetPrometheus() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetSplunk() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
@@ -28705,9 +30501,28 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrast
 	return t.Stacks
 }
 
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability struct {
+	Logs    *bool "json:\"logs,omitempty\" graphql:\"logs\""
+	Metrics *bool "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability) GetLogs() *bool {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Logs
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability) GetMetrics() *bool {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Metrics
+}
+
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration struct {
 	Coding         *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Coding         "json:\"coding,omitempty\" graphql:\"coding\""
 	Infrastructure *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure "json:\"infrastructure,omitempty\" graphql:\"infrastructure\""
+	Observability  *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability  "json:\"observability,omitempty\" graphql:\"observability\""
 }
 
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration) GetCoding() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Coding {
@@ -28721,6 +30536,12 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration) GetInf
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration{}
 	}
 	return t.Infrastructure
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration) GetObservability() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Observability {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration{}
+	}
+	return t.Observability
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Skills_Ref struct {
@@ -28764,6 +30585,42 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Skills) GetRef() *Del
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Skills{}
 	}
 	return t.Ref
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -28823,15 +30680,379 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.URL
 }
 
-type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
-	HTTP *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAzure() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetCloudwatch() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDatadog() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDynatrace() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetJaeger() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLinear() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLoki() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetPrometheus() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetSplunk() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -28891,15 +31112,379 @@ func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.URL
 }
 
-type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration struct {
-	HTTP *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetAzure() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetCloudwatch() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetDatadog() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetDynatrace() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetElastic() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetJaeger() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetLinear() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetLoki() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetPrometheus() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetSplunk() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetTempo() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -28959,15 +31544,379 @@ func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.URL
 }
 
-type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration struct {
-	HTTP *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetAzure() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetCloudwatch() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetDatadog() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetDynatrace() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetElastic() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetJaeger() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetLinear() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetLoki() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetPrometheus() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetSplunk() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetTempo() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                               "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -29027,15 +31976,343 @@ func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.URL
 }
 
-type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration struct {
-	HTTP *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetAzure() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetCloudwatch() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetDatadog() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetDynatrace() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetElastic() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetJaeger() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetLinear() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetLoki() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetPrometheus() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetSplunk() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetTempo() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
@@ -29106,9 +32383,28 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_
 	return t.Stacks
 }
 
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability struct {
+	Logs    *bool "json:\"logs,omitempty\" graphql:\"logs\""
+	Metrics *bool "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability) GetLogs() *bool {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Logs
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability) GetMetrics() *bool {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Metrics
+}
+
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration struct {
 	Coding         *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Coding         "json:\"coding,omitempty\" graphql:\"coding\""
 	Infrastructure *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure "json:\"infrastructure,omitempty\" graphql:\"infrastructure\""
+	Observability  *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability  "json:\"observability,omitempty\" graphql:\"observability\""
 }
 
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration) GetCoding() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Coding {
@@ -29122,6 +32418,12 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration)
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration{}
 	}
 	return t.Infrastructure
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration) GetObservability() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Observability {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration{}
+	}
+	return t.Observability
 }
 
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Skills_Ref struct {
@@ -29165,6 +32467,42 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Skills) GetRef
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Skills{}
 	}
 	return t.Ref
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                                                      "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -29224,15 +32562,343 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_Workbenc
 	return t.URL
 }
 
-type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
-	HTTP *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAzure() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetCloudwatch() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDatadog() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDynatrace() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetJaeger() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLinear() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLoki() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetPrometheus() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetSplunk() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type ListWorkbenches_Workbenches_Edges struct {
@@ -29332,9 +32998,28 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) 
 	return t.Stacks
 }
 
+type GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability struct {
+	Logs    *bool "json:\"logs,omitempty\" graphql:\"logs\""
+	Metrics *bool "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability) GetLogs() *bool {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Logs
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability) GetMetrics() *bool {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability{}
+	}
+	return t.Metrics
+}
+
 type GetWorkbench_Workbench_WorkbenchFragment_Configuration struct {
 	Coding         *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Coding         "json:\"coding,omitempty\" graphql:\"coding\""
 	Infrastructure *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure "json:\"infrastructure,omitempty\" graphql:\"infrastructure\""
+	Observability  *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability  "json:\"observability,omitempty\" graphql:\"observability\""
 }
 
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration) GetCoding() *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Coding {
@@ -29348,6 +33033,12 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration) GetInfrastructu
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration{}
 	}
 	return t.Infrastructure
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration) GetObservability() *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Observability {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration{}
+	}
+	return t.Observability
 }
 
 type GetWorkbench_Workbench_WorkbenchFragment_Skills_Ref struct {
@@ -29391,6 +33082,42 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Skills) GetRef() *GetWorkbench
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Skills{}
 	}
 	return t.Ref
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                                      "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -29450,15 +33177,343 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Co
 	return t.URL
 }
 
-type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
-	HTTP *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAzure() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetCloudwatch() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDatadog() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetDynatrace() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetJaeger() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLinear() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetLoki() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetPrometheus() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetSplunk() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type GetWorkbenchTiny_Workbench struct {
@@ -29477,6 +33532,42 @@ func (t *GetWorkbenchTiny_Workbench) GetName() string {
 		t = &GetWorkbenchTiny_Workbench{}
 	}
 	return t.Name
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                                    "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -29536,15 +33627,343 @@ func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Conf
 	return t.URL
 }
 
-type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration struct {
-	HTTP *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetAtlassian() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetAzure() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetCloudwatch() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetDatadog() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetDynatrace() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetElastic() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetHTTP() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetJaeger() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetLinear() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetLoki() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetPrometheus() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetSplunk() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetTempo() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type ListWorkbenchTools_WorkbenchTools_Edges struct {
@@ -29574,6 +33993,42 @@ func (t *ListWorkbenchTools_WorkbenchTools) GetPageInfo() *PageInfoFragment {
 		t = &ListWorkbenchTools_WorkbenchTools{}
 	}
 	return &t.PageInfo
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Name
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers) GetValue() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers{}
+	}
+	return t.Value
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication struct {
+	Headers []*GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                                                      "json:\"plural,omitempty\" graphql:\"plural\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetHeaders() []*GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Headers
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP_Headers struct {
@@ -29633,15 +34088,343 @@ func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP
 	return t.URL
 }
 
-type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration struct {
-	HTTP *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP "json:\"http,omitempty\" graphql:\"http\""
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic struct {
+	Index    string "json:\"index\" graphql:\"index\""
+	URL      string "json:\"url\" graphql:\"url\""
+	Username string "json:\"username\" graphql:\"username\""
 }
 
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetIndex() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Index
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetURL() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic) GetUsername() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.TenantID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.TenantID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo struct {
+	TenantID *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.TenantID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger struct {
+	URL      *string "json:\"url,omitempty\" graphql:\"url\""
+	Username *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Datadog struct {
+	Site *string "json:\"site,omitempty\" graphql:\"site\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Datadog) GetSite() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Datadog{}
+	}
+	return t.Site
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace struct {
+	URL *string "json:\"url,omitempty\" graphql:\"url\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace{}
+	}
+	return t.URL
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch struct {
+	LogGroupNames   []*string "json:\"logGroupNames,omitempty\" graphql:\"logGroupNames\""
+	Region          *string   "json:\"region,omitempty\" graphql:\"region\""
+	RoleArn         *string   "json:\"roleArn,omitempty\" graphql:\"roleArn\""
+	RoleSessionName *string   "json:\"roleSessionName,omitempty\" graphql:\"roleSessionName\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetLogGroupNames() []*string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.LogGroupNames
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRegion() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.Region
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleArn() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleArn
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch) GetRoleSessionName() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch{}
+	}
+	return t.RoleSessionName
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure struct {
+	ClientID       *string "json:\"clientId,omitempty\" graphql:\"clientId\""
+	SubscriptionID *string "json:\"subscriptionId,omitempty\" graphql:\"subscriptionId\""
+	TenantID       *string "json:\"tenantId,omitempty\" graphql:\"tenantId\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetClientID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.ClientID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetSubscriptionID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.SubscriptionID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure) GetTenantID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure{}
+	}
+	return t.TenantID
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Linear struct {
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Linear) GetURL() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Linear{}
+	}
+	return t.URL
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian struct {
+	Email *string "json:\"email,omitempty\" graphql:\"email\""
+	URL   string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetEmail() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.Email
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian{}
+	}
+	return t.URL
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration struct {
+	Atlassian  *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
+	Azure      *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
+	Cloudwatch *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch "json:\"cloudwatch,omitempty\" graphql:\"cloudwatch\""
+	Datadog    *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
+	Dynatrace  *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
+	Elastic    *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	HTTP       *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
+	Jaeger     *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
+	Linear     *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
+	Loki       *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki       "json:\"loki,omitempty\" graphql:\"loki\""
+	Prometheus *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus "json:\"prometheus,omitempty\" graphql:\"prometheus\""
+	Splunk     *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk     "json:\"splunk,omitempty\" graphql:\"splunk\""
+	Tempo      *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo      "json:\"tempo,omitempty\" graphql:\"tempo\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Atlassian
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetAzure() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Azure
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetCloudwatch() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Cloudwatch {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Cloudwatch
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetDatadog() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Datadog {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Datadog
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetDynatrace() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Dynatrace
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetElastic() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Elastic
+}
 func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
 		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetJaeger() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Jaeger
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetLinear() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Linear {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Linear
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetLoki() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Loki
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetPrometheus() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Prometheus {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Prometheus
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetSplunk() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Splunk
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetTempo() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Tempo
 }
 
 type GetWorkbenchToolTiny_WorkbenchTool struct {
@@ -29658,6 +34441,394 @@ func (t *GetWorkbenchToolTiny_WorkbenchTool) GetID() string {
 func (t *GetWorkbenchToolTiny_WorkbenchTool) GetName() string {
 	if t == nil {
 		t = &GetWorkbenchToolTiny_WorkbenchTool{}
+	}
+	return t.Name
+}
+
+type CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchCron_CreateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchCron_UpdateWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchCron_DeleteWorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook_UpdateWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook_DeleteWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
+	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
+	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
+	Substring       *string "json:\"substring,omitempty\" graphql:\"substring\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetCaseInsensitive() *bool {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.CaseInsensitive
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetRegex() *string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Regex
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches) GetSubstring() *string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Matches{}
+	}
+	return t.Substring
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Webhook{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_IssueWebhook{}
+	}
+	return t.Name
+}
+
+type GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchWebhook_GetWorkbenchWebhook_WorkbenchWebhookFragment_Workbench{}
 	}
 	return t.Name
 }
@@ -29946,6 +35117,17 @@ func (t *DeleteObservabilityWebhook) GetDeleteObservabilityWebhook() *Observabil
 		t = &DeleteObservabilityWebhook{}
 	}
 	return t.DeleteObservabilityWebhook
+}
+
+type GetIssueWebhook struct {
+	IssueWebhook *IssueWebhookFragment "json:\"issueWebhook,omitempty\" graphql:\"issueWebhook\""
+}
+
+func (t *GetIssueWebhook) GetIssueWebhook() *IssueWebhookFragment {
+	if t == nil {
+		t = &GetIssueWebhook{}
+	}
+	return t.IssueWebhook
 }
 
 type CreateClusterBackup struct {
@@ -32951,6 +38133,94 @@ func (t *GetWorkbenchToolTiny) GetWorkbenchTool() *GetWorkbenchToolTiny_Workbenc
 	return t.WorkbenchTool
 }
 
+type CreateWorkbenchCron struct {
+	CreateWorkbenchCron *WorkbenchCronFragment "json:\"createWorkbenchCron,omitempty\" graphql:\"createWorkbenchCron\""
+}
+
+func (t *CreateWorkbenchCron) GetCreateWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &CreateWorkbenchCron{}
+	}
+	return t.CreateWorkbenchCron
+}
+
+type UpdateWorkbenchCron struct {
+	UpdateWorkbenchCron *WorkbenchCronFragment "json:\"updateWorkbenchCron,omitempty\" graphql:\"updateWorkbenchCron\""
+}
+
+func (t *UpdateWorkbenchCron) GetUpdateWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &UpdateWorkbenchCron{}
+	}
+	return t.UpdateWorkbenchCron
+}
+
+type DeleteWorkbenchCron struct {
+	DeleteWorkbenchCron *WorkbenchCronFragment "json:\"deleteWorkbenchCron,omitempty\" graphql:\"deleteWorkbenchCron\""
+}
+
+func (t *DeleteWorkbenchCron) GetDeleteWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &DeleteWorkbenchCron{}
+	}
+	return t.DeleteWorkbenchCron
+}
+
+type GetWorkbenchCron struct {
+	WorkbenchCron *WorkbenchCronFragment "json:\"workbenchCron,omitempty\" graphql:\"workbenchCron\""
+}
+
+func (t *GetWorkbenchCron) GetWorkbenchCron() *WorkbenchCronFragment {
+	if t == nil {
+		t = &GetWorkbenchCron{}
+	}
+	return t.WorkbenchCron
+}
+
+type CreateWorkbenchWebhook struct {
+	CreateWorkbenchWebhook *WorkbenchWebhookFragment "json:\"createWorkbenchWebhook,omitempty\" graphql:\"createWorkbenchWebhook\""
+}
+
+func (t *CreateWorkbenchWebhook) GetCreateWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &CreateWorkbenchWebhook{}
+	}
+	return t.CreateWorkbenchWebhook
+}
+
+type UpdateWorkbenchWebhook struct {
+	UpdateWorkbenchWebhook *WorkbenchWebhookFragment "json:\"updateWorkbenchWebhook,omitempty\" graphql:\"updateWorkbenchWebhook\""
+}
+
+func (t *UpdateWorkbenchWebhook) GetUpdateWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &UpdateWorkbenchWebhook{}
+	}
+	return t.UpdateWorkbenchWebhook
+}
+
+type DeleteWorkbenchWebhook struct {
+	DeleteWorkbenchWebhook *WorkbenchWebhookFragment "json:\"deleteWorkbenchWebhook,omitempty\" graphql:\"deleteWorkbenchWebhook\""
+}
+
+func (t *DeleteWorkbenchWebhook) GetDeleteWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &DeleteWorkbenchWebhook{}
+	}
+	return t.DeleteWorkbenchWebhook
+}
+
+type GetWorkbenchWebhook struct {
+	GetWorkbenchWebhook *WorkbenchWebhookFragment "json:\"getWorkbenchWebhook,omitempty\" graphql:\"getWorkbenchWebhook\""
+}
+
+func (t *GetWorkbenchWebhook) GetGetWorkbenchWebhook() *WorkbenchWebhookFragment {
+	if t == nil {
+		t = &GetWorkbenchWebhook{}
+	}
+	return t.GetWorkbenchWebhook
+}
+
 const GetAgentRuntimeDocument = `query GetAgentRuntime ($id: ID!) {
 	agentRuntime(id: $id) {
 		... AgentRuntimeFragment
@@ -33285,6 +38555,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -33320,6 +38591,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -33432,6 +38705,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -33467,6 +38741,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -33588,6 +38864,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -33623,6 +38900,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -33791,6 +39070,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -33826,6 +39106,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -33932,6 +39214,7 @@ fragment AgentRunFragment on AgentRun {
 	id
 	prompt
 	repository
+	branch
 	mode
 	language
 	languageVersion
@@ -33967,6 +39250,8 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	babysit
+	babysitInterval
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -34541,6 +39826,36 @@ func (c *Client) DeleteObservabilityWebhook(ctx context.Context, id string, inte
 
 	var res DeleteObservabilityWebhook
 	if err := c.Client.Post(ctx, "DeleteObservabilityWebhook", DeleteObservabilityWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetIssueWebhookDocument = `query GetIssueWebhook ($id: ID, $name: String) {
+	issueWebhook(id: $id, name: $name) {
+		... IssueWebhookFragment
+	}
+}
+fragment IssueWebhookFragment on IssueWebhook {
+	id
+	name
+	provider
+}
+`
+
+func (c *Client) GetIssueWebhook(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetIssueWebhook, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetIssueWebhook
+	if err := c.Client.Post(ctx, "GetIssueWebhook", GetIssueWebhookDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -54465,6 +59780,10 @@ fragment WorkbenchFragment on Workbench {
 			stacks
 			kubernetes
 		}
+		observability {
+			logs
+			metrics
+		}
 	}
 	skills {
 		ref {
@@ -54476,6 +59795,12 @@ fragment WorkbenchFragment on Workbench {
 	}
 	tools {
 		... WorkbenchToolFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
 	}
 	insertedAt
 	updatedAt
@@ -54511,6 +59836,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -54522,9 +59853,102 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -54574,6 +59998,10 @@ fragment WorkbenchFragment on Workbench {
 			stacks
 			kubernetes
 		}
+		observability {
+			logs
+			metrics
+		}
 	}
 	skills {
 		ref {
@@ -54585,6 +60013,12 @@ fragment WorkbenchFragment on Workbench {
 	}
 	tools {
 		... WorkbenchToolFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
 	}
 	insertedAt
 	updatedAt
@@ -54620,6 +60054,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -54631,9 +60071,102 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -54684,6 +60217,10 @@ fragment WorkbenchFragment on Workbench {
 			stacks
 			kubernetes
 		}
+		observability {
+			logs
+			metrics
+		}
 	}
 	skills {
 		ref {
@@ -54695,6 +60232,12 @@ fragment WorkbenchFragment on Workbench {
 	}
 	tools {
 		... WorkbenchToolFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
 	}
 	insertedAt
 	updatedAt
@@ -54730,6 +60273,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -54741,9 +60290,102 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -54777,6 +60419,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -54788,6 +60436,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
@@ -54796,6 +60496,47 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -54829,6 +60570,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -54840,6 +60587,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
@@ -54848,6 +60647,47 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -54882,6 +60722,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -54893,6 +60739,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
@@ -54901,6 +60799,47 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -54957,6 +60896,10 @@ fragment WorkbenchFragment on Workbench {
 			stacks
 			kubernetes
 		}
+		observability {
+			logs
+			metrics
+		}
 	}
 	skills {
 		ref {
@@ -54968,6 +60911,12 @@ fragment WorkbenchFragment on Workbench {
 	}
 	tools {
 		... WorkbenchToolFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
 	}
 	insertedAt
 	updatedAt
@@ -55003,6 +60952,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -55014,9 +60969,102 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -55074,6 +61122,10 @@ fragment WorkbenchFragment on Workbench {
 			stacks
 			kubernetes
 		}
+		observability {
+			logs
+			metrics
+		}
 	}
 	skills {
 		ref {
@@ -55085,6 +61137,12 @@ fragment WorkbenchFragment on Workbench {
 	}
 	tools {
 		... WorkbenchToolFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
 	}
 	insertedAt
 	updatedAt
@@ -55120,6 +61178,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -55131,9 +61195,102 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -55201,6 +61358,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -55212,6 +61375,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
@@ -55220,6 +61435,47 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -55261,6 +61517,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	project {
 		... TinyProjectFragment
 	}
+	mcpServer {
+		... MCPServerFragment
+	}
+	cloudConnection {
+		... CloudConnectionFragment
+	}
 	configuration {
 		http {
 			url
@@ -55272,6 +61534,58 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			body
 			inputSchema
 		}
+		elastic {
+			index
+			url
+			username
+		}
+		prometheus {
+			url
+			username
+			tenantId
+		}
+		loki {
+			url
+			username
+			tenantId
+		}
+		splunk {
+			url
+			username
+		}
+		tempo {
+			url
+			username
+			tenantId
+		}
+		jaeger {
+			url
+			username
+		}
+		datadog {
+			site
+		}
+		dynatrace {
+			url
+		}
+		cloudwatch {
+			region
+			logGroupNames
+			roleArn
+			roleSessionName
+		}
+		azure {
+			subscriptionId
+			tenantId
+			clientId
+		}
+		linear {
+			url
+		}
+		atlassian {
+			url
+			email
+		}
 	}
 	insertedAt
 	updatedAt
@@ -55280,6 +61594,47 @@ fragment TinyProjectFragment on Project {
 	id
 	name
 	default
+}
+fragment MCPServerFragment on McpServer {
+	id
+	name
+	url
+	authentication {
+		plural
+		headers {
+			name
+			value
+		}
+	}
+	confirm
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -55327,6 +61682,326 @@ func (c *Client) GetWorkbenchToolTiny(ctx context.Context, id *string, name *str
 	return &res, nil
 }
 
+const CreateWorkbenchCronDocument = `mutation CreateWorkbenchCron ($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+	createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) CreateWorkbenchCron(ctx context.Context, workbenchID string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchCron, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"attributes":  attributes,
+	}
+
+	var res CreateWorkbenchCron
+	if err := c.Client.Post(ctx, "CreateWorkbenchCron", CreateWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateWorkbenchCronDocument = `mutation UpdateWorkbenchCron ($id: ID!, $attributes: WorkbenchCronAttributes!) {
+	updateWorkbenchCron(id: $id, attributes: $attributes) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) UpdateWorkbenchCron(ctx context.Context, id string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchCron, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateWorkbenchCron
+	if err := c.Client.Post(ctx, "UpdateWorkbenchCron", UpdateWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteWorkbenchCronDocument = `mutation DeleteWorkbenchCron ($id: ID!) {
+	deleteWorkbenchCron(id: $id) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) DeleteWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchCron, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteWorkbenchCron
+	if err := c.Client.Post(ctx, "DeleteWorkbenchCron", DeleteWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetWorkbenchCronDocument = `mutation GetWorkbenchCron ($id: ID!) {
+	workbenchCron(id: $id) {
+		... WorkbenchCronFragment
+	}
+}
+fragment WorkbenchCronFragment on WorkbenchCron {
+	id
+	crontab
+	prompt
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchCron, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetWorkbenchCron
+	if err := c.Client.Post(ctx, "GetWorkbenchCron", GetWorkbenchCronDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateWorkbenchWebhookDocument = `mutation CreateWorkbenchWebhook ($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+	createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"attributes":  attributes,
+	}
+
+	var res CreateWorkbenchWebhook
+	if err := c.Client.Post(ctx, "CreateWorkbenchWebhook", CreateWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateWorkbenchWebhookDocument = `mutation UpdateWorkbenchWebhook ($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+	updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateWorkbenchWebhook
+	if err := c.Client.Post(ctx, "UpdateWorkbenchWebhook", UpdateWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteWorkbenchWebhookDocument = `mutation DeleteWorkbenchWebhook ($id: ID!) {
+	deleteWorkbenchWebhook(id: $id) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) DeleteWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteWorkbenchWebhook
+	if err := c.Client.Post(ctx, "DeleteWorkbenchWebhook", DeleteWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetWorkbenchWebhookDocument = `mutation GetWorkbenchWebhook ($id: ID!) {
+	getWorkbenchWebhook(id: $id) {
+		... WorkbenchWebhookFragment
+	}
+}
+fragment WorkbenchWebhookFragment on WorkbenchWebhook {
+	id
+	name
+	prompt
+	matches {
+		regex
+		substring
+		caseInsensitive
+	}
+	webhook {
+		id
+		name
+	}
+	issueWebhook {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchWebhook, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetWorkbenchWebhook
+	if err := c.Client.Post(ctx, "GetWorkbenchWebhook", GetWorkbenchWebhookDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 var DocumentOperationNames = map[string]string{
 	GetAgentRuntimeDocument:                           "GetAgentRuntime",
 	GetAgentRuntimeByNameDocument:                     "GetAgentRuntimeByName",
@@ -55354,6 +62029,7 @@ var DocumentOperationNames = map[string]string{
 	GetObservabilityWebhookDocument:                   "GetObservabilityWebhook",
 	UpsertObservabilityWebhookDocument:                "UpsertObservabilityWebhook",
 	DeleteObservabilityWebhookDocument:                "DeleteObservabilityWebhook",
+	GetIssueWebhookDocument:                           "GetIssueWebhook",
 	CreateClusterBackupDocument:                       "CreateClusterBackup",
 	GetClusterBackupDocument:                          "GetClusterBackup",
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",
@@ -55627,4 +62303,12 @@ var DocumentOperationNames = map[string]string{
 	ListWorkbenchToolsDocument:                        "ListWorkbenchTools",
 	GetWorkbenchToolDocument:                          "GetWorkbenchTool",
 	GetWorkbenchToolTinyDocument:                      "GetWorkbenchToolTiny",
+	CreateWorkbenchCronDocument:                       "CreateWorkbenchCron",
+	UpdateWorkbenchCronDocument:                       "UpdateWorkbenchCron",
+	DeleteWorkbenchCronDocument:                       "DeleteWorkbenchCron",
+	GetWorkbenchCronDocument:                          "GetWorkbenchCron",
+	CreateWorkbenchWebhookDocument:                    "CreateWorkbenchWebhook",
+	UpdateWorkbenchWebhookDocument:                    "UpdateWorkbenchWebhook",
+	DeleteWorkbenchWebhookDocument:                    "DeleteWorkbenchWebhook",
+	GetWorkbenchWebhookDocument:                       "GetWorkbenchWebhook",
 }

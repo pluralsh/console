@@ -4,12 +4,23 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
-- version: 1.30.6
+- version: 1.30.7
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
-  chart_version: 1.30.6
+  summary:
+    helm_changes: ''
+    chart_updates: ['From 1.30.0 release notes: otel-collector deployment fix to allow
+        external OTEL URL without requiring a cloud provider.', 'NetworkPolicy fixes:
+        prometheus-exporter egress + storage ingress rules corrected.', NetworkPolicy
+        fix to allow Prometheus ServiceMonitor traffic to kubescape., 'Feature added:
+        image-based capability (per PR ''Feat/image based'').', No specific changelog
+        items were provided for 1.30.7 in the notes you shared (release exists but
+        has no listed changes).]
+    features: ['Adds an image-based mode/capability (details depend on chart values;
+        see PR #770 in kubescape/helm-charts).']
+    breaking_changes: []
+  chart_version: 1.30.7
   images: []
 - version: 1.30.0
   kube: ['1.35', '1.34', '1.33']
@@ -68,7 +79,15 @@ versions:
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [No explicit chart/values changes are described in the provided
+        notes for `kubescape-operator-1.29.0` (release entry contains only metadata).,
+      'From `1.28.0`, the chart added **kubelet directory support** in the node-agent
+        configuration (PR #707).']
+    features: ['(From 1.28.0 notes) Node agent configuration gained support for specifying/handling
+        the kubelet directory, improving compatibility across node layouts/distributions.']
+    breaking_changes: []
   chart_version: 1.29.0
   images: []
 - version: 1.28.0
@@ -429,7 +448,11 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: []
+    breaking_changes: []
   chart_version: 1.16.0
   images: []
 - version: 1.15.0

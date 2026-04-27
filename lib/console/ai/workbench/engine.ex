@@ -20,7 +20,8 @@ defmodule Console.AI.Workbench.Engine do
     Environment,
     Message,
     Supervisor,
-    Heartbeat
+    Heartbeat,
+    Canvas
   }
   alias Console.AI.Tools.Workbench.{
     Complete,
@@ -29,8 +30,9 @@ defmodule Console.AI.Workbench.Engine do
     Skills,
     Skill,
     Notes,
-    FetchNotes
+    FetchNotes,
   }
+  alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
   require EEx
 
@@ -38,7 +40,7 @@ defmodule Console.AI.Workbench.Engine do
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job =
-      Repo.preload(job, [user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]])
+      Repo.preload(job, [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]])
 
     user = Console.Services.Rbac.preload(user)
     with {:ok, _} <- Heartbeat.start_link(job),
@@ -90,6 +92,7 @@ defmodule Console.AI.Workbench.Engine do
 
   defp tool_fmt(%Notes{} = notes), do: String.trim(notes_message(notes: notes))
   defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
+  defp tool_fmt(%CanvasTool{}), do: "launched canvas subagent, waiting for the result"
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(pass), do: pass
 
@@ -97,6 +100,7 @@ defmodule Console.AI.Workbench.Engine do
     Enum.reduce_while(messages, [], fn
       %Complete{} = complete, _ -> {:halt, complete}
       %Subagent{} = subagent, acc -> {:cont, [subagent | acc]}
+      %CanvasTool{} = canvas, acc -> {:cont, [canvas | acc]}
       %Notes{} = notes, acc -> {:cont, [notes | acc]}
       _, acc -> {:cont, acc}
     end)
@@ -134,6 +138,26 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
+  defp spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
+    Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
+    with {:ok, activity} <- Workbenches.create_job_activity(%{type: :canvas, prompt: prompt, tool_call: tool_attrs(call)}, job) do
+      Canvas.new(activity, existing_canvas(job))
+
+      output = Console.safely(fn ->
+        SA.Canvas.run(activity, job, %{environment | activities: activities})
+      end, & "error running subagent: #{inspect(&1)}, feel free to try again if it is still necessary")
+
+      Canvas.canvas()
+      |> Canvas.render()
+      |> Workbenches.save_canvas(output, activity)
+      |> log_error("failed to save canvas")
+      |> case do
+        {:ok, activity, _} -> {:ok, activity}
+        err -> err
+      end
+    end
+  end
+
   defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
     Console.mapify(status)
     |> Map.drop([:id])
@@ -147,6 +171,9 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activity(_, _), do: :ignore
+
+  defp existing_canvas(%WorkbenchJob{result: %Console.Schema.WorkbenchJobResult{canvas: canvas}}) when is_list(canvas), do: canvas
+  defp existing_canvas(_), do: []
 
   defp crash_fallback(err) do
     %{status: :failed, result: %{error: "error running subagent: #{inspect(err)}, feel free to try again if it is still necessary"}}
@@ -178,12 +205,13 @@ defmodule Console.AI.Workbench.Engine do
     subagents = Environment.subagents(job) |> maybe_add_memory(activities)
     categories = Environment.categories(job)
     [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)},
+      %Skill{skills: Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)},
       %Subagents{subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Notes,
+      CanvasTool,
       Complete,
     ]
   end

@@ -13,24 +13,24 @@ import {
 } from '@pluralsh/design-system'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
-  useWorkbenchToolsQuery,
   useUpdateWorkbenchMutation,
+  useWorkbenchToolsQuery,
   WorkbenchQuery,
 } from 'generated/graphql'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import {
-  TOOL_TYPE_TO_LABEL,
-  WorkbenchToolCardBody,
-  WorkbenchToolIcon,
-  workbenchToolCardGridStyles,
-} from '../tools/workbenchToolsUtils'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { isNonNullable } from 'utils/isNonNullable'
+import {
+  getWorkbenchToolLabel,
+  WorkbenchToolCardBody,
+  workbenchToolCardGridStyles,
+  WorkbenchToolIcon,
+} from '../tools/workbenchToolsUtils'
 
 const ModalActionsRowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -38,6 +38,18 @@ const ModalActionsRowSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   width: '100%',
   gap: theme.spacing.medium,
+}))
+
+const ModalContentSC = styled(Flex)(() => ({
+  minHeight: 0,
+  maxHeight: 'min(70vh, 760px)',
+  overflow: 'hidden',
+}))
+
+const CardsScrollAreaSC = styled.div(({ theme }) => ({
+  minHeight: 0,
+  overflowY: 'auto',
+  paddingRight: theme.spacing.xxsmall,
 }))
 
 export function WorkbenchToolsEditModal({
@@ -172,7 +184,7 @@ export function WorkbenchToolsEditModal({
       {toolsError || saveError ? (
         <GqlError error={toolsError ?? saveError} />
       ) : (
-        <Flex
+        <ModalContentSC
           direction="column"
           gap="medium"
         >
@@ -222,28 +234,28 @@ export function WorkbenchToolsEditModal({
             </Select>
           </FormField>
           {selectedTools.length > 0 && (
-            <CardGrid
-              styles={{
-                ...workbenchToolCardGridStyles(320),
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              }}
-            >
-              {selectedTools.map(
-                ({ id, name, tool: type, cloudConnection }) => (
-                  <Card key={id}>
-                    <WorkbenchToolCardBody>
-                      <Flex
-                        align="center"
-                        justify="space-between"
-                        width="100%"
-                        gap="small"
-                      >
-                        <StackedText
-                          first={name}
-                          firstPartialType="body2Bold"
-                          firstColor="text"
-                          second={TOOL_TYPE_TO_LABEL[type]}
-                          icon={
+            <CardsScrollAreaSC>
+              <CardGrid
+                styles={{
+                  ...workbenchToolCardGridStyles(320),
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                }}
+              >
+                {selectedTools.map(
+                  ({ id, name, tool: type, cloudConnection }) => (
+                    <Card key={id}>
+                      <WorkbenchToolCardBody>
+                        <Flex
+                          align="center"
+                          justify="space-between"
+                          width="100%"
+                          gap="small"
+                        >
+                          <Flex
+                            align="center"
+                            gap="small"
+                            css={{ minWidth: 0, flex: 1 }}
+                          >
                             <IconFrame
                               circle
                               type="secondary"
@@ -255,24 +267,34 @@ export function WorkbenchToolsEditModal({
                                 />
                               }
                             />
-                          }
-                          css={{ minWidth: 0, flex: 1 }}
-                        />
-                        <IconFrame
-                          circle
-                          clickable
-                          icon={<CloseIcon />}
-                          tooltip="Remove from selection"
-                          onClick={() => handleDeselectTool(id)}
-                        />
-                      </Flex>
-                    </WorkbenchToolCardBody>
-                  </Card>
-                )
-              )}
-            </CardGrid>
+                            <StackedText
+                              truncate
+                              first={name}
+                              firstPartialType="body2Bold"
+                              firstColor="text"
+                              second={getWorkbenchToolLabel(
+                                type,
+                                cloudConnection?.provider
+                              )}
+                              css={{ minWidth: 0, flex: 1, width: 0 }}
+                            />
+                          </Flex>
+                          <IconFrame
+                            circle
+                            clickable
+                            icon={<CloseIcon />}
+                            tooltip="Remove from selection"
+                            onClick={() => handleDeselectTool(id)}
+                          />
+                        </Flex>
+                      </WorkbenchToolCardBody>
+                    </Card>
+                  )
+                )}
+              </CardGrid>
+            </CardsScrollAreaSC>
           )}
-        </Flex>
+        </ModalContentSC>
       )}
     </Modal>
   )

@@ -108,7 +108,7 @@ defmodule Console.AI.Provider do
       do: handle_tool_calls(result, tools)
   end
 
-  def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_atom(tool) do
+  def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_struct(tool) or is_atom(tool) do
     name = Tool.name(tool)
     case tool_call(history, [tool], opts) do
       {:ok, [%{^name => %{result: result}} | _]} -> {:ok, result}

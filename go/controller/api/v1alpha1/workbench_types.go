@@ -92,7 +92,7 @@ func (in *Workbench) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string, toolIDs []string) console.WorkbenchAttributes {
+func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string, toolIDs []string, readBindings, writeBindings []*console.PolicyBindingAttributes) console.WorkbenchAttributes {
 	return console.WorkbenchAttributes{
 		Name:           in.ConsoleName(),
 		Description:    in.Spec.Description,
@@ -102,6 +102,8 @@ func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string,
 		AgentRuntimeID: agentRuntimeID,
 		Configuration:  in.Spec.Configuration.Attributes(),
 		Skills:         in.Spec.Skills.Attributes(),
+		ReadBindings:   readBindings,
+		WriteBindings:  writeBindings,
 		ToolAssociations: lo.Map(toolIDs, func(id string, _ int) *console.WorkbenchToolAssociationAttributes {
 			return &console.WorkbenchToolAssociationAttributes{ToolID: id}
 		}),
@@ -146,6 +148,10 @@ type WorkbenchSpec struct {
 	// +kubebuilder:validation:Optional
 	Skills *WorkbenchSkills `json:"skills,omitempty"`
 
+	// Bindings define read and write access policies for this workbench.
+	// +kubebuilder:validation:Optional
+	Bindings *Bindings `json:"bindings,omitempty"`
+
 	// ToolRefs references WorkbenchTool resources to associate with this workbench.
 	// +kubebuilder:validation:Optional
 	ToolRefs []corev1.ObjectReference `json:"toolRefs,omitempty"`
@@ -164,6 +170,10 @@ type WorkbenchConfiguration struct {
 	// Infrastructure configures infrastructure capabilities (services, stacks, Kubernetes).
 	// +kubebuilder:validation:Optional
 	Infrastructure *WorkbenchInfrastructureConfig `json:"infrastructure,omitempty"`
+
+	// Observability configures observability capabilities (logs, metrics).
+	// +kubebuilder:validation:Optional
+	Observability *WorkbenchObservabilityConfig `json:"observability,omitempty"`
 }
 
 func (c *WorkbenchConfiguration) Attributes() *console.WorkbenchConfigurationAttributes {
@@ -174,6 +184,7 @@ func (c *WorkbenchConfiguration) Attributes() *console.WorkbenchConfigurationAtt
 	return &console.WorkbenchConfigurationAttributes{
 		Coding:         c.Coding.Attributes(),
 		Infrastructure: c.Infrastructure.Attributes(),
+		Observability:  c.Observability.Attributes(),
 	}
 }
 
@@ -278,5 +289,27 @@ func (r *WorkbenchSkillsRef) Attributes() *console.GitRefAttributes {
 		Ref:    r.Ref,
 		Folder: r.Folder,
 		Files:  r.Files,
+	}
+}
+
+// WorkbenchObservabilityConfig configures observability capabilities.
+type WorkbenchObservabilityConfig struct {
+	// Logs enables the logs capability.
+	// +kubebuilder:validation:Optional
+	Logs *bool `json:"logs,omitempty"`
+
+	// Metrics enables the metrics capability.
+	// +kubebuilder:validation:Optional
+	Metrics *bool `json:"metrics,omitempty"`
+}
+
+func (c *WorkbenchObservabilityConfig) Attributes() *console.WorkbenchObservabilityAttributes {
+	if c == nil {
+		return nil
+	}
+
+	return &console.WorkbenchObservabilityAttributes{
+		Logs:    c.Logs,
+		Metrics: c.Metrics,
 	}
 }

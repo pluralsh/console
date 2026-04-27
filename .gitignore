@@ -68,3 +68,5 @@ data/
 # config/pubkey.pem
 
 release-notes.md
+# Rust binary artifacts
+/target/

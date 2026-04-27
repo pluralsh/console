@@ -9461,16 +9461,19 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings   []*PolicyBinding            `json:"writeBindings,omitempty"`
-	Runs            *WorkbenchJobConnection     `json:"runs,omitempty"`
-	Crons           *WorkbenchCronConnection    `json:"crons,omitempty"`
-	Prompts         *WorkbenchPromptConnection  `json:"prompts,omitempty"`
-	WorkbenchSkills *WorkbenchSkillConnection   `json:"workbenchSkills,omitempty"`
-	Webhooks        *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
-	Alerts          *AlertConnection            `json:"alerts,omitempty"`
-	Issues          *IssueConnection            `json:"issues,omitempty"`
-	InsertedAt      *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt       *string                     `json:"updatedAt,omitempty"`
+	WriteBindings   []*PolicyBinding           `json:"writeBindings,omitempty"`
+	Runs            *WorkbenchJobConnection    `json:"runs,omitempty"`
+	Crons           *WorkbenchCronConnection   `json:"crons,omitempty"`
+	Prompts         *WorkbenchPromptConnection `json:"prompts,omitempty"`
+	WorkbenchSkills *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	// eval configuration for this workbench (at most one; null if none configured)
+	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
+	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
+	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
+	Alerts      *AlertConnection               `json:"alerts,omitempty"`
+	Issues      *IssueConnection               `json:"issues,omitempty"`
+	InsertedAt  *string                        `json:"insertedAt,omitempty"`
+	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -9500,6 +9503,44 @@ type WorkbenchAttributes struct {
 	ToolAssociations []*WorkbenchToolAssociationAttributes `json:"toolAssociations,omitempty"`
 	// skills to include with this workbench
 	WorkbenchSkills []*WorkbenchSkillAttributes `json:"workbenchSkills,omitempty"`
+}
+
+type WorkbenchCanvasBlock struct {
+	Identifier *string                      `json:"identifier,omitempty"`
+	Type       *WorkbenchCanvasBlockType    `json:"type,omitempty"`
+	Layout     *WorkbenchCanvasBlockLayout  `json:"layout,omitempty"`
+	Content    *WorkbenchCanvasBlockContent `json:"content,omitempty"`
+}
+
+type WorkbenchCanvasBlockContent struct {
+	Markdown *string                    `json:"markdown,omitempty"`
+	Metrics  *WorkbenchCanvasToolGraph  `json:"metrics,omitempty"`
+	Logs     *WorkbenchCanvasToolGraph  `json:"logs,omitempty"`
+	Pie      *WorkbenchCanvasBlockGraph `json:"pie,omitempty"`
+	Bar      *WorkbenchCanvasBlockGraph `json:"bar,omitempty"`
+}
+
+type WorkbenchCanvasBlockGraph struct {
+	Title *string                     `json:"title,omitempty"`
+	Data  []*WorkbenchCanvasDataPoint `json:"data,omitempty"`
+}
+
+type WorkbenchCanvasBlockLayout struct {
+	X *int64 `json:"x,omitempty"`
+	Y *int64 `json:"y,omitempty"`
+	W *int64 `json:"w,omitempty"`
+	H *int64 `json:"h,omitempty"`
+}
+
+type WorkbenchCanvasDataPoint struct {
+	Label *string  `json:"label,omitempty"`
+	Value *float64 `json:"value,omitempty"`
+}
+
+type WorkbenchCanvasToolGraph struct {
+	Title   *string                 `json:"title,omitempty"`
+	Summary *string                 `json:"summary,omitempty"`
+	Query   *WorkbenchToolQueryData `json:"query,omitempty"`
 }
 
 type WorkbenchCoding struct {
@@ -9578,6 +9619,77 @@ type WorkbenchEdge struct {
 	Cursor *string    `json:"cursor,omitempty"`
 }
 
+type WorkbenchEval struct {
+	// the id of the eval configuration
+	ID string `json:"id"`
+	// rules for evaluating job conclusions
+	ConclusionRules *string `json:"conclusionRules,omitempty"`
+	// rules for evaluating job prompts
+	PromptRules *string `json:"promptRules,omitempty"`
+	// rules for evaluating job progress
+	ProgressRules *string `json:"progressRules,omitempty"`
+	// the workbench this eval belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchEvalAttributes struct {
+	// rules for evaluating job conclusions
+	ConclusionRules *string `json:"conclusionRules,omitempty"`
+	// rules for evaluating job prompts
+	PromptRules *string `json:"promptRules,omitempty"`
+	// rules for evaluating job progress
+	ProgressRules *string `json:"progressRules,omitempty"`
+}
+
+type WorkbenchEvalFeedback struct {
+	// high-level eval summary
+	Summary *string `json:"summary,omitempty"`
+	// prompt used for grading
+	Prompt *string `json:"prompt,omitempty"`
+	// evaluator outcome text
+	Result *string `json:"result,omitempty"`
+	// evaluator rationale
+	Logic *string `json:"logic,omitempty"`
+}
+
+type WorkbenchEvalResult struct {
+	// the id of this eval result row
+	ID string `json:"id"`
+	// numeric grade for the job (0–10 scale)
+	Grade *int64 `json:"grade,omitempty"`
+	// structured feedback for this run
+	Feedback *WorkbenchEvalFeedback `json:"feedback,omitempty"`
+	// the eval configuration this row belongs to
+	WorkbenchEval *WorkbenchEval `json:"workbenchEval,omitempty"`
+	// the workbench job that was graded
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchEvalResultConnection struct {
+	PageInfo PageInfo                   `json:"pageInfo"`
+	Edges    []*WorkbenchEvalResultEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchEvalResultEdge struct {
+	Node   *WorkbenchEvalResult `json:"node,omitempty"`
+	Cursor *string              `json:"cursor,omitempty"`
+}
+
+type WorkbenchEvalResultsAverage struct {
+	Timestamp *string  `json:"timestamp,omitempty"`
+	Average   *float64 `json:"average,omitempty"`
+}
+
+type WorkbenchEvalResultsWorkbenchAverage struct {
+	Workbench *Workbench `json:"workbench,omitempty"`
+	Timestamp *string    `json:"timestamp,omitempty"`
+	Average   *float64   `json:"average,omitempty"`
+}
+
 type WorkbenchInfrastructure struct {
 	// services capability enabled
 	Services *bool `json:"services,omitempty"`
@@ -9615,6 +9727,8 @@ type WorkbenchJob struct {
 	User *User `json:"user,omitempty"`
 	// the result for this job (sideloadable)
 	Result *WorkbenchJobResult `json:"result,omitempty"`
+	// the eval result for this job (sideloadable)
+	EvalResult *WorkbenchEvalResult `json:"evalResult,omitempty"`
 	// pull requests associated with this workbench job
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	// the alert this run was spawned from
@@ -9623,6 +9737,7 @@ type WorkbenchJob struct {
 	Issue       *Issue                          `json:"issue,omitempty"`
 	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
+	LogsTool    []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -9670,9 +9785,11 @@ type WorkbenchJobActivityEdge struct {
 }
 
 type WorkbenchJobActivityJobUpdate struct {
-	Diff          *string `json:"diff,omitempty"`
-	WorkingTheory *string `json:"workingTheory,omitempty"`
-	Conclusion    *string `json:"conclusion,omitempty"`
+	Diff          *string                   `json:"diff,omitempty"`
+	WorkingTheory *string                   `json:"workingTheory,omitempty"`
+	Conclusion    *string                   `json:"conclusion,omitempty"`
+	Topology      *string                   `json:"topology,omitempty"`
+	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
 }
 
 type WorkbenchJobActivityLog struct {
@@ -9695,12 +9812,20 @@ type WorkbenchJobActivityResult struct {
 	Error *string `json:"error,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
+	// dashboard canvas blocks for this activity
+	Canvas []*WorkbenchCanvasBlock `json:"canvas,omitempty"`
 	// metrics emitted by the activity
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
-	// metrics tool query emitted by the activity
+	// metrics tool queries emitted by the activity
+	MetricsQueries []*WorkbenchToolQueryData `json:"metricsQueries,omitempty"`
+	// logs tool queries emitted by the activity
+	LogsQueries []*WorkbenchToolQueryData `json:"logsQueries,omitempty"`
+	// primary metrics tool query for this activity
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
+	// primary logs tool query for this activity
+	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9741,6 +9866,8 @@ type WorkbenchJobResult struct {
 	Topology *string `json:"topology,omitempty"`
 	// todos for this result
 	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+	// dashboard canvas blocks for this job result
+	Canvas []*WorkbenchCanvasBlock `json:"canvas,omitempty"`
 	// metadata for this result
 	Metadata *WorkbenchJobResultMetadata `json:"metadata,omitempty"`
 	// the job this result belongs to
@@ -9756,6 +9883,8 @@ type WorkbenchJobResultMetadata struct {
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 	// metrics tool query for this result
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
+	// logs tool query for this result
+	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -9817,6 +9946,22 @@ type WorkbenchObservabilityAttributes struct {
 	Metrics *bool `json:"metrics,omitempty"`
 }
 
+type WorkbenchPrMergeRateByWorkbenchEntry struct {
+	// workbench this bucket applies to
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// UTC bucket start for this merge rate sample
+	Timestamp *string `json:"timestamp,omitempty"`
+	// fraction of workbench PRs merged in this bucket (0.0–1.0)
+	MergeRate *float64 `json:"mergeRate,omitempty"`
+}
+
+type WorkbenchPrMergeRateEntry struct {
+	// UTC bucket start for this merge rate sample
+	Timestamp *string `json:"timestamp,omitempty"`
+	// fraction of workbench PRs merged in this bucket (0.0–1.0)
+	MergeRate *float64 `json:"mergeRate,omitempty"`
+}
+
 type WorkbenchPrompt struct {
 	// the id of the saved prompt
 	ID string `json:"id"`
@@ -9857,6 +10002,8 @@ type WorkbenchSkill struct {
 	Description *string `json:"description,omitempty"`
 	// the saved skill contents
 	Contents *string `json:"contents,omitempty"`
+	// subagent roles this skill applies to
+	Subagents []*WorkbenchSkillSubagent `json:"subagents,omitempty"`
 	// the workbench this skill belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -9870,6 +10017,8 @@ type WorkbenchSkillAttributes struct {
 	Description *string `json:"description,omitempty"`
 	// the saved skill contents
 	Contents string `json:"contents"`
+	// subagent roles this skill applies to
+	Subagents []*WorkbenchSkillSubagent `json:"subagents,omitempty"`
 }
 
 type WorkbenchSkillConnection struct {
@@ -9912,6 +10061,10 @@ type WorkbenchTool struct {
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
 	// the project of this tool
 	Project *Project `json:"project,omitempty"`
+	// read policy for this tool
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this tool
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// tool configuration
 	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
 	// the mcp server for this tool
@@ -9956,6 +10109,10 @@ type WorkbenchToolAttributes struct {
 	McpServerID *string `json:"mcpServerId,omitempty"`
 	// the cloud connection for this tool (e.g. infrastructure cloud tools)
 	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
+	// users who can read and execute this tool
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// users who can modify this tool
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// tool configuration (e.g. http)
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }
@@ -12064,6 +12221,63 @@ func (e *Delta) UnmarshalJSON(b []byte) error {
 }
 
 func (e Delta) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type EvalResultsPeriod string
+
+const (
+	EvalResultsPeriodDay   EvalResultsPeriod = "DAY"
+	EvalResultsPeriodWeek  EvalResultsPeriod = "WEEK"
+	EvalResultsPeriodMonth EvalResultsPeriod = "MONTH"
+)
+
+var AllEvalResultsPeriod = []EvalResultsPeriod{
+	EvalResultsPeriodDay,
+	EvalResultsPeriodWeek,
+	EvalResultsPeriodMonth,
+}
+
+func (e EvalResultsPeriod) IsValid() bool {
+	switch e {
+	case EvalResultsPeriodDay, EvalResultsPeriodWeek, EvalResultsPeriodMonth:
+		return true
+	}
+	return false
+}
+
+func (e EvalResultsPeriod) String() string {
+	return string(e)
+}
+
+func (e *EvalResultsPeriod) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EvalResultsPeriod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EvalResultsPeriod", str)
+	}
+	return nil
+}
+
+func (e EvalResultsPeriod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EvalResultsPeriod) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EvalResultsPeriod) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -16118,6 +16332,67 @@ func (e VulnUserInteraction) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type WorkbenchCanvasBlockType string
+
+const (
+	WorkbenchCanvasBlockTypeMarkdown WorkbenchCanvasBlockType = "MARKDOWN"
+	WorkbenchCanvasBlockTypeMetrics  WorkbenchCanvasBlockType = "METRICS"
+	WorkbenchCanvasBlockTypeLogs     WorkbenchCanvasBlockType = "LOGS"
+	WorkbenchCanvasBlockTypePie      WorkbenchCanvasBlockType = "PIE"
+	WorkbenchCanvasBlockTypeBar      WorkbenchCanvasBlockType = "BAR"
+)
+
+var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
+	WorkbenchCanvasBlockTypeMarkdown,
+	WorkbenchCanvasBlockTypeMetrics,
+	WorkbenchCanvasBlockTypeLogs,
+	WorkbenchCanvasBlockTypePie,
+	WorkbenchCanvasBlockTypeBar,
+}
+
+func (e WorkbenchCanvasBlockType) IsValid() bool {
+	switch e {
+	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchCanvasBlockType) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchCanvasBlockType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchCanvasBlockType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchCanvasBlockType", str)
+	}
+	return nil
+}
+
+func (e WorkbenchCanvasBlockType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchCanvasBlockType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchCanvasBlockType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type WorkbenchJobActivityStatus string
 
 const (
@@ -16192,6 +16467,7 @@ const (
 	WorkbenchJobActivityTypeUser           WorkbenchJobActivityType = "USER"
 	WorkbenchJobActivityTypeMemory         WorkbenchJobActivityType = "MEMORY"
 	WorkbenchJobActivityTypeConclusion     WorkbenchJobActivityType = "CONCLUSION"
+	WorkbenchJobActivityTypeCanvas         WorkbenchJobActivityType = "CANVAS"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -16205,11 +16481,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeUser,
 	WorkbenchJobActivityTypeMemory,
 	WorkbenchJobActivityTypeConclusion,
+	WorkbenchJobActivityTypeCanvas,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas:
 		return true
 	}
 	return false
@@ -16306,6 +16583,67 @@ func (e *WorkbenchJobStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e WorkbenchJobStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchSkillSubagent string
+
+const (
+	WorkbenchSkillSubagentCoding         WorkbenchSkillSubagent = "CODING"
+	WorkbenchSkillSubagentInfrastructure WorkbenchSkillSubagent = "INFRASTRUCTURE"
+	WorkbenchSkillSubagentObservability  WorkbenchSkillSubagent = "OBSERVABILITY"
+	WorkbenchSkillSubagentIntegration    WorkbenchSkillSubagent = "INTEGRATION"
+	WorkbenchSkillSubagentOrchestrator   WorkbenchSkillSubagent = "ORCHESTRATOR"
+)
+
+var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
+	WorkbenchSkillSubagentCoding,
+	WorkbenchSkillSubagentInfrastructure,
+	WorkbenchSkillSubagentObservability,
+	WorkbenchSkillSubagentIntegration,
+	WorkbenchSkillSubagentOrchestrator,
+}
+
+func (e WorkbenchSkillSubagent) IsValid() bool {
+	switch e {
+	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchSkillSubagent) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchSkillSubagent) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchSkillSubagent(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchSkillSubagent", str)
+	}
+	return nil
+}
+
+func (e WorkbenchSkillSubagent) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchSkillSubagent) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchSkillSubagent) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

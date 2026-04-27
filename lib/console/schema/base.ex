@@ -101,4 +101,14 @@ defmodule Console.Schema.Base do
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)
   def parse_duration(duration), do: Duration.from_iso8601(String.upcase("PT#{duration}"))
+
+  def normalize_period(period) when period in ~w(day week month), do: period
+  def normalize_period(period) when period in ~w(day week month)a, do: Atom.to_string(period)
+
+  def normalize_period(period),
+    do: raise(ArgumentError, "invalid period #{inspect(period)}; expected day, week, or month")
+
+  def lookback_window("day"), do: {14, "day"}
+  def lookback_window("week"), do: {2, "month"}
+  def lookback_window("month"), do: {6, "month"}
 end

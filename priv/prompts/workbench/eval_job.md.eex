@@ -1,0 +1,36 @@
+Here's the result of the workbench job we're evaluating.
+
+## Initial Prompt
+
+```
+<%= @job.prompt %>
+```
+
+## Job Activities
+
+This is the work done durin the workbench job, you can use this to evaluate the thought process and the quality of the evidence gathered.
+
+<%= for activity <- @job.activities do %>
+<%= Console.AI.Workbench.Eval.activity_prompt(activity: activity) %>
+<% end %>
+
+## Conclusion
+
+This is the final conclusion drawn by the workbench job.
+
+```
+<%= @job.result.conclusion %>
+```
+
+<%= if is_binary(@job.result.topology) && byte_size(@job.result.topology) > 0 do %>
+## Topology
+
+A mermaid diagram of the system graph at the time of the analysis.
+
+```mermaid
+<%= @job.result.topology %>
+```
+<% end %>
+
+
+Please use this all to grade the work fairly and descriptively.

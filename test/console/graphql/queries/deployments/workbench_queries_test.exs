@@ -241,6 +241,84 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert Enum.any?(nodes, & &1["name"] == "skill-two" and &1["description"] == "second" and &1["contents"] == "echo two")
     end
 
+    test "it returns null eval when no eval is configured" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            eval { id }
+            evalResults(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      assert found["eval"] == nil
+      assert from_connection(found["evalResults"]) == []
+    end
+
+    test "it can sideload eval and paginate eval results on the workbench" do
+      workbench = insert(:workbench)
+      eval = insert(:workbench_eval, workbench: workbench, conclusion_rules: "c-rules", prompt_rules: "p-rules")
+      jobs = insert_list(5, :workbench_job, workbench: workbench)
+
+      for job <- jobs do
+        insert(:workbench_eval_result, workbench_eval: eval, workbench_job: job, grade: 8)
+      end
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            eval {
+              id
+              conclusionRules
+              promptRules
+            }
+            evalResults(first: 2) {
+              edges {
+                node {
+                  id
+                  grade
+                  feedback { summary }
+                  workbenchJob { id }
+                }
+              }
+              pageInfo { hasNextPage endCursor }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      ev = found["eval"]
+      assert ev["id"] == eval.id
+      assert ev["conclusionRules"] == "c-rules"
+      assert ev["promptRules"] == "p-rules"
+
+      conn = found["evalResults"]
+      assert length(from_connection(conn)) == 2
+      assert conn["pageInfo"]["hasNextPage"] == true
+
+      {:ok, %{data: %{"workbench" => page2}}} = run_query("""
+        query Workbench($id: ID!, $after: String!) {
+          workbench(id: $id) {
+            evalResults(first: 10, after: $after) {
+              edges { node { id } }
+              pageInfo { hasNextPage }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "after" => conn["pageInfo"]["endCursor"]}, %{current_user: admin_user()})
+
+      assert length(from_connection(page2["evalResults"])) == 3
+      assert page2["evalResults"]["pageInfo"]["hasNextPage"] == false
+    end
+
     test "it can fetch workbench webhooks" do
       workbench = insert(:workbench)
       webhook1 = insert(:workbench_webhook, workbench: workbench, name: "wh-one")
@@ -491,6 +569,37 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == job.id
       assert found["result"]["workingTheory"] == "theory"
       assert found["result"]["conclusion"] == "done"
+    end
+
+    test "it can fetch eval result for a workbench job (has_one)" do
+      workbench = insert(:workbench)
+      eval = insert(:workbench_eval, workbench: workbench)
+      job = insert(:workbench_job, workbench: workbench)
+      eval_result =
+        insert(:workbench_eval_result,
+          workbench_eval: eval,
+          workbench_job: job,
+          grade: 9,
+          feedback: %{summary: "strong result", prompt: "p", result: "r", logic: "l"}
+        )
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            evalResult {
+              id
+              grade
+              feedback { summary }
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["evalResult"]["id"] == eval_result.id
+      assert found["evalResult"]["grade"] == 9
+      assert found["evalResult"]["feedback"]["summary"] == "strong result"
     end
 
     test "it resolves metricsTool using the generated observability metrics tool name and parses GraphQL output" do
@@ -855,6 +964,144 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == tool.id
       assert found["name"] == tool.name
+    end
+  end
+
+  describe "eval result averages" do
+    test "averageWorkbenchEvalResults respects workbench permissions and returns workbench rows" do
+      user = insert(:user)
+      allowed_project = insert(:project, read_bindings: [%{user_id: user.id}])
+      denied_project = insert(:project)
+
+      allowed_wb = insert(:workbench, project: allowed_project)
+      denied_wb = insert(:workbench, project: denied_project)
+      allowed_eval = insert(:workbench_eval, workbench: allowed_wb)
+      denied_eval = insert(:workbench_eval, workbench: denied_wb)
+
+      insert(:workbench_eval_result, workbench_eval: allowed_eval, workbench_job: insert(:workbench_job, workbench: allowed_wb), grade: 6)
+      insert(:workbench_eval_result, workbench_eval: allowed_eval, workbench_job: insert(:workbench_job, workbench: allowed_wb), grade: 8)
+      insert(:workbench_eval_result, workbench_eval: denied_eval, workbench_job: insert(:workbench_job, workbench: denied_wb), grade: 10)
+
+      {:ok, %{data: %{"averageWorkbenchEvalResults" => rows}}} = run_query("""
+        query AvgWorkbenchEvalResults($period: EvalResultsPeriod) {
+          averageWorkbenchEvalResults(period: $period) {
+            timestamp
+            average
+            workbench { id }
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: user})
+
+      assert length(rows) == 1
+      row = hd(rows)
+      assert row["workbench"]["id"] == allowed_wb.id
+      assert row["average"] == 7.0
+      assert row["timestamp"]
+    end
+
+    test "averageEvalResults returns global averages by period" do
+      wb1 = insert(:workbench)
+      wb2 = insert(:workbench)
+      eval1 = insert(:workbench_eval, workbench: wb1)
+      eval2 = insert(:workbench_eval, workbench: wb2)
+
+      insert(:workbench_eval_result, workbench_eval: eval1, workbench_job: insert(:workbench_job, workbench: wb1), grade: 4)
+      insert(:workbench_eval_result, workbench_eval: eval2, workbench_job: insert(:workbench_job, workbench: wb2), grade: 10)
+
+      {:ok, %{data: %{"averageEvalResults" => rows}}} = run_query("""
+        query AvgEvalResults($period: EvalResultsPeriod) {
+          averageEvalResults(period: $period) {
+            timestamp
+            average
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: admin_user()})
+
+      assert length(rows) == 1
+      row = hd(rows)
+      assert row["average"] == 7.0
+      assert row["timestamp"]
+    end
+  end
+
+  describe "workbench pull request metrics" do
+    test "workbenchPullRequests respects workbench permissions" do
+      user = insert(:user)
+      allowed_project = insert(:project, read_bindings: [%{user_id: user.id}])
+      denied_project = insert(:project)
+
+      allowed_wb = insert(:workbench, project: allowed_project)
+      denied_wb = insert(:workbench, project: denied_project)
+
+      job_allowed = insert(:workbench_job, workbench: allowed_wb)
+      job_denied = insert(:workbench_job, workbench: denied_wb)
+
+      insert(:pull_request, workbench_job: job_allowed, status: :merged)
+      insert(:pull_request, workbench_job: job_allowed, status: :closed)
+      insert(:pull_request, workbench_job: job_denied, status: :merged)
+
+      {:ok, %{data: %{"workbenchPullRequests" => total}}} = run_query("""
+        query {
+          workbenchPullRequests
+        }
+      """, %{}, %{current_user: user})
+
+      assert total == 3
+    end
+
+    test "workbenchPrMergeRates returns global merge rate buckets" do
+      wb1 = insert(:workbench)
+      wb2 = insert(:workbench)
+      job1 = insert(:workbench_job, workbench: wb1)
+      job2 = insert(:workbench_job, workbench: wb2)
+
+      insert(:pull_request, workbench_job: job1, status: :merged)
+      insert(:pull_request, workbench_job: job2, status: :closed)
+
+      {:ok, %{data: %{"workbenchPrMergeRates" => rows}}} = run_query("""
+        query WorkbenchPrMergeRates($period: EvalResultsPeriod) {
+          workbenchPrMergeRates(period: $period) {
+            timestamp
+            merge_rate
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: admin_user()})
+
+      assert length(rows) == 1
+      row = hd(rows)
+      assert row["merge_rate"] == 0.5
+      assert row["timestamp"]
+    end
+
+    test "workbenchPullRequestMergeRatesByWorkbench respects workbench permissions" do
+      user = insert(:user)
+      allowed_project = insert(:project, read_bindings: [%{user_id: user.id}])
+      denied_project = insert(:project)
+
+      allowed_wb = insert(:workbench, project: allowed_project)
+      denied_wb = insert(:workbench, project: denied_project)
+
+      job_allowed = insert(:workbench_job, workbench: allowed_wb)
+      job_denied = insert(:workbench_job, workbench: denied_wb)
+
+      insert(:pull_request, workbench_job: job_allowed, status: :merged)
+      insert(:pull_request, workbench_job: job_denied, status: :merged)
+
+      {:ok, %{data: %{"workbenchPrMergeRatesByWorkbench" => rows}}} = run_query("""
+        query WorkbenchPrMergeRatesByWb($period: EvalResultsPeriod) {
+          workbenchPrMergeRatesByWorkbench(period: $period) {
+            timestamp
+            merge_rate
+            workbench { id }
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: user})
+
+      assert length(rows) == 1
+      row = hd(rows)
+      assert row["workbench"]["id"] == allowed_wb.id
+      assert row["merge_rate"] == 1.0
+      assert row["timestamp"]
     end
   end
 end

@@ -1237,6 +1237,26 @@ defmodule Console.Factory do
     }
   end
 
+  def workbench_eval_factory do
+    %Schema.WorkbenchEval{
+      conclusion_rules: "conclusion rules blob",
+      prompt_rules: "prompt rules blob",
+      progress_rules: "progress rules blob",
+      workbench: build(:workbench)
+    }
+  end
+
+  def workbench_eval_result_factory do
+    eval = build(:workbench_eval)
+
+    %Schema.WorkbenchEvalResult{
+      grade: 7,
+      feedback: %Schema.WorkbenchEvalResult.Feedback{summary: "eval summary"},
+      workbench_eval: eval,
+      workbench_job: build(:workbench_job, workbench: eval.workbench)
+    }
+  end
+
   def workbench_webhook_factory do
     %Schema.WorkbenchWebhook{
       name: sequence(:workbench_webhook, & "workbench-webhook-#{&1}"),

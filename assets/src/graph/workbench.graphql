@@ -102,6 +102,12 @@ fragment WorkbenchToolTiny on WorkbenchTool {
 
 fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
   configuration {
     http {
       url
@@ -211,6 +217,48 @@ fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
   labels
 }
 
+fragment WorkbenchCanvasBlockGraph on WorkbenchCanvasBlockGraph {
+  title
+  data {
+    label
+    value
+  }
+}
+
+fragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {
+  title
+  summary
+  query {
+    ...WorkbenchToolQueryData
+  }
+}
+
+fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
+  identifier
+  type
+  layout {
+    x
+    y
+    w
+    h
+  }
+  content {
+    markdown
+    metrics {
+      ...WorkbenchCanvasToolGraph
+    }
+    logs {
+      ...WorkbenchCanvasToolGraph
+    }
+    pie {
+      ...WorkbenchCanvasBlockGraph
+    }
+    bar {
+      ...WorkbenchCanvasBlockGraph
+    }
+  }
+}
+
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
@@ -219,10 +267,8 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   todos {
     ...WorkbenchJobResultTodo
   }
-  metadata {
-    metricsQuery {
-      ...WorkbenchToolQueryData
-    }
+  canvas {
+    ...WorkbenchCanvasBlock
   }
 }
 
@@ -239,6 +285,9 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   }
   logs {
     ...WorkbenchJobActivityLog
+  }
+  canvas {
+    ...WorkbenchCanvasBlock
   }
 }
 
@@ -611,6 +660,15 @@ query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
   }
 }
 
+query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    logsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityLog
+    }
+  }
+}
+
 query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
@@ -845,5 +903,11 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
 subscription WorkbenchTextStream($jobId: ID!) {
   workbenchTextStream(jobId: $jobId) {
     ...WorkbenchTextStream
+  }
+}
+
+subscription WorkbenchCanvasStream($jobId: ID!, $activityId: ID) {
+  workbenchCanvasStream(jobId: $jobId, activityId: $activityId) {
+    ...WorkbenchCanvasBlock
   }
 }

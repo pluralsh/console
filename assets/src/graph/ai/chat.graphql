@@ -111,13 +111,6 @@ fragment AgentSession on AgentSession {
   id
   type
   done
-  planConfirmed
-  thread {
-    id
-    summary
-    insertedAt
-    lastMessageAt
-  }
   connection {
     id
     name
@@ -133,17 +126,6 @@ fragment AgentSession on AgentSession {
   pullRequest {
     id
     url
-  }
-  stack {
-    id
-    name
-  }
-  service {
-    id
-    name
-    cluster {
-      id
-    }
   }
 }
 
@@ -256,24 +238,6 @@ query ChatThreadMessages(
 ) {
   chatThread(id: $id) {
     ...ChatThreadMessages
-  }
-}
-
-query AgentSessions(
-  $first: Int = 100
-  $last: Int
-  $after: String
-  $before: String
-) {
-  agentSessions(first: $first, last: $last, after: $after, before: $before) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...AgentSession
-      }
-    }
   }
 }
 
