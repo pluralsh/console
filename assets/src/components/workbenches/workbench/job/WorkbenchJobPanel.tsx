@@ -13,14 +13,18 @@ import {
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
 import {
-  DEFAULT_MAX_WIDTH_VW,
   SidePanel,
-  useSidePanelWidth,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
 import { useWorkbenchJobQuery, WorkbenchJobFragment } from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { ReactElement, useRef, useState } from 'react'
+import { isEmpty, isNil } from 'lodash'
+import {
+  ReactElement,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from 'react'
 import { matchPath, useLocation } from 'react-router-dom'
 import {
   WORKBENCH_JOB_ABS_PATH,
@@ -58,13 +62,6 @@ export function WorkbenchJobPanelContent() {
   })
   const job = data?.workbenchJob
   const isLoading = loading && !job
-
-  const hasConclusionWhileSettled =
-    Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
-  useSidePanelWidth({
-    maxWidthVw: 60,
-    initialWidthVw: hasConclusionWhileSettled ? 60 : DEFAULT_MAX_WIDTH_VW,
-  })
 
   const tabs = getPanelTabs(job)
 
@@ -131,13 +128,21 @@ export function WorkbenchJobPanelContent() {
   )
 }
 
-export function useWorkbenchJobPanel() {
+export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
   const { sidePanel, setSidePanel } = useTopLevelSidePanel()
   const isOpen = sidePanel === SIDE_PANEL_TYPE
-  return {
-    isOpen,
-    setOpen: (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null),
-  }
+  const setOpen = (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null)
+
+  const onAutoOpen = useEffectEvent(() => setOpen(true))
+  const onUnmount = useEffectEvent(() => setOpen(false))
+  useEffect(() => {
+    if (!!autoOpen) onAutoOpen()
+    return () => {
+      if (!isNil(autoOpen)) onUnmount()
+    }
+  }, [autoOpen])
+
+  return { isOpen, setOpen }
 }
 
 const ContentWrapperSC = styled.div(() => ({

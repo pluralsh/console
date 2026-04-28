@@ -99,13 +99,16 @@ export function TopLevelSidePanel() {
       >
         <div
           css={{ position: 'relative', height: '100%' }}
-          style={{ '--side-panel-width': `${calculatedPanelWidth}px` }}
+          style={{
+            '--side-panel-width': `${calculatedPanelWidth}px`,
+            '--is-dragging': isDragging ? '1' : '0',
+          }}
         >
           <TopLevelSidePanelContent sidePanel={sidePanel} />
           <DragHandleSC
             tabIndex={0}
             {...dragHandleProps}
-            $isDragging={isDragging}
+            style={{ '--is-dragging': isDragging ? '1' : '0' }}
           />
         </div>
       </AccordionItem>

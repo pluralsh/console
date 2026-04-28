@@ -20,6 +20,7 @@ const SidePanelWrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   height: '100%',
   width: 'var(--side-panel-width)',
+  transition: 'width calc((1 - var(--is-dragging)) * 0.2s) ease-in-out',
   borderLeft: theme.borders.default,
   background: theme.colors['fill-accent'],
 }))
@@ -54,25 +55,24 @@ export const ResizeGripSC = styled.div(({ theme }) => ({
   },
 }))
 
-export const DragHandleSC = styled.div<{ $isDragging: boolean }>(
-  ({ theme, $isDragging }) => ({
-    position: 'absolute',
-    zIndex: theme.zIndexes.modal,
-    left: -HANDLE_THICKNESS / 2,
-    top: 0,
-    width: HANDLE_THICKNESS,
-    height: '100%',
-    cursor: 'ew-resize',
-    background: 'transparent',
-    display: 'flex',
-    justifyContent: 'center',
-    '&:focus-visible': { outline: theme.borders['outline-focused'] },
-    '&::before': {
-      content: '""',
-      pointerEvents: 'none',
-      width: HANDLE_THICKNESS / 4,
-      background: $isDragging ? theme.colors['icon-primary'] : 'transparent',
-      transition: 'background 0.2s ease-in-out',
-    },
-  })
-)
+export const DragHandleSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  zIndex: theme.zIndexes.modal,
+  left: -HANDLE_THICKNESS / 2,
+  top: 0,
+  width: HANDLE_THICKNESS,
+  height: '100%',
+  cursor: 'ew-resize',
+  background: 'transparent',
+  display: 'flex',
+  justifyContent: 'center',
+  '&:focus-visible': { outline: theme.borders['outline-focused'] },
+  '&::before': {
+    content: '""',
+    pointerEvents: 'none',
+    width: HANDLE_THICKNESS / 4,
+    background: theme.colors['icon-primary'],
+    opacity: 'var(--is-dragging)',
+    transition: 'opacity 0.2s ease-in-out',
+  },
+}))
