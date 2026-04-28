@@ -174,7 +174,7 @@ function ResolutionCell({ getValue }: CellContext<AlertFragment, unknown>) {
         <Flex gap="xsmall">
           <Button
             small
-            floating
+            secondary
             disabled
           >
             Resolved
@@ -182,7 +182,7 @@ function ResolutionCell({ getValue }: CellContext<AlertFragment, unknown>) {
           <IconFrame
             clickable
             onClick={handleClick}
-            type="floating"
+            type="secondary"
             tooltip="View resolution"
             icon={<EyeIcon />}
           />
@@ -190,7 +190,7 @@ function ResolutionCell({ getValue }: CellContext<AlertFragment, unknown>) {
       ) : (
         <Button
           small
-          floating
+          secondary
           onClick={handleClick}
         >
           Mark as resolved
