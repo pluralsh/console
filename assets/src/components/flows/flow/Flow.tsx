@@ -25,6 +25,7 @@ import { ReactNode, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
+  FLOW_WORKBENCHES_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
 import { VULNERABILITY_REPORTS_REL_PATH } from 'routes/securityRoutesConsts'
@@ -32,6 +33,7 @@ import styled from 'styled-components'
 
 const directory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
+  { path: FLOW_WORKBENCHES_REL_PATH, label: 'Workbenches' },
   { path: 'pipelines', label: 'Pipelines' },
   { path: 'previews', label: 'Previews' },
   { path: 'prs', label: 'PRs' },
