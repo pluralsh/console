@@ -35,8 +35,8 @@ const directory: SubtabDirectory = [
   { path: 'pipelines', label: 'Pipelines' },
   { path: 'previews', label: 'Previews' },
   { path: 'prs', label: 'PRs' },
-  { path: 'alerts', label: 'Alerts' },
   { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },
+  { path: 'alerts', label: 'Alerts' },
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerabilities' },
 ]
 
