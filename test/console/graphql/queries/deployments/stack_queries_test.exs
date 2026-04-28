@@ -3,6 +3,7 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
   use Mimic
   alias Console.Deployments.{Tar}
   alias Console.Deployments.Git.Discovery
+  alias Console.Schema.StackInfracostResource
 
   describe "infrastructureStack" do
     test "it can fetch a stack by id" do
@@ -185,6 +186,63 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
               name
               value
               secret
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
+
+    test "it can list stack infracost resources with limit" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run1 = insert(:stack_run, stack: stack)
+      run2 = insert(:stack_run, stack: stack)
+
+      Repo.insert!(%StackInfracostResource{
+        resource_scope: "breakdown",
+        project_name: "default",
+        name: "aws_instance.old",
+        stack_id: stack.id,
+        stack_run_id: run1.id,
+        monthly_cost: Decimal.new("7.30")
+      })
+
+      newer =
+        Repo.insert!(%StackInfracostResource{
+          resource_scope: "breakdown",
+          project_name: "default",
+          name: "aws_instance.foo",
+          stack_id: stack.id,
+          stack_run_id: run2.id,
+          monthly_cost: Decimal.new("8.40")
+        })
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            infracostResources(limit: 1) {
+              id
+              resourceScope
+              projectName
+              name
+              monthlyCost
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert [%{"id" => newest_id, "resourceScope" => "breakdown", "name" => "aws_instance.foo"}] = found["infracostResources"]
+      assert newest_id == newer.id
+    end
+
+    test "users without stack read access cannot list stack infracost resources" do
+      stack = insert(:stack)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            infracostResources {
+              id
             }
           }
         }
@@ -524,6 +582,94 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
               name
               value
               secret
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: insert(:user)})
+    end
+
+    test "it can list stack run infracost resources with limit" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack)
+
+      Repo.insert!(%StackInfracostResource{
+        resource_scope: "breakdown",
+        name: "aws_instance.old",
+        stack_id: stack.id,
+        stack_run_id: run.id,
+        monthly_cost: Decimal.new("5.10")
+      })
+
+      newer =
+        Repo.insert!(%StackInfracostResource{
+          resource_scope: "breakdown",
+          name: "aws_instance.new",
+          stack_id: stack.id,
+          stack_run_id: run.id,
+          monthly_cost: Decimal.new("9.20")
+        })
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            infracostResources(limit: 1) {
+              id
+              resourceScope
+              name
+              monthlyCost
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert [%{"id" => newest_id, "resourceScope" => "breakdown", "name" => "aws_instance.new"}] = found["infracostResources"]
+      assert newest_id == newer.id
+    end
+
+    test "only writers and owning cluster can view stack run infracost resources" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack)
+
+      resource =
+        Repo.insert!(%StackInfracostResource{
+          resource_scope: "breakdown",
+          name: "aws_instance.foo",
+          stack_id: stack.id,
+          stack_run_id: run.id
+        })
+      resource_id = resource.id
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            infracostResources {
+              id
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert [%{"id" => ^resource_id}] = found["infracostResources"]
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            infracostResources {
+              id
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: run.cluster})
+
+      assert [%{"id" => ^resource_id}] = found["infracostResources"]
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            infracostResources {
+              id
             }
           }
         }

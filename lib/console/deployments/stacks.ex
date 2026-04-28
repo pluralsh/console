@@ -4,6 +4,8 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   import Console.AI.Fixer.Base, only: [blacklist: 1]
+  import Ecto.Query, only: [from: 2]
+  require Logger
   alias Console.PubSub
   alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
@@ -17,6 +19,7 @@ defmodule Console.Deployments.Stacks do
     Stack,
     StackRun,
     StackState,
+    StackInfracostResource,
     RunStep,
     RunLog,
     GitRepository,
@@ -285,6 +288,8 @@ defmodule Console.Deployments.Stacks do
   """
   @spec update_stack_run(map, binary, User.t | Cluster.t) :: run_resp
   def update_stack_run(attrs, id, actor) do
+    {attrs, infracost_resources} = pop_infracost_resources(attrs)
+
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
@@ -295,6 +300,7 @@ defmodule Console.Deployments.Stacks do
     end)
     |> add_operation(:stack, &sync_stack_status(&1[:run]))
     |> execute(extract: :run)
+    |> maybe_ingest_infracost_resources(infracost_resources)
     |> notify(:update)
   end
 
@@ -426,6 +432,8 @@ defmodule Console.Deployments.Stacks do
   """
   @spec complete_stack_run(map, binary, User.t | Cluster.t) :: run_resp
   def complete_stack_run(attrs, id, actor) do
+    {attrs, infracost_resources} = pop_infracost_resources(attrs)
+
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
@@ -436,8 +444,62 @@ defmodule Console.Deployments.Stacks do
     end)
     |> add_operation(:stack, &sync_stack_status(&1[:run]))
     |> execute(extract: :run)
+    |> maybe_ingest_infracost_resources(infracost_resources)
     |> notify(:complete)
   end
+
+  defp pop_infracost_resources(attrs) when is_map(attrs) do
+    resources =
+      Map.get(attrs, :infracost_resources) ||
+      Map.get(attrs, "infracost_resources")
+
+    state_id =
+      Map.get(attrs, :infracost_stack_state_id) ||
+      Map.get(attrs, "infracost_stack_state_id")
+
+    attrs = Map.drop(attrs, [:infracost_resources, "infracost_resources",
+                              :infracost_stack_state_id, "infracost_stack_state_id"])
+
+    opts = if is_list(resources) and resources != [], do: %{rows: resources, stack_state_id: state_id}, else: nil
+    {attrs, opts}
+  end
+
+  defp maybe_ingest_infracost_resources({:ok, %StackRun{} = run} = pass, opts) when not is_nil(opts) do
+    %{rows: rows, stack_state_id: state_id} = opts
+    state_id = state_id || (run.state && run.state.id)
+
+    result = Repo.transaction(fn ->
+      Repo.delete_all(from r in StackInfracostResource, where: r.stack_run_id == ^run.id)
+
+      rows
+      |> Enum.map(fn row ->
+        row
+        |> Map.new(fn {k, v} -> {to_string(k), v} end)
+        |> Map.merge(%{"stack_id" => run.stack_id, "stack_run_id" => run.id, "stack_state_id" => state_id})
+      end)
+      |> Enum.reduce_while(:ok, fn row_attrs, _ ->
+        case StackInfracostResource.changeset(%StackInfracostResource{}, row_attrs) do
+          %{valid?: false} = cs ->
+            Repo.rollback({:invalid, cs})
+          cs ->
+            case Repo.insert(cs) do
+              {:ok, _} -> {:cont, :ok}
+              {:error, reason} -> Repo.rollback(reason)
+            end
+        end
+      end)
+    end)
+
+    case result do
+      {:error, reason} ->
+        Logger.warning("Infracost resource ingest failed for run #{run.id}: #{inspect(reason)}")
+      _ -> :ok
+    end
+
+    pass
+  end
+
+  defp maybe_ingest_infracost_resources(pass, _), do: pass
 
   defp sync_stack_status(%StackRun{dry_run: false, status: :successful} = run) do
     %{state: state, output: output, stack: stack} = Repo.preload(run, [:state, :output, :stack])
