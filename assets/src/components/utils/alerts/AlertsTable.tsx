@@ -1,5 +1,6 @@
 import { ApolloError } from '@apollo/client'
 import {
+  ArrowTopRightIcon,
   Button,
   CheckOutlineIcon,
   Chip,
@@ -35,6 +36,7 @@ import { InlineA } from '../typography/Text'
 import { AlertResolutionModal } from './AlertResolutionModal'
 import { AlertsTableExpander } from './AlertsTableExpander'
 import { AlertStateChip } from './AlertStateChip'
+import { TRUNCATE } from '../truncate'
 
 type ViewJobData = {
   workbenchId: string
@@ -145,12 +147,33 @@ function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
       justify="space-between"
       width="100%"
     >
-      <Tooltip
-        placement="top"
-        label={url}
+      <Flex
+        align="center"
+        gap="xsmall"
+        width="100%"
+        minWidth={0}
       >
-        <InlineA href={url}>{url ?? ''}</InlineA>
-      </Tooltip>
+        <Tooltip
+          placement="top"
+          label={url}
+        >
+          <InlineA
+            href={url}
+            style={{
+              ...TRUNCATE,
+              minWidth: 0,
+            }}
+          >
+            {url ?? ''}
+          </InlineA>
+        </Tooltip>
+        {!!url && (
+          <ArrowTopRightIcon
+            size={16}
+            color="text"
+          />
+        )}
+      </Flex>
       <AiInsightSummaryIcon
         insight={insight}
         navPath={`insight/${insight?.id}`}
