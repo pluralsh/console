@@ -12,7 +12,7 @@ defmodule Console.AI.Workbench.Environment do
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :activities, :user]
+  defstruct [:job, :tools, :skills, :user, activities: []]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     %__MODULE__{

@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "description": "Backfills missing workbench skills based on the completed job context.",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Instructions describing what missing skills should be generated or backfilled."
+    }
+  },
+  "required": ["prompt"]
+}

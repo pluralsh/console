@@ -2349,6 +2349,10 @@ enum WorkbenchSkillSubagent {
   OBSERVABILITY
   INTEGRATION
   ORCHESTRATOR
+  MEMORY
+  SKILL
+  HISTORY
+  SEARCH
 }
 
 enum EvalResultsPeriod {

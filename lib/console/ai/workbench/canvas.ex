@@ -9,6 +9,8 @@ defmodule Console.AI.Workbench.Canvas do
 
   defstruct [:activity, blocks: %{}]
 
+  defguardp canvas_block(x, y, w, h) when is_integer(x) and is_integer(y) and is_integer(w) and is_integer(h) and w > 0 and h > 0
+
   def new(%WorkbenchJobActivity{} = activity, blocks) when is_list(blocks) do
     save(%__MODULE__{activity: activity, blocks: Map.new(blocks, & {&1.identifier, &1})})
   end
@@ -84,14 +86,11 @@ defmodule Console.AI.Workbench.Canvas do
 
   defp row_spans(blocks) do
     Enum.reduce(blocks, %{}, fn
-      %CanvasBlock{layout: %CanvasBlock.Layout{x: x, y: y, w: w, h: h}}, acc
-          when is_integer(x) and is_integer(y) and is_integer(w) and is_integer(h) and w > 0 and h > 0 ->
+      %CanvasBlock{layout: %CanvasBlock.Layout{x: x, y: y, w: w, h: h}}, acc when canvas_block(x, y, w, h) ->
         Enum.reduce(y..(y + h - 1), acc, fn row, row_acc ->
           Map.update(row_acc, row, [{x, x + w - 1}], &[{x, x + w - 1} | &1])
         end)
-
-      _, acc ->
-        acc
+      _, acc -> acc
     end)
   end
 

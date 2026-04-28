@@ -24,6 +24,7 @@ defmodule Console.AI.Workbench.Engine do
     Canvas
   }
   alias Console.AI.Tools.Workbench.{
+    Calculator,
     Complete,
     Subagents,
     Subagent,
@@ -31,6 +32,7 @@ defmodule Console.AI.Workbench.Engine do
     Skill,
     Notes,
     FetchNotes,
+    SkillBackfill
   }
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
@@ -111,6 +113,7 @@ defmodule Console.AI.Workbench.Engine do
       %Subagent{} = subagent, acc -> {:cont, [subagent | acc]}
       %CanvasTool{} = canvas, acc -> {:cont, [canvas | acc]}
       %Notes{} = notes, acc -> {:cont, [notes | acc]}
+      %SkillBackfill{} = backfill, acc -> {:cont, [backfill | acc]}
       _, acc -> {:cont, acc}
     end)
     |> case do
@@ -144,6 +147,18 @@ defmodule Console.AI.Workbench.Engine do
       # stream_callbacks(activity)
       Console.safely(fn ->
         module.run(activity, job, %{environment | activities: activities})
+      end, &crash_fallback/1)
+      |> Workbenches.update_job_activity(activity)
+      |> log_error("Failed to update job activity")
+    end
+  end
+
+  defp spawn_activity(%SkillBackfill{prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities}) do
+    Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
+    with {:ok, activity} <- Workbenches.create_job_activity(%{type: :skill, prompt: prompt, tool_call: tool_attrs(call)}, job) do
+      # stream_callbacks(activity)
+      Console.safely(fn ->
+        SA.Skill.run(activity, job, %{environment | activities: activities})
       end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
       |> log_error("Failed to update job activity")
@@ -227,16 +242,21 @@ defmodule Console.AI.Workbench.Engine do
       %Subagents{subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
+      Calculator,
       Notes,
       Complete,
     ] ++ type_tools(job)
+      ++ include_backfill(job)
   end
+
+  defp include_backfill(%WorkbenchJob{result: %{conclusion: c}}) when is_binary(c) and byte_size(c) > 0, do: [SkillBackfill]
+  defp include_backfill(_), do: []
 
   defp type_tools(%WorkbenchJob{type: :skill}), do: []
   defp type_tools(_), do: [CanvasTool]
 
   defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
-  defp sysprompt(%WorkbenchJob{prompt: prompt}, engine), do: String.trim(system_prompt(prompt: prompt, engine: engine))
+  defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))
 
   @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]]
 

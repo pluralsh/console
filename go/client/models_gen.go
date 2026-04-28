@@ -16646,6 +16646,10 @@ const (
 	WorkbenchSkillSubagentObservability  WorkbenchSkillSubagent = "OBSERVABILITY"
 	WorkbenchSkillSubagentIntegration    WorkbenchSkillSubagent = "INTEGRATION"
 	WorkbenchSkillSubagentOrchestrator   WorkbenchSkillSubagent = "ORCHESTRATOR"
+	WorkbenchSkillSubagentMemory         WorkbenchSkillSubagent = "MEMORY"
+	WorkbenchSkillSubagentSkill          WorkbenchSkillSubagent = "SKILL"
+	WorkbenchSkillSubagentHistory        WorkbenchSkillSubagent = "HISTORY"
+	WorkbenchSkillSubagentSearch         WorkbenchSkillSubagent = "SEARCH"
 )
 
 var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
@@ -16654,11 +16658,15 @@ var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
 	WorkbenchSkillSubagentObservability,
 	WorkbenchSkillSubagentIntegration,
 	WorkbenchSkillSubagentOrchestrator,
+	WorkbenchSkillSubagentMemory,
+	WorkbenchSkillSubagentSkill,
+	WorkbenchSkillSubagentHistory,
+	WorkbenchSkillSubagentSearch,
 }
 
 func (e WorkbenchSkillSubagent) IsValid() bool {
 	switch e {
-	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator:
+	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator, WorkbenchSkillSubagentMemory, WorkbenchSkillSubagentSkill, WorkbenchSkillSubagentHistory, WorkbenchSkillSubagentSearch:
 		return true
 	}
 	return false

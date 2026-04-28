@@ -1,3 +1,4 @@
+<%= if @result do %>
 We've also run an eval on the given workbench job.  Here are the results:
 
 Grade (scored between 0 and 10): <%= @result.grade %>
@@ -21,8 +22,7 @@ This is a breakdown of the agents entire process and conclusion
 ## Logic - Feedback on the logic used to justify the grade, useful to guide future runs and potentially tune tool calls
 
 <%= @result.logic %>
-
-
+<% end %>
 <%= if is_binary(@prompt) && byte_size(@prompt) > 0 do %>
 # User Instructions
 

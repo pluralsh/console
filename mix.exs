@@ -49,7 +49,7 @@ defmodule Console.MixProject do
       lockfile: "mix.lock",
       elixir: "~> 1.16",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers(),
+      compilers: [:yecc, :leex] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
