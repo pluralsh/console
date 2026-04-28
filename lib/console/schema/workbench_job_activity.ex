@@ -16,7 +16,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     conclusion: 9,
     canvas: 10,
     skill: 11,
-    history: 12
+    history: 12,
+    search: 13
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending

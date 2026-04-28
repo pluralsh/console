@@ -16487,6 +16487,7 @@ const (
 	WorkbenchJobActivityTypeCanvas         WorkbenchJobActivityType = "CANVAS"
 	WorkbenchJobActivityTypeSkill          WorkbenchJobActivityType = "SKILL"
 	WorkbenchJobActivityTypeHistory        WorkbenchJobActivityType = "HISTORY"
+	WorkbenchJobActivityTypeSearch         WorkbenchJobActivityType = "SEARCH"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -16503,11 +16504,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeCanvas,
 	WorkbenchJobActivityTypeSkill,
 	WorkbenchJobActivityTypeHistory,
+	WorkbenchJobActivityTypeSearch,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch:
 		return true
 	}
 	return false

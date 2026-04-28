@@ -15367,6 +15367,7 @@ export enum WorkbenchJobActivityType {
   Memory = 'MEMORY',
   Observability = 'OBSERVABILITY',
   Plan = 'PLAN',
+  Search = 'SEARCH',
   Skill = 'SKILL',
   Ticketing = 'TICKETING',
   User = 'USER'

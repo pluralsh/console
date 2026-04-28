@@ -2331,6 +2331,7 @@ enum WorkbenchJobActivityType {
   CANVAS
   SKILL
   HISTORY
+  SEARCH
 }
 
 enum WorkbenchCanvasBlockType {
