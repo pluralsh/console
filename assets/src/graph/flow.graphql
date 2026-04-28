@@ -108,6 +108,16 @@ query FlowServices($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query FlowWorkbenches($id: ID!) {
+  flow(id: $id) {
+    id
+    workbenches {
+      id
+      name
+    }
+  }
+}
+
 query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id
@@ -117,11 +127,29 @@ query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+fragment FlowAlert on Alert {
+  ...Alert
+  workbench {
+    id
+  }
+  workbenchJob {
+    id
+    status
+  }
+}
+
 query FlowAlerts($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id
     alerts(first: $first, after: $after) {
-      ...AlertConnection
+      edges {
+        node {
+          ...FlowAlert
+        }
+      }
+      pageInfo {
+        ...PageInfo
+      }
     }
   }
 }

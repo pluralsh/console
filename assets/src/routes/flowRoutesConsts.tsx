@@ -4,6 +4,7 @@ export const FLOW_PARAM_ID_OR_NAME = 'flowIdOrName'
 export const FLOW_ABS_PATH = `${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID_OR_NAME}`
 
 export const FLOW_MCP_CONNECTIONS_REL_PATH = 'mcp-connections'
+export const FLOW_WORKBENCHES_REL_PATH = 'workbenches'
 
 export function getFlowDetailsPath({
   flowIdOrName,

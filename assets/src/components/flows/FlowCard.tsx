@@ -48,6 +48,7 @@ export function FlowCard({
               size="xxsmall"
               url={flow.icon ?? ''}
               icon={<FlowIcon />}
+              css={{ borderRadius: '50%' }}
             />
             <Body1BoldP>{flow.name}</Body1BoldP>
           </Flex>
@@ -71,7 +72,7 @@ export function FlowCard({
                 e.stopPropagation()
                 setShowPermissions(!showPermissions)
               }}
-              icon={<PeopleIcon />}
+              icon={<PeopleIcon color="icon-light" />}
             />
             <IconFrame
               clickable
@@ -80,11 +81,11 @@ export function FlowCard({
                 e.stopPropagation()
                 navigate(`${flow.id}/pipelines`)
               }}
-              icon={<GitPullIcon />}
+              icon={<GitPullIcon color="icon-light" />}
             />
           </Flex>
 
-          <ArrowRightIcon />
+          <ArrowRightIcon color="icon-light" />
         </FooterSC>
       </CardSC>
       <PermissionsModal

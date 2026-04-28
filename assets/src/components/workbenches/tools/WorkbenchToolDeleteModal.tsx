@@ -23,9 +23,8 @@ export function WorkbenchToolDeleteModal({
     variables: { id: tool?.id ?? '' },
     onCompleted: () => {
       popToast({
-        name: tool?.name ?? '',
-        action: 'deleted',
-        color: 'icon-danger',
+        content: `${tool?.name ?? 'tool'} deleted`,
+        severity: 'danger',
       })
       onClose()
       onDeleted?.()

@@ -437,6 +437,7 @@ function PluralSkillFormSteps({
             type="button"
             onClick={() => isClickable && onStepSelect(id)}
             css={{
+              ...theme.partials.text.body2,
               display: 'flex',
               alignItems: 'center',
               gap: theme.spacing.xsmall,
@@ -448,13 +449,13 @@ function PluralSkillFormSteps({
               cursor: isClickable ? 'pointer' : 'not-allowed',
               opacity: isClickable ? 1 : 0.6,
               padding: 0,
-              ...theme.partials.text.caption,
             }}
           >
             <Flex
               align="center"
               justify="center"
               css={{
+                ...theme.partials.text.overline,
                 width: 18,
                 height: 18,
                 borderRadius: '50%',
@@ -463,7 +464,6 @@ function PluralSkillFormSteps({
                 color: isActive
                   ? theme.colors['text']
                   : theme.colors['text-xlight'],
-                ...theme.partials.text.overline,
               }}
             >
               {idx + 1}

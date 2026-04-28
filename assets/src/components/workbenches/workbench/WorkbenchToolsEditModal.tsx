@@ -112,9 +112,8 @@ export function WorkbenchToolsEditModal({
       awaitRefetchQueries: true,
       onCompleted: () => {
         popToast({
-          name: workbench?.name ?? 'workbench tools',
-          action: 'updated',
-          color: 'icon-success',
+          content: `${workbench?.name ?? 'workbench tools'} updated`,
+          severity: 'success',
         })
         onClose()
       },

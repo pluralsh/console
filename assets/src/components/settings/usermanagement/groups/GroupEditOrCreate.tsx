@@ -54,7 +54,7 @@ export function GroupEditOrCreate({
   ] = useCreateGroupMutation({
     onCompleted: ({ createGroup }) => {
       setGroupEdit(createGroup)
-      popToast({ name, action: 'created', color: 'icon-info' })
+      popToast({ content: `${name} created`, severity: 'info' })
     },
     refetchQueries: ['Groups'],
   })
@@ -65,7 +65,7 @@ export function GroupEditOrCreate({
     onCompleted: ({ updateGroup }) => {
       const name = updateGroup?.name ?? 'Group'
       setGroupEdit(updateGroup)
-      popToast({ name, action: 'updated', color: 'icon-info' })
+      popToast({ content: `${name} updated`, severity: 'info' })
     },
     refetchQueries: ['Groups'],
   })
@@ -75,9 +75,10 @@ export function GroupEditOrCreate({
   ] = useCreateGroupMemberMutation({
     onCompleted: ({ createGroupMember }) =>
       popToast({
-        name: createGroupMember?.user?.name ?? undefined,
-        action: 'added',
-        color: 'icon-success',
+        content: [createGroupMember?.user?.name, 'added']
+          .filter(Boolean)
+          .join(' '),
+        severity: 'success',
       }),
     refetchQueries: ['GroupMembers'],
     awaitRefetchQueries: true,
