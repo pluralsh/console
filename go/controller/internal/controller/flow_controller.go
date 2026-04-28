@@ -50,6 +50,7 @@ func (r *FlowReconciler) Name() types.Reconciler {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=flows,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=flows/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=flows/finalizers,verbs=update
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=workbenches,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop.
 func (r *FlowReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -109,12 +110,17 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 			return common.HandleRequeue(res, err, flow.SetCondition)
 		}
 
+		workbenchAssociationAttributes, res, err := r.getWorkbenchAssociationAttributes(ctx, flow)
+		if res != nil || err != nil {
+			return common.HandleRequeue(res, err, flow.SetCondition)
+		}
+
 		agentRuntimeID, err := common.ResolveAgentRuntimeID(ctx, r.ConsoleClient, flow.Spec.AgentRuntime)
 		if err != nil {
 			return common.HandleRequeue(lo.ToPtr(common.Wait()), err, flow.SetCondition)
 		}
 
-		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes, agentRuntimeID)
+		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes, workbenchAssociationAttributes, agentRuntimeID)
 		if err != nil {
 			return common.HandleRequeue(nil, err, flow.SetCondition)
 		}
@@ -137,13 +143,20 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	return flow.Spec.Reconciliation.Requeue(), nil
 }
 
-func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes, agentRuntimeID *string) (*console.FlowAttributes, error) {
+func (r *FlowReconciler) Attributes(
+	flow *v1alpha1.Flow,
+	projectID *string,
+	serverAssociations []*console.McpServerAssociationAttributes,
+	workbenchAssociations []*console.FlowWorkbenchAttributes,
+	agentRuntimeID *string,
+) (*console.FlowAttributes, error) {
 	attrs := console.FlowAttributes{
 		Name:               flow.FlowName(),
 		Description:        flow.Spec.Description,
 		Icon:               flow.Spec.Icon,
 		ProjectID:          projectID,
 		ServerAssociations: serverAssociations,
+		FlowWorkbenches:    workbenchAssociations,
 		Repositories:       lo.ToSlicePtr(flow.Spec.Repositories),
 		AgentRuntimeID:     agentRuntimeID,
 	}
@@ -221,4 +234,29 @@ func (r *FlowReconciler) getServerAssociationAttributes(ctx context.Context, flo
 	}
 
 	return serverAssociationAttrs, nil, nil
+}
+
+func (r *FlowReconciler) getWorkbenchAssociationAttributes(ctx context.Context, flow *v1alpha1.Flow) ([]*console.FlowWorkbenchAttributes, *ctrl.Result, error) {
+	if flow.Spec.WorkbenchAssociations == nil {
+		return nil, nil, nil
+	}
+
+	workbenchAssociationAttrs := make([]*console.FlowWorkbenchAttributes, 0)
+	for _, workbenchAssociation := range flow.Spec.WorkbenchAssociations {
+		ref := workbenchAssociation.WorkbenchRef
+		workbench := new(v1alpha1.Workbench)
+		if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, workbench); err != nil {
+			return nil, nil, err
+		}
+
+		if !workbench.Status.HasID() {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("workbench %s is not ready", ref.Name)
+		}
+
+		workbenchAssociationAttrs = append(workbenchAssociationAttrs, &console.FlowWorkbenchAttributes{
+			WorkbenchID: workbench.Status.ID,
+		})
+	}
+
+	return workbenchAssociationAttrs, nil, nil
 }
