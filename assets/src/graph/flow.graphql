@@ -108,6 +108,16 @@ query FlowServices($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query FlowWorkbenches($id: ID!) {
+  flow(id: $id) {
+    id
+    workbenches {
+      id
+      name
+    }
+  }
+}
+
 query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id

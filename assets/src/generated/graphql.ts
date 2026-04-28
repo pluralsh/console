@@ -18209,6 +18209,13 @@ export type FlowServicesQueryVariables = Exact<{
 
 export type FlowServicesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
+export type FlowWorkbenchesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type FlowWorkbenchesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, workbenches?: Array<{ __typename?: 'Workbench', id: string, name: string } | null> | null } | null };
+
 export type FlowPipelinesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -34307,6 +34314,53 @@ export type FlowServicesQueryHookResult = ReturnType<typeof useFlowServicesQuery
 export type FlowServicesLazyQueryHookResult = ReturnType<typeof useFlowServicesLazyQuery>;
 export type FlowServicesSuspenseQueryHookResult = ReturnType<typeof useFlowServicesSuspenseQuery>;
 export type FlowServicesQueryResult = Apollo.QueryResult<FlowServicesQuery, FlowServicesQueryVariables>;
+export const FlowWorkbenchesDocument = gql`
+    query FlowWorkbenches($id: ID!) {
+  flow(id: $id) {
+    id
+    workbenches {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useFlowWorkbenchesQuery__
+ *
+ * To run a query within a React component, call `useFlowWorkbenchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlowWorkbenchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlowWorkbenchesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFlowWorkbenchesQuery(baseOptions: Apollo.QueryHookOptions<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables> & ({ variables: FlowWorkbenchesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>(FlowWorkbenchesDocument, options);
+      }
+export function useFlowWorkbenchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>(FlowWorkbenchesDocument, options);
+        }
+// @ts-ignore
+export function useFlowWorkbenchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>): Apollo.UseSuspenseQueryResult<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>;
+export function useFlowWorkbenchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>): Apollo.UseSuspenseQueryResult<FlowWorkbenchesQuery | undefined, FlowWorkbenchesQueryVariables>;
+export function useFlowWorkbenchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>(FlowWorkbenchesDocument, options);
+        }
+export type FlowWorkbenchesQueryHookResult = ReturnType<typeof useFlowWorkbenchesQuery>;
+export type FlowWorkbenchesLazyQueryHookResult = ReturnType<typeof useFlowWorkbenchesLazyQuery>;
+export type FlowWorkbenchesSuspenseQueryHookResult = ReturnType<typeof useFlowWorkbenchesSuspenseQuery>;
+export type FlowWorkbenchesQueryResult = Apollo.QueryResult<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>;
 export const FlowPipelinesDocument = gql`
     query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
@@ -42824,6 +42878,7 @@ export const namedOperations = {
     Flows: 'Flows',
     Flow: 'Flow',
     FlowServices: 'FlowServices',
+    FlowWorkbenches: 'FlowWorkbenches',
     FlowPipelines: 'FlowPipelines',
     FlowAlerts: 'FlowAlerts',
     FlowPrs: 'FlowPrs',
