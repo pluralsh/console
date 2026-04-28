@@ -1,4 +1,4 @@
-import { Code, Divider, Switch } from '@pluralsh/design-system'
+import { Code, Divider, Flex, Switch } from '@pluralsh/design-system'
 import {
   ChatWithAIButton,
   insightMessage,
@@ -51,7 +51,7 @@ export function ClusterInsightComponent() {
   useSetActionContent(
     useMemo(
       () => (
-        <>
+        <Flex gap="small">
           <Switch
             checked={showRaw}
             onChange={(checked) => setShowRaw(checked)}
@@ -67,7 +67,7 @@ export function ClusterInsightComponent() {
             insightId={component?.insight?.id}
             messages={[insightMessage(component?.insight)]}
           />
-        </>
+        </Flex>
       ),
       [showRaw, clusterLoading, refetch, component?.insight]
     )

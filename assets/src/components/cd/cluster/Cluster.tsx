@@ -259,13 +259,13 @@ export function Cluster() {
       }
       headingContent={
         <>
-          <div css={{ width: 320, height: '100%' }}>
+          <div css={{ width: 320, height: '100%', flexShrink: 0 }}>
             <ClusterSelector
               clusterId={clusterId}
               allowDeselect={false}
               showUpgrades={tab === 'addons'}
               onClusterChange={(c) => {
-                if (c?.id) {
+                if (c?.id && c.id !== clusterId) {
                   navigate(
                     `/cd/clusters/${c.id}/${tab}/${tab === 'addons' ? CLUSTER_ALL_ADDONS_REL_PATH : tab === 'details' ? `${detailsTab}` : ''}`
                   )

@@ -1,5 +1,6 @@
 import {
   Button,
+  EmptyState,
   FillLevelProvider,
   Flex,
   Flyover,
@@ -9,16 +10,16 @@ import {
   useClusterOverviewDetailsQuery,
 } from 'generated/graphql'
 
-import semver from 'semver'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts.tsx'
 import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
+import semver from 'semver'
 import { getClusterKubeVersion } from '../runtime/RuntimeServices.tsx'
 import { HealthScoreTab } from './health/HealthScoreTab.tsx'
 import { OverviewTab } from './overview/OverviewTab.tsx'
@@ -103,7 +104,7 @@ function ClusterInfoFlyoverContent({
 }) {
   const [tab, setTab] = useState(initialTab)
 
-  const kubeVersion = getClusterKubeVersion(clusterBasic)
+  const kubeVersion = getClusterKubeVersion(clusterBasic) ?? ''
   const parsedKubeVersion =
     semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
   const nextKubeVersion = `${parsedKubeVersion.major}.${parsedKubeVersion.minor + 1}`
@@ -115,13 +116,12 @@ function ClusterInfoFlyoverContent({
       hasKubeVersion: true,
       id: clusterBasic?.id ?? '',
     },
+    skip: !clusterBasic?.id || !kubeVersion,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-
   const cluster = data?.cluster
 
-  if (!cluster) return loading ? <LoadingIndicator /> : null
   if (error) return <GqlError error={error} />
 
   return (
@@ -140,14 +140,25 @@ function ClusterInfoFlyoverContent({
           tab={tab}
           onClick={(path) => setTab(path as ClusterInfoFlyoverTab)}
         />
-        {tab === ClusterInfoFlyoverTab.Overview && (
-          <OverviewTab
-            cluster={cluster}
-            setTab={setTab}
+        {cluster ? (
+          <>
+            {tab === ClusterInfoFlyoverTab.Overview && (
+              <OverviewTab
+                cluster={cluster}
+                setTab={setTab}
+              />
+            )}
+            {tab === ClusterInfoFlyoverTab.HealthScore && (
+              <HealthScoreTab cluster={cluster} />
+            )}
+          </>
+        ) : loading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="100%"
           />
-        )}
-        {tab === ClusterInfoFlyoverTab.HealthScore && (
-          <HealthScoreTab cluster={cluster} />
+        ) : (
+          <EmptyState message="Cluster not found." />
         )}
       </Flex>
     </FillLevelProvider>
