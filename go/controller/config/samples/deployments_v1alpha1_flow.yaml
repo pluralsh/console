@@ -13,9 +13,9 @@ spec:
   description: "test flow"
   bindings:
     read:
-      - userEmail: test@plural.sh
+      - userEmail: marcin@plural.sh
     write:
-      - userEmail: test@plural.sh
+      - userEmail: marcin@plural.sh
   workbenchAssociations:
     - workbenchRef:
         apiVersion: deployments.plural.sh/v1alpha1
