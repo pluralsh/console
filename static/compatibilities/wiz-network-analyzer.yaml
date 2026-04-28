@@ -12,3 +12,10 @@ versions:
   summary: null
   chart_version: 0.1.1
   images: ['wiziopublic.azurecr.io/wiz-app/wiz-network-analyzer:0.1']
+- version: 0.1.0
+  kube: ['1.36', '1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.1.1
+  images: ['wiziopublic.azurecr.io/wiz-app/wiz-network-analyzer:0.1']
