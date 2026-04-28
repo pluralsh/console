@@ -12,34 +12,41 @@ versions:
   summary: null
   chart_version: 3.12.10-preview
   images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.12']
+- version: 2.12.0
+  kube: ['1.36', '1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 3.12.10-preview
+  images: []
 - version: 2.11.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 3.12.0-preview.2
-  images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.11']
+  images: []
 - version: 2.10.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 3.11.0-preview
-  images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.10']
+  images: []
 - version: 2.9.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 3.9.4
-  images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.9']
+  images: []
 - version: 2.8.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 3.8.0-preview
-  images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.8']
+  images: []
 - version: 2.7.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []

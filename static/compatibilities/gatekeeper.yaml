@@ -5,6 +5,34 @@ helm_repository_url: https://open-policy-agent.github.io/gatekeeper/charts
 chart_name: gatekeeper
 eolApiSlug: gatekeeper
 versions:
+- version: 3.22.2
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No chart-specific changes are called out in the provided notes\
+        \ for v3.22.2; it\u2019s an application-level bugfix release.", "From v3.22.0,\
+        \ there were some chart-related items included in the app notes (e.g., metrics\
+        \ backend configuration options; missing flags exposed as Helm values; namespace\
+        \ exemption label merge). If you\u2019re upgrading from 3.22.0 these are already\
+        \ in place, but verify your values file doesn\u2019t need to start setting\
+        \ newly-exposed options explicitly."]
+    features: [v3.22.2 introduces no new Gatekeeper features; it is a patch release.,
+      'v3.22.0 enabled `sync-vap-enforcement-scope` by default, improving ValidatingAdmissionPolicy
+        (VAP) enforcement scope sync behavior out of the box.', v3.22.0 added namespace
+        context to both CEL (`namespaceObject`) and Rego (`input.namespace`) for namespace-aware
+        decisions in admission and audit., v3.22.0 added `gator bench` for benchmarking
+        policy performance (latency/throughput/memory) and `gator policy` for managing
+        policies from gatekeeper-library/bundles., v3.22.0 added an option to disable
+        the audit `fake-reader` sidecar when using audit file-based logging and introduced
+        `--enable-remote-cluster` for running Gatekeeper outside the managed cluster.]
+    breaking_changes: ['Potential behavior change in v3.22.0: `sync-vap-enforcement-scope`
+        is now true by default, which can change how VAP resources reflect constraint
+        enforcement actions without additional configuration. Validate this aligns
+        with your expectations if you rely on VAP integration.']
+  chart_version: 3.22.2
+  images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.22.2', 'openpolicyagent/gatekeeper:v3.22.2']
 - version: 3.22.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
