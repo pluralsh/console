@@ -1555,9 +1555,26 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow. |  | Optional: \{\} <br /> |
 | `repositories` _string array_ | Repositories contains a list of git https urls of the application code repositories used in this flow. |  | Optional: \{\} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow.<br />Can also be managed within the Plural Console UI securely. |  | Optional: \{\} <br /> |
+| `workbenchAssociations` _[FlowWorkbenchAssociation](#flowworkbenchassociation) array_ | WorkbenchAssociations contains a list of workbenches you wish to associate with this flow. |  | Optional: \{\} <br /> |
 | `metadata` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: \{\} <br /> |
 | `agentRuntime` _[AgentRuntimeRef](#agentruntimeref)_ | AgentRuntime references the agent runtime to use for this flow by cluster handle and runtime name.<br />The controller resolves this to an agent runtime ID when syncing to the Console API. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+
+
+#### FlowWorkbenchAssociation
+
+
+
+
+
+
+
+_Appears in:_
+- [FlowSpec](#flowspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef is a required reference to a Workbench resource.<br />This establishes the connection between the flow and the workbench. |  | Required: \{\} <br /> |
 
 
 #### GCPCloudConnection

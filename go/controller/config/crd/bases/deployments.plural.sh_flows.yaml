@@ -260,8 +260,8 @@ spec:
                   type: object
                 type: array
               workbenchAssociations:
-                description: WorkbenchAssociations contains a list of workbenches you
-                  wish to associate with this flow.
+                description: WorkbenchAssociations contains a list of workbenches
+                  you wish to associate with this flow.
                 items:
                   properties:
                     workbenchRef:
