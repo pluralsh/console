@@ -121,6 +121,68 @@ defmodule Console.AI.Workbench.EngineTest do
       assert infra.tool_call.name == "workbench_subagent"
     end
 
+    test "runs a skill job with a referenced job without crashing" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "make notes", [
+          %Tool{
+            id: "2",
+            name: "workbench_notes",
+            arguments: %{"status" => %{working_theory: "working theory"}, "summary" => "make notes"}
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "try infrastructure", [
+          %Tool{
+            id: "3",
+            name: "workbench_subagent",
+            arguments: %{"prompt" => "try infrastructure", "subagent" => "infrastructure"}
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ -> {:ok, "need more information"} end)
+
+      expect(Subagents.Infrastructure, :run, fn _, _, _ -> %{status: :successful, result: %{output: "infrastructure result"}} end)
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "todo 1", description: "todo 1", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
+      referenced_job = insert(:workbench_job, workbench: workbench)
+      job = insert(:workbench_job, workbench: workbench, type: :skill, referenced_job: referenced_job)
+
+      {:ok, engine} = Engine.new(job)
+      {:ok, result} = Engine.run(engine)
+
+      assert result.status == :successful
+      assert result.result.conclusion == "complete"
+    end
+
     test "dispatches build_dashboard tool calls, persists the canvas activity, and completes the job" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},

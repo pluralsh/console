@@ -33,6 +33,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
   [WorkbenchToolType.Azure]: extractAzureMetadata,
   [WorkbenchToolType.Jaeger]: extractJaegerMetadata,
+  [WorkbenchToolType.Exa]: extractExaMetadata,
   [WorkbenchToolType.Cloud]: () => [],
 }
 
@@ -194,6 +195,12 @@ function extractJaegerMetadata(
     { label: 'URL', value: configuration?.jaeger?.url },
     { label: 'User', value: configuration?.jaeger?.username },
   ]
+}
+
+function extractExaMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.exa?.url }]
 }
 
 function getConfiguredHeadersCount(

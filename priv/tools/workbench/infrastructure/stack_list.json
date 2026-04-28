@@ -5,13 +5,22 @@
             "type": "string",
             "description": "Optional prefix search on stack name"
         },
-        "project_id": {
+        "project": {
             "type": "string",
-            "description": "Optional filter by project UUID"
+            "description": "Optional filter by project name, you can find the project name in the plrl_projects tool"
         },
         "status": {
             "type": "string",
-            "description": "Optional filter by stack status (e.g. running, failed, successful)"
+            "enum": [
+                "queued",
+                "pending",
+                "running",
+                "successful",
+                "failed",
+                "cancelled",
+                "pending_approval"
+            ],
+            "description": "Optional filter by stack status"
         }
     }
 }

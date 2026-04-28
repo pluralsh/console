@@ -12,6 +12,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.StackFiles,
     Infrastructure.Cluster,
     Infrastructure.ClusterList,
+    Infrastructure.ClusterTags,
+    Infrastructure.Projects,
     Infrastructure.ClusterServices,
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
@@ -83,7 +85,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %ServiceInspect{user: user},
       %ClusterServices{user: user},
       %Cluster{user: user},
-      %ClusterList{user: user}
+      %ClusterList{user: user},
+      %ClusterTags{user: user},
+      %Projects{user: user}
     ]
   end
   defp svc_tools(_, _), do: []

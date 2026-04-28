@@ -80,6 +80,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
     end
   end
 
+  def structured(%__MODULE__{} = tool) do
+    with {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(tool),
+         {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input) do
+      {:ok, Enum.map(output.spans, &mapify/1)}
+    end
+  end
+
   defp mapify(%TraceSpan{} = trace) do
     %{
       trace_id: trace.trace_id,

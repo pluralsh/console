@@ -15,6 +15,7 @@ import {
   TempoLogoIcon,
   ToolsIcon,
 } from '@pluralsh/design-system'
+import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
   Provider,
   WorkbenchToolCategory,
@@ -35,6 +36,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Jaeger,
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
+  WorkbenchToolType.Exa,
   WorkbenchToolType.Splunk,
   WorkbenchToolType.Dynatrace,
   WorkbenchToolType.Cloudwatch,
@@ -58,6 +60,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Atlassian]: 'atlassian',
+  [WorkbenchToolType.Exa]: 'exa',
   [WorkbenchToolType.Splunk]: 'splunk',
   [WorkbenchToolType.Dynatrace]: 'dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
@@ -97,6 +100,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
   [WorkbenchToolType.Azure]: 'Azure Monitor',
   [WorkbenchToolType.Jaeger]: 'Jaeger',
+  [WorkbenchToolType.Exa]: 'Exa',
   [WorkbenchToolType.Cloud]: 'Cloud',
   [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
   [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
@@ -125,6 +129,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Exa]: [WorkbenchToolCategory.Search],
   [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
   [WorkbenchToolType.Mcp]: [],
   [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
@@ -162,6 +167,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Connect to Jira, Confluence, and other Atlassian products.',
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
+  [WorkbenchToolType.Exa]:
+    'Search the web with Exa to fetch high-signal context for tasks.',
   [WorkbenchToolType.Http]:
     'Call arbitrary HTTP endpoints- useful for custom integrations.',
   [WorkbenchToolType.Splunk]: 'Query logs and search data in Splunk.',
@@ -179,6 +186,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Logs]: 'Logs',
   [WorkbenchToolCategory.Traces]: 'Traces',
   [WorkbenchToolCategory.Ticketing]: 'Ticketing',
+  [WorkbenchToolCategory.Search]: 'Web Search',
   [WorkbenchToolCategory.Integration]: 'Integration',
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
@@ -294,6 +302,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Http]: ToolsIcon,
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
+  [WorkbenchToolType.Exa]: ExaLogoIcon,
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
   [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
   [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,

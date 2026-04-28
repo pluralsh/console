@@ -12,6 +12,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Datadog]: '/setup-guides/tools/datadog.md',
   [WorkbenchToolType.Linear]: '/setup-guides/tools/linear.md',
   [WorkbenchToolType.Atlassian]: '/setup-guides/tools/atlassian.md',
+  [WorkbenchToolType.Exa]: '/setup-guides/tools/exa.md',
   [WorkbenchToolType.Splunk]: '/setup-guides/tools/splunk.md',
   [WorkbenchToolType.Dynatrace]: '/setup-guides/tools/dynatrace.md',
   [WorkbenchToolType.Cloudwatch]: '/setup-guides/tools/cloudwatch.md',
@@ -35,6 +36,7 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
   [WorkbenchToolType.Linear]: 'https://linear.app/docs/api-and-webhooks',
   [WorkbenchToolType.Atlassian]:
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
+  [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',
   [WorkbenchToolType.Splunk]:
     'https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/latest/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities',
   [WorkbenchToolType.Dynatrace]:

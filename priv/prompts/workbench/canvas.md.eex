@@ -17,7 +17,12 @@ The main components are:
 
 You can also query the current state of the canvas at any time using the `show_canvas` tool.
 
-Once the canvas is to your liking, call the subagent_result tool and we'll ensure the canvas is saved.  The results will be streamed to the frontend, so
+As blocks are added, we will validate canvas shape in two ways:
+
+1. Ensuring no overlapping blocks are added.
+2. Ensuring no gaps in the canvas as they are added.  A block is either an empty row to start, or empty columns to start a row, or column gap within blocks in a row.
+
+Once the canvas looks good, call the subagent_result tool and we'll ensure the canvas is saved.  The results will be streamed to the frontend, so
 you should focus on modifying from top-left to bottom-right, as the canvas is scrollable vertically.
 
 If the canvas is in a substantially misconfigured state, you can use the `recreate_canvas` tool to reset it to a fresh state. And then recreate the blocks you wish to use.

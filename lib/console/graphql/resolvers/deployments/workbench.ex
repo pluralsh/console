@@ -54,6 +54,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do
+    WorkbenchJob.for_flow(flow_id)
+    |> workbench_job_filters(args)
+    |> WorkbenchJob.ordered()
+    |> paginate(args)
+  end
+
   def list_workbench_crons(workbench, args, _) do
     WorkbenchCron.for_workbench(workbench.id)
     |> WorkbenchCron.ordered()
@@ -152,6 +159,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Toolchain.logs(job, name, args)
   end
 
+  def traces_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
+    Toolchain.traces(job, name, args)
+  end
+
   def workbenches(args, %{context: %{current_user: user}}) do
     Workbench.ordered()
     |> Workbench.for_user(user)
@@ -230,6 +241,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_eval(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_eval(id, user)
+
+  def workbench_eval_skill(%{id: id,} = args, %{context: %{current_user: user}}),
+    do: Workbenches.workbench_eval_skill(id, args[:prompt], user)
 
   def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)

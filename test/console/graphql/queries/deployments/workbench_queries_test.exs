@@ -3,7 +3,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   use Mimic
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.Stub
-  alias Toolquery.{MetricPoint, MetricsQueryOutput}
+  alias Toolquery.{MetricPoint, MetricsQueryOutput, TraceSpan, TracesQueryOutput}
 
   describe "workbenches" do
     test "it can fetch workbenches" do
@@ -676,6 +676,81 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         "id" => job.id,
         "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m]))", "step" => "30s"})
       }, %{current_user: admin_user()})
+    end
+
+    test "it resolves tracesTool using the generated observability traces tool name and parses GraphQL output" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "tempo",
+        tool: :tempo,
+        categories: [:traces],
+        configuration: %{
+          tempo: %{url: "https://tempo.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+      ten_seconds_later = DateTime.add(now, 10, :second)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :traces, fn :mock_conn, input ->
+        assert input.query == "{ service.name = \"checkout\" }"
+        assert input.limit == 50
+
+        {:ok,
+         %TracesQueryOutput{
+           spans: [
+             %TraceSpan{
+               trace_id: "trace-1",
+               span_id: "span-1",
+               parent_id: "parent-1",
+               name: "GET /checkout",
+               service: "checkout",
+               start: Google.Protobuf.from_datetime(now),
+               end: Google.Protobuf.from_datetime(ten_seconds_later),
+               tags: %{"http.method" => "GET"}
+             }
+           ]
+         }}
+      end)
+
+      tool_name = "workbench_observability_traces_tempo"
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $name: String!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            id
+            tracesTool(name: $name, arguments: $arguments) {
+              traceId
+              spanId
+              parentId
+              name
+              service
+              start
+              end
+              tags
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "name" => tool_name,
+        "arguments" => Jason.encode!(%{"query" => "{ service.name = \"checkout\" }", "limit" => 50})
+      }, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      [trace] = found["tracesTool"]
+      assert trace["traceId"] == "trace-1"
+      assert trace["spanId"] == "span-1"
+      assert trace["parentId"] == "parent-1"
+      assert trace["name"] == "GET /checkout"
+      assert trace["service"] == "checkout"
+      assert trace["start"]
+      assert trace["end"]
+      assert trace["tags"] == %{"http.method" => "GET"}
     end
   end
 

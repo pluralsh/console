@@ -16,6 +16,7 @@ To do this you'll have:
 * a tool to update a skill by replacing an exact `previous` snippet with `replacement`, and opens a PR using the given branch name, title, and description, or to create a new skill.
 * a tool to create a new skill with the given name, description, and contents.  Use this only if no existing skill is truly relevant.
 * a tool to end the investigation entirely because no skill update is needed.
+* a tool to list all pull requests created in the job, which can be useful to evaluate if code changes were directionally correct.
 
 The specific investigation was prompted with:
 
@@ -24,3 +25,26 @@ The specific investigation was prompted with:
 And the ultimate conclusion was:
 
 <%= @job.result.conclusion %>
+
+
+Some ancillary information about the conclusion as well:
+
+<%= if is_binary(@job.result.topology) && byte_size(@job.result.topology) > 0 do %>
+## Topology
+
+A mermaid diagram of the system graph at the time of the analysis.
+
+```mermaid
+<%= @job.result.topology %>
+```
+<% end %>
+
+<%= if !Enum.empty?(@job.result.canvas) do %>
+## Canvas
+
+A list of canvas blocks that were generated to explain the conclusion.
+
+```json
+<%= Console.mapify(@job.result.canvas) |> Jason.encode!() %>
+```
+<% end %>

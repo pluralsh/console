@@ -1,0 +1,34 @@
+We've also run an eval on the given workbench job.  Here are the results:
+
+Grade (scored between 0 and 10): <%= @result.grade %>
+
+# Summary
+
+<%= @result.summary %>
+
+# Analysis Breakdown
+
+This is a breakdown of the agents entire process and conclusion
+
+## Prompt - Feedback on the prompt used, to potentially aid human operators in steering their agent
+
+<%= @result.prompt %>
+
+## Conclusion - Feedback on the conclusion generated itself
+
+<%= @result.result %>
+
+## Logic - Feedback on the logic used to justify the grade, useful to guide future runs and potentially tune tool calls
+
+<%= @result.logic %>
+
+
+<%= if is_binary(@prompt) && byte_size(@prompt) > 0 do %>
+# User Instructions
+
+The user has also added some custom guidance for you to inform decision making, here it is:
+
+<%= @prompt %>
+
+Take this into account when generating any memories, alongside what happened in the workbench run itself.
+<% end %>

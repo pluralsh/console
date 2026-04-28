@@ -6,8 +6,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   embedded_schema do
     field :user, :map, virtual: true
-    field :q, :string
-    field :distro, Console.Schema.Cluster.Distro
+    field :q,       :string
+    field :project, :string
+    field :distro,  Console.Schema.Cluster.Distro
 
     embeds_many :tags, Tag, on_replace: :delete do
       field :name, :string
@@ -15,7 +16,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
     end
   end
 
-  @valid ~w(q distro)a
+  @valid ~w(q project distro)a
 
   def changeset(model, attrs) do
     model
@@ -29,11 +30,12 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   def name(_), do: "plrl_clusters"
   def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle for full details."
 
-  def implement(%__MODULE__{user: %User{} = user, q: q, distro: distro, tags: tags}) do
+  def implement(%__MODULE__{user: %User{} = user, q: q, project: project, distro: distro, tags: tags}) do
     Cluster.ordered()
     |> Cluster.for_user(user)
     |> maybe_distro(distro)
     |> maybe_tags(tags)
+    |> maybe_project(project)
     |> Cluster.preloaded([:tags, :project])
     |> maybe_search(q)
     |> Repo.all()
@@ -49,6 +51,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   defp maybe_tags(query, [_ | _ ] = tags), do: Cluster.for_tags(query, tags)
   defp maybe_tags(query, _), do: query
+
+  defp maybe_project(query, name) when is_binary(name) and byte_size(name) > 0,
+    do: Cluster.for_project_name(query, name)
+  defp maybe_project(query, _), do: query
 
   defp cluster_brief(%Cluster{} = c) do
     %{

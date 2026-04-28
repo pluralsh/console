@@ -25,7 +25,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
     ...props
   }: IconProps) {
     const theme = useTheme()
-    const workingColor = theme.utils.resolveColorString(color)
+    const workingColor = theme.utils?.resolveColorString(color)
 
     return (
       <HonorableIcon

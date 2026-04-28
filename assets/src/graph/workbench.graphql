@@ -189,6 +189,9 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
     metrics {
       ...WorkbenchJobActivityMetric
     }
+    traces {
+      ...WorkbenchJobActivityTrace
+    }
   }
 }
 
@@ -215,6 +218,17 @@ fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
   timestamp
   message
   labels
+}
+
+fragment WorkbenchJobActivityTrace on WorkbenchJobActivityTrace {
+  traceId
+  spanId
+  parentId
+  name
+  service
+  start
+  end
+  tags
 }
 
 fragment WorkbenchCanvasBlockGraph on WorkbenchCanvasBlockGraph {
@@ -248,6 +262,9 @@ fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
       ...WorkbenchCanvasToolGraph
     }
     logs {
+      ...WorkbenchCanvasToolGraph
+    }
+    traces {
       ...WorkbenchCanvasToolGraph
     }
     pie {
@@ -285,6 +302,12 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   }
   logs {
     ...WorkbenchJobActivityLog
+  }
+  traces {
+    ...WorkbenchJobActivityTrace
+  }
+  tracesQuery {
+    ...WorkbenchToolQueryData
   }
   canvas {
     ...WorkbenchCanvasBlock
@@ -665,6 +688,15 @@ query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {
     id
     logsTool(name: $name, arguments: $arguments) {
       ...WorkbenchJobActivityLog
+    }
+  }
+}
+
+query WorkbenchJobTracesTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    tracesTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityTrace
     }
   }
 }

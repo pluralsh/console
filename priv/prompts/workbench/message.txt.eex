@@ -56,6 +56,28 @@ There were also some important logs queries emitted by the activity, in json for
 These should be specified when delegating to the dashboard agent if you wish to include them in the final dashboard.
 <% end %>
 
+<%= if is_map(@activity.result.traces_query) and map_size(@activity.result.traces_query) > 0 do %>
+There were also key traces emitted by the activity, the tool call used to find them in json format:
+
+```json
+<%= Console.clean(@activity.result.traces_query) |> Jason.encode!() %>
+```
+
+That traces query can be useful when reporting the final trace evidence informing your investigation.
+<% end %>
+
+<%= if is_list(@activity.result.traces_queries) and !Enum.empty?(@activity.result.traces_queries) do %>
+There were also some important traces queries emitted by the activity, in json format:
+
+<%= for query <- @activity.result.traces_queries do %>
+```json
+<%= Console.clean(query) |> Jason.encode!() %>
+```
+<% end %>
+
+These should be specified when delegating to the dashboard agent if you wish to include them in the final dashboard.
+<% end %>
+
 <%= if @activity.result.job_update do %>
 The key job attributes you updated were:
 
