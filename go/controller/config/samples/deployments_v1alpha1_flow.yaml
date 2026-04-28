@@ -20,6 +20,20 @@ spec:
     - workbenchRef:
         apiVersion: deployments.plural.sh/v1alpha1
         kind: Workbench
-        name: workbench-sample
+        name: flow-workbench-sample
         namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Workbench
+metadata:
+  labels:
+    app.kubernetes.io/name: workbench
+    app.kubernetes.io/instance: flow-workbench-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: flow-workbench-sample
+  namespace: default
+spec:
+  name: flow-workbench-sample
 
