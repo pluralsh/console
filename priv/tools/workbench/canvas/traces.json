@@ -1,0 +1,47 @@
+{
+    "type": "object",
+    "description": "Adds or updates a traces panel that binds to a configured workbench traces tool (CanvasBlock with type traces and ToolGraph content). The UI will run the named tool with the given arguments to fetch trace spans. Use `tool_name` that exists on this workbench and shape `tool_args` to that tool's input schema.",
+    "properties": {
+        "identifier": {
+            "type": "string",
+            "description": "Unique key for this canvas block (e.g. `checkout_trace_errors`)."
+        },
+        "layout": {
+            "type": "object",
+            "description": "Required grid placement (CanvasBlock.Layout). All of x, y, w, and h must be set.",
+            "properties": {
+                "x": { "type": "integer" },
+                "y": { "type": "integer" },
+                "w": { "type": "integer" },
+                "h": { "type": "integer" }
+            },
+            "required": ["x", "y", "w", "h"]
+        },
+        "props": {
+            "type": "object",
+            "description": "Traces widget configuration (WorkbenchJobResult.ToolGraph): human-readable framing plus the tool invocation.",
+            "properties": {
+                "title": { "type": "string" },
+                "summary": { "type": "string" },
+                "query": {
+                    "type": "object",
+                    "description": "Which workbench tool to call and with what arguments (WorkbenchJobResult.ToolQuery).",
+                    "properties": {
+                        "tool_name": {
+                            "type": "string",
+                            "description": "Name of the workbench traces tool to execute."
+                        },
+                        "tool_args": {
+                            "type": "string",
+                            "description": "JSON string passed verbatim to that tool's input schema."
+                        },
+                        "summary": { "type": "string" }
+                    },
+                    "required": ["tool_name"]
+                }
+            },
+            "required": ["title", "query"]
+        }
+    },
+    "required": ["identifier", "layout", "props"]
+}

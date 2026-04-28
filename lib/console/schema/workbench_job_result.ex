@@ -1,7 +1,7 @@
 defmodule Console.Schema.WorkbenchJobResult do
   use Console.Schema.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
-  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log}
+  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log, Trace}
 
   defenum TodoStatus, pending: 0, in_progress: 1, completed: 2
 
@@ -28,16 +28,22 @@ defmodule Console.Schema.WorkbenchJobResult do
     embedded_schema do
       embeds_many :metrics, Metric, on_replace: :delete
       embeds_many :logs,    Log, on_replace: :delete
+      embeds_many :traces,  Trace, on_replace: :delete
 
       embeds_one :metrics_query, ToolQuery, on_replace: :update
       embeds_one :logs_query,    ToolQuery, on_replace: :update
+      embeds_one :traces_query,  ToolQuery, on_replace: :update
     end
 
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, [])
+      |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
       |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
+      |> cast_embed(:traces, with: &WorkbenchJobActivity.trace_changeset/2)
       |> cast_embed(:metrics_query)
+      |> cast_embed(:logs_query)
+      |> cast_embed(:traces_query)
     end
   end
 
@@ -79,7 +85,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     use Console.Schema.Base
     alias Console.Schema.WorkbenchJobResult.{ToolGraph, DataPoint}
 
-    defenum Type, markdown: 0, metrics: 1, logs: 2, pie: 3, bar: 4
+    defenum Type, markdown: 0, metrics: 1, logs: 2, traces: 3, pie: 4, bar: 5
 
     defmodule Layout do
       use Console.Schema.Base
@@ -126,6 +132,7 @@ defmodule Console.Schema.WorkbenchJobResult do
 
         embeds_one :metrics, ToolGraph, on_replace: :update
         embeds_one :logs,    ToolGraph, on_replace: :update
+        embeds_one :traces,  ToolGraph, on_replace: :update
 
         embeds_one :pie, Graph, on_replace: :update
         embeds_one :bar, Graph, on_replace: :update
@@ -145,6 +152,7 @@ defmodule Console.Schema.WorkbenchJobResult do
       |> cast(attrs, [:markdown])
       |> cast_embed(:metrics)
       |> cast_embed(:logs)
+      |> cast_embed(:traces)
       |> cast_embed(:pie)
       |> cast_embed(:bar)
     end

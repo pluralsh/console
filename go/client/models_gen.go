@@ -9519,6 +9519,7 @@ type WorkbenchCanvasBlockContent struct {
 	Markdown *string                    `json:"markdown,omitempty"`
 	Metrics  *WorkbenchCanvasToolGraph  `json:"metrics,omitempty"`
 	Logs     *WorkbenchCanvasToolGraph  `json:"logs,omitempty"`
+	Traces   *WorkbenchCanvasToolGraph  `json:"traces,omitempty"`
 	Pie      *WorkbenchCanvasBlockGraph `json:"pie,omitempty"`
 	Bar      *WorkbenchCanvasBlockGraph `json:"bar,omitempty"`
 }
@@ -9741,6 +9742,7 @@ type WorkbenchJob struct {
 	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
 	LogsTool    []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
+	TracesTool  []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -9821,14 +9823,31 @@ type WorkbenchJobActivityResult struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// traces emitted by the activity
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
 	// metrics tool queries emitted by the activity
 	MetricsQueries []*WorkbenchToolQueryData `json:"metricsQueries,omitempty"`
 	// logs tool queries emitted by the activity
 	LogsQueries []*WorkbenchToolQueryData `json:"logsQueries,omitempty"`
+	// traces tool queries emitted by the activity
+	TracesQueries []*WorkbenchToolQueryData `json:"tracesQueries,omitempty"`
 	// primary metrics tool query for this activity
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 	// primary logs tool query for this activity
 	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
+	// primary traces tool query for this activity
+	TracesQuery *WorkbenchToolQueryData `json:"tracesQuery,omitempty"`
+}
+
+type WorkbenchJobActivityTrace struct {
+	TraceID  *string        `json:"traceId,omitempty"`
+	SpanID   *string        `json:"spanId,omitempty"`
+	ParentID *string        `json:"parentId,omitempty"`
+	Name     *string        `json:"name,omitempty"`
+	Service  *string        `json:"service,omitempty"`
+	Start    *string        `json:"start,omitempty"`
+	End      *string        `json:"end,omitempty"`
+	Tags     map[string]any `json:"tags,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9884,10 +9903,14 @@ type WorkbenchJobResultMetadata struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for this result
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// traces for this result
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
 	// metrics tool query for this result
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 	// logs tool query for this result
 	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
+	// traces tool query for this result
+	TracesQuery *WorkbenchToolQueryData `json:"tracesQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -9918,6 +9941,8 @@ type WorkbenchJobThoughtAttributes struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for the thought
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// traces for the thought
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
 }
 
 type WorkbenchJobThoughtDelta struct {
@@ -16355,6 +16380,7 @@ const (
 	WorkbenchCanvasBlockTypeMarkdown WorkbenchCanvasBlockType = "MARKDOWN"
 	WorkbenchCanvasBlockTypeMetrics  WorkbenchCanvasBlockType = "METRICS"
 	WorkbenchCanvasBlockTypeLogs     WorkbenchCanvasBlockType = "LOGS"
+	WorkbenchCanvasBlockTypeTraces   WorkbenchCanvasBlockType = "TRACES"
 	WorkbenchCanvasBlockTypePie      WorkbenchCanvasBlockType = "PIE"
 	WorkbenchCanvasBlockTypeBar      WorkbenchCanvasBlockType = "BAR"
 )
@@ -16363,13 +16389,14 @@ var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
 	WorkbenchCanvasBlockTypeMarkdown,
 	WorkbenchCanvasBlockTypeMetrics,
 	WorkbenchCanvasBlockTypeLogs,
+	WorkbenchCanvasBlockTypeTraces,
 	WorkbenchCanvasBlockTypePie,
 	WorkbenchCanvasBlockTypeBar,
 }
 
 func (e WorkbenchCanvasBlockType) IsValid() bool {
 	switch e {
-	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
+	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypeTraces, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
 		return true
 	}
 	return false

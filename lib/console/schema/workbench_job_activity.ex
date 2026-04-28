@@ -58,11 +58,24 @@ defmodule Console.Schema.WorkbenchJobActivity do
         field :labels,    :map
       end
 
+      embeds_many :traces, Trace, on_replace: :delete do
+        field :trace_id,  :string
+        field :span_id,   :string
+        field :parent_id, :string
+        field :name,      :string
+        field :service,   :string
+        field :start,     :utc_datetime_usec
+        field :end,       :utc_datetime_usec
+        field :tags,      :map
+      end
+
       embeds_many :metrics_queries, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :delete
       embeds_many :logs_queries, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :delete
+      embeds_many :traces_queries, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :delete
 
       embeds_one :metrics_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
       embeds_one :logs_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
+      embeds_one :traces_query, Console.Schema.WorkbenchJobResult.ToolQuery, on_replace: :update
     end
 
     belongs_to :workbench_job, WorkbenchJob
@@ -121,10 +134,15 @@ defmodule Console.Schema.WorkbenchJobActivity do
     model
     |> cast(attrs, ~w(output error)a)
     |> cast_embed(:job_update, with: &job_update_changeset/2)
+    |> cast_embed(:metrics, with: &metric_changeset/2)
     |> cast_embed(:logs, with: &log_changeset/2)
+    |> cast_embed(:traces, with: &trace_changeset/2)
     |> cast_embed(:metrics_query)
+    |> cast_embed(:logs_query)
+    |> cast_embed(:traces_query)
     |> cast_embed(:metrics_queries)
     |> cast_embed(:logs_queries)
+    |> cast_embed(:traces_queries)
     |> cast_embed(:canvas)
   end
 
@@ -142,5 +160,10 @@ defmodule Console.Schema.WorkbenchJobActivity do
   def log_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp message labels)a)
+  end
+
+  def trace_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(trace_id span_id parent_id name service start end tags)a)
   end
 end

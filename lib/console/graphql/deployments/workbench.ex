@@ -341,6 +341,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.logs_tool/3
     end
 
+    field :traces_tool, list_of(:workbench_job_activity_trace) do
+      arg :name,      :string, description: "the name of the traces tool"
+      arg :arguments, :json,   description: "the arguments for the traces tool"
+
+      resolve &Deployments.traces_tool/3
+    end
+
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     timestamps()
@@ -378,6 +385,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_thought_attributes do
     field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
     field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
+    field :traces,  list_of(:workbench_job_activity_trace), description: "traces for the thought"
   end
 
   object :workbench_job_activity_result do
@@ -387,10 +395,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
     field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
     field :logs,            list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :traces,          list_of(:workbench_job_activity_trace), description: "traces emitted by the activity"
     field :metrics_queries, list_of(:workbench_tool_query_data), description: "metrics tool queries emitted by the activity"
     field :logs_queries,    list_of(:workbench_tool_query_data), description: "logs tool queries emitted by the activity"
+    field :traces_queries,  list_of(:workbench_tool_query_data), description: "traces tool queries emitted by the activity"
     field :metrics_query,   :workbench_tool_query_data, description: "primary metrics tool query for this activity"
     field :logs_query,      :workbench_tool_query_data, description: "primary logs tool query for this activity"
+    field :traces_query,    :workbench_tool_query_data, description: "primary traces tool query for this activity"
   end
 
   object :workbench_job_activity_job_update do
@@ -414,6 +425,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :labels,    :map
   end
 
+  object :workbench_job_activity_trace do
+    field :trace_id,  :string
+    field :span_id,   :string
+    field :parent_id, :string
+    field :name,      :string
+    field :service,   :string
+    field :start,     :datetime
+    field :end,       :datetime
+    field :tags,      :map
+  end
+
   object :workbench_job_result do
     field :id,              non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
@@ -431,8 +453,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_result_metadata do
     field :metrics,        list_of(:workbench_job_activity_metric), description: "metrics for this result"
     field :logs,           list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :traces,         list_of(:workbench_job_activity_trace), description: "traces for this result"
     field :metrics_query,  :workbench_tool_query_data, description: "metrics tool query for this result"
     field :logs_query,     :workbench_tool_query_data, description: "logs tool query for this result"
+    field :traces_query,   :workbench_tool_query_data, description: "traces tool query for this result"
   end
 
   object :workbench_tool_query_data do
@@ -468,6 +492,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :markdown, :string
     field :metrics,  :workbench_canvas_tool_graph
     field :logs,     :workbench_canvas_tool_graph
+    field :traces,   :workbench_canvas_tool_graph
     field :pie,      :workbench_canvas_block_graph
     field :bar,      :workbench_canvas_block_graph
   end

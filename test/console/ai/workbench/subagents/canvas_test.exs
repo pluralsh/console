@@ -39,7 +39,7 @@ defmodule Console.AI.Workbench.Subagents.CanvasTest do
             name: "add_bar_block",
             arguments: %{
               "identifier" => "latency",
-              "layout" => %{"x" => 6, "y" => 0, "w" => 6, "h" => 4},
+              "layout" => %{"x" => 0, "y" => 2, "w" => 6, "h" => 4},
               "props" => %{
                 "title" => "p95 latency (ms)",
                 "data" => [
@@ -54,7 +54,7 @@ defmodule Console.AI.Workbench.Subagents.CanvasTest do
             name: "add_pie_block",
             arguments: %{
               "identifier" => "traffic",
-              "layout" => %{"x" => 0, "y" => 2, "w" => 6, "h" => 4},
+              "layout" => %{"x" => 0, "y" => 6, "w" => 6, "h" => 4},
               "props" => %{
                 "title" => "Traffic share",
                 "data" => [

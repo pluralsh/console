@@ -2338,6 +2338,7 @@ enum WorkbenchCanvasBlockType {
   MARKDOWN
   METRICS
   LOGS
+  TRACES
   PIE
   BAR
 }
@@ -2938,6 +2939,14 @@ type WorkbenchJob {
     arguments: Json
   ): [WorkbenchJobActivityLog]
 
+  tracesTool(
+    "the name of the traces tool"
+    name: String
+
+    "the arguments for the traces tool"
+    arguments: Json
+  ): [WorkbenchJobActivityTrace]
+
   "whimsically describes current progress for you"
   whimsey: String
 
@@ -3012,6 +3021,9 @@ type WorkbenchJobThoughtAttributes {
 
   "logs for the thought"
   logs: [WorkbenchJobActivityLog]
+
+  "traces for the thought"
+  traces: [WorkbenchJobActivityTrace]
 }
 
 type WorkbenchJobActivityResult {
@@ -3033,17 +3045,26 @@ type WorkbenchJobActivityResult {
   "logs emitted by the activity"
   logs: [WorkbenchJobActivityLog]
 
+  "traces emitted by the activity"
+  traces: [WorkbenchJobActivityTrace]
+
   "metrics tool queries emitted by the activity"
   metricsQueries: [WorkbenchToolQueryData]
 
   "logs tool queries emitted by the activity"
   logsQueries: [WorkbenchToolQueryData]
 
+  "traces tool queries emitted by the activity"
+  tracesQueries: [WorkbenchToolQueryData]
+
   "primary metrics tool query for this activity"
   metricsQuery: WorkbenchToolQueryData
 
   "primary logs tool query for this activity"
   logsQuery: WorkbenchToolQueryData
+
+  "primary traces tool query for this activity"
+  tracesQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -3065,6 +3086,17 @@ type WorkbenchJobActivityLog {
   timestamp: DateTime
   message: String
   labels: Map
+}
+
+type WorkbenchJobActivityTrace {
+  traceId: String
+  spanId: String
+  parentId: String
+  name: String
+  service: String
+  start: DateTime
+  end: DateTime
+  tags: Map
 }
 
 type WorkbenchJobResult {
@@ -3104,11 +3136,17 @@ type WorkbenchJobResultMetadata {
   "logs for this result"
   logs: [WorkbenchJobActivityLog]
 
+  "traces for this result"
+  traces: [WorkbenchJobActivityTrace]
+
   "metrics tool query for this result"
   metricsQuery: WorkbenchToolQueryData
 
   "logs tool query for this result"
   logsQuery: WorkbenchToolQueryData
+
+  "traces tool query for this result"
+  tracesQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchToolQueryData {
@@ -3149,6 +3187,7 @@ type WorkbenchCanvasBlockContent {
   markdown: String
   metrics: WorkbenchCanvasToolGraph
   logs: WorkbenchCanvasToolGraph
+  traces: WorkbenchCanvasToolGraph
   pie: WorkbenchCanvasBlockGraph
   bar: WorkbenchCanvasBlockGraph
 }
