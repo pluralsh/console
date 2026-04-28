@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -19,7 +20,7 @@ import {
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -33,6 +34,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchToolIcon } from '../../tools/workbenchToolsUtils'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
+import { isJobRunning } from './WorkbenchJobActivity'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
 
 const MAX_VISIBLE_JOB_TOOLS = 3
@@ -41,13 +43,7 @@ export function WorkbenchJob() {
   const theme = useTheme()
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
   const { popToast } = useSimpleToast()
-  const { isOpen, setOpen } = useWorkbenchJobPanel()
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
-
-  const onMount = useEffectEvent(() => setOpen(true))
-  useEffect(() => {
-    onMount()
-  }, [])
 
   const {
     data,
@@ -62,6 +58,15 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
+
+  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id)
+  useSidePanelWidth({
+    maxWidthVw: 60,
+    initialWidthVw:
+      Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
+        ? 60
+        : undefined,
+  })
 
   const workbenchId = job?.workbench?.id ?? ''
   const workbenchName = job?.workbench?.name ?? 'workbench'
