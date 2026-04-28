@@ -99,6 +99,10 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
 
+	// WorkbenchAssociations contains a list of workbenches you wish to associate with this flow.
+	// +kubebuilder:validation:Optional
+	WorkbenchAssociations []FlowWorkbenchAssociation `json:"workbenchAssociations,omitempty"`
+
 	// Metadata contains arbitrary JSON metadata for the flow.
 	// Used for custom configuration and integration with external systems.
 	// +kubebuilder:validation:Optional
@@ -137,4 +141,11 @@ type FlowServerAssociation struct {
 	// This establishes the connection between the flow and the server.
 	// +kubebuilder:validation:Required
 	MCPServerRef corev1.ObjectReference `json:"mcpServerRef,omitempty"`
+}
+
+type FlowWorkbenchAssociation struct {
+	// WorkbenchRef is a required reference to a Workbench resource.
+	// This establishes the connection between the flow and the workbench.
+	// +kubebuilder:validation:Required
+	WorkbenchRef corev1.ObjectReference `json:"workbenchRef,omitempty"`
 }

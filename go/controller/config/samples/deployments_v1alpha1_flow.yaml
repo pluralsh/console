@@ -16,4 +16,10 @@ spec:
       - userEmail: test@plural.sh
     write:
       - userEmail: test@plural.sh
+  workbenchAssociations:
+    - workbenchRef:
+        apiVersion: deployments.plural.sh/v1alpha1
+        kind: Workbench
+        name: workbench-sample
+        namespace: default
 
