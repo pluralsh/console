@@ -1,7 +1,7 @@
 import { useResizeObserver } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { clamp, isNil } from 'lodash'
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const STORAGE_KEY = 'chatbot-panel-width'
 
@@ -29,16 +29,19 @@ export function useResizablePane(
     setPanelWidth(calculatedPanelWidth)
   )
 
-  const prevWidth = useRef<number>(calculatedPanelWidth)
-  const jumpToWidth = useEffectEvent((width: number) => {
-    prevWidth.current = calculatedPanelWidth
-    setPanelWidth(width)
-  })
   // snap to initial when provided, otherwise return to previous width before initial was set
-  useEffect(() => {
-    if (!isNil(initialWidthVw)) jumpToWidth(vwToPx(initialWidthVw))
-    else setPanelWidth(prevWidth.current)
-  }, [initialWidthVw, setPanelWidth])
+  const [prevInitialWidthVw, setPrevInitialWidthVw] =
+    useState<Nullable<number>>(null)
+  const [prevWidth, setPrevWidth] = useState<number>(calculatedPanelWidth)
+  if (initialWidthVw !== prevInitialWidthVw) {
+    setPrevInitialWidthVw(initialWidthVw)
+    if (!isNil(initialWidthVw)) {
+      setPrevWidth(calculatedPanelWidth)
+      setPanelWidth(vwToPx(initialWidthVw))
+    } else {
+      setPanelWidth(prevWidth)
+    }
+  }
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault()
