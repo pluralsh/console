@@ -6,6 +6,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Result,
     Skills,
     Skill,
+    Calculator,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.ServiceFiles,
@@ -56,6 +57,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
+      Calculator,
       Result
     ])
   end

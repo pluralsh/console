@@ -21,6 +21,7 @@ data or use queries relative to the current time.
 1. When querying observability tools, you should give at least some time range to the query.  A 5 minute window minimum is good practice.
 2. Feel free to query the same data source multiple times to probe.  If you're investigating an alert, assume it's a real thing and search.
 3. When searching logs, you can always search for contextual logs by filtering on specific facets (eg pod name that isolates to a specific running container), and using time ranges around the log in question.
+4. You have a `calculator` tool available to you to do deterministic math calculations.  You should be leveraging that instead of trying to infer based on prior tool calls and summaries, using exact raw data in the expressions used.
 
 ## Tone of Voice Gudiance
 
