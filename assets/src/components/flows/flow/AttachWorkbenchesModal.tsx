@@ -7,12 +7,16 @@ import {
   SearchIcon,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
+import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
 import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
+import { getWebhookIcon } from 'components/workbenches/workbench/webhooks/utils'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
+  AgentRuntimeType,
   useUpsertFlowMutation,
   useWorkbenchesQuery,
   WorkbenchTinyFragment,
@@ -20,6 +24,9 @@ import {
 import { isEmpty } from 'lodash'
 import {
   ComponentPropsWithoutRef,
+  cloneElement,
+  isValidElement,
+  ReactElement,
   ReactNode,
   useEffect,
   useMemo,
@@ -114,7 +121,7 @@ export function AttachWorkbenchesModal({
       onClose={onClose}
       header="Attach workbench to flow"
       size="custom"
-      css={{ maxWidth: 800 }}
+      css={{ maxWidth: 800, width: 800 }}
       onOpenAutoFocus={(e) => e.preventDefault()}
       actions={
         <Flex
@@ -154,18 +161,10 @@ export function AttachWorkbenchesModal({
           emptyMessage="No workbenches attached."
         >
           {attached.map((workbench) => (
-            <WorkbenchModalRow
+            <AttachedWorkbench
               key={workbench.id}
               workbench={workbench}
-              action={
-                <Button
-                  destructive
-                  small
-                  onClick={() => removeWorkbench(workbench.id)}
-                >
-                  Remove
-                </Button>
-              }
+              onRemove={removeWorkbench}
             />
           ))}
         </ModalSection>
@@ -178,18 +177,10 @@ export function AttachWorkbenchesModal({
           }
         >
           {available.map((workbench) => (
-            <WorkbenchModalRow
+            <AvailableWorkbench
               key={workbench.id}
               workbench={workbench}
-              action={
-                <Button
-                  secondary
-                  small
-                  onClick={() => addWorkbench(workbench)}
-                >
-                  Add
-                </Button>
-              }
+              onAdd={addWorkbench}
             />
           ))}
         </ModalSection>
@@ -224,17 +215,17 @@ function ModalSection({
   )
 }
 
-function WorkbenchModalRow({
+function AttachedWorkbench({
   workbench,
-  action,
+  onRemove,
 }: {
   workbench: WorkbenchTinyFragment
-  action: ReactNode
+  onRemove: (workbenchId: string) => void
 }) {
   const tools = workbench.tools?.filter(isNonNullable) ?? []
 
   return (
-    <WorkbenchCardSC>
+    <AttachedWorkbenchCardSC>
       <StackedText
         first={workbench.name}
         second={workbench.description}
@@ -260,15 +251,161 @@ function WorkbenchModalRow({
           }))}
         />
       )}
-      {action}
-    </WorkbenchCardSC>
+      <Button
+        destructive
+        small
+        onClick={() => onRemove(workbench.id)}
+      >
+        Remove
+      </Button>
+    </AttachedWorkbenchCardSC>
   )
 }
 
-const WorkbenchCardSC = styled(Card)(({ theme }) => ({
+function AvailableWorkbench({
+  workbench,
+  onAdd,
+}: {
+  workbench: WorkbenchTinyFragment
+  onAdd: (workbench: WorkbenchTinyFragment) => void
+}) {
+  const RuntimeIcon =
+    runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
+  const tools = workbench.tools?.filter(isNonNullable) ?? []
+  const webhooks = mapExistingNodes(workbench.webhooks)
+  const hasCodingAgent = Boolean(workbench.agentRuntime?.name)
+  const hasWebhooks = webhooks.length > 0
+  const hasTools = tools.length > 0
+  const hasAnyMetadata = hasCodingAgent || hasWebhooks || hasTools
+
+  return (
+    <AvailableWorkbenchCardSC>
+      <Flex
+        direction="column"
+        gap="small"
+        minWidth={0}
+      >
+        <StackedText
+          first={workbench.name}
+          second={workbench.description}
+          truncate
+          firstPartialType="body2Bold"
+          firstColor="text"
+          secondPartialType="caption"
+          secondColor="text-xlight"
+          css={{ flex: 1, minWidth: 0 }}
+        />
+
+        {hasAnyMetadata && (
+          <MetadataGridSC>
+            {hasCodingAgent && (
+              <>
+                <MetadataLabelSC>coding agent</MetadataLabelSC>
+                <MetadataValueSC>
+                  <Flex
+                    align="center"
+                    gap="xxsmall"
+                    minWidth={0}
+                  >
+                    <RuntimeIcon
+                      fullColor
+                      size={12}
+                    />
+                    <CaptionP
+                      $color="text-xlight"
+                      css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+                    >
+                      {workbench.agentRuntime?.name}
+                    </CaptionP>
+                  </Flex>
+                </MetadataValueSC>
+              </>
+            )}
+            {hasWebhooks && (
+              <>
+                <MetadataLabelSC>webhooks</MetadataLabelSC>
+                <MetadataValueSC>
+                  <MetadataIcons
+                    items={webhooks.map((webhook) => ({
+                      id: webhook.id,
+                      label: webhook.name ?? 'Webhook',
+                      icon: withIconSize(getWebhookIcon(webhook), 12),
+                    }))}
+                  />
+                </MetadataValueSC>
+              </>
+            )}
+            {hasTools && (
+              <>
+                <MetadataLabelSC>bound tools</MetadataLabelSC>
+                <MetadataValueSC>
+                  <MetadataIcons
+                    items={tools.map((tool) => ({
+                      id: tool.id,
+                      label: tool.name,
+                      icon: (
+                        <WorkbenchToolIcon
+                          type={tool.tool}
+                          provider={tool.cloudConnection?.provider}
+                          size={12}
+                        />
+                      ),
+                    }))}
+                  />
+                </MetadataValueSC>
+              </>
+            )}
+          </MetadataGridSC>
+        )}
+      </Flex>
+      <Button
+        secondary
+        small
+        onClick={() => onAdd(workbench)}
+      >
+        Add
+      </Button>
+    </AvailableWorkbenchCardSC>
+  )
+}
+
+function withIconSize(icon: ReactNode, size: number) {
+  if (!isValidElement(icon)) return icon
+
+  return cloneElement(icon as ReactElement<{ size?: number }>, { size })
+}
+
+const AttachedWorkbenchCardSC = styled(Card)(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
   gap: theme.spacing.medium,
   justifyContent: 'space-between',
   padding: theme.spacing.medium,
 }))
+
+const AvailableWorkbenchCardSC = styled(Card)(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.medium,
+  justifyContent: 'space-between',
+  padding: theme.spacing.medium,
+}))
+
+const MetadataGridSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr',
+  columnGap: theme.spacing.small,
+  rowGap: theme.spacing.xxsmall,
+  alignItems: 'center',
+  minWidth: 0,
+  width: '100%',
+}))
+
+const MetadataLabelSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-input-disabled'],
+}))
+
+const MetadataValueSC = styled.div({
+  minWidth: 0,
+})
