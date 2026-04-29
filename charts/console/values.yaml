@@ -474,10 +474,23 @@ cloudQuery:
 
   database:
     enabled: true
+
+    # aws config is used to configure the cloud-query to use AWS credentials for querying AWS resources.
+    # It is required by the cloud-query AWS provider to allow usage of the assume role functionality.
+    aws:
+      ### The below options are only used if useLocalCredentials is set to true ###
+      # If set, AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE will be mounted into both cloud-query containers under /shared
+      mountPath: /shared
+      # If set, AWS_CONFIG_FILE env var will be injected into both cloud-query containers
+      configFile: /shared/.aws/config
+      # If set, AWS_SHARED_CREDENTIALS_FILE env var will be injected into both cloud-query containers
+      credentialsFile: /shared/.aws/credentials
+
     image:
       repository: ghcr.io/pluralsh/cloud-query-db
       pullPolicy: IfNotPresent
       tag: ~
+
     # PostgreSQL password configuration
     password:
       # If not provided, a default value of "postgres" will be used

@@ -59,15 +59,27 @@ spec:
               name: {{ include "console.cloudquery.db.secret" . }}
               key: password
                 {{- end }}
+          {{- if .Values.cloudQuery.database.aws.configFile }}
+        - name: AWS_CONFIG_FILE
+          value: {{ .Values.cloudQuery.database.aws.configFile }}
+          {{- end }}
+          {{- if .Values.cloudQuery.database.aws.credentialsFile }}
+        - name: AWS_SHARED_CREDENTIALS_FILE
+          value: {{ .Values.cloudQuery.database.aws.credentialsFile }}
+          {{- end }}
+        volumeMounts:
+        - name: cloud-query-shared
+          mountPath: {{ .Values.cloudQuery.database.aws.mountPath }}
         readinessProbe:
           exec:
             command:
             - /bin/sh
             - -c
             - pg_isready -U postgres
-          initialDelaySeconds: 10
-          periodSeconds: 30
-          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
         {{- end }}
       - name: cloud-query
           {{- with .Values.cloudQuery.securityContext }}
@@ -92,6 +104,14 @@ spec:
               name: {{ include "console.cloudquery.db.secret" . }}
               key: password
                 {{- end }}
+          {{- if .Values.cloudQuery.database.aws.configFile }}
+        - name: AWS_CONFIG_FILE
+          value: {{ .Values.cloudQuery.database.aws.configFile }}
+          {{- end }}
+          {{- if .Values.cloudQuery.database.aws.credentialsFile }}
+        - name: AWS_SHARED_CREDENTIALS_FILE
+          value: {{ .Values.cloudQuery.database.aws.credentialsFile }}
+          {{- end }}
           {{- else }}
         env:
         - name: PLRL_DATABASE_ENABLED
@@ -116,12 +136,17 @@ spec:
         resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.cloudQuery.volumeMounts }}
         volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.cloudQuery.volumes }}
+          - name: cloud-query-shared
+            mountPath: {{ .Values.cloudQuery.database.aws.mountPath }}
+            {{- with .Values.cloudQuery.volumeMounts }}
+              {{- toYaml . | nindent 10 }}
+            {{- end }}
       volumes:
+      - name: cloud-query-shared
+        emptyDir:
+          medium: Memory
+      {{- with .Values.cloudQuery.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.cloudQuery.nodeSelector }}
