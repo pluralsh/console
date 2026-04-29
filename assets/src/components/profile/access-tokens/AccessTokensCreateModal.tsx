@@ -1,7 +1,6 @@
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
-import { Button, Codeline, Modal, Switch } from '@pluralsh/design-system'
-import { isEmpty } from 'lodash'
+import { FormEvent, useCallback, useState } from 'react'
+import { Button, Codeline, Modal } from '@pluralsh/design-system'
 
 import {
   AccessTokensDocument,
@@ -20,18 +19,18 @@ export function AccessTokensCreateModal({
   setOpen: (open: boolean) => void
 }) {
   const theme = useTheme()
-  const [addScopes, setAddScopes] = useState(false)
   const [selectedScopes, setSelectedScopes] = useState<string[]>([])
 
   const close = useCallback(() => {
     setOpen(false)
-    setAddScopes(false)
     setSelectedScopes([])
-  }, [setOpen, setAddScopes, setSelectedScopes])
+  }, [setOpen, setSelectedScopes])
 
   const [mutation, { data, loading, error }] = useCreateAccessTokenMutation({
     variables: {
-      ...(addScopes && { scopes: [{ apis: selectedScopes, identifier: '*' }] }),
+      ...(selectedScopes.length > 0 && {
+        scopes: [{ apis: selectedScopes, identifier: '*' }],
+      }),
     },
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -41,16 +40,12 @@ export function AccessTokensCreateModal({
       }),
   })
 
-  const valid = useMemo(
-    () => !addScopes || !isEmpty(selectedScopes),
-    [addScopes, selectedScopes]
-  )
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if (valid && !loading) mutation()
+      if (!loading) mutation()
     },
-    [valid, loading, mutation]
+    [loading, mutation]
   )
 
   return (
@@ -72,22 +67,7 @@ export function AccessTokensCreateModal({
           </Button>
         ) : (
           <div css={{ display: 'flex', gap: theme.spacing.small, flexGrow: 1 }}>
-            <div css={{ display: 'flex', flexGrow: 1 }}>
-              <Switch
-                checked={addScopes}
-                onChange={(val) => setAddScopes(val)}
-              >
-                <div
-                  css={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: theme.spacing.xsmall,
-                  }}
-                >
-                  Configure access scopes
-                </div>
-              </Switch>
-            </div>
+            <div css={{ display: 'flex', flexGrow: 1 }} />
             <Button
               secondary
               type="button"
@@ -97,7 +77,6 @@ export function AccessTokensCreateModal({
             </Button>
             <Button
               type="submit"
-              disabled={!valid}
               loading={loading}
               primary
             >
@@ -124,21 +103,10 @@ export function AccessTokensCreateModal({
       ) : (
         <>
           <p>Do you want to create new access token?</p>
-          {addScopes && (
-            <>
-              <div
-                css={{
-                  ...theme.partials.text.body2,
-                  color: theme.colors['text-light'],
-                  marginTop: theme.spacing.small,
-                }}
-              />
-              <AccessTokensCreateScope
-                selectedScopes={selectedScopes}
-                setSelectedScopes={setSelectedScopes}
-              />
-            </>
-          )}
+          <AccessTokensCreateScope
+            selectedScopes={selectedScopes}
+            setSelectedScopes={setSelectedScopes}
+          />
           {error && (
             <div css={{ marginTop: theme.spacing.medium }}>
               <GqlError

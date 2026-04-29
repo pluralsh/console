@@ -90,8 +90,7 @@ export function AccessTokensCreateScope({
     >
       <FormField
         label="Scopes"
-        hint="Choose one or more GraphQL scopes for this token."
-        required
+        hint="Choose GraphQL scopes for this token, or leave empty to allow all scopes."
       >
         <Select
           label="Scopes"

@@ -21,8 +21,7 @@ import {
   UserFragment,
   useServiceAccountAccessTokenMutation,
 } from 'generated/graphql.ts'
-import { isEmpty } from 'lodash'
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import styled from 'styled-components'
 
 const columnHelper = createColumnHelper<UserFragment>()
@@ -107,7 +106,6 @@ function CreateServiceAccountTokenForm({
 }) {
   const [refresh, setRefresh] = useState(false)
   const [expiry, setExpiry] = useState('')
-  const [addScopes, setAddScopes] = useState(false)
   const [selectedScopes, setSelectedScopes] = useState<string[]>([])
 
   const [mutation, { data, loading, error }] =
@@ -117,19 +115,14 @@ function CreateServiceAccountTokenForm({
         refresh,
         attributes: {
           ...(expiry && { expiry }),
-          ...(addScopes && {
+          ...(selectedScopes.length > 0 && {
             scopes: [{ apis: selectedScopes, identifier: '*' }],
           }),
         },
       },
     })
 
-  const scopesValid = useMemo(
-    () => !addScopes || !isEmpty(selectedScopes),
-    [addScopes, selectedScopes]
-  )
-
-  const allowSubmit = !loading && scopesValid
+  const allowSubmit = !loading
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (allowSubmit) mutation()
@@ -148,11 +141,11 @@ function CreateServiceAccountTokenForm({
   ) : (
     <Flex gap="small">
       <Switch
-        checked={addScopes}
-        onChange={setAddScopes}
+        checked={refresh}
+        onChange={setRefresh}
         css={{ flex: 1 }}
       >
-        Configure access scopes
+        Wipe old tokens for this service account
       </Switch>
       <Button
         secondary
@@ -164,7 +157,6 @@ function CreateServiceAccountTokenForm({
       <Button
         type="submit"
         loading={loading}
-        disabled={!scopesValid}
       >
         Create
       </Button>
@@ -202,20 +194,12 @@ function CreateServiceAccountTokenForm({
                 placeholder="e.g. 1d"
               />
             </FormField>
-            <Switch
-              checked={refresh}
-              onChange={setRefresh}
-            >
-              Wipe old tokens for this service account
-            </Switch>
-            {addScopes && (
-              <Flex direction="column">
-                <AccessTokensCreateScope
-                  selectedScopes={selectedScopes}
-                  setSelectedScopes={setSelectedScopes}
-                />
-              </Flex>
-            )}
+            <Flex direction="column">
+              <AccessTokensCreateScope
+                selectedScopes={selectedScopes}
+                setSelectedScopes={setSelectedScopes}
+              />
+            </Flex>
             {error && (
               <GqlError
                 header="Problem creating token"
