@@ -58,6 +58,8 @@ Only call `workbench_complete` if you believe all work has been completed, we ca
 
 The exception to that rule would be if no code change is needed at all, or if multiple pull requests are required to accomplish what the user intends.
 
+If you're being asked to create/modify infrastructure, do not loop back and confirm that happened beyond pull request creation, as it will simply burn tokens for no purpose since the infra creation is post pr merge.
+
 You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
 
 Once work is done, wrap up all todos, write a final conclusion.
