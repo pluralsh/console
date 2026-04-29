@@ -18291,7 +18291,16 @@ export type FlowWorkbenchesQueryVariables = Exact<{
 }>;
 
 
-export type FlowWorkbenchesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, workbenches?: Array<WorkbenchTinyFragment | null> | null } | null };
+export type FlowWorkbenchesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, workbenches?: Array<{ __typename?: 'Workbench', id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null> | null } | null };
+
+export type FlowWorkbenchJobsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type FlowWorkbenchJobsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, workbenchJobs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, user?: { __typename?: 'User', id: string, name: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null } | null } | null> | null } | null } | null };
 
 export type FlowPipelinesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -34475,6 +34484,62 @@ export type FlowWorkbenchesQueryHookResult = ReturnType<typeof useFlowWorkbenche
 export type FlowWorkbenchesLazyQueryHookResult = ReturnType<typeof useFlowWorkbenchesLazyQuery>;
 export type FlowWorkbenchesSuspenseQueryHookResult = ReturnType<typeof useFlowWorkbenchesSuspenseQuery>;
 export type FlowWorkbenchesQueryResult = Apollo.QueryResult<FlowWorkbenchesQuery, FlowWorkbenchesQueryVariables>;
+export const FlowWorkbenchJobsDocument = gql`
+    query FlowWorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    workbenchJobs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchJobTinyFragmentDoc}`;
+
+/**
+ * __useFlowWorkbenchJobsQuery__
+ *
+ * To run a query within a React component, call `useFlowWorkbenchJobsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlowWorkbenchJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlowWorkbenchJobsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useFlowWorkbenchJobsQuery(baseOptions: Apollo.QueryHookOptions<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables> & ({ variables: FlowWorkbenchJobsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>(FlowWorkbenchJobsDocument, options);
+      }
+export function useFlowWorkbenchJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>(FlowWorkbenchJobsDocument, options);
+        }
+// @ts-ignore
+export function useFlowWorkbenchJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>): Apollo.UseSuspenseQueryResult<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>;
+export function useFlowWorkbenchJobsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>): Apollo.UseSuspenseQueryResult<FlowWorkbenchJobsQuery | undefined, FlowWorkbenchJobsQueryVariables>;
+export function useFlowWorkbenchJobsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>(FlowWorkbenchJobsDocument, options);
+        }
+export type FlowWorkbenchJobsQueryHookResult = ReturnType<typeof useFlowWorkbenchJobsQuery>;
+export type FlowWorkbenchJobsLazyQueryHookResult = ReturnType<typeof useFlowWorkbenchJobsLazyQuery>;
+export type FlowWorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useFlowWorkbenchJobsSuspenseQuery>;
+export type FlowWorkbenchJobsQueryResult = Apollo.QueryResult<FlowWorkbenchJobsQuery, FlowWorkbenchJobsQueryVariables>;
 export const FlowPipelinesDocument = gql`
     query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
@@ -43041,6 +43106,7 @@ export const namedOperations = {
     Flow: 'Flow',
     FlowServices: 'FlowServices',
     FlowWorkbenches: 'FlowWorkbenches',
+    FlowWorkbenchJobs: 'FlowWorkbenchJobs',
     FlowPipelines: 'FlowPipelines',
     FlowAlerts: 'FlowAlerts',
     FlowPrs: 'FlowPrs',

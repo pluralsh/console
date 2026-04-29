@@ -117,6 +117,22 @@ query FlowWorkbenches($id: ID!) {
   }
 }
 
+query FlowWorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    workbenchJobs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
 query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id
