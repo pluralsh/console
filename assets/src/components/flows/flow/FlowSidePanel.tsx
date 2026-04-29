@@ -1,16 +1,25 @@
 import {
   AddIcon,
   Button,
+  Divider,
   Flex,
-  WorkbenchIcon,
   IconFrame,
+  Tooltip,
+  WorkbenchIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
+import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchTinyFragment } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+
+const MAX_VISIBLE_METADATA_ITEMS = 5
+const METADATA_ICON_SIZE = 10
 
 export function FlowSidePanel({
   workbenches,
@@ -41,23 +50,15 @@ export function FlowSidePanel({
           </HeaderSC>
           {hasWorkbenches ? (
             <Flex
-              gap="small"
+              gap="large"
               direction="column"
             >
               {workbenches.map((workbench) => (
-                <WorkbenchRowButtonSC
+                <WorkbenchPanelItem
                   key={workbench.id}
-                  type="button"
+                  workbench={workbench}
                   onClick={() => navigate(getWorkbenchAbsPath(workbench.id))}
-                >
-                  <ItemIconContainerSC>
-                    <IconFrame
-                      icon={<WorkbenchIcon />}
-                      size="xsmall"
-                    />
-                  </ItemIconContainerSC>
-                  <WorkbenchNameSC>{workbench.name}</WorkbenchNameSC>
-                </WorkbenchRowButtonSC>
+                />
               ))}
             </Flex>
           ) : (
@@ -70,7 +71,10 @@ export function FlowSidePanel({
               >
                 Attach workbench
               </ButtonSC>
-              <DividerSC css={{ margin: `${theme.spacing.small}px 0` }} />
+              <Divider
+                backgroundColor="border"
+                css={{ margin: `${theme.spacing.small}px 0` }}
+              />
               <Flex
                 direction="column"
                 gap="xxsmall"
@@ -96,9 +100,131 @@ export function FlowSidePanel({
   )
 }
 
+function WorkbenchPanelItem({
+  workbench,
+  onClick,
+}: {
+  workbench: WorkbenchTinyFragment
+  onClick: () => void
+}) {
+  const [showFullDescription, setShowFullDescription] = useState(false)
+  const [canExpandDescription, setCanExpandDescription] = useState(false)
+  const descriptionRef = useRef<HTMLSpanElement>(null)
+  const tools = workbench.tools?.filter(isNonNullable) ?? []
+  const metadataItems = tools.map((tool) => ({
+    id: `tool-${tool.id}`,
+    label: tool.name,
+    icon: (
+      <WorkbenchToolIcon
+        type={tool.tool}
+        provider={tool.cloudConnection?.provider}
+        size={METADATA_ICON_SIZE}
+      />
+    ),
+  }))
+
+  useEffect(() => {
+    if (!workbench.description) {
+      setCanExpandDescription(false)
+      return
+    }
+
+    if (showFullDescription) return
+
+    const descriptionEl = descriptionRef.current
+    if (!descriptionEl) return
+
+    setCanExpandDescription(
+      descriptionEl.scrollHeight > descriptionEl.clientHeight
+    )
+  }, [showFullDescription, workbench.description])
+
+  return (
+    <WorkbenchItemSC>
+      <Flex
+        direction="column"
+        gap="xsmall"
+        minWidth={0}
+      >
+        <Flex gap="xsmall">
+          <WorkbenchIcon
+            color="icon-light"
+            size={16}
+          />
+          <WorkbenchNameButtonSC
+            type="button"
+            onClick={onClick}
+          >
+            {workbench.name}
+          </WorkbenchNameButtonSC>
+        </Flex>
+        {!!workbench.description && (
+          <Flex
+            direction="column"
+            gap="xxsmall"
+          >
+            <WorkbenchDescriptionSC
+              ref={descriptionRef}
+              $expanded={showFullDescription}
+            >
+              {workbench.description}
+            </WorkbenchDescriptionSC>
+            {canExpandDescription && (
+              <ReadMoreSC
+                type="button"
+                onClick={() => setShowFullDescription((value) => !value)}
+              >
+                {showFullDescription ? 'Show less' : 'Read more'}
+              </ReadMoreSC>
+            )}
+          </Flex>
+        )}
+        {!!metadataItems.length && <MetadataIcons items={metadataItems} />}
+      </Flex>
+    </WorkbenchItemSC>
+  )
+}
+
+function MetadataIcons({
+  items,
+}: {
+  items: Array<{ id: string; label: string; icon: ReactNode }>
+}) {
+  const visibleItems = items.slice(0, MAX_VISIBLE_METADATA_ITEMS)
+  const hiddenItems = items.slice(MAX_VISIBLE_METADATA_ITEMS)
+  const hiddenItemsLabel = hiddenItems.map(({ label }) => label).join(', ')
+
+  return (
+    <Flex
+      align="center"
+      gap="xsmall"
+      wrap="wrap"
+      css={{ minWidth: 0 }}
+    >
+      {visibleItems.map((item) => (
+        <Tooltip
+          key={item.id}
+          label={item.label}
+          placement="bottom"
+        >
+          <MetadataIconWrapSC>{item.icon}</MetadataIconWrapSC>
+        </Tooltip>
+      ))}
+      {!!hiddenItems.length && (
+        <Tooltip
+          label={hiddenItemsLabel || `${hiddenItems.length} more`}
+          placement="bottom"
+        >
+          <CaptionP $color="text-xlight">+{hiddenItems.length}</CaptionP>
+        </Tooltip>
+      )}
+    </Flex>
+  )
+}
+
 const WrapperSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-one'],
-  borderRight: theme.borders['fill-one'],
+  borderRight: theme.borders.default,
   display: 'flex',
   flexDirection: 'column',
   flexGrow: 1,
@@ -114,13 +240,14 @@ const ContentSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.large,
   minHeight: '100%',
-  padding: theme.spacing.medium,
+  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
 }))
 
 const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
+
   ...(!$first && {
     borderTop: theme.borders['fill-one'],
     paddingTop: theme.spacing.medium,
@@ -137,50 +264,68 @@ const HeaderSC = styled.div(({ theme }) => ({
 
 const ButtonSC = styled(Button)(({ theme }) => ({
   ...theme.partials.reset.button,
-  ...theme.partials.text.caption,
+  ...theme.partials.text.body2,
   alignSelf: 'start',
   color: theme.colors['text-xlight'],
   padding: 0,
 
   '&:hover': {
     ...theme.partials.reset.button,
-    ...theme.partials.text.caption,
+    ...theme.partials.text.body2,
     color: theme.colors['text-light'],
   },
 }))
 
-const WorkbenchRowButtonSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  alignItems: 'center',
+const WorkbenchItemSC = styled.div(({ theme }) => ({
+  alignItems: 'flex-start',
   display: 'flex',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.small,
   width: '100%',
+}))
+
+const WorkbenchNameButtonSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.body2,
+  ...TRUNCATE,
+  color: theme.colors['text-primary-accent'],
   textAlign: 'left',
-  '&:hover span': {
-    color: theme.colors.text,
+  '&:hover': {
+    color: theme.colors['text-light'],
   },
 }))
 
-const ItemIconContainerSC = styled.div({
-  display: 'flex',
+const WorkbenchDescriptionSC = styled.span<{ $expanded: boolean }>(
+  ({ theme, $expanded }) => ({
+    ...theme.partials.text.caption,
+    color: theme.colors['text-xlight'],
+
+    ...(!$expanded && {
+      display: '-webkit-box',
+      overflow: 'hidden',
+      WebkitBoxOrient: 'vertical',
+      WebkitLineClamp: 2,
+    }),
+  })
+)
+
+const ReadMoreSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  alignSelf: 'start',
+  color: theme.colors['text-input-disabled'],
+  '&:hover': {
+    color: theme.colors['text-light'],
+  },
+}))
+
+const MetadataIconWrapSC = styled.span({
   alignItems: 'center',
+  display: 'flex',
+  height: METADATA_ICON_SIZE,
   justifyContent: 'center',
-  width: 20,
-  height: 20,
+  lineHeight: 0,
+  width: METADATA_ICON_SIZE,
 })
-
-const WorkbenchNameSC = styled.span(({ theme }) => ({
-  color: theme.colors['text-light'],
-  flex: 1,
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-}))
-
-const DividerSC = styled.div(({ theme }) => ({
-  borderTop: theme.borders['fill-one'],
-}))
 
 const LearnMoreLinkSC = styled.a(({ theme }) => ({
   ...theme.partials.text.caption,
