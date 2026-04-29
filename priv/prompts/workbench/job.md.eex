@@ -104,7 +104,7 @@ As you gather information and complete each todo, be sure to call the `workbench
 
 You also have a `skill_backfill` tool available.  Usage of this tool has a few rules you must follow:
 
-1. Only call this if explicitly asked to save/update skills.  Do not infer based on subtext, wait for a user to tell you to do so.
+1. Only call this if explicitly asked to create/save/update skills.  Any synonym for this that explicitly references skills is enough to trigger.
 2. Use the job's history to build the appropriate prompt to do the backfill.  You can invoke another subagent first to do so, if additional context is needed.  Ofentimes there's some back and forth that makes it pretty obvious.
 3. Report any skill updates back to the user so they are aware of what was added or updated.
 <% end %>
