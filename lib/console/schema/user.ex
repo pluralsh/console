@@ -10,6 +10,8 @@ defmodule Console.Schema.User do
     Chat
   }
 
+  defenum Homepage, clusters: 0, workbenches: 1
+
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
   schema "watchman_users" do
@@ -30,6 +32,7 @@ defmodule Console.Schema.User do
     field :scopes,           :map, virtual: true
     field :api,              :string, virtual: true
     field :roles_updated,    :boolean, virtual: true, default: false
+    field :homepage,         Homepage, default: :clusters
 
     field :last_digest_at,   :utc_datetime_usec
 
@@ -127,7 +130,7 @@ defmodule Console.Schema.User do
     from(u in query, order_by: ^order)
   end
 
-  @valid ~w(name email password deleted_at profile plural_id service_account signing_private_key)a
+  @valid ~w(name email password deleted_at profile plural_id service_account homepage signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do
     model

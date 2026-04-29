@@ -4789,6 +4789,11 @@ export type HelmValueAttributes = {
   value?: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum Homepage {
+  Clusters = 'CLUSTERS',
+  Workbenches = 'WORKBENCHES'
+}
+
 /** the details of how to connect to a http service like prometheus */
 export type HttpConnection = {
   __typename?: 'HttpConnection';
@@ -14458,6 +14463,7 @@ export type User = {
   email: Scalars['String']['output'];
   emailSettings?: Maybe<EmailSettings>;
   groups?: Maybe<Array<Maybe<Group>>>;
+  homepage?: Maybe<Homepage>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   jwt?: Maybe<Scalars['String']['output']>;
@@ -14475,6 +14481,7 @@ export type User = {
 export type UserAttributes = {
   email?: InputMaybe<Scalars['String']['input']>;
   emailSettings?: InputMaybe<EmailSettingsAttributes>;
+  homepage?: InputMaybe<Homepage>;
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UserRoleAttributes>;
@@ -19794,7 +19801,7 @@ export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: stri
 
 export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null };
 
-export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
+export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null };
 
@@ -19849,7 +19856,7 @@ export type WorkbenchesIssuesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIssues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null };
+export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIssues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null };
 
 export type WorkbenchIssuesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19858,7 +19865,7 @@ export type WorkbenchIssuesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchIssuesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null } | null };
+export type WorkbenchIssuesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null } | null };
 
 export type GetWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -25279,7 +25286,6 @@ export const WorkbenchIssueFragmentDoc = gql`
   updatedAt
   workbench {
     id
-    name
   }
   workbenchJob {
     id

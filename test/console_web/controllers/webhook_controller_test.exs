@@ -529,6 +529,35 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert issue.body == "Updated body"
       assert issue.status == :completed
     end
+
+    test "it matches workbench substring on non-first line in linear description", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "match-me"})
+
+      linear_issue = %{
+        "id" => "linear-multiline-substring",
+        "title" => "Investigate webhook filtering",
+        "url" => "https://linear.app/team/issue/999",
+        "description" => "first line\nmatch-me on second line",
+        "state" => %{"name" => "Open"}
+      }
+
+      payload = Jason.encode!(%{"type" => "Issue", "data" => linear_issue})
+
+      signature =
+        :crypto.mac(:hmac, :sha256, hook.secret, payload)
+        |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("linear-signature", signature)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.workbench_id == wh.workbench_id
+      assert issue.workbench_webhook_id == wh.id
+    end
   end
 
   describe "#issue/2 (Jira)" do

@@ -14429,6 +14429,11 @@ enum PersonaRole {
   MANAGEMENT
 }
 
+enum Homepage {
+  CLUSTERS
+  WORKBENCHES
+}
+
 enum ReadType {
   NOTIFICATION
   BUILD
@@ -14438,6 +14443,7 @@ input UserAttributes {
   name: String
   email: String
   password: String
+  homepage: Homepage
   roles: UserRoleAttributes
   emailSettings: EmailSettingsAttributes
   signingPrivateKey: String
@@ -14579,6 +14585,7 @@ type User {
   id: ID!
   name: String!
   email: String!
+  homepage: Homepage
   deletedAt: DateTime
   profile: String
   pluralId: String

@@ -25,8 +25,8 @@ defmodule Console.Repo.Migrations.AddChatThreading do
     create index(:chats, [:thread_id])
     create unique_index(:chat_sequences, [:thread_id])
 
-    flush()
+    # flush()
 
-    :ok = Console.AI.Chat.backfill_threads()
+    # :ok = Console.AI.Chat.backfill_threads()
   end
 end

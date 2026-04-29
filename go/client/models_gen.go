@@ -9127,6 +9127,7 @@ type User struct {
 	ID                  string           `json:"id"`
 	Name                string           `json:"name"`
 	Email               string           `json:"email"`
+	Homepage            *Homepage        `json:"homepage,omitempty"`
 	DeletedAt           *string          `json:"deletedAt,omitempty"`
 	Profile             *string          `json:"profile,omitempty"`
 	PluralID            *string          `json:"pluralId,omitempty"`
@@ -9150,6 +9151,7 @@ type UserAttributes struct {
 	Name              *string                  `json:"name,omitempty"`
 	Email             *string                  `json:"email,omitempty"`
 	Password          *string                  `json:"password,omitempty"`
+	Homepage          *Homepage                `json:"homepage,omitempty"`
 	Roles             *UserRoleAttributes      `json:"roles,omitempty"`
 	EmailSettings     *EmailSettingsAttributes `json:"emailSettings,omitempty"`
 	SigningPrivateKey *string                  `json:"signingPrivateKey,omitempty"`
@@ -12670,6 +12672,61 @@ func (e *HelmAuthProvider) UnmarshalJSON(b []byte) error {
 }
 
 func (e HelmAuthProvider) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type Homepage string
+
+const (
+	HomepageClusters    Homepage = "CLUSTERS"
+	HomepageWorkbenches Homepage = "WORKBENCHES"
+)
+
+var AllHomepage = []Homepage{
+	HomepageClusters,
+	HomepageWorkbenches,
+}
+
+func (e Homepage) IsValid() bool {
+	switch e {
+	case HomepageClusters, HomepageWorkbenches:
+		return true
+	}
+	return false
+}
+
+func (e Homepage) String() string {
+	return string(e)
+}
+
+func (e *Homepage) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Homepage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Homepage", str)
+	}
+	return nil
+}
+
+func (e Homepage) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Homepage) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Homepage) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
