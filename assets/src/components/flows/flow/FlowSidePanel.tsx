@@ -36,7 +36,14 @@ export function FlowSidePanel({
     <WrapperSC>
       <ContentSC>
         <SectionSC $first>
-          <HeaderSC>
+          <Flex
+            align="center"
+            justify="space-between"
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-xlight'],
+            }}
+          >
             <span>Workbenches</span>
             {hasWorkbenches && (
               <IconFrame
@@ -47,7 +54,7 @@ export function FlowSidePanel({
                 onClick={onAttachWorkbench}
               />
             )}
-          </HeaderSC>
+          </Flex>
           {hasWorkbenches ? (
             <Flex
               gap="large"
@@ -63,14 +70,26 @@ export function FlowSidePanel({
             </Flex>
           ) : (
             <>
-              <ButtonSC
+              <Button
                 small
                 startIcon={<AddIcon size={12} />}
                 tertiary
                 onClick={onAttachWorkbench}
+                css={{
+                  ...theme.partials.reset.button,
+                  ...theme.partials.text.body2,
+                  alignSelf: 'start',
+                  color: theme.colors['text-xlight'],
+                  padding: 0,
+                  '&:hover': {
+                    ...theme.partials.reset.button,
+                    ...theme.partials.text.body2,
+                    color: theme.colors['text-light'],
+                  },
+                }}
               >
                 Attach workbench
-              </ButtonSC>
+              </Button>
               <Divider
                 backgroundColor="border"
                 css={{ margin: `${theme.spacing.small}px 0` }}
@@ -84,13 +103,20 @@ export function FlowSidePanel({
                   always-on, customizable DevOps agents that monitor alerts,
                   resolve environment issues, and manage ticket closures.
                 </CaptionP>
-                <LearnMoreLinkSC
+                <a
                   href="https://www.plural.sh/blog/introducing-plural-workbenches-build-your-own-agents-for-devops/"
                   target="_blank"
                   rel="noopener noreferrer"
+                  css={{
+                    ...theme.partials.text.caption,
+                    color: theme.colors['text-input-disabled'],
+                    textDecoration: 'none',
+                    width: 'fit-content',
+                    '&:hover': { color: theme.colors['text-light'] },
+                  }}
                 >
                   Learn more use cases
-                </LearnMoreLinkSC>
+                </a>
               </Flex>
             </>
           )}
@@ -140,7 +166,11 @@ function WorkbenchPanelItem({
   }, [showFullDescription, workbench.description])
 
   return (
-    <WorkbenchItemSC>
+    <Flex
+      align="flex-start"
+      gap="small"
+      width="100%"
+    >
       <Flex
         direction="column"
         gap="xsmall"
@@ -181,7 +211,7 @@ function WorkbenchPanelItem({
         )}
         {!!metadataItems.length && <MetadataIcons items={metadataItems} />}
       </Flex>
-    </WorkbenchItemSC>
+    </Flex>
   )
 }
 
@@ -207,7 +237,16 @@ function MetadataIcons({
           label={item.label}
           placement="bottom"
         >
-          <MetadataIconWrapSC>{item.icon}</MetadataIconWrapSC>
+          <Flex
+            align="center"
+            justify="center"
+            css={{
+              height: METADATA_ICON_SIZE,
+              width: METADATA_ICON_SIZE,
+            }}
+          >
+            {item.icon}
+          </Flex>
         </Tooltip>
       ))}
       {!!hiddenItems.length && (
@@ -254,35 +293,6 @@ const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
   }),
 }))
 
-const HeaderSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-}))
-
-const ButtonSC = styled(Button)(({ theme }) => ({
-  ...theme.partials.reset.button,
-  ...theme.partials.text.body2,
-  alignSelf: 'start',
-  color: theme.colors['text-xlight'],
-  padding: 0,
-
-  '&:hover': {
-    ...theme.partials.reset.button,
-    ...theme.partials.text.body2,
-    color: theme.colors['text-light'],
-  },
-}))
-
-const WorkbenchItemSC = styled.div(({ theme }) => ({
-  alignItems: 'flex-start',
-  display: 'flex',
-  gap: theme.spacing.small,
-  width: '100%',
-}))
-
 const WorkbenchNameButtonSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
   ...theme.partials.text.body2,
@@ -313,25 +323,6 @@ const ReadMoreSC = styled.button(({ theme }) => ({
   ...theme.partials.text.caption,
   alignSelf: 'start',
   color: theme.colors['text-input-disabled'],
-  '&:hover': {
-    color: theme.colors['text-light'],
-  },
-}))
-
-const MetadataIconWrapSC = styled.span({
-  alignItems: 'center',
-  display: 'flex',
-  height: METADATA_ICON_SIZE,
-  justifyContent: 'center',
-  lineHeight: 0,
-  width: METADATA_ICON_SIZE,
-})
-
-const LearnMoreLinkSC = styled.a(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-input-disabled'],
-  textDecoration: 'none',
-  width: 'fit-content',
   '&:hover': {
     color: theme.colors['text-light'],
   },
