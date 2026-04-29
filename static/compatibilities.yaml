@@ -5589,6 +5589,25 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.4.1
+    kube: ['1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm chart released for v2.4.0 (chart packaging/release step
+          in v2.4.1)., Helm chart adds liveness probes to the cert-controller and
+          webhook components., 'Chart-level behavior change/fix: prevent creation
+          of a specific type of Kubernetes Secret (implementation detail not specified
+          in notes).']
+      features: ['GCP PushSecret: support multiple `replicationLocations` for secret
+          replication.', 'Passbolt provider: support custom CA bundle / CA provider
+          for TLS trust.', 'Azure PushSecret: support setting `contentType` on pushed
+          secrets.', 'Chart: liveness probes added for cert-controller and webhook
+          to improve pod health detection/restarts.']
+      breaking_changes: []
+    chart_version: 2.4.1
+    images: ['ghcr.io/external-secrets/external-secrets:v2.4.1']
   - version: 2.4.0
     kube: ['1.35', '1.34']
     requirements: []
@@ -12775,7 +12794,7 @@ addons:
           apply/diff (SSA, server-side dry-run, apply-out-of-sync-only, replace/force
           options) can alter sync outcomes; validate sync options and test against
           critical apps before rolling out broadly.']
-    chart_version: 9.5.4
+    chart_version: 9.5.7
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.3.8']
   - version: 3.3.0
@@ -17165,7 +17184,7 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 3.12.10-preview
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.12']
+    images: []
   - version: 2.12.0
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
