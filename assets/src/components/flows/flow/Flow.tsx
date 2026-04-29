@@ -21,10 +21,11 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, createContext, use, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
+  FLOW_WORKBENCHES_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
 import { VULNERABILITY_REPORTS_REL_PATH } from 'routes/securityRoutesConsts'
@@ -32,6 +33,7 @@ import styled from 'styled-components'
 
 const directory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
+  { path: FLOW_WORKBENCHES_REL_PATH, label: 'Workbenches' },
   { path: 'pipelines', label: 'Pipelines' },
   { path: 'previews', label: 'Previews' },
   { path: 'prs', label: 'PRs' },
@@ -42,6 +44,18 @@ const directory: SubtabDirectory = [
 
 export type FlowOutletContext = {
   flow: Nullable<FlowBasicWithBindingsFragment>
+}
+
+type FlowSidePanelContextValue = {
+  setSidePanelContent: (content: ReactNode | null) => void
+}
+
+const FlowSidePanelContext = createContext<FlowSidePanelContextValue>({
+  setSidePanelContent: () => {},
+})
+
+export function useFlowSidePanel() {
+  return use(FlowSidePanelContext)
 }
 
 export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
@@ -55,12 +69,19 @@ export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
 
 export function Flow() {
   const [showPermissions, setShowPermissions] = useState(false)
+  const [sidePanelContent, setSidePanelContent] = useState<ReactNode | null>(
+    null
+  )
   const { flowIdOrName, flowData, loading, error, refetch } = useCurrentFlow()
   const tab = useMatch(`${FLOWS_ABS_PATH}/${flowIdOrName}/:tab/*`)?.params.tab
   const flow = flowData?.flow
 
   const [headerContent, setHeaderContent] = useState<ReactNode | null>(null)
   const headerCtx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
+  const sidePanelCtx = useMemo(
+    () => ({ setSidePanelContent }),
+    [setSidePanelContent]
+  )
   const outletCtx: FlowOutletContext = useMemo(() => ({ flow }), [flow])
 
   useSetBreadcrumbs(
@@ -85,57 +106,64 @@ export function Flow() {
 
   return (
     <PageHeaderContext value={headerCtx}>
-      <WrapperSC>
-        <HeaderSC>
-          <IconFrame
-            icon={<ReturnIcon />}
-            clickable
-            as={Link}
-            size="large"
-            type="secondary"
-            to={FLOWS_ABS_PATH}
-            tooltip="Return to flows"
-          />
-          <Flex
-            gap="small"
-            align="center"
-            flex={1}
-          >
-            <AppIcon
-              size="xxsmall"
-              url={flow.icon ?? ''}
-              icon={<FlowIcon />}
-            />
-            <StackedText
-              first={flow.name}
-              firstPartialType="body1Bold"
-              firstColor="text"
-              second={flow.description}
-              secondColor="text-xlight"
-            />
-          </Flex>
-          <Button
-            secondary
-            startIcon={<PeopleIcon />}
-            onClick={() => setShowPermissions(true)}
-          >
-            Permissions
-          </Button>
-          <ChatWithAIButton
-            floating
-            flowId={flow.id}
-            bodyText="Start a Flow chat"
-            summaryText={`Further questions about "${flow.name}" Flow`}
-          />
-        </HeaderSC>
-        <Flex justify="space-between">
-          <SubTabs directory={directory} />
-          {headerContent}
-        </Flex>
-        <ContentSC>
-          <Outlet context={outletCtx} />
-        </ContentSC>
-      </WrapperSC>
+      <FlowSidePanelContext value={sidePanelCtx}>
+        <WrapperSC>
+          <BodySC>
+            {sidePanelContent}
+            <ContentSC>
+              <HeaderSC>
+                <IconFrame
+                  icon={<ReturnIcon />}
+                  clickable
+                  as={Link}
+                  size="large"
+                  type="secondary"
+                  to={FLOWS_ABS_PATH}
+                  tooltip="Return to flows"
+                />
+                <Flex
+                  gap="small"
+                  align="center"
+                  flex={1}
+                >
+                  <AppIcon
+                    size="xxsmall"
+                    url={flow.icon ?? ''}
+                    icon={<FlowIcon />}
+                  />
+                  <StackedText
+                    first={flow.name}
+                    firstPartialType="body1Bold"
+                    firstColor="text"
+                    second={flow.description}
+                    secondColor="text-xlight"
+                  />
+                </Flex>
+                <Button
+                  secondary
+                  startIcon={<PeopleIcon />}
+                  onClick={() => setShowPermissions(true)}
+                >
+                  Permissions
+                </Button>
+                <ChatWithAIButton
+                  floating
+                  flowId={flow.id}
+                  bodyText="Start a Flow chat"
+                  summaryText={`Further questions about "${flow.name}" Flow`}
+                />
+              </HeaderSC>
+              <Flex justify="space-between">
+                <SubTabs directory={directory} />
+                {headerContent}
+              </Flex>
+              <OutletWrapSC>
+                <Outlet context={outletCtx} />
+              </OutletWrapSC>
+            </ContentSC>
+          </BodySC>
+        </WrapperSC>
+      </FlowSidePanelContext>
       <PermissionsModal
         id={flow.id}
         type={PermissionsIdType.Flow}
@@ -149,17 +177,23 @@ export function Flow() {
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const WrapperSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
-  padding: theme.spacing.large,
+  flex: 1,
   height: '100%',
   width: '100%',
-  maxWidth: theme.breakpoints.desktopLarge,
-  alignSelf: 'center',
+  minHeight: 0,
   overflow: 'hidden',
-}))
+})
+
+const BodySC = styled.div({
+  display: 'flex',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+})
 
 const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -167,10 +201,22 @@ const HeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
 }))
 
-const ContentSC = styled.div({
+const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  height: '100%',
-  width: '100%',
+  flex: 1,
+  gap: theme.spacing.medium,
+  minHeight: 0,
+  minWidth: 0,
   overflow: 'hidden',
+  padding: theme.spacing.large,
+}))
+
+const OutletWrapSC = styled.div({
+  display: 'block',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  width: '100%',
+  overflow: 'auto',
 })

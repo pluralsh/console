@@ -3,18 +3,14 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFlowWorkbenchesQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
-import type { FlowOutletContext } from './Flow'
+import { FlowSidePanel, type FlowWorkbenchRow } from './FlowSidePanel'
+import { type FlowOutletContext, useFlowSidePanel } from './Flow'
 
-type WorkbenchRow = {
-  id: string
-  name: string
-}
-
-const columnHelper = createColumnHelper<WorkbenchRow>()
+const columnHelper = createColumnHelper<FlowWorkbenchRow>()
 const columns = [
   columnHelper.accessor((row) => row, {
     id: 'name',
@@ -31,18 +27,25 @@ const columns = [
 export function FlowWorkbenches() {
   const { flow } = useOutletContext<FlowOutletContext>()
   const navigate = useNavigate()
+  const { setSidePanelContent } = useFlowSidePanel()
   const { data, loading, error } = useFlowWorkbenchesQuery({
     variables: { id: flow?.id ?? '' },
     skip: !flow?.id,
   })
 
-  const workbenches = useMemo<WorkbenchRow[]>(
+  const workbenches = useMemo<FlowWorkbenchRow[]>(
     () =>
       (data?.flow?.workbenches ?? [])
         .filter(isNonNullable)
         .map(({ id, name }) => ({ id, name })),
     [data]
   )
+
+  useEffect(() => {
+    setSidePanelContent(<FlowSidePanel workbenches={workbenches} />)
+
+    return () => setSidePanelContent(null)
+  }, [workbenches, setSidePanelContent])
 
   if (error) return <GqlError error={error} />
 
