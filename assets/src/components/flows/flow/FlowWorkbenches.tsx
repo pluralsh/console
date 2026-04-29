@@ -16,6 +16,7 @@ import {
 } from 'generated/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AttachWorkbenchesModal } from './AttachWorkbenchesModal'
@@ -76,28 +77,26 @@ export function FlowWorkbenches() {
 
   return (
     <>
-      <Flex
-        direction="column"
-        gap="medium"
-        minHeight={400}
-      >
+      <WrapperSC>
         <Body2BoldP>Workbench Jobs</Body2BoldP>
-        <WorkbenchJobsTableContent
-          jobs={jobs}
-          loading={jobsLoading}
-          loaded={!!jobsData}
-          pageInfo={jobsPageInfo}
-          fetchNextPage={fetchNextJobsPage}
-          setVirtualSlice={setJobsVirtualSlice}
-          columns={[
-            promptColumn,
-            creatorColumn,
-            workbenchColumn,
-            pullRequestsColumn,
-            actionsColumn,
-          ]}
-        />
-      </Flex>
+        <TableContainerSC>
+          <WorkbenchJobsTableContent
+            jobs={jobs}
+            loading={jobsLoading}
+            loaded={!!jobsData}
+            pageInfo={jobsPageInfo}
+            fetchNextPage={fetchNextJobsPage}
+            setVirtualSlice={setJobsVirtualSlice}
+            columns={[
+              promptColumn,
+              creatorColumn,
+              workbenchColumn,
+              pullRequestsColumn,
+              actionsColumn,
+            ]}
+          />
+        </TableContainerSC>
+      </WrapperSC>
       {flow?.name && (
         <AttachWorkbenchesModal
           flowName={flow.name}
@@ -110,3 +109,16 @@ export function FlowWorkbenches() {
     </>
   )
 }
+
+const WrapperSC = styled(Flex)(({ theme }) => ({
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  minHeight: 400,
+  height: '100%',
+  overflow: 'hidden',
+}))
+
+const TableContainerSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+})
