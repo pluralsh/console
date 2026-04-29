@@ -5,16 +5,12 @@ import { isEmpty } from 'lodash'
 
 import {
   AccessTokensDocument,
-  ScopeAttributes,
   useCreateAccessTokenMutation,
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 import { AccessTokensCreateScope } from './AccessTokensCreateScope'
-import { produce } from 'immer'
-
-export const EMPTY_SCOPE: ScopeAttributes = { apis: [], ids: [] }
 
 export function AccessTokensCreateModal({
   open,
@@ -25,16 +21,18 @@ export function AccessTokensCreateModal({
 }) {
   const theme = useTheme()
   const [addScopes, setAddScopes] = useState(false)
-  const [scopes, setScopes] = useState<ScopeAttributes[]>([EMPTY_SCOPE])
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([])
 
   const close = useCallback(() => {
     setOpen(false)
     setAddScopes(false)
-    setScopes([EMPTY_SCOPE])
-  }, [setOpen, setAddScopes, setScopes])
+    setSelectedScopes([])
+  }, [setOpen, setAddScopes, setSelectedScopes])
 
   const [mutation, { data, loading, error }] = useCreateAccessTokenMutation({
-    variables: { ...(addScopes && { scopes }) },
+    variables: {
+      ...(addScopes && { scopes: [{ apis: selectedScopes }] }),
+    },
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,
@@ -43,25 +41,9 @@ export function AccessTokensCreateModal({
       }),
   })
 
-  const addScope = () => {
-    setScopes([...scopes, EMPTY_SCOPE])
-  }
-  const setScope = (s: ScopeAttributes, i: number) => {
-    // clones the array because apollo seems to have a bug with nested immer updates
-    setScopes([
-      ...produce(scopes, (draft) => {
-        draft[i] = s
-      }),
-    ])
-  }
-  const removeScope = (idx: number) => {
-    if (scopes.length < 2) return
-    setScopes(scopes.filter((_, i) => i !== idx))
-  }
-
   const valid = useMemo(
-    () => !addScopes || scopes.every((s) => !isEmpty(s.apis)),
-    [addScopes, scopes]
+    () => !addScopes || !isEmpty(selectedScopes),
+    [addScopes, selectedScopes]
   )
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -106,15 +88,6 @@ export function AccessTokensCreateModal({
                 </div>
               </Switch>
             </div>
-            {addScopes && (
-              <Button
-                secondary
-                type="button"
-                onClick={addScope}
-              >
-                Add scope
-              </Button>
-            )}
             <Button
               secondary
               type="button"
@@ -160,14 +133,10 @@ export function AccessTokensCreateModal({
                   marginTop: theme.spacing.small,
                 }}
               />
-              {scopes.map((scope, index) => (
-                <AccessTokensCreateScope
-                  scope={scope}
-                  setScope={(s: ScopeAttributes) => setScope(s, index)}
-                  canRemove={scopes.length > 1}
-                  remove={() => removeScope(index)}
-                />
-              ))}
+              <AccessTokensCreateScope
+                selectedScopes={selectedScopes}
+                setSelectedScopes={setSelectedScopes}
+              />
             </>
           )}
           {error && (
