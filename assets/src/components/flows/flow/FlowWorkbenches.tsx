@@ -1,47 +1,54 @@
-import { Table } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
-import { StackedText } from 'components/utils/table/StackedText'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { WorkbenchJobsTableContent } from 'components/workbenches/workbench/WorkbenchJobsTable'
 import {
+  useFlowWorkbenchJobsQuery,
   useFlowWorkbenchesQuery,
-  WorkbenchTinyFragment,
 } from 'generated/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
-import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
+import { useOutletContext } from 'react-router-dom'
+import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AttachWorkbenchesModal } from './AttachWorkbenchesModal'
 import { FlowSidePanel } from './FlowSidePanel'
 import { type FlowOutletContext, useFlowSidePanel } from './Flow'
 
-const columnHelper = createColumnHelper<WorkbenchTinyFragment>()
-const columns = [
-  columnHelper.accessor((row) => row, {
-    id: 'name',
-    header: 'Workbench',
-    meta: { gridTemplate: '1fr' },
-    cell: ({ getValue }) => {
-      const { name } = getValue()
-
-      return <StackedText first={name} />
-    },
-  }),
-]
-
 export function FlowWorkbenches() {
   const { flow } = useOutletContext<FlowOutletContext>()
-  const navigate = useNavigate()
   const { setSidePanelContent } = useFlowSidePanel()
   const [attachModalOpen, setAttachModalOpen] = useState(false)
   const openAttachModal = useCallback(() => setAttachModalOpen(true), [])
-  const { data, loading, error, refetch } = useFlowWorkbenchesQuery({
+  const {
+    data: workbenchesData,
+    error: workbenchesError,
+    refetch: refetchWorkbenches,
+  } = useFlowWorkbenchesQuery({
     variables: { id: flow?.id ?? '' },
     skip: !flow?.id,
   })
+  const {
+    data: jobsData,
+    loading: jobsLoading,
+    error: jobsError,
+    pageInfo: jobsPageInfo,
+    fetchNextPage: fetchNextJobsPage,
+    setVirtualSlice: setJobsVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useFlowWorkbenchJobsQuery,
+      keyPath: ['flow', 'workbenchJobs'],
+      skip: !flow?.id,
+    },
+    { id: flow?.id ?? '' }
+  )
 
   const workbenches = useMemo(
-    () => (data?.flow?.workbenches ?? []).filter(isNonNullable),
-    [data]
+    () => (workbenchesData?.flow?.workbenches ?? []).filter(isNonNullable),
+    [workbenchesData]
+  )
+  const jobs = useMemo(
+    () => mapExistingNodes(jobsData?.flow?.workbenchJobs),
+    [jobsData]
   )
 
   useEffect(() => {
@@ -55,17 +62,18 @@ export function FlowWorkbenches() {
     return () => setSidePanelContent(null)
   }, [openAttachModal, workbenches, setSidePanelContent])
 
-  if (error) return <GqlError error={error} />
+  if (workbenchesError) return <GqlError error={workbenchesError} />
+  if (jobsError) return <GqlError error={jobsError} />
 
   return (
     <>
-      <Table
-        fullHeightWrap
-        data={workbenches}
-        columns={columns}
-        loading={!data && loading}
-        onRowClick={(_, row) => navigate(getWorkbenchAbsPath(row.original.id))}
-        emptyStateProps={{ message: 'No workbenches found.' }}
+      <WorkbenchJobsTableContent
+        jobs={jobs}
+        loading={jobsLoading}
+        loaded={!!jobsData}
+        pageInfo={jobsPageInfo}
+        fetchNextPage={fetchNextJobsPage}
+        setVirtualSlice={setJobsVirtualSlice}
       />
       {flow?.name && (
         <AttachWorkbenchesModal
@@ -73,7 +81,7 @@ export function FlowWorkbenches() {
           attachedWorkbenches={workbenches}
           open={attachModalOpen}
           onClose={() => setAttachModalOpen(false)}
-          onUpdated={() => refetch()}
+          onUpdated={() => refetchWorkbenches()}
         />
       )}
     </>

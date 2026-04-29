@@ -13,9 +13,13 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  VirtualSlice,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
+  PageInfoFragment,
   PrStatus,
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
@@ -40,21 +44,55 @@ export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   if (error) return <GqlError error={error} />
 
   return (
+    <WorkbenchJobsTableContent
+      jobs={jobs}
+      loading={loading}
+      loaded={!!data}
+      pageInfo={pageInfo}
+      fetchNextPage={fetchNextPage}
+      setVirtualSlice={setVirtualSlice}
+    />
+  )
+}
+
+export function WorkbenchJobsTableContent({
+  jobs,
+  loading,
+  loaded,
+  pageInfo,
+  fetchNextPage,
+  setVirtualSlice,
+}: {
+  jobs: WorkbenchJobTinyFragment[]
+  loading: boolean
+  loaded: boolean
+  pageInfo: PageInfoFragment | undefined
+  fetchNextPage: () => void
+  setVirtualSlice: (slice: VirtualSlice) => void
+}) {
+  return (
     <Table
       hideHeader
       fullHeightWrap
       virtualizeRows
       data={jobs}
       columns={columns}
-      loading={!data && loading}
+      loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       emptyStateProps={{ message: 'No jobs found.' }}
       getRowLink={({ original }) => {
-        const { id: jobId } = original as WorkbenchJobTinyFragment
-        return <Link to={getWorkbenchJobAbsPath({ workbenchId, jobId })} />
+        const { id: jobId, workbench } = original as WorkbenchJobTinyFragment
+        return (
+          <Link
+            to={getWorkbenchJobAbsPath({
+              workbenchId: workbench?.id ?? '',
+              jobId,
+            })}
+          />
+        )
       }}
     />
   )
