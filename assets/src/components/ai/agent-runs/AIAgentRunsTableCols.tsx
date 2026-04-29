@@ -17,7 +17,7 @@ import {
 } from 'components/self-service/pr/queue/PrQueueColumns'
 import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { TRUNCATE } from 'components/utils/truncate'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2P, SpanSC } from 'components/utils/typography/Text'
 import {
   AgentRunTinyFragment,
   PullRequestBasicFragment,
@@ -145,14 +145,16 @@ export function PRsModalIcon({
     )
   return (
     <>
-      <IconFrame
+      <Chip
         clickable
-        type="secondary"
-        tooltip="View pull requests"
-        icon={<PrOpenIcon />}
+        size="small"
         onClick={() => setModalOpen(true)}
-        {...props}
-      />
+        tooltip="View pull requests"
+        fillLevel={0}
+      >
+        <SpanSC $color="text-xlight">{prs.length}</SpanSC>{' '}
+        <SpanSC $color="text-light">PRs</SpanSC>
+      </Chip>
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

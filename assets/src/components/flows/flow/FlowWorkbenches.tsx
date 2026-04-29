@@ -5,6 +5,7 @@ import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   actionsColumn,
   creatorColumn,
+  pullRequestsColumn,
   promptColumn,
   workbenchColumn,
   WorkbenchJobsTableContent,
@@ -92,6 +93,7 @@ export function FlowWorkbenches() {
             promptColumn,
             creatorColumn,
             workbenchColumn,
+            pullRequestsColumn,
             actionsColumn,
           ]}
         />

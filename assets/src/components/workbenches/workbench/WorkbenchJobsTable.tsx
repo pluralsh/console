@@ -26,7 +26,7 @@ import {
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
+import { toLower, truncate } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -80,7 +80,14 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns ?? [promptColumn, creatorColumn, actionsColumn]}
+      columns={
+        columns ?? [
+          promptColumn,
+          creatorColumn,
+          pullRequestsColumn,
+          actionsColumn,
+        ]
+      }
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -141,34 +148,54 @@ export const workbenchColumn = columnHelper.accessor(
   }
 )
 
+export const pullRequestsColumn = columnHelper.accessor(
+  ({ pullRequests }) => pullRequests,
+  {
+    id: 'pullRequests',
+    cell: function Cell({ getValue }) {
+      const theme = useTheme()
+      const prs = getValue()?.filter(isNonNullable) ?? []
+      const singlePrProps =
+        prs.length === 1
+          ? (() => {
+              const singlePrStatus = prs[0].status ?? PrStatus.Open
+              const tooltip = `View ${toLower(singlePrStatus)} pull request`
+              const icon =
+                singlePrStatus === PrStatus.Merged ? (
+                  <PrMergedIcon color={theme.colors['code-block-purple']} />
+                ) : singlePrStatus === PrStatus.Closed ? (
+                  <PrClosedIcon color="icon-danger" />
+                ) : (
+                  <PrOpenIcon color="icon-success" />
+                )
+
+              return { icon, tooltip }
+            })()
+          : null
+
+      return (
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          <PRsModalIcon
+            size="small"
+            type="tertiary"
+            prs={prs}
+            {...(singlePrProps ?? {})}
+          />
+        </Flex>
+      )
+    },
+  }
+)
+
 export const actionsColumn = columnHelper.accessor((job) => job, {
   id: 'actions',
   cell: function Cell({ getValue }) {
     const theme = useTheme()
     const { spacing } = theme
-    const { pullRequests, result, status } = getValue()
-    const prs = pullRequests?.filter(isNonNullable) ?? []
-    const singlePrProps =
-      prs.length === 1
-        ? (() => {
-            const singlePrStatus = prs[0].status
-            const icon =
-              singlePrStatus === PrStatus.Merged ? (
-                <PrMergedIcon color={theme.colors['code-block-purple']} />
-              ) : singlePrStatus === PrStatus.Closed ? (
-                <PrClosedIcon color="icon-danger" />
-              ) : (
-                <PrOpenIcon color="icon-success" />
-              )
-            const tooltip =
-              singlePrStatus === PrStatus.Merged
-                ? 'View merged pull request'
-                : singlePrStatus === PrStatus.Closed
-                  ? 'View closed pull request'
-                  : 'View open pull request'
-            return { icon, tooltip }
-          })()
-        : null
+    const { result, status } = getValue()
 
     return (
       <Flex
@@ -177,12 +204,6 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
         justify="flex-end"
         width="100%"
       >
-        <PRsModalIcon
-          size="small"
-          type="tertiary"
-          prs={prs}
-          {...(singlePrProps ?? {})}
-        />
         {result?.conclusion && (
           <ActivityModalIcon
             icon={PaperCheckIcon}
