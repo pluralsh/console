@@ -11,7 +11,7 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 3.12.10-preview
-  images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.12']
+  images: []
 - version: 2.12.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
