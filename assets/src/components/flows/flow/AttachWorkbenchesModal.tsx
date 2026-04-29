@@ -131,7 +131,13 @@ export function AttachWorkbenchesModal({
       onClose={onClose}
       header="Attach workbench to flow"
       size="custom"
-      css={{ maxWidth: 800, width: 800 }}
+      css={{
+        maxHeight: 'calc(100vh - 64px)',
+        maxWidth: 800,
+        overflow: 'hidden',
+        width: 800,
+      }}
+      scrollable={false}
       onOpenAutoFocus={(e) => e.preventDefault()}
       actions={
         <Flex
@@ -157,6 +163,10 @@ export function AttachWorkbenchesModal({
       <Flex
         direction="column"
         gap="large"
+        css={{
+          minHeight: 0,
+          overflow: 'hidden',
+        }}
       >
         {error && <GqlError error={error} />}
         {mutationError && <GqlError error={mutationError} />}
@@ -166,82 +176,116 @@ export function AttachWorkbenchesModal({
           startIcon={<SearchIcon />}
           placeholder="Search for available workbenches"
         />
-        <Flex
-          direction="column"
-          gap="small"
-        >
-          <Body2BoldP $color="text">Attached</Body2BoldP>
-          {!isEmpty(attached) ? (
-            attached.map((workbench) => (
-              <AttachedWorkbench
-                key={workbench.id}
-                workbench={workbench}
-                onRemove={removeWorkbench}
-              />
-            ))
-          ) : (
-            <CaptionP $color="text-xlight">No workbenches attached.</CaptionP>
-          )}
-        </Flex>
-        <Flex
-          direction="column"
-          gap="small"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            minHeight: 0,
+          }}
         >
           <Flex
-            align="center"
-            gap="xsmall"
-          >
-            <Body2BoldP $color="text">Available</Body2BoldP>
-            <Tooltip
-              label="You can use workbenches matching your permissions tier on this flow. Contact your admin for access."
-              css={{ width: 300 }}
-            >
-              <InfoOutlineIcon
-                color="icon-xlight"
-                size={12}
-              />
-            </Tooltip>
-          </Flex>
-          <div
+            direction="column"
+            gap="small"
             css={{
-              display: 'grid',
-              gap: theme.spacing.xsmall,
-              maxHeight: 360,
-              overflowY: 'auto',
-            }}
-            onScroll={(event: UIEvent<HTMLDivElement>) => {
-              const target = event.currentTarget
-              const reachedBottom =
-                target.scrollTop + target.clientHeight >=
-                target.scrollHeight - 16
-              if (reachedBottom && !loading && pageInfo?.hasNextPage) {
-                fetchNextPage()
-              }
+              minHeight: 0,
+              overflow: 'hidden',
             }}
           >
-            {!isEmpty(available) ? (
-              available.map((workbench) => (
-                <AvailableWorkbench
-                  key={workbench.id}
-                  workbench={workbench}
-                  onAdd={addWorkbench}
-                />
-              ))
-            ) : loading ? (
-              <Flex
-                align="center"
-                justify="center"
-                padding="small"
+            <Body2BoldP $color="text">Attached</Body2BoldP>
+            <div
+              css={{
+                alignContent: 'start',
+                display: 'grid',
+                gap: theme.spacing.xsmall,
+                gridAutoRows: 'max-content',
+                maxHeight: 'clamp(128px, 32vh, 320px)',
+                minHeight: 0,
+                overflowY: 'auto',
+              }}
+            >
+              {!isEmpty(attached) ? (
+                attached.map((workbench) => (
+                  <AttachedWorkbench
+                    key={workbench.id}
+                    workbench={workbench}
+                    onRemove={removeWorkbench}
+                  />
+                ))
+              ) : (
+                <CaptionP $color="text-xlight">
+                  No workbenches attached.
+                </CaptionP>
+              )}
+            </div>
+          </Flex>
+          <Flex
+            direction="column"
+            gap="small"
+            css={{
+              minHeight: 0,
+              overflow: 'hidden',
+            }}
+          >
+            <Flex
+              align="center"
+              gap="xsmall"
+            >
+              <Body2BoldP $color="text">Available</Body2BoldP>
+              <Tooltip
+                label="You can use workbenches matching your permissions tier on this flow. Contact your admin for access."
+                css={{ width: 300 }}
               >
-                <Spinner color={theme.colors['text-xlight']} />
-              </Flex>
-            ) : (
-              <CaptionP $color="text-xlight">
-                No available workbenches match your search.
-              </CaptionP>
-            )}
-          </div>
-        </Flex>
+                <InfoOutlineIcon
+                  color="icon-xlight"
+                  size={12}
+                />
+              </Tooltip>
+            </Flex>
+            <div
+              css={{
+                alignContent: 'start',
+                display: 'grid',
+                gap: theme.spacing.xsmall,
+                gridAutoRows: 'max-content',
+                maxHeight: 'clamp(128px, 32vh, 320px)',
+                minHeight: 0,
+                overflowY: 'auto',
+              }}
+              onScroll={(event: UIEvent<HTMLDivElement>) => {
+                const target = event.currentTarget
+                const reachedBottom =
+                  target.scrollTop + target.clientHeight >=
+                  target.scrollHeight - 16
+                if (reachedBottom && !loading && pageInfo?.hasNextPage) {
+                  fetchNextPage()
+                }
+              }}
+            >
+              {!isEmpty(available) ? (
+                available.map((workbench) => (
+                  <AvailableWorkbench
+                    key={workbench.id}
+                    workbench={workbench}
+                    onAdd={addWorkbench}
+                  />
+                ))
+              ) : loading ? (
+                <Flex
+                  align="center"
+                  justify="center"
+                  padding="small"
+                >
+                  <Spinner color={theme.colors['text-xlight']} />
+                </Flex>
+              ) : (
+                <CaptionP $color="text-xlight">
+                  No available workbenches match your search.
+                </CaptionP>
+              )}
+            </div>
+          </Flex>
+        </div>
       </Flex>
     </Modal>
   )
