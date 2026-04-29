@@ -34,7 +34,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -158,21 +158,32 @@ export function AttachWorkbenchesModal({
           startIcon={<SearchIcon />}
           placeholder="Search for available workbenches"
         />
-        <ModalSection
-          title="Attached"
-          emptyMessage="No workbenches attached."
+        <Flex
+          direction="column"
+          gap="small"
         >
-          {attached.map((workbench) => (
-            <AttachedWorkbench
-              key={workbench.id}
-              workbench={workbench}
-              onRemove={removeWorkbench}
-            />
-          ))}
-        </ModalSection>
-        <ModalSection
-          title="Available"
-          headerAddon={
+          <Body2BoldP $color="text">Attached</Body2BoldP>
+          {!isEmpty(attached) ? (
+            attached.map((workbench) => (
+              <AttachedWorkbench
+                key={workbench.id}
+                workbench={workbench}
+                onRemove={removeWorkbench}
+              />
+            ))
+          ) : (
+            <CaptionP $color="text-xlight">No workbenches attached.</CaptionP>
+          )}
+        </Flex>
+        <Flex
+          direction="column"
+          gap="small"
+        >
+          <Flex
+            align="center"
+            gap="xsmall"
+          >
+            <Body2BoldP $color="text">Available</Body2BoldP>
             <Tooltip
               label="You can use workbenches matching your permissions tier on this flow. Contact your admin for access."
               css={{ width: 300 }}
@@ -182,57 +193,25 @@ export function AttachWorkbenchesModal({
                 size={12}
               />
             </Tooltip>
-          }
-          emptyMessage={
-            loading
-              ? 'Loading workbenches...'
-              : 'No available workbenches match your search.'
-          }
-        >
-          {available.map((workbench) => (
-            <AvailableWorkbench
-              key={workbench.id}
-              workbench={workbench}
-              onAdd={addWorkbench}
-            />
-          ))}
-        </ModalSection>
+          </Flex>
+          {!isEmpty(available) ? (
+            available.map((workbench) => (
+              <AvailableWorkbench
+                key={workbench.id}
+                workbench={workbench}
+                onAdd={addWorkbench}
+              />
+            ))
+          ) : (
+            <CaptionP $color="text-xlight">
+              {loading
+                ? 'Loading workbenches...'
+                : 'No available workbenches match your search.'}
+            </CaptionP>
+          )}
+        </Flex>
       </Flex>
     </Modal>
-  )
-}
-
-function ModalSection({
-  title,
-  headerAddon,
-  emptyMessage,
-  children,
-}: {
-  title: string
-  headerAddon?: ReactNode
-  emptyMessage: string
-  children: ReactNode
-}) {
-  const hasItems = !isEmpty(children)
-
-  return (
-    <Flex
-      direction="column"
-      gap="small"
-    >
-      <Flex
-        align="center"
-        gap="xsmall"
-      >
-        <Body2BoldP $color="text">{title}</Body2BoldP>
-        {headerAddon}
-      </Flex>
-      {hasItems ? (
-        children
-      ) : (
-        <CaptionP $color="text-xlight">{emptyMessage}</CaptionP>
-      )}
-    </Flex>
   )
 }
 
@@ -243,10 +222,19 @@ function AttachedWorkbench({
   workbench: WorkbenchTinyFragment
   onRemove: (workbenchId: string) => void
 }) {
+  const theme = useTheme()
   const tools = workbench.tools?.filter(isNonNullable) ?? []
 
   return (
-    <AttachedWorkbenchCardSC>
+    <Card
+      css={{
+        alignItems: 'center',
+        display: 'flex',
+        gap: theme.spacing.medium,
+        justifyContent: 'space-between',
+        padding: theme.spacing.medium,
+      }}
+    >
       <StackedText
         first={workbench.name}
         second={workbench.description}
@@ -279,7 +267,7 @@ function AttachedWorkbench({
       >
         Remove
       </Button>
-    </AttachedWorkbenchCardSC>
+    </Card>
   )
 }
 
@@ -290,6 +278,7 @@ function AvailableWorkbench({
   workbench: WorkbenchTinyFragment
   onAdd: (workbench: WorkbenchTinyFragment) => void
 }) {
+  const theme = useTheme()
   const RuntimeIcon =
     runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
   const tools = workbench.tools?.filter(isNonNullable) ?? []
@@ -300,7 +289,15 @@ function AvailableWorkbench({
   const hasAnyMetadata = hasCodingAgent || hasWebhooks || hasTools
 
   return (
-    <AvailableWorkbenchCardSC>
+    <Card
+      css={{
+        alignItems: 'center',
+        display: 'flex',
+        gap: theme.spacing.medium,
+        justifyContent: 'space-between',
+        padding: theme.spacing.medium,
+      }}
+    >
       <Flex
         direction="column"
         gap="small"
@@ -318,11 +315,21 @@ function AvailableWorkbench({
         />
 
         {hasAnyMetadata && (
-          <MetadataGridSC>
+          <div
+            css={{
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr',
+              columnGap: theme.spacing.small,
+              rowGap: theme.spacing.xxsmall,
+              alignItems: 'center',
+              minWidth: 0,
+              width: '100%',
+            }}
+          >
             {hasCodingAgent && (
               <>
                 <MetadataLabelSC>coding agent</MetadataLabelSC>
-                <MetadataValueSC>
+                <div css={{ minWidth: 0 }}>
                   <Flex
                     align="center"
                     gap="xxsmall"
@@ -339,13 +346,13 @@ function AvailableWorkbench({
                       {workbench.agentRuntime?.name}
                     </CaptionP>
                   </Flex>
-                </MetadataValueSC>
+                </div>
               </>
             )}
             {hasWebhooks && (
               <>
                 <MetadataLabelSC>webhooks</MetadataLabelSC>
-                <MetadataValueSC>
+                <div css={{ minWidth: 0 }}>
                   <MetadataIcons
                     items={webhooks.map((webhook) => ({
                       id: webhook.id,
@@ -353,13 +360,13 @@ function AvailableWorkbench({
                       icon: withIconSize(getWebhookIcon(webhook), 12),
                     }))}
                   />
-                </MetadataValueSC>
+                </div>
               </>
             )}
             {hasTools && (
               <>
                 <MetadataLabelSC>bound tools</MetadataLabelSC>
-                <MetadataValueSC>
+                <div css={{ minWidth: 0 }}>
                   <MetadataIcons
                     items={tools.map((tool) => ({
                       id: tool.id,
@@ -373,10 +380,10 @@ function AvailableWorkbench({
                       ),
                     }))}
                   />
-                </MetadataValueSC>
+                </div>
               </>
             )}
-          </MetadataGridSC>
+          </div>
         )}
       </Flex>
       <Button
@@ -386,7 +393,7 @@ function AvailableWorkbench({
       >
         Add
       </Button>
-    </AvailableWorkbenchCardSC>
+    </Card>
   )
 }
 
@@ -396,37 +403,7 @@ function withIconSize(icon: ReactNode, size: number) {
   return cloneElement(icon as ReactElement<{ size?: number }>, { size })
 }
 
-const AttachedWorkbenchCardSC = styled(Card)(({ theme }) => ({
-  alignItems: 'center',
-  display: 'flex',
-  gap: theme.spacing.medium,
-  justifyContent: 'space-between',
-  padding: theme.spacing.medium,
-}))
-
-const AvailableWorkbenchCardSC = styled(Card)(({ theme }) => ({
-  alignItems: 'center',
-  display: 'flex',
-  gap: theme.spacing.medium,
-  justifyContent: 'space-between',
-  padding: theme.spacing.medium,
-}))
-
-const MetadataGridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'auto 1fr',
-  columnGap: theme.spacing.small,
-  rowGap: theme.spacing.xxsmall,
-  alignItems: 'center',
-  minWidth: 0,
-  width: '100%',
-}))
-
 const MetadataLabelSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-input-disabled'],
 }))
-
-const MetadataValueSC = styled.div({
-  minWidth: 0,
-})
