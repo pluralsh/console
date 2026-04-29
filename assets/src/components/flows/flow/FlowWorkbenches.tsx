@@ -1,5 +1,7 @@
+import { Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import { WorkbenchJobsTableContent } from 'components/workbenches/workbench/WorkbenchJobsTable'
 import {
   useFlowWorkbenchJobsQuery,
@@ -67,14 +69,21 @@ export function FlowWorkbenches() {
 
   return (
     <>
-      <WorkbenchJobsTableContent
-        jobs={jobs}
-        loading={jobsLoading}
-        loaded={!!jobsData}
-        pageInfo={jobsPageInfo}
-        fetchNextPage={fetchNextJobsPage}
-        setVirtualSlice={setJobsVirtualSlice}
-      />
+      <Flex
+        direction="column"
+        gap="medium"
+        minHeight={400}
+      >
+        <Body2BoldP>Workbench Jobs</Body2BoldP>
+        <WorkbenchJobsTableContent
+          jobs={jobs}
+          loading={jobsLoading}
+          loaded={!!jobsData}
+          pageInfo={jobsPageInfo}
+          fetchNextPage={fetchNextJobsPage}
+          setVirtualSlice={setJobsVirtualSlice}
+        />
+      </Flex>
       {flow?.name && (
         <AttachWorkbenchesModal
           flowName={flow.name}
