@@ -109,7 +109,11 @@ export function Flow() {
       <FlowSidePanelContext value={sidePanelCtx}>
         <WrapperSC>
           <BodySC>
-            {sidePanelContent}
+            <SidePanelWrapSC $open={!!sidePanelContent}>
+              <SidePanelInnerSC $open={!!sidePanelContent}>
+                {sidePanelContent}
+              </SidePanelInnerSC>
+            </SidePanelWrapSC>
             <ContentSC>
               <HeaderSC>
                 <IconFrame
@@ -194,6 +198,27 @@ const BodySC = styled.div({
   minWidth: 0,
   overflow: 'hidden',
 })
+
+const SidePanelWrapSC = styled.div<{ $open: boolean }>(({ theme, $open }) => ({
+  display: 'flex',
+  width: $open ? 250 : 0,
+  height: '100%',
+  flexShrink: 0,
+  marginRight: $open ? theme.spacing.small : 0,
+  minWidth: 0,
+  overflow: 'hidden',
+  transition: 'width 0.25s ease, margin-right 0.25s ease',
+}))
+
+const SidePanelInnerSC = styled.div<{ $open: boolean }>(({ $open }) => ({
+  display: 'flex',
+  width: 250,
+  height: '100%',
+  flexShrink: 0,
+  opacity: $open ? 1 : 0,
+  transform: $open ? 'translateX(0)' : 'translateX(-8px)',
+  transition: 'opacity 0.2s ease, transform 0.25s ease',
+}))
 
 const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
