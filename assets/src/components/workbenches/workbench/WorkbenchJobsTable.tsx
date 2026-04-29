@@ -121,7 +121,6 @@ export const creatorColumn = columnHelper.accessor(({ user }) => user, {
       <Tooltip label={user.name}>
         <AppIcon
           name={user.name}
-          spacing={user.profile ? 'none' : undefined}
           size="xxsmall"
         />
       </Tooltip>
