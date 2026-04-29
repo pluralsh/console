@@ -317,7 +317,9 @@ defmodule Console do
     try do
       fun.()
     catch
-      _, err -> fallback.(err)
+      _, err ->
+        Logger.error(Exception.format(:error, err, __STACKTRACE__))
+        fallback.(err)
     end
   end
 
