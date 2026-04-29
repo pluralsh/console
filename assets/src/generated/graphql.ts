@@ -18291,7 +18291,7 @@ export type FlowWorkbenchesQueryVariables = Exact<{
 }>;
 
 
-export type FlowWorkbenchesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, workbenches?: Array<{ __typename?: 'Workbench', id: string, name: string } | null> | null } | null };
+export type FlowWorkbenchesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, workbenches?: Array<WorkbenchTinyFragment | null> | null } | null };
 
 export type FlowPipelinesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -34434,12 +34434,11 @@ export const FlowWorkbenchesDocument = gql`
   flow(id: $id) {
     id
     workbenches {
-      id
-      name
+      ...WorkbenchTiny
     }
   }
 }
-    `;
+    ${WorkbenchTinyFragmentDoc}`;
 
 /**
  * __useFlowWorkbenchesQuery__
