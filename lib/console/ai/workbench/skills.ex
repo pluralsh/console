@@ -96,7 +96,7 @@ defmodule Console.AI.Workbench.Skills do
     else
       {:regex, _} ->
         {:error, "could not parse skill in file #{file}, no metadata block found"}
-      {:yaml, {:error, _} = err} ->
+      {:yaml, {:error, err}} ->
         {:error, "could not parse skill in file #{file}, invalid yaml block: #{inspect(err)}"}
       {:yaml, _} -> {:error, "could not parse skill in file #{file}, invalid yaml block"}
     end

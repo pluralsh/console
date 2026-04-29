@@ -10,13 +10,13 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
   end
 
   embedded_schema do
-    field :skills,      :map, virtual: true
-    field :job,         :map, virtual: true
-    field :name,        :string
-    field :previous,    :string
-    field :replacement, :string
-    field :branch_name, :string
-    field :pr_title,    :string
+    field :skills,         :map, virtual: true
+    field :job,            :map, virtual: true
+    field :name,           :string
+    field :previous,       :string
+    field :replacement,    :string
+    field :branch_name,    :string
+    field :pr_title,       :string
     field :pr_description, :string
     field :commit_message, :string
   end
@@ -33,9 +33,7 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
     |> validate_required([:name, :previous, :replacement, :branch_name, :pr_title, :pr_description])
   end
 
-  def implement(%__MODULE__{} = model), do: {:ok, model}
-
-  def execute(%__MODULE__{job: job, name: name, previous: previous, replacement: replacement} = model) do
+  def implement(%__MODULE__{job: job, name: name, previous: previous, replacement: replacement} = model) do
     case Skills.plural?(name, job.workbench) do
       true -> plural_update(job, name, previous, replacement)
       false -> git_update(model)
