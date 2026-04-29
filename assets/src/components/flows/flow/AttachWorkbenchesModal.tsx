@@ -2,9 +2,11 @@ import {
   Button,
   Card,
   Flex,
+  InfoOutlineIcon,
   Input2,
   Modal,
   SearchIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
@@ -170,6 +172,17 @@ export function AttachWorkbenchesModal({
         </ModalSection>
         <ModalSection
           title="Available"
+          headerAddon={
+            <Tooltip
+              label="You can use workbenches matching your permissions tier on this flow. Contact your admin for access."
+              css={{ width: 300 }}
+            >
+              <InfoOutlineIcon
+                color="icon-xlight"
+                size={12}
+              />
+            </Tooltip>
+          }
           emptyMessage={
             loading
               ? 'Loading workbenches...'
@@ -191,10 +204,12 @@ export function AttachWorkbenchesModal({
 
 function ModalSection({
   title,
+  headerAddon,
   emptyMessage,
   children,
 }: {
   title: string
+  headerAddon?: ReactNode
   emptyMessage: string
   children: ReactNode
 }) {
@@ -205,7 +220,13 @@ function ModalSection({
       direction="column"
       gap="small"
     >
-      <Body2BoldP $color="text">{title}</Body2BoldP>
+      <Flex
+        align="center"
+        gap="xsmall"
+      >
+        <Body2BoldP $color="text">{title}</Body2BoldP>
+        {headerAddon}
+      </Flex>
       {hasItems ? (
         children
       ) : (
