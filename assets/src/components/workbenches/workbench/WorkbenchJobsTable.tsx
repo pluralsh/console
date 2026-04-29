@@ -1,4 +1,5 @@
 import {
+  AppIcon,
   Card,
   CaretRightIcon,
   Flex,
@@ -8,6 +9,7 @@ import {
   PrMergedIcon,
   PrOpenIcon,
   Table,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
@@ -104,12 +106,23 @@ const columns = [
     ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
     { id: 'prompt', meta: { gridTemplate: '1fr' } }
   ),
-  columnHelper.accessor(({ user }) => user?.name, {
+  columnHelper.accessor(({ user }) => user, {
     id: 'creator',
     cell: ({ getValue }) => {
-      const name = getValue()
-      if (!name) return null
-      return <CaptionP $color="text-xlight">{name}</CaptionP>
+      const user = getValue()
+      if (!user?.name) return null
+
+      return (
+        <Tooltip label={user.name}>
+          <AppIcon
+            url={user.profile ?? undefined}
+            name={user.name}
+            size="xxsmall"
+            spacing="none"
+            css={{ borderRadius: '50%' }}
+          />
+        </Tooltip>
+      )
     },
   }),
   columnHelper.accessor((job) => job, {

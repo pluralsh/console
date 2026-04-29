@@ -418,6 +418,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   user {
     id
     name
+    profile
   }
   workbench {
     id
