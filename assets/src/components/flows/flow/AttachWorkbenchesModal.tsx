@@ -12,6 +12,7 @@ import { useDebounce } from '@react-hooks-library/core'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
 import { MetadataIcons } from 'components/utils/MetadataIcons'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
@@ -30,6 +31,7 @@ import {
   isValidElement,
   ReactElement,
   ReactNode,
+  UIEvent,
   useEffect,
   useMemo,
   useState,
@@ -49,16 +51,21 @@ export function AttachWorkbenchesModal({
   attachedWorkbenches: WorkbenchTinyFragment[]
   onUpdated: () => void
 } & ComponentPropsWithoutRef<typeof Modal>) {
+  const theme = useTheme()
   const [query, setQuery] = useState('')
   const [selectedWorkbenches, setSelectedWorkbenches] = useState<
     Map<string, WorkbenchTinyFragment>
   >(new Map())
   const debouncedQuery = useDebounce(query, 200)
 
-  const { data, loading, error } = useWorkbenchesQuery({
-    variables: { q: debouncedQuery },
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, error, pageInfo, fetchNextPage } =
+    useFetchPaginatedData(
+      {
+        queryHook: useWorkbenchesQuery,
+        keyPath: ['workbenches'],
+      },
+      { q: debouncedQuery }
+    )
 
   const [upsertFlow, { loading: mutationLoading, error: mutationError }] =
     useUpsertFlowMutation({
@@ -194,21 +201,39 @@ export function AttachWorkbenchesModal({
               />
             </Tooltip>
           </Flex>
-          {!isEmpty(available) ? (
-            available.map((workbench) => (
-              <AvailableWorkbench
-                key={workbench.id}
-                workbench={workbench}
-                onAdd={addWorkbench}
-              />
-            ))
-          ) : (
-            <CaptionP $color="text-xlight">
-              {loading
-                ? 'Loading workbenches...'
-                : 'No available workbenches match your search.'}
-            </CaptionP>
-          )}
+          <div
+            css={{
+              display: 'grid',
+              gap: theme.spacing.xsmall,
+              maxHeight: 360,
+              overflowY: 'auto',
+            }}
+            onScroll={(event: UIEvent<HTMLDivElement>) => {
+              const target = event.currentTarget
+              const reachedBottom =
+                target.scrollTop + target.clientHeight >=
+                target.scrollHeight - 16
+              if (reachedBottom && !loading && pageInfo?.hasNextPage) {
+                fetchNextPage()
+              }
+            }}
+          >
+            {!isEmpty(available) ? (
+              available.map((workbench) => (
+                <AvailableWorkbench
+                  key={workbench.id}
+                  workbench={workbench}
+                  onAdd={addWorkbench}
+                />
+              ))
+            ) : (
+              <CaptionP $color="text-xlight">
+                {loading
+                  ? 'Loading workbenches...'
+                  : 'No available workbenches match your search.'}
+              </CaptionP>
+            )}
+          </div>
         </Flex>
       </Flex>
     </Modal>
@@ -229,10 +254,13 @@ function AttachedWorkbench({
     <Card
       css={{
         alignItems: 'center',
+        boxSizing: 'border-box',
         display: 'flex',
         gap: theme.spacing.medium,
         justifyContent: 'space-between',
+        minWidth: 0,
         padding: theme.spacing.medium,
+        width: '100%',
       }}
     >
       <StackedText
@@ -292,10 +320,13 @@ function AvailableWorkbench({
     <Card
       css={{
         alignItems: 'center',
+        boxSizing: 'border-box',
         display: 'flex',
         gap: theme.spacing.medium,
         justifyContent: 'space-between',
+        minWidth: 0,
         padding: theme.spacing.medium,
+        width: '100%',
       }}
     >
       <Flex
