@@ -422,6 +422,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   }
   workbench {
     id
+    name
   }
   pullRequests {
     ...PullRequestBasic

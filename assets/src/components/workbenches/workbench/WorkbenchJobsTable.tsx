@@ -11,7 +11,7 @@ import {
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
@@ -64,6 +64,7 @@ export function WorkbenchJobsTableContent({
   pageInfo,
   fetchNextPage,
   setVirtualSlice,
+  columns,
 }: {
   jobs: WorkbenchJobTinyFragment[]
   loading: boolean
@@ -71,6 +72,7 @@ export function WorkbenchJobsTableContent({
   pageInfo: PageInfoFragment | undefined
   fetchNextPage: () => void
   setVirtualSlice: (slice: VirtualSlice) => void
+  columns?: ColumnDef<WorkbenchJobTinyFragment, any>[]
 }) {
   return (
     <Table
@@ -78,7 +80,7 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns}
+      columns={columns ?? [promptColumn, creatorColumn, actionsColumn]}
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -101,92 +103,105 @@ export function WorkbenchJobsTableContent({
 }
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
-const columns = [
-  columnHelper.accessor(
-    ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
-    { id: 'prompt', meta: { gridTemplate: '1fr' } }
-  ),
-  columnHelper.accessor(({ user }) => user, {
-    id: 'creator',
+export const promptColumn = columnHelper.accessor(
+  ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
+  { id: 'prompt', meta: { gridTemplate: '1fr' } }
+)
+
+export const creatorColumn = columnHelper.accessor(({ user }) => user, {
+  id: 'creator',
+  cell: ({ getValue }) => {
+    const user = getValue()
+    if (!user?.name) return null
+
+    return (
+      <Tooltip label={user.name}>
+        <AppIcon
+          url={user.profile ?? undefined}
+          name={user.name}
+          size="xxsmall"
+          spacing="none"
+          css={{ borderRadius: '50%' }}
+        />
+      </Tooltip>
+    )
+  },
+})
+
+export const workbenchColumn = columnHelper.accessor(
+  ({ workbench }) => workbench?.name,
+  {
+    id: 'workbench',
     cell: ({ getValue }) => {
-      const user = getValue()
-      if (!user?.name) return null
+      const workbenchName = getValue()
+      if (!workbenchName) return null
 
-      return (
-        <Tooltip label={user.name}>
-          <AppIcon
-            url={user.profile ?? undefined}
-            name={user.name}
-            size="xxsmall"
-            spacing="none"
-            css={{ borderRadius: '50%' }}
-          />
-        </Tooltip>
-      )
+      return <CaptionP $color="text-xlight">{workbenchName}</CaptionP>
     },
-  }),
-  columnHelper.accessor((job) => job, {
-    id: 'actions',
-    cell: function Cell({ getValue }) {
-      const theme = useTheme()
-      const { spacing } = theme
-      const { pullRequests, result, status } = getValue()
-      const prs = pullRequests?.filter(isNonNullable) ?? []
-      const singlePrProps =
-        prs.length === 1
-          ? (() => {
-              const singlePrStatus = prs[0].status
-              const icon =
-                singlePrStatus === PrStatus.Merged ? (
-                  <PrMergedIcon color={theme.colors['code-block-purple']} />
-                ) : singlePrStatus === PrStatus.Closed ? (
-                  <PrClosedIcon color="icon-danger" />
-                ) : (
-                  <PrOpenIcon color="icon-success" />
-                )
-              const tooltip =
-                singlePrStatus === PrStatus.Merged
-                  ? 'View merged pull request'
-                  : singlePrStatus === PrStatus.Closed
-                    ? 'View closed pull request'
-                    : 'View open pull request'
-              return { icon, tooltip }
-            })()
-          : null
+  }
+)
 
-      return (
-        <Flex
-          gap="medium"
-          align="center"
-          justify="flex-end"
-          width="100%"
-        >
-          <PRsModalIcon
-            size="small"
-            type="tertiary"
-            prs={prs}
-            {...(singlePrProps ?? {})}
+export const actionsColumn = columnHelper.accessor((job) => job, {
+  id: 'actions',
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+    const { spacing } = theme
+    const { pullRequests, result, status } = getValue()
+    const prs = pullRequests?.filter(isNonNullable) ?? []
+    const singlePrProps =
+      prs.length === 1
+        ? (() => {
+            const singlePrStatus = prs[0].status
+            const icon =
+              singlePrStatus === PrStatus.Merged ? (
+                <PrMergedIcon color={theme.colors['code-block-purple']} />
+              ) : singlePrStatus === PrStatus.Closed ? (
+                <PrClosedIcon color="icon-danger" />
+              ) : (
+                <PrOpenIcon color="icon-success" />
+              )
+            const tooltip =
+              singlePrStatus === PrStatus.Merged
+                ? 'View merged pull request'
+                : singlePrStatus === PrStatus.Closed
+                  ? 'View closed pull request'
+                  : 'View open pull request'
+            return { icon, tooltip }
+          })()
+        : null
+
+    return (
+      <Flex
+        gap="medium"
+        align="center"
+        justify="flex-end"
+        width="100%"
+      >
+        <PRsModalIcon
+          size="small"
+          type="tertiary"
+          prs={prs}
+          {...(singlePrProps ?? {})}
+        />
+        {result?.conclusion && (
+          <ActivityModalIcon
+            icon={PaperCheckIcon}
+            tooltip="View conclusion"
+            modalHeader="Conclusion"
+            modalContent={
+              <Card css={{ padding: spacing.large, overflow: 'auto' }}>
+                <Markdown text={result?.conclusion} />
+              </Card>
+            }
+            size={16}
           />
-          {result?.conclusion && (
-            <ActivityModalIcon
-              icon={PaperCheckIcon}
-              tooltip="View conclusion"
-              modalHeader="Conclusion"
-              modalContent={
-                <Card css={{ padding: spacing.large, overflow: 'auto' }}>
-                  <Markdown text={result?.conclusion} />
-                </Card>
-              }
-              size={16}
-            />
-          )}
-          <RunStatusIcon
-            fullColor
-            status={status}
-          />
-          <CaretRightIcon color="icon-xlight" />
-        </Flex>
-      )
-    },
-  }),
-]
+        )}
+        <RunStatusIcon
+          fullColor
+          status={status}
+        />
+        <CaretRightIcon color="icon-xlight" />
+      </Flex>
+    )
+  },
+})
