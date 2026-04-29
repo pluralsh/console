@@ -4,22 +4,18 @@ import {
   Divider,
   Flex,
   IconFrame,
-  Tooltip,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
+import { WorkbenchToolsMetadataIcons } from 'components/workbenches/tools/WorkbenchToolsMetadataIcons'
 import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchTinyFragment } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-
-const MAX_VISIBLE_METADATA_ITEMS = 5
-const METADATA_ICON_SIZE = 10
 
 export function FlowSidePanel({
   workbenches,
@@ -137,17 +133,6 @@ function WorkbenchPanelItem({
   const [canExpandDescription, setCanExpandDescription] = useState(false)
   const descriptionRef = useRef<HTMLSpanElement>(null)
   const tools = workbench.tools?.filter(isNonNullable) ?? []
-  const metadataItems = tools.map((tool) => ({
-    id: `tool-${tool.id}`,
-    label: tool.name,
-    icon: (
-      <WorkbenchToolIcon
-        type={tool.tool}
-        provider={tool.cloudConnection?.provider}
-        size={METADATA_ICON_SIZE}
-      />
-    ),
-  }))
 
   useEffect(() => {
     if (!workbench.description) {
@@ -209,54 +194,8 @@ function WorkbenchPanelItem({
             )}
           </Flex>
         )}
-        {!!metadataItems.length && <MetadataIcons items={metadataItems} />}
+        {!!tools.length && <WorkbenchToolsMetadataIcons tools={tools} />}
       </Flex>
-    </Flex>
-  )
-}
-
-function MetadataIcons({
-  items,
-}: {
-  items: Array<{ id: string; label: string; icon: ReactNode }>
-}) {
-  const visibleItems = items.slice(0, MAX_VISIBLE_METADATA_ITEMS)
-  const hiddenItems = items.slice(MAX_VISIBLE_METADATA_ITEMS)
-  const hiddenItemsLabel = hiddenItems.map(({ label }) => label).join(', ')
-
-  return (
-    <Flex
-      align="center"
-      gap="xsmall"
-      wrap="wrap"
-      css={{ minWidth: 0 }}
-    >
-      {visibleItems.map((item) => (
-        <Tooltip
-          key={item.id}
-          label={item.label}
-          placement="bottom"
-        >
-          <Flex
-            align="center"
-            justify="center"
-            css={{
-              height: METADATA_ICON_SIZE,
-              width: METADATA_ICON_SIZE,
-            }}
-          >
-            {item.icon}
-          </Flex>
-        </Tooltip>
-      ))}
-      {!!hiddenItems.length && (
-        <Tooltip
-          label={hiddenItemsLabel || `${hiddenItems.length} more`}
-          placement="bottom"
-        >
-          <CaptionP $color="text-xlight">+{hiddenItems.length}</CaptionP>
-        </Tooltip>
-      )}
     </Flex>
   )
 }

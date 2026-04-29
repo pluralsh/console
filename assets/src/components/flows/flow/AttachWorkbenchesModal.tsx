@@ -8,8 +8,9 @@ import {
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
-import { TRUNCATE } from 'components/utils/truncate'
-import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { StackedText } from 'components/utils/table/StackedText'
+import { WorkbenchToolsMetadataIcons } from 'components/workbenches/tools/WorkbenchToolsMetadataIcons'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   useUpsertFlowMutation,
   useWorkbenchesQuery,
@@ -25,6 +26,7 @@ import {
 } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 
 export function AttachWorkbenchesModal({
   flowName,
@@ -110,7 +112,8 @@ export function AttachWorkbenchesModal({
       open={open}
       onClose={onClose}
       header="Attach workbench to flow"
-      size="large"
+      size="custom"
+      css={{ maxWidth: 800 }}
       onOpenAutoFocus={(e) => e.preventDefault()}
       actions={
         <>
@@ -152,8 +155,8 @@ export function AttachWorkbenchesModal({
               workbench={workbench}
               action={
                 <Button
-                  secondary
                   destructive
+                  small
                   onClick={() => removeWorkbench(workbench.id)}
                 >
                   Remove
@@ -177,6 +180,7 @@ export function AttachWorkbenchesModal({
               action={
                 <Button
                   secondary
+                  small
                   onClick={() => addWorkbench(workbench)}
                 >
                   Add
@@ -223,28 +227,26 @@ function WorkbenchModalRow({
   workbench: WorkbenchTinyFragment
   action: ReactNode
 }) {
+  const tools = workbench.tools?.filter(isNonNullable) ?? []
+
   return (
     <WorkbenchCardSC>
-      <Flex
-        direction="column"
-        minWidth={0}
-        flex={1}
-      >
-        <Body2BoldP
-          $color="text"
-          css={TRUNCATE}
-        >
-          {workbench.name}
-        </Body2BoldP>
-        {'description' in workbench && workbench.description && (
-          <Body2P
-            $color="text-xlight"
-            css={TRUNCATE}
-          >
-            {workbench.description}
-          </Body2P>
-        )}
-      </Flex>
+      <StackedText
+        first={workbench.name}
+        second={workbench.description}
+        truncate
+        firstPartialType="body2Bold"
+        firstColor="text"
+        secondPartialType="caption"
+        secondColor="text-xlight"
+        css={{ flex: 1, minWidth: 0 }}
+      />
+      {!!tools.length && (
+        <WorkbenchToolsMetadataIcons
+          iconSize={16}
+          tools={tools}
+        />
+      )}
       {action}
     </WorkbenchCardSC>
   )
