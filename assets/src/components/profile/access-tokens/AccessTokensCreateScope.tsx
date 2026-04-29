@@ -7,8 +7,8 @@ import {
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
 import { useMemo } from 'react'
+import { useTheme } from 'styled-components'
 
 const GRAPHQL_SCOPE_VALUES = [
   'agent.read',

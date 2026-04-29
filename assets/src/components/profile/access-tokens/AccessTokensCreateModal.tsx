@@ -31,7 +31,7 @@ export function AccessTokensCreateModal({
 
   const [mutation, { data, loading, error }] = useCreateAccessTokenMutation({
     variables: {
-      ...(addScopes && { scopes: [{ apis: selectedScopes }] }),
+      ...(addScopes && { scopes: [{ apis: selectedScopes, identifier: '*' }] }),
     },
     update: (cache, { data }) =>
       updateCache(cache, {

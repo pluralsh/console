@@ -11,19 +11,16 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { EMPTY_SCOPE } from 'components/profile/access-tokens/AccessTokensCreateModal'
 import { AccessTokensCreateScope } from 'components/profile/access-tokens/AccessTokensCreateScope'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { Body1P, Body2P, StrongSC } from 'components/utils/typography/Text'
 import UserInfo from 'components/utils/UserInfo'
 import {
-  ScopeAttributes,
   useDeleteUserMutation,
   UserFragment,
   useServiceAccountAccessTokenMutation,
 } from 'generated/graphql.ts'
-import { produce } from 'immer'
 import { isEmpty } from 'lodash'
 import { FormEvent, useMemo, useState } from 'react'
 import styled from 'styled-components'
@@ -111,37 +108,25 @@ function CreateServiceAccountTokenForm({
   const [refresh, setRefresh] = useState(false)
   const [expiry, setExpiry] = useState('')
   const [addScopes, setAddScopes] = useState(false)
-  const [scopes, setScopes] = useState<ScopeAttributes[]>([EMPTY_SCOPE])
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([])
 
   const [mutation, { data, loading, error }] =
     useServiceAccountAccessTokenMutation({
       variables: {
         id: serviceAccount.id,
         refresh,
-        attributes: { ...(expiry && { expiry }), ...(addScopes && { scopes }) },
+        attributes: {
+          ...(expiry && { expiry }),
+          ...(addScopes && {
+            scopes: [{ apis: selectedScopes, identifier: '*' }],
+          }),
+        },
       },
     })
 
-  const addScope = () => {
-    setScopes([...scopes, EMPTY_SCOPE])
-  }
-  const setScope = (s: ScopeAttributes, i: number) => {
-    // clones the array because apollo seems to have a bug with nested immer updates
-    setScopes([
-      ...produce(scopes, (draft) => {
-        draft[i] = s
-      }),
-    ])
-  }
-
-  const removeScope = (idx: number) => {
-    if (scopes.length < 2) return
-    setScopes(scopes.filter((_, i) => i !== idx))
-  }
-
   const scopesValid = useMemo(
-    () => !addScopes || scopes.every((s) => !isEmpty(s.apis)),
-    [addScopes, scopes]
+    () => !addScopes || !isEmpty(selectedScopes),
+    [addScopes, selectedScopes]
   )
 
   const allowSubmit = !loading && scopesValid
@@ -225,24 +210,10 @@ function CreateServiceAccountTokenForm({
             </Switch>
             {addScopes && (
               <Flex direction="column">
-                <Button
-                  small
-                  secondary
-                  alignSelf="end"
-                  type="button"
-                  onClick={addScope}
-                >
-                  Add scope
-                </Button>
-                {scopes.map((scope, index) => (
-                  <AccessTokensCreateScope
-                    key={index}
-                    scope={scope}
-                    setScope={(s: ScopeAttributes) => setScope(s, index)}
-                    canRemove={scopes.length > 1}
-                    remove={() => removeScope(index)}
-                  />
-                ))}
+                <AccessTokensCreateScope
+                  selectedScopes={selectedScopes}
+                  setSelectedScopes={setSelectedScopes}
+                />
               </Flex>
             )}
             {error && (
