@@ -8,8 +8,9 @@ import {
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
+import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { StackedText } from 'components/utils/table/StackedText'
-import { WorkbenchToolsMetadataIcons } from 'components/workbenches/tools/WorkbenchToolsMetadataIcons'
+import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   useUpsertFlowMutation,
@@ -242,9 +243,18 @@ function WorkbenchModalRow({
         css={{ flex: 1, minWidth: 0 }}
       />
       {!!tools.length && (
-        <WorkbenchToolsMetadataIcons
-          iconSize={16}
-          tools={tools}
+        <MetadataIcons
+          items={tools.map((tool) => ({
+            id: tool.id,
+            label: tool.name,
+            icon: (
+              <WorkbenchToolIcon
+                type={tool.tool}
+                provider={tool.cloudConnection?.provider}
+                size={16}
+              />
+            ),
+          }))}
         />
       )}
       {action}

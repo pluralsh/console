@@ -6,7 +6,8 @@ import {
   IconFrame,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { WorkbenchToolsMetadataIcons } from 'components/workbenches/tools/WorkbenchToolsMetadataIcons'
+import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
+import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchTinyFragment } from 'generated/graphql'
@@ -194,7 +195,21 @@ function WorkbenchPanelItem({
             )}
           </Flex>
         )}
-        {!!tools.length && <WorkbenchToolsMetadataIcons tools={tools} />}
+        {!!tools.length && (
+          <MetadataIcons
+            items={tools.map((tool) => ({
+              id: tool.id,
+              label: tool.name,
+              icon: (
+                <WorkbenchToolIcon
+                  type={tool.tool}
+                  provider={tool.cloudConnection?.provider}
+                  size={10}
+                />
+              ),
+            }))}
+          />
+        )}
       </Flex>
     </Flex>
   )
