@@ -1,0 +1,16 @@
+<%= if @skill do %>
+<%= if @update, do: "Updated", else: "Created" %> new workbench skill.  Here's the details:
+
+```yaml
+name: <%= @skill.name %>
+description: <%= @skill.description %>
+```
+
+<%= @skill.contents %>
+<% end %><%= if @pr do %>
+Updated workbench skill via PR <%= @pr.url %>
+
+# <%= @pr.title %>
+
+<%= @pr.body %>
+<% end %>

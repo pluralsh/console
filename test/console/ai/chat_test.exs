@@ -330,7 +330,7 @@ defmodule Console.AI.ChatTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-4.1-mini")
+        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
       end)
 
       user = insert(:user)
@@ -535,7 +535,7 @@ defmodule Console.AI.ChatSyncTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-4.1-mini")
+        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
       end)
 
       {:ok, [next]} = Chat.hybrid_chat([

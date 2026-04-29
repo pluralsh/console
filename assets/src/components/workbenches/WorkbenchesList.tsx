@@ -1,10 +1,4 @@
-import {
-  ArrowRightIcon,
-  Card,
-  Flex,
-  AddIcon,
-  Tooltip,
-} from '@pluralsh/design-system'
+import { ArrowRightIcon, Card, Flex, AddIcon } from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
 import {
   CardGrid,
@@ -13,6 +7,7 @@ import {
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
+import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -28,7 +23,6 @@ import {
   ComponentType,
   isValidElement,
   ReactElement,
-  ReactNode,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -188,6 +182,7 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
               <MetadataLabelSC>bound tools</MetadataLabelSC>
               <MetadataValueSC>
                 <MetadataIcons
+                  maxVisibleItems={MAX_VISIBLE_METADATA_ITEMS}
                   items={tools.map((tool) => ({
                     id: tool.id,
                     label: tool.name,
@@ -212,42 +207,6 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
         />
       </CardArrowSC>
     </WorkbenchCardSC>
-  )
-}
-
-function MetadataIcons({
-  items,
-}: {
-  items: Array<{ id: string; label: string; icon: ReactNode }>
-}) {
-  const visibleItems = items.slice(0, MAX_VISIBLE_METADATA_ITEMS)
-  const hiddenItems = items.slice(MAX_VISIBLE_METADATA_ITEMS)
-  const hiddenItemsLabel = hiddenItems.map(({ label }) => label).join(', ')
-
-  return (
-    <Flex
-      align="center"
-      gap="xsmall"
-      wrap="wrap"
-    >
-      {visibleItems.map((item) => (
-        <Tooltip
-          key={item.id}
-          label={item.label}
-          placement="bottom"
-        >
-          <span>{item.icon}</span>
-        </Tooltip>
-      ))}
-      {!!hiddenItems.length && (
-        <Tooltip
-          label={hiddenItemsLabel || `${hiddenItems.length} more`}
-          placement="bottom"
-        >
-          <CaptionP $color="text-xlight">+{hiddenItems.length}</CaptionP>
-        </Tooltip>
-      )}
-    </Flex>
   )
 }
 

@@ -1,59 +1,124 @@
-import { Table } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { StackedText } from 'components/utils/table/StackedText'
-import { useFlowWorkbenchesQuery } from 'generated/graphql'
-import { useMemo } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
-import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { Body2BoldP } from 'components/utils/typography/Text'
+import {
+  actionsColumn,
+  creatorColumn,
+  pullRequestsColumn,
+  promptColumn,
+  workbenchColumn,
+  WorkbenchJobsTableContent,
+} from 'components/workbenches/workbench/WorkbenchJobsTable'
+import {
+  useFlowWorkbenchJobsQuery,
+  useFlowWorkbenchesQuery,
+} from 'generated/graphql'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
+import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import type { FlowOutletContext } from './Flow'
-
-type WorkbenchRow = {
-  id: string
-  name: string
-}
-
-const columnHelper = createColumnHelper<WorkbenchRow>()
-const columns = [
-  columnHelper.accessor((row) => row, {
-    id: 'name',
-    header: 'Workbench',
-    meta: { gridTemplate: '1fr' },
-    cell: ({ getValue }) => {
-      const { name } = getValue()
-
-      return <StackedText first={name} />
-    },
-  }),
-]
+import { AttachWorkbenchesModal } from './AttachWorkbenchesModal'
+import { FlowSidePanel } from './FlowSidePanel'
+import { type FlowOutletContext, useFlowSidePanel } from './Flow'
 
 export function FlowWorkbenches() {
   const { flow } = useOutletContext<FlowOutletContext>()
-  const navigate = useNavigate()
-  const { data, loading, error } = useFlowWorkbenchesQuery({
+  const { setSidePanelContent } = useFlowSidePanel()
+  const [attachModalOpen, setAttachModalOpen] = useState(false)
+  const openAttachModal = useCallback(() => setAttachModalOpen(true), [])
+  const {
+    data: workbenchesData,
+    error: workbenchesError,
+    refetch: refetchWorkbenches,
+  } = useFlowWorkbenchesQuery({
     variables: { id: flow?.id ?? '' },
     skip: !flow?.id,
   })
-
-  const workbenches = useMemo<WorkbenchRow[]>(
-    () =>
-      (data?.flow?.workbenches ?? [])
-        .filter(isNonNullable)
-        .map(({ id, name }) => ({ id, name })),
-    [data]
+  const {
+    data: jobsData,
+    loading: jobsLoading,
+    error: jobsError,
+    pageInfo: jobsPageInfo,
+    fetchNextPage: fetchNextJobsPage,
+    setVirtualSlice: setJobsVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useFlowWorkbenchJobsQuery,
+      keyPath: ['flow', 'workbenchJobs'],
+      skip: !flow?.id,
+    },
+    { id: flow?.id ?? '' }
   )
 
-  if (error) return <GqlError error={error} />
+  const workbenches = useMemo(
+    () => (workbenchesData?.flow?.workbenches ?? []).filter(isNonNullable),
+    [workbenchesData]
+  )
+  const jobs = useMemo(
+    () => mapExistingNodes(jobsData?.flow?.workbenchJobs),
+    [jobsData]
+  )
+
+  useEffect(() => {
+    setSidePanelContent(
+      <FlowSidePanel
+        workbenches={workbenches}
+        onAttachWorkbench={openAttachModal}
+      />
+    )
+
+    return () => setSidePanelContent(null)
+  }, [openAttachModal, workbenches, setSidePanelContent])
+
+  if (workbenchesError) return <GqlError error={workbenchesError} />
+  if (jobsError) return <GqlError error={jobsError} />
 
   return (
-    <Table
-      fullHeightWrap
-      data={workbenches}
-      columns={columns}
-      loading={!data && loading}
-      onRowClick={(_, row) => navigate(getWorkbenchAbsPath(row.original.id))}
-      emptyStateProps={{ message: 'No workbenches found.' }}
-    />
+    <>
+      <WrapperSC>
+        <Body2BoldP>Workbench Jobs</Body2BoldP>
+        <TableContainerSC>
+          <WorkbenchJobsTableContent
+            jobs={jobs}
+            loading={jobsLoading}
+            loaded={!!jobsData}
+            pageInfo={jobsPageInfo}
+            fetchNextPage={fetchNextJobsPage}
+            setVirtualSlice={setJobsVirtualSlice}
+            columns={[
+              promptColumn,
+              creatorColumn,
+              workbenchColumn,
+              pullRequestsColumn,
+              actionsColumn,
+            ]}
+          />
+        </TableContainerSC>
+      </WrapperSC>
+      {flow?.name && (
+        <AttachWorkbenchesModal
+          flowName={flow.name}
+          attachedWorkbenches={workbenches}
+          open={attachModalOpen}
+          onClose={() => setAttachModalOpen(false)}
+          onUpdated={() => refetchWorkbenches()}
+        />
+      )}
+    </>
   )
 }
+
+const WrapperSC = styled(Flex)(({ theme }) => ({
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  minHeight: 400,
+  height: '100%',
+  overflow: 'hidden',
+}))
+
+const TableContainerSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+})

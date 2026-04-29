@@ -339,7 +339,12 @@ defmodule Console.Deployments.Agents do
     with {:ok, _} <- allow(run, actor, :creds),
          %ScmConnection{username: username, type: provider} = conn <- Tool.scm_connection(),
          {:ok, conn} <- backfill_token(conn) do
-      {:ok, %{type: provider, username: username || "apikey", token: conn.token}}
+      ok(%{
+        type: provider,
+        base_url: conn.base_url,
+        username: username || "apikey",
+        token: conn.token
+      })
     else
       nil -> {:error, "no scm connection found"}
       err -> err

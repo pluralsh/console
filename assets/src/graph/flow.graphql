@@ -112,8 +112,23 @@ query FlowWorkbenches($id: ID!) {
   flow(id: $id) {
     id
     workbenches {
-      id
-      name
+      ...WorkbenchTiny
+    }
+  }
+}
+
+query FlowWorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    workbenchJobs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
     }
   }
 }

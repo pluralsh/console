@@ -217,6 +217,13 @@ defmodule Console.Schema.Stack do
     from(s in query, where: s.project_id == ^pid)
   end
 
+  def for_project_name(query \\ __MODULE__, name) do
+    from(s in query,
+      join: p in assoc(s, :project),
+      where: p.name == ^name
+    )
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(s in query,
@@ -253,7 +260,7 @@ defmodule Console.Schema.Stack do
     from(s in query, order_by: ^order)
   end
 
-def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
+  def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
 
   def for_status(query \\ __MODULE__, status) do
     from(s in query, where: s.status == ^status)

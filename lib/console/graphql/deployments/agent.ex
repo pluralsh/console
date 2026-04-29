@@ -187,6 +187,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   object :scm_creds do
     field :type,     :scm_type, description: "the type of the scm connection"
+    field :base_url, :string, description: "the base url of the scm connection"
     field :username, non_null(:string)
     field :token,    non_null(:string)
   end

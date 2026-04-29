@@ -8,8 +8,8 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  @model "gpt-5.4-mini"
-  @tool_model "gpt-5.4"
+  @model "gpt-4.1-mini"
+  @tool_model "gpt-4.1"
   @embedding_model "text-embedding-3-large"
 
   def default_model(), do: @model
@@ -22,10 +22,12 @@ defmodule Console.AI.OpenAI do
   def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
 
   def new(opts) do
+    model_defaults = model_defaults(Map.get(opts, :base_url))
+
     %__MODULE__{
       access_key: Map.get(opts, :access_token),
-      model: Map.get(opts, :model) || @model,
-      tool_model: Map.get(opts, :tool_model) || @tool_model,
+      model: Map.get(opts, :model) || model_defaults[:model],
+      tool_model: Map.get(opts, :tool_model) || model_defaults[:tool_model],
       base_url: Map.get(opts, :base_url),
       embedding_model: Map.get(opts, :embedding_model) || @embedding_model,
       azure_token: Map.get(opts, :azure_token),
@@ -33,6 +35,9 @@ defmodule Console.AI.OpenAI do
       stream: Stream.stream()
     }
   end
+
+  defp model_defaults(base) when is_binary(base), do: %{model: @model, tool_model: @tool_model}
+  defp model_defaults(_), do: %{model: "gpt-5.4-mini", tool_model: "gpt-5.4"}
 
   def proxy(%__MODULE__{} = openai) do
     {:ok, %Console.AI.Proxy{

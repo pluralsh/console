@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.SkillUpdate do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.{WorkbenchSkill, WorkbenchJob, Workbench}
+  alias Console.Schema.{WorkbenchSkill, WorkbenchJob, Workbench, PullRequest}
   alias Console.AI.Tools.Pr
   alias Console.AI.Workbench.Skills
   alias Console.AI.File.Editor
@@ -55,20 +55,34 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
   end
 
   defp git_update(%__MODULE__{job: job, name: name, previous: previous, replacement: replacement} = mod)  do
-    with {:ok, {repo, branch, path}} <- Skills.skill_file(name, job.workbench) do
-      %Pr{
-        repo_url: repo.url,
-        branch_name: branch,
-        commit_message: mod.commit_message,
-        pr_title: mod.pr_title,
-        pr_description: mod.pr_description,
-        file_updates: [%{file_name: path, previous: previous, replacement: replacement}]
-      }
-      |> Pr.implement()
+    with {:ok, {repo, branch, path}} <- Skills.skill_file(name, job.workbench),
+         {:ok, attrs} <- Pr.implement(%Pr{
+                            repo_url: repo.url,
+                            branch_name: branch,
+                            commit_message: mod.commit_message,
+                            pr_title: mod.pr_title,
+                            pr_description: mod.pr_description,
+                            file_updates: [%{file_name: path, previous: previous, replacement: replacement}]
+                          }) do
+      ctx = Console.AI.Tool.context()
+      %PullRequest{author_id: ctx.user.id}
+      |> PullRequest.changeset(Map.merge(context_attrs(ctx), attrs))
+      |> Console.Repo.insert()
       |> case do
         {:ok, pr} -> {:ok, %Result{result: pr}}
         err -> err
       end
     end
+  end
+
+  defp context_attrs(ctx) do
+    Map.from_struct(ctx)
+    |> Enum.reduce(%{}, fn
+      {:job, %{id: id}}, acc -> Map.put(acc, :workbench_job_id, id)
+      {:stack, %{id: id}}, acc -> Map.put(acc, :stack_id, id)
+      {:cluster, %{id: id}}, acc -> Map.put(acc, :cluster_id, id)
+      {:service, %{id: id}}, acc -> Map.put(acc, :service_id, id)
+      _, acc -> acc
+    end)
   end
 end

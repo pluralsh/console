@@ -4,13 +4,13 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackList do
   alias Console.Schema.{Stack, User}
 
   embedded_schema do
-    field :user, :map, virtual: true
-    field :q, :string
-    field :project_id, :string
-    field :status, Console.Schema.Stack.Status
+    field :user,    :map, virtual: true
+    field :q,       :string
+    field :project, :string
+    field :status,  Console.Schema.Stack.Status
   end
 
-  @valid ~w(q project_id status)a
+  @valid ~w(q project status)a
 
   def changeset(model, attrs) do
     model
@@ -35,13 +35,14 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackList do
     |> Jason.encode()
   end
 
-  defp stack_filters(query, %__MODULE__{project_id: pid, status: st}) do
+  defp stack_filters(query, %__MODULE__{project: project, status: status}) do
     query
-    |> maybe_project(pid)
-    |> maybe_status(st)
+    |> maybe_project(project)
+    |> maybe_status(status)
   end
 
-  defp maybe_project(q, pid) when is_binary(pid) and pid != "", do: Stack.for_project(q, pid)
+  defp maybe_project(q, name) when is_binary(name) and byte_size(name) > 0,
+    do: Stack.for_project_name(q, name)
   defp maybe_project(q, _), do: q
 
   defp maybe_status(q, s) when not is_nil(s), do: Stack.for_status(q, s)

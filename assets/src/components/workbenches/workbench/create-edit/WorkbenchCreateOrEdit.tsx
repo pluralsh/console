@@ -21,6 +21,7 @@ import {
   WorkbenchAttributes,
   WorkbenchFragment,
   WorkbenchSkillAttributes,
+  WorkbenchSkillSubagent,
 } from 'generated/graphql'
 import { cloneDeep } from 'lodash'
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
@@ -505,6 +506,9 @@ function sanitizeInitialForm({
       name: skill.name ?? '',
       description: skill.description ?? null,
       contents: skill.contents ?? '',
+      subagents:
+        (skill.subagents?.filter(isNonNullable) as WorkbenchSkillSubagent[]) ??
+        [],
     }))
 
   return {

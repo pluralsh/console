@@ -1,22 +1,24 @@
 import {
+  AppIcon,
   Card,
   CaretRightIcon,
   Flex,
   Markdown,
   PaperCheckIcon,
-  PrClosedIcon,
-  PrMergedIcon,
-  PrOpenIcon,
   Table,
+  Tooltip,
 } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  VirtualSlice,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
-  PrStatus,
+  PageInfoFragment,
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
@@ -40,102 +42,157 @@ export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   if (error) return <GqlError error={error} />
 
   return (
+    <WorkbenchJobsTableContent
+      jobs={jobs}
+      loading={loading}
+      loaded={!!data}
+      pageInfo={pageInfo}
+      fetchNextPage={fetchNextPage}
+      setVirtualSlice={setVirtualSlice}
+    />
+  )
+}
+
+export function WorkbenchJobsTableContent({
+  jobs,
+  loading,
+  loaded,
+  pageInfo,
+  fetchNextPage,
+  setVirtualSlice,
+  columns,
+}: {
+  jobs: WorkbenchJobTinyFragment[]
+  loading: boolean
+  loaded: boolean
+  pageInfo: PageInfoFragment | undefined
+  fetchNextPage: () => void
+  setVirtualSlice: (slice: VirtualSlice) => void
+  columns?: ColumnDef<WorkbenchJobTinyFragment, any>[]
+}) {
+  return (
     <Table
       hideHeader
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns}
-      loading={!data && loading}
+      columns={
+        columns ?? [
+          promptColumn,
+          creatorColumn,
+          pullRequestsColumn,
+          actionsColumn,
+        ]
+      }
+      loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       emptyStateProps={{ message: 'No jobs found.' }}
       getRowLink={({ original }) => {
-        const { id: jobId } = original as WorkbenchJobTinyFragment
-        return <Link to={getWorkbenchJobAbsPath({ workbenchId, jobId })} />
+        const { id: jobId, workbench } = original as WorkbenchJobTinyFragment
+        return (
+          <Link
+            to={getWorkbenchJobAbsPath({
+              workbenchId: workbench?.id ?? '',
+              jobId,
+            })}
+          />
+        )
       }}
     />
   )
 }
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
-const columns = [
-  columnHelper.accessor(
-    ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
-    { id: 'prompt', meta: { gridTemplate: '1fr' } }
-  ),
-  columnHelper.accessor(({ user }) => user?.name, {
-    id: 'creator',
+export const promptColumn = columnHelper.accessor(
+  ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
+  { id: 'prompt', meta: { gridTemplate: '1fr' } }
+)
+
+export const creatorColumn = columnHelper.accessor(({ user }) => user, {
+  id: 'creator',
+  cell: ({ getValue }) => {
+    const user = getValue()
+    if (!user?.name) return null
+
+    return (
+      <Tooltip label={user.name}>
+        <AppIcon
+          name={user.name}
+          size="xxsmall"
+        />
+      </Tooltip>
+    )
+  },
+})
+
+export const workbenchColumn = columnHelper.accessor(
+  ({ workbench }) => workbench?.name,
+  {
+    id: 'workbench',
     cell: ({ getValue }) => {
-      const name = getValue()
-      if (!name) return null
-      return <CaptionP $color="text-xlight">{name}</CaptionP>
+      const workbenchName = getValue()
+      if (!workbenchName) return null
+
+      return <CaptionP $color="text-xlight">{workbenchName}</CaptionP>
     },
-  }),
-  columnHelper.accessor((job) => job, {
-    id: 'actions',
+  }
+)
+
+export const pullRequestsColumn = columnHelper.accessor(
+  ({ pullRequests }) => pullRequests,
+  {
+    id: 'pullRequests',
     cell: function Cell({ getValue }) {
-      const theme = useTheme()
-      const { spacing } = theme
-      const { pullRequests, result, status } = getValue()
-      const prs = pullRequests?.filter(isNonNullable) ?? []
-      const singlePrProps =
-        prs.length === 1
-          ? (() => {
-              const singlePrStatus = prs[0].status
-              const icon =
-                singlePrStatus === PrStatus.Merged ? (
-                  <PrMergedIcon color={theme.colors['code-block-purple']} />
-                ) : singlePrStatus === PrStatus.Closed ? (
-                  <PrClosedIcon color="icon-danger" />
-                ) : (
-                  <PrOpenIcon color="icon-success" />
-                )
-              const tooltip =
-                singlePrStatus === PrStatus.Merged
-                  ? 'View merged pull request'
-                  : singlePrStatus === PrStatus.Closed
-                    ? 'View closed pull request'
-                    : 'View open pull request'
-              return { icon, tooltip }
-            })()
-          : null
+      const prs = getValue()?.filter(isNonNullable) ?? []
 
       return (
         <Flex
-          gap="medium"
+          gap="xsmall"
           align="center"
-          justify="flex-end"
-          width="100%"
         >
-          <PRsModalIcon
-            size="small"
-            type="tertiary"
-            prs={prs}
-            {...(singlePrProps ?? {})}
-          />
-          {result?.conclusion && (
-            <ActivityModalIcon
-              icon={PaperCheckIcon}
-              tooltip="View conclusion"
-              modalHeader="Conclusion"
-              modalContent={
-                <Card css={{ padding: spacing.large, overflow: 'auto' }}>
-                  <Markdown text={result?.conclusion} />
-                </Card>
-              }
-              size={16}
-            />
-          )}
-          <RunStatusIcon
-            fullColor
-            status={status}
-          />
-          <CaretRightIcon color="icon-xlight" />
+          <PRsModalIcon prs={prs} />
         </Flex>
       )
     },
-  }),
-]
+  }
+)
+
+export const actionsColumn = columnHelper.accessor((job) => job, {
+  id: 'actions',
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+    const { spacing } = theme
+    const { result, status } = getValue()
+
+    return (
+      <Flex
+        gap="medium"
+        align="center"
+        justify="flex-end"
+        width="100%"
+      >
+        {result?.conclusion && (
+          <ActivityModalIcon
+            icon={PaperCheckIcon}
+            tooltip="View conclusion"
+            modalHeader="Conclusion"
+            modalContent={
+              <Card css={{ padding: spacing.large, overflow: 'auto' }}>
+                <Markdown text={result?.conclusion} />
+              </Card>
+            }
+            size={16}
+          />
+        )}
+        <RunStatusIcon
+          fullColor
+          status={status}
+        />
+        <CaretRightIcon color="icon-xlight" />
+      </Flex>
+    )
+  },
+})

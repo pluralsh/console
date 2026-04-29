@@ -11,6 +11,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     MarkdownBlock,
     MetricsBlock,
     LogsBlock,
+    TracesBlock,
     PieBlock,
     BarBlock,
     Empty
@@ -46,6 +47,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
       MarkdownBlock,
       %MetricsBlock{env: env},
       %LogsBlock{env: env},
+      %TracesBlock{env: env},
       PieBlock,
       BarBlock,
       Empty

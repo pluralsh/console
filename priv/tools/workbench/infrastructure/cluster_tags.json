@@ -1,0 +1,13 @@
+{
+    "type": "object",
+    "properties": {
+        "tag": {
+            "type": "string",
+            "description": "Only return tags with name equal to this value."
+        },
+        "q": {
+            "type": "string",
+            "description": "Search for tags with this substring in name or value."
+        }
+    }
+}

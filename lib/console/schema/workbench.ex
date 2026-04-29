@@ -13,6 +13,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchSkill,
     WorkbenchEval,
     PolicyBinding,
+    FlowWorkbench,
     User,
     AgentRun,
     Alert
@@ -65,15 +66,16 @@ defmodule Console.Schema.Workbench do
     belongs_to :bot_user, User, foreign_key: :bot_user_id
 
     has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
-    has_many :tools, through: [:tool_associations, :tool]
-    has_many :jobs,             WorkbenchJob,     on_replace: :delete
-    has_many :webhooks,         WorkbenchWebhook, on_replace: :delete
-    has_many :crons,            WorkbenchCron,    on_replace: :delete
-    has_many :prompts,          WorkbenchPrompt,  on_replace: :delete
-    has_many :workbench_skills, WorkbenchSkill, on_replace: :delete
-    has_one :eval,              WorkbenchEval
-    has_many :alerts,           Alert
+    has_many :jobs,              WorkbenchJob,     on_replace: :delete
+    has_many :webhooks,          WorkbenchWebhook, on_replace: :delete
+    has_many :crons,             WorkbenchCron,    on_replace: :delete
+    has_many :prompts,           WorkbenchPrompt,  on_replace: :delete
+    has_many :flows_workbenches, FlowWorkbench,    on_replace: :delete
+    has_many :workbench_skills,  WorkbenchSkill,   on_replace: :delete
+    has_many :alerts,            Alert
+    has_one :eval,               WorkbenchEval
 
+    has_many :tools, through: [:tool_associations, :tool]
     timestamps()
   end
 

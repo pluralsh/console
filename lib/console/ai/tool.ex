@@ -10,7 +10,8 @@ defmodule Console.AI.Tool do
     AgentSession,
     ChatThread,
     InfraResearch,
-    AgentRuntime
+    AgentRuntime,
+    WorkbenchJob
   }
   alias Console.AI.Chat.Knowledge
   alias Console.Deployments.{Git, Settings, Agents}
@@ -18,7 +19,7 @@ defmodule Console.AI.Tool do
   @type t :: %__MODULE__{}
 
   defmodule Context do
-    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service, InfraResearch, AgentRuntime}
+    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service, InfraResearch, AgentRuntime, WorkbenchJob}
     @type t :: %__MODULE__{
       flow: Flow.t,
       user: User.t,
@@ -29,10 +30,11 @@ defmodule Console.AI.Tool do
       session: AgentSession.t,
       thread: ChatThread.t,
       research: InfraResearch.t,
-      runtime: AgentRuntime.t
+      runtime: AgentRuntime.t,
+      job: WorkbenchJob.t
     }
 
-    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session, :thread, :research, :runtime]
+    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session, :thread, :research, :runtime, :job]
 
     def new(args), do: struct(__MODULE__, args)
   end
@@ -77,6 +79,7 @@ defmodule Console.AI.Tool do
       %Context{insight:  %AiInsight{service: %Service{} = svc}} -> svc
       %Context{insight:  %AiInsight{stack: %Stack{} = stack}} -> stack
       %Context{insight:  %AiInsight{cluster: %Cluster{} = cluster}} -> cluster
+      %Context{job:      %WorkbenchJob{} = job} -> job
       _ -> nil
     end
   end

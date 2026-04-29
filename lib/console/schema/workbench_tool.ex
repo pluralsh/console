@@ -1,17 +1,41 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User, McpServer, CloudConnection}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer, CloudConnection, WorkbenchOauthClient}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10, dynatrace: 11, cloudwatch: 12, azure: 13, cloud: 14, jaeger: 15
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6
+  defenum Tool,
+    http: 0,
+    elastic: 1,
+    datadog: 2,
+    prometheus: 3,
+    loki: 4,
+    tempo: 5,
+    sentry: 6,
+    mcp: 7,
+    linear: 8,
+    atlassian: 9,
+    splunk: 10,
+    dynatrace: 11,
+    cloudwatch: 12,
+    azure: 13,
+    cloud: 14,
+    jaeger: 15,
+    exa: 16
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
     field :tool,            Tool
     field :categories,      {:array, Category}
     field :name,            :string
+
+    embeds_one :oauth_token, OauthToken, on_replace: :update do
+      field :access_token,  :string
+      field :refresh_token, :string
+      field :expiry,        :integer
+      field :scopes,        {:array, :string}
+    end
 
     embeds_one :configuration, Configuration, on_replace: :update do
       embeds_one :elastic, ElasticConnection, on_replace: :update do
@@ -104,6 +128,10 @@ defmodule Console.Schema.WorkbenchTool do
         field :client_secret,   EncryptedString
       end
 
+      embeds_one :exa, ExaConnection, on_replace: :update do
+        field :api_key, EncryptedString, virtual: true
+      end
+
       embeds_one :http, HttpConfiguration, on_replace: :update do
         field :url,          :string
         field :method,       HttpMethod
@@ -133,6 +161,7 @@ defmodule Console.Schema.WorkbenchTool do
     belongs_to :project,          Project
     belongs_to :mcp_server,       McpServer
     belongs_to :cloud_connection, CloudConnection
+    has_one    :oauth_client,     WorkbenchOauthClient, foreign_key: :tool, references: :tool
 
     timestamps()
   end
@@ -169,7 +198,8 @@ defmodule Console.Schema.WorkbenchTool do
     |> unique_constraint(:name)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
-    |> then(fn cs -> cast_embed(cs, :configuration, with: &configuration_changeset(&1, &2, get_field(cs, :tool))) end)
+    |> cast_embed(:oauth_token, with: &oauth_token_changeset/2)
+    |> cast_embed(:configuration, with: &configuration_changeset/2)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
@@ -221,11 +251,10 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:linear), do: [:ticketing]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
+  defp categories(:exa), do: [:search]
   defp categories(_), do: [:integration]
 
-  @noconfig [:mcp, :cloud]
-
-  defp configuration_changeset(model, attrs, tool) do
+  defp configuration_changeset(model, attrs) do
     model
     |> cast(attrs, [])
     |> cast_embed(:http, with: &http_configuration_changeset/2)
@@ -242,7 +271,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
-    |> validate_required(if tool in @noconfig, do: [], else: [tool])
+    |> cast_embed(:exa, with: &exa_configuration_changeset/2)
   end
 
   defp http_configuration_changeset(model, attrs) do
@@ -351,5 +380,17 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(name value)a)
     |> validate_required([:name, :value])
+  end
+
+  defp oauth_token_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(access_token refresh_token expiry scopes)a)
+    |> validate_required([:access_token, :refresh_token, :expiry])
+  end
+
+  defp exa_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(api_key)a)
+    |> validate_required([:api_key])
   end
 end

@@ -5,7 +5,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
   alias Console.AI.Tools.Workbench.Infrastructure.{
     Cluster,
     ClusterList,
+    ClusterTags,
     ClusterServices,
+    Projects,
     ServiceInspect,
     StackInspect,
     StackList
@@ -30,6 +32,68 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:ok, parsed} = Tool.validate(%ClusterList{user: user}, %{})
       assert {:ok, json} = ClusterList.implement(parsed)
       assert {:ok, []} = Jason.decode(json)
+    end
+
+    test "filters results by project name" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      other_project = insert(:project, read_bindings: [%{user_id: user.id}])
+      allowed_cluster = insert(:cluster, project: project, read_bindings: [%{user_id: user.id}])
+      _other_cluster = insert(:cluster, project: other_project, read_bindings: [%{user_id: user.id}])
+
+      assert {:ok, parsed} = Tool.validate(%ClusterList{user: user}, %{"project" => project.name})
+      assert {:ok, json} = ClusterList.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert Enum.any?(list, &(&1["id"] == allowed_cluster.id))
+      refute Enum.any?(list, &(&1["project"]["name"] == other_project.name))
+    end
+  end
+
+  describe "ClusterTags (plrl_cluster_tags)" do
+    test "returns {:ok, json} listing cluster tags" do
+      cluster = insert(:cluster)
+      tag = insert(:tag, cluster: cluster, name: "team", value: "platform")
+
+      assert {:ok, parsed} = Tool.validate(%ClusterTags{}, %{})
+      assert {:ok, json} = ClusterTags.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert Enum.any?(list, &(&1["name"] == tag.name and &1["value"] == tag.value))
+    end
+
+    test "filters tags by tag name" do
+      cluster = insert(:cluster)
+      _tag1 = insert(:tag, cluster: cluster, name: "team", value: "platform")
+      tag2 = insert(:tag, cluster: cluster, name: "env", value: "prod")
+
+      assert {:ok, parsed} = Tool.validate(%ClusterTags{}, %{"tag" => "env"})
+      assert {:ok, json} = ClusterTags.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert Enum.all?(list, &(&1["name"] == "env"))
+      assert Enum.any?(list, &(&1["name"] == tag2.name and &1["value"] == tag2.value))
+    end
+  end
+
+  describe "Projects (plrl_projects)" do
+    test "returns {:ok, json} including projects the user can read" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+
+      assert {:ok, parsed} = Tool.validate(%Projects{user: user}, %{})
+      assert {:ok, json} = Projects.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert Enum.any?(list, &(&1["id"] == project.id))
+    end
+
+    test "filters projects by q search" do
+      user = insert(:user)
+      project = insert(:project, name: "alpha-observability", read_bindings: [%{user_id: user.id}])
+      _other = insert(:project, name: "beta-platform", read_bindings: [%{user_id: user.id}])
+
+      assert {:ok, parsed} = Tool.validate(%Projects{user: user}, %{"q" => "alpha"})
+      assert {:ok, json} = Projects.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert Enum.any?(list, &(&1["id"] == project.id))
+      assert Enum.all?(list, &(String.contains?(&1["name"], "alpha")))
     end
   end
 

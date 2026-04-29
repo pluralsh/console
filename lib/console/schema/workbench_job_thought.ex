@@ -1,7 +1,7 @@
 defmodule Console.Schema.WorkbenchJobThought do
   use Console.Schema.Base
   alias Console.Schema.WorkbenchJobActivity
-  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log}
+  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log, Trace}
 
   schema "workbench_job_thoughts" do
     field :content,    :binary
@@ -11,6 +11,7 @@ defmodule Console.Schema.WorkbenchJobThought do
     embeds_one :attributes, Attributes, on_replace: :update do
       embeds_many :metrics, Metric, on_replace: :delete
       embeds_many :logs, Log, on_replace: :delete
+      embeds_many :traces, Trace, on_replace: :delete
     end
 
     belongs_to :activity, WorkbenchJobActivity
@@ -41,5 +42,6 @@ defmodule Console.Schema.WorkbenchJobThought do
     |> cast(attrs, [])
     |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
     |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
+    |> cast_embed(:traces, with: &WorkbenchJobActivity.trace_changeset/2)
   end
 end

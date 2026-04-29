@@ -5,6 +5,10 @@
             "type": "string",
             "description": "Optional prefix search on cluster name"
         },
+        "project": {
+            "type": "string",
+            "description": "Optional filter by project name, you can find the project name in the plrl_projects tool"
+        },
         "distro": {
             "type": "string",
             "enum": [
