@@ -1,28 +1,45 @@
-import { Flex, WorkbenchIcon, IconFrame } from '@pluralsh/design-system'
+import {
+  AddIcon,
+  Button,
+  Flex,
+  WorkbenchIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { CaptionP } from 'components/utils/typography/Text'
+import { WorkbenchTinyFragment } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
 import { useNavigate } from 'react-router-dom'
 import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 
-export type FlowWorkbenchRow = {
-  id: string
-  name: string
-}
-
 export function FlowSidePanel({
   workbenches,
+  onAttachWorkbench,
 }: {
-  workbenches: FlowWorkbenchRow[]
+  workbenches: WorkbenchTinyFragment[]
+  onAttachWorkbench: () => void
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const hasWorkbenches = !isEmpty(workbenches)
 
   return (
     <WrapperSC>
       <ContentSC>
         <SectionSC $first>
-          <CaptionP $color="text-xlight">Workbenches</CaptionP>
-          {workbenches.length ? (
+          <HeaderSC>
+            <span>Workbenches</span>
+            {hasWorkbenches && (
+              <IconFrame
+                clickable
+                size="small"
+                icon={<AddIcon size={12} />}
+                tooltip="Attach workbench"
+                onClick={onAttachWorkbench}
+              />
+            )}
+          </HeaderSC>
+          {hasWorkbenches ? (
             <Flex
               gap="small"
               direction="column"
@@ -45,6 +62,14 @@ export function FlowSidePanel({
             </Flex>
           ) : (
             <>
+              <ButtonSC
+                small
+                startIcon={<AddIcon size={12} />}
+                tertiary
+                onClick={onAttachWorkbench}
+              >
+                Attach workbench
+              </ButtonSC>
               <DividerSC css={{ margin: `${theme.spacing.small}px 0` }} />
               <Flex
                 direction="column"
@@ -100,6 +125,28 @@ const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
     borderTop: theme.borders['fill-one'],
     paddingTop: theme.spacing.medium,
   }),
+}))
+
+const HeaderSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+}))
+
+const ButtonSC = styled(Button)(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  alignSelf: 'start',
+  color: theme.colors['text-xlight'],
+  padding: 0,
+
+  '&:hover': {
+    ...theme.partials.reset.button,
+    ...theme.partials.text.caption,
+    color: theme.colors['text-light'],
+  },
 }))
 
 const WorkbenchRowButtonSC = styled.button(({ theme }) => ({
