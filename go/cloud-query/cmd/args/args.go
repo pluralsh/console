@@ -111,7 +111,7 @@ func DatabaseName() string {
 }
 
 func DatabaseHost() string {
-	if argDatabaseHost == nil || len(*argDatabaseHost) == 0 {
+	if len(*argDatabaseHost) == 0 {
 		return defaultDatabaseHost
 	}
 
@@ -119,7 +119,7 @@ func DatabaseHost() string {
 }
 
 func DatabasePort() string {
-	if argDatabasePort == nil || len(*argDatabasePort) == 0 {
+	if len(*argDatabasePort) == 0 {
 		return defaultDatabasePort
 	}
 
