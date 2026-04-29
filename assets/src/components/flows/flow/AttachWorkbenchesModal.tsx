@@ -117,9 +117,12 @@ export function AttachWorkbenchesModal({
       css={{ maxWidth: 800 }}
       onOpenAutoFocus={(e) => e.preventDefault()}
       actions={
-        <>
+        <Flex
+          flex={1}
+          justifyContent="space-between"
+          gap="small"
+        >
           <Button
-            secondary
             destructive
             onClick={onClose}
           >
@@ -131,7 +134,7 @@ export function AttachWorkbenchesModal({
           >
             Save
           </Button>
-        </>
+        </Flex>
       }
     >
       <Flex
