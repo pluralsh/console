@@ -6,6 +6,7 @@ import {
   Input2,
   Modal,
   SearchIcon,
+  Spinner,
   Tooltip,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
@@ -226,11 +227,17 @@ export function AttachWorkbenchesModal({
                   onAdd={addWorkbench}
                 />
               ))
+            ) : loading ? (
+              <Flex
+                align="center"
+                justify="center"
+                padding="small"
+              >
+                <Spinner color={theme.colors['text-xlight']} />
+              </Flex>
             ) : (
               <CaptionP $color="text-xlight">
-                {loading
-                  ? 'Loading workbenches...'
-                  : 'No available workbenches match your search.'}
+                No available workbenches match your search.
               </CaptionP>
             )}
           </div>
