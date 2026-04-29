@@ -4,6 +4,8 @@ import {
   IconFrame,
   IconFrameProps,
   Modal,
+  PrClosedIcon,
+  PrMergedIcon,
   PrOpenIcon,
   SmallPodIcon,
   Table,
@@ -20,12 +22,14 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P, SpanSC } from 'components/utils/typography/Text'
 import {
   AgentRunTinyFragment,
+  PrStatus,
   PullRequestBasicFragment,
 } from 'generated/graphql'
-import { capitalize, isEmpty } from 'lodash'
+import { capitalize, isEmpty, toLower } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
+import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { RunStatusChip } from '../infra-research/details/InfraResearch'
 
@@ -121,6 +125,7 @@ export function PRsModalIcon({
 }: {
   prs: PullRequestBasicFragment[]
 } & Partial<IconFrameProps & LinkProps>) {
+  const theme = useTheme()
   const [modalOpen, setModalOpen] = useState(false)
 
   const basicPrTableCols = useMemo(
@@ -129,7 +134,17 @@ export function PRsModalIcon({
   )
 
   if (isEmpty(prs)) return null
-  if (prs.length === 1)
+  if (prs.length === 1) {
+    const singlePrStatus = prs[0].status ?? PrStatus.Open
+    const icon =
+      singlePrStatus === PrStatus.Merged ? (
+        <PrMergedIcon color={theme.colors['code-block-purple']} />
+      ) : singlePrStatus === PrStatus.Closed ? (
+        <PrClosedIcon color="icon-danger" />
+      ) : (
+        <PrOpenIcon color="icon-success" />
+      )
+
     return (
       <IconFrame
         clickable
@@ -138,11 +153,13 @@ export function PRsModalIcon({
         to={prs[0].url}
         target="_blank"
         rel="noopener noreferrer"
-        tooltip="View pull request"
-        icon={<PrOpenIcon />}
+        tooltip={`View ${toLower(singlePrStatus)} pull request`}
+        icon={icon}
         {...props}
       />
     )
+  }
+
   return (
     <>
       <Chip

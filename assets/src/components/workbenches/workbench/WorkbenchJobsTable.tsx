@@ -5,9 +5,6 @@ import {
   Flex,
   Markdown,
   PaperCheckIcon,
-  PrClosedIcon,
-  PrMergedIcon,
-  PrOpenIcon,
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -22,11 +19,10 @@ import {
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   PageInfoFragment,
-  PrStatus,
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
-import { toLower, truncate } from 'lodash'
+import { truncate } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -153,25 +149,7 @@ export const pullRequestsColumn = columnHelper.accessor(
   {
     id: 'pullRequests',
     cell: function Cell({ getValue }) {
-      const theme = useTheme()
       const prs = getValue()?.filter(isNonNullable) ?? []
-      const singlePrProps =
-        prs.length === 1
-          ? (() => {
-              const singlePrStatus = prs[0].status ?? PrStatus.Open
-              const tooltip = `View ${toLower(singlePrStatus)} pull request`
-              const icon =
-                singlePrStatus === PrStatus.Merged ? (
-                  <PrMergedIcon color={theme.colors['code-block-purple']} />
-                ) : singlePrStatus === PrStatus.Closed ? (
-                  <PrClosedIcon color="icon-danger" />
-                ) : (
-                  <PrOpenIcon color="icon-success" />
-                )
-
-              return { icon, tooltip }
-            })()
-          : null
 
       return (
         <Flex
@@ -182,7 +160,6 @@ export const pullRequestsColumn = columnHelper.accessor(
             size="small"
             type="tertiary"
             prs={prs}
-            {...(singlePrProps ?? {})}
           />
         </Flex>
       )
