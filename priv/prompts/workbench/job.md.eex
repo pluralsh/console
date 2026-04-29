@@ -54,7 +54,9 @@ and then delegate to the dashboard agent to craft a dashboard to explain the sys
 ## Completion Criteria
 Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.
 
-**In general, if a pull request has been created to fix the issue, you should almost always consider the work complete (unless additional pull requests are needed)**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+**In general, if a pull request has been created to fix the issue or accomplish the task, you should almost always consider the work complete**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+
+The exception to that rule would be if no code change is needed at all, or if multiple pull requests are required to accomplish what the user intends.
 
 You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
 

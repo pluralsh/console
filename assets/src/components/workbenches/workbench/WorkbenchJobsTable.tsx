@@ -1,5 +1,5 @@
 import {
-  AppIcon,
+  Avatar,
   Card,
   CaretRightIcon,
   Flex,
@@ -119,12 +119,9 @@ export const creatorColumn = columnHelper.accessor(({ user }) => user, {
 
     return (
       <Tooltip label={user.name}>
-        <AppIcon
-          url={user.profile ?? undefined}
+        <Avatar
           name={user.name}
-          size="xxsmall"
-          spacing="none"
-          css={{ borderRadius: '50%' }}
+          size={24}
         />
       </Tooltip>
     )
