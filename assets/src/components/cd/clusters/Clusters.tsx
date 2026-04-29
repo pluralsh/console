@@ -1,9 +1,10 @@
 import {
   Breadcrumb,
+  Button,
   Flex,
   GearTrainIcon,
+  HeatMapIcon,
   IconFrame,
-  TabPanel,
   Table,
   TableProps,
   WrapWithIf,
@@ -11,22 +12,15 @@ import {
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import chroma from 'chroma-js'
-import {
-  ComponentProps,
-  Key,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ComponentProps, Key, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
 import {
   ClustersRowFragment,
   Conjunction,
-  useClustersQuery,
   useClusterStatusesQuery,
+  useClustersQuery,
 } from 'generated/graphql'
 
 import {
@@ -78,6 +72,7 @@ import {
   ClusterInfoFlyover,
   ClusterInfoFlyoverTab,
 } from './info-flyover/ClusterInfoFlyover.tsx'
+import { ClustersCharts } from './ClustersCharts.tsx'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -132,7 +127,7 @@ export default function Clusters() {
   const projectId = useProjectId()
   const cdIsEnabled = useCDEnabled()
   const onboarded = useOnboarded()
-  const tabStateRef = useRef<any>(null)
+  const [showCharts, setShowCharts] = usePersistedState('show-charts', true)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
   const [upgradeableFilter, setUpgradeableFilter] =
@@ -208,13 +203,19 @@ export default function Clusters() {
   const headerActions = useMemo(
     () =>
       cdIsEnabled ? (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.medium,
-          }}
+        <Flex
+          justify="flex-end"
+          gap="medium"
         >
+          {!showCharts && (
+            <Button
+              secondary
+              endIcon={<HeatMapIcon />}
+              onClick={() => setShowCharts(true)}
+            >
+              Show charts
+            </Button>
+          )}
           <IconFrame
             type="secondary"
             size="large"
@@ -225,9 +226,9 @@ export default function Clusters() {
             to={GLOBAL_SETTINGS_ABS_PATH}
           />
           <CreateCluster />
-        </div>
+        </Flex>
       ) : null,
-    [cdIsEnabled, theme.spacing.medium]
+    [cdIsEnabled, setShowCharts, showCharts]
   )
 
   useSetPageHeaderContent(headerActions)
@@ -254,10 +255,15 @@ export default function Clusters() {
       gap="small"
       height="100%"
     >
+      {!showGettingStarted && (
+        <ClustersCharts
+          show={showCharts}
+          setShow={setShowCharts}
+        />
+      )}
       <ClustersFilters
         setQueryStatusFilter={setStatusFilter}
         setQueryString={setSearchString}
-        tabStateRef={tabStateRef}
         statusCounts={statusCounts}
         selectedTagKeys={selectedTagKeys}
         setSelectedTagKeys={setSelectedTagKeys}
@@ -268,40 +274,32 @@ export default function Clusters() {
         upgradeStats={upgradeStatistics}
         loadingStatuses={aggLoading}
       />
-      <TabPanel
-        stateRef={tabStateRef}
-        css={{ height: '100%', overflow: 'hidden' }}
-      >
-        <WrapWithIf
-          condition={showGettingStarted}
-          wrapper={
-            <div
-              css={{
-                display: 'flex',
-                border: theme.borders['fill-two'],
-                borderRadius: theme.borderRadiuses.medium,
-                flexDirection: 'column',
-                overflow: 'auto',
-                height: '100%',
-              }}
-            />
-          }
-        >
-          <ClustersTable
-            loading={!data && loading}
-            flush={showGettingStarted}
-            fullHeightWrap={!showGettingStarted}
-            data={tableData || []}
-            refetch={refetch}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
+      <WrapWithIf
+        condition={showGettingStarted}
+        wrapper={
+          <Flex
+            border={theme.borders['fill-two']}
+            borderRadius={theme.borderRadiuses.medium}
+            direction="column"
+            overflow="auto"
+            height="100%"
           />
-          {showGettingStarted && <GettingStartedBlock />}
-        </WrapWithIf>
-      </TabPanel>
+        }
+      >
+        <ClustersTable
+          loading={!data && loading}
+          flush={showGettingStarted}
+          fullHeightWrap={!showGettingStarted}
+          data={tableData || []}
+          refetch={refetch}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+        />
+        {showGettingStarted && <GettingStartedBlock />}
+      </WrapWithIf>
     </Flex>
   ) : (
     <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />

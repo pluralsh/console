@@ -41,6 +41,24 @@ export function HomeFilterOptionCard<T extends string>({
   )
 }
 
+export function ChartLegendItem({
+  color,
+  label,
+}: {
+  color: string
+  label: string
+}) {
+  return (
+    <Flex
+      align="center"
+      gap="xsmall"
+    >
+      <ColorSwatchSC $color={color} />
+      <CaptionP $color="text">{label}</CaptionP>
+    </Flex>
+  )
+}
+
 const CardSC = styled.button<{ $selected: boolean }>(
   ({ theme, $selected }) => ({
     ...theme.partials.reset.button,
