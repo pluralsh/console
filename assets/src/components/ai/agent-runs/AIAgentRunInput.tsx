@@ -1,4 +1,11 @@
-import { Flex, ListBoxItem, LogsIcon, Select } from '@pluralsh/design-system'
+import {
+  Checkbox,
+  Flex,
+  ListBoxItem,
+  LogsIcon,
+  Select,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { GqlError } from 'components/utils/Alert'
 import { AgentRunMode, useCreateAgentRunMutation } from 'generated/graphql'
@@ -14,6 +21,8 @@ import usePersistedState from 'components/hooks/usePersistedState'
 const PROMPT_KEY = 'ai-agent-run-prompt'
 const MODE_KEY = 'ai-agent-run-mode'
 const RUNTIME_ID_KEY = 'ai-agent-run-runtime-id'
+const BABYSITTING_TOOLTIP =
+  'Keeps the agent active after it opens a PR so it can monitor review feedback and requested changes, then follow up until the PR is ready.'
 
 export function AIAgentRunInput() {
   const navigate = useNavigate()
@@ -28,11 +37,17 @@ export function AIAgentRunInput() {
     RUNTIME_ID_KEY,
     null
   )
+  const [babysit, setBabysit] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAgentRunMutation({
     variables: {
       runtimeId: runtimeId ?? '',
-      attributes: { prompt, mode, repository: repository ?? '' },
+      attributes: {
+        prompt,
+        mode,
+        repository: repository ?? '',
+        babysit: mode === AgentRunMode.Write ? babysit : undefined,
+      },
     },
     onCompleted: ({ createAgentRun }) =>
       createAgentRun?.id &&
@@ -72,6 +87,23 @@ export function AIAgentRunInput() {
               selectedRepository={repository}
               setSelectedRepository={setRepository}
             />
+            {mode === AgentRunMode.Write && (
+              <Tooltip
+                label={BABYSITTING_TOOLTIP}
+                css={{ width: 320 }}
+              >
+                <Checkbox
+                  small
+                  checked={babysit}
+                  onChange={(e) => setBabysit(e.target.checked)}
+                  {...{
+                    '& .label': { userSelect: 'none', textWrap: 'nowrap' },
+                  }}
+                >
+                  Babysitting
+                </Checkbox>
+              </Tooltip>
+            )}
           </Flex>
         }
       />
