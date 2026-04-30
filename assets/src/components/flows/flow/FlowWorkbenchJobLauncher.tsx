@@ -177,13 +177,13 @@ function FlowWorkbenchJobPanel({
                 ))}
               </Select>
             </Flex>
-            <Flex
+            {/* <Flex
               direction="column"
               gap="small"
             >
               <Body2BoldP $color="text">Flow context</Body2BoldP>
               <FlowContextSC />
-            </Flex>
+            </Flex> */}
             <WorkbenchJobCreateInput
               workbenchId={selectedWorkbenchId}
               workbenchLoading={workbenchesLoading}
