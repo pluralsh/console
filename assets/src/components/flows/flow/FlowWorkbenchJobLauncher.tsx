@@ -169,7 +169,7 @@ function FlowWorkbenchJobPanel({
           workbenchLoading={workbenchesLoading}
           disabled={!selectedWorkbenchId}
           placeholder="Start typing your question here..."
-          wrapperStyles={{ minHeight: 160, maxWidth: '100%' }}
+          wrapperStyles={{ minHeight: 140, maxWidth: '100%' }}
         />
       </PanelContentSC>
     </Card>
@@ -195,8 +195,8 @@ const PanelContentSC = styled(Flex)(({ theme }) => ({
 }))
 
 const FlowContextSC = styled.div(({ theme }) => ({
-  minHeight: 112,
-  maxHeight: 204,
+  height: 120,
+  maxHeight: 120,
   overflowY: 'auto',
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.medium,
