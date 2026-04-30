@@ -14,8 +14,8 @@ defmodule Console.AI.Tools.Workbench.History do
   @json_schema Console.priv_file!("tools/workbench/history.json") |> Jason.decode!()
 
   def json_schema(_), do: @json_schema
-  def name(_), do: "workbench_activity_history"
-  def description(_), do: "Searches past workbench activities.  Useful to remember what has been done that might not be present in the context of this subagent."
+  def name(_), do: "workbench_history"
+  def description(_), do: "Searches past workbench activities.  Use this to gather context from other investigations that are not directly in your prompt."
 
   def changeset(model, attrs) do
     model
