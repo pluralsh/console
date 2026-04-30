@@ -20,6 +20,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
 import {
   useCreateWorkbenchJobMutation,
+  WorkbenchJob,
   useWorkbenchPromptsQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
@@ -42,12 +43,14 @@ export function WorkbenchJobCreateInput({
   workbenchId,
   workbenchLoading,
   disabled = false,
+  onCreated,
   placeholder = 'What would you like to investigate?',
   wrapperStyles,
 }: {
   workbenchId: string
   workbenchLoading: boolean
   disabled?: boolean
+  onCreated?: (job: WorkbenchJob) => void
   placeholder?: string
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
@@ -59,11 +62,18 @@ export function WorkbenchJobCreateInput({
 
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({
-      onCompleted: ({ createWorkbenchJob }) =>
-        createWorkbenchJob?.id &&
+      onCompleted: ({ createWorkbenchJob }) => {
+        if (!createWorkbenchJob?.id) return
+
+        if (onCreated) {
+          onCreated(createWorkbenchJob)
+          return
+        }
+
         navigate(
           getWorkbenchJobAbsPath({ workbenchId, jobId: createWorkbenchJob.id })
-        ),
+        )
+      },
       refetchQueries: ['WorkbenchJobs'],
       awaitRefetchQueries: true,
     })
