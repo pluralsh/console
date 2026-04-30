@@ -175,15 +175,6 @@ query FlowAlerts($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-query FlowPrs($id: ID!, $first: Int = 100, $after: String) {
-  flow(id: $id) {
-    id
-    pullRequests(first: $first, after: $after) {
-      ...PullRequestConnection
-    }
-  }
-}
-
 query FlowPreviewEnvironmentInstances(
   $id: ID!
   $first: Int = 100
@@ -206,15 +197,6 @@ query FlowPreviewEnvironmentTemplates(
     id
     previewEnvironmentTemplates(first: $first, after: $after) {
       ...PreviewEnvironmentTemplateConnection
-    }
-  }
-}
-
-query FlowMcpServers($id: ID!) {
-  flow(id: $id) {
-    id
-    servers {
-      ...McpServer
     }
   }
 }
