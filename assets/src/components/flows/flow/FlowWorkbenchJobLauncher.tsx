@@ -220,6 +220,7 @@ function CreatedWorkbenchJobContent({
   useEffect(() => {
     if (cancellable) startPolling(POLL_INTERVAL)
     else stopPolling()
+    return () => stopPolling()
   }, [cancellable, startPolling, stopPolling])
 
   const [cancelWorkbenchJob, { loading, error }] =
