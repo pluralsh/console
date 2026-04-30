@@ -22,6 +22,7 @@ export const getGlobalSettingsBreadcrumbs = (page: string) => [
 ]
 
 const directory = [
+  { path: 'general', label: 'General' },
   { path: 'permissions', label: 'Permissions' },
   { path: 'repositories', label: 'Repositories' },
   { path: 'agents', label: 'Agent config' },
