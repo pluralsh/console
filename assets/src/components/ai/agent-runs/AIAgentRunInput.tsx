@@ -91,7 +91,7 @@ export function AIAgentRunInput() {
                 onChange={(e) => setBabysit(e.target.checked)}
                 {...{ '& .label': { userSelect: 'none', textWrap: 'nowrap' } }}
               >
-                Babysitting mode
+                Babysitting
               </Checkbox>
             )}
           </Flex>
