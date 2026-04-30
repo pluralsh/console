@@ -9517,6 +9517,15 @@ type Workbench struct {
 	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
 }
 
+type WorkbenchAggregates struct {
+	// count of merged pull requests included in the aggregate
+	PullRequests *int64 `json:"pullRequests,omitempty"`
+	// fraction of those pull requests that are merged (0.0–1.0)
+	PullRequestMergeRate *float64 `json:"pullRequestMergeRate,omitempty"`
+	// average eval grade across workbench eval results
+	EvalResults *float64 `json:"evalResults,omitempty"`
+}
+
 type WorkbenchAttributes struct {
 	// the name of the workbench (must be unique)
 	Name string `json:"name"`

@@ -541,6 +541,8 @@ type RootQueryType {
 
   workbenchPullRequests: Int!
 
+  workbenchAggregates: WorkbenchAggregates!
+
   workbenchPrMergeRates(period: EvalResultsPeriod): [WorkbenchPrMergeRateEntry]
 
   workbenchPrMergeRatesByWorkbench(period: EvalResultsPeriod): [WorkbenchPrMergeRateByWorkbenchEntry]
@@ -3402,6 +3404,17 @@ type WorkbenchPrMergeRateByWorkbenchEntry {
 
   "fraction of workbench PRs merged in this bucket (0.0–1.0)"
   mergeRate: Float
+}
+
+type WorkbenchAggregates {
+  "count of merged pull requests included in the aggregate"
+  pullRequests: Int
+
+  "fraction of those pull requests that are merged (0.0–1.0)"
+  pullRequestMergeRate: Float
+
+  "average eval grade across workbench eval results"
+  evalResults: Float
 }
 
 type WorkbenchWebhookMatches {

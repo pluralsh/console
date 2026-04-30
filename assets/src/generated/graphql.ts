@@ -10621,6 +10621,7 @@ export type RootQueryType = {
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   vulnerabilityStatistics?: Maybe<Array<Maybe<VulnerabilityStatistic>>>;
   workbench?: Maybe<Workbench>;
+  workbenchAggregates: WorkbenchAggregates;
   workbenchAlerts?: Maybe<AlertConnection>;
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
@@ -14990,6 +14991,16 @@ export type WorkbenchWorkbenchSkillsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type WorkbenchAggregates = {
+  __typename?: 'WorkbenchAggregates';
+  /** average eval grade across workbench eval results */
+  evalResults?: Maybe<Scalars['Float']['output']>;
+  /** fraction of those pull requests that are merged (0.0–1.0) */
+  pullRequestMergeRate?: Maybe<Scalars['Float']['output']>;
+  /** count of merged pull requests included in the aggregate */
+  pullRequests?: Maybe<Scalars['Int']['output']>;
 };
 
 export type WorkbenchAttributes = {
