@@ -2,6 +2,7 @@ import {
   Breadcrumb,
   Card,
   CaretRightIcon,
+  Chip,
   Flex,
   useSetBreadcrumbs,
   WorkbenchIcon,
@@ -39,6 +40,9 @@ import { isNonNullable } from 'utils/isNonNullable'
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 const RECENT_JOBS_COUNT = 3
 const WORKBENCH_ID_KEY = 'home-workbench-id'
+const ANNOUNCEMENT_DISMISSED_KEY = 'home-workbenches-announcement-dismissed'
+const ANNOUNCEMENT_LINK =
+  'https://www.plural.sh/blog/introducing-plural-workbenches-build-your-own-agents-for-devops/'
 
 export function HomeWorkbenches() {
   useSetBreadcrumbs(breadcrumbs)
@@ -55,6 +59,7 @@ export function HomeWorkbenches() {
       overflow="auto"
     >
       <ContentWrapperSC>
+        <AnnouncementBanner />
         <HeadingSC>
           <WorkbenchIcon size={20} />
           <Title2H1>
@@ -143,6 +148,36 @@ function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
   )
 }
 
+function AnnouncementBanner() {
+  const [dismissed, setDismissed] = usePersistedState(
+    ANNOUNCEMENT_DISMISSED_KEY,
+    false
+  )
+  if (dismissed) return null
+  return (
+    <BannerSC fillLevel={2}>
+      <Body2P>
+        Introducing workbenches- build your own agents for DevOps.{' '}
+        <BannerLinkSC
+          href={ANNOUNCEMENT_LINK}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Learn what you can do for your team
+        </BannerLinkSC>
+      </Body2P>
+      <Chip
+        clickable
+        size="small"
+        severity="neutral"
+        onClick={() => setDismissed(true)}
+      >
+        dismiss
+      </Chip>
+    </BannerSC>
+  )
+}
+
 function YourWorkbenchesSection() {
   const { data, loading, error } = useWorkbenchesQuery({
     fetchPolicy: 'cache-and-network',
@@ -190,6 +225,22 @@ const ContentWrapperSC = styled.div(({ theme }) => ({
 const BottomSpacerSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   height: theme.spacing.large,
+}))
+
+const BannerSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  margin: `-${theme.spacing.medium}px 0 -${theme.spacing.xlarge}px`,
+  [`@media (max-width: 1500px)`]: { marginBottom: 0 },
+}))
+
+const BannerLinkSC = styled.a(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-xlight'],
+  '&:hover': { color: theme.colors['text-light'] },
 }))
 
 const HeadingSC = styled.div(({ theme }) => ({

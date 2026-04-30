@@ -45,7 +45,7 @@ function SaveWorkbenchPromptButtonInner({
   const { data } = useWorkbenchPromptsSuspenseQuery({
     variables: { id: workbenchId },
     skip: !workbenchId || !prompt,
-    errorPolicy: 'ignore',
+    errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   })
 

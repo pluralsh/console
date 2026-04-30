@@ -1,4 +1,4 @@
-import { Button, CaretUpIcon, Flex } from '@pluralsh/design-system'
+import { Button, CaretUpIcon } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useProjectId } from 'components/contexts/ProjectsContext'
@@ -79,7 +79,7 @@ function ClusterChartsContent() {
   )
 
   return (
-    <Flex height={320}>
+    <WrapperSC>
       <ChartCellSC $side="left">
         <Body1BoldP>Health scores</Body1BoldP>
         <ClusterHealthScoresHeatmap
@@ -99,9 +99,15 @@ function ClusterChartsContent() {
           onClick={() => {}}
         />
       </ChartCellSC>
-    </Flex>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div({
+  display: 'flex',
+  height: 290,
+  [`@media (max-width: 1500px)`]: { height: 230 },
+})
 
 const ChartCellSC = styled.div<{ $side?: 'left' | 'right' }>(
   ({ theme, $side }) => ({

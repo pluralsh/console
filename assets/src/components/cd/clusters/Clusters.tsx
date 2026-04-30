@@ -19,9 +19,12 @@ import styled, { useTheme } from 'styled-components'
 import {
   ClustersRowFragment,
   Conjunction,
+  Homepage,
   useClusterStatusesQuery,
   useClustersQuery,
 } from 'generated/graphql'
+
+import { useLogin } from 'components/contexts'
 
 import {
   CD_REL_PATH,
@@ -65,6 +68,7 @@ import {
 } from '../../../utils/datetime.ts'
 import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
+import { ClustersCharts } from './ClustersCharts.tsx'
 import { cdClustersColumns } from './ClustersColumns'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
@@ -72,7 +76,6 @@ import {
   ClusterInfoFlyover,
   ClusterInfoFlyoverTab,
 } from './info-flyover/ClusterInfoFlyover.tsx'
-import { ClustersCharts } from './ClustersCharts.tsx'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -125,9 +128,10 @@ export const TableWrapperSC = styled.div<TableWrapperSCProps>(
 export default function Clusters() {
   const theme = useTheme()
   const projectId = useProjectId()
+  const { me } = useLogin()
   const cdIsEnabled = useCDEnabled()
   const onboarded = useOnboarded()
-  const [showCharts, setShowCharts] = usePersistedState('show-charts', true)
+  const [showingCharts, setShowingCharts] = usePersistedState('cd-charts', true)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
   const [upgradeableFilter, setUpgradeableFilter] =
@@ -200,6 +204,21 @@ export default function Clusters() {
     [clusterStatuses]
   )
 
+  const clusterEdges = useMemo(
+    () => data?.clusters?.edges?.filter(isNonNullable) ?? [],
+    [data?.clusters?.edges]
+  )
+  const hasStatFilters = !!debouncedSearchString || !!projectId
+  const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
+  const tableData: Edge<ClustersRowFragment>[] = isDemo
+    ? DEMO_CLUSTERS
+    : clusterEdges
+  const showGettingStarted = !onboarded && tableData && tableData?.length < 2
+  const canShowCharts =
+    me?.homepage !== Homepage.Clusters && !showGettingStarted
+
+  useSetPageScrollable(isDemo)
+
   const headerActions = useMemo(
     () =>
       cdIsEnabled ? (
@@ -207,11 +226,11 @@ export default function Clusters() {
           justify="flex-end"
           gap="medium"
         >
-          {!showCharts && (
+          {canShowCharts && !showingCharts && (
             <Button
               secondary
               endIcon={<HeatMapIcon />}
-              onClick={() => setShowCharts(true)}
+              onClick={() => setShowingCharts(true)}
             >
               Show charts
             </Button>
@@ -228,25 +247,11 @@ export default function Clusters() {
           <CreateCluster />
         </Flex>
       ) : null,
-    [cdIsEnabled, setShowCharts, showCharts]
+    [cdIsEnabled, canShowCharts, showingCharts, setShowingCharts]
   )
 
   useSetPageHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
-
-  const clusterEdges = useMemo(
-    () => data?.clusters?.edges?.filter(isNonNullable) ?? [],
-    [data?.clusters?.edges]
-  )
-  const hasStatFilters = !!debouncedSearchString || !!projectId
-  const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
-  const tableData: Edge<ClustersRowFragment>[] = isDemo
-    ? DEMO_CLUSTERS
-    : clusterEdges
-  const showGettingStarted = !onboarded && tableData && tableData?.length < 2
-
-  useSetPageScrollable(isDemo)
-
   if (error) return <GqlError error={error} />
 
   return !isDemo ? (
@@ -254,11 +259,13 @@ export default function Clusters() {
       direction="column"
       gap="small"
       height="100%"
+      overflow="auto"
+      minHeight={0}
     >
-      {!showGettingStarted && (
+      {canShowCharts && (
         <ClustersCharts
-          show={showCharts}
-          setShow={setShowCharts}
+          show={showingCharts}
+          setShow={setShowingCharts}
         />
       )}
       <ClustersFilters
@@ -297,7 +304,9 @@ export default function Clusters() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           onVirtualSliceChange={setVirtualSlice}
+          {...(tableData.length > 3 && showingCharts && { minHeight: 350 })}
         />
+
         {showGettingStarted && <GettingStartedBlock />}
       </WrapWithIf>
     </Flex>
