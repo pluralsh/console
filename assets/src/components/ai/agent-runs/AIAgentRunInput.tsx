@@ -4,6 +4,7 @@ import {
   ListBoxItem,
   LogsIcon,
   Select,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { GqlError } from 'components/utils/Alert'
@@ -20,6 +21,8 @@ import usePersistedState from 'components/hooks/usePersistedState'
 const PROMPT_KEY = 'ai-agent-run-prompt'
 const MODE_KEY = 'ai-agent-run-mode'
 const RUNTIME_ID_KEY = 'ai-agent-run-runtime-id'
+const BABYSITTING_TOOLTIP =
+  'Keeps the agent active after it opens a PR so it can monitor review feedback and requested changes, then follow up until the PR is ready.'
 
 export function AIAgentRunInput() {
   const navigate = useNavigate()
@@ -85,14 +88,21 @@ export function AIAgentRunInput() {
               setSelectedRepository={setRepository}
             />
             {mode === AgentRunMode.Write && (
-              <Checkbox
-                small
-                checked={babysit}
-                onChange={(e) => setBabysit(e.target.checked)}
-                {...{ '& .label': { userSelect: 'none', textWrap: 'nowrap' } }}
+              <Tooltip
+                label={BABYSITTING_TOOLTIP}
+                css={{ width: 320 }}
               >
-                Babysitting
-              </Checkbox>
+                <Checkbox
+                  small
+                  checked={babysit}
+                  onChange={(e) => setBabysit(e.target.checked)}
+                  {...{
+                    '& .label': { userSelect: 'none', textWrap: 'nowrap' },
+                  }}
+                >
+                  Babysitting
+                </Checkbox>
+              </Tooltip>
             )}
           </Flex>
         }
