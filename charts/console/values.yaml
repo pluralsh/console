@@ -645,7 +645,9 @@ kas:
     # targetMemoryUtilizationPercentage: 75
 
   # jwtSecretName is used to set the name of the secret that contains the JWT secret, usually the default `console-env` secret
-  jwtSecretName: console-env
+  jwtSecret:
+    name: console-env
+    key: JWT_SECRET
 
   secrets:
     create: true
