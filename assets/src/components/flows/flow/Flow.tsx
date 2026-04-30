@@ -24,7 +24,6 @@ import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { ReactNode, createContext, use, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
-  FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOW_WORKBENCHES_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
@@ -36,8 +35,6 @@ const directory: SubtabDirectory = [
   { path: FLOW_WORKBENCHES_REL_PATH, label: 'Workbenches' },
   { path: 'pipelines', label: 'Pipelines' },
   { path: 'previews', label: 'Previews' },
-  { path: 'prs', label: 'PRs' },
-  { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },
   { path: 'alerts', label: 'Alerts' },
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerabilities' },
 ]
