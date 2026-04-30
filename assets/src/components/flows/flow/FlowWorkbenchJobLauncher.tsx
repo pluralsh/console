@@ -16,14 +16,16 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   FlowBasicWithBindingsFragment,
   useCancelWorkbenchJobMutation,
   useFlowWorkbenchesQuery,
+  useWorkbenchJobQuery,
   WorkbenchJob,
-  WorkbenchJobStatus,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
+import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -142,8 +144,7 @@ function FlowWorkbenchJobPanel({
         {workbenchesError && <GqlError error={workbenchesError} />}
         {createdJob ? (
           <CreatedWorkbenchJobContent
-            job={createdJob}
-            setJob={setCreatedJob}
+            initialJob={createdJob}
             workbenchId={selectedWorkbenchId}
           />
         ) : (
@@ -199,25 +200,33 @@ function FlowWorkbenchJobPanel({
 }
 
 function CreatedWorkbenchJobContent({
-  job,
-  setJob,
+  initialJob,
   workbenchId,
 }: {
-  job: WorkbenchJob
-  setJob: (job: WorkbenchJob) => void
+  initialJob: WorkbenchJob
   workbenchId: string
 }) {
-  const cancellable =
-    job.status === WorkbenchJobStatus.Pending ||
-    job.status === WorkbenchJobStatus.Running
+  const { data, startPolling, stopPolling } = useWorkbenchJobQuery({
+    variables: { id: initialJob.id },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+    skip: !initialJob.id,
+    notifyOnNetworkStatusChange: true,
+  })
+
+  const job = data?.workbenchJob ?? initialJob
+  const cancellable = isJobRunning(job.status)
+
+  useEffect(() => {
+    if (cancellable) startPolling(POLL_INTERVAL)
+    else stopPolling()
+  }, [cancellable, startPolling, stopPolling])
 
   const [cancelWorkbenchJob, { loading, error }] =
     useCancelWorkbenchJobMutation({
       variables: { jobId: job.id },
-      onCompleted: ({ cancelWorkbenchJob }) => {
-        if (cancelWorkbenchJob?.status)
-          setJob({ ...job, status: cancelWorkbenchJob.status })
-      },
+      awaitRefetchQueries: true,
+      refetchQueries: ['WorkbenchJob'],
     })
 
   return (
