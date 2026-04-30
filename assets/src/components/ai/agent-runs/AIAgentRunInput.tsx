@@ -1,4 +1,10 @@
-import { Flex, ListBoxItem, LogsIcon, Select } from '@pluralsh/design-system'
+import {
+  Checkbox,
+  Flex,
+  ListBoxItem,
+  LogsIcon,
+  Select,
+} from '@pluralsh/design-system'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { GqlError } from 'components/utils/Alert'
 import { AgentRunMode, useCreateAgentRunMutation } from 'generated/graphql'
@@ -28,11 +34,17 @@ export function AIAgentRunInput() {
     RUNTIME_ID_KEY,
     null
   )
+  const [babysit, setBabysit] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAgentRunMutation({
     variables: {
       runtimeId: runtimeId ?? '',
-      attributes: { prompt, mode, repository: repository ?? '' },
+      attributes: {
+        prompt,
+        mode,
+        repository: repository ?? '',
+        babysit: mode === AgentRunMode.Write ? babysit : undefined,
+      },
     },
     onCompleted: ({ createAgentRun }) =>
       createAgentRun?.id &&
@@ -72,6 +84,16 @@ export function AIAgentRunInput() {
               selectedRepository={repository}
               setSelectedRepository={setRepository}
             />
+            {mode === AgentRunMode.Write && (
+              <Checkbox
+                small
+                checked={babysit}
+                onChange={(e) => setBabysit(e.target.checked)}
+                {...{ '& .label': { userSelect: 'none', textWrap: 'nowrap' } }}
+              >
+                Babysitting mode
+              </Checkbox>
+            )}
           </Flex>
         }
       />
