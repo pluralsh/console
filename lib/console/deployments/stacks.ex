@@ -4,6 +4,7 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   import Console.AI.Fixer.Base, only: [blacklist: 1]
+  require Logger
   alias Console.PubSub
   alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
@@ -288,7 +289,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, violations: :causes])
+      |> Repo.preload([:state, :infracost_resources, violations: :causes])
       |> StackRun.update_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)
@@ -429,7 +430,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, :output, :errors, :stack, violations: :causes])
+      |> Repo.preload([:state, :output, :errors, :stack, :infracost_resources, violations: :causes])
       |> StackRun.complete_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)

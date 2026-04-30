@@ -1,8 +1,9 @@
 defmodule Console.Deployments.StacksTest do
   use Console.DataCase, async: true
   use Mimic
+  import Ecto.Query, only: [from: 2]
   alias Console.PubSub
-  alias Console.Schema.{StackRun}
+  alias Console.Schema.{StackRun, StackInfracostResource}
   alias Console.Deployments.{Stacks, Settings, Tar}
   alias Console.Deployments.Git.Discovery
 
@@ -888,6 +889,42 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
     end
 
+    test "writers can attach infracost resources on update" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack)
+
+      {:ok, updated} =
+        Stacks.update_stack_run(
+          %{
+            status: :successful,
+            job_ref: %{namespace: "ns", name: "job"},
+            infracost_resources: [
+              %{
+                resource_scope: "breakdown",
+                project_name: "default",
+                name: "aws_instance.foo",
+                resource_type: "aws_instance",
+                monthly_cost: "7.3",
+                hourly_cost: "0.01"
+              }
+            ]
+          },
+          run.id,
+          user
+        )
+
+      assert updated.id == run.id
+
+      resources = Repo.all(from r in StackInfracostResource, where: r.stack_run_id == ^run.id)
+      assert length(resources) == 1
+      [res] = resources
+      assert res.resource_scope == "breakdown"
+      assert res.project_name == "default"
+      assert res.name == "aws_instance.foo"
+      assert res.stack_id == stack.id
+    end
+
     test "clusters can update runs" do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
@@ -987,6 +1024,40 @@ defmodule Console.Deployments.StacksTest do
       assert completed.status == :successful
 
       assert_receive {:event, %PubSub.StackRunCompleted{item: ^completed}}
+    end
+
+    test "writers can attach infracost resources on complete" do
+      user  = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run   = insert(:stack_run, stack: stack)
+
+      {:ok, completed} =
+        Stacks.complete_stack_run(
+          %{
+            status: :successful,
+            infracost_resources: [
+              %{
+                resource_scope: "breakdown",
+                project_name: "default",
+                name: "aws_instance.bar",
+                resource_type: "aws_instance",
+                monthly_cost: "12.5"
+              }
+            ]
+          },
+          run.id,
+          user
+        )
+
+      assert completed.id == run.id
+
+      resources = Repo.all(from r in StackInfracostResource, where: r.stack_run_id == ^run.id)
+      assert length(resources) == 1
+      [res] = resources
+      assert res.resource_scope == "breakdown"
+      assert res.project_name  == "default"
+      assert res.name          == "aws_instance.bar"
+      assert res.stack_id      == stack.id
     end
 
     test "random users cannot complete runs" do
@@ -1254,6 +1325,7 @@ defmodule Console.Deployments.StacksTest do
       {:error, _} = Stacks.stack_files(stack.id, insert(:user))
     end
   end
+
 end
 
 defmodule Console.Deployments.StacksSyncTest do
