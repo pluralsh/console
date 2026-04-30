@@ -747,6 +747,30 @@ defmodule Console.Deployments.StacksTest do
 
       assert updated.scm_state.comment_id == "id"
     end
+
+    test "it includes failed step logs in the github pr comment body" do
+      run = insert(:stack_run,
+        status: :failed,
+        pull_request: build(:pull_request, url: "https://github.com/pluralsh/console/pull/10"),
+        stack: build(:stack, connection: build(:scm_connection))
+      )
+
+      step = insert(:run_step, run: run, status: :failed, index: 1)
+      insert(:run_log, step: step, logs: "first line\n")
+      insert(:run_log, step: step, logs: "second line\n")
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, %{"body" => comment} ->
+        assert String.contains?(comment, "Failed to generate a plan for this PR")
+        assert String.contains?(comment, "<details>")
+        assert String.contains?(comment, "first line\nsecond line\n")
+
+        {:ok, %{"id" => "id"}, :ok}
+      end)
+
+      {:ok, updated} = Stacks.post_comment(run)
+
+      assert updated.scm_state.comment_id == "id"
+    end
   end
 
   describe "#restart_run/2" do

@@ -353,7 +353,12 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("failed", link: url))
+        {logs, has_logs} = failed_job_logs(run)
+        Dispatcher.review(
+          conn,
+          %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)},
+          pr_blob("failed", link: url, logs: logs, has_logs: has_logs)
+        )
         |> save_comment(run, :comment_id)
       {%StackRun{
         id: id,
@@ -420,6 +425,19 @@ defmodule Console.Deployments.Stacks do
   defp pr_blob(type, assigns) do
     Path.join([:code.priv_dir(:console), "pr", "#{type}.md.eex"])
     |> EEx.eval_file(assigns: assigns)
+  end
+
+  @spec failed_job_logs(StackRun.t) :: {binary, boolean}
+  def failed_job_logs(%StackRun{id: id}) do
+    RunStep.for_run(id)
+    |> RunStep.failing()
+    |> RunStep.with_limit(1)
+    |> Repo.one()
+    |> Repo.preload([:logs])
+    |> case do
+      %RunStep{logs: logs} -> {Enum.map(logs, & &1.logs) |> Enum.join(""), true}
+      nil -> {"{no logs found}", false}
+    end
   end
 
   @doc """
