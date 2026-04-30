@@ -43,7 +43,7 @@ export function FlowWorkbenchJobLauncher({
   const [open, setOpen] = useState(false)
   const { data, loading, error } = useFlowWorkbenchesQuery({
     variables: { id: flow.id },
-    skip: !flow.id,
+    skip: !flow.id || !open,
   })
 
   const workbenches = useMemo(
