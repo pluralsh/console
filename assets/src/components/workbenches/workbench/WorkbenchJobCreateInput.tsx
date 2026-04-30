@@ -41,9 +41,15 @@ const MAX_WIDTH = 924
 export function WorkbenchJobCreateInput({
   workbenchId,
   workbenchLoading,
+  disabled = false,
+  placeholder = 'What would you like to investigate?',
+  wrapperStyles,
 }: {
   workbenchId: string
   workbenchLoading: boolean
+  disabled?: boolean
+  placeholder?: string
+  wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
   const navigate = useNavigate()
   const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
@@ -75,7 +81,10 @@ export function WorkbenchJobCreateInput({
     setPrompt(trimmedPrompt)
     setSavedPromptsOpen(false)
     void createWorkbenchJob({
-      variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
+      variables: {
+        workbenchId,
+        attributes: { prompt: trimmedPrompt },
+      },
     })
   }
 
@@ -94,11 +103,12 @@ export function WorkbenchJobCreateInput({
       <InputWrapperSC ref={inputWrapperRef}>
         <ChatInputSimple
           ref={inputRef}
-          placeholder="What would you like to investigate?"
+          disabled={disabled}
+          placeholder={placeholder}
           setValue={setPrompt}
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
-          allowSubmit={!!prompt.trim()}
+          allowSubmit={!!prompt.trim() && !disabled}
           options={
             <Flex
               gap="xsmall"
@@ -118,7 +128,7 @@ export function WorkbenchJobCreateInput({
               />
             </Flex>
           }
-          wrapperStyles={{ maxWidth: MAX_WIDTH }}
+          wrapperStyles={{ maxWidth: MAX_WIDTH, ...wrapperStyles }}
         />
         <WorkbenchSavedPromptsOverlay
           open={savedPromptsOpen}
