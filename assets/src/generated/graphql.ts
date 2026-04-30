@@ -10559,6 +10559,8 @@ export type RootQueryType = {
   projectUsageHistory?: Maybe<ProjectUsageHistoryConnection>;
   projects?: Maybe<ProjectConnection>;
   pullRequests?: Maybe<PullRequestConnection>;
+  /** Lists recent workbench jobs across all workbenches the user can read. Max 20. */
+  recentWorkbenchJobs?: Maybe<Array<Maybe<WorkbenchJob>>>;
   refresh?: Maybe<User>;
   refreshTokens?: Maybe<RefreshTokenConnection>;
   /** request manifests from an agent, to be returned by a future call to fetchManifests */
@@ -11686,6 +11688,11 @@ export type RootQueryTypePullRequestsArgs = {
   open?: InputMaybe<Scalars['Boolean']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeRecentWorkbenchJobsArgs = {
+  count?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

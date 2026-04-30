@@ -529,6 +529,12 @@ type RootQueryType {
 
   workbenchJob(id: ID!): WorkbenchJob
 
+  "Lists recent workbench jobs across all workbenches the user can read. Max 20."
+  recentWorkbenchJobs(
+    "the maximum number of jobs to return (defaults to 3, max 20)"
+    count: Int
+  ): [WorkbenchJob]
+
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
 
   workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection

@@ -47,11 +47,29 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> allow(actor(ctx), :read)
   end
 
+  @default_recent_workbench_jobs 3
+  @max_recent_workbench_jobs 20
+
   def list_workbench_runs(workbench, args, _) do
     WorkbenchJob.for_workbench(workbench.id)
     |> workbench_job_filters(args)
     |> WorkbenchJob.ordered()
     |> paginate(args)
+  end
+
+  def recent_workbench_jobs(args, %{context: %{current_user: user}}) do
+    case Map.get(args, :count, @default_recent_workbench_jobs) do
+      count when count < 1 ->
+        {:error, "count must be at least 1"}
+      count when count > @max_recent_workbench_jobs ->
+        {:error, "count must be at most #{@max_recent_workbench_jobs}"}
+      count ->
+        WorkbenchJob.for_user(user)
+        |> WorkbenchJob.ordered()
+        |> WorkbenchJob.with_limit(count)
+        |> Console.Repo.all()
+        |> ok()
+    end
   end
 
   def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do

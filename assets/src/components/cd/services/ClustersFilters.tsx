@@ -26,22 +26,19 @@ import styled, { useTheme } from 'styled-components'
 import { TagsFilter } from './ClusterTagsFilter'
 import { serviceStatusToSeverity } from './ServiceStatusChip'
 
-export type ClusterStatusTabKey = 'HEALTHY' | 'UNHEALTHY' | 'ALL'
+export type ClusterStatusTabKey = 'ALL' | 'HEALTHY' | 'UNHEALTHY'
 export type UpgradeableFilterKey = 'ALL' | 'UPGRADEABLE' | 'NON-UPGRADEABLE'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
-  HEALTHY: {
-    label: 'Healthy',
-  },
-  UNHEALTHY: {
-    label: 'Unhealthy',
-  },
+  HEALTHY: { label: 'Healthy' },
+  UNHEALTHY: { label: 'Unhealthy' },
 } as const satisfies Record<string, { label: string }>)
 
 const ClustersFiltersSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexGrow: 1,
   columnGap: theme.spacing.medium,
+  whiteSpace: 'nowrap',
 }))
 
 export function ClustersFilters({
@@ -162,84 +159,82 @@ export function ClustersFilters({
           ))}
         </Select>
       </div>
-      <div css={{ minWidth: 180 }}>
-        <Select
-          selectedKey={upgradeableFilter}
-          onSelectionChange={(key) =>
-            setUpgradeableFilter(key as UpgradeableFilterKey)
+      <Select
+        selectedKey={upgradeableFilter}
+        onSelectionChange={(key) =>
+          setUpgradeableFilter(key as UpgradeableFilterKey)
+        }
+        triggerButton={
+          <SelectButton
+            rightContent={
+              hasUpgradeStats &&
+              upgradeableFilter !== 'ALL' && (
+                <Chip
+                  size="small"
+                  severity={upgradeFilterToSeverity(upgradeableFilter)}
+                >
+                  {upgradeableFilter === 'UPGRADEABLE'
+                    ? upgradeable
+                    : count - upgradeable}
+                </Chip>
+              )
+            }
+            css={{
+              borderColor:
+                upgradeableFilter === 'ALL'
+                  ? undefined
+                  : colors['border-primary'],
+            }}
+          >
+            {upgradeableFilter === 'ALL'
+              ? 'Filter by upgrade status'
+              : capitalize(upgradeableFilter)}
+          </SelectButton>
+        }
+      >
+        <ListBoxItem
+          key="ALL"
+          label="All"
+          rightContent={
+            hasUpgradeStats && (
+              <Chip
+                size="small"
+                severity={upgradeFilterToSeverity('ALL')}
+              >
+                {count}
+              </Chip>
+            )
           }
-          triggerButton={
-            <SelectButton
-              rightContent={
-                hasUpgradeStats &&
-                upgradeableFilter !== 'ALL' && (
-                  <Chip
-                    size="small"
-                    severity={upgradeFilterToSeverity(upgradeableFilter)}
-                  >
-                    {upgradeableFilter === 'UPGRADEABLE'
-                      ? upgradeable
-                      : count - upgradeable}
-                  </Chip>
-                )
-              }
-              css={{
-                borderColor:
-                  upgradeableFilter === 'ALL'
-                    ? undefined
-                    : colors['border-primary'],
-              }}
-            >
-              {upgradeableFilter === 'ALL'
-                ? 'Filter by upgrade status'
-                : capitalize(upgradeableFilter)}
-            </SelectButton>
+        />
+        <ListBoxItem
+          key="UPGRADEABLE"
+          label="Upgradeable"
+          rightContent={
+            hasUpgradeStats && (
+              <Chip
+                size="small"
+                severity={upgradeFilterToSeverity('UPGRADEABLE')}
+              >
+                {upgradeable}
+              </Chip>
+            )
           }
-        >
-          <ListBoxItem
-            key="ALL"
-            label="All"
-            rightContent={
-              hasUpgradeStats && (
-                <Chip
-                  size="small"
-                  severity={upgradeFilterToSeverity('ALL')}
-                >
-                  {count}
-                </Chip>
-              )
-            }
-          />
-          <ListBoxItem
-            key="UPGRADEABLE"
-            label="Upgradeable"
-            rightContent={
-              hasUpgradeStats && (
-                <Chip
-                  size="small"
-                  severity={upgradeFilterToSeverity('UPGRADEABLE')}
-                >
-                  {upgradeable}
-                </Chip>
-              )
-            }
-          />
-          <ListBoxItem
-            key="NON-UPGRADEABLE"
-            label="Non-upgradeable"
-            rightContent={
-              hasUpgradeStats && (
-                <Chip
-                  size="small"
-                  severity="danger"
-                >
-                  {count - upgradeable}
-                </Chip>
-              )
-            }
-          />
-        </Select>
-      </div>
+        />
+        <ListBoxItem
+          key="NON-UPGRADEABLE"
+          label="Non-upgradeable"
+          rightContent={
+            hasUpgradeStats && (
+              <Chip
+                size="small"
+                severity="danger"
+              >
+                {count - upgradeable}
+              </Chip>
+            )
+          }
+        />
+      </Select>
     </ClustersFiltersSC>
   )
 }

@@ -841,6 +841,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.workbench_job/2
     end
 
+    @desc "Lists recent workbench jobs across all workbenches the user can read. Max 20."
+    field :recent_workbench_jobs, list_of(:workbench_job) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :count, :integer, description: "the maximum number of jobs to return (defaults to 3, max 20)"
+
+      resolve &Deployments.recent_workbench_jobs/2
+    end
+
     field :workbench_job_activity, :workbench_job_activity do
       middleware Authenticated
       middleware Scope,

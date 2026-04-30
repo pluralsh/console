@@ -104,7 +104,8 @@ defmodule Console.Schema.Workbench do
       from(w in query,
         join: p in assoc(w, :project),
         left_join: b in PolicyBinding,
-          on: b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+          on: b.policy_id == w.read_policy_id or b.policy_id == w.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
         where: b.user_id == ^id or b.group_id in ^groups,
         distinct: true
       )
