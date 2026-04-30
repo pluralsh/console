@@ -9,12 +9,12 @@ import {
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ChatWithAIButton } from 'components/ai/chatbot/ChatbotButton'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -24,20 +24,18 @@ import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { ReactNode, createContext, use, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
-  FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOW_WORKBENCHES_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
 import { VULNERABILITY_REPORTS_REL_PATH } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
+import { FlowWorkbenchJobLauncher } from './FlowWorkbenchJobLauncher'
 
-const directory: SubtabDirectory = [
+const baseDirectory: SubtabDirectory = [
   { path: 'services', label: 'Services' },
   { path: FLOW_WORKBENCHES_REL_PATH, label: 'Workbenches' },
   { path: 'pipelines', label: 'Pipelines' },
   { path: 'previews', label: 'Previews' },
-  { path: 'prs', label: 'PRs' },
-  { path: FLOW_MCP_CONNECTIONS_REL_PATH, label: 'MCP connections' },
   { path: 'alerts', label: 'Alerts' },
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerabilities' },
 ]
@@ -69,6 +67,7 @@ export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
 
 export function Flow() {
   const [showPermissions, setShowPermissions] = useState(false)
+  const { featureFlags } = use(FeatureFlagContext)
   const [sidePanelContent, setSidePanelContent] = useState<ReactNode | null>(
     null
   )
@@ -83,6 +82,14 @@ export function Flow() {
     [setSidePanelContent]
   )
   const outletCtx: FlowOutletContext = useMemo(() => ({ flow }), [flow])
+  const directory = useMemo(
+    () =>
+      baseDirectory.filter(
+        ({ path }) =>
+          featureFlags.Workbenches || path !== FLOW_WORKBENCHES_REL_PATH
+      ),
+    [featureFlags.Workbenches]
+  )
 
   useSetBreadcrumbs(
     useMemo(() => getFlowBreadcrumbs(flow?.name || '', tab), [flow?.name, tab])
@@ -150,12 +157,9 @@ export function Flow() {
                 >
                   Permissions
                 </Button>
-                <ChatWithAIButton
-                  floating
-                  flowId={flow.id}
-                  bodyText="Start a Flow chat"
-                  summaryText={`Further questions about "${flow.name}" Flow`}
-                />
+                {featureFlags.Workbenches && (
+                  <FlowWorkbenchJobLauncher flow={flow} />
+                )}
               </HeaderSC>
               <Flex justify="space-between">
                 <SubTabs directory={directory} />

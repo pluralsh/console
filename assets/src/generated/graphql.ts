@@ -18302,9 +18302,9 @@ export type ClusterIsoImagesQueryVariables = Exact<{
 
 export type ClusterIsoImagesQuery = { __typename?: 'RootQueryType', clusterIsoImages?: { __typename?: 'ClusterIsoImageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterIsoImageEdge', node?: { __typename?: 'ClusterIsoImage', id: string, user?: string | null, password?: string | null, registry: string, image: string, insertedAt?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null } | null };
 
-export type FlowBasicFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
+export type FlowBasicFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
 
-export type FlowBasicWithBindingsFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
+export type FlowBasicWithBindingsFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
 
 export type PreviewEnvironmentTemplateFragment = { __typename?: 'PreviewEnvironmentTemplate', id: string, name: string, commentTemplate?: string | null, referenceService?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
 
@@ -18321,7 +18321,7 @@ export type FlowsQueryVariables = Exact<{
 }>;
 
 
-export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type FlowQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -18329,7 +18329,7 @@ export type FlowQueryVariables = Exact<{
 }>;
 
 
-export type FlowQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
+export type FlowQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
 
 export type FlowServicesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18376,15 +18376,6 @@ export type FlowAlertsQueryVariables = Exact<{
 
 export type FlowAlertsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null } | null };
 
-export type FlowPrsQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-  first?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type FlowPrsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null> | null } | null } | null };
-
 export type FlowPreviewEnvironmentInstancesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -18403,13 +18394,6 @@ export type FlowPreviewEnvironmentTemplatesQueryVariables = Exact<{
 
 export type FlowPreviewEnvironmentTemplatesQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, previewEnvironmentTemplates?: { __typename?: 'PreviewEnvironmentTemplateConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PreviewEnvironmentTemplateEdge', node?: { __typename?: 'PreviewEnvironmentTemplate', id: string, name: string, commentTemplate?: string | null, referenceService?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null } | null> | null } | null } | null };
 
-export type FlowMcpServersQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type FlowMcpServersQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, servers?: Array<{ __typename?: 'McpServer', id: string, name: string, url: string, confirm?: boolean | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, authentication?: { __typename?: 'McpServerAuthentication', plural?: boolean | null, headers?: Array<{ __typename?: 'McpServerHeader', name: string, value: string } | null> | null } | null } | null> | null } | null };
-
 export type FlowVulnerabilityReportsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -18424,7 +18408,7 @@ export type UpsertFlowMutationVariables = Exact<{
 }>;
 
 
-export type UpsertFlowMutation = { __typename?: 'RootMutationType', upsertFlow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
+export type UpsertFlowMutation = { __typename?: 'RootMutationType', upsertFlow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
@@ -23036,6 +23020,12 @@ export const FlowBasicFragmentDoc = gql`
   name
   description
   icon
+  metadata
+  repositories
+  project {
+    id
+    name
+  }
   alerts(first: 500) {
     edges {
       node {
@@ -34724,54 +34714,6 @@ export type FlowAlertsQueryHookResult = ReturnType<typeof useFlowAlertsQuery>;
 export type FlowAlertsLazyQueryHookResult = ReturnType<typeof useFlowAlertsLazyQuery>;
 export type FlowAlertsSuspenseQueryHookResult = ReturnType<typeof useFlowAlertsSuspenseQuery>;
 export type FlowAlertsQueryResult = Apollo.QueryResult<FlowAlertsQuery, FlowAlertsQueryVariables>;
-export const FlowPrsDocument = gql`
-    query FlowPrs($id: ID!, $first: Int = 100, $after: String) {
-  flow(id: $id) {
-    id
-    pullRequests(first: $first, after: $after) {
-      ...PullRequestConnection
-    }
-  }
-}
-    ${PullRequestConnectionFragmentDoc}`;
-
-/**
- * __useFlowPrsQuery__
- *
- * To run a query within a React component, call `useFlowPrsQuery` and pass it any options that fit your needs.
- * When your component renders, `useFlowPrsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useFlowPrsQuery({
- *   variables: {
- *      id: // value for 'id'
- *      first: // value for 'first'
- *      after: // value for 'after'
- *   },
- * });
- */
-export function useFlowPrsQuery(baseOptions: Apollo.QueryHookOptions<FlowPrsQuery, FlowPrsQueryVariables> & ({ variables: FlowPrsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FlowPrsQuery, FlowPrsQueryVariables>(FlowPrsDocument, options);
-      }
-export function useFlowPrsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlowPrsQuery, FlowPrsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FlowPrsQuery, FlowPrsQueryVariables>(FlowPrsDocument, options);
-        }
-// @ts-ignore
-export function useFlowPrsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlowPrsQuery, FlowPrsQueryVariables>): Apollo.UseSuspenseQueryResult<FlowPrsQuery, FlowPrsQueryVariables>;
-export function useFlowPrsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowPrsQuery, FlowPrsQueryVariables>): Apollo.UseSuspenseQueryResult<FlowPrsQuery | undefined, FlowPrsQueryVariables>;
-export function useFlowPrsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowPrsQuery, FlowPrsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<FlowPrsQuery, FlowPrsQueryVariables>(FlowPrsDocument, options);
-        }
-export type FlowPrsQueryHookResult = ReturnType<typeof useFlowPrsQuery>;
-export type FlowPrsLazyQueryHookResult = ReturnType<typeof useFlowPrsLazyQuery>;
-export type FlowPrsSuspenseQueryHookResult = ReturnType<typeof useFlowPrsSuspenseQuery>;
-export type FlowPrsQueryResult = Apollo.QueryResult<FlowPrsQuery, FlowPrsQueryVariables>;
 export const FlowPreviewEnvironmentInstancesDocument = gql`
     query FlowPreviewEnvironmentInstances($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
@@ -34868,52 +34810,6 @@ export type FlowPreviewEnvironmentTemplatesQueryHookResult = ReturnType<typeof u
 export type FlowPreviewEnvironmentTemplatesLazyQueryHookResult = ReturnType<typeof useFlowPreviewEnvironmentTemplatesLazyQuery>;
 export type FlowPreviewEnvironmentTemplatesSuspenseQueryHookResult = ReturnType<typeof useFlowPreviewEnvironmentTemplatesSuspenseQuery>;
 export type FlowPreviewEnvironmentTemplatesQueryResult = Apollo.QueryResult<FlowPreviewEnvironmentTemplatesQuery, FlowPreviewEnvironmentTemplatesQueryVariables>;
-export const FlowMcpServersDocument = gql`
-    query FlowMcpServers($id: ID!) {
-  flow(id: $id) {
-    id
-    servers {
-      ...McpServer
-    }
-  }
-}
-    ${McpServerFragmentDoc}`;
-
-/**
- * __useFlowMcpServersQuery__
- *
- * To run a query within a React component, call `useFlowMcpServersQuery` and pass it any options that fit your needs.
- * When your component renders, `useFlowMcpServersQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useFlowMcpServersQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useFlowMcpServersQuery(baseOptions: Apollo.QueryHookOptions<FlowMcpServersQuery, FlowMcpServersQueryVariables> & ({ variables: FlowMcpServersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FlowMcpServersQuery, FlowMcpServersQueryVariables>(FlowMcpServersDocument, options);
-      }
-export function useFlowMcpServersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlowMcpServersQuery, FlowMcpServersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FlowMcpServersQuery, FlowMcpServersQueryVariables>(FlowMcpServersDocument, options);
-        }
-// @ts-ignore
-export function useFlowMcpServersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlowMcpServersQuery, FlowMcpServersQueryVariables>): Apollo.UseSuspenseQueryResult<FlowMcpServersQuery, FlowMcpServersQueryVariables>;
-export function useFlowMcpServersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowMcpServersQuery, FlowMcpServersQueryVariables>): Apollo.UseSuspenseQueryResult<FlowMcpServersQuery | undefined, FlowMcpServersQueryVariables>;
-export function useFlowMcpServersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FlowMcpServersQuery, FlowMcpServersQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<FlowMcpServersQuery, FlowMcpServersQueryVariables>(FlowMcpServersDocument, options);
-        }
-export type FlowMcpServersQueryHookResult = ReturnType<typeof useFlowMcpServersQuery>;
-export type FlowMcpServersLazyQueryHookResult = ReturnType<typeof useFlowMcpServersLazyQuery>;
-export type FlowMcpServersSuspenseQueryHookResult = ReturnType<typeof useFlowMcpServersSuspenseQuery>;
-export type FlowMcpServersQueryResult = Apollo.QueryResult<FlowMcpServersQuery, FlowMcpServersQueryVariables>;
 export const FlowVulnerabilityReportsDocument = gql`
     query FlowVulnerabilityReports($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
@@ -43189,10 +43085,8 @@ export const namedOperations = {
     FlowWorkbenchJobs: 'FlowWorkbenchJobs',
     FlowPipelines: 'FlowPipelines',
     FlowAlerts: 'FlowAlerts',
-    FlowPrs: 'FlowPrs',
     FlowPreviewEnvironmentInstances: 'FlowPreviewEnvironmentInstances',
     FlowPreviewEnvironmentTemplates: 'FlowPreviewEnvironmentTemplates',
-    FlowMcpServers: 'FlowMcpServers',
     FlowVulnerabilityReports: 'FlowVulnerabilityReports',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',

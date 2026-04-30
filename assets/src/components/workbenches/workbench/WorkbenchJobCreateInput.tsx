@@ -20,6 +20,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
 import {
   useCreateWorkbenchJobMutation,
+  WorkbenchJob,
   useWorkbenchPromptsQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
@@ -41,9 +42,17 @@ const MAX_WIDTH = 924
 export function WorkbenchJobCreateInput({
   workbenchId,
   workbenchLoading,
+  disabled = false,
+  onCreated,
+  placeholder = 'What would you like to investigate?',
+  wrapperStyles,
 }: {
   workbenchId: string
   workbenchLoading: boolean
+  disabled?: boolean
+  onCreated?: (job: WorkbenchJob) => void
+  placeholder?: string
+  wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
   const navigate = useNavigate()
   const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
@@ -53,11 +62,18 @@ export function WorkbenchJobCreateInput({
 
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({
-      onCompleted: ({ createWorkbenchJob }) =>
-        createWorkbenchJob?.id &&
+      onCompleted: ({ createWorkbenchJob }) => {
+        if (!createWorkbenchJob?.id) return
+
+        if (onCreated) {
+          onCreated(createWorkbenchJob)
+          return
+        }
+
         navigate(
           getWorkbenchJobAbsPath({ workbenchId, jobId: createWorkbenchJob.id })
-        ),
+        )
+      },
       refetchQueries: ['WorkbenchJobs'],
       awaitRefetchQueries: true,
     })
@@ -75,7 +91,10 @@ export function WorkbenchJobCreateInput({
     setPrompt(trimmedPrompt)
     setSavedPromptsOpen(false)
     void createWorkbenchJob({
-      variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
+      variables: {
+        workbenchId,
+        attributes: { prompt: trimmedPrompt },
+      },
     })
   }
 
@@ -94,11 +113,12 @@ export function WorkbenchJobCreateInput({
       <InputWrapperSC ref={inputWrapperRef}>
         <ChatInputSimple
           ref={inputRef}
-          placeholder="What would you like to investigate?"
+          disabled={disabled}
+          placeholder={placeholder}
           setValue={setPrompt}
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
-          allowSubmit={!!prompt.trim()}
+          allowSubmit={!!prompt.trim() && !disabled}
           options={
             <Flex
               gap="xsmall"
@@ -118,7 +138,7 @@ export function WorkbenchJobCreateInput({
               />
             </Flex>
           }
-          wrapperStyles={{ maxWidth: MAX_WIDTH }}
+          wrapperStyles={{ maxWidth: MAX_WIDTH, ...wrapperStyles }}
         />
         <WorkbenchSavedPromptsOverlay
           open={savedPromptsOpen}
@@ -273,7 +293,7 @@ const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   left: 0,
   right: 0,
-  zIndex: theme.zIndexes.selectPopover,
+  zIndex: theme.zIndexes.modal + 1,
   boxSizing: 'border-box',
   overflow: 'hidden',
   backdropFilter: 'blur(4px)',
