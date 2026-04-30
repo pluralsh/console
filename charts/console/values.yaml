@@ -643,6 +643,10 @@ kas:
     targetCPUAverageValue: 100m
     # targetCPUUtilizationPercentage: 75
     # targetMemoryUtilizationPercentage: 75
+
+  # jwtSecretName is used to set the name of the secret that contains the JWT secret, usually the default `console-env` secret
+  jwtSecretName: console-env
+
   secrets:
     create: true
     api: ""
