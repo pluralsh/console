@@ -330,12 +330,12 @@ const StartedJobCardSC = styled.div(({ theme }) => ({
   },
 }))
 
-const FlowContextSC = styled.div(({ theme }) => ({
-  height: 120,
-  maxHeight: 120,
-  overflowY: 'auto',
-  border: theme.borders.input,
-  borderRadius: theme.borderRadiuses.medium,
-  backgroundColor: theme.colors['fill-zero-selected'],
-  padding: theme.spacing.medium,
-}))
+// const FlowContextSC = styled.div(({ theme }) => ({
+//   height: 120,
+//   maxHeight: 120,
+//   overflowY: 'auto',
+//   border: theme.borders.input,
+//   borderRadius: theme.borderRadiuses.medium,
+//   backgroundColor: theme.colors['fill-zero-selected'],
+//   padding: theme.spacing.medium,
+// }))
