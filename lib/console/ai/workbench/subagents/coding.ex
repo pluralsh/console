@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Coding do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun, PullRequest}
-  alias Console.AI.Tools.Workbench.{Skills, Skill, CodingAgent, Result, Coding.PullRequests}
+  alias Console.AI.Tools.Workbench.{Skills, History, Skill, CodingAgent, Result, Coding.PullRequests}
   alias Console.Deployments.Workbenches
   alias Console.AI.Workbench.Environment
 
@@ -54,12 +54,13 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     |> Repo.update_all(set: [workbench_job_id: id])
   end
 
-  defp tools(%Environment{skills: skills, job: job}) do
+  defp tools(%Environment{skills: skills, job: job, activities: activities}) do
     [
       %CodingAgent{workbench: job.workbench},
       %PullRequests{job: job},
       %Skills{skills: Environment.subagent_skills(skills, :coding)},
       %Skill{skills: Environment.subagent_skills(skills, :coding)},
+      %History{job: job, activities: activities},
       Result
     ]
   end

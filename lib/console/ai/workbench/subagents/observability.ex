@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator, History}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Time, Plrl}
   alias Console.AI.Workbench.{Environment, MCP}
 
@@ -27,7 +27,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end
   end
 
-  def tools(%Environment{skills: skills, tools: tools, job: job}) do
+  def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities}) do
     obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(plrl_log_tools(job))
@@ -37,7 +37,8 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       %Skill{skills: Environment.subagent_skills(skills, :observability)},
       ObservabilityResult,
       Time,
-      Calculator
+      Calculator,
+      %History{job: job, activities: activities}
     ])
   end
 

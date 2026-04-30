@@ -115,8 +115,8 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.create_policy_id
 
       assert res.settings.ai.enabled
-      assert res.settings.ai.provider == :openai
-      assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
+      assert res.settings.ai.provider == :bedrock
+      assert res.settings.ai.bedrock.region == "us-east-2"
     end
 
     test "it will set up elasticsearch bindings when cloud and specified" do
@@ -159,8 +159,8 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.logging.elastic.index == "plrl-test-logs-*"
 
       assert res.settings.ai.enabled
-      assert res.settings.ai.provider == :openai
-      assert res.settings.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
+      assert res.settings.ai.provider == :bedrock
+      assert res.settings.ai.bedrock.region == "us-east-2"
 
       context = Services.get_context_by_name!("plrl/cloud/observability")
       assert context.configuration["vmetrics"]["url"] == "https://my.plural.console/ext/v1/ingest/prometheus"
