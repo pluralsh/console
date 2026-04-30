@@ -1,5 +1,6 @@
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import {
+  ArrowTopRightIcon,
   Button,
   Card,
   CloseIcon,
@@ -10,18 +11,25 @@ import {
   WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { animated, useTransition } from '@react-spring/web'
+import chroma from 'chroma-js'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body1P, Body2BoldP } from 'components/utils/typography/Text'
+import { Body1P, Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
 import {
   FlowBasicWithBindingsFragment,
+  useCancelWorkbenchJobMutation,
   useFlowWorkbenchesQuery,
+  WorkbenchJob,
+  WorkbenchJobStatus,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
+import { Link } from 'react-router-dom'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 
 export function FlowWorkbenchJobLauncher({
   flow,
@@ -88,6 +96,7 @@ function FlowWorkbenchJobPanel({
 }) {
   const theme = useTheme()
   const [selectedWorkbenchId, setSelectedWorkbenchId] = useState('')
+  const [createdJob, setCreatedJob] = useState<Nullable<WorkbenchJob>>(null)
 
   const selectedWorkbench = useMemo(
     () => workbenches.find((workbench) => workbench.id === selectedWorkbenchId),
@@ -131,48 +140,141 @@ function FlowWorkbenchJobPanel({
       </Flex>
       <PanelContentSC>
         {workbenchesError && <GqlError error={workbenchesError} />}
-        <Flex
-          direction="column"
-          gap="small"
-        >
-          <Body2BoldP $color="text">Select workbench</Body2BoldP>
-          <Select
-            selectedKey={selectedWorkbenchId}
-            isDisabled={!workbenchesLoading && !workbenches.length}
-            label={
-              workbenchesLoading ? (
-                <RectangleSkeleton $width="100%" />
-              ) : (
-                selectedWorkbench?.name || 'No workbenches attached'
-              )
-            }
-            onSelectionChange={(key) => key && setSelectedWorkbenchId(`${key}`)}
-          >
-            {workbenches.map((workbench) => (
-              <ListBoxItem
-                key={workbench.id}
-                label={workbench.name}
-                textValue={workbench.name}
-              />
-            ))}
-          </Select>
-        </Flex>
-        <Flex
-          direction="column"
-          gap="small"
-        >
-          <Body2BoldP $color="text">Flow context</Body2BoldP>
-          <FlowContextSC />
-        </Flex>
-        <WorkbenchJobCreateInput
-          workbenchId={selectedWorkbenchId}
-          workbenchLoading={workbenchesLoading}
-          disabled={!selectedWorkbenchId}
-          placeholder="Start typing your question here..."
-          wrapperStyles={{ minHeight: 140, maxWidth: '100%' }}
-        />
+        {createdJob ? (
+          <CreatedWorkbenchJobContent
+            job={createdJob}
+            setJob={setCreatedJob}
+            workbenchId={selectedWorkbenchId}
+          />
+        ) : (
+          <>
+            <Flex
+              direction="column"
+              gap="small"
+            >
+              <Body2BoldP $color="text">Select workbench</Body2BoldP>
+              <Select
+                selectedKey={selectedWorkbenchId}
+                isDisabled={!workbenchesLoading && !workbenches.length}
+                label={
+                  workbenchesLoading ? (
+                    <RectangleSkeleton $width="100%" />
+                  ) : (
+                    selectedWorkbench?.name || 'No workbenches attached'
+                  )
+                }
+                onSelectionChange={(key) =>
+                  key && setSelectedWorkbenchId(`${key}`)
+                }
+              >
+                {workbenches.map((workbench) => (
+                  <ListBoxItem
+                    key={workbench.id}
+                    label={workbench.name}
+                    textValue={workbench.name}
+                  />
+                ))}
+              </Select>
+            </Flex>
+            <Flex
+              direction="column"
+              gap="small"
+            >
+              <Body2BoldP $color="text">Flow context</Body2BoldP>
+              <FlowContextSC />
+            </Flex>
+            <WorkbenchJobCreateInput
+              workbenchId={selectedWorkbenchId}
+              workbenchLoading={workbenchesLoading}
+              disabled={!selectedWorkbenchId}
+              onCreated={setCreatedJob}
+              placeholder="Start typing your question here..."
+              wrapperStyles={{ minHeight: 140, maxWidth: '100%' }}
+            />
+          </>
+        )}
       </PanelContentSC>
     </Card>
+  )
+}
+
+function CreatedWorkbenchJobContent({
+  job,
+  setJob,
+  workbenchId,
+}: {
+  job: WorkbenchJob
+  setJob: (job: WorkbenchJob) => void
+  workbenchId: string
+}) {
+  const cancellable =
+    job.status === WorkbenchJobStatus.Pending ||
+    job.status === WorkbenchJobStatus.Running
+
+  const [cancelWorkbenchJob, { loading, error }] =
+    useCancelWorkbenchJobMutation({
+      variables: { jobId: job.id },
+      onCompleted: ({ cancelWorkbenchJob }) => {
+        if (cancelWorkbenchJob?.status)
+          setJob({ ...job, status: cancelWorkbenchJob.status })
+      },
+    })
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      {error && <GqlError error={error} />}
+      <StartedJobCardSC>
+        <IconFrame
+          type="secondary"
+          icon={<WorkbenchIcon color="icon-light" />}
+          css={{ borderRadius: '50%' }}
+        />
+        <Flex
+          direction="column"
+          gap="xxsmall"
+          flex={1}
+          minWidth={0}
+        >
+          <Body2BoldP $color="text">Started workbench job</Body2BoldP>
+          <Body2P
+            $color="text-light"
+            css={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {job.prompt}
+          </Body2P>
+        </Flex>
+        <RunStatusChip
+          status={job.status}
+          showSpinner
+        />
+      </StartedJobCardSC>
+      <Flex justify={cancellable ? 'space-between' : 'flex-end'}>
+        {cancellable && (
+          <Button
+            destructive
+            loading={loading}
+            onClick={() => cancelWorkbenchJob()}
+          >
+            Cancel workbench run
+          </Button>
+        )}
+        <Button
+          as={Link}
+          to={getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })}
+          endIcon={<ArrowTopRightIcon />}
+        >
+          See progress
+        </Button>
+      </Flex>
+    </Flex>
   )
 }
 
@@ -193,6 +295,30 @@ const PanelContentSC = styled(Flex)(({ theme }) => ({
   marginTop: theme.spacing.medium,
   minHeight: 0,
   overflow: 'visible',
+}))
+
+const StartedJobCardSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  background: theme.colors['fill-two'],
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  gap: theme.spacing.medium,
+  padding: theme.spacing.medium,
+  position: 'relative',
+
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 'inherit',
+    padding: 1,
+    background: `linear-gradient(315deg, ${chroma('#5C77FF').alpha(0).hex()} 0%, #494FF2 46%, ${chroma('#8FD6FF').alpha(0.6).hex()} 79%, ${chroma('#52F4D9').alpha(0.5).hex()} 100%)`,
+    pointerEvents: 'none',
+    WebkitMask:
+      'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+    WebkitMaskComposite: 'xor',
+    maskComposite: 'exclude',
+  },
 }))
 
 const FlowContextSC = styled.div(({ theme }) => ({
