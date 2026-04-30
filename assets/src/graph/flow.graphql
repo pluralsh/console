@@ -3,6 +3,12 @@ fragment FlowBasic on Flow {
   name
   description
   icon
+  metadata
+  repositories
+  project {
+    id
+    name
+  }
   alerts(first: 500) {
     # just to get the count
     edges {
