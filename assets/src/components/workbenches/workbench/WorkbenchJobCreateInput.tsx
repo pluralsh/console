@@ -5,6 +5,9 @@ import {
   Chip,
   ChipProps,
   Flex,
+  ListBoxItem,
+  Select,
+  WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { animated, useTransition } from '@react-spring/web'
 import chroma from 'chroma-js'
@@ -20,12 +23,13 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
 import {
   useCreateWorkbenchJobMutation,
+  useWorkbenchesQuery,
   useWorkbenchPromptsQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import truncate from 'lodash/truncate'
 import type { ComponentProps, RefObject } from 'react'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
@@ -40,41 +44,38 @@ const MAX_WIDTH = 924
 
 export function WorkbenchJobCreateInput({
   workbenchId,
+  setWorkbenchId,
   workbenchLoading,
+  placeholder = 'What would you like to investigate?',
 }: {
-  workbenchId: string
+  workbenchId: Nullable<string>
+  setWorkbenchId?: (id: Nullable<string>) => void
   workbenchLoading: boolean
+  placeholder?: string
 }) {
   const navigate = useNavigate()
   const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
-  const inputWrapperRef = useRef<HTMLDivElement>(null)
   const [prompt, setPrompt] = useState('')
-  const [savedPromptsOpen, setSavedPromptsOpen] = useState(false)
 
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({
       onCompleted: ({ createWorkbenchJob }) =>
         createWorkbenchJob?.id &&
+        workbenchId &&
         navigate(
           getWorkbenchJobAbsPath({ workbenchId, jobId: createWorkbenchJob.id })
         ),
-      refetchQueries: ['WorkbenchJobs'],
+      refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
       awaitRefetchQueries: true,
     })
-
-  useOutsideClick(inputWrapperRef, () => {
-    if (!savedPromptsOpen) return
-    setSavedPromptsOpen(false)
-  })
 
   const handleSubmitPrompt = (nextPrompt = prompt) => {
     const trimmedPrompt = nextPrompt.trim()
 
-    if (!trimmedPrompt) return
+    if (!trimmedPrompt || !workbenchId) return
 
     setPrompt(trimmedPrompt)
-    setSavedPromptsOpen(false)
-    void createWorkbenchJob({
+    createWorkbenchJob({
       variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
     })
   }
@@ -91,46 +92,142 @@ export function WorkbenchJobCreateInput({
   return (
     <>
       {error && <GqlError error={error} />}
-      <InputWrapperSC ref={inputWrapperRef}>
+      <InputWrapperSC>
         <ChatInputSimple
           ref={inputRef}
-          placeholder="What would you like to investigate?"
+          placeholder={placeholder}
           setValue={setPrompt}
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
-          allowSubmit={!!prompt.trim()}
+          allowSubmit={!!prompt.trim() && !!workbenchId}
           options={
             <Flex
               gap="xsmall"
               height={32}
             >
-              <ChatOptionPill
-                isOpen={savedPromptsOpen}
-                disabled={loading}
-                onClick={() => setSavedPromptsOpen((open) => !open)}
-              >
-                <BookmarkIcon size={12} />
-                <span>Saved prompts</span>
-              </ChatOptionPill>
-              <SaveWorkbenchPromptButton
-                workbenchId={workbenchId}
-                prompt={prompt}
-              />
+              {setWorkbenchId && (
+                <WorkbenchPillSelector
+                  workbenchId={workbenchId}
+                  setWorkbenchId={setWorkbenchId}
+                />
+              )}
+              {workbenchId && (
+                <>
+                  <WorkbenchSavedPrompts
+                    workbenchId={workbenchId}
+                    disabled={loading}
+                    onSelectPrompt={handleSubmitPrompt}
+                  />
+                  <SaveWorkbenchPromptButton
+                    workbenchId={workbenchId}
+                    prompt={prompt}
+                  />
+                </>
+              )}
             </Flex>
           }
           wrapperStyles={{ maxWidth: MAX_WIDTH }}
-        />
-        <WorkbenchSavedPromptsOverlay
-          open={savedPromptsOpen}
-          workbenchId={workbenchId}
-          onSelectPrompt={handleSubmitPrompt}
         />
       </InputWrapperSC>
     </>
   )
 }
 
-function WorkbenchSavedPromptsOverlay({
+function WorkbenchPillSelector({
+  workbenchId,
+  setWorkbenchId,
+}: {
+  workbenchId: Nullable<string>
+  setWorkbenchId: (id: Nullable<string>) => void
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const { data, loading } = useWorkbenchesQuery({
+    fetchPolicy: 'cache-and-network',
+  })
+  const workbenches = useMemo(() => mapExistingNodes(data?.workbenches), [data])
+  const selectedWorkbench = workbenches.find((w) => w.id === workbenchId)
+
+  // clear a persisted id that no longer maps to an existing workbench
+  useEffect(() => {
+    if (data && workbenchId && !selectedWorkbench) setWorkbenchId(null)
+  }, [data, workbenchId, selectedWorkbench, setWorkbenchId])
+
+  return (
+    <Select
+      transparent
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+      width={240}
+      placement="left"
+      label="Select workbench"
+      selectedKey={workbenchId ?? ''}
+      onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
+      triggerButton={
+        <ChatOptionPill
+          isOpen={isOpen}
+          css={{ height: '100%' }}
+        >
+          <WorkbenchIcon size={12} />
+          {!data && loading ? (
+            <RectangleSkeleton
+              $bright
+              $width={75}
+            />
+          ) : (
+            <span>{selectedWorkbench?.name ?? 'Select workbench'}</span>
+          )}
+        </ChatOptionPill>
+      }
+    >
+      {workbenches.map(({ id, name }) => (
+        <ListBoxItem
+          key={id}
+          label={name}
+          leftContent={<WorkbenchIcon size={12} />}
+        />
+      ))}
+    </Select>
+  )
+}
+
+function WorkbenchSavedPrompts({
+  workbenchId,
+  disabled,
+  onSelectPrompt,
+}: {
+  workbenchId: string
+  disabled: boolean
+  onSelectPrompt: (prompt: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  useOutsideClick(wrapperRef, () => {
+    if (open) setOpen(false)
+  })
+
+  return (
+    <div ref={wrapperRef}>
+      <ChatOptionPill
+        isOpen={open}
+        disabled={disabled}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <BookmarkIcon size={12} />
+        <span>Saved prompts</span>
+      </ChatOptionPill>
+      <SavedPromptsOverlay
+        open={open}
+        workbenchId={workbenchId}
+        onSelectPrompt={(p) => {
+          setOpen(false)
+          onSelectPrompt(p)
+        }}
+      />
+    </div>
+  )
+}
+
+function SavedPromptsOverlay({
   open,
   workbenchId,
   onSelectPrompt,
@@ -172,6 +269,8 @@ function WorkbenchSavedPromptsOverlay({
 
   const transitions = useTransition(open ? [true] : [], transitionProps)
 
+  if (error) return null
+
   return transitions((styles) => (
     <AnimatedPromptsPanelSC
       style={{
@@ -180,9 +279,7 @@ function WorkbenchSavedPromptsOverlay({
         marginTop: styles.marginTop,
       }}
     >
-      {error ? (
-        <GqlError error={error} />
-      ) : noPrompts ? (
+      {noPrompts ? (
         <Body2P $color="text-xlight">No saved prompts yet.</Body2P>
       ) : (
         <VirtualList
@@ -271,6 +368,7 @@ const InputWrapperSC = styled.div({
 
 const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
+  top: '100%',
   left: 0,
   right: 0,
   zIndex: theme.zIndexes.selectPopover,
