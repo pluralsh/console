@@ -415,6 +415,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
+  insertedAt
   user {
     id
     name
@@ -435,7 +436,6 @@ fragment WorkbenchJobTiny on WorkbenchJob {
 
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
-  insertedAt
   workbench {
     id
     name
@@ -506,6 +506,12 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
         }
       }
     }
+  }
+}
+
+query RecentWorkbenchJobs($count: Int) {
+  recentWorkbenchJobs(count: $count) {
+    ...WorkbenchJobTiny
   }
 }
 

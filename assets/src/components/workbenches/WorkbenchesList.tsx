@@ -94,7 +94,11 @@ export function WorkbenchesList() {
   )
 }
 
-function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
+export function WorkbenchCard({
+  workbench,
+}: {
+  workbench: WorkbenchTinyFragment
+}) {
   const theme = useTheme()
 
   const {

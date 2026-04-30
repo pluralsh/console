@@ -179,17 +179,6 @@ export function useCommands({
                 },
               ]
             : []),
-          ...(!featureFlags.Workbenches
-            ? [
-                {
-                  id: 'enable-workbenches',
-                  label: 'Enable Workbenches',
-                  icon: WorkbenchIcon,
-                  callback: () => setFeatureFlag('Workbenches', true),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
         ],
       },
     ],
@@ -270,18 +259,14 @@ export function useCommands({
                 },
               ]
             : []),
-          ...(featureFlags.Workbenches
-            ? [
-                {
-                  id: 'workbenches',
-                  label: 'Workbenches',
-                  icon: WorkbenchIcon,
-                  callback: () => navigate(WORKBENCHES_ABS_PATH),
-                  deps: [navigate],
-                  hotkeys: ['shift W'],
-                },
-              ]
-            : []),
+          {
+            id: 'workbenches',
+            label: 'Workbenches',
+            icon: WorkbenchIcon,
+            callback: () => navigate(WORKBENCHES_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift W'],
+          },
           {
             id: 'pull-requests',
             label: "Pull requests (PR's)",
@@ -417,7 +402,6 @@ export function useCommands({
     [
       navigate,
       featureFlags.Edge,
-      featureFlags.Workbenches,
       cluster?.id,
       openShareSecret,
       openAccessTokenModal,
