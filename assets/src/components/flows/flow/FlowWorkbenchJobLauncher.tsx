@@ -183,6 +183,7 @@ const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   maxHeight: 'calc(100vh - 160px)',
+  overflow: 'visible',
   transformOrigin: 'top right',
 }))
 
@@ -191,7 +192,7 @@ const PanelContentSC = styled(Flex)(({ theme }) => ({
   gap: theme.spacing.large,
   marginTop: theme.spacing.medium,
   minHeight: 0,
-  overflowY: 'auto',
+  overflow: 'visible',
 }))
 
 const FlowContextSC = styled.div(({ theme }) => ({

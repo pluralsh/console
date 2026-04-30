@@ -283,7 +283,7 @@ const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   left: 0,
   right: 0,
-  zIndex: theme.zIndexes.selectPopover,
+  zIndex: theme.zIndexes.modal + 1,
   boxSizing: 'border-box',
   overflow: 'hidden',
   backdropFilter: 'blur(4px)',
