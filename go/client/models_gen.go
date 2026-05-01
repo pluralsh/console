@@ -2688,6 +2688,7 @@ type ConsoleConfiguration struct {
 	Byok          *bool              `json:"byok,omitempty"`
 	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
 	OidcName      *string            `json:"oidcName,omitempty"`
+	QoveKey       *string            `json:"qoveKey,omitempty"`
 	Features      *AvailableFeatures `json:"features,omitempty"`
 	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
 	Manifest      *PluralManifest    `json:"manifest,omitempty"`

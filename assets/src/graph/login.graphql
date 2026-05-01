@@ -70,6 +70,7 @@ query Me {
     features {
       ...AvailableFeatures
     }
+    qoveKey
   }
 }
 

@@ -14999,6 +14999,8 @@ type ConsoleConfiguration {
 
   oidcName: String
 
+  qoveKey: String
+
   features: AvailableFeatures
 
   licenseExpiry: DateTime

@@ -84,6 +84,8 @@ console:
     # adminEmails is a list of emails which will be auto-configured as admins in the console.
     adminEmails: []
 
+    qovePublicKey: ~
+
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:
     # enabled is used to configure whether custom oidc authentication should be enabled.
