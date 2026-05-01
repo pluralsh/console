@@ -32,7 +32,7 @@ defmodule Console.Schema.User do
     field :scopes,           :map, virtual: true
     field :api,              :string, virtual: true
     field :roles_updated,    :boolean, virtual: true, default: false
-    field :homepage,         Homepage, default: :clusters
+    field :homepage,         Homepage
 
     field :last_digest_at,   :utc_datetime_usec
 
@@ -146,6 +146,7 @@ defmodule Console.Schema.User do
     |> validate_format(:email, @email_re)
     |> validate_required([:email, :name])
     |> put_new_change(:assume_policy_id, &Ecto.UUID.generate/0)
+    |> put_new_change(:homepage, &homepage/0)
     |> change_markers(roles: :roles_updated)
     |> hash_password()
   end
@@ -169,6 +170,13 @@ defmodule Console.Schema.User do
     case {get_field(changeset, :name), get_field(changeset, :email)} do
       {nil, email} -> put_change(changeset, :name, email)
       _ -> changeset
+    end
+  end
+
+  defp homepage() do
+    case Console.conf(:workbench_default) do
+      true -> :workbenches
+      _ -> :clusters
     end
   end
 end

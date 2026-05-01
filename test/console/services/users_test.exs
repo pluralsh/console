@@ -248,6 +248,7 @@ defmodule Console.Services.UsersTest do
 
       assert user.name == "Some user"
       assert user.email == "user@example.com"
+      assert user.homepage == :workbenches
 
       assert_receive {:event, %PubSub.UserCreated{item: ^user}}
     end

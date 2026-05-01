@@ -50,7 +50,8 @@ config :console,
   grafana_dns: "grafana.example.com",
   prom_plugins: [],
   github_app_id: "1234567890",
-  provider: :aws
+  provider: :aws,
+  workbench_default: true
   # github_app_pem: priv_string
 
 config :console, :login_link,
