@@ -101,6 +101,8 @@ Two agents can give useful information about the codebase defining the system:
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.
 
+For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When computation is necessary, leverage the calculator tool to gather exact deterministic results.
+
 That said, you *should* avoid repeatedly calling the notes tool unless you're meaningfully updating your working theory, plan, or conclusion.  This will spam users and is unnneeded.
 
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  You can mark notes and trigger a subagent in parallel as well.
@@ -110,7 +112,7 @@ As you gather information and complete each todo, be sure to call the `workbench
 
 You also have a `skill_backfill` tool available.  Usage of this tool has a few rules you must follow:
 
-1. Only call this if explicitly asked to create/save/update skills.  Any synonym for this that explicitly references skills is enough to trigger.
+1. Call this if asked to create/save/update skills.  Any synonym for this that references skills is enough to trigger.
 2. Use the job's history to build the appropriate prompt to do the backfill.  You can invoke another subagent first to do so, if additional context is needed.  Ofentimes there's some back and forth that makes it pretty obvious.
 3. Report any skill updates back to the user so they are aware of what was added or updated.
 <% end %>

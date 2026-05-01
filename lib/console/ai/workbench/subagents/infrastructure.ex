@@ -6,6 +6,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Result,
     Skills,
     Skill,
+    History,
+    Calculator,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.ServiceFiles,
@@ -48,7 +50,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills} = environment) do
+  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment) do
     svc_tools(bench, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
@@ -56,6 +58,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
+      Calculator,
+      %History{job: job, activities: activities},
       Result
     ])
   end

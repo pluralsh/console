@@ -131,6 +131,8 @@ secrets:
   plural_client_id: ~
   # plural_client_secret is used to set PLURAL_CLIENT_SECRET if not null
   plural_client_secret: ~
+  # exaApiKey is used to set EXA_API_KEY if not null
+  exaApiKey: ~
 
 # image is used to configure the image for the console container as follows: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
@@ -641,6 +643,12 @@ kas:
     targetCPUAverageValue: 100m
     # targetCPUUtilizationPercentage: 75
     # targetMemoryUtilizationPercentage: 75
+
+  # jwtSecretName is used to set the name of the secret that contains the JWT secret, usually the default `console-env` secret
+  jwtSecret:
+    name: console-env
+    key: JWT_SECRET
+
   secrets:
     create: true
     api: ""

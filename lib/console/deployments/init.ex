@@ -106,8 +106,14 @@ defmodule Console.Deployments.Init do
   defp namespace(), do: System.get_env("NAMESPACE") || "console"
 
   defp maybe_ai(attrs) do
-    case Console.cloud?() do
-      true ->
+    case {Console.cloud?(), Console.conf(:provider)} do
+      {true, :aws} ->
+        Map.put(attrs, :ai, %{
+          provider: :bedrock,
+          enabled: true,
+          bedrock: %{region: "us-east-2"}
+        })
+      {true, _} ->
         Map.put(attrs, :ai, %{
           provider: :openai,
           enabled: true,

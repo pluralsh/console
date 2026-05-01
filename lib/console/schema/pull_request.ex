@@ -14,6 +14,10 @@ defmodule Console.Schema.PullRequest do
     Workbench
   }
 
+  defmodule Aggregate do
+    defstruct [:merged, :merge_rate]
+  end
+
   defenum Status, open: 0, merged: 1, closed: 2
 
   schema "pull_requests" do
@@ -179,6 +183,19 @@ defmodule Console.Schema.PullRequest do
           )
       },
       order_by: [desc: 2]
+    )
+  end
+
+  def for_workbench_jobs(query \\ __MODULE__) do
+    from(pr in query, where: not is_nil(pr.workbench_job_id))
+  end
+
+  def aggregates(query \\ __MODULE__) do
+    from(pr in query,
+      select: %Aggregate{
+        merged: sum(fragment("case when ? = 1 then 1 else 0 end", pr.status)),
+        merge_rate: fragment("?::float", avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status)))
+      }
     )
   end
 

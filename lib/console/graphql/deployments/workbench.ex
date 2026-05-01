@@ -623,6 +623,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :merge_rate, :float, description: "fraction of workbench PRs merged in this bucket (0.0–1.0)"
   end
 
+  object :workbench_aggregates do
+    field :pull_requests, :integer,
+      description: "count of merged pull requests included in the aggregate"
+
+    field :pull_request_merge_rate, :float,
+      description: "fraction of those pull requests that are merged (0.0–1.0)"
+
+    field :eval_results, :float,
+      description: "average eval grade across workbench eval results"
+  end
+
   object :workbench_webhook_matches do
     field :regex,            :string, description: "regex pattern to match"
     field :substring,        :string, description: "substring to match"
@@ -896,6 +907,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
 
       resolve &Deployments.workbench_pull_requests/2
+    end
+
+    field :workbench_aggregates, non_null(:workbench_aggregates) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+
+      resolve &Deployments.aggregates/2
     end
 
     field :workbench_pr_merge_rates, list_of(:workbench_pr_merge_rate_entry) do

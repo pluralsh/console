@@ -1124,6 +1124,39 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert total == 3
     end
 
+    test "workbenchAggregates returns merged PR stats and average eval grade" do
+      wb = insert(:workbench)
+      job = insert(:workbench_job, workbench: wb)
+      insert(:pull_request, workbench_job: job, status: :merged)
+      insert(:pull_request, workbench_job: job, status: :closed)
+
+      eval = insert(:workbench_eval, workbench: wb)
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: job,
+        grade: 6
+      )
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: insert(:workbench_job, workbench: wb),
+        grade: 10
+      )
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query {
+          workbenchAggregates {
+            pullRequests
+            pullRequestMergeRate
+            evalResults
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 1
+      assert agg["pullRequestMergeRate"] == 0.5
+      assert agg["evalResults"] == 8.0
+    end
+
     test "workbenchPrMergeRates returns global merge rate buckets" do
       wb1 = insert(:workbench)
       wb2 = insert(:workbench)
