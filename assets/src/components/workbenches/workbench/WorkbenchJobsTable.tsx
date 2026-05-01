@@ -170,10 +170,6 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             size={16}
           />
         )}
-        <RunStatusIcon
-          fullColor
-          status={status}
-        />
         <Tooltip
           placement="top"
           label={user?.name}
@@ -183,6 +179,10 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             size="xxsmall"
           />
         </Tooltip>
+        <RunStatusIcon
+          fullColor
+          status={status}
+        />
         <CaretRightIcon color="icon-xlight" />
       </Flex>
     )
