@@ -127,6 +127,19 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def aggregates(_, _) do
+    with [pr] <- Console.Repo.all(PullRequest.aggregates()),
+         [eval] <- Console.Repo.all(WorkbenchEvalResult.aggregates()) do
+      {:ok, %{
+        pull_requests: pr.merged,
+        pull_request_merge_rate: pr.merge_rate,
+        eval_results: eval.average_grade,
+      }}
+    else
+      _ -> {:error, "Failed to fetch aggregates"}
+    end
+  end
+
   def average_workbench_eval_results(args, %{context: %{current_user: user}}) do
     period = args[:period] || :day
 

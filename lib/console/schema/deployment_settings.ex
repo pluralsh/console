@@ -404,7 +404,7 @@ defmodule Console.Schema.DeploymentSettings do
   defp bedrock_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments)a)
-    |> validate_required(~w(model_id region)a)
+    |> validate_required(~w(region)a)
   end
 
   defp vertex_changeset(model, attrs) do

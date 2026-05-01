@@ -4,6 +4,7 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   import Console.AI.Fixer.Base, only: [blacklist: 1]
+  require Logger
   alias Console.PubSub
   alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
@@ -288,7 +289,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, violations: :causes])
+      |> Repo.preload([:state, :infracost_resources, violations: :causes])
       |> StackRun.update_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)
@@ -352,7 +353,12 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("failed", link: url))
+        {logs, has_logs} = failed_job_logs(run)
+        Dispatcher.review(
+          conn,
+          %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)},
+          pr_blob("failed", link: url, logs: logs, has_logs: has_logs)
+        )
         |> save_comment(run, :comment_id)
       {%StackRun{
         id: id,
@@ -421,6 +427,19 @@ defmodule Console.Deployments.Stacks do
     |> EEx.eval_file(assigns: assigns)
   end
 
+  @spec failed_job_logs(StackRun.t) :: {binary, boolean}
+  def failed_job_logs(%StackRun{id: id}) do
+    RunStep.for_run(id)
+    |> RunStep.failing()
+    |> RunStep.with_limit(1)
+    |> Repo.one()
+    |> Repo.preload([:logs])
+    |> case do
+      %RunStep{logs: logs} -> {Enum.map(logs, & &1.logs) |> Enum.join(""), true}
+      nil -> {"{no logs found}", false}
+    end
+  end
+
   @doc """
   It terminates a run in a completed state, and if successful, persists output/state information to the stack
   """
@@ -429,7 +448,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, :output, :errors, :stack, violations: :causes])
+      |> Repo.preload([:state, :output, :errors, :stack, :infracost_resources, violations: :causes])
       |> StackRun.complete_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)

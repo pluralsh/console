@@ -805,10 +805,7 @@ mutation CreateWorkbenchJob(
   $attributes: WorkbenchJobAttributes!
 ) {
   createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {
-    id
-    status
-    prompt
-    insertedAt
+    ...WorkbenchJob
   }
 }
 

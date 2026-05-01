@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     Result,
     Skills,
     Skill,
+    History
   }
   alias Console.AI.Tools.Workbench.Canvas.{
     Canvas,
@@ -38,7 +39,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     end
   end
 
-  defp tools(%Environment{skills: skills} = env) do
+  defp tools(%Environment{skills: skills, job: job, activities: activities} = env) do
     [
       %Skills{skills: Environment.subagent_skills(skills, :canvas)},
       %Skill{skills: Environment.subagent_skills(skills, :canvas)},
@@ -50,6 +51,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
       %TracesBlock{env: env},
       PieBlock,
       BarBlock,
+      %History{job: job, activities: activities},
       Empty
     ]
   end

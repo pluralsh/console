@@ -30,5 +30,5 @@
       "description": "The commit message for this skill change."
     }
   },
-  "required": ["name", "previous", "replacement", "branch_name", "pr_title", "pr_description"]
+  "required": ["name", "previous", "replacement", "branch_name", "pr_title", "pr_description", "commit_message"]
 }

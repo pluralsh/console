@@ -25,6 +25,7 @@ import {
   useCreateWorkbenchJobMutation,
   useWorkbenchesQuery,
   useWorkbenchPromptsQuery,
+  WorkbenchJobFragment,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import truncate from 'lodash/truncate'
@@ -46,12 +47,18 @@ export function WorkbenchJobCreateInput({
   workbenchId,
   setWorkbenchId,
   workbenchLoading,
+  disabled = false,
+  onCreated,
   placeholder = 'What would you like to investigate?',
+  wrapperStyles,
 }: {
   workbenchId: Nullable<string>
   setWorkbenchId?: (id: Nullable<string>) => void
   workbenchLoading: boolean
+  disabled?: boolean
+  onCreated?: (job: WorkbenchJobFragment) => void
   placeholder?: string
+  wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
   const navigate = useNavigate()
   const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
@@ -59,12 +66,20 @@ export function WorkbenchJobCreateInput({
 
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({
-      onCompleted: ({ createWorkbenchJob }) =>
-        createWorkbenchJob?.id &&
-        workbenchId &&
-        navigate(
-          getWorkbenchJobAbsPath({ workbenchId, jobId: createWorkbenchJob.id })
-        ),
+      onCompleted: ({ createWorkbenchJob }) => {
+        if (!createWorkbenchJob?.id) return
+        if (onCreated) {
+          onCreated(createWorkbenchJob)
+          return
+        }
+        if (workbenchId)
+          navigate(
+            getWorkbenchJobAbsPath({
+              workbenchId,
+              jobId: createWorkbenchJob.id,
+            })
+          )
+      },
       refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
       awaitRefetchQueries: true,
     })
@@ -75,6 +90,7 @@ export function WorkbenchJobCreateInput({
     if (!trimmedPrompt || !workbenchId) return
 
     setPrompt(trimmedPrompt)
+    setSavedPromptsOpen(false)
     createWorkbenchJob({
       variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
     })
@@ -95,11 +111,12 @@ export function WorkbenchJobCreateInput({
       <InputWrapperSC>
         <ChatInputSimple
           ref={inputRef}
+          disabled={disabled}
           placeholder={placeholder}
           setValue={setPrompt}
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
-          allowSubmit={!!prompt.trim() && !!workbenchId}
+          allowSubmit={!!prompt.trim() && !!workbenchId && !disabled}
           options={
             <Flex
               gap="xsmall"
@@ -126,7 +143,7 @@ export function WorkbenchJobCreateInput({
               )}
             </Flex>
           }
-          wrapperStyles={{ maxWidth: MAX_WIDTH }}
+          wrapperStyles={{ maxWidth: MAX_WIDTH, ...wrapperStyles }}
         />
       </InputWrapperSC>
     </>
@@ -371,7 +388,7 @@ const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
   top: '100%',
   left: 0,
   right: 0,
-  zIndex: theme.zIndexes.selectPopover,
+  zIndex: theme.zIndexes.modal + 1,
   boxSizing: 'border-box',
   overflow: 'hidden',
   backdropFilter: 'blur(4px)',

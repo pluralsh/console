@@ -160,9 +160,9 @@ spec:
                   - key: redis-password
                     path: redis_server_secret
             - secret:
-                name: console-env
+                name: {{ .Values.kas.jwtSecret.name }}
                 items:
-                  - key: JWT_SECRET
+                  - key: {{ .Values.kas.jwtSecret.key }}
                     path: jwt_secret
       {{- with .Values.kas.nodeSelector }}
       nodeSelector:

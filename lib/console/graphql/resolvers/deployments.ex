@@ -83,6 +83,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ClusterScalingRecommendation,
     StackPolicyViolation,
     StackViolationCause,
+    StackInfracostResource,
     Alert,
     AlertResolution,
     Flow,
@@ -194,6 +195,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterScalingRecommendation, _), do: ClusterScalingRecommendation
   def query(StackPolicyViolation, _), do: StackPolicyViolation
   def query(StackViolationCause, _), do: StackViolationCause
+  def query(StackInfracostResource, _), do: StackInfracostResource
   def query(Alert, _), do: Alert
   def query(AlertResolution, _), do: AlertResolution
   def query(Flow, _), do: Flow

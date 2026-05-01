@@ -207,10 +207,7 @@ function WorkbenchForm({
     ({ label }) => label === curStep
   )
   const allowSubmit = validateForm(formState)
-  const numUnvisitedSteps = Object.values(stepStatuses).reduce(
-    (acc, status) => acc + (status === 'not-visited' ? 1 : 0),
-    0
-  )
+  const isLastStep = curStepIndex === workbenchFormSteps.length - 1
 
   const StepComponent = workbenchFormSteps[curStepIndex]?.component
 
@@ -299,7 +296,7 @@ function WorkbenchForm({
                       >
                         Cancel
                       </Button>
-                      {numUnvisitedSteps < 2 ? (
+                      {isLastStep ? (
                         <Button
                           disabled={!allowSubmit}
                           loading={mutationLoading}

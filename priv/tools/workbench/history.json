@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "A natural-language question about past workbench activities (what was tried, decided, or discovered). The tool returns relevant activity context for you to answer from."
+        }
+    },
+    "required": ["query"]
+}
