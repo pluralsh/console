@@ -156,7 +156,6 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             })}
           />
         )}
-        <PRsModalIcon prs={prs} />
         {result?.conclusion && (
           <ActivityModalIcon
             icon={PaperCheckIcon}
@@ -170,6 +169,7 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             size={16}
           />
         )}
+        <PRsModalIcon prs={prs} />
         <Tooltip
           placement="top"
           label={user?.name}

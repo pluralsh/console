@@ -119,7 +119,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
   defp pod_logs_tools(%Workbench{configuration: %{infrastructure: %{pod_logs: true}}}, %User{} = user),
     do: [%PodLogs{user: user}]
-
   defp pod_logs_tools(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])

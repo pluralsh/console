@@ -88,8 +88,6 @@ export type WorkbenchFormStepProps = {
   setFormState: FormStateSetter
 }
 
-const rbacTooltipNote = ' Enforced with your user RBAC.'
-
 function CapabilityCheckbox(props: {
   checked: boolean
   label: string
@@ -99,7 +97,7 @@ function CapabilityCheckbox(props: {
   const { checked, label, tooltip, onCheckedChange } = props
   return (
     <Tooltip
-      label={`${tooltip}${rbacTooltipNote}`}
+      label={tooltip}
       placement="top"
     >
       <span css={{ display: 'inline-flex' }}>
@@ -151,10 +149,7 @@ export function WorkbenchSetupStep({
         />
       </FormField>
 
-      <FormField
-        hint="Plural native integrations for delivery and clusters. Hover a capability for what it enables."
-        label="Enable Infrastructure"
-      >
+      <FormField label="Enable Infrastructure">
         <Flex
           gap="large"
           wrap="wrap"
@@ -186,7 +181,7 @@ export function WorkbenchSetupStep({
           <CapabilityCheckbox
             label="Kubernetes"
             checked={infra?.kubernetes ?? false}
-            tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane."
+            tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane. Respects k8s RBAC."
             onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
@@ -198,7 +193,7 @@ export function WorkbenchSetupStep({
           <CapabilityCheckbox
             label="Kubernetes pod logs"
             checked={infra?.podLogs ?? false}
-            tooltip="Expose a tool to fetch container stdout/stderr logs from pods. Separate from Plural integrated logs under Observability."
+            tooltip="Expose a tool to fetch container stdout/stderr logs from pods, respecting k8s RBAC. Separate from Plural integrated logs under Observability."
             onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
@@ -209,10 +204,7 @@ export function WorkbenchSetupStep({
           />
         </Flex>
       </FormField>
-      <FormField
-        hint="Uses Plural-hosted query helpers for observability backends you connect. Hover a capability for behavior."
-        label="Enable Observability"
-      >
+      <FormField label="Enable Observability">
         <Flex
           gap="large"
           wrap="wrap"
