@@ -22,7 +22,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.StackInspect,
     Infrastructure.CloudSchema,
     Infrastructure.CloudQuery,
-    Infrastructure.CloudTables
+    Infrastructure.CloudTables,
+    Infrastructure.PodLogs
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.Environment
@@ -54,6 +55,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     svc_tools(bench, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
+    |> Enum.concat(pod_logs_tools(bench, user))
     |> Enum.concat(cloud_tools(environment))
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
@@ -114,6 +116,11 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     ]
   end
   defp k8s_tools(_, _), do: []
+
+  defp pod_logs_tools(%Workbench{configuration: %{infrastructure: %{pod_logs: true}}}, %User{} = user),
+    do: [%PodLogs{user: user}]
+
+  defp pod_logs_tools(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])
 end

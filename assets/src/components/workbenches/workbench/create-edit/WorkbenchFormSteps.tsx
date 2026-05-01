@@ -19,6 +19,7 @@ import {
   RadioGroup,
   Select,
   SelectButton,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   AgentRunMode,
@@ -87,6 +88,33 @@ export type WorkbenchFormStepProps = {
   setFormState: FormStateSetter
 }
 
+const rbacTooltipNote = ' Enforced with your user RBAC.'
+
+function CapabilityCheckbox(props: {
+  checked: boolean
+  label: string
+  tooltip: string
+  onCheckedChange: (checked: boolean) => void
+}) {
+  const { checked, label, tooltip, onCheckedChange } = props
+  return (
+    <Tooltip
+      label={`${tooltip}${rbacTooltipNote}`}
+      placement="top"
+    >
+      <span css={{ display: 'inline-flex' }}>
+        <Checkbox
+          small
+          checked={checked}
+          onChange={(e) => onCheckedChange(e.target.checked)}
+        >
+          {label}
+        </Checkbox>
+      </span>
+    </Tooltip>
+  )
+}
+
 export function WorkbenchSetupStep({
   formState,
   setFormState,
@@ -124,82 +152,95 @@ export function WorkbenchSetupStep({
       </FormField>
 
       <FormField
-        infoTooltip="Plural native integration"
+        hint="Plural native integrations for delivery and clusters. Hover a capability for what it enables."
         label="Enable Infrastructure"
       >
-        <Flex gap="large">
-          <Checkbox
-            small
+        <Flex
+          gap="large"
+          wrap="wrap"
+        >
+          <CapabilityCheckbox
+            label="Stacks"
             checked={infra?.stacks ?? false}
-            onChange={(e) =>
+            tooltip="Expose stack inspection tools for Plural stack definitions, runs, and related context."
+            onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.stacks = e.target.checked
+                d.configuration.infrastructure.stacks = checked
               })
             }
-          >
-            Stacks
-          </Checkbox>
-          <Checkbox
-            small
+          />
+          <CapabilityCheckbox
+            label="Services"
             checked={infra?.services ?? false}
-            onChange={(e) =>
+            tooltip="Expose service inspection tools for Plural-managed services, clusters, and deployment wiring."
+            onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.services = e.target.checked
+                d.configuration.infrastructure.services = checked
               })
             }
-          >
-            Services
-          </Checkbox>
-          <Checkbox
-            small
+          />
+          <CapabilityCheckbox
+            label="Kubernetes"
             checked={infra?.kubernetes ?? false}
-            onChange={(e) =>
+            tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane."
+            onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.kubernetes = e.target.checked
+                d.configuration.infrastructure.kubernetes = checked
               })
             }
-          >
-            Kubernetes
-          </Checkbox>
+          />
+          <CapabilityCheckbox
+            label="Kubernetes pod logs"
+            checked={infra?.podLogs ?? false}
+            tooltip="Expose a tool to fetch container stdout/stderr logs from pods. Separate from Plural integrated logs under Observability."
+            onCheckedChange={(checked) =>
+              update((d) => {
+                d.configuration ??= {}
+                d.configuration.infrastructure ??= {}
+                d.configuration.infrastructure.podLogs = checked
+              })
+            }
+          />
         </Flex>
       </FormField>
       <FormField
-        infoTooltip="Plural native integration"
+        hint="Uses Plural-hosted query helpers for observability backends you connect. Hover a capability for behavior."
         label="Enable Observability"
       >
-        <Flex gap="large">
-          <Checkbox
-            small
+        <Flex
+          gap="large"
+          wrap="wrap"
+        >
+          <CapabilityCheckbox
+            label="Plural integrated metrics"
             checked={observability?.metrics ?? false}
-            onChange={(e) =>
+            tooltip="Enable Plural-built metrics exploration for this workbench against your configured metrics backends."
+            onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.observability ??= {}
-                d.configuration.observability.metrics = e.target.checked
+                d.configuration.observability.metrics = checked
               })
             }
-          >
-            Plural integrated metrics
-          </Checkbox>
-          <Checkbox
-            small
+          />
+          <CapabilityCheckbox
+            label="Plural integrated logs"
             checked={observability?.logs ?? false}
-            onChange={(e) =>
+            tooltip="Enable Plural-built log browsing and aggregates for this workbench against your configured log backends (not Kubernetes pod log streaming)."
+            onCheckedChange={(checked) =>
               update((d) => {
                 d.configuration ??= {}
                 d.configuration.observability ??= {}
-                d.configuration.observability.logs = e.target.checked
+                d.configuration.observability.logs = checked
               })
             }
-          >
-            Plural integrated logs
-          </Checkbox>
+          />
         </Flex>
       </FormField>
     </>

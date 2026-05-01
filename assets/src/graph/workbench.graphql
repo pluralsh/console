@@ -47,6 +47,7 @@ fragment Workbench on Workbench {
       services
       stacks
       kubernetes
+      podLogs
     }
     observability {
       logs

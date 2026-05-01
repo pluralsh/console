@@ -2445,6 +2445,9 @@ input WorkbenchInfrastructureAttributes {
 
   "enable kubernetes capability"
   kubernetes: Boolean
+
+  "enable pod logs capability"
+  podLogs: Boolean
 }
 
 input WorkbenchCodingAttributes {
@@ -3237,6 +3240,9 @@ type WorkbenchInfrastructure {
 
   "kubernetes capability enabled"
   kubernetes: Boolean
+
+  "pod logs capability enabled"
+  podLogs: Boolean
 }
 
 type WorkbenchCoding {

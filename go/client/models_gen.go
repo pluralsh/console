@@ -9748,6 +9748,8 @@ type WorkbenchInfrastructure struct {
 	Stacks *bool `json:"stacks,omitempty"`
 	// kubernetes capability enabled
 	Kubernetes *bool `json:"kubernetes,omitempty"`
+	// pod logs capability enabled
+	PodLogs *bool `json:"podLogs,omitempty"`
 }
 
 type WorkbenchInfrastructureAttributes struct {
@@ -9757,6 +9759,8 @@ type WorkbenchInfrastructureAttributes struct {
 	Stacks *bool `json:"stacks,omitempty"`
 	// enable kubernetes capability
 	Kubernetes *bool `json:"kubernetes,omitempty"`
+	// enable pod logs capability
+	PodLogs *bool `json:"podLogs,omitempty"`
 }
 
 type WorkbenchJob struct {

@@ -56,6 +56,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :services,   :boolean, description: "enable services capability"
     field :stacks,     :boolean, description: "enable stacks capability"
     field :kubernetes, :boolean, description: "enable kubernetes capability"
+    field :pod_logs,   :boolean, description: "enable pod logs capability"
   end
 
   input_object :workbench_coding_attributes do
@@ -520,6 +521,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :services,   :boolean, description: "services capability enabled"
     field :stacks,     :boolean, description: "stacks capability enabled"
     field :kubernetes, :boolean, description: "kubernetes capability enabled"
+    field :pod_logs,   :boolean, description: "pod logs capability enabled"
   end
 
   object :workbench_coding do
