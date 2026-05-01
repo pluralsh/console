@@ -425,6 +425,16 @@ fragment WorkbenchJobTiny on WorkbenchJob {
     id
     name
   }
+  alert {
+    id
+    state
+    url
+  }
+  issue {
+    id
+    status
+    url
+  }
   pullRequests {
     ...PullRequestBasic
   }

@@ -5,7 +5,6 @@ import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   actionsColumn,
   creatorColumn,
-  pullRequestsColumn,
   promptColumn,
   workbenchColumn,
   WorkbenchJobsTableContent,
@@ -89,9 +88,8 @@ export function FlowWorkbenches() {
             setVirtualSlice={setJobsVirtualSlice}
             columns={[
               promptColumn,
-              creatorColumn,
               workbenchColumn,
-              pullRequestsColumn,
+              creatorColumn,
               actionsColumn,
             ]}
           />
