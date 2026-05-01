@@ -83,7 +83,7 @@ export function useWorkbenchFormCardRightContent() {
 // use FormBinding[] so BindingInput can show chips (user email / group name).
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
-  'readBindings' | 'writeBindings' | 'projectId'
+  'readBindings' | 'writeBindings' | 'projectId' | 'systemPrompt'
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
@@ -478,7 +478,6 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
 function sanitizeInitialForm({
   name,
   description = '',
-  systemPrompt = '',
   configuration,
   agentRuntime,
   repository,
@@ -511,7 +510,6 @@ function sanitizeInitialForm({
   return {
     name,
     description,
-    systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
     botUser: botUser

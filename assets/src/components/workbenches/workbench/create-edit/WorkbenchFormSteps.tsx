@@ -123,20 +123,6 @@ export function WorkbenchSetupStep({
         />
       </FormField>
 
-      <FormField label="System prompt">
-        <EditableDivWrapperSC>
-          <EditableDiv
-            initialValue={formState.systemPrompt ?? ''}
-            setValue={(value) =>
-              update((d) => {
-                d.systemPrompt = value || null
-              })
-            }
-            placeholder="E.g. 'analyze unusual metrics and provide a solution'"
-            css={{ minHeight: 80 }}
-          />
-        </EditableDivWrapperSC>
-      </FormField>
       <FormField
         infoTooltip="Plural native integration"
         label="Enable Infrastructure"
