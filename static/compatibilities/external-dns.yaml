@@ -3,6 +3,38 @@ git_url: https://github.com/kubernetes-sigs/external-dns
 release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/external-dns
 versions:
+- version: 0.21.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Charts: Fix ptsc indentation (#6054).', 'Charts: Add schema for
+        provider.webhook.serviceMonitor (#5932).', 'Charts: Skip cluster-scope RBAC
+        when running namespaced (#5843).']
+    features: ['New Kubernetes client rate-limiting flags: `--kube-api-qps` and `--kube-api-burst`
+        to control API load.', 'Events can be emitted for managed resources (Ingress/Service/Pod/Node/CRD)
+        with standardized messages, improving debuggability.', 'Expanded DNS record
+        support: NAPTR (AWS/Route53 + TXT registry), SRV/NAPTR in TXT registry, MX
+        trailing-dot handling, and generalized PTR support across providers.', 'Cloudflare
+        can batch DNS record changes, reducing API calls; Azure supports DNS record
+        metadata/tags.', Memory/performance improvements via informer object transformers
+        and reduced cache footprint; new metric for ownership conflicts (`skipped_records_owner_mismatch_per_sync`).]
+    breaking_changes: ['DigitalOcean in-tree provider removed; deployments using the
+        built-in DigitalOcean provider must switch to an alternative (e.g., webhook
+        provider) or stay pinned.', CloudFoundry source support removed; any setups
+        relying on CloudFoundry resources must migrate away., Gateway API sources
+        migrated to `gateway.networking.k8s.io/v1` (Gateway/HTTPRoute); clusters still
+        using beta APIs must upgrade CRDs/resources., Istio sources migrated to `networking.istio.io/v1`
+        for Gateway/VirtualService; older Istio API versions will no longer be watched.,
+      "PTR record support generalized beyond rfc2136; expect behavior/flags/annotations\
+        \ around PTR to change\u2014test provider compatibility.", Pi-hole v5 API
+        support deprecated; plan to move to v6 API., 'Service source now ignores unschedulable
+        nodes; if you previously relied on DNS records from unschedulable nodes, behavior
+        will change.']
+  chart_version: 1.21.1
+  images: ['registry.k8s.io/external-dns/external-dns:v0.21.0']
 - version: 0.20.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
