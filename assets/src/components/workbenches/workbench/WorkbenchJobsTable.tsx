@@ -78,7 +78,7 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns ?? [promptColumn, creatorColumn, actionsColumn]}
+      columns={columns ?? [promptColumn, actionsColumn]}
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -104,27 +104,8 @@ const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
 
 export const promptColumn = columnHelper.accessor(
   ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
-  { id: 'prompt' }
+  { id: 'prompt', meta: { gridTemplate: '1fr' } }
 )
-
-export const creatorColumn = columnHelper.accessor(({ user }) => user?.name, {
-  id: 'creator',
-  meta: { gridTemplate: '1fr' },
-  cell: ({ getValue }) => {
-    const name = getValue()
-    return (
-      <Tooltip
-        placement="top"
-        label={name}
-      >
-        <AppIcon
-          name={name}
-          size="xxsmall"
-        />
-      </Tooltip>
-    )
-  },
-})
 
 export const workbenchColumn = columnHelper.accessor(
   ({ workbench }) => workbench?.name,
@@ -144,7 +125,7 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
   cell: function Cell({ getValue }) {
     const theme = useTheme()
     const { spacing } = theme
-    const { alert, issue, pullRequests, result, status } = getValue()
+    const { alert, issue, pullRequests, result, status, user } = getValue()
     const prs = pullRequests?.filter(isNonNullable) ?? []
 
     return (
@@ -193,6 +174,15 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
           fullColor
           status={status}
         />
+        <Tooltip
+          placement="top"
+          label={user?.name}
+        >
+          <AppIcon
+            name={user?.name}
+            size="xxsmall"
+          />
+        </Tooltip>
         <CaretRightIcon color="icon-xlight" />
       </Flex>
     )
