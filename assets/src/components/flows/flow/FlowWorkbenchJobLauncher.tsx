@@ -22,7 +22,7 @@ import {
   useCancelWorkbenchJobMutation,
   useFlowWorkbenchesQuery,
   useWorkbenchJobQuery,
-  WorkbenchJob,
+  WorkbenchJobFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
@@ -98,7 +98,8 @@ function FlowWorkbenchJobPanel({
 }) {
   const theme = useTheme()
   const [selectedWorkbenchId, setSelectedWorkbenchId] = useState('')
-  const [createdJob, setCreatedJob] = useState<Nullable<WorkbenchJob>>(null)
+  const [createdJob, setCreatedJob] =
+    useState<Nullable<WorkbenchJobFragment>>(null)
 
   const selectedWorkbench = useMemo(
     () => workbenches.find((workbench) => workbench.id === selectedWorkbenchId),
@@ -203,7 +204,7 @@ function CreatedWorkbenchJobContent({
   initialJob,
   workbenchId,
 }: {
-  initialJob: WorkbenchJob
+  initialJob: WorkbenchJobFragment
   workbenchId: string
 }) {
   const { data, startPolling, stopPolling } = useWorkbenchJobQuery({

@@ -90,7 +90,6 @@ export function WorkbenchJobCreateInput({
     if (!trimmedPrompt || !workbenchId) return
 
     setPrompt(trimmedPrompt)
-    setSavedPromptsOpen(false)
     createWorkbenchJob({
       variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
     })

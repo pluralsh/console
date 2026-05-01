@@ -27,7 +27,7 @@ export function GlobalSettingsGeneral() {
   const { spacing, mode } = useTheme()
   const { me } = useLogin()
   const { popToast } = useSimpleToast()
-  const savedHomepage = me?.homepage ?? Homepage.Workbenches
+  const savedHomepage = me?.homepage ?? Homepage.Clusters
   const savedThemeMode = mode
 
   const [homepage, setHomepage] = useState<Homepage>(savedHomepage)
