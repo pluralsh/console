@@ -17,7 +17,10 @@ import {
   useWorkbenchesQuery,
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
-import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
+import {
+  WORKBENCHES_CREATE_REL_PATH,
+  getWorkbenchAbsPath,
+} from 'routes/workbenchesRoutesConsts'
 import {
   cloneElement,
   ComponentType,
@@ -126,7 +129,7 @@ export function WorkbenchCard({
     <WorkbenchCardSC
       clickable
       forwardedAs={Link}
-      to={id}
+      to={getWorkbenchAbsPath(id)}
     >
       <Body2BoldP>{name}</Body2BoldP>
       {description && (

@@ -48,7 +48,6 @@ export function FlowCard({
               size="xxsmall"
               url={flow.icon ?? ''}
               icon={<FlowIcon />}
-              css={{ borderRadius: '50%' }}
             />
             <Body1BoldP>{flow.name}</Body1BoldP>
           </Flex>

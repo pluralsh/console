@@ -182,17 +182,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> ok()
   end
 
-  def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
-    Toolchain.metrics(job, name, args)
-  end
+  def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.metrics(job, name, args, user)
 
-  def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
-    Toolchain.logs(job, name, args)
-  end
+  def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.logs(job, name, args, user)
 
-  def traces_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
-    Toolchain.traces(job, name, args)
-  end
+  def traces_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.traces(job, name, args, user)
 
   def workbenches(args, %{context: %{current_user: user}}) do
     Workbench.ordered()

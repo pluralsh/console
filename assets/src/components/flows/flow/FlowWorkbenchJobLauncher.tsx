@@ -241,7 +241,6 @@ function CreatedWorkbenchJobContent({
         <IconFrame
           type="secondary"
           icon={<WorkbenchIcon color="icon-light" />}
-          css={{ borderRadius: '50%' }}
         />
         <Flex
           direction="column"
