@@ -120,9 +120,17 @@ export function WorkbenchSetupStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
+  const theme = useTheme()
   const update = createFormUpdater(setFormState)
   const infra = formState.configuration?.infrastructure
   const observability = formState.configuration?.observability
+  const capabilityCheckboxGridCss = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    alignItems: 'start' as const,
+    columnGap: theme.spacing.large,
+    rowGap: theme.spacing.xxsmall,
+  }
   return (
     <>
       <FormField
@@ -152,92 +160,99 @@ export function WorkbenchSetupStep({
         />
       </FormField>
 
-      <FormField label="Enable Infrastructure">
-        <Flex
-          gap="large"
-          wrap="wrap"
-        >
-          <CapabilityCheckbox
-            label="Stacks"
-            checked={infra?.stacks ?? false}
-            tooltip="Expose stack inspection tools for Plural stack definitions, runs, and related context."
-            onCheckedChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.stacks = checked
-              })
-            }
-          />
-          <CapabilityCheckbox
-            label="Services"
-            checked={infra?.services ?? false}
-            tooltip="Expose service inspection tools for Plural-managed services, clusters, and deployment wiring."
-            onCheckedChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.services = checked
-              })
-            }
-          />
-          <CapabilityCheckbox
-            label="Kubernetes"
-            checked={infra?.kubernetes ?? false}
-            tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane. Respects k8s RBAC."
-            onCheckedChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.kubernetes = checked
-              })
-            }
-          />
-          <CapabilityCheckbox
-            label="Kubernetes pod logs"
-            checked={infra?.podLogs ?? false}
-            tooltip="Expose a tool to fetch container stdout/stderr logs from pods, respecting k8s RBAC. Separate from Plural integrated logs under Observability."
-            onCheckedChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.podLogs = checked
-              })
-            }
-          />
-        </Flex>
-      </FormField>
-      <FormField label="Enable Observability">
-        <Flex
-          gap="large"
-          wrap="wrap"
-        >
-          <CapabilityCheckbox
-            label="Plural integrated metrics"
-            checked={observability?.metrics ?? false}
-            tooltip="Enable Plural-built metrics exploration for this workbench against your configured metrics backends."
-            onCheckedChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.observability ??= {}
-                d.configuration.observability.metrics = checked
-              })
-            }
-          />
-          <CapabilityCheckbox
-            label="Plural integrated logs"
-            checked={observability?.logs ?? false}
-            tooltip="Enable Plural-built log browsing and aggregates for this workbench against your configured log backends (not Kubernetes pod log streaming)."
-            onCheckedChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.observability ??= {}
-                d.configuration.observability.logs = checked
-              })
-            }
-          />
-        </Flex>
-      </FormField>
+      <Divider backgroundColor="border" />
+
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        <CaptionP $color="text-light">
+          Configure Plural native infrastructure and observability integrations.
+          Tool access respects RBAC baked into these integrations so agents only
+          reach resources your organization allows.
+        </CaptionP>
+
+        <FormField label="Enable Infrastructure">
+          <Flex css={capabilityCheckboxGridCss}>
+            <CapabilityCheckbox
+              label="Stacks"
+              checked={infra?.stacks ?? false}
+              tooltip="Expose stack inspection tools for Plural stack definitions, runs, and related context."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.stacks = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Services"
+              checked={infra?.services ?? false}
+              tooltip="Expose service inspection tools for Plural-managed services, clusters, and deployment wiring."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.services = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Kubernetes"
+              checked={infra?.kubernetes ?? false}
+              tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane. Respects k8s RBAC."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.kubernetes = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Pod Logs"
+              checked={infra?.podLogs ?? false}
+              tooltip="Expose a tool to fetch container stdout/stderr logs from pods, respecting k8s RBAC. Separate from Plural integrated logs under Observability."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.podLogs = checked
+                })
+              }
+            />
+          </Flex>
+        </FormField>
+        <FormField label="Enable Observability">
+          <Flex css={capabilityCheckboxGridCss}>
+            <CapabilityCheckbox
+              label="Metrics"
+              checked={observability?.metrics ?? false}
+              tooltip="Enable Plural-built metrics exploration for this workbench against your configured metrics backends."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.observability ??= {}
+                  d.configuration.observability.metrics = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Log Aggregation"
+              checked={observability?.logs ?? false}
+              tooltip="Enable Plural-built log browsing and aggregates for this workbench against your configured log backends (not Kubernetes pod log streaming)."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.observability ??= {}
+                  d.configuration.observability.logs = checked
+                })
+              }
+            />
+          </Flex>
+        </FormField>
+      </Flex>
     </>
   )
 }

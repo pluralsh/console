@@ -6,6 +6,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   alias Console.Deployments.Agents
 
   embedded_schema do
+    field :activity,     :map, virtual: true
     field :workbench,    :map, virtual: true
     field :mode,         AgentRun.Mode
     field :babysit,      :boolean
@@ -58,10 +59,10 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def name(_), do: "workbench_coding_agent"
   def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt to either analyze the code in question or modify it and generate a reviewable PR."
 
-  def implement(%__MODULE__{id: tool, mode: mode, repository: repo, prompt: prompt}) do
+  def implement(%__MODULE__{id: tool, mode: mode, repository: repo, prompt: prompt, activity: activity}) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
          {:runtime, %AgentRuntime{} = runtime} <- {:runtime, Tool.agent_runtime()},
-         {:ok, run} <- Agents.create_agent_run(%{repository: repo, prompt: prompt, mode: mode}, runtime.id, user) do
+         {:ok, run} <- Agents.create_agent_run(%{repository: repo, prompt: prompt, mode: mode, activity: activity}, runtime.id, user) do
       {:ok, %{run | tool: tool}}
     else
       {:user, _} -> {:error, "no actor found for this session"}
