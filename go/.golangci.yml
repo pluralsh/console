@@ -36,6 +36,15 @@ linters:
       - builtin$
       - examples$
       - (^|/)ai-proxy($|/) # ai-proxy module is deprecated
+    rules:
+      # Parameter docs for Liquid filters are repetitive string tables, not domain constants.
+      - path: (^|/)polly/template($|/)
+        linters:
+          - goconst
+      # Proto-gen repeats field names for validation errors.
+      - path: .*\.pb\.validate\.go$
+        linters:
+          - goconst
 formatters:
   enable:
     - gofmt

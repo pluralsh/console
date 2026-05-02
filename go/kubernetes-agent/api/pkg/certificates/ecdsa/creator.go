@@ -33,6 +33,8 @@ import (
 	certapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/certificates/api"
 )
 
+const kubernetesDashboardSubjectCN = "kubernetes-dashboard"
+
 // Implements certificate Creator interface. See Creator for more information.
 type ecdsaCreator struct {
 	keyFile  string
@@ -71,8 +73,8 @@ func (in *ecdsaCreator) GenerateCertificate(key interface{}) []byte {
 		template.Issuer = pkix.Name{CommonName: podDomainName}
 		template.DNSNames = []string{podDomainName}
 	} else {
-		template.Subject = pkix.Name{CommonName: "kubernetes-dashboard", OrganizationalUnit: []string{"kubernetes-dashboard"}, Organization: []string{"kubernetes-dashboard"}}
-		template.Issuer = pkix.Name{CommonName: "kubernetes-dashboard", OrganizationalUnit: []string{"kubernetes-dashboard"}, Organization: []string{"kubernetes-dashboard"}}
+		template.Subject = pkix.Name{CommonName: kubernetesDashboardSubjectCN, OrganizationalUnit: []string{kubernetesDashboardSubjectCN}, Organization: []string{kubernetesDashboardSubjectCN}}
+		template.Issuer = pkix.Name{CommonName: kubernetesDashboardSubjectCN, OrganizationalUnit: []string{kubernetesDashboardSubjectCN}, Organization: []string{kubernetesDashboardSubjectCN}}
 	}
 
 	if len(pod.Status.PodIP) > 0 {

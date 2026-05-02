@@ -45,7 +45,10 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-const NotificationRouterFinalizer = "deployments.plural.sh/notification-router-protection"
+const (
+	NotificationRouterFinalizer = "deployments.plural.sh/notification-router-protection"
+	deploymentsPluralAPIGroup   = "deployments.plural.sh"
+)
 
 // NotificationRouterReconciler reconciles a NotificationRouter object
 type NotificationRouterReconciler struct {
@@ -194,7 +197,7 @@ func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *co
 		return nil, err
 	}
 	if !cluster.Status.HasID() {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "Cluster", Group: "deployments.plural.sh"}, obj.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "Cluster", Group: deploymentsPluralAPIGroup}, obj.Name)
 	}
 	return cluster.Status.ID, nil
 }
@@ -222,7 +225,7 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 		return nil, err
 	}
 	if !resource.Status.HasID() {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "Pipeline", Group: "deployments.plural.sh"}, objRef.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: "Pipeline", Group: deploymentsPluralAPIGroup}, objRef.Name)
 	}
 	return resource.Status.ID, nil
 }

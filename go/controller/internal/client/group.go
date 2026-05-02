@@ -10,13 +10,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+const consoleAPIResourceGroup = "group"
+
 func (c *client) GetGroupId(name string) (string, error) {
 	response, err := c.consoleClient.GetGroupTiny(c.ctx, name)
 	if internalerror.IsNotFound(err) {
-		return "", errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+		return "", errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceGroup}, name)
 	}
 	if err == nil && (response == nil || response.Group == nil) {
-		return "", errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+		return "", errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceGroup}, name)
 	}
 	if response == nil {
 		return "", err
@@ -28,10 +30,10 @@ func (c *client) GetGroupId(name string) (string, error) {
 func (c *client) GetGroup(name string) (*console.GroupFragment, error) {
 	response, err := c.consoleClient.GetGroup(c.ctx, name)
 	if internalerror.IsNotFound(err) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceGroup}, name)
 	}
 	if err == nil && (response == nil || response.Group == nil) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceGroup}, name)
 	}
 	if response == nil {
 		return nil, err
@@ -43,10 +45,10 @@ func (c *client) GetGroup(name string) (*console.GroupFragment, error) {
 func (c *client) GetGroupTiny(name string) (*console.GetGroupTiny_Group, error) {
 	response, err := c.consoleClient.GetGroupTiny(c.ctx, name)
 	if internalerror.IsNotFound(err) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceGroup}, name)
 	}
 	if err == nil && (response == nil || response.Group == nil) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceGroup}, name)
 	}
 	if response == nil {
 		return nil, err

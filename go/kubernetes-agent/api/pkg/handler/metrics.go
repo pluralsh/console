@@ -21,13 +21,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+const prometheusLabelResource = "resource"
+
 var (
 	requestCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "apiserver_request_count",
 			Help: "Counter of apiserver requests broken out for each verb, API resource, client, and HTTP response contentType and code.",
 		},
-		[]string{"verb", "resource", "client", "contentType", "code"},
+		[]string{"verb", prometheusLabelResource, "client", "contentType", "code"},
 	)
 	requestLatencies = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -36,7 +38,7 @@ var (
 			// Use buckets ranging from 125 ms to 8 seconds.
 			Buckets: prometheus.ExponentialBuckets(125000, 2.0, 7),
 		},
-		[]string{"verb", "resource"},
+		[]string{"verb", prometheusLabelResource},
 	)
 	requestLatenciesSummary = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
@@ -45,7 +47,7 @@ var (
 			// Make the sliding window of 1h.
 			MaxAge: time.Hour,
 		},
-		[]string{"verb", "resource"},
+		[]string{"verb", prometheusLabelResource},
 	)
 )
 
