@@ -14,6 +14,8 @@ import (
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 )
 
+const sentryFingerprintTransportGRPC = "grpc"
+
 type serverRpcApi struct {
 	modshared.RpcApiStub
 	sentryHubRoot *sentry.Hub
@@ -48,8 +50,8 @@ func (a *serverRpcApi) hubOnce() {
 	scope := hub.Scope()
 	scope.SetTag(modserver2.GrpcServiceSentryField, a.service)
 	scope.SetTag(modserver2.GrpcMethodSentryField, a.method)
-	a.transaction = a.service + "::" + a.method                            // Like in Gitaly
-	scope.SetFingerprint([]string{"{{ default }}", "grpc", a.transaction}) // use Sentry's default error hash but also split by gRPC transaction
+	a.transaction = a.service + "::" + a.method // Like in Gitaly
+	scope.SetFingerprint([]string{"{{ default }}", sentryFingerprintTransportGRPC, a.transaction})
 	if a.traceID.IsValid() {
 		scope.SetTag(modserver2.SentryFieldTraceId, a.traceID.String())
 	}

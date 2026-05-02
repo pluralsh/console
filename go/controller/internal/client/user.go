@@ -7,13 +7,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+const consoleAPIResourceUser = "user"
+
 func (c *client) GetUser(email string) (*console.UserFragment, error) {
 	response, err := c.consoleClient.GetUser(c.ctx, email)
 	if internalerror.IsNotFound(err) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "user"}, email)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceUser}, email)
 	}
 	if err == nil && (response == nil || response.User == nil) {
-		return nil, errors.NewNotFound(schema.GroupResource{Resource: "user"}, email)
+		return nil, errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceUser}, email)
 	}
 	if response == nil {
 		return nil, err
@@ -25,10 +27,10 @@ func (c *client) GetUser(email string) (*console.UserFragment, error) {
 func (c *client) GetUserId(email string) (string, error) {
 	response, err := c.consoleClient.GetUserTiny(c.ctx, email)
 	if internalerror.IsNotFound(err) {
-		return "", errors.NewNotFound(schema.GroupResource{Resource: "user"}, email)
+		return "", errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceUser}, email)
 	}
 	if err == nil && (response == nil || response.User == nil) {
-		return "", errors.NewNotFound(schema.GroupResource{Resource: "user"}, email)
+		return "", errors.NewNotFound(schema.GroupResource{Resource: consoleAPIResourceUser}, email)
 	}
 	if response == nil {
 		return "", err

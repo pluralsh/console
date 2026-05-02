@@ -1,24 +1,26 @@
 import { Flex, severityToColor } from '@pluralsh/design-system'
+import chroma from 'chroma-js'
 import { healthScoreToSeverity } from 'components/cd/clusters/ClusterHealthChip'
+import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { TreeMap, TreeMapData } from 'components/utils/TreeMap'
 import { ClusterHealthScoreFragment } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import chroma from 'chroma-js'
-import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
-import { isEmpty } from 'lodash'
+import { ChartLegendItem, HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { EmptyHeatmapSvg } from './ClusterHealthScoresHeatmapEmpty'
-import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
 
 export type HealthScoreFilterLabel = keyof typeof healthScoreLabelToRange
 
 export function ClusterHealthScoresHeatmap({
   clusters,
   onClick,
+  showLegend = false,
 }: {
   clusters: ClusterHealthScoreFragment[]
   onClick: (clusterName: string) => void
+  showLegend?: boolean
 }) {
   const { colors } = useTheme()
   const data = useMemo(() => getHeatmapData(clusters), [clusters])
@@ -35,31 +37,55 @@ export function ClusterHealthScoresHeatmap({
     return <EmptyHeatmapSvg label="No data to display." />
 
   return (
-    <TreeMap
-      rounded
-      data={data}
-      colors={(d) => getColor(d).hex()}
-      onClick={({ id }) => onClick(id)} // id will be the cluster name
-      valueFormat={(value) => `${101 - value}`}
-      tooltip={({ node }) => (
-        <ChartTooltip
-          color={node.color}
-          value={
-            <span
-              css={{
-                color:
-                  colors[
-                    severityToColor[healthScoreToSeverity(101 - node.value)]
-                  ],
-              }}
-            >
-              {node.formattedValue}
-            </span>
-          }
-          label={node.id}
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+    >
+      <TreeMap
+        rounded
+        data={data}
+        colors={(d) => getColor(d).hex()}
+        onClick={({ id }) => onClick(id)} // id will be the cluster name
+        valueFormat={(value) => `${101 - value}`}
+        tooltip={({ node }) => (
+          <ChartTooltip
+            color={node.color}
+            value={
+              <span
+                css={{
+                  color:
+                    colors[
+                      severityToColor[healthScoreToSeverity(101 - node.value)]
+                    ],
+                }}
+              >
+                {node.formattedValue}
+              </span>
+            }
+            label={node.id}
+          />
+        )}
+      />
+      {showLegend && <ClusterHealthScoresLegend />}
+    </Flex>
+  )
+}
+
+export function ClusterHealthScoresLegend() {
+  return (
+    <Flex
+      gap="medium"
+      wrap="wrap"
+    >
+      {selectableFilterOptions.map((label) => (
+        <ChartLegendItem
+          key={label}
+          color={healthScoreLabelToBaseColor[label]}
+          label={label}
         />
-      )}
-    />
+      ))}
+    </Flex>
   )
 }
 

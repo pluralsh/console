@@ -27,6 +27,7 @@ import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
 import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
 import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
+import { QoveScriptLoader } from '../QoveScriptLoader'
 import { SentryInitializer } from '../SentryInitializer'
 import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
@@ -44,31 +45,33 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <SentryInitializer>
-              <SelectedProjectProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbsProvider>
-                    <TerminalThemeProvider>
-                      <ShareSecretProvider>
-                        <AccessTokenProvider>
-                          <DeploymentSettingsProvider>
-                            <SidebarProvider>
-                              <TopLevelSidePanelProviders>
-                                <FeatureFlagProvider>
-                                  <CommandPaletteProvider>
-                                    <SimpleToastProvider>
-                                      <ConsoleContent />
-                                    </SimpleToastProvider>
-                                  </CommandPaletteProvider>
-                                </FeatureFlagProvider>
-                              </TopLevelSidePanelProviders>
-                            </SidebarProvider>
-                          </DeploymentSettingsProvider>
-                        </AccessTokenProvider>
-                      </ShareSecretProvider>
-                    </TerminalThemeProvider>
-                  </BreadcrumbsProvider>
-                </BillingSubscriptionProvider>
-              </SelectedProjectProvider>
+              <QoveScriptLoader>
+                <SelectedProjectProvider>
+                  <BillingSubscriptionProvider>
+                    <BreadcrumbsProvider>
+                      <TerminalThemeProvider>
+                        <ShareSecretProvider>
+                          <AccessTokenProvider>
+                            <DeploymentSettingsProvider>
+                              <SidebarProvider>
+                                <TopLevelSidePanelProviders>
+                                  <FeatureFlagProvider>
+                                    <CommandPaletteProvider>
+                                      <SimpleToastProvider>
+                                        <ConsoleContent />
+                                      </SimpleToastProvider>
+                                    </CommandPaletteProvider>
+                                  </FeatureFlagProvider>
+                                </TopLevelSidePanelProviders>
+                              </SidebarProvider>
+                            </DeploymentSettingsProvider>
+                          </AccessTokenProvider>
+                        </ShareSecretProvider>
+                      </TerminalThemeProvider>
+                    </BreadcrumbsProvider>
+                  </BillingSubscriptionProvider>
+                </SelectedProjectProvider>
+              </QoveScriptLoader>
             </SentryInitializer>
           </EnsureLogin>
         </ConsoleNavContextProvider>

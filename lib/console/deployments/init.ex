@@ -4,7 +4,7 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
-  alias Console.Schema.{AccessToken, Cluster, Group, User, WorkbenchTool}
+  alias Console.Schema.{AccessToken, Cluster, DeploymentSettings, Group, User, Workbench}
   alias Kube.Utils
   alias Console.Deployments.{Clusters, Git, Settings, Services, Workbenches}
 
@@ -123,6 +123,22 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  def migrate_bedrock() do
+    with {true, :aws} <- {Console.cloud?(), Console.conf(:provider)},
+         %DeploymentSettings{ai: %{
+           provider: :openai,
+           openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}}
+         } = settings <- Settings.fetch_consistent() do
+      DeploymentSettings.changeset(settings, %{ai: %{
+        provider: :bedrock,
+        bedrock: %{region: "us-east-1"}
+      }})
+      |> Repo.update()
+    else
+      _ -> {:ok, %{}}
+    end
+  end
+
   defp maybe_agent_helm_values(attrs) do
     case Console.conf(:agent_helm_values) do
       helm_values when is_binary(helm_values) and byte_size(helm_values) > 0 ->
@@ -131,7 +147,7 @@ defmodule Console.Deployments.Init do
     end
   end
 
-  @spec setup_workbench() :: {:ok, %{es: WorkbenchTool.t(), prometheus: WorkbenchTool.t()}} | Console.error()
+  @spec setup_workbench() :: {:ok, %{bench: Workbench.t()}} | Console.error()
   def setup_workbench() do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
@@ -166,14 +182,22 @@ defmodule Console.Deployments.Init do
           }
         }, bot)
       end)
-      |> add_operation(:bench, fn _ ->
+      |> add_operation(:exa, fn _ ->
+        Workbenches.create_tool(%{
+          name: "exa",
+          tool: :exa,
+          configuration: %{exa: %{api_key: Console.conf(:exa_api_key)}}
+        }, bot)
+      end)
+      |> add_operation(:bench, fn %{exa: %{id: exa_id}} ->
         Workbenches.create_workbench(%{
           name: "plural",
           description: "Workbench pre-configured with all plural-native tools",
           configuration: %{
             infrastructure: %{services: true, stacks: true, kubernetes: true},
             observability: %{logs: true, metrics: true}
-          }
+          },
+          tool_associations: [%{tool_id: exa_id}]
         }, bot)
       end)
       |> execute()

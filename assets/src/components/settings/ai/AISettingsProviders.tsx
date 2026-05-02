@@ -98,7 +98,7 @@ export function validateAttributes(
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Bedrock:
-      return !!settings.bedrock?.modelId
+      return true
     case AiProvider.Ollama:
       return !!(
         settings.ollama?.model &&
@@ -261,8 +261,7 @@ export function BedrockSettings({
     <>
       <FormField
         label="Model ID"
-        hint="Primary Bedrock model for Explain/Fix with AI, Insights, and similar features."
-        required={enabled}
+        hint="Primary Bedrock model for Explain/Fix with AI, Insights, and similar features. Leave blank to use Plural defaults."
         flex={1}
       >
         <Input

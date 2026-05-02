@@ -47,6 +47,7 @@ fragment Workbench on Workbench {
       services
       stacks
       kubernetes
+      podLogs
     }
     observability {
       logs
@@ -55,6 +56,7 @@ fragment Workbench on Workbench {
     coding {
       mode
       repositories
+      enableBabysitting
     }
   }
   skills {
@@ -415,6 +417,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
+  insertedAt
   user {
     id
     name
@@ -423,6 +426,16 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   workbench {
     id
     name
+  }
+  alert {
+    id
+    state
+    url
+  }
+  issue {
+    id
+    status
+    url
   }
   pullRequests {
     ...PullRequestBasic
@@ -435,7 +448,6 @@ fragment WorkbenchJobTiny on WorkbenchJob {
 
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
-  insertedAt
   workbench {
     id
     name
@@ -506,6 +518,12 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
         }
       }
     }
+  }
+}
+
+query RecentWorkbenchJobs($count: Int) {
+  recentWorkbenchJobs(count: $count) {
+    ...WorkbenchJobTiny
   }
 }
 
@@ -799,10 +817,7 @@ mutation CreateWorkbenchJob(
   $attributes: WorkbenchJobAttributes!
 ) {
   createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {
-    id
-    status
-    prompt
-    insertedAt
+    ...WorkbenchJob
   }
 }
 

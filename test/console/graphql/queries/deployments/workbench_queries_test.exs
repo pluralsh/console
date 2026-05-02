@@ -55,6 +55,59 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal(workbenches)
     end
 
+    test "users with direct read bindings on a workbench can see it without project access" do
+      user = insert(:user)
+      visible = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([visible])
+    end
+
+    test "users with direct write bindings on a workbench can see it without project access" do
+      user = insert(:user)
+      visible = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([visible])
+    end
+
+    test "users in a group bound to a workbench can see it without project access" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, group: group, user: user)
+      visible = insert(:workbench, read_bindings: [%{group_id: group.id}])
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([visible])
+    end
+
     test "it can filter by projectId" do
       project_a = insert(:project)
       project_b = insert(:project)
@@ -1002,6 +1055,180 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert from_connection(found)
              |> Enum.empty?()
+    end
+  end
+
+  describe "recentWorkbenchJobs" do
+    test "admins see recent jobs across all workbenches" do
+      workbench_a = insert(:workbench)
+      workbench_b = insert(:workbench)
+      jobs = insert_list(2, :workbench_job, workbench: workbench_a)
+              ++ insert_list(2, :workbench_job, workbench: workbench_b)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 10}, %{current_user: admin_user()})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users only see jobs for workbenches they have access to" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+
+      other_workbench = insert(:workbench)
+      insert_list(3, :workbench_job, workbench: other_workbench)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users with no workbench access see no jobs" do
+      user = insert(:user)
+      insert_list(3, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert Enum.empty?(found)
+    end
+
+    test "users with direct read bindings on a workbench see its jobs without project access" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+      insert_list(2, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users with direct write bindings on a workbench see its jobs without project access" do
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+      insert_list(2, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users in a group bound to a workbench see its jobs without project access" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, group: group, user: user)
+      workbench = insert(:workbench, read_bindings: [%{group_id: group.id}])
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+      insert_list(2, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "it respects the count argument" do
+      insert_list(5, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 3}, %{current_user: admin_user()})
+
+      assert length(found) == 3
+    end
+
+    test "it errors when more than 20 are requested" do
+      insert_list(2, :workbench_job)
+
+      {:ok, %{errors: [%{message: msg} | _]}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 21}, %{current_user: admin_user()})
+
+      assert msg =~ "20"
+    end
+
+    test "it errors when less than 1 is requested" do
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 0}, %{current_user: admin_user()})
+    end
+
+    test "it defaults to returning 3 jobs" do
+      insert_list(5, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert length(found) == 3
+    end
+
+    test "it returns jobs ordered by most recent first" do
+      jobs = for _ <- 1..3, do: insert(:workbench_job)
+      expected = jobs |> Enum.reverse() |> Enum.map(& &1.id)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == expected
     end
   end
 

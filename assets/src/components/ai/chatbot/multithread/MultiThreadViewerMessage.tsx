@@ -13,7 +13,7 @@ import { isNil, truncate } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import styled, { useTheme } from 'styled-components'
+import styled, { CSSProperties, useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
 
 export function MultiThreadViewerMessage({
@@ -251,6 +251,7 @@ export function SimpleAccordion({
   setIsOpen,
   loading = false,
   children,
+  accordionStyles,
   ...props
 }: {
   label?: ReactNode
@@ -258,6 +259,7 @@ export function SimpleAccordion({
   isOpen?: boolean
   setIsOpen?: (isOpen: boolean) => void
   loading?: boolean
+  accordionStyles?: CSSProperties
   children: ReactNode
 } & Partial<ComponentProps<typeof AccordionItem>>) {
   return (
@@ -266,7 +268,12 @@ export function SimpleAccordion({
       defaultValue={defaultOpen ? ARBITRARY_VALUE_NAME : undefined}
       value={isOpen ? ARBITRARY_VALUE_NAME : isNil(isOpen) ? undefined : ''}
       onValueChange={(value) => setIsOpen?.(value === 'value')}
-      css={{ background: 'none', border: 'none', width: '100%' }}
+      css={{
+        background: 'none',
+        border: 'none',
+        width: '100%',
+        ...accordionStyles,
+      }}
     >
       <AccordionItem
         value={ARBITRARY_VALUE_NAME}

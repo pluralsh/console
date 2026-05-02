@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Toolchain do
   Allows on-the-fly querying of tools within a workbench
   """
   alias Console.Repo
-  alias Console.Schema.{WorkbenchJob}
+  alias Console.Schema.{WorkbenchJob, User}
   alias Console.AI.Tool
   alias Console.AI.Workbench.{Environment, Subagents}
   alias Console.AI.Tools.Workbench.Observability
@@ -12,9 +12,9 @@ defmodule Console.AI.Workbench.Toolchain do
   @logs_tools [Observability.Logs, Observability.Plrl.Logs]
   @traces_tools [Observability.Traces]
 
-  def metrics(%WorkbenchJob{} = job, name, args) do
+  def metrics(%WorkbenchJob{} = job, name, args, %User{} = user) do
     env = env(job)
-    tools = Subagents.Observability.tools(env)
+    tools = Subagents.Observability.tools(env, user)
     with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
          {:ok, %mod{} = t} when mod in @metrics_tools <- Tool.validate(tool, args) do
       mod.structured(t)
@@ -25,9 +25,9 @@ defmodule Console.AI.Workbench.Toolchain do
     end
   end
 
-  def logs(%WorkbenchJob{} = job, name, args) do
+  def logs(%WorkbenchJob{} = job, name, args, %User{} = user) do
     env = env(job)
-    tools = Subagents.Observability.tools(env)
+    tools = Subagents.Observability.tools(env, user)
     with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
          {:ok, %mod{} = t} when mod in @logs_tools <- Tool.validate(tool, args) do
       mod.structured(t)
@@ -38,9 +38,9 @@ defmodule Console.AI.Workbench.Toolchain do
     end
   end
 
-  def traces(%WorkbenchJob{} = job, name, args) do
+  def traces(%WorkbenchJob{} = job, name, args, %User{} = user) do
     env = env(job)
-    tools = Subagents.Observability.tools(env)
+    tools = Subagents.Observability.tools(env, user)
     with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
          {:ok, %mod{} = t} when mod in @traces_tools <- Tool.validate(tool, args) do
       mod.structured(t)

@@ -1,6 +1,7 @@
 import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useCloudSetupUnfinished } from 'components/contexts'
+import { useCloudSetupUnfinished, useLogin } from 'components/contexts'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
+import { HomeWorkbenches } from './HomeWorkbenches.tsx'
 
 import { ClustersTable } from 'components/cd/clusters/Clusters.tsx'
 import { homeClustersColumns } from 'components/cd/clusters/ClustersColumns.tsx'
@@ -11,6 +12,7 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import {
   ClustersQueryVariables,
   ClustersRowFragment,
+  Homepage,
   useClusterHealthScoresQuery,
   useClustersQuery,
   useUpgradeStatisticsQuery,
@@ -43,6 +45,12 @@ import { Body1BoldP } from 'components/utils/typography/Text.tsx'
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
+  const { me } = useLogin()
+  if (me?.homepage === Homepage.Workbenches) return <HomeWorkbenches />
+  return <HomeClusters />
+}
+
+function HomeClusters() {
   const { borders } = useTheme()
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)

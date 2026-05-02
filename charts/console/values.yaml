@@ -51,6 +51,8 @@ migrator:
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
   config:
+    # homepage is used to configure the default homepage for the console.  Use ``clusters`` to show clusters, ``workbenches`` to show workbenches
+    homepage: clusters
     # refreshTokenExpiry is used to configure the refresh token expiry time.  Use a duration string like ``7d``, ``1h`` etc to set the expiry,.
     refreshTokenExpiry: 7d
     # oidcSync is used to configure whether oidc group claims full sync or not in the db.  Use ``full`` to enable full sync.
@@ -81,6 +83,8 @@ console:
 
     # adminEmails is a list of emails which will be auto-configured as admins in the console.
     adminEmails: []
+
+    qovePublicKey: ~
 
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:

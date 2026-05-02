@@ -4,8 +4,6 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   actionsColumn,
-  creatorColumn,
-  pullRequestsColumn,
   promptColumn,
   workbenchColumn,
   WorkbenchJobsTableContent,
@@ -87,13 +85,7 @@ export function FlowWorkbenches() {
             pageInfo={jobsPageInfo}
             fetchNextPage={fetchNextJobsPage}
             setVirtualSlice={setJobsVirtualSlice}
-            columns={[
-              promptColumn,
-              creatorColumn,
-              workbenchColumn,
-              pullRequestsColumn,
-              actionsColumn,
-            ]}
+            columns={[promptColumn, workbenchColumn, actionsColumn]}
           />
         </TableContainerSC>
       </WrapperSC>

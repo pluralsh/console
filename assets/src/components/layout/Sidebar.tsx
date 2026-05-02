@@ -137,17 +137,13 @@ function getMenuItems({
       path: FLOWS_ABS_PATH,
       hotkeys: ['shift F'],
     },
-    ...(featureFlags.Workbenches
-      ? [
-          {
-            text: 'Workbenches',
-            expandedLabel: 'Workbenches',
-            icon: <WorkbenchIcon />,
-            path: WORKBENCHES_ABS_PATH,
-            hotkeys: ['shift W'],
-          },
-        ]
-      : []),
+    {
+      text: 'Workbenches',
+      expandedLabel: 'Workbenches',
+      icon: <WorkbenchIcon />,
+      path: WORKBENCHES_ABS_PATH,
+      hotkeys: ['shift W'],
+    },
     {
       text: 'Self service',
       expandedLabel: 'Self service',

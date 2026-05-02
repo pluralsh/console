@@ -100,8 +100,10 @@ defmodule Console.AI.Workbench.Environment do
   defp coding_agents(%Workbench{agent_runtime_id: id}) when is_binary(id), do: [:coding]
   defp coding_agents(_), do: []
 
-  defp infra_agents(%Workbench{configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k}}}) do
-    case (s || st || k) do
+  defp infra_agents(%Workbench{
+         configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k, pod_logs: pl}}
+       }) do
+    case s || st || k || pl do
       true -> [:infrastructure]
       _ -> []
     end

@@ -14,7 +14,6 @@ import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -67,7 +66,6 @@ export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
 
 export function Flow() {
   const [showPermissions, setShowPermissions] = useState(false)
-  const { featureFlags } = use(FeatureFlagContext)
   const [sidePanelContent, setSidePanelContent] = useState<ReactNode | null>(
     null
   )
@@ -82,14 +80,6 @@ export function Flow() {
     [setSidePanelContent]
   )
   const outletCtx: FlowOutletContext = useMemo(() => ({ flow }), [flow])
-  const directory = useMemo(
-    () =>
-      baseDirectory.filter(
-        ({ path }) =>
-          featureFlags.Workbenches || path !== FLOW_WORKBENCHES_REL_PATH
-      ),
-    [featureFlags.Workbenches]
-  )
 
   useSetBreadcrumbs(
     useMemo(() => getFlowBreadcrumbs(flow?.name || '', tab), [flow?.name, tab])
@@ -157,12 +147,10 @@ export function Flow() {
                 >
                   Permissions
                 </Button>
-                {featureFlags.Workbenches && (
-                  <FlowWorkbenchJobLauncher flow={flow} />
-                )}
+                <FlowWorkbenchJobLauncher flow={flow} />
               </HeaderSC>
               <Flex justify="space-between">
-                <SubTabs directory={directory} />
+                <SubTabs directory={baseDirectory} />
                 {headerContent}
               </Flex>
               <OutletWrapSC>

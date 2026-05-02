@@ -13,7 +13,7 @@ func slice(v any, indices ...int) (any, error) {
 
 	rv := reflect.ValueOf(v)
 	// Handle pointers
-	if rv.Kind() == reflect.Ptr {
+	if rv.Kind() == reflect.Ptr { //nolint:govet // reflect.Kind constants compared intentionally
 		if rv.IsNil() {
 			return nil, fmt.Errorf("slice input can't be nil pointer")
 		}

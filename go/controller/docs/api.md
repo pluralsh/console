@@ -320,7 +320,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Required: \{\} <br /> |
+| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Optional: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |

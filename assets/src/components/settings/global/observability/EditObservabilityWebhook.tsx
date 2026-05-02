@@ -175,7 +175,7 @@ export function getObservabilityWebhookTypeIcon(
     case ObservabilityWebhookType.Pagerduty:
       return <PagerdutyLogoIcon fullColor />
     case ObservabilityWebhookType.Sentry:
-      return <SentryLogoIcon />
+      return <SentryLogoIcon fullColor />
     case ObservabilityWebhookType.Plural:
       return <PluralLogoIcon />
     default:

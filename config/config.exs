@@ -69,7 +69,9 @@ config :console,
   cloudquery: false,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem")),
   oidc_sync: :upsert,
-  refresh_token_expiry: "7d"
+  refresh_token_expiry: "7d",
+  workbench_default: false,
+  qove_key: nil
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

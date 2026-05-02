@@ -1,7 +1,61 @@
 defmodule Console.Deployments.InitTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.Deployments.{Init, Git, Services}
+  alias Console.Deployments.{Init, Git, Services, Settings}
+  alias Console.Schema.DeploymentSettings
+
+  describe "#migrate_bedrock/0" do
+    @legacy_proxy_ai %{
+      enabled: true,
+      provider: :openai,
+      openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
+    }
+
+    test "updates global settings from legacy ai-proxy OpenAI to Bedrock when cloud and AWS" do
+      insert(:deployment_settings, ai: @legacy_proxy_ai)
+
+      stub(Console, :conf, fn
+        :cloud -> true
+        :provider -> :aws
+      end)
+
+      assert {:ok, %DeploymentSettings{}} = Init.migrate_bedrock()
+
+      updated = Settings.fetch_consistent()
+      assert updated.ai.provider == :bedrock
+      assert updated.ai.bedrock
+    end
+
+    test "does not update settings when conf indicates not cloud" do
+      insert(:deployment_settings, ai: @legacy_proxy_ai)
+
+      stub(Console, :conf, fn
+        :cloud -> false
+        :provider -> :aws
+      end)
+
+      assert {:ok, %{}} = Init.migrate_bedrock()
+
+      unchanged = Settings.fetch_consistent()
+      assert unchanged.ai.provider == :openai
+      assert unchanged.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
+    end
+
+    test "does not update settings when conf provider is not AWS" do
+      insert(:deployment_settings, ai: @legacy_proxy_ai)
+
+      stub(Console, :conf, fn
+        :cloud -> true
+        :provider -> :azure
+      end)
+
+      assert {:ok, %{}} = Init.migrate_bedrock()
+
+      unchanged = Settings.fetch_consistent()
+      assert unchanged.ai.provider == :openai
+      assert unchanged.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
+    end
+  end
 
   describe "#setup/0" do
     test "it will setup some initial resources" do
@@ -174,14 +228,18 @@ defmodule Console.Deployments.InitTest do
   end
 
   describe "#setup_workbench/0" do
-    test "creates elastic and prometheus workbench tools when cloud and creds are available" do
+    test "creates elastic, prometheus, and exa workbench tools and plural workbench when cloud and creds are available" do
       expect(Console, :cloud?, fn -> true end)
       expect(Console, :cloud_instance, fn -> "test" end)
       expect(Console, :es_creds, fn -> {:ok, "http://test.es.com", "secret"} end)
       expect(Console, :vmetrics_creds, fn -> {:ok, "http://vmetrics.example.com", "vtenant"} end)
+      stub(Console, :conf, fn
+        :exa_api_key -> "test-exa-api-key"
+        key -> Application.get_env(:console, key, nil)
+      end)
       insert(:user, bot_name: "console", roles: %{admin: true})
 
-      {:ok, %{es: es, prometheus: prometheus}} = Init.setup_workbench()
+      {:ok, %{es: es, prometheus: prometheus, exa: exa, bench: bench}} = Init.setup_workbench()
 
       assert es.name == "plrl_elastic_logs"
       assert es.tool == :elastic
@@ -195,6 +253,14 @@ defmodule Console.Deployments.InitTest do
       assert prometheus.configuration.prometheus.url == "http://vmetrics.example.com/select/vtenant/prometheus"
       assert prometheus.configuration.prometheus.username == "plrl-test"
       assert prometheus.configuration.prometheus.password == "secret"
+
+      assert exa.name == "exa"
+      assert exa.tool == :exa
+      assert exa.configuration.exa.api_key == "test-exa-api-key"
+
+      bench = Console.Repo.preload(bench, tool_associations: :tool)
+      assert bench.name == "plural"
+      assert Enum.any?(bench.tool_associations, &(&1.tool_id == exa.id))
     end
   end
 

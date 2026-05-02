@@ -48,7 +48,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_configuration_attributes do
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
-    field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories)"
+    field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories, babysitting)"
     field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
   end
 
@@ -56,11 +56,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :services,   :boolean, description: "enable services capability"
     field :stacks,     :boolean, description: "enable stacks capability"
     field :kubernetes, :boolean, description: "enable kubernetes capability"
+    field :pod_logs,   :boolean, description: "enable pod logs capability"
   end
 
   input_object :workbench_coding_attributes do
-    field :mode,         :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
-    field :repositories, list_of(:string), description: "allowed repository identifiers"
+    field :mode,                 :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
+    field :repositories,         list_of(:string), description: "allowed repository identifiers"
+    field :enable_babysitting,   :boolean, description: "when true, enables babysitting for the coding agent"
   end
 
   input_object :workbench_observability_attributes do
@@ -520,11 +522,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :services,   :boolean, description: "services capability enabled"
     field :stacks,     :boolean, description: "stacks capability enabled"
     field :kubernetes, :boolean, description: "kubernetes capability enabled"
+    field :pod_logs,   :boolean, description: "pod logs capability enabled"
   end
 
   object :workbench_coding do
-    field :mode,         :agent_run_mode, description: "the mode of the coding agent"
-    field :repositories, list_of(:string), description: "allowed repository identifiers"
+    field :mode,               :agent_run_mode, description: "the mode of the coding agent"
+    field :repositories,       list_of(:string), description: "allowed repository identifiers"
+    field :enable_babysitting, :boolean, description: "whether babysitting is enabled for the coding agent"
   end
 
   object :workbench_observability do
@@ -850,6 +854,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.workbench_job/2
+    end
+
+    @desc "Lists recent workbench jobs across all workbenches the user can read. Max 20."
+    field :recent_workbench_jobs, list_of(:workbench_job) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :count, :integer, description: "the maximum number of jobs to return (defaults to 3, max 20)"
+
+      resolve &Deployments.recent_workbench_jobs/2
     end
 
     field :workbench_job_activity, :workbench_job_activity do

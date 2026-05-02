@@ -83,7 +83,7 @@ export function useWorkbenchFormCardRightContent() {
 // use FormBinding[] so BindingInput can show chips (user email / group name).
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
-  'readBindings' | 'writeBindings' | 'projectId'
+  'readBindings' | 'writeBindings' | 'projectId' | 'systemPrompt'
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
@@ -478,7 +478,6 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
 function sanitizeInitialForm({
   name,
   description = '',
-  systemPrompt = '',
   configuration,
   agentRuntime,
   repository,
@@ -490,9 +489,9 @@ function sanitizeInitialForm({
   botUser,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
-  const { kubernetes, services, stacks } = infrastructure ?? {}
+  const { kubernetes, services, stacks, podLogs } = infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
-  const { mode, repositories } = coding ?? {}
+  const { mode, repositories, enableBabysitting } = coding ?? {}
   const { files, ref } = skills ?? {}
 
   // TODO: Load all skills via pagination instead of first 500.
@@ -511,7 +510,6 @@ function sanitizeInitialForm({
   return {
     name,
     description,
-    systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
     botUser: botUser
@@ -524,9 +522,9 @@ function sanitizeInitialForm({
       : null,
     overrideBotUser: false,
     configuration: {
-      infrastructure: { kubernetes, services, stacks },
+      infrastructure: { kubernetes, services, stacks, podLogs },
       observability: { logs, metrics },
-      coding: { mode, repositories },
+      coding: { mode, repositories, enableBabysitting },
     },
     skills: { ref, files },
     toolAssociations:

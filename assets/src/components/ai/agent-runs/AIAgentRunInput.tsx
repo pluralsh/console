@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { ChatInputSimple, ChatOptionPill } from '../chatbot/input/ChatInput'
+import { BABYSITTING_TOOLTIP } from '../babysittingTooltip'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { AgentRunRepoSelector } from './AgentRunRepoSelector'
 import usePersistedState from 'components/hooks/usePersistedState'
@@ -21,8 +22,6 @@ import usePersistedState from 'components/hooks/usePersistedState'
 const PROMPT_KEY = 'ai-agent-run-prompt'
 const MODE_KEY = 'ai-agent-run-mode'
 const RUNTIME_ID_KEY = 'ai-agent-run-runtime-id'
-const BABYSITTING_TOOLTIP =
-  'Keeps the agent active after it opens a PR so it can monitor review feedback and requested changes, then follow up until the PR is ready.'
 
 export function AIAgentRunInput() {
   const navigate = useNavigate()
@@ -100,7 +99,7 @@ export function AIAgentRunInput() {
                     '& .label': { userSelect: 'none', textWrap: 'nowrap' },
                   }}
                 >
-                  Babysitting
+                  Babysit
                 </Checkbox>
               </Tooltip>
             )}

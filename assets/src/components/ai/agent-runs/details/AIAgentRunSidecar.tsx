@@ -130,6 +130,14 @@ export function AgentRunSidecar({
                 </Chip>
               </SidecarItem>
             )}
+            <SidecarItem heading="Babysit">
+              <Chip
+                size="small"
+                severity={run.babysit ? 'success' : 'neutral'}
+              >
+                {run.babysit ? 'On' : 'Off'}
+              </Chip>
+            </SidecarItem>
             <SidecarItem>
               <Flex
                 direction="column"

@@ -2,6 +2,7 @@ defmodule Console.Deployments.AgentsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Agents
   alias Console.PubSub
+  alias Console.Schema.{WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -169,6 +170,38 @@ defmodule Console.Deployments.AgentsTest do
         repository: "https://github.com/pluralsh/console.git",
       }, runtime.id, user)
     end
+
+    test "it associates a workbench activity when activity is passed" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster, create_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :coding)
+
+      {:ok, run} =
+        Agents.create_agent_run(
+          %{
+            prompt: "hello world",
+            mode: :write,
+            repository: "https://github.com/pluralsh/console.git",
+            activity: activity
+          },
+          runtime.id,
+          user
+        )
+
+      assert Repo.get_by(WorkbenchJobActivityAgentRun,
+               agent_run_id: run.id,
+               workbench_job_activity_id: activity.id
+             )
+
+      assert %WorkbenchJobActivity{agent_run_id: run_agent_id, status: :running} =
+               Repo.get!(WorkbenchJobActivity, activity.id)
+
+      assert run_agent_id == run.id
+
+      assert_receive {:event, %PubSub.AgentRunCreated{item: ^run}}
+    end
   end
 
   describe "update_agent_run/3" do
@@ -289,6 +322,53 @@ defmodule Console.Deployments.AgentsTest do
       assert pr.flow_id == run.flow_id
       assert pr.agent_run_id == run.id
       assert pr.session_id == session.id
+    end
+
+    test "it sets workbench_job_id when the agent run is linked to a job activity" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+
+      run =
+        insert(:agent_run,
+          runtime: runtime,
+          flow: insert(:flow),
+          user: user
+        )
+
+      job = insert(:workbench_job)
+      activity = insert(:workbench_job_activity, workbench_job: job)
+
+      {:ok, _} =
+        %WorkbenchJobActivityAgentRun{}
+        |> WorkbenchJobActivityAgentRun.changeset(%{
+          workbench_job_activity_id: activity.id,
+          agent_run_id: run.id
+        })
+        |> Repo.insert()
+
+      insert(:scm_connection, default: true)
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git",
+                                                      "main", "plrl/ai/pr-test" ->
+        {:ok, %{url: "https://github.com/pr/url", title: "a pr"}}
+      end)
+
+      {:ok, pr} =
+        Agents.agent_pull_request(
+          %{
+            title: "a pr",
+            body: "a body",
+            repository: "https://github.com/pluralsh/console.git",
+            base: "main",
+            head: "plrl/ai/pr-test"
+          },
+          run.id,
+          user
+        )
+
+      assert pr.workbench_job_id == job.id
+      assert pr.agent_run_id == run.id
+      assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
     test "other users cannot create pull requests" do

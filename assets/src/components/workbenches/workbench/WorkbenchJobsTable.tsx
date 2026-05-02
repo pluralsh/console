@@ -12,11 +12,13 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
+import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import {
   VirtualSlice,
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
+import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import {
   PageInfoFragment,
   WorkbenchJobTinyFragment,
@@ -76,14 +78,7 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={
-        columns ?? [
-          promptColumn,
-          creatorColumn,
-          pullRequestsColumn,
-          actionsColumn,
-        ]
-      }
+      columns={columns ?? [promptColumn, actionsColumn]}
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -106,27 +101,11 @@ export function WorkbenchJobsTableContent({
 }
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
+
 export const promptColumn = columnHelper.accessor(
   ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
   { id: 'prompt', meta: { gridTemplate: '1fr' } }
 )
-
-export const creatorColumn = columnHelper.accessor(({ user }) => user, {
-  id: 'creator',
-  cell: ({ getValue }) => {
-    const user = getValue()
-    if (!user?.name) return null
-
-    return (
-      <Tooltip label={user.name}>
-        <AppIcon
-          name={user.name}
-          size="xxsmall"
-        />
-      </Tooltip>
-    )
-  },
-})
 
 export const workbenchColumn = columnHelper.accessor(
   ({ workbench }) => workbench?.name,
@@ -141,31 +120,13 @@ export const workbenchColumn = columnHelper.accessor(
   }
 )
 
-export const pullRequestsColumn = columnHelper.accessor(
-  ({ pullRequests }) => pullRequests,
-  {
-    id: 'pullRequests',
-    cell: function Cell({ getValue }) {
-      const prs = getValue()?.filter(isNonNullable) ?? []
-
-      return (
-        <Flex
-          gap="xsmall"
-          align="center"
-        >
-          <PRsModalIcon prs={prs} />
-        </Flex>
-      )
-    },
-  }
-)
-
 export const actionsColumn = columnHelper.accessor((job) => job, {
   id: 'actions',
   cell: function Cell({ getValue }) {
     const theme = useTheme()
     const { spacing } = theme
-    const { result, status } = getValue()
+    const { alert, issue, pullRequests, result, status, user } = getValue()
+    const prs = pullRequests?.filter(isNonNullable) ?? []
 
     return (
       <Flex
@@ -174,6 +135,27 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
         justify="flex-end"
         width="100%"
       >
+        {alert && (
+          <AlertStateChip
+            state={alert.state}
+            {...(alert.url && {
+              ...chipAsLinkProps,
+              href: alert.url,
+              tooltip: 'View alert',
+            })}
+          />
+        )}
+        {issue && (
+          <IssueStatusChip
+            status={issue.status}
+            fillLevel={1}
+            {...(issue.url && {
+              ...chipAsLinkProps,
+              href: issue.url,
+              tooltip: 'View issue',
+            })}
+          />
+        )}
         {result?.conclusion && (
           <ActivityModalIcon
             icon={PaperCheckIcon}
@@ -187,6 +169,16 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             size={16}
           />
         )}
+        <PRsModalIcon prs={prs} />
+        <Tooltip
+          placement="top"
+          label={user?.name}
+        >
+          <AppIcon
+            name={user?.name}
+            size="xxsmall"
+          />
+        </Tooltip>
         <RunStatusIcon
           fullColor
           status={status}
@@ -196,3 +188,10 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
     )
   },
 })
+
+const chipAsLinkProps = {
+  clickable: true,
+  forwardedAs: 'a',
+  target: '_blank',
+  rel: 'noopener noreferrer',
+}

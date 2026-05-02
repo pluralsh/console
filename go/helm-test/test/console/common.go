@@ -14,6 +14,8 @@ import (
 const (
 	RelativeConsoleChartPath      = "../../../../charts/console"
 	RelativeConsoleRapidChartPath = "../../../../charts/console-rapid"
+
+	consoleChartReleaseName = "console"
 )
 
 // ChartEntry represents a chart to test.
@@ -26,7 +28,7 @@ type ChartEntry struct {
 // Charts returns all chart variants that should be tested.
 func Charts() []ChartEntry {
 	return []ChartEntry{
-		{Name: "Console", Path: RelativeConsoleChartPath, ReleaseName: "console"},
+		{Name: "Console", Path: RelativeConsoleChartPath, ReleaseName: consoleChartReleaseName},
 		{Name: "Console Rapid", Path: RelativeConsoleRapidChartPath, ReleaseName: "console-rapid"},
 	}
 }
@@ -84,21 +86,21 @@ func DefaultResources(prefix string) struct {
 	}{
 		Console: Console{
 			Deployment: common.ManifestKey{
-				Name: "console",
+				Name: consoleChartReleaseName,
 				GroupKind: schema.GroupKind{
 					Group: common.GroupApps,
 					Kind:  common.KindDeployment,
 				},
 			},
 			Service: common.ManifestKey{
-				Name: "console",
+				Name: consoleChartReleaseName,
 				GroupKind: schema.GroupKind{
 					Group: common.GroupCore,
 					Kind:  common.KindService,
 				},
 			},
 			Ingress: common.ManifestKey{
-				Name: "console",
+				Name: consoleChartReleaseName,
 				GroupKind: schema.GroupKind{
 					Group: common.GroupNetworking,
 					Kind:  common.KindIngress,

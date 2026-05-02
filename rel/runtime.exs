@@ -194,8 +194,10 @@ config :console,
   cloudquery: get_env("CONSOLE_CLOUDQUERY") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
+  workbench_default: get_env("CONSOLE_WORKBENCH_DEFAULT") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
-  agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES")
+  agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES"),
+  qove_key: get_env("CONSOLE_QOVE_PUBLIC_KEY")
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,
