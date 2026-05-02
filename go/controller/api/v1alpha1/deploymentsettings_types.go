@@ -971,8 +971,8 @@ type AzureOpenAISettings struct {
 type BedrockSettings struct {
 	// ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported.
 	//
-	// +kubebuilder:validation:Required
-	ModelID string `json:"modelId"`
+	// +kubebuilder:validation:Optional
+	ModelID *string `json:"modelId"`
 
 	// ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning
 	//

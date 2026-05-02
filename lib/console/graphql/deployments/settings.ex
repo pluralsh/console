@@ -157,7 +157,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :bedrock_ai_attributes do
-    field :model_id,              non_null(:string), description: "the bedrock model id to use"
+    field :model_id,              :string, description: "the bedrock model id to use"
     field :tool_model_id,         :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_token,          :string, description: "the openai bedrock access token to use"
     field :region,                :string, description: "the aws region the model is hosted in"
@@ -390,7 +390,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
-    field :model_id,        non_null(:string), description: "the bedrock model to use"
+    field :model_id,        :string, description: "the bedrock model to use (omit for Plural defaults)"
     field :tool_model_id,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)"
     field :region,          :string, description: "the aws region the model is hosted in"

@@ -391,6 +391,6 @@ defmodule Console.Schema.WorkbenchTool do
   defp exa_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(api_key)a)
-    |> validate_required([:api_key])
+    |> put_new_change(:api_key, fn -> Console.conf(:exa_api_key) end)
   end
 end

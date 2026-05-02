@@ -459,35 +459,6 @@ export function WorkbenchCodingAgentStep({
           <Radio value={AgentRunMode.Write}>Write</Radio>
         </RadioGroup>
       </FormField>
-      {mode === AgentRunMode.Write && (
-        <Flex
-          align="center"
-          gap="xsmall"
-        >
-          <Switch
-            checked={enableBabysitting}
-            onChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.coding ??= {}
-                d.configuration.coding.enableBabysitting = checked
-              })
-            }
-          >
-            Enable babysitting
-          </Switch>
-          <Tooltip
-            label={BABYSITTING_TOOLTIP}
-            css={{ maxWidth: 320 }}
-          >
-            <InfoOutlineIcon
-              color="icon-xlight"
-              size={14}
-              css={{ cursor: 'help', flexShrink: 0 }}
-            />
-          </Tooltip>
-        </Flex>
-      )}
       <FormField
         label="Allowed repositories"
         hint={
@@ -568,6 +539,35 @@ export function WorkbenchCodingAgentStep({
           </Flex>
         )}
       </FormField>
+      {mode === AgentRunMode.Write && (
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          <Switch
+            checked={enableBabysitting}
+            onChange={(checked) =>
+              update((d) => {
+                d.configuration ??= {}
+                d.configuration.coding ??= {}
+                d.configuration.coding.enableBabysitting = checked
+              })
+            }
+          >
+            Enable babysitting
+          </Switch>
+          <Tooltip
+            label={BABYSITTING_TOOLTIP}
+            css={{ maxWidth: 320 }}
+          >
+            <InfoOutlineIcon
+              color="icon-xlight"
+              size={14}
+              css={{ cursor: 'help', flexShrink: 0 }}
+            />
+          </Tooltip>
+        </Flex>
+      )}
     </>
   )
 }

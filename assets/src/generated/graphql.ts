@@ -1505,7 +1505,7 @@ export type BedrockAiAttributes = {
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
-  modelId: Scalars['String']['input'];
+  modelId?: InputMaybe<Scalars['String']['input']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the aws region the model is hosted in */
@@ -1523,8 +1523,8 @@ export type BedrockAiSettings = {
   deployments?: Maybe<Scalars['Map']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
-  /** the bedrock model to use */
-  modelId: Scalars['String']['output'];
+  /** the bedrock model to use (omit for Plural defaults) */
+  modelId?: Maybe<Scalars['String']['output']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the aws region the model is hosted in */

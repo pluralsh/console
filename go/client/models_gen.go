@@ -1194,7 +1194,7 @@ type BackupAttributes struct {
 
 type BedrockAiAttributes struct {
 	// the bedrock model id to use
-	ModelID string `json:"modelId"`
+	ModelID *string `json:"modelId,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock access token to use
@@ -9600,6 +9600,8 @@ type WorkbenchCoding struct {
 	Mode *AgentRunMode `json:"mode,omitempty"`
 	// allowed repository identifiers
 	Repositories []*string `json:"repositories,omitempty"`
+	// whether babysitting is enabled for the coding agent
+	EnableBabysitting *bool `json:"enableBabysitting,omitempty"`
 }
 
 type WorkbenchCodingAttributes struct {
@@ -9607,6 +9609,8 @@ type WorkbenchCodingAttributes struct {
 	Mode *AgentRunMode `json:"mode,omitempty"`
 	// allowed repository identifiers
 	Repositories []*string `json:"repositories,omitempty"`
+	// when true, enables babysitting for the coding agent
+	EnableBabysitting *bool `json:"enableBabysitting,omitempty"`
 }
 
 type WorkbenchConfiguration struct {
@@ -9621,7 +9625,7 @@ type WorkbenchConfiguration struct {
 type WorkbenchConfigurationAttributes struct {
 	// infrastructure capabilities (services, stacks, kubernetes)
 	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
-	// coding capabilities (mode, repositories)
+	// coding capabilities (mode, repositories, babysitting)
 	Coding *WorkbenchCodingAttributes `json:"coding,omitempty"`
 	// observability capabilities (logs, metrics)
 	Observability *WorkbenchObservabilityAttributes `json:"observability,omitempty"`
