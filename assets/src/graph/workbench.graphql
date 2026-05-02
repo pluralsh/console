@@ -56,6 +56,7 @@ fragment Workbench on Workbench {
     coding {
       mode
       repositories
+      enableBabysitting
     }
   }
   skills {

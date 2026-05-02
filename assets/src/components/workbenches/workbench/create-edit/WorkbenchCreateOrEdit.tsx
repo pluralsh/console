@@ -491,7 +491,7 @@ function sanitizeInitialForm({
   const { infrastructure, coding, observability } = configuration ?? {}
   const { kubernetes, services, stacks, podLogs } = infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
-  const { mode, repositories } = coding ?? {}
+  const { mode, repositories, enableBabysitting } = coding ?? {}
   const { files, ref } = skills ?? {}
 
   // TODO: Load all skills via pagination instead of first 500.
@@ -524,7 +524,7 @@ function sanitizeInitialForm({
     configuration: {
       infrastructure: { kubernetes, services, stacks, podLogs },
       observability: { logs, metrics },
-      coding: { mode, repositories },
+      coding: { mode, repositories, enableBabysitting },
     },
     skills: { ref, files },
     toolAssociations:

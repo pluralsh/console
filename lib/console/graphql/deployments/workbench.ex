@@ -48,7 +48,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_configuration_attributes do
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
-    field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories)"
+    field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories, babysitting)"
     field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
   end
 
@@ -60,8 +60,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_coding_attributes do
-    field :mode,         :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
-    field :repositories, list_of(:string), description: "allowed repository identifiers"
+    field :mode,                 :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
+    field :repositories,         list_of(:string), description: "allowed repository identifiers"
+    field :enable_babysitting,   :boolean, description: "when true, enables babysitting for the coding agent"
   end
 
   input_object :workbench_observability_attributes do
@@ -525,8 +526,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_coding do
-    field :mode,         :agent_run_mode, description: "the mode of the coding agent"
-    field :repositories, list_of(:string), description: "allowed repository identifiers"
+    field :mode,               :agent_run_mode, description: "the mode of the coding agent"
+    field :repositories,       list_of(:string), description: "allowed repository identifiers"
+    field :enable_babysitting, :boolean, description: "whether babysitting is enabled for the coding agent"
   end
 
   object :workbench_observability do

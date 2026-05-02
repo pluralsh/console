@@ -6,19 +6,21 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   alias Console.Deployments.Agents
 
   embedded_schema do
-    field :workbench,  :map, virtual: true
-    field :mode,       AgentRun.Mode
-    field :repository, :string
-    field :prompt,     :string
+    field :workbench,    :map, virtual: true
+    field :mode,         AgentRun.Mode
+    field :babysit,      :boolean
+    field :repository,   :string
+    field :prompt,       :string
   end
 
-  @valid ~w(mode repository prompt)a
+  @valid ~w(mode repository prompt babysit)a
 
   def changeset(%__MODULE__{workbench: bench} = model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid)
+    |> validate_required(@valid -- [:babysit])
     |> validate_mode(bench)
+    |> fix_babysit(bench)
     |> validate_repository(bench)
   end
 
@@ -30,6 +32,9 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     end
   end
   defp validate_mode(cs, _), do: cs
+
+  defp fix_babysit(cs, %Workbench{configuration: %{coding: %{enable_babysitting: true}}}), do: cs
+  defp fix_babysit(cs, _), do: put_change(cs, :babysit, false)
 
   defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}) do
     conn = Tool.agent_runtime() |> Agents.scm_conection()

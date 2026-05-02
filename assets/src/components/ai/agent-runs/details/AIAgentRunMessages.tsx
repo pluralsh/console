@@ -24,8 +24,6 @@ type DisplayItem = ChatFragment | ChatFragment[]
 
 const BATCHED_TOOLS = ['bash', 'read', 'grep', 'edit'] as const
 
-export const AI_GRADIENT_BG = `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(74, 81, 242, 0.05) 100%)`
-
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   const { spacing, colors } = useTheme()
 
@@ -70,7 +68,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   )
 
   return (
-    <GradientWrapperSC>
+    <MessagesStreamWrapperSC>
       <VirtualList
         isReversed
         data={displayItems}
@@ -99,7 +97,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
         }
         bottomContent={isRunning && <AILoadingText defaultText="Thinking" />}
       />
-    </GradientWrapperSC>
+    </MessagesStreamWrapperSC>
   )
 }
 
@@ -167,7 +165,7 @@ function ToolCallGroup({
   )
 }
 
-const GradientWrapperSC = styled.div(({ theme }) => ({
+const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   flexDirection: 'column',
@@ -175,7 +173,7 @@ const GradientWrapperSC = styled.div(({ theme }) => ({
   minHeight: 610,
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  background: AI_GRADIENT_BG,
+  background: theme.colors['fill-one'],
 }))
 
 function groupConsecutiveToolMessages(messages: ChatFragment[]): DisplayItem[] {

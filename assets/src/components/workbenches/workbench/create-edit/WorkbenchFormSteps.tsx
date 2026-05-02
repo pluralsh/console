@@ -12,6 +12,7 @@ import {
   Flex,
   FormField,
   IconFrame,
+  InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
   ListBoxItem,
@@ -19,6 +20,7 @@ import {
   RadioGroup,
   Select,
   SelectButton,
+  Switch,
   Tooltip,
 } from '@pluralsh/design-system'
 import {
@@ -54,6 +56,7 @@ import { CaptionP, InlineA, OverlineH3 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
+import { BABYSITTING_TOOLTIP } from 'components/ai/babysittingTooltip'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
@@ -394,6 +397,7 @@ export function WorkbenchCodingAgentStep({
     [coding?.repositories]
   )
   const mode = coding?.mode ?? AgentRunMode.Analyze
+  const enableBabysitting = coding?.enableBabysitting ?? false
 
   const setCodingRepos = (next: string[]) => {
     update((d) => {
@@ -455,6 +459,35 @@ export function WorkbenchCodingAgentStep({
           <Radio value={AgentRunMode.Write}>Write</Radio>
         </RadioGroup>
       </FormField>
+      {mode === AgentRunMode.Write && (
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          <Switch
+            checked={enableBabysitting}
+            onChange={(checked) =>
+              update((d) => {
+                d.configuration ??= {}
+                d.configuration.coding ??= {}
+                d.configuration.coding.enableBabysitting = checked
+              })
+            }
+          >
+            Enable babysitting
+          </Switch>
+          <Tooltip
+            label={BABYSITTING_TOOLTIP}
+            css={{ maxWidth: 320 }}
+          >
+            <InfoOutlineIcon
+              color="icon-xlight"
+              size={14}
+              css={{ cursor: 'help', flexShrink: 0 }}
+            />
+          </Tooltip>
+        </Flex>
+      )}
       <FormField
         label="Allowed repositories"
         hint={

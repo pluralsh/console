@@ -2429,7 +2429,7 @@ input WorkbenchConfigurationAttributes {
   "infrastructure capabilities (services, stacks, kubernetes)"
   infrastructure: WorkbenchInfrastructureAttributes
 
-  "coding capabilities (mode, repositories)"
+  "coding capabilities (mode, repositories, babysitting)"
   coding: WorkbenchCodingAttributes
 
   "observability capabilities (logs, metrics)"
@@ -2456,6 +2456,9 @@ input WorkbenchCodingAttributes {
 
   "allowed repository identifiers"
   repositories: [String]
+
+  "when true, enables babysitting for the coding agent"
+  enableBabysitting: Boolean
 }
 
 input WorkbenchObservabilityAttributes {
@@ -3251,6 +3254,9 @@ type WorkbenchCoding {
 
   "allowed repository identifiers"
   repositories: [String]
+
+  "whether babysitting is enabled for the coding agent"
+  enableBabysitting: Boolean
 }
 
 type WorkbenchObservability {

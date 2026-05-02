@@ -39,8 +39,9 @@ defmodule Console.Schema.Workbench do
       end
 
       embeds_one :coding, Coding, on_replace: :update do
-        field :mode,         AgentRun.Mode
-        field :repositories, {:array, :string}
+        field :mode,               AgentRun.Mode
+        field :enable_babysitting, :boolean
+        field :repositories,       {:array, :string}
       end
     end
 
@@ -163,7 +164,7 @@ defmodule Console.Schema.Workbench do
 
   def coding_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(mode repositories)a)
+    |> cast(attrs, ~w(mode repositories enable_babysitting)a)
   end
 
   def observability_changeset(model, attrs \\ %{}) do

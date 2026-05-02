@@ -18,9 +18,10 @@ import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { useChatbot } from '../AIContext.tsx'
 import { MultiThreadViewerThreadMessages } from './multithread/MultiThreadViewerThreadMessages.tsx'
-import { AI_GRADIENT_BG } from '../agent-runs/details/AIAgentRunMessages.tsx'
 
 const THREAD_GAP = 'small'
+
+const INFRA_RESEARCH_PANEL_BG = `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(74, 81, 242, 0.05) 100%)`
 
 export function ChatbotPanelInfraResearch() {
   const navigate = useNavigate()
@@ -123,7 +124,7 @@ const GradientWrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   overflow: 'auto',
   padding: `${theme.spacing.medium}px ${theme.spacing.xxxlarge}px ${theme.spacing.xlarge}px`,
-  background: AI_GRADIENT_BG,
+  background: INFRA_RESEARCH_PANEL_BG,
 }))
 
 const PromptCardSC = styled(Card)(({ theme }) => ({
