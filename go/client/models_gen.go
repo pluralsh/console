@@ -9009,6 +9009,20 @@ type ToolThought struct {
 	Content *string `json:"content,omitempty"`
 }
 
+// A representation of a skill sourced from either the API or git
+type UnifiedWorkbenchSkill struct {
+	// the id of the saved skill (if it's API-derived, otherwise null)
+	ID *string `json:"id,omitempty"`
+	// the saved skill name
+	Name *string `json:"name,omitempty"`
+	// the saved skill description
+	Description *string `json:"description,omitempty"`
+	// the saved skill contents
+	Contents *string `json:"contents,omitempty"`
+	// subagent roles this skill applies to
+	Subagents []*WorkbenchSkillSubagent `json:"subagents,omitempty"`
+}
+
 // How to enforce uniqueness for a field
 type UniqByAttributes struct {
 	// the scope this name is uniq w/in
@@ -9514,6 +9528,7 @@ type Workbench struct {
 	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
 	Alerts      *AlertConnection               `json:"alerts,omitempty"`
 	Issues      *IssueConnection               `json:"issues,omitempty"`
+	AllSkills   []*UnifiedWorkbenchSkill       `json:"allSkills,omitempty"`
 	InsertedAt  *string                        `json:"insertedAt,omitempty"`
 	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
 }

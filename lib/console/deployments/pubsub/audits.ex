@@ -17,8 +17,6 @@ defimpl Console.PubSub.Auditable, for: [
   Console.PubSub.GitRepositoryDeleted,
   Console.PubSub.DeploymentSettingsUpdated,
   Console.PubSub.PipelineGateUpdated,
-  Console.PubSub.PipelineUpdated,
-  Console.PubSub.PipelineCreated,
   Console.PubSub.PipelineDeleted,
   Console.PubSub.ClusterRestoreCreated,
   Console.PubSub.ObjectStoreCreated,

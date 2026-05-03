@@ -2897,6 +2897,8 @@ type Workbench {
 
   issues(after: String, first: Int, before: String, last: Int): IssueConnection
 
+  allSkills: [UnifiedWorkbenchSkill]
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -3342,6 +3344,24 @@ type WorkbenchSkill {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A representation of a skill sourced from either the API or git"
+type UnifiedWorkbenchSkill {
+  "the id of the saved skill (if it's API-derived, otherwise null)"
+  id: String
+
+  "the saved skill name"
+  name: String
+
+  "the saved skill description"
+  description: String
+
+  "the saved skill contents"
+  contents: String
+
+  "subagent roles this skill applies to"
+  subagents: [WorkbenchSkillSubagent]
 }
 
 type WorkbenchEval {

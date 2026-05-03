@@ -14341,6 +14341,21 @@ export type ToolThought = {
   id: Scalars['ID']['output'];
 };
 
+/** A representation of a skill sourced from either the API or git */
+export type UnifiedWorkbenchSkill = {
+  __typename?: 'UnifiedWorkbenchSkill';
+  /** the saved skill contents */
+  contents?: Maybe<Scalars['String']['output']>;
+  /** the saved skill description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the id of the saved skill (if it's API-derived, otherwise null) */
+  id?: Maybe<Scalars['String']['output']>;
+  /** the saved skill name */
+  name?: Maybe<Scalars['String']['output']>;
+  /** subagent roles this skill applies to */
+  subagents?: Maybe<Array<Maybe<WorkbenchSkillSubagent>>>;
+};
+
 /** How to enforce uniqueness for a field */
 export type UniqByAttributes = {
   /** the scope this name is uniq w/in */
@@ -14898,6 +14913,7 @@ export type Workbench = {
   /** the agent runtime for this workbench */
   agentRuntime?: Maybe<AgentRuntime>;
   alerts?: Maybe<AlertConnection>;
+  allSkills?: Maybe<Array<Maybe<UnifiedWorkbenchSkill>>>;
   /** the service account user used for automated workbench agent runs */
   botUser?: Maybe<User>;
   /** workbench configuration */
