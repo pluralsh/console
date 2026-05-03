@@ -307,6 +307,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_issues/3
     end
 
+    field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
+
     timestamps()
   end
 
@@ -575,6 +577,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this skill belongs to"
 
     timestamps()
+  end
+
+  @desc "A representation of a skill sourced from either the API or git"
+  object :unified_workbench_skill do
+    field :id,          :string, description: "the id of the saved skill (if it's API-derived, otherwise null)"
+    field :name,        :string, description: "the saved skill name"
+    field :description, :string, description: "the saved skill description"
+    field :contents,    :string, description: "the saved skill contents"
+    field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
   end
 
   object :workbench_eval do
