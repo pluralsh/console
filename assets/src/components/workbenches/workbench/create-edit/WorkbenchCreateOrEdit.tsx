@@ -489,7 +489,8 @@ function sanitizeInitialForm({
   botUser,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
-  const { kubernetes, services, stacks, podLogs } = infrastructure ?? {}
+  const { kubernetes, services, stacks, podLogs, vulnerabilities } =
+    infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
   const { mode, repositories, enableBabysitting } = coding ?? {}
   const { files, ref } = skills ?? {}
@@ -522,7 +523,13 @@ function sanitizeInitialForm({
       : null,
     overrideBotUser: false,
     configuration: {
-      infrastructure: { kubernetes, services, stacks, podLogs },
+      infrastructure: {
+        kubernetes,
+        services,
+        stacks,
+        podLogs,
+        vulnerabilities,
+      },
       observability: { logs, metrics },
       coding: { mode, repositories, enableBabysitting },
     },

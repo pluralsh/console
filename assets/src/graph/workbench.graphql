@@ -48,6 +48,7 @@ fragment Workbench on Workbench {
       stacks
       kubernetes
       podLogs
+      vulnerabilities
     }
     observability {
       logs

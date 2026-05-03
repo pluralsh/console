@@ -11,6 +11,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
   ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
+
   enum :eval_results_period do
     value :day
     value :week
@@ -53,10 +54,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_infrastructure_attributes do
-    field :services,   :boolean, description: "enable services capability"
-    field :stacks,     :boolean, description: "enable stacks capability"
-    field :kubernetes, :boolean, description: "enable kubernetes capability"
-    field :pod_logs,   :boolean, description: "enable pod logs capability"
+    field :services,        :boolean, description: "enable services capability"
+    field :stacks,          :boolean, description: "enable stacks capability"
+    field :kubernetes,      :boolean, description: "enable kubernetes capability"
+    field :pod_logs,        :boolean, description: "enable pod logs capability"
+    field :vulnerabilities, :boolean, description: "enable vulnerabilities capability"
   end
 
   input_object :workbench_coding_attributes do
@@ -519,10 +521,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_infrastructure do
-    field :services,   :boolean, description: "services capability enabled"
-    field :stacks,     :boolean, description: "stacks capability enabled"
-    field :kubernetes, :boolean, description: "kubernetes capability enabled"
-    field :pod_logs,   :boolean, description: "pod logs capability enabled"
+    field :services,        :boolean, description: "services capability enabled"
+    field :stacks,          :boolean, description: "stacks capability enabled"
+    field :kubernetes,      :boolean, description: "kubernetes capability enabled"
+    field :pod_logs,        :boolean, description: "pod logs capability enabled"
+    field :vulnerabilities, :boolean, description: "vulnerabilities capability enabled"
   end
 
   object :workbench_coding do

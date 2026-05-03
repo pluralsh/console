@@ -9755,6 +9755,8 @@ type WorkbenchInfrastructure struct {
 	Kubernetes *bool `json:"kubernetes,omitempty"`
 	// pod logs capability enabled
 	PodLogs *bool `json:"podLogs,omitempty"`
+	// vulnerabilities capability enabled
+	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
 }
 
 type WorkbenchInfrastructureAttributes struct {
@@ -9766,6 +9768,8 @@ type WorkbenchInfrastructureAttributes struct {
 	Kubernetes *bool `json:"kubernetes,omitempty"`
 	// enable pod logs capability
 	PodLogs *bool `json:"podLogs,omitempty"`
+	// enable vulnerabilities capability
+	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
 }
 
 type WorkbenchJob struct {

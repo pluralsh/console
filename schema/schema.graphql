@@ -2448,6 +2448,9 @@ input WorkbenchInfrastructureAttributes {
 
   "enable pod logs capability"
   podLogs: Boolean
+
+  "enable vulnerabilities capability"
+  vulnerabilities: Boolean
 }
 
 input WorkbenchCodingAttributes {
@@ -3246,6 +3249,9 @@ type WorkbenchInfrastructure {
 
   "pod logs capability enabled"
   podLogs: Boolean
+
+  "vulnerabilities capability enabled"
+  vulnerabilities: Boolean
 }
 
 type WorkbenchCoding {
