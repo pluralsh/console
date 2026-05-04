@@ -3,6 +3,12 @@ fragment FlowBasic on Flow {
   name
   description
   icon
+  metadata
+  repositories
+  project {
+    id
+    name
+  }
   alerts(first: 500) {
     # just to get the count
     edges {
@@ -108,6 +114,31 @@ query FlowServices($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query FlowWorkbenches($id: ID!) {
+  flow(id: $id) {
+    id
+    workbenches {
+      ...WorkbenchTiny
+    }
+  }
+}
+
+query FlowWorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+  flow(id: $id) {
+    id
+    workbenchJobs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
 query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id
@@ -117,20 +148,29 @@ query FlowPipelines($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+fragment FlowAlert on Alert {
+  ...Alert
+  workbench {
+    id
+  }
+  workbenchJob {
+    id
+    status
+  }
+}
+
 query FlowAlerts($id: ID!, $first: Int = 100, $after: String) {
   flow(id: $id) {
     id
     alerts(first: $first, after: $after) {
-      ...AlertConnection
-    }
-  }
-}
-
-query FlowPrs($id: ID!, $first: Int = 100, $after: String) {
-  flow(id: $id) {
-    id
-    pullRequests(first: $first, after: $after) {
-      ...PullRequestConnection
+      edges {
+        node {
+          ...FlowAlert
+        }
+      }
+      pageInfo {
+        ...PageInfo
+      }
     }
   }
 }
@@ -157,15 +197,6 @@ query FlowPreviewEnvironmentTemplates(
     id
     previewEnvironmentTemplates(first: $first, after: $after) {
       ...PreviewEnvironmentTemplateConnection
-    }
-  }
-}
-
-query FlowMcpServers($id: ID!) {
-  flow(id: $id) {
-    id
-    servers {
-      ...McpServer
     }
   }
 }

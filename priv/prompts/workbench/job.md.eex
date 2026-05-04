@@ -11,6 +11,7 @@ the task.  You'll be given the following:
   4. an integration tooling agent, to interact with business tools via apis and known interfaces.  Useful for things like reporting or interacting with internal systems if present, usually task tracking tools, knowledge bases or internal compliance software that's not SRE related.  **If you want to fetch observability-related data, use the observability agent instead.**
   5. a dashboard agent (the canvas tool) which allows you to craft a custom dashboard to explain the system in question.  This will be useful for understanding the dynamics of the system in question, and will be used to generate a dashboard for other developers to consume.
   6. the ability to record notes and modify your current plan and working theory of how to accomplish the task along the way to memorize progress.
+  7. a search agent to search the web for information.  Useful to find information that is not already in the workbench environment.
 
 Basic guardrails for using these subagents:
 
@@ -53,7 +54,13 @@ and then delegate to the dashboard agent to craft a dashboard to explain the sys
 ## Completion Criteria
 Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.
 
-**In general, if a pull request has been created to fix the issue, you should almost always consider the work complete (unless additional pull requests are needed)**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+**In general, if a pull request has been created to fix the issue or accomplish the task, you should almost always consider the work complete**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+
+The exception to that rule would be if no code change is needed at all, or if multiple pull requests are required to accomplish what the user intends.
+
+**Never** have a coding agent reevaluate if a prior pr has been merged or anything similar, as it just wastes tokens.
+
+If you're being asked to create/modify infrastructure, do not loop back and confirm that happened beyond pull request creation, as it will simply burn tokens for no purpose since the infra creation is post pr merge.
 
 You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
 
@@ -94,9 +101,21 @@ Two agents can give useful information about the codebase defining the system:
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.
 
+For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When computation is necessary, leverage the calculator tool to gather exact deterministic results.
+
 That said, you *should* avoid repeatedly calling the notes tool unless you're meaningfully updating your working theory, plan, or conclusion.  This will spam users and is unnneeded.
 
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  You can mark notes and trigger a subagent in parallel as well.
+
+<%= if @job.result && @job.result.conclusion && byte_size(@job.result.conclusion) > 0 do %>
+### Skill Backfill Guidance
+
+You also have a `skill_backfill` tool available.  Usage of this tool has a few rules you must follow:
+
+1. Call this if asked to create/save/update skills.  Any synonym for this that references skills is enough to trigger.
+2. Use the job's history to build the appropriate prompt to do the backfill.  You can invoke another subagent first to do so, if additional context is needed.  Ofentimes there's some back and forth that makes it pretty obvious.
+3. Report any skill updates back to the user so they are aware of what was added or updated.
+<% end %>
 
 **IDEAL OUTPUT**
 You should always return a markdown formatted conclusion based on the investigation.  That said, it's also extremely important to include either:

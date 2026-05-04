@@ -45,6 +45,7 @@ function SaveWorkbenchPromptButtonInner({
   const { data } = useWorkbenchPromptsSuspenseQuery({
     variables: { id: workbenchId },
     skip: !workbenchId || !prompt,
+    errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   })
 
@@ -64,13 +65,12 @@ function SaveWorkbenchPromptButtonInner({
       refetchQueries: ['WorkbenchPrompts'],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        popToast({ name: 'prompt', action: 'saved', color: 'icon-success' })
+        popToast({ content: 'prompt saved', severity: 'success' })
       },
       onError: () => {
         popToast({
-          name: 'prompt',
-          action: 'failed to save',
-          color: 'icon-danger',
+          content: 'prompt failed to save',
+          severity: 'danger',
         })
       },
     })
@@ -81,13 +81,12 @@ function SaveWorkbenchPromptButtonInner({
       refetchQueries: ['WorkbenchPrompts'],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        popToast({ name: 'prompt', action: 'removed', color: 'icon-danger' })
+        popToast({ content: 'prompt removed', severity: 'danger' })
       },
       onError: () => {
         popToast({
-          name: 'prompt',
-          action: 'failed to remove',
-          color: 'icon-danger',
+          content: 'prompt failed to remove',
+          severity: 'danger',
         })
       },
     })

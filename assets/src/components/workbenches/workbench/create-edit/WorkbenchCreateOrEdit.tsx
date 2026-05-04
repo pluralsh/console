@@ -21,6 +21,7 @@ import {
   WorkbenchAttributes,
   WorkbenchFragment,
   WorkbenchSkillAttributes,
+  WorkbenchSkillSubagent,
 } from 'generated/graphql'
 import { cloneDeep } from 'lodash'
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
@@ -82,7 +83,7 @@ export function useWorkbenchFormCardRightContent() {
 // use FormBinding[] so BindingInput can show chips (user email / group name).
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
-  'readBindings' | 'writeBindings' | 'projectId'
+  'readBindings' | 'writeBindings' | 'projectId' | 'systemPrompt'
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
@@ -206,10 +207,7 @@ function WorkbenchForm({
     ({ label }) => label === curStep
   )
   const allowSubmit = validateForm(formState)
-  const numUnvisitedSteps = Object.values(stepStatuses).reduce(
-    (acc, status) => acc + (status === 'not-visited' ? 1 : 0),
-    0
-  )
+  const isLastStep = curStepIndex === workbenchFormSteps.length - 1
 
   const StepComponent = workbenchFormSteps[curStepIndex]?.component
 
@@ -255,6 +253,7 @@ function WorkbenchForm({
           direction="column"
           width={200}
           flexShrink={0}
+          gap="xxxsmall"
         >
           {workbenchFormSteps.map(({ label }) => (
             <SidebarItem
@@ -297,7 +296,7 @@ function WorkbenchForm({
                       >
                         Cancel
                       </Button>
-                      {numUnvisitedSteps < 2 ? (
+                      {isLastStep ? (
                         <Button
                           disabled={!allowSubmit}
                           loading={mutationLoading}
@@ -359,17 +358,17 @@ function SidebarItem({
         status === null ? null : status === 'visited' ? (
           <CheckOutlineIcon
             color="icon-success"
-            size={10}
+            size={16}
           />
         ) : status === 'error' ? (
           <ErrorOutlineIcon
             color="icon-danger"
-            size={10}
+            size={16}
           />
         ) : (
           <CircleDashIcon
             color="icon-light"
-            size={10}
+            size={16}
           />
         )
       }
@@ -381,7 +380,7 @@ function SidebarItem({
 
 export const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
   ({ theme, $active }) => ({
-    ...theme.partials.text.caption,
+    ...theme.partials.text.body2,
     justifyContent: 'space-between',
     color: theme.colors.text,
     textDecoration: 'none',
@@ -479,7 +478,6 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
 function sanitizeInitialForm({
   name,
   description = '',
-  systemPrompt = '',
   configuration,
   agentRuntime,
   repository,
@@ -491,9 +489,9 @@ function sanitizeInitialForm({
   botUser,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
-  const { kubernetes, services, stacks } = infrastructure ?? {}
+  const { kubernetes, services, stacks, podLogs } = infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
-  const { mode, repositories } = coding ?? {}
+  const { mode, repositories, enableBabysitting } = coding ?? {}
   const { files, ref } = skills ?? {}
 
   // TODO: Load all skills via pagination instead of first 500.
@@ -504,12 +502,14 @@ function sanitizeInitialForm({
       name: skill.name ?? '',
       description: skill.description ?? null,
       contents: skill.contents ?? '',
+      subagents:
+        (skill.subagents?.filter(isNonNullable) as WorkbenchSkillSubagent[]) ??
+        [],
     }))
 
   return {
     name,
     description,
-    systemPrompt,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
     botUser: botUser
@@ -522,9 +522,9 @@ function sanitizeInitialForm({
       : null,
     overrideBotUser: false,
     configuration: {
-      infrastructure: { kubernetes, services, stacks },
+      infrastructure: { kubernetes, services, stacks, podLogs },
       observability: { logs, metrics },
-      coding: { mode, repositories },
+      coding: { mode, repositories, enableBabysitting },
     },
     skills: { ref, files },
     toolAssociations:

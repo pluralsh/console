@@ -12,6 +12,7 @@ import {
   Flex,
   FormField,
   IconFrame,
+  InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
   ListBoxItem,
@@ -19,6 +20,8 @@ import {
   RadioGroup,
   Select,
   SelectButton,
+  Switch,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   AgentRunMode,
@@ -53,6 +56,7 @@ import { CaptionP, InlineA, OverlineH3 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
+import { BABYSITTING_TOOLTIP } from 'components/ai/babysittingTooltip'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
@@ -87,13 +91,46 @@ export type WorkbenchFormStepProps = {
   setFormState: FormStateSetter
 }
 
+function CapabilityCheckbox(props: {
+  checked: boolean
+  label: string
+  tooltip: string
+  onCheckedChange: (checked: boolean) => void
+}) {
+  const { checked, label, tooltip, onCheckedChange } = props
+  return (
+    <Tooltip
+      label={tooltip}
+      placement="top"
+    >
+      <span css={{ display: 'inline-flex' }}>
+        <Checkbox
+          small
+          checked={checked}
+          onChange={(e) => onCheckedChange(e.target.checked)}
+        >
+          {label}
+        </Checkbox>
+      </span>
+    </Tooltip>
+  )
+}
+
 export function WorkbenchSetupStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
+  const theme = useTheme()
   const update = createFormUpdater(setFormState)
   const infra = formState.configuration?.infrastructure
   const observability = formState.configuration?.observability
+  const capabilityCheckboxGridCss = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    alignItems: 'start' as const,
+    columnGap: theme.spacing.large,
+    rowGap: theme.spacing.xxsmall,
+  }
   return (
     <>
       <FormField
@@ -123,99 +160,99 @@ export function WorkbenchSetupStep({
         />
       </FormField>
 
-      <FormField label="System prompt">
-        <EditableDivWrapperSC>
-          <EditableDiv
-            initialValue={formState.systemPrompt ?? ''}
-            setValue={(value) =>
-              update((d) => {
-                d.systemPrompt = value || null
-              })
-            }
-            placeholder="E.g. 'analyze unusual metrics and provide a solution'"
-            css={{ minHeight: 80 }}
-          />
-        </EditableDivWrapperSC>
-      </FormField>
-      <FormField
-        infoTooltip="Plural native integration"
-        label="Enable Infrastructure"
+      <Divider backgroundColor="border" />
+
+      <Flex
+        direction="column"
+        gap="large"
       >
-        <Flex gap="large">
-          <Checkbox
-            small
-            checked={infra?.stacks ?? false}
-            onChange={(e) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.stacks = e.target.checked
-              })
-            }
-          >
-            Stacks
-          </Checkbox>
-          <Checkbox
-            small
-            checked={infra?.services ?? false}
-            onChange={(e) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.services = e.target.checked
-              })
-            }
-          >
-            Services
-          </Checkbox>
-          <Checkbox
-            small
-            checked={infra?.kubernetes ?? false}
-            onChange={(e) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.infrastructure ??= {}
-                d.configuration.infrastructure.kubernetes = e.target.checked
-              })
-            }
-          >
-            Kubernetes
-          </Checkbox>
-        </Flex>
-      </FormField>
-      <FormField
-        infoTooltip="Plural native integration"
-        label="Enable Observability"
-      >
-        <Flex gap="large">
-          <Checkbox
-            small
-            checked={observability?.metrics ?? false}
-            onChange={(e) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.observability ??= {}
-                d.configuration.observability.metrics = e.target.checked
-              })
-            }
-          >
-            Plural integrated metrics
-          </Checkbox>
-          <Checkbox
-            small
-            checked={observability?.logs ?? false}
-            onChange={(e) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.observability ??= {}
-                d.configuration.observability.logs = e.target.checked
-              })
-            }
-          >
-            Plural integrated logs
-          </Checkbox>
-        </Flex>
-      </FormField>
+        <CaptionP $color="text-light">
+          Configure Plural native infrastructure and observability integrations.
+          Tool access respects RBAC baked into these integrations so agents only
+          reach resources your organization allows.
+        </CaptionP>
+
+        <FormField label="Enable Infrastructure">
+          <Flex css={capabilityCheckboxGridCss}>
+            <CapabilityCheckbox
+              label="Stacks"
+              checked={infra?.stacks ?? false}
+              tooltip="Expose stack inspection tools for Plural stack definitions, runs, and related context."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.stacks = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Services"
+              checked={infra?.services ?? false}
+              tooltip="Expose service inspection tools for Plural-managed services, clusters, and deployment wiring."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.services = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Kubernetes"
+              checked={infra?.kubernetes ?? false}
+              tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane. Respects k8s RBAC."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.kubernetes = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Pod Logs"
+              checked={infra?.podLogs ?? false}
+              tooltip="Expose a tool to fetch container stdout/stderr logs from pods, respecting k8s RBAC. Separate from Plural integrated logs under Observability."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.podLogs = checked
+                })
+              }
+            />
+          </Flex>
+        </FormField>
+        <FormField label="Enable Observability">
+          <Flex css={capabilityCheckboxGridCss}>
+            <CapabilityCheckbox
+              label="Metrics"
+              checked={observability?.metrics ?? false}
+              tooltip="Enable Plural-built metrics exploration for this workbench against your configured metrics backends."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.observability ??= {}
+                  d.configuration.observability.metrics = checked
+                })
+              }
+            />
+            <CapabilityCheckbox
+              label="Log Aggregation"
+              checked={observability?.logs ?? false}
+              tooltip="Enable Plural-built log browsing and aggregates for this workbench against your configured log backends (not Kubernetes pod log streaming)."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.observability ??= {}
+                  d.configuration.observability.logs = checked
+                })
+              }
+            />
+          </Flex>
+        </FormField>
+      </Flex>
     </>
   )
 }
@@ -375,6 +412,7 @@ export function WorkbenchCodingAgentStep({
     [coding?.repositories]
   )
   const mode = coding?.mode ?? AgentRunMode.Analyze
+  const enableBabysitting = coding?.enableBabysitting ?? false
 
   const setCodingRepos = (next: string[]) => {
     update((d) => {
@@ -516,6 +554,35 @@ export function WorkbenchCodingAgentStep({
           </Flex>
         )}
       </FormField>
+      {mode === AgentRunMode.Write && (
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          <Switch
+            checked={enableBabysitting}
+            onChange={(checked) =>
+              update((d) => {
+                d.configuration ??= {}
+                d.configuration.coding ??= {}
+                d.configuration.coding.enableBabysitting = checked
+              })
+            }
+          >
+            Enable babysitting
+          </Switch>
+          <Tooltip
+            label={BABYSITTING_TOOLTIP}
+            css={{ maxWidth: 320 }}
+          >
+            <InfoOutlineIcon
+              color="icon-xlight"
+              size={14}
+              css={{ cursor: 'help', flexShrink: 0 }}
+            />
+          </Tooltip>
+        </Flex>
+      )}
     </>
   )
 }

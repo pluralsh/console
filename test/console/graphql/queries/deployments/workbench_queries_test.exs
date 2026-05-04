@@ -3,7 +3,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   use Mimic
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.Stub
-  alias Toolquery.{MetricPoint, MetricsQueryOutput}
+  alias Toolquery.{MetricPoint, MetricsQueryOutput, TraceSpan, TracesQueryOutput}
 
   describe "workbenches" do
     test "it can fetch workbenches" do
@@ -53,6 +53,59 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(workbenches)
+    end
+
+    test "users with direct read bindings on a workbench can see it without project access" do
+      user = insert(:user)
+      visible = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([visible])
+    end
+
+    test "users with direct write bindings on a workbench can see it without project access" do
+      user = insert(:user)
+      visible = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([visible])
+    end
+
+    test "users in a group bound to a workbench can see it without project access" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, group: group, user: user)
+      visible = insert(:workbench, read_bindings: [%{group_id: group.id}])
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([visible])
     end
 
     test "it can filter by projectId" do
@@ -677,6 +730,81 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m]))", "step" => "30s"})
       }, %{current_user: admin_user()})
     end
+
+    test "it resolves tracesTool using the generated observability traces tool name and parses GraphQL output" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "tempo",
+        tool: :tempo,
+        categories: [:traces],
+        configuration: %{
+          tempo: %{url: "https://tempo.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+      ten_seconds_later = DateTime.add(now, 10, :second)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :traces, fn :mock_conn, input ->
+        assert input.query == "{ service.name = \"checkout\" }"
+        assert input.limit == 50
+
+        {:ok,
+         %TracesQueryOutput{
+           spans: [
+             %TraceSpan{
+               trace_id: "trace-1",
+               span_id: "span-1",
+               parent_id: "parent-1",
+               name: "GET /checkout",
+               service: "checkout",
+               start: Google.Protobuf.from_datetime(now),
+               end: Google.Protobuf.from_datetime(ten_seconds_later),
+               tags: %{"http.method" => "GET"}
+             }
+           ]
+         }}
+      end)
+
+      tool_name = "workbench_observability_traces_tempo"
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $name: String!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            id
+            tracesTool(name: $name, arguments: $arguments) {
+              traceId
+              spanId
+              parentId
+              name
+              service
+              start
+              end
+              tags
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "name" => tool_name,
+        "arguments" => Jason.encode!(%{"query" => "{ service.name = \"checkout\" }", "limit" => 50})
+      }, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      [trace] = found["tracesTool"]
+      assert trace["traceId"] == "trace-1"
+      assert trace["spanId"] == "span-1"
+      assert trace["parentId"] == "parent-1"
+      assert trace["name"] == "GET /checkout"
+      assert trace["service"] == "checkout"
+      assert trace["start"]
+      assert trace["end"]
+      assert trace["tags"] == %{"http.method" => "GET"}
+    end
   end
 
   describe "workbenchJobActivity" do
@@ -930,6 +1058,180 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
   end
 
+  describe "recentWorkbenchJobs" do
+    test "admins see recent jobs across all workbenches" do
+      workbench_a = insert(:workbench)
+      workbench_b = insert(:workbench)
+      jobs = insert_list(2, :workbench_job, workbench: workbench_a)
+              ++ insert_list(2, :workbench_job, workbench: workbench_b)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 10}, %{current_user: admin_user()})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users only see jobs for workbenches they have access to" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+
+      other_workbench = insert(:workbench)
+      insert_list(3, :workbench_job, workbench: other_workbench)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users with no workbench access see no jobs" do
+      user = insert(:user)
+      insert_list(3, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert Enum.empty?(found)
+    end
+
+    test "users with direct read bindings on a workbench see its jobs without project access" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+      insert_list(2, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users with direct write bindings on a workbench see its jobs without project access" do
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+      insert_list(2, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "users in a group bound to a workbench see its jobs without project access" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, group: group, user: user)
+      workbench = insert(:workbench, read_bindings: [%{group_id: group.id}])
+      jobs = insert_list(2, :workbench_job, workbench: workbench)
+      insert_list(2, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert ids_equal(found, jobs)
+    end
+
+    test "it respects the count argument" do
+      insert_list(5, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 3}, %{current_user: admin_user()})
+
+      assert length(found) == 3
+    end
+
+    test "it errors when more than 20 are requested" do
+      insert_list(2, :workbench_job)
+
+      {:ok, %{errors: [%{message: msg} | _]}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 21}, %{current_user: admin_user()})
+
+      assert msg =~ "20"
+    end
+
+    test "it errors when less than 1 is requested" do
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Recent($count: Int) {
+          recentWorkbenchJobs(count: $count) {
+            id
+          }
+        }
+      """, %{"count" => 0}, %{current_user: admin_user()})
+    end
+
+    test "it defaults to returning 3 jobs" do
+      insert_list(5, :workbench_job)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert length(found) == 3
+    end
+
+    test "it returns jobs ordered by most recent first" do
+      jobs = for _ <- 1..3, do: insert(:workbench_job)
+      expected = jobs |> Enum.reverse() |> Enum.map(& &1.id)
+
+      {:ok, %{data: %{"recentWorkbenchJobs" => found}}} = run_query("""
+        query {
+          recentWorkbenchJobs {
+            id
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == expected
+    end
+  end
+
   describe "workbench_tool" do
     test "it can fetch a workbench tool" do
       tool = insert(:workbench_tool)
@@ -1047,6 +1349,39 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       """, %{}, %{current_user: user})
 
       assert total == 3
+    end
+
+    test "workbenchAggregates returns merged PR stats and average eval grade" do
+      wb = insert(:workbench)
+      job = insert(:workbench_job, workbench: wb)
+      insert(:pull_request, workbench_job: job, status: :merged)
+      insert(:pull_request, workbench_job: job, status: :closed)
+
+      eval = insert(:workbench_eval, workbench: wb)
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: job,
+        grade: 6
+      )
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: insert(:workbench_job, workbench: wb),
+        grade: 10
+      )
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query {
+          workbenchAggregates {
+            pullRequests
+            pullRequestMergeRate
+            evalResults
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 1
+      assert agg["pullRequestMergeRate"] == 0.5
+      assert agg["evalResults"] == 8.0
     end
 
     test "workbenchPrMergeRates returns global merge rate buckets" do

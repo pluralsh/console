@@ -300,9 +300,6 @@ fragment Cluster on Cluster {
 
 fragment ClusterInsight on Cluster {
   id
-  insight {
-    ...AiInsight
-  }
   insightComponents {
     ...ClusterInsightComponent
   }

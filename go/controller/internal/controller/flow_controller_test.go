@@ -8,6 +8,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -24,9 +25,10 @@ import (
 var _ = Describe("Flow Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			flowName  = "test"
-			namespace = "default"
-			id        = "123"
+			flowName      = "test"
+			workbenchName = "flow-workbench"
+			namespace     = "default"
+			id            = "123"
 		)
 
 		ctx := context.Background()
@@ -37,9 +39,27 @@ var _ = Describe("Flow Controller", Ordered, func() {
 		}
 
 		BeforeAll(func() {
+			By("creating a referenced Workbench")
+			workbench := &v1alpha1.Workbench{}
+			err := k8sClient.Get(ctx, types.NamespacedName{Name: workbenchName, Namespace: namespace}, workbench)
+			if err != nil && errors.IsNotFound(err) {
+				resource := &v1alpha1.Workbench{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      workbenchName,
+						Namespace: namespace,
+					},
+					Spec: v1alpha1.WorkbenchSpec{
+						Name: lo.ToPtr(workbenchName),
+					},
+				}
+				Expect(common.MaybeCreate(k8sClient, resource, func(p *v1alpha1.Workbench) {
+					p.Status.ID = lo.ToPtr("wb-123")
+				})).To(Succeed())
+			}
+
 			By("creating the custom resource for the Kind Flow")
 			flow := &v1alpha1.Flow{}
-			err := k8sClient.Get(ctx, typeNamespacedName, flow)
+			err = k8sClient.Get(ctx, typeNamespacedName, flow)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &v1alpha1.Flow{
 					ObjectMeta: metav1.ObjectMeta{
@@ -59,6 +79,12 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			if err := k8sClient.Get(ctx, typeNamespacedName, flow); err == nil {
 				By("Cleanup the specific resource instance Flow")
 				Expect(k8sClient.Delete(ctx, flow)).To(Succeed())
+			}
+
+			workbench := &v1alpha1.Workbench{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: workbenchName, Namespace: namespace}, workbench); err == nil {
+				By("Cleanup the specific resource instance Workbench")
+				Expect(k8sClient.Delete(ctx, workbench)).To(Succeed())
 			}
 		})
 
@@ -152,6 +178,43 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.RequeueAfter).ToNot(BeZero())
+		})
+
+		It("should include workbench associations in flow attributes", func() {
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Flow{
+				ObjectMeta: metav1.ObjectMeta{Name: flowName, Namespace: namespace},
+			}, func(p *v1alpha1.Flow) {
+				p.Spec.WorkbenchAssociations = []v1alpha1.FlowWorkbenchAssociation{
+					{
+						WorkbenchRef: corev1.ObjectReference{
+							Name:      workbenchName,
+							Namespace: namespace,
+						},
+					},
+				}
+			})).To(Succeed())
+
+			flowFragment := &gqlclient.FlowFragment{ID: id}
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.
+				On("UpsertFlow", mock.Anything, mock.MatchedBy(func(attrs gqlclient.FlowAttributes) bool {
+					if len(attrs.FlowWorkbenches) != 1 {
+						return false
+					}
+					return attrs.FlowWorkbenches[0] != nil && lo.FromPtr(attrs.FlowWorkbenches[0].WorkbenchID) == "wb-123"
+				})).
+				Return(flowFragment, nil)
+
+			reconciler := &controller.FlowReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Process(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should successfully reconcile the resource", func() {

@@ -1,14 +1,17 @@
 import { Card, CardProps } from '@pluralsh/design-system'
-import { ReactElement } from 'react'
+import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
+import { RectangleSkeleton } from './SkeletonLoaders.tsx'
+import { StretchedFlex } from './StretchedFlex.tsx'
 import { OverlineH1 } from './typography/Text.tsx'
 
 export default function PropCard({
   title,
   titleContent,
   children,
+  loading,
   ...props
-}: { title: string; titleContent?: ReactElement<any> } & CardProps) {
+}: { title: string; titleContent?: ReactNode; loading?: boolean } & CardProps) {
   const theme = useTheme()
 
   return (
@@ -16,13 +19,7 @@ export default function PropCard({
       {...props}
       css={{ ...theme.partials.text.body2Bold, padding: theme.spacing.medium }}
     >
-      <div
-        css={{
-          alignItems: 'baseline',
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
+      <StretchedFlex align="baseline">
         <OverlineH1
           as="h3"
           css={{
@@ -33,8 +30,15 @@ export default function PropCard({
           {title}
         </OverlineH1>
         {titleContent}
-      </div>
-      {children}
+      </StretchedFlex>
+      {loading ? (
+        <RectangleSkeleton
+          $bright
+          $height="large"
+        />
+      ) : (
+        children
+      )}
     </Card>
   )
 }

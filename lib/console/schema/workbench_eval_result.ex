@@ -2,6 +2,10 @@ defmodule Console.Schema.WorkbenchEvalResult do
   use Console.Schema.Base
   alias Console.Schema.{WorkbenchEval, WorkbenchJob, Workbench}
 
+  defmodule Aggregate do
+    defstruct [:average_grade]
+  end
+
   schema "workbench_eval_results" do
     field :grade,    :integer
 
@@ -47,6 +51,14 @@ defmodule Console.Schema.WorkbenchEvalResult do
         average: r.average
       },
       order_by: [desc: r.timestamp]
+    )
+  end
+
+  def aggregates(query \\ __MODULE__) do
+    from(r in query,
+      select: %Aggregate{
+        average_grade: fragment("?::float", avg(r.grade))
+}
     )
   end
 

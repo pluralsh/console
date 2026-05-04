@@ -1,6 +1,7 @@
-import { Flex, Table } from '@pluralsh/design-system'
+import { Divider, Flex, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
+import { Fragment } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 import { isNonNullable } from 'utils/isNonNullable'
@@ -41,7 +42,8 @@ export default function Service() {
   if (service?.__typename !== 'Service') return null
 
   const loadBalancer = service.status?.loadBalancer
-  const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
+  const ingressEntries = loadBalancer?.ingress?.filter(isNonNullable) ?? []
+
   const ports = service.spec?.ports?.filter(isNonNullable) ?? []
 
   return (
@@ -63,12 +65,27 @@ export default function Service() {
         direction="row"
         gap="large"
       >
-        {hasIngress && (
+        {!isEmpty(ingressEntries) && (
           <InfoSection title="Status">
             <PaddedCard>
-              <PropWideBold title="IP">
-                {loadBalancer?.ingress?.[0]?.ip}
-              </PropWideBold>
+              {ingressEntries.map((entry, i) => (
+                <Fragment key={i}>
+                  {i !== 0 && (
+                    <Divider
+                      backgroundColor="border-input"
+                      margin="xsmall"
+                    />
+                  )}
+                  {entry.ip && (
+                    <PropWideBold title="IP">{entry.ip}</PropWideBold>
+                  )}
+                  {entry.hostname && (
+                    <PropWideBold title="Hostname">
+                      {entry.hostname}
+                    </PropWideBold>
+                  )}
+                </Fragment>
+              ))}
             </PaddedCard>
           </InfoSection>
         )}

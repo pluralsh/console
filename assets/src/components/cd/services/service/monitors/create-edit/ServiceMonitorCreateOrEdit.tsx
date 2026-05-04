@@ -123,10 +123,8 @@ function ServiceMonitorCreateOrEditInner({
   const onSuccess = (shouldNav: boolean) => {
     if (shouldNav) navigate('..', { relative: 'path' })
     popToast({
-      name: state.name,
-      action: mode === 'create' ? 'created' : 'updated',
-      suffix: 'successfully',
-      color: 'icon-success',
+      content: `${state.name} ${mode === 'create' ? 'created' : 'updated'} successfully`,
+      severity: 'success',
     })
   }
   const [createMonitor, { loading: createLoading, error: createError }] =

@@ -20,7 +20,8 @@ defmodule Console.Schema.Stack do
     Service,
     Project,
     StackDefinition,
-    AiInsight
+    AiInsight,
+    StackInfracostResource
   }
 
   defenum Type, terraform: 0, ansible: 1, custom: 2
@@ -186,6 +187,7 @@ defmodule Console.Schema.Stack do
     has_many :files,       StackFile, on_replace: :delete
     has_many :output,      StackOutput, on_replace: :delete
     has_many :runs,        StackRun
+    has_many :infracost_resources, StackInfracostResource, foreign_key: :stack_id
     has_many :tags,        Tag, on_replace: :delete
 
     has_many :observable_metrics, ObservableMetric, on_replace: :delete
@@ -215,6 +217,13 @@ defmodule Console.Schema.Stack do
 
   def for_project(query \\ __MODULE__, pid) do
     from(s in query, where: s.project_id == ^pid)
+  end
+
+  def for_project_name(query \\ __MODULE__, name) do
+    from(s in query,
+      join: p in assoc(s, :project),
+      where: p.name == ^name
+    )
   end
 
   def for_user(query \\ __MODULE__, %User{} = user) do
@@ -253,7 +262,7 @@ defmodule Console.Schema.Stack do
     from(s in query, order_by: ^order)
   end
 
-def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
+  def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
 
   def for_status(query \\ __MODULE__, status) do
     from(s in query, where: s.status == ^status)

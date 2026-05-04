@@ -52,7 +52,7 @@ defmodule Console.AI.ResearchTest do
             })
           }]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-4.1-mini")
+        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
       end)
 
       {:ok, research} = Research.fix_diagram("some error message", research.id, user)

@@ -2,7 +2,16 @@ defmodule Console.Schema.WorkbenchSkill do
   use Console.Schema.Base
   alias Console.Schema.Workbench
 
-  defenum Subagent, coding: 0, infrastructure: 1, observability: 2, integration: 3, orchestrator: 4
+  defenum Subagent,
+    coding: 0,
+    infrastructure: 1,
+    observability: 2,
+    integration: 3,
+    orchestrator: 4,
+    memory: 5,
+    skill: 6,
+    history: 7,
+    search: 8
 
   schema "workbench_skills" do
     field :name, :string

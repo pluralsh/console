@@ -1,6 +1,7 @@
 import {
   AccordionItem,
   ArrowTopRightIcon,
+  AsanaLogoIcon,
   AzureDevopsLogoIcon,
   DocumentIcon,
   Flex,
@@ -30,6 +31,7 @@ const providerToIcon: Partial<
     ComponentType<{ size?: number; fullColor?: boolean }>
   >
 > = {
+  [IssueWebhookProvider.Asana]: AsanaLogoIcon,
   [IssueWebhookProvider.AzureDevops]: AzureDevopsLogoIcon,
   [IssueWebhookProvider.Github]: GitHubLogoIcon,
   [IssueWebhookProvider.Gitlab]: GitLabLogoIcon,

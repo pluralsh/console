@@ -6,6 +6,7 @@ fragment Service on Service {
     loadBalancer {
       ingress {
         ip
+        hostname
       }
     }
   }

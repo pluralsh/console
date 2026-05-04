@@ -20,9 +20,8 @@ export function WebhookTriggerDeleteModal({
     variables: { id: webhook?.id ?? '' },
     onCompleted: () => {
       popToast({
-        name: webhook?.name ?? '',
-        action: 'deleted',
-        color: 'icon-danger',
+        content: `${webhook?.name ?? 'webhook'} deleted`,
+        severity: 'danger',
       })
       onClose()
     },

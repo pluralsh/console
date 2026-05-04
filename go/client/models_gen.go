@@ -1194,7 +1194,7 @@ type BackupAttributes struct {
 
 type BedrockAiAttributes struct {
 	// the bedrock model id to use
-	ModelID string `json:"modelId"`
+	ModelID *string `json:"modelId,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock access token to use
@@ -2688,6 +2688,7 @@ type ConsoleConfiguration struct {
 	Byok          *bool              `json:"byok,omitempty"`
 	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
 	OidcName      *string            `json:"oidcName,omitempty"`
+	QoveKey       *string            `json:"qoveKey,omitempty"`
 	Features      *AvailableFeatures `json:"features,omitempty"`
 	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
 	Manifest      *PluralManifest    `json:"manifest,omitempty"`
@@ -3337,6 +3338,7 @@ type Flow struct {
 	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
 	VulnerabilityReports        *VulnerabilityReportConnection        `json:"vulnerabilityReports,omitempty"`
 	Issues                      *IssueConnection                      `json:"issues,omitempty"`
+	WorkbenchJobs               *WorkbenchJobConnection               `json:"workbenchJobs,omitempty"`
 	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
 	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
@@ -4091,11 +4093,13 @@ type InfrastructureStack struct {
 	Actor           *User                     `json:"actor,omitempty"`
 	CustomStackRuns *CustomStackRunConnection `json:"customStackRuns,omitempty"`
 	// key/value tags to filter stacks
-	Tags          []*Tag           `json:"tags,omitempty"`
-	ReadBindings  []*PolicyBinding `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
-	InsertedAt    *string          `json:"insertedAt,omitempty"`
-	UpdatedAt     *string          `json:"updatedAt,omitempty"`
+	Tags []*Tag `json:"tags,omitempty"`
+	// Infracost resource rows attached to this stack (newest first)
+	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
+	ReadBindings       []*PolicyBinding          `json:"readBindings,omitempty"`
+	WriteBindings      []*PolicyBinding          `json:"writeBindings,omitempty"`
+	InsertedAt         *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
 }
 
 type InfrastructureStackConnection struct {
@@ -7313,9 +7317,11 @@ type ScmConnectionEdge struct {
 
 type ScmCreds struct {
 	// the type of the scm connection
-	Type     *ScmType `json:"type,omitempty"`
-	Username string   `json:"username"`
-	Token    string   `json:"token"`
+	Type *ScmType `json:"type,omitempty"`
+	// the base url of the scm connection
+	BaseURL  *string `json:"baseUrl,omitempty"`
+	Username string  `json:"username"`
+	Token    string  `json:"token"`
 }
 
 type ScmWebhook struct {
@@ -8532,6 +8538,36 @@ type StackHookAttributes struct {
 	AfterStage StepStage `json:"afterStage"`
 }
 
+type StackInfracostResource struct {
+	ID string `json:"id"`
+	// breakdown | past_breakdown | diff | free
+	ResourceScope string `json:"resourceScope"`
+	// Infracost project name this resource belongs to
+	ProjectName      *string        `json:"projectName,omitempty"`
+	Name             string         `json:"name"`
+	ResourceType     *string        `json:"resourceType,omitempty"`
+	HourlyCost       *float64       `json:"hourlyCost,omitempty"`
+	MonthlyCost      *float64       `json:"monthlyCost,omitempty"`
+	MonthlyUsageCost *float64       `json:"monthlyUsageCost,omitempty"`
+	RawResource      map[string]any `json:"rawResource,omitempty"`
+	StackRun         *StackRun      `json:"stackRun,omitempty"`
+	InsertedAt       *string        `json:"insertedAt,omitempty"`
+	UpdatedAt        *string        `json:"updatedAt,omitempty"`
+}
+
+type StackInfracostResourceAttributes struct {
+	// breakdown | past_breakdown | diff | free
+	ResourceScope string `json:"resourceScope"`
+	// Infracost project name this resource belongs to
+	ProjectName      *string  `json:"projectName,omitempty"`
+	Name             string   `json:"name"`
+	ResourceType     *string  `json:"resourceType,omitempty"`
+	HourlyCost       *float64 `json:"hourlyCost,omitempty"`
+	MonthlyCost      *float64 `json:"monthlyCost,omitempty"`
+	MonthlyUsageCost *float64 `json:"monthlyUsageCost,omitempty"`
+	RawResource      *string  `json:"rawResource,omitempty"`
+}
+
 type StackOutput struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
@@ -8649,8 +8685,10 @@ type StackRun struct {
 	Repository *GitRepository `json:"repository,omitempty"`
 	// policy violations for this stack
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
-	InsertedAt *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+	// Infracost resource rows attached to this run (newest first)
+	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
+	InsertedAt         *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
 }
 
 type StackRunApprovalResult struct {
@@ -8675,6 +8713,8 @@ type StackRunAttributes struct {
 	CancellationReason *string `json:"cancellationReason,omitempty"`
 	// the violations detected by the policy engine
 	Violations []*StackPolicyViolationAttributes `json:"violations,omitempty"`
+	// Infracost resource rows to persist for this run
+	InfracostResources []*StackInfracostResourceAttributes `json:"infracostResources,omitempty"`
 }
 
 type StackRunConnection struct {
@@ -9124,6 +9164,7 @@ type User struct {
 	ID                  string           `json:"id"`
 	Name                string           `json:"name"`
 	Email               string           `json:"email"`
+	Homepage            *Homepage        `json:"homepage,omitempty"`
 	DeletedAt           *string          `json:"deletedAt,omitempty"`
 	Profile             *string          `json:"profile,omitempty"`
 	PluralID            *string          `json:"pluralId,omitempty"`
@@ -9147,6 +9188,7 @@ type UserAttributes struct {
 	Name              *string                  `json:"name,omitempty"`
 	Email             *string                  `json:"email,omitempty"`
 	Password          *string                  `json:"password,omitempty"`
+	Homepage          *Homepage                `json:"homepage,omitempty"`
 	Roles             *UserRoleAttributes      `json:"roles,omitempty"`
 	EmailSettings     *EmailSettingsAttributes `json:"emailSettings,omitempty"`
 	SigningPrivateKey *string                  `json:"signingPrivateKey,omitempty"`
@@ -9476,6 +9518,15 @@ type Workbench struct {
 	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
 }
 
+type WorkbenchAggregates struct {
+	// count of merged pull requests included in the aggregate
+	PullRequests *int64 `json:"pullRequests,omitempty"`
+	// fraction of those pull requests that are merged (0.0–1.0)
+	PullRequestMergeRate *float64 `json:"pullRequestMergeRate,omitempty"`
+	// average eval grade across workbench eval results
+	EvalResults *float64 `json:"evalResults,omitempty"`
+}
+
 type WorkbenchAttributes struct {
 	// the name of the workbench (must be unique)
 	Name string `json:"name"`
@@ -9516,6 +9567,7 @@ type WorkbenchCanvasBlockContent struct {
 	Markdown *string                    `json:"markdown,omitempty"`
 	Metrics  *WorkbenchCanvasToolGraph  `json:"metrics,omitempty"`
 	Logs     *WorkbenchCanvasToolGraph  `json:"logs,omitempty"`
+	Traces   *WorkbenchCanvasToolGraph  `json:"traces,omitempty"`
 	Pie      *WorkbenchCanvasBlockGraph `json:"pie,omitempty"`
 	Bar      *WorkbenchCanvasBlockGraph `json:"bar,omitempty"`
 }
@@ -9548,6 +9600,8 @@ type WorkbenchCoding struct {
 	Mode *AgentRunMode `json:"mode,omitempty"`
 	// allowed repository identifiers
 	Repositories []*string `json:"repositories,omitempty"`
+	// whether babysitting is enabled for the coding agent
+	EnableBabysitting *bool `json:"enableBabysitting,omitempty"`
 }
 
 type WorkbenchCodingAttributes struct {
@@ -9555,6 +9609,8 @@ type WorkbenchCodingAttributes struct {
 	Mode *AgentRunMode `json:"mode,omitempty"`
 	// allowed repository identifiers
 	Repositories []*string `json:"repositories,omitempty"`
+	// when true, enables babysitting for the coding agent
+	EnableBabysitting *bool `json:"enableBabysitting,omitempty"`
 }
 
 type WorkbenchConfiguration struct {
@@ -9569,7 +9625,7 @@ type WorkbenchConfiguration struct {
 type WorkbenchConfigurationAttributes struct {
 	// infrastructure capabilities (services, stacks, kubernetes)
 	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
-	// coding capabilities (mode, repositories)
+	// coding capabilities (mode, repositories, babysitting)
 	Coding *WorkbenchCodingAttributes `json:"coding,omitempty"`
 	// observability capabilities (logs, metrics)
 	Observability *WorkbenchObservabilityAttributes `json:"observability,omitempty"`
@@ -9697,6 +9753,8 @@ type WorkbenchInfrastructure struct {
 	Stacks *bool `json:"stacks,omitempty"`
 	// kubernetes capability enabled
 	Kubernetes *bool `json:"kubernetes,omitempty"`
+	// pod logs capability enabled
+	PodLogs *bool `json:"podLogs,omitempty"`
 }
 
 type WorkbenchInfrastructureAttributes struct {
@@ -9706,6 +9764,8 @@ type WorkbenchInfrastructureAttributes struct {
 	Stacks *bool `json:"stacks,omitempty"`
 	// enable kubernetes capability
 	Kubernetes *bool `json:"kubernetes,omitempty"`
+	// enable pod logs capability
+	PodLogs *bool `json:"podLogs,omitempty"`
 }
 
 type WorkbenchJob struct {
@@ -9738,6 +9798,7 @@ type WorkbenchJob struct {
 	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
 	LogsTool    []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
+	TracesTool  []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -9818,14 +9879,31 @@ type WorkbenchJobActivityResult struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs emitted by the activity
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// traces emitted by the activity
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
 	// metrics tool queries emitted by the activity
 	MetricsQueries []*WorkbenchToolQueryData `json:"metricsQueries,omitempty"`
 	// logs tool queries emitted by the activity
 	LogsQueries []*WorkbenchToolQueryData `json:"logsQueries,omitempty"`
+	// traces tool queries emitted by the activity
+	TracesQueries []*WorkbenchToolQueryData `json:"tracesQueries,omitempty"`
 	// primary metrics tool query for this activity
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 	// primary logs tool query for this activity
 	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
+	// primary traces tool query for this activity
+	TracesQuery *WorkbenchToolQueryData `json:"tracesQuery,omitempty"`
+}
+
+type WorkbenchJobActivityTrace struct {
+	TraceID  *string        `json:"traceId,omitempty"`
+	SpanID   *string        `json:"spanId,omitempty"`
+	ParentID *string        `json:"parentId,omitempty"`
+	Name     *string        `json:"name,omitempty"`
+	Service  *string        `json:"service,omitempty"`
+	Start    *string        `json:"start,omitempty"`
+	End      *string        `json:"end,omitempty"`
+	Tags     map[string]any `json:"tags,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -9881,10 +9959,14 @@ type WorkbenchJobResultMetadata struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for this result
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// traces for this result
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
 	// metrics tool query for this result
 	MetricsQuery *WorkbenchToolQueryData `json:"metricsQuery,omitempty"`
 	// logs tool query for this result
 	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
+	// traces tool query for this result
+	TracesQuery *WorkbenchToolQueryData `json:"tracesQuery,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -9915,6 +9997,8 @@ type WorkbenchJobThoughtAttributes struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for the thought
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// traces for the thought
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
 }
 
 type WorkbenchJobThoughtDelta struct {
@@ -10192,6 +10276,8 @@ type WorkbenchToolConfiguration struct {
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// atlassian connection (no secrets)
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
+	// exa connection (no secrets)
+	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -10221,6 +10307,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// atlassian/jira connection (ticketing)
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
+	// exa connection (search)
+	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -10277,6 +10365,16 @@ type WorkbenchToolElasticConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// elasticsearch index
 	Index string `json:"index"`
+}
+
+type WorkbenchToolExaConnection struct {
+	// static API URL for Exa (credentials never exposed)
+	URL string `json:"url"`
+}
+
+type WorkbenchToolExaConnectionAttributes struct {
+	// exa API key
+	APIKey *string `json:"apiKey,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -12628,6 +12726,61 @@ func (e *HelmAuthProvider) UnmarshalJSON(b []byte) error {
 }
 
 func (e HelmAuthProvider) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type Homepage string
+
+const (
+	HomepageClusters    Homepage = "CLUSTERS"
+	HomepageWorkbenches Homepage = "WORKBENCHES"
+)
+
+var AllHomepage = []Homepage{
+	HomepageClusters,
+	HomepageWorkbenches,
+}
+
+func (e Homepage) IsValid() bool {
+	switch e {
+	case HomepageClusters, HomepageWorkbenches:
+		return true
+	}
+	return false
+}
+
+func (e Homepage) String() string {
+	return string(e)
+}
+
+func (e *Homepage) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Homepage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Homepage", str)
+	}
+	return nil
+}
+
+func (e Homepage) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Homepage) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Homepage) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -16338,6 +16491,7 @@ const (
 	WorkbenchCanvasBlockTypeMarkdown WorkbenchCanvasBlockType = "MARKDOWN"
 	WorkbenchCanvasBlockTypeMetrics  WorkbenchCanvasBlockType = "METRICS"
 	WorkbenchCanvasBlockTypeLogs     WorkbenchCanvasBlockType = "LOGS"
+	WorkbenchCanvasBlockTypeTraces   WorkbenchCanvasBlockType = "TRACES"
 	WorkbenchCanvasBlockTypePie      WorkbenchCanvasBlockType = "PIE"
 	WorkbenchCanvasBlockTypeBar      WorkbenchCanvasBlockType = "BAR"
 )
@@ -16346,13 +16500,14 @@ var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
 	WorkbenchCanvasBlockTypeMarkdown,
 	WorkbenchCanvasBlockTypeMetrics,
 	WorkbenchCanvasBlockTypeLogs,
+	WorkbenchCanvasBlockTypeTraces,
 	WorkbenchCanvasBlockTypePie,
 	WorkbenchCanvasBlockTypeBar,
 }
 
 func (e WorkbenchCanvasBlockType) IsValid() bool {
 	switch e {
-	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
+	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypeTraces, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
 		return true
 	}
 	return false
@@ -16468,6 +16623,9 @@ const (
 	WorkbenchJobActivityTypeMemory         WorkbenchJobActivityType = "MEMORY"
 	WorkbenchJobActivityTypeConclusion     WorkbenchJobActivityType = "CONCLUSION"
 	WorkbenchJobActivityTypeCanvas         WorkbenchJobActivityType = "CANVAS"
+	WorkbenchJobActivityTypeSkill          WorkbenchJobActivityType = "SKILL"
+	WorkbenchJobActivityTypeHistory        WorkbenchJobActivityType = "HISTORY"
+	WorkbenchJobActivityTypeSearch         WorkbenchJobActivityType = "SEARCH"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -16482,11 +16640,14 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeMemory,
 	WorkbenchJobActivityTypeConclusion,
 	WorkbenchJobActivityTypeCanvas,
+	WorkbenchJobActivityTypeSkill,
+	WorkbenchJobActivityTypeHistory,
+	WorkbenchJobActivityTypeSearch,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch:
 		return true
 	}
 	return false
@@ -16596,6 +16757,10 @@ const (
 	WorkbenchSkillSubagentObservability  WorkbenchSkillSubagent = "OBSERVABILITY"
 	WorkbenchSkillSubagentIntegration    WorkbenchSkillSubagent = "INTEGRATION"
 	WorkbenchSkillSubagentOrchestrator   WorkbenchSkillSubagent = "ORCHESTRATOR"
+	WorkbenchSkillSubagentMemory         WorkbenchSkillSubagent = "MEMORY"
+	WorkbenchSkillSubagentSkill          WorkbenchSkillSubagent = "SKILL"
+	WorkbenchSkillSubagentHistory        WorkbenchSkillSubagent = "HISTORY"
+	WorkbenchSkillSubagentSearch         WorkbenchSkillSubagent = "SEARCH"
 )
 
 var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
@@ -16604,11 +16769,15 @@ var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
 	WorkbenchSkillSubagentObservability,
 	WorkbenchSkillSubagentIntegration,
 	WorkbenchSkillSubagentOrchestrator,
+	WorkbenchSkillSubagentMemory,
+	WorkbenchSkillSubagentSkill,
+	WorkbenchSkillSubagentHistory,
+	WorkbenchSkillSubagentSearch,
 }
 
 func (e WorkbenchSkillSubagent) IsValid() bool {
 	switch e {
-	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator:
+	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator, WorkbenchSkillSubagentMemory, WorkbenchSkillSubagentSkill, WorkbenchSkillSubagentHistory, WorkbenchSkillSubagentSearch:
 		return true
 	}
 	return false
@@ -16659,6 +16828,7 @@ const (
 	WorkbenchToolCategoryTraces         WorkbenchToolCategory = "TRACES"
 	WorkbenchToolCategoryErrorTracking  WorkbenchToolCategory = "ERROR_TRACKING"
 	WorkbenchToolCategoryInfrastructure WorkbenchToolCategory = "INFRASTRUCTURE"
+	WorkbenchToolCategorySearch         WorkbenchToolCategory = "SEARCH"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -16669,11 +16839,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryTraces,
 	WorkbenchToolCategoryErrorTracking,
 	WorkbenchToolCategoryInfrastructure,
+	WorkbenchToolCategorySearch,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch:
 		return true
 	}
 	return false
@@ -16794,6 +16965,7 @@ const (
 	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
 	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
 	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
+	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16813,11 +16985,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeAzure,
 	WorkbenchToolTypeCloud,
 	WorkbenchToolTypeJaeger,
+	WorkbenchToolTypeExa,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa:
 		return true
 	}
 	return false

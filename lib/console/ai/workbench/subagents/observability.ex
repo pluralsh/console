@@ -1,14 +1,14 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill}
+  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator, History, Infrastructure.PodLogs}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Time, Plrl}
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
-    tools(environment)
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user}, %Environment{} = environment) do
+    tools(environment, user)
     |> MemoryEngine.new(50, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
@@ -27,16 +27,19 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end
   end
 
-  def tools(%Environment{skills: skills, tools: tools, job: job}) do
+  def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities}, user) do
     obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(plrl_log_tools(job))
     |> Enum.concat(plrl_metric_tools(job))
+    |> Enum.concat(pod_logs_tools(job, user))
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :observability)},
       %Skill{skills: Environment.subagent_skills(skills, :observability)},
       ObservabilityResult,
-      Time
+      Time,
+      Calculator,
+      %History{job: job, activities: activities}
     ])
   end
 
@@ -48,6 +51,10 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     ]
   end
   defp plrl_log_tools(_), do: []
+
+  defp pod_logs_tools(%Workbench{configuration: %{infrastructure: %{pod_logs: true}}}, %User{} = user),
+    do: [%PodLogs{user: user}]
+  defp pod_logs_tools(_, _), do: []
 
   defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{metrics: true}}}}),
     do: [Plrl.Metrics, Plrl.MetricsSearch]

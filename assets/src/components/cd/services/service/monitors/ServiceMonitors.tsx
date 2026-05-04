@@ -133,10 +133,10 @@ const cols = [
         variables: { id },
         onCompleted: () => {
           setDeleteOpen(false)
-          popToast({ name, action: 'deleted', color: 'icon-danger' })
+          popToast({ content: `${name} deleted`, severity: 'danger' })
         },
         onError: () =>
-          popToast({ name, action: 'failed to delete', color: 'icon-danger' }),
+          popToast({ content: `${name} failed to delete`, severity: 'danger' }),
         refetchQueries: ['ServiceMonitors'],
         awaitRefetchQueries: true,
       })

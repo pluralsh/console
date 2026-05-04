@@ -1,6 +1,7 @@
 defmodule Console.Schema.WorkbenchJob do
   use Console.Schema.Base
   alias Console.Schema.{
+    PolicyBinding,
     Workbench,
     WorkbenchEval,
     WorkbenchEvalResult,
@@ -11,21 +12,25 @@ defmodule Console.Schema.WorkbenchJob do
     Issue,
     PullRequest
   }
+  alias Console.Deployments.Policies.Rbac
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
+  defenum Type, job: 0, skill: 1
 
   schema "workbench_jobs" do
     field :status, Status, default: :pending
+    field :type,   Type, default: :job
     field :prompt, :binary
-    field :error, :binary
+    field :error,  :binary
 
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
 
-    belongs_to :workbench, Workbench
-    belongs_to :user,      User
-    belongs_to :alert,     Alert
-    belongs_to :issue,     Issue
+    belongs_to :workbench,      Workbench
+    belongs_to :user,           User
+    belongs_to :alert,          Alert
+    belongs_to :issue,          Issue
+    belongs_to :referenced_job, __MODULE__
 
     has_one  :result,        WorkbenchJobResult, on_replace: :update
     has_one  :eval_result,   WorkbenchEvalResult, on_replace: :update
@@ -65,6 +70,28 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status == ^status)
   end
 
+  def for_flow(query \\ __MODULE__, flow_id) do
+    from(j in query,
+      join: w in assoc(j, :workbench),
+      join: fb in assoc(w, :flows_workbenches),
+      where: fb.flow_id == ^flow_id
+    )
+  end
+
+  def for_user(query \\ __MODULE__, %User{} = user) do
+    Rbac.globally_readable(query, user, fn query, id, groups ->
+      from(j in query,
+        join: w in assoc(j, :workbench),
+        join: p in assoc(w, :project),
+        left_join: b in PolicyBinding,
+          on: b.policy_id == w.read_policy_id or b.policy_id == w.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+        where: b.user_id == ^id or b.group_id in ^groups,
+        distinct: true
+      )
+    end)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(j in query, order_by: ^order)
   end
@@ -78,14 +105,14 @@ defmodule Console.Schema.WorkbenchJob do
   end
 
   def requires_backfill(query \\ __MODULE__) do
-    from(j in query, where: is_nil(j.knowledge_updated_at))
+    from(j in query, where: is_nil(j.knowledge_updated_at) and j.type == ^:job)
   end
 
   def resolved(query \\ __MODULE__) do
     from(j in query,
       left_join: pr in ^PullRequest.for_status(:merged),
         on: pr.workbench_job_id == j.id,
-      where: not is_nil(pr.id),
+      where: not is_nil(pr.id) and j.type == ^:job,
       select: j,
       distinct: true
     )
@@ -97,14 +124,14 @@ defmodule Console.Schema.WorkbenchJob do
         on: e.workbench_id == j.workbench_id,
       left_join: r in WorkbenchEvalResult,
         on: r.workbench_eval_id == e.id and r.workbench_job_id == j.id,
-      where: j.inserted_at >= e.inserted_at,
+      where: j.inserted_at >= e.inserted_at and j.type == ^:job,
       where: is_nil(r.id),
       select: j,
       distinct: true
     )
   end
 
-  @valid ~w(status prompt workbench_id error user_id started_at completed_at alert_id issue_id)a
+  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -114,6 +141,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
     |> foreign_key_constraint(:issue_id)
+    |> foreign_key_constraint(:referenced_job_id)
     |> validate_required([:status, :workbench_id, :user_id])
   end
 

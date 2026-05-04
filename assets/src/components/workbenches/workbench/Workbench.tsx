@@ -124,9 +124,8 @@ export function Workbench() {
         setDeleteModalOpen(false)
         navigate(WORKBENCHES_ABS_PATH)
         popToast({
-          name: workbench?.name,
-          action: 'deleted',
-          color: 'icon-danger',
+          content: `${workbench?.name ?? 'workbench'} deleted`,
+          severity: 'danger',
         })
       },
     })

@@ -68,6 +68,7 @@ function Table({
   stickyColumn = false,
   flush = false,
   width,
+  minHeight,
   virtualizeRows = false,
   lockColumnsOnScroll,
   reactVirtualOptions,
@@ -227,7 +228,7 @@ function Table({
   return (
     <WrapWithIf
       condition={fullHeightWrap}
-      wrapper={<FullHeightWrapSC />}
+      wrapper={<FullHeightWrapSC $minHeight={minHeight} />}
     >
       <TableWrapSC
         ref={forwardedRef}
@@ -490,12 +491,15 @@ function Table({
   )
 }
 
-const FullHeightWrapSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  overflow: 'hidden',
-})
+const FullHeightWrapSC = styled.div<{ $minHeight?: TableProps['minHeight'] }>(
+  ({ $minHeight }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden',
+    ...($minHeight && { minHeight: $minHeight }),
+  })
+)
 
 const TableWrapSC = styled.div<{
   $width?: TableProps['width']

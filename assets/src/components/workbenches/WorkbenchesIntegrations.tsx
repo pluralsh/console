@@ -103,7 +103,7 @@ export function WorkbenchesIntegrations() {
       <WorkbenchTabHeader
         icon={<ApiIcon />}
         title="Integrations"
-        description="Integrate your dev stack, including observability, ticketing, MCP, and Cloud services with Plural."
+        description="Integrate your dev stack, including observability, ticketing, MCP, and Cloud services with Plural.  You can create multiple tools for each."
       />
       <FiltersLayoutSC>
         {panelTransitions((styles) => (

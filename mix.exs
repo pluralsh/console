@@ -49,7 +49,7 @@ defmodule Console.MixProject do
       lockfile: "mix.lock",
       elixir: "~> 1.16",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers(),
+      compilers: [:yecc, :leex] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
@@ -180,7 +180,8 @@ defmodule Console.MixProject do
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.10"},
+      {:req_llm, "~> 1.11"},
+      {:sweet_xml, ">= 0.0.0"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

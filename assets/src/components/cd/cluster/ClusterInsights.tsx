@@ -1,5 +1,5 @@
 import { mergeDeep } from '@apollo/client/utilities'
-import { EmptyState, Flex, SubTab, TabList } from '@pluralsh/design-system'
+import { EmptyState, Flex } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cluster/constants.ts'
 import { GqlError } from 'components/utils/Alert.tsx'
 import {
@@ -9,51 +9,23 @@ import {
   Suspense,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import { Outlet, useMatch, useOutletContext } from 'react-router-dom'
+import { Outlet, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   ClusterFragment,
   ClusterInsightFragment,
   useClusterInsightQuery,
 } from '../../../generated/graphql.ts'
-import {
-  CLUSTER_ABS_PATH,
-  CLUSTER_INSIGHTS_COMPONENTS_PATH,
-  CLUSTER_INSIGHTS_PATH,
-  CLUSTER_INSIGHTS_SUMMARY_PATH,
-} from '../../../routes/cdRoutesConsts.tsx'
 
-import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from '../../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
-import { LinkTabWrap } from '../../utils/Tabs.tsx'
 import { useClusterContext } from './Cluster.tsx'
-
-const DIRECTORY: Array<DirectoryEntry> = [
-  { path: CLUSTER_INSIGHTS_SUMMARY_PATH, label: 'Insight summary' },
-  { path: CLUSTER_INSIGHTS_COMPONENTS_PATH, label: 'Component insights' },
-]
-
-interface DirectoryEntry {
-  path: string
-  label?: string
-}
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 
 export function ClusterInsights() {
   const theme = useTheme()
   const { cluster, clusterLoading } = useClusterContext()
-  const tabStateRef = useRef<any>(null)
-  const { tab } =
-    useMatch(`${CLUSTER_ABS_PATH}/${CLUSTER_INSIGHTS_PATH}/:tab?/*`)?.params ??
-    {}
-  const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
   const {
     data,
@@ -92,82 +64,14 @@ export function ClusterInsights() {
       marginBottom={theme.spacing.large}
       height="100%"
     >
-      <Flex
-        justify="space-between"
-        alignItems="center"
-      >
-        <Flex
-          align="center"
-          gap="small"
-        >
-          {navigationContent ? (
-            navigationContent
-          ) : (
-            <TabList
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-            >
-              {DIRECTORY.map(({ path, label }) => (
-                <LinkTabWrap
-                  subTab
-                  key={path}
-                  textValue={label}
-                  to={path}
-                >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    {label}
-                  </SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-          )}
-        </Flex>
-        <Flex
-          align="center"
-          gap="small"
-        >
-          {actionContent}
-        </Flex>
-      </Flex>
+      <StretchedFlex align="end">
+        {navigationContent}
+        {actionContent}
+      </StretchedFlex>
       <Suspense fallback={<LoadingIndicator />}>
         <Outlet context={ctx} />
       </Suspense>
     </Flex>
-  )
-}
-
-export function ClusterInsightsSummary() {
-  const { cluster } = useClusterContext()
-  const { clusterLoading } = useClusterInsightsContext()
-
-  useSetActionContent(
-    useMemo(
-      () => (
-        <>
-          {cluster?.insight && <InsightRefresh insight={cluster?.insight} />}
-          <ChatWithAIButton
-            floating
-            insightId={cluster?.insight?.id}
-            messages={[insightMessage(cluster?.insight)]}
-          />
-        </>
-      ),
-      [cluster?.insight]
-    )
-  )
-
-  return (
-    <InsightDisplay
-      insight={cluster?.insight}
-      kind="cluster"
-      loading={clusterLoading}
-    />
   )
 }
 

@@ -1,20 +1,20 @@
-import type { SemanticColorKey } from '@pluralsh/design-system'
-import { createContext, ReactNode, use, useMemo, useRef, useState } from 'react'
+import { Toast } from '@pluralsh/design-system'
+import {
+  ComponentProps,
+  createContext,
+  ReactNode,
+  use,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
-import { SimpleToastChip } from 'components/utils/SimpleToastChip'
-import { Body2P, StrongSC } from 'components/utils/typography/Text'
+type ToastSeverity = ComponentProps<typeof Toast>['severity']
 
 export type SimpleToastPayload = {
-  /** Custom content; if omitted, name/action/color are used to render default action text */
-  content?: ReactNode
-  prefix?: ReactNode
-  suffix?: string
-  name?: Nullable<string>
-  action?: string
-  color?: SemanticColorKey
+  content: ReactNode
+  severity?: ToastSeverity
   delayTimeout?: number | 'none'
-  clickable?: boolean
-  onClick?: () => void
 }
 
 type SimpleToastContextT = {
@@ -53,36 +53,24 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
   const show = !!toast
   const {
     content,
-    name,
-    action,
-    prefix,
-    suffix,
-    color = 'text',
+    severity,
     delayTimeout = DEFAULT_DELAY_TIMEOUT,
-    clickable = false,
-    onClick,
   } = toast?.payload ?? {}
 
   return (
     <SimpleToastContext value={value}>
       {children}
-      <SimpleToastChip
+      <Toast
         key={toast?.id}
         show={show}
-        delayTimeout={delayTimeout}
+        closeTimeout={delayTimeout}
         onClose={value.clearToast}
-        clickable={clickable}
-        onClick={onClick}
+        position="bottom-right"
+        margin="large"
+        severity={severity}
       >
-        {content || (
-          <Body2P $color="text-light">
-            {prefix && <span>{prefix} </span>}
-            {name && <StrongSC $color="text">{name} </StrongSC>}
-            <StrongSC $color={color}>{action}</StrongSC>
-            {suffix && <span> {suffix}</span>}
-          </Body2P>
-        )}
-      </SimpleToastChip>
+        {content}
+      </Toast>
     </SimpleToastContext>
   )
 }

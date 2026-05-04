@@ -16,7 +16,7 @@ import { RuntimeService, runtimeColumns } from './columns'
 export function getClusterKubeVersion(
   cluster: Nullable<Pick<ClustersRowFragment, 'currentVersion' | 'version'>>
 ) {
-  return cluster?.currentVersion || cluster?.version || '1.20.0'
+  return cluster?.currentVersion || cluster?.version
 }
 
 export function RuntimeServices({

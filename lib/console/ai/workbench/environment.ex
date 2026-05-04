@@ -12,7 +12,7 @@ defmodule Console.AI.Workbench.Environment do
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :activities, :user]
+  defstruct [:job, :tools, :skills, :user, activities: []]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     %__MODULE__{
@@ -36,11 +36,17 @@ defmodule Console.AI.Workbench.Environment do
     |> Map.new()
   end
 
-  def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench}) do
+  def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench} = job) do
     tool_agents(tools)
+    |> Enum.concat(type_subagents(job))
     |> Enum.concat(coding_agents(bench))
     |> Enum.concat(infra_agents(bench))
+    |> Enum.filter(&allow_subagent?(job, &1))
   end
+
+  defp allow_subagent?(%WorkbenchJob{type: :skill}, :canvas), do: false
+  defp allow_subagent?(%WorkbenchJob{type: :skill}, :coding), do: false
+  defp allow_subagent?(_, _), do: true
 
   def categories(%WorkbenchJob{workbench: %Workbench{tools: tools}}) when is_list(tools) do
     Enum.flat_map(tools, & (&1.categories || []))
@@ -94,13 +100,18 @@ defmodule Console.AI.Workbench.Environment do
   defp coding_agents(%Workbench{agent_runtime_id: id}) when is_binary(id), do: [:coding]
   defp coding_agents(_), do: []
 
-  defp infra_agents(%Workbench{configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k}}}) do
-    case (s || st || k) do
+  defp infra_agents(%Workbench{
+         configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k, pod_logs: pl}}
+       }) do
+    case s || st || k || pl do
       true -> [:infrastructure]
       _ -> []
     end
   end
   defp infra_agents(_), do: []
+
+  defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
+  defp type_subagents(_), do: []
 
   defp tool_agents(tools) do
     Enum.flat_map(tools || [], fn
@@ -118,5 +129,6 @@ defmodule Console.AI.Workbench.Environment do
   defp category_to_subagent(:error_tracking), do: :observability
   defp category_to_subagent(:integration), do: :integration
   defp category_to_subagent(:ticketing), do: :integration
+  defp category_to_subagent(:search), do: :search
   defp category_to_subagent(_), do: :integration
 end

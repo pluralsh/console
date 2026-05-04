@@ -1,0 +1,30 @@
+{
+    "type": "object",
+    "properties": {
+        "cluster": {
+            "type": "string",
+            "description": "The Plural cluster handle identifying which cluster to query"
+        },
+        "name": {
+            "type": "string",
+            "description": "The kubernetes pod name to fetch logs from"
+        },
+        "namespace": {
+            "type": "string",
+            "description": "The kubernetes namespace where the pod is running"
+        },
+        "container": {
+            "type": "string",
+            "description": "The container name within the pod to stream logs from"
+        },
+        "since_seconds": {
+            "type": "integer",
+            "description": "Only return logs newer than this many seconds ago"
+        },
+        "limit_bytes": {
+            "type": "integer",
+            "description": "Maximum number of log bytes to return; defaults to 5120"
+        }
+    },
+    "required": ["cluster", "name", "namespace", "container"]
+}

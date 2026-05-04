@@ -121,7 +121,7 @@ export function ClusterUpgradePlan() {
     fetchPolicy: 'cache-and-network',
   })
   const clusterBasic = basicData?.cluster
-  const kubeVersion = getClusterKubeVersion(clusterBasic)
+  const kubeVersion = getClusterKubeVersion(clusterBasic) ?? ''
   const parsedKubeVersion =
     semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
   const nextKubeVersion = `${parsedKubeVersion.major}.${parsedKubeVersion.minor + 1}`
@@ -133,7 +133,7 @@ export function ClusterUpgradePlan() {
       nextKubeVersion,
       hasKubeVersion: true,
     },
-    skip: !clusterBasic?.id,
+    skip: !clusterBasic?.id || !kubeVersion,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })

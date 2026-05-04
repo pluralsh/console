@@ -529,6 +529,12 @@ type RootQueryType {
 
   workbenchJob(id: ID!): WorkbenchJob
 
+  "Lists recent workbench jobs across all workbenches the user can read. Max 20."
+  recentWorkbenchJobs(
+    "the maximum number of jobs to return (defaults to 3, max 20)"
+    count: Int
+  ): [WorkbenchJob]
+
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
 
   workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection
@@ -540,6 +546,8 @@ type RootQueryType {
   averageEvalResults(period: EvalResultsPeriod): [WorkbenchEvalResultsAverage]
 
   workbenchPullRequests: Int!
+
+  workbenchAggregates: WorkbenchAggregates!
 
   workbenchPrMergeRates(period: EvalResultsPeriod): [WorkbenchPrMergeRateEntry]
 
@@ -1287,6 +1295,14 @@ type RootMutationType {
 
   "Deletes the eval configuration for a workbench. Requires write access to the workbench."
   deleteWorkbenchEval(id: ID!): WorkbenchEval
+
+  workbenchEvalSkill(
+    "the id of the eval result to generate a memory for"
+    id: ID!
+
+    "optional custom prompt to guide the memory generation"
+    prompt: String
+  ): WorkbenchJob
 
   createWorkbenchWebhook(
     "the workbench to create a webhook for"
@@ -2073,6 +2089,9 @@ type ScmCreds {
   "the type of the scm connection"
   type: ScmType
 
+  "the base url of the scm connection"
+  baseUrl: String
+
   username: String!
 
   token: String!
@@ -2268,6 +2287,7 @@ enum WorkbenchToolType {
   AZURE
   CLOUD
   JAEGER
+  EXA
 }
 
 enum WorkbenchToolCategory {
@@ -2278,6 +2298,7 @@ enum WorkbenchToolCategory {
   TRACES
   ERROR_TRACKING
   INFRASTRUCTURE
+  SEARCH
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2316,12 +2337,16 @@ enum WorkbenchJobActivityType {
   MEMORY
   CONCLUSION
   CANVAS
+  SKILL
+  HISTORY
+  SEARCH
 }
 
 enum WorkbenchCanvasBlockType {
   MARKDOWN
   METRICS
   LOGS
+  TRACES
   PIE
   BAR
 }
@@ -2332,6 +2357,10 @@ enum WorkbenchSkillSubagent {
   OBSERVABILITY
   INTEGRATION
   ORCHESTRATOR
+  MEMORY
+  SKILL
+  HISTORY
+  SEARCH
 }
 
 enum EvalResultsPeriod {
@@ -2400,7 +2429,7 @@ input WorkbenchConfigurationAttributes {
   "infrastructure capabilities (services, stacks, kubernetes)"
   infrastructure: WorkbenchInfrastructureAttributes
 
-  "coding capabilities (mode, repositories)"
+  "coding capabilities (mode, repositories, babysitting)"
   coding: WorkbenchCodingAttributes
 
   "observability capabilities (logs, metrics)"
@@ -2416,6 +2445,9 @@ input WorkbenchInfrastructureAttributes {
 
   "enable kubernetes capability"
   kubernetes: Boolean
+
+  "enable pod logs capability"
+  podLogs: Boolean
 }
 
 input WorkbenchCodingAttributes {
@@ -2424,6 +2456,9 @@ input WorkbenchCodingAttributes {
 
   "allowed repository identifiers"
   repositories: [String]
+
+  "when true, enables babysitting for the coding agent"
+  enableBabysitting: Boolean
 }
 
 input WorkbenchObservabilityAttributes {
@@ -2584,6 +2619,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
+
+  "exa connection (search)"
+  exa: WorkbenchToolExaConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2751,6 +2789,11 @@ input WorkbenchToolAtlassianConnectionAttributes {
   email: String
 }
 
+input WorkbenchToolExaConnectionAttributes {
+  "exa API key"
+  apiKey: String
+}
+
 input WorkbenchToolHttpConfigurationAttributes {
   "the request url"
   url: String!
@@ -2914,6 +2957,14 @@ type WorkbenchJob {
     arguments: Json
   ): [WorkbenchJobActivityLog]
 
+  tracesTool(
+    "the name of the traces tool"
+    name: String
+
+    "the arguments for the traces tool"
+    arguments: Json
+  ): [WorkbenchJobActivityTrace]
+
   "whimsically describes current progress for you"
   whimsey: String
 
@@ -2988,6 +3039,9 @@ type WorkbenchJobThoughtAttributes {
 
   "logs for the thought"
   logs: [WorkbenchJobActivityLog]
+
+  "traces for the thought"
+  traces: [WorkbenchJobActivityTrace]
 }
 
 type WorkbenchJobActivityResult {
@@ -3009,17 +3063,26 @@ type WorkbenchJobActivityResult {
   "logs emitted by the activity"
   logs: [WorkbenchJobActivityLog]
 
+  "traces emitted by the activity"
+  traces: [WorkbenchJobActivityTrace]
+
   "metrics tool queries emitted by the activity"
   metricsQueries: [WorkbenchToolQueryData]
 
   "logs tool queries emitted by the activity"
   logsQueries: [WorkbenchToolQueryData]
 
+  "traces tool queries emitted by the activity"
+  tracesQueries: [WorkbenchToolQueryData]
+
   "primary metrics tool query for this activity"
   metricsQuery: WorkbenchToolQueryData
 
   "primary logs tool query for this activity"
   logsQuery: WorkbenchToolQueryData
+
+  "primary traces tool query for this activity"
+  tracesQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -3041,6 +3104,17 @@ type WorkbenchJobActivityLog {
   timestamp: DateTime
   message: String
   labels: Map
+}
+
+type WorkbenchJobActivityTrace {
+  traceId: String
+  spanId: String
+  parentId: String
+  name: String
+  service: String
+  start: DateTime
+  end: DateTime
+  tags: Map
 }
 
 type WorkbenchJobResult {
@@ -3080,11 +3154,17 @@ type WorkbenchJobResultMetadata {
   "logs for this result"
   logs: [WorkbenchJobActivityLog]
 
+  "traces for this result"
+  traces: [WorkbenchJobActivityTrace]
+
   "metrics tool query for this result"
   metricsQuery: WorkbenchToolQueryData
 
   "logs tool query for this result"
   logsQuery: WorkbenchToolQueryData
+
+  "traces tool query for this result"
+  tracesQuery: WorkbenchToolQueryData
 }
 
 type WorkbenchToolQueryData {
@@ -3125,6 +3205,7 @@ type WorkbenchCanvasBlockContent {
   markdown: String
   metrics: WorkbenchCanvasToolGraph
   logs: WorkbenchCanvasToolGraph
+  traces: WorkbenchCanvasToolGraph
   pie: WorkbenchCanvasBlockGraph
   bar: WorkbenchCanvasBlockGraph
 }
@@ -3162,6 +3243,9 @@ type WorkbenchInfrastructure {
 
   "kubernetes capability enabled"
   kubernetes: Boolean
+
+  "pod logs capability enabled"
+  podLogs: Boolean
 }
 
 type WorkbenchCoding {
@@ -3170,6 +3254,9 @@ type WorkbenchCoding {
 
   "allowed repository identifiers"
   repositories: [String]
+
+  "whether babysitting is enabled for the coding agent"
+  enableBabysitting: Boolean
 }
 
 type WorkbenchObservability {
@@ -3337,6 +3424,17 @@ type WorkbenchPrMergeRateByWorkbenchEntry {
   mergeRate: Float
 }
 
+type WorkbenchAggregates {
+  "count of merged pull requests included in the aggregate"
+  pullRequests: Int
+
+  "fraction of those pull requests that are merged (0.0–1.0)"
+  pullRequestMergeRate: Float
+
+  "average eval grade across workbench eval results"
+  evalResults: Float
+}
+
 type WorkbenchWebhookMatches {
   "regex pattern to match"
   regex: String
@@ -3453,6 +3551,9 @@ type WorkbenchToolConfiguration {
 
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
+
+  "exa connection (no secrets)"
+  exa: WorkbenchToolExaConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -3561,6 +3662,11 @@ type WorkbenchToolAtlassianConnection {
 
   "atlassian account email for use with PAT authentication"
   email: String
+}
+
+type WorkbenchToolExaConnection {
+  "static API URL for Exa (credentials never exposed)"
+  url: String!
 }
 
 type WorkbenchToolHttpConfiguration {
@@ -4448,6 +4554,22 @@ type Flow {
     status: IssueStatus
   ): IssueConnection
 
+  workbenchJobs(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "show runs spawned from alerts"
+    alert: Boolean
+
+    "show runs spawned from issues"
+    issue: Boolean
+  ): WorkbenchJobConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -4908,7 +5030,7 @@ input AzureOpenaiAttributes {
 
 input BedrockAiAttributes {
   "the bedrock model id to use"
-  modelId: String!
+  modelId: String
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModelId: String
@@ -5278,8 +5400,8 @@ type AzureOpenaiSettings {
 
 "Settings for usage of AWS Bedrock for LLMs"
 type BedrockAiSettings {
-  "the bedrock model to use"
-  modelId: String!
+  "the bedrock model to use (omit for Plural defaults)"
+  modelId: String
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModelId: String
@@ -6158,6 +6280,29 @@ input StackRunAttributes {
 
   "the violations detected by the policy engine"
   violations: [StackPolicyViolationAttributes]
+
+  "Infracost resource rows to persist for this run"
+  infracostResources: [StackInfracostResourceAttributes]
+}
+
+input StackInfracostResourceAttributes {
+  "breakdown | past_breakdown | diff | free"
+  resourceScope: String!
+
+  "Infracost project name this resource belongs to"
+  projectName: String
+
+  name: String!
+
+  resourceType: String
+
+  hourlyCost: Float
+
+  monthlyCost: Float
+
+  monthlyUsageCost: Float
+
+  rawResource: Json
 }
 
 input RunStepAttributes {
@@ -6374,6 +6519,9 @@ type InfrastructureStack {
 
   "key\/value tags to filter stacks"
   tags: [Tag]
+
+  "Infracost resource rows attached to this stack (newest first)"
+  infracostResources(limit: Int): [StackInfracostResource]
 
   readBindings: [PolicyBinding]
 
@@ -6633,6 +6781,37 @@ type StackRun {
 
   "policy violations for this stack"
   violations: [StackPolicyViolation]
+
+  "Infracost resource rows attached to this run (newest first)"
+  infracostResources(limit: Int): [StackInfracostResource]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type StackInfracostResource {
+  id: ID!
+
+  "breakdown | past_breakdown | diff | free"
+  resourceScope: String!
+
+  "Infracost project name this resource belongs to"
+  projectName: String
+
+  name: String!
+
+  resourceType: String
+
+  hourlyCost: Float
+
+  monthlyCost: Float
+
+  monthlyUsageCost: Float
+
+  rawResource: Map
+
+  stackRun: StackRun
 
   insertedAt: DateTime
 
@@ -14338,6 +14517,11 @@ enum PersonaRole {
   MANAGEMENT
 }
 
+enum Homepage {
+  CLUSTERS
+  WORKBENCHES
+}
+
 enum ReadType {
   NOTIFICATION
   BUILD
@@ -14347,6 +14531,7 @@ input UserAttributes {
   name: String
   email: String
   password: String
+  homepage: Homepage
   roles: UserRoleAttributes
   emailSettings: EmailSettingsAttributes
   signingPrivateKey: String
@@ -14488,6 +14673,7 @@ type User {
   id: ID!
   name: String!
   email: String!
+  homepage: Homepage
   deletedAt: DateTime
   profile: String
   pluralId: String
@@ -14818,6 +15004,8 @@ type ConsoleConfiguration {
   externalOidc: Boolean
 
   oidcName: String
+
+  qoveKey: String
 
   features: AvailableFeatures
 

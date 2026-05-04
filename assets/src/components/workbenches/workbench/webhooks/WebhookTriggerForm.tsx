@@ -234,9 +234,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 
   const handleCompleted = () => {
     popToast({
-      name: label,
-      action: editing ? 'updated' : 'created',
-      color: 'icon-success',
+      content: `${label} ${editing ? 'updated' : 'created'}`,
+      severity: 'success',
     })
 
     navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))

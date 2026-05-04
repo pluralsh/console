@@ -4,9 +4,10 @@ import { useTheme } from 'styled-components'
 import {
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
-} from '../../../routes/cdRoutesConsts'
+} from 'routes/cdRoutesConsts'
 
-import { TRUNCATE } from '../../utils/truncate'
+import { TRUNCATE } from 'components/utils/truncate'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export default function ClusterAddOnsEntry({
   id,
@@ -15,6 +16,7 @@ export default function ClusterAddOnsEntry({
   blocking,
   active,
   cloudAddon,
+  loading,
 }: {
   id: string
   name: string
@@ -22,6 +24,7 @@ export default function ClusterAddOnsEntry({
   blocking?: boolean | null
   active: boolean
   cloudAddon: boolean
+  loading?: boolean
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -31,7 +34,7 @@ export default function ClusterAddOnsEntry({
   return (
     <div
       onClick={() => {
-        if (!active)
+        if (!active && !loading)
           navigate(
             getClusterAddOnDetailsPath({
               clusterId,
@@ -68,9 +71,9 @@ export default function ClusterAddOnsEntry({
           gap: theme.spacing.small,
         }}
       >
-        {icon ? (
+        {icon || loading ? (
           <AppIcon
-            url={icon}
+            url={icon || ''}
             size="xxsmall"
             css={{
               backgroundColor: active
@@ -94,7 +97,14 @@ export default function ClusterAddOnsEntry({
             flexGrow: 1,
           }}
         >
-          {name}
+          {loading ? (
+            <RectangleSkeleton
+              $height="medium"
+              $width={`${90 - ((id.length % 2) + 1) * 8}%`}
+            />
+          ) : (
+            name
+          )}
         </div>
         {blocking && (
           <Chip

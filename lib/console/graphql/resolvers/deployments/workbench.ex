@@ -47,8 +47,33 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> allow(actor(ctx), :read)
   end
 
+  @default_recent_workbench_jobs 3
+  @max_recent_workbench_jobs 20
+
   def list_workbench_runs(workbench, args, _) do
     WorkbenchJob.for_workbench(workbench.id)
+    |> workbench_job_filters(args)
+    |> WorkbenchJob.ordered()
+    |> paginate(args)
+  end
+
+  def recent_workbench_jobs(args, %{context: %{current_user: user}}) do
+    case Map.get(args, :count, @default_recent_workbench_jobs) do
+      count when count < 1 ->
+        {:error, "count must be at least 1"}
+      count when count > @max_recent_workbench_jobs ->
+        {:error, "count must be at most #{@max_recent_workbench_jobs}"}
+      count ->
+        WorkbenchJob.for_user(user)
+        |> WorkbenchJob.ordered()
+        |> WorkbenchJob.with_limit(count)
+        |> Console.Repo.all()
+        |> ok()
+    end
+  end
+
+  def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do
+    WorkbenchJob.for_flow(flow_id)
     |> workbench_job_filters(args)
     |> WorkbenchJob.ordered()
     |> paginate(args)
@@ -102,6 +127,19 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def aggregates(_, _) do
+    with [pr] <- Console.Repo.all(PullRequest.aggregates()),
+         [eval] <- Console.Repo.all(WorkbenchEvalResult.aggregates()) do
+      {:ok, %{
+        pull_requests: pr.merged,
+        pull_request_merge_rate: pr.merge_rate,
+        eval_results: eval.average_grade,
+      }}
+    else
+      _ -> {:error, "Failed to fetch aggregates"}
+    end
+  end
+
   def average_workbench_eval_results(args, %{context: %{current_user: user}}) do
     period = args[:period] || :day
 
@@ -144,13 +182,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> ok()
   end
 
-  def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
-    Toolchain.metrics(job, name, args)
-  end
+  def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.metrics(job, name, args, user)
 
-  def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, _) do
-    Toolchain.logs(job, name, args)
-  end
+  def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.logs(job, name, args, user)
+
+  def traces_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.traces(job, name, args, user)
 
   def workbenches(args, %{context: %{current_user: user}}) do
     Workbench.ordered()
@@ -230,6 +269,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_eval(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_eval(id, user)
+
+  def workbench_eval_skill(%{id: id,} = args, %{context: %{current_user: user}}),
+    do: Workbenches.workbench_eval_skill(id, args[:prompt], user)
 
   def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)

@@ -1,5 +1,5 @@
 defmodule Console.Schema.RunStep do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{StackRun, RunLog}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3
@@ -19,6 +19,14 @@ defmodule Console.Schema.RunStep do
     belongs_to :run, StackRun
 
     timestamps()
+  end
+
+  def for_run(query \\ __MODULE__, run_id) do
+    from(s in query, where: s.run_id == ^run_id)
+  end
+
+  def failing(query \\ __MODULE__) do
+    from(s in query, where: s.status == ^:failed)
   end
 
   @valid ~w(name status stage cmd args require_approval index run_id)a

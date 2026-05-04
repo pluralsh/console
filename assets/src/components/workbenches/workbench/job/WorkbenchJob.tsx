@@ -3,23 +3,25 @@ import {
   EmptyState,
   Flex,
   SidePanelOpenIcon,
-  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
+import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
+import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
 import {
   useCancelWorkbenchJobMutation,
   useWorkbenchJobQuery,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -30,24 +32,16 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { WorkbenchToolIcon } from '../../tools/workbenchToolsUtils'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
+import { isJobRunning } from './WorkbenchJobActivity'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-
-const MAX_VISIBLE_JOB_TOOLS = 3
 
 export function WorkbenchJob() {
   const theme = useTheme()
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
   const { popToast } = useSimpleToast()
-  const { isOpen, setOpen } = useWorkbenchJobPanel()
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
-
-  const onMount = useEffectEvent(() => setOpen(true))
-  useEffect(() => {
-    onMount()
-  }, [])
 
   const {
     data,
@@ -62,6 +56,15 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
+
+  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id)
+  useSidePanelWidth({
+    maxWidthVw: 60,
+    initialWidthVw:
+      Boolean(job?.result?.conclusion) && !isJobRunning(job?.status)
+        ? 60
+        : undefined,
+  })
 
   const workbenchId = job?.workbench?.id ?? ''
   const workbenchName = job?.workbench?.name ?? 'workbench'
@@ -78,7 +81,7 @@ export function WorkbenchJob() {
       ],
       onCompleted: () => {
         setCancelModalOpen(false)
-        popToast({ name: 'job', action: 'cancelled', color: 'icon-danger' })
+        popToast({ content: 'job cancelled', severity: 'danger' })
       },
     })
 
@@ -86,12 +89,6 @@ export function WorkbenchJob() {
     job?.status === WorkbenchJobStatus.Pending ||
     job?.status === WorkbenchJobStatus.Running
   const jobTools = job?.workbench?.tools?.filter(isNonNullable) ?? []
-  const visibleJobTools = jobTools.slice(0, MAX_VISIBLE_JOB_TOOLS)
-  const hiddenJobTools = jobTools.slice(MAX_VISIBLE_JOB_TOOLS)
-  const hiddenJobToolsLabel = hiddenJobTools
-    .map((tool) => tool.name)
-    .filter(Boolean)
-    .join(', ')
 
   useSetBreadcrumbs(
     useMemo(
@@ -174,32 +171,20 @@ export function WorkbenchJob() {
                     </span>
                   )}
                   {!isEmpty(jobTools) && (
-                    <Flex gap="xsmall">
-                      {visibleJobTools.map((tool) => (
-                        <Tooltip
-                          key={tool.id}
-                          label={tool.name}
-                          placement="bottom"
-                        >
+                    <MetadataIcons
+                      maxVisibleItems={3}
+                      items={jobTools.map((tool) => ({
+                        id: tool.id,
+                        label: tool.name,
+                        icon: (
                           <WorkbenchToolIcon
                             type={tool.tool}
                             provider={tool.cloudConnection?.provider}
                             size={12}
                           />
-                        </Tooltip>
-                      ))}
-                      {!isEmpty(hiddenJobTools) && (
-                        <Tooltip
-                          label={
-                            hiddenJobToolsLabel ||
-                            `${hiddenJobTools.length} more`
-                          }
-                          placement="bottom"
-                        >
-                          <span>+{hiddenJobTools.length}</span>
-                        </Tooltip>
-                      )}
-                    </Flex>
+                        ),
+                      }))}
+                    />
                   )}
                 </Flex>
               )

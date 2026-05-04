@@ -68,6 +68,28 @@
                 "required": ["tool_name", "tool_args", "summary"]
             }
         },
+        "traces_queries": {
+            "type": "array",
+            "description": "The traces queries gathered from the observability tool call",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tool_name": {
+                        "type": "string",
+                        "description": "The tool name used for querying traces."
+                    },
+                    "tool_args": {
+                        "type": "string",
+                        "description": "The arguments passed to the traces tool/function call from `tool_name`. This should be a JSON string."
+                    },
+                    "summary": {
+                        "type": "string",
+                        "description": "A two to three sentence summary of what this traces query means."
+                    }
+                },
+                "required": ["tool_name", "tool_args", "summary"]
+            }
+        },
         "logs": {
             "type": "array",
             "description": "The logs gathered from the observability tool call",

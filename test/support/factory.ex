@@ -1170,6 +1170,7 @@ defmodule Console.Factory do
 
   def workbench_job_factory do
     %Schema.WorkbenchJob{
+      type: :job,
       status: :pending,
       prompt: "test prompt",
       workbench: build(:workbench),

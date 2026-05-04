@@ -7,7 +7,7 @@ defmodule Console.Pipelines.AI.WorkbenchCron.PipelineTest do
     test "creates a workbench job and updates cron last_run_at and next_run_at" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       group = insert(:group)
-      %{user: user} =insert(:group_member, group: group)
+      %{user: user} = insert(:group_member, group: group)
       workbench = insert(:workbench, read_bindings: [%{group_id: group.id}])
       prompt = "scheduled analysis"
       past = DateTime.add(DateTime.utc_now(), -60, :second)

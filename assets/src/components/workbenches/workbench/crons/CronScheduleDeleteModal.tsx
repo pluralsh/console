@@ -21,9 +21,8 @@ export function CronScheduleDeleteModal({
     variables: { id: cron?.id ?? '' },
     onCompleted: () => {
       popToast({
-        name: cron?.prompt ?? '',
-        action: 'deleted',
-        color: 'icon-danger',
+        content: `${cron?.prompt ?? 'schedule'} deleted`,
+        severity: 'danger',
       })
       onClose()
     },

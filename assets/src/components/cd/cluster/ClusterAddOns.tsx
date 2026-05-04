@@ -1,5 +1,4 @@
-import { Tab, TabList } from '@pluralsh/design-system'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { Flex, Tab, TabList } from '@pluralsh/design-system'
 import {
   CloudAddonFragment,
   ClusterDistro,
@@ -8,7 +7,7 @@ import {
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import {
   Outlet,
   useMatch,
@@ -36,8 +35,9 @@ import { useClusterContext } from './Cluster.tsx'
 import ClusterAddOnsEntry from './ClusterAddOnsEntry'
 
 export type AddonContextType = {
-  cluster: ClusterFragment
+  cluster: Nullable<ClusterFragment>
   cloudAddon?: CloudAddonFragment
+  loading?: boolean
 }
 
 export function useAddonsContext() {
@@ -52,8 +52,8 @@ const directory = [
 export default function ClusterAddOns() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { cluster } = useClusterContext()
-  const kubeVersion = getClusterKubeVersion(cluster)
+  const { cluster, clusterLoading } = useClusterContext()
+  const kubeVersion = getClusterKubeVersion(cluster) ?? ''
   const tabStateRef = useRef<any>(null)
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
@@ -67,11 +67,13 @@ export default function ClusterAddOns() {
   const currentTab = directory.find(({ path }) => path === tab)
   const isCloudAddon = currentTab?.path == CLUSTER_CLOUD_ADDONS_REL_PATH
 
-  const { data, error } = useRuntimeServicesQuery({
+  const { data, loading, error } = useRuntimeServicesQuery({
     variables: { kubeVersion, hasKubeVersion: !!kubeVersion, id: clusterId },
+    skip: !kubeVersion,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+  const isLoading = (!data && loading) || (!cluster && clusterLoading)
 
   const addOns: RuntimeServiceFragment[] | CloudAddonFragment[] = useMemo(
     () =>
@@ -86,47 +88,41 @@ export default function ClusterAddOns() {
     [addOnId, addOns]
   )
 
-  const hasAddons = !isEmpty(addOns)
-
   const supportsCloudAddons = cluster?.distro === ClusterDistro.Eks
 
-  useEffect(() => {
-    if (hasAddons && !addOnId)
+  useLayoutEffect(() => {
+    if (!isEmpty(addOns) && !addOnId)
       navigate(
         getClusterAddOnDetailsPath({
           clusterId,
           addOnId: addOns[0].id,
           isCloudAddon,
-        })
+        }),
+        { replace: true }
       )
-  }, [addOns, addOnId, navigate, clusterId, hasAddons, isCloudAddon])
+  }, [addOns, addOnId, navigate, clusterId, isCloudAddon])
 
   const context = useMemo(
-    () =>
-      ({
-        cluster,
-        cloudAddon: isCloudAddon ? addOn : undefined, // Update once there is a separate query to get a single cloud addon.
-      }) as AddonContextType,
-    [addOn, cluster, isCloudAddon]
+    () => ({
+      cluster,
+      cloudAddon: isCloudAddon ? addOn : undefined, // Update once there is a separate query to get a single cloud addon.
+      loading: isLoading,
+    }),
+    [addOn, cluster, isCloudAddon, isLoading]
   )
 
   if (error) return <GqlError error={error} />
 
-  if (!data) return <LoadingIndicator />
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        height: '100%',
-        width: '100%',
-        overflow: 'hidden',
-      }}
+    <Flex
+      height="100%"
+      width="100%"
+      overflow="hidden"
+      gap="medium"
     >
       <div
         css={{
           height: '100%',
-          marginRight: theme.spacing.medium,
           maxWidth: 320,
           minWidth: 320,
           overflow: 'hidden',
@@ -164,7 +160,7 @@ export default function ClusterAddOns() {
             height: '100%',
           }}
         >
-          {hasAddons ? (
+          {!isEmpty(addOns) ? (
             addOns.map((addon: RuntimeServiceFragment | CloudAddonFragment) => (
               <ClusterAddOnsEntry
                 key={addon.id}
@@ -184,6 +180,18 @@ export default function ClusterAddOns() {
                 }
                 active={addon.id === addOnId}
                 cloudAddon={addon.__typename === 'CloudAddon'}
+                loading={loading}
+              />
+            ))
+          ) : isLoading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <ClusterAddOnsEntry
+                loading
+                key={index}
+                id={`x`.repeat(index)}
+                name=""
+                active={index === 0}
+                cloudAddon={isCloudAddon}
               />
             ))
           ) : (
@@ -198,7 +206,7 @@ export default function ClusterAddOns() {
           )}
         </div>
       </div>
-      {addOn && <Outlet context={context} />}
-    </div>
+      <Outlet context={context} />
+    </Flex>
   )
 }

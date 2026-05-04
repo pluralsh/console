@@ -99,6 +99,8 @@ spec:
         - name: api
           image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.kas.podSecurityContext | nindent 12 }}
           command: ["/api"]
           args:
             - --act-as-proxy
@@ -158,9 +160,9 @@ spec:
                   - key: redis-password
                     path: redis_server_secret
             - secret:
-                name: console-env
+                name: {{ .Values.kas.jwtSecret.name }}
                 items:
-                  - key: JWT_SECRET
+                  - key: {{ .Values.kas.jwtSecret.key }}
                     path: jwt_secret
       {{- with .Values.kas.nodeSelector }}
       nodeSelector:

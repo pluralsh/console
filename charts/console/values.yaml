@@ -51,6 +51,8 @@ migrator:
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
   config:
+    # homepage is used to configure the default homepage for the console.  Use ``clusters`` to show clusters, ``workbenches`` to show workbenches
+    homepage: clusters
     # refreshTokenExpiry is used to configure the refresh token expiry time.  Use a duration string like ``7d``, ``1h`` etc to set the expiry,.
     refreshTokenExpiry: 7d
     # oidcSync is used to configure whether oidc group claims full sync or not in the db.  Use ``full`` to enable full sync.
@@ -81,6 +83,8 @@ console:
 
     # adminEmails is a list of emails which will be auto-configured as admins in the console.
     adminEmails: []
+
+    qovePublicKey: ~
 
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:
@@ -131,6 +135,8 @@ secrets:
   plural_client_id: ~
   # plural_client_secret is used to set PLURAL_CLIENT_SECRET if not null
   plural_client_secret: ~
+  # exaApiKey is used to set EXA_API_KEY if not null
+  exaApiKey: ~
 
 # image is used to configure the image for the console container as follows: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
@@ -474,10 +480,23 @@ cloudQuery:
 
   database:
     enabled: true
+
+    # aws config is used to configure the cloud-query to use AWS credentials for querying AWS resources.
+    # It is required by the cloud-query AWS provider to allow usage of the assume role functionality.
+    aws:
+      ### The below options are only used if useLocalCredentials is set to true ###
+      # If set, AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE will be mounted into both cloud-query containers under /shared
+      mountPath: /shared
+      # If set, AWS_CONFIG_FILE env var will be injected into both cloud-query containers
+      configFile: /shared/.aws/config
+      # If set, AWS_SHARED_CREDENTIALS_FILE env var will be injected into both cloud-query containers
+      credentialsFile: /shared/.aws/credentials
+
     image:
       repository: ghcr.io/pluralsh/cloud-query-db
       pullPolicy: IfNotPresent
       tag: ~
+
     # PostgreSQL password configuration
     password:
       # If not provided, a default value of "postgres" will be used
@@ -628,6 +647,12 @@ kas:
     targetCPUAverageValue: 100m
     # targetCPUUtilizationPercentage: 75
     # targetMemoryUtilizationPercentage: 75
+
+  # jwtSecretName is used to set the name of the secret that contains the JWT secret, usually the default `console-env` secret
+  jwtSecret:
+    name: console-env
+    key: JWT_SECRET
+
   secrets:
     create: true
     api: ""

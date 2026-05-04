@@ -8,7 +8,8 @@ defmodule Console.Schema.AgentRun do
     Flow,
     NamespacedName,
     PullRequest,
-    AgentSession
+    AgentSession,
+    WorkbenchJobActivityAgentRun
   }
 
   @expiry 14
@@ -50,6 +51,8 @@ defmodule Console.Schema.AgentRun do
     belongs_to :user,    User
     belongs_to :flow,    Flow
     belongs_to :session, AgentSession
+
+    has_one :workbench_job_activity_agent_run, WorkbenchJobActivityAgentRun
 
     has_many :pull_requests, PullRequest
     has_many :messages, AgentMessage, on_replace: :delete

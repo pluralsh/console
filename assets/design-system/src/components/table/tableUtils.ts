@@ -33,6 +33,7 @@ export type TableBaseProps = {
   expandedRowType?: 'default' | 'custom'
   expandedBgColor?: SemanticColorKey
   fullHeightWrap?: boolean
+  minHeight?: CSSProperties['minHeight']
   fillLevel?: TableFillLevel
   rowBg?: 'base' | 'raised' | 'stripes'
   highlightedRowId?: string

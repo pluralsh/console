@@ -283,6 +283,13 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.project_id == ^pid)
   end
 
+  def for_project_name(query \\ __MODULE__, name) do
+    from(c in query,
+      join: p in assoc(c, :project),
+      where: p.name == ^name
+    )
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       sub = Service.for_user(user)

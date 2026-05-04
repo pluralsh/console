@@ -1,4 +1,5 @@
 import {
+  AsanaLogoIcon,
   AzureDevopsLogoIcon,
   DatadogLogoIcon,
   GitHubLogoIcon,
@@ -52,7 +53,7 @@ export function getObservabilityWebhookTypeIcon(type: Nullable<string>) {
     case ObservabilityWebhookType.Pagerduty:
       return <PagerdutyLogoIcon fullColor />
     case ObservabilityWebhookType.Sentry:
-      return <SentryLogoIcon />
+      return <SentryLogoIcon fullColor />
     case ObservabilityWebhookType.Plural:
     default:
       return <WebhooksIcon />
@@ -72,6 +73,7 @@ export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
     case IssueWebhookProvider.Jira:
       return <JiraLogoIcon fullColor />
     case IssueWebhookProvider.Asana:
+      return <AsanaLogoIcon fullColor />
     default:
       return <WebhooksIcon />
   }

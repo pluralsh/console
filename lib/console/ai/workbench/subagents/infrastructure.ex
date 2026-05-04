@@ -6,19 +6,24 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Result,
     Skills,
     Skill,
+    History,
+    Calculator,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.ServiceFiles,
     Infrastructure.StackFiles,
     Infrastructure.Cluster,
     Infrastructure.ClusterList,
+    Infrastructure.ClusterTags,
+    Infrastructure.Projects,
     Infrastructure.ClusterServices,
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
     Infrastructure.StackInspect,
     Infrastructure.CloudSchema,
     Infrastructure.CloudQuery,
-    Infrastructure.CloudTables
+    Infrastructure.CloudTables,
+    Infrastructure.PodLogs
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.Environment
@@ -46,14 +51,17 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills} = environment) do
+  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment) do
     svc_tools(bench, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
+    |> Enum.concat(pod_logs_tools(bench, user))
     |> Enum.concat(cloud_tools(environment))
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
+      Calculator,
+      %History{job: job, activities: activities},
       Result
     ])
   end
@@ -83,7 +91,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %ServiceInspect{user: user},
       %ClusterServices{user: user},
       %Cluster{user: user},
-      %ClusterList{user: user}
+      %ClusterList{user: user},
+      %ClusterTags{user: user},
+      %Projects{user: user}
     ]
   end
   defp svc_tools(_, _), do: []
@@ -106,6 +116,10 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     ]
   end
   defp k8s_tools(_, _), do: []
+
+  defp pod_logs_tools(%Workbench{configuration: %{infrastructure: %{pod_logs: true}}}, %User{} = user),
+    do: [%PodLogs{user: user}]
+  defp pod_logs_tools(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])
 end

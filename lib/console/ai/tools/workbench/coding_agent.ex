@@ -6,19 +6,22 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   alias Console.Deployments.Agents
 
   embedded_schema do
-    field :workbench,  :map, virtual: true
-    field :mode,       AgentRun.Mode
-    field :repository, :string
-    field :prompt,     :string
+    field :activity,     :map, virtual: true
+    field :workbench,    :map, virtual: true
+    field :mode,         AgentRun.Mode
+    field :babysit,      :boolean
+    field :repository,   :string
+    field :prompt,       :string
   end
 
-  @valid ~w(mode repository prompt)a
+  @valid ~w(mode repository prompt babysit)a
 
   def changeset(%__MODULE__{workbench: bench} = model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid)
+    |> validate_required(@valid -- [:babysit])
     |> validate_mode(bench)
+    |> fix_babysit(bench)
     |> validate_repository(bench)
   end
 
@@ -30,6 +33,9 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     end
   end
   defp validate_mode(cs, _), do: cs
+
+  defp fix_babysit(cs, %Workbench{configuration: %{coding: %{enable_babysitting: true}}}), do: cs
+  defp fix_babysit(cs, _), do: put_change(cs, :babysit, false)
 
   defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}) do
     conn = Tool.agent_runtime() |> Agents.scm_conection()
@@ -53,10 +59,10 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def name(_), do: "workbench_coding_agent"
   def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt to either analyze the code in question or modify it and generate a reviewable PR."
 
-  def implement(%__MODULE__{id: tool, mode: mode, repository: repo, prompt: prompt}) do
+  def implement(%__MODULE__{id: tool, mode: mode, repository: repo, prompt: prompt, activity: activity}) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
          {:runtime, %AgentRuntime{} = runtime} <- {:runtime, Tool.agent_runtime()},
-         {:ok, run} <- Agents.create_agent_run(%{repository: repo, prompt: prompt, mode: mode}, runtime.id, user) do
+         {:ok, run} <- Agents.create_agent_run(%{repository: repo, prompt: prompt, mode: mode, activity: activity}, runtime.id, user) do
       {:ok, %{run | tool: tool}}
     else
       {:user, _} -> {:error, "no actor found for this session"}

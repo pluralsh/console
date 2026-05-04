@@ -46,8 +46,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.MetricsBlock do
     end
   end
 
-  def validate_tool(%Console.AI.Workbench.Environment{} = env, %ToolQuery{tool_name: name, tool_args: args}, valid_tools) do
-    tools = Subagents.Observability.tools(env)
+  def validate_tool(%Console.AI.Workbench.Environment{user: user} = env, %ToolQuery{tool_name: name, tool_args: args}, valid_tools) do
+    tools = Subagents.Observability.tools(env, user)
     with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
          {:ok, %mod{} = t} <- Tool.validate(tool, args),
          true <- Enum.member?(valid_tools, mod) do

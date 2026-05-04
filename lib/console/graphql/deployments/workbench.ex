@@ -48,7 +48,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_configuration_attributes do
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
-    field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories)"
+    field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories, babysitting)"
     field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
   end
 
@@ -56,11 +56,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :services,   :boolean, description: "enable services capability"
     field :stacks,     :boolean, description: "enable stacks capability"
     field :kubernetes, :boolean, description: "enable kubernetes capability"
+    field :pod_logs,   :boolean, description: "enable pod logs capability"
   end
 
   input_object :workbench_coding_attributes do
-    field :mode,         :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
-    field :repositories, list_of(:string), description: "allowed repository identifiers"
+    field :mode,                 :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
+    field :repositories,         list_of(:string), description: "allowed repository identifiers"
+    field :enable_babysitting,   :boolean, description: "when true, enables babysitting for the coding agent"
   end
 
   input_object :workbench_observability_attributes do
@@ -140,6 +142,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
+    field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -223,6 +226,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :service_account, :string, description: "encrypted service account JSON (alternative to api_token + email)"
     field :api_token,       :string, description: "atlassian API token (required if not using service_account)"
     field :email,           :string, description: "atlassian account email (required if not using service_account)"
+  end
+
+  input_object :workbench_tool_exa_connection_attributes do
+    field :api_key, :string, description: "exa API key"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -336,6 +343,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.logs_tool/3
     end
 
+    field :traces_tool, list_of(:workbench_job_activity_trace) do
+      arg :name,      :string, description: "the name of the traces tool"
+      arg :arguments, :json,   description: "the arguments for the traces tool"
+
+      resolve &Deployments.traces_tool/3
+    end
+
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     timestamps()
@@ -373,6 +387,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_thought_attributes do
     field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
     field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
+    field :traces,  list_of(:workbench_job_activity_trace), description: "traces for the thought"
   end
 
   object :workbench_job_activity_result do
@@ -382,10 +397,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
     field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
     field :logs,            list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
+    field :traces,          list_of(:workbench_job_activity_trace), description: "traces emitted by the activity"
     field :metrics_queries, list_of(:workbench_tool_query_data), description: "metrics tool queries emitted by the activity"
     field :logs_queries,    list_of(:workbench_tool_query_data), description: "logs tool queries emitted by the activity"
+    field :traces_queries,  list_of(:workbench_tool_query_data), description: "traces tool queries emitted by the activity"
     field :metrics_query,   :workbench_tool_query_data, description: "primary metrics tool query for this activity"
     field :logs_query,      :workbench_tool_query_data, description: "primary logs tool query for this activity"
+    field :traces_query,    :workbench_tool_query_data, description: "primary traces tool query for this activity"
   end
 
   object :workbench_job_activity_job_update do
@@ -409,6 +427,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :labels,    :map
   end
 
+  object :workbench_job_activity_trace do
+    field :trace_id,  :string
+    field :span_id,   :string
+    field :parent_id, :string
+    field :name,      :string
+    field :service,   :string
+    field :start,     :datetime
+    field :end,       :datetime
+    field :tags,      :map
+  end
+
   object :workbench_job_result do
     field :id,              non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
@@ -426,8 +455,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_result_metadata do
     field :metrics,        list_of(:workbench_job_activity_metric), description: "metrics for this result"
     field :logs,           list_of(:workbench_job_activity_log), description: "logs for this result"
+    field :traces,         list_of(:workbench_job_activity_trace), description: "traces for this result"
     field :metrics_query,  :workbench_tool_query_data, description: "metrics tool query for this result"
     field :logs_query,     :workbench_tool_query_data, description: "logs tool query for this result"
+    field :traces_query,   :workbench_tool_query_data, description: "traces tool query for this result"
   end
 
   object :workbench_tool_query_data do
@@ -463,6 +494,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :markdown, :string
     field :metrics,  :workbench_canvas_tool_graph
     field :logs,     :workbench_canvas_tool_graph
+    field :traces,   :workbench_canvas_tool_graph
     field :pie,      :workbench_canvas_block_graph
     field :bar,      :workbench_canvas_block_graph
   end
@@ -490,11 +522,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :services,   :boolean, description: "services capability enabled"
     field :stacks,     :boolean, description: "stacks capability enabled"
     field :kubernetes, :boolean, description: "kubernetes capability enabled"
+    field :pod_logs,   :boolean, description: "pod logs capability enabled"
   end
 
   object :workbench_coding do
-    field :mode,         :agent_run_mode, description: "the mode of the coding agent"
-    field :repositories, list_of(:string), description: "allowed repository identifiers"
+    field :mode,               :agent_run_mode, description: "the mode of the coding agent"
+    field :repositories,       list_of(:string), description: "allowed repository identifiers"
+    field :enable_babysitting, :boolean, description: "whether babysitting is enabled for the coding agent"
   end
 
   object :workbench_observability do
@@ -593,6 +627,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :merge_rate, :float, description: "fraction of workbench PRs merged in this bucket (0.0–1.0)"
   end
 
+  object :workbench_aggregates do
+    field :pull_requests, :integer,
+      description: "count of merged pull requests included in the aggregate"
+
+    field :pull_request_merge_rate, :float,
+      description: "fraction of those pull requests that are merged (0.0–1.0)"
+
+    field :eval_results, :float,
+      description: "average eval grade across workbench eval results"
+  end
+
   object :workbench_webhook_matches do
     field :regex,            :string, description: "regex pattern to match"
     field :substring,        :string, description: "substring to match"
@@ -642,6 +687,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
+    field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -708,6 +754,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.atlassian.com/v1/mcp"} end,
       description: "static MCP URL for Atlassian/Jira (credentials never exposed)"
     field :email, :string, description: "atlassian account email for use with PAT authentication"
+  end
+
+  object :workbench_tool_exa_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://api.exa.ai"} end,
+      description: "static API URL for Exa (credentials never exposed)"
   end
 
   object :workbench_tool_http_configuration do
@@ -805,6 +856,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.workbench_job/2
     end
 
+    @desc "Lists recent workbench jobs across all workbenches the user can read. Max 20."
+    field :recent_workbench_jobs, list_of(:workbench_job) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :count, :integer, description: "the maximum number of jobs to return (defaults to 3, max 20)"
+
+      resolve &Deployments.recent_workbench_jobs/2
+    end
+
     field :workbench_job_activity, :workbench_job_activity do
       middleware Authenticated
       middleware Scope,
@@ -860,6 +922,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
 
       resolve &Deployments.workbench_pull_requests/2
+    end
+
+    field :workbench_aggregates, non_null(:workbench_aggregates) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+
+      resolve &Deployments.aggregates/2
     end
 
     field :workbench_pr_merge_rates, list_of(:workbench_pr_merge_rate_entry) do
@@ -1093,6 +1164,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_eval/2
+    end
+
+    field :workbench_eval_skill, :workbench_job do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id,     non_null(:id), description: "the id of the eval result to generate a memory for"
+      arg :prompt, :string, description: "optional custom prompt to guide the memory generation"
+
+      resolve &Deployments.workbench_eval_skill/2
     end
 
     field :create_workbench_webhook, :workbench_webhook do

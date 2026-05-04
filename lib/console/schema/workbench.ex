@@ -13,6 +13,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchSkill,
     WorkbenchEval,
     PolicyBinding,
+    FlowWorkbench,
     User,
     AgentRun,
     Alert
@@ -29,6 +30,7 @@ defmodule Console.Schema.Workbench do
         field :services,   :boolean
         field :stacks,     :boolean
         field :kubernetes, :boolean
+        field :pod_logs,   :boolean
       end
 
       embeds_one :observability, Observability, on_replace: :update do
@@ -37,8 +39,9 @@ defmodule Console.Schema.Workbench do
       end
 
       embeds_one :coding, Coding, on_replace: :update do
-        field :mode,         AgentRun.Mode
-        field :repositories, {:array, :string}
+        field :mode,               AgentRun.Mode
+        field :enable_babysitting, :boolean
+        field :repositories,       {:array, :string}
       end
     end
 
@@ -65,15 +68,16 @@ defmodule Console.Schema.Workbench do
     belongs_to :bot_user, User, foreign_key: :bot_user_id
 
     has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
-    has_many :tools, through: [:tool_associations, :tool]
-    has_many :jobs,             WorkbenchJob,     on_replace: :delete
-    has_many :webhooks,         WorkbenchWebhook, on_replace: :delete
-    has_many :crons,            WorkbenchCron,    on_replace: :delete
-    has_many :prompts,          WorkbenchPrompt,  on_replace: :delete
-    has_many :workbench_skills, WorkbenchSkill, on_replace: :delete
-    has_one :eval,              WorkbenchEval
-    has_many :alerts,           Alert
+    has_many :jobs,              WorkbenchJob,     on_replace: :delete
+    has_many :webhooks,          WorkbenchWebhook, on_replace: :delete
+    has_many :crons,             WorkbenchCron,    on_replace: :delete
+    has_many :prompts,           WorkbenchPrompt,  on_replace: :delete
+    has_many :flows_workbenches, FlowWorkbench,    on_replace: :delete
+    has_many :workbench_skills,  WorkbenchSkill,   on_replace: :delete
+    has_many :alerts,            Alert
+    has_one :eval,               WorkbenchEval
 
+    has_many :tools, through: [:tool_associations, :tool]
     timestamps()
   end
 
@@ -102,7 +106,8 @@ defmodule Console.Schema.Workbench do
       from(w in query,
         join: p in assoc(w, :project),
         left_join: b in PolicyBinding,
-          on: b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+          on: b.policy_id == w.read_policy_id or b.policy_id == w.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
         where: b.user_id == ^id or b.group_id in ^groups,
         distinct: true
       )
@@ -154,12 +159,12 @@ defmodule Console.Schema.Workbench do
 
   def infrastructure_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(services stacks kubernetes)a)
+    |> cast(attrs, ~w(services stacks kubernetes pod_logs)a)
   end
 
   def coding_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(mode repositories)a)
+    |> cast(attrs, ~w(mode repositories enable_babysitting)a)
   end
 
   def observability_changeset(model, attrs \\ %{}) do

@@ -132,13 +132,21 @@ export default function Services() {
       clusterId,
       // we want empty strings omitted from the new params objects
       setClusterId: (newId: string) =>
-        setParams({ ...(q && { q }), ...(newId && { clusterId: newId }) }),
+        (newId || null) !== clusterId &&
+        setParams(
+          { ...(q && { q }), ...(newId && { clusterId: newId }) },
+          { replace: true }
+        ),
       q,
       setQ: (newQ: string) =>
-        setParams({
-          ...(clusterId && { clusterId }),
-          ...(newQ && { q: newQ }),
-        }),
+        (newQ || null) !== q &&
+        setParams(
+          {
+            ...(clusterId && { clusterId }),
+            ...(newQ && { q: newQ }),
+          },
+          { replace: true }
+        ),
     }
   }, [setRefetch, params, setParams])
 

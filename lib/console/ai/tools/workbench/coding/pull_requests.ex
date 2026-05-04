@@ -24,6 +24,7 @@ defmodule Console.AI.Tools.Workbench.Coding.PullRequests do
     |> Enum.map(&format/1)
     |> Jason.encode()
   end
+  def implement(_), do: {:error, "no job provided"}
 
   defp format(%PullRequest{} = pr) do
     %{

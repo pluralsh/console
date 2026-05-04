@@ -1,59 +1,49 @@
 import {
   Chip,
+  ChipSeverity,
   Input,
   ListBoxItem,
   SearchIcon,
   Select,
-  SubTab,
-  TabList,
+  SelectButton,
 } from '@pluralsh/design-system'
 
 import { useDebounce } from '@react-hooks-library/core'
 
-import { UpgradeStatistics } from 'generated/graphql'
-import { isNumber } from 'lodash'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { ServiceDeploymentStatus, UpgradeStatistics } from 'generated/graphql'
+import { capitalize, isNumber } from 'lodash'
 import isNil from 'lodash/isNil'
 import {
   type ComponentProps,
   Dispatch,
-  RefObject,
   SetStateAction,
   useDeferredValue,
   useEffect,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { TagsFilter } from './ClusterTagsFilter'
 import { serviceStatusToSeverity } from './ServiceStatusChip'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
-export type ClusterStatusTabKey = 'HEALTHY' | 'UNHEALTHY' | 'ALL'
+export type ClusterStatusTabKey = 'ALL' | 'HEALTHY' | 'UNHEALTHY'
 export type UpgradeableFilterKey = 'ALL' | 'UPGRADEABLE' | 'NON-UPGRADEABLE'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
-  HEALTHY: {
-    label: 'Healthy',
-  },
-  UNHEALTHY: {
-    label: 'Unhealthy',
-  },
+  HEALTHY: { label: 'Healthy' },
+  UNHEALTHY: { label: 'Unhealthy' },
 } as const satisfies Record<string, { label: string }>)
 
 const ClustersFiltersSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexGrow: 1,
   columnGap: theme.spacing.medium,
-  '.statusTab': {
-    display: 'flex',
-    gap: theme.spacing.small,
-    alignItems: 'center',
-  },
+  whiteSpace: 'nowrap',
 }))
 
 export function ClustersFilters({
   setQueryStatusFilter,
   setQueryString,
-  tabStateRef,
   statusCounts,
   selectedTagKeys,
   setSelectedTagKeys,
@@ -66,7 +56,6 @@ export function ClustersFilters({
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<ClusterStatusTabKey>>
   setQueryString: (string) => void
-  tabStateRef: RefObject<any>
   statusCounts: Record<ClusterStatusTabKey, number | undefined>
   selectedTagKeys: ComponentProps<typeof TagsFilter>['selectedTagKeys']
   setSelectedTagKeys: ComponentProps<typeof TagsFilter>['setSelectedTagKeys']
@@ -77,6 +66,7 @@ export function ClustersFilters({
   upgradeStats: Nullable<Pick<UpgradeStatistics, 'upgradeable' | 'count'>>
   loadingStatuses: boolean
 }) {
+  const { colors } = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 400)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
@@ -112,73 +102,152 @@ export function ClustersFilters({
           }}
         />
       </div>
-      <div css={{ minWidth: 180 }}>
-        <TabList
-          scrollable
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: statusFilter,
-            onSelectionChange: (key) => {
-              setStatusFilter(key as ClusterStatusTabKey)
-            },
-          }}
-        >
-          {statusTabs?.map(([key, { label }]) => (
-            <SubTab
-              key={key}
-              textValue={label}
-              className="statusTab"
-            >
-              {label}
-              {isNil(statusCounts?.[key]) ? (
-                loadingStatuses && (
-                  <RectangleSkeleton
-                    $width={26}
-                    $height={22}
-                  />
-                )
-              ) : (
-                <Chip
-                  size="small"
-                  severity={serviceStatusToSeverity(key as any)}
-                >
-                  {statusCounts?.[key]}
-                </Chip>
-              )}
-            </SubTab>
-          ))}
-        </TabList>
-      </div>
-      <div css={{ minWidth: 240 }}>
+      <div css={{ minWidth: 200 }}>
         <Select
-          label={upgradeableFilter}
-          selectedKey={upgradeableFilter}
+          selectedKey={statusFilter}
           onSelectionChange={(key) =>
-            setUpgradeableFilter(key as UpgradeableFilterKey)
+            setStatusFilter(key as ClusterStatusTabKey)
+          }
+          triggerButton={
+            <SelectButton
+              rightContent={
+                statusFilter !== 'ALL' &&
+                !isNil(statusCounts?.[statusFilter]) && (
+                  <Chip
+                    size="small"
+                    severity={serviceStatusToSeverity(
+                      statusFilter as ServiceDeploymentStatus
+                    )}
+                  >
+                    {statusCounts[statusFilter]}
+                  </Chip>
+                )
+              }
+              css={{
+                borderColor:
+                  statusFilter === 'ALL' ? undefined : colors['border-primary'],
+              }}
+            >
+              {statusFilter === 'ALL'
+                ? 'Filter by health'
+                : statusTabs.find(([k]) => k === statusFilter)?.[1].label}
+            </SelectButton>
           }
         >
-          <ListBoxItem
-            key="ALL"
-            label="All upgrade statuses"
-            rightContent={hasUpgradeStats && <Chip size="small">{count}</Chip>}
-          />
-          <ListBoxItem
-            key="UPGRADEABLE"
-            label="Upgradeable only"
-            rightContent={
-              hasUpgradeStats && <Chip size="small">{upgradeable}</Chip>
-            }
-          />
-          <ListBoxItem
-            key="NON-UPGRADEABLE"
-            label="Non-upgradeable only"
-            rightContent={
-              hasUpgradeStats && <Chip size="small">{count - upgradeable}</Chip>
-            }
-          />
+          {statusTabs.map(([key, { label }]) => (
+            <ListBoxItem
+              key={key}
+              label={label}
+              rightContent={
+                isNil(statusCounts?.[key]) ? (
+                  loadingStatuses && (
+                    <RectangleSkeleton
+                      $width={26}
+                      $height={22}
+                    />
+                  )
+                ) : (
+                  <Chip
+                    size="small"
+                    severity={serviceStatusToSeverity(key as any)}
+                  >
+                    {statusCounts?.[key]}
+                  </Chip>
+                )
+              }
+            />
+          ))}
         </Select>
       </div>
+      <Select
+        selectedKey={upgradeableFilter}
+        onSelectionChange={(key) =>
+          setUpgradeableFilter(key as UpgradeableFilterKey)
+        }
+        triggerButton={
+          <SelectButton
+            rightContent={
+              hasUpgradeStats &&
+              upgradeableFilter !== 'ALL' && (
+                <Chip
+                  size="small"
+                  severity={upgradeFilterToSeverity(upgradeableFilter)}
+                >
+                  {upgradeableFilter === 'UPGRADEABLE'
+                    ? upgradeable
+                    : count - upgradeable}
+                </Chip>
+              )
+            }
+            css={{
+              borderColor:
+                upgradeableFilter === 'ALL'
+                  ? undefined
+                  : colors['border-primary'],
+            }}
+          >
+            {upgradeableFilter === 'ALL'
+              ? 'Filter by upgrade status'
+              : capitalize(upgradeableFilter)}
+          </SelectButton>
+        }
+      >
+        <ListBoxItem
+          key="ALL"
+          label="All"
+          rightContent={
+            hasUpgradeStats && (
+              <Chip
+                size="small"
+                severity={upgradeFilterToSeverity('ALL')}
+              >
+                {count}
+              </Chip>
+            )
+          }
+        />
+        <ListBoxItem
+          key="UPGRADEABLE"
+          label="Upgradeable"
+          rightContent={
+            hasUpgradeStats && (
+              <Chip
+                size="small"
+                severity={upgradeFilterToSeverity('UPGRADEABLE')}
+              >
+                {upgradeable}
+              </Chip>
+            )
+          }
+        />
+        <ListBoxItem
+          key="NON-UPGRADEABLE"
+          label="Non-upgradeable"
+          rightContent={
+            hasUpgradeStats && (
+              <Chip
+                size="small"
+                severity="danger"
+              >
+                {count - upgradeable}
+              </Chip>
+            )
+          }
+        />
+      </Select>
     </ClustersFiltersSC>
   )
+}
+
+const upgradeFilterToSeverity = (
+  filter: UpgradeableFilterKey
+): ChipSeverity => {
+  switch (filter) {
+    case 'ALL':
+      return 'neutral'
+    case 'UPGRADEABLE':
+      return 'success'
+    case 'NON-UPGRADEABLE':
+      return 'danger'
+  }
 }

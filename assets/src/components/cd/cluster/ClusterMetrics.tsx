@@ -7,7 +7,10 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
-import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
+import {
+  useLoadingDeploymentSettings,
+  useMetricsEnabled,
+} from 'components/contexts/DeploymentSettingsContext'
 import {
   ClusterWithMetricsFragment,
   HeatMapFlavor,
@@ -19,9 +22,9 @@ import { capitalize, isEmpty, isNull } from 'lodash'
 import styled, { useTheme } from 'styled-components'
 
 import { Prometheus } from '../../../utils/prometheus'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 import { useMemo, useState } from 'react'
@@ -43,13 +46,14 @@ export function ClusterMetrics() {
   const { spacing } = useTheme()
   const { clusterId } = useParams()
   const metricsEnabled = useMetricsEnabled()
+  const deploymentSettingsLoading = useLoadingDeploymentSettings()
 
   const [heatMapFlavor, setHeatMapFlavor] = useState<HeatMapFlavor>(
     HeatMapFlavor.Node
   )
 
   const {
-    utilLoading: loading,
+    utilLoading,
     utilError: error,
     utilCpuHeatMap,
     utilMemoryHeatMap,
@@ -58,10 +62,11 @@ export function ClusterMetrics() {
     fetchUtilization: true,
     utilizationFlavor: heatMapFlavor,
   })
+  const loading = utilLoading || deploymentSettingsLoading
 
   const {
     data: metricsData,
-    loading: metricsLoading,
+    loading: metricsQueryLoading,
     error: metricsError,
   } = useClusterMetricsQuery({
     variables: { clusterId: clusterId ?? '' },
@@ -69,13 +74,15 @@ export function ClusterMetrics() {
     fetchPolicy: 'cache-and-network',
     pollInterval: 60_000,
   })
+  const metricsLoading = metricsQueryLoading || deploymentSettingsLoading
 
   const { cpuMetrics, memMetrics, podsMetrics } = useMemo(
     () => processClusterMetrics(metricsData?.cluster),
     [metricsData?.cluster]
   )
 
-  if (!metricsEnabled) return <MetricsEmptyState />
+  if (!(metricsEnabled || deploymentSettingsLoading))
+    return <MetricsEmptyState />
 
   const hasMetrics =
     !isNull(cpuMetrics.total) &&
@@ -90,12 +97,15 @@ export function ClusterMetrics() {
         gap="small"
       >
         <Subtitle2H1>Metrics</Subtitle2H1>
-        <Card css={{ padding: spacing.xlarge }}>
+        <Card style={{ padding: hasMetrics ? spacing.xlarge : 0 }}>
           {!hasMetrics ? (
             metricsError ? (
               <GqlError error={metricsError} />
             ) : metricsLoading ? (
-              <LoadingIndicator />
+              <RectangleSkeleton
+                $height={306}
+                $width="100%"
+              />
             ) : (
               <EmptyState message="No metrics available." />
             )
@@ -148,15 +158,13 @@ export function ClusterMetrics() {
             </Select>
           </Flex>
         </Flex>
-        {!hasHeatmapData ? (
+        {!(hasHeatmapData || loading) ? (
           <Card css={{ padding: spacing.xlarge, flex: 1 }}>
             {error ? (
               <GqlError
                 css={{ width: '100%' }}
                 error={error}
               />
-            ) : loading ? (
-              <LoadingIndicator />
             ) : (
               <EmptyState message="Utilization heatmaps not available." />
             )}

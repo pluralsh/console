@@ -2,19 +2,18 @@ import {
   FlowAlertInsight,
   FlowAlerts,
 } from 'components/flows/flow/FlowAlerts.tsx'
-import { FlowMcpConnections } from 'components/flows/flow/FlowMcpConnections.tsx'
 import { FlowPipelines } from 'components/flows/flow/FlowPipelines.tsx'
-import { FlowPrs } from 'components/flows/flow/FlowPrs.tsx'
 import { FlowServices } from 'components/flows/flow/FlowServices.tsx'
 import { FlowPreviews } from 'components/flows/flow/previews/FlowPreviews.tsx'
+import { FlowWorkbenches } from 'components/flows/flow/FlowWorkbenches.tsx'
 import { Navigate, Outlet, Route } from 'react-router-dom'
 import { Flows } from '../components/flows/Flows.tsx'
 import { Flow } from '../components/flows/flow/Flow.tsx'
 import { ALERT_INSIGHT_REL_PATH } from './cdRoutesConsts.tsx'
 import {
   FLOWS_ABS_PATH,
-  FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOW_PARAM_ID_OR_NAME,
+  FLOW_WORKBENCHES_REL_PATH,
 } from './flowRoutesConsts.tsx'
 import {
   getComponentRoutes,
@@ -54,6 +53,10 @@ export const flowRoutes = [
       element={<FlowServices />}
     />
     <Route
+      path={FLOW_WORKBENCHES_REL_PATH}
+      element={<FlowWorkbenches />}
+    />
+    <Route
       path={'previews'}
       element={<FlowPreviews />}
     />
@@ -62,16 +65,8 @@ export const flowRoutes = [
       element={<FlowPipelines />}
     />
     <Route
-      path={'prs'}
-      element={<FlowPrs />}
-    />
-    <Route
       path={'alerts'}
       element={<FlowAlerts />}
-    />
-    <Route
-      path={FLOW_MCP_CONNECTIONS_REL_PATH}
-      element={<FlowMcpConnections />}
     />
     <Route
       path={VULNERABILITY_REPORTS_REL_PATH}

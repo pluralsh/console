@@ -287,7 +287,6 @@ spec:
                           less frequent and often requires more advanced reasoning
                         type: string
                     required:
-                    - modelId
                     - region
                     type: object
                   embeddingProvider:

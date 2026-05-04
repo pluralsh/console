@@ -56,6 +56,7 @@ defmodule Console.Schema.Issue do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> truncate_fields([:body], 10_000)
     |> unique_constraint(:external_id)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:flow_id)

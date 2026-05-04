@@ -78,6 +78,7 @@ export function AIAgentRun() {
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
+  const isCancellable = isRunning || run?.status == AgentRunStatus.Babysitting
   const prevIsRunning = usePrevious(isRunning)
 
   if (prevIsRunning && !isRunning && !showAnalysisToast && !isAnalysisInView)
@@ -124,7 +125,7 @@ export function AIAgentRun() {
             css={{ flex: 1 }}
           />
           <Flex gap="small">
-            {isRunning && (
+            {isCancellable && (
               <Button
                 small
                 secondary

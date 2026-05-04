@@ -1,4 +1,11 @@
-import { Flex, ListBoxItem, LogsIcon, Select } from '@pluralsh/design-system'
+import {
+  Checkbox,
+  Flex,
+  ListBoxItem,
+  LogsIcon,
+  Select,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { GqlError } from 'components/utils/Alert'
 import { AgentRunMode, useCreateAgentRunMutation } from 'generated/graphql'
@@ -7,6 +14,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { ChatInputSimple, ChatOptionPill } from '../chatbot/input/ChatInput'
+import { BABYSITTING_TOOLTIP } from '../babysittingTooltip'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { AgentRunRepoSelector } from './AgentRunRepoSelector'
 import usePersistedState from 'components/hooks/usePersistedState'
@@ -28,11 +36,17 @@ export function AIAgentRunInput() {
     RUNTIME_ID_KEY,
     null
   )
+  const [babysit, setBabysit] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAgentRunMutation({
     variables: {
       runtimeId: runtimeId ?? '',
-      attributes: { prompt, mode, repository: repository ?? '' },
+      attributes: {
+        prompt,
+        mode,
+        repository: repository ?? '',
+        babysit: mode === AgentRunMode.Write ? babysit : undefined,
+      },
     },
     onCompleted: ({ createAgentRun }) =>
       createAgentRun?.id &&
@@ -72,6 +86,23 @@ export function AIAgentRunInput() {
               selectedRepository={repository}
               setSelectedRepository={setRepository}
             />
+            {mode === AgentRunMode.Write && (
+              <Tooltip
+                label={BABYSITTING_TOOLTIP}
+                css={{ width: 320 }}
+              >
+                <Checkbox
+                  small
+                  checked={babysit}
+                  onChange={(e) => setBabysit(e.target.checked)}
+                  {...{
+                    '& .label': { userSelect: 'none', textWrap: 'nowrap' },
+                  }}
+                >
+                  Babysit
+                </Checkbox>
+              </Tooltip>
+            )}
           </Flex>
         }
       />
