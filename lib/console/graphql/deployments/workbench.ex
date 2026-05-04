@@ -218,6 +218,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id,       non_null(:string), description: "azure tenant id"
     field :client_id,       non_null(:string), description: "azure client id"
     field :client_secret,   non_null(:string), description: "azure client secret"
+    field :prometheus_url,  :string, description: "Optional azure managed prometheus url if you wish to use it for metrics"
   end
 
   input_object :workbench_tool_linear_connection_attributes do

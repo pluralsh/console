@@ -6,11 +6,13 @@
 -spec token_value(tuple()) -> float().
 token_value({_Token, _Line, Value}) -> Value.
 
--file("/Users/michaelguarino/.asdf/installs/erlang/27.3.2/lib/parsetools-2.6/include/yeccpre.hrl", 0).
+-file("/Users/michaelguarino/.asdf/installs/erlang/28.5/lib/parsetools-2.7.1/include/yeccpre.hrl", 0).
 %%
 %% %CopyrightBegin%
 %%
-%% Copyright Ericsson AB 1996-2024. All Rights Reserved.
+%% SPDX-License-Identifier: Apache-2.0
+%%
+%% Copyright Ericsson AB 1996-2025. All Rights Reserved.
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
@@ -194,7 +196,7 @@ yecctoken2string1(Other) ->
 
 
 
--file("src/console_ai_workbenches_calculator_parser.erl", 197).
+-file("src/console_ai_workbenches_calculator_parser.erl", 199).
 
 -dialyzer({nowarn_function, yeccpars2/7}).
 -compile({nowarn_unused_function,  yeccpars2/7}).

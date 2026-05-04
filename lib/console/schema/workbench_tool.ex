@@ -126,6 +126,7 @@ defmodule Console.Schema.WorkbenchTool do
         field :tenant_id,       :string
         field :client_id,       :string
         field :client_secret,   EncryptedString
+        field :prometheus_url,  :string
       end
 
       embeds_one :exa, ExaConnection, on_replace: :update do
@@ -330,7 +331,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp azure_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(subscription_id tenant_id client_id client_secret)a)
+    |> cast(attrs, ~w(subscription_id tenant_id client_id client_secret prometheus_url)a)
     |> validate_required([:subscription_id, :tenant_id, :client_id, :client_secret])
   end
 

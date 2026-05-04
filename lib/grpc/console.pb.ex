@@ -1,13 +1,16 @@
 defmodule Plrl.AiConfigRequest do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.AiConfigRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 end
 
 defmodule Plrl.AiConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf, full_name: "plrl.AiConfig", protoc_gen_elixir_version: "0.16.0", syntax: :proto3
 
   field :enabled, 1, type: :bool
   field :openai, 2, type: Plrl.OpenAiConfig
@@ -20,7 +23,10 @@ end
 defmodule Plrl.OpenAiConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.OpenAiConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :apiKey, 1, proto3_optional: true, type: :string
   field :model, 2, proto3_optional: true, type: :string
@@ -33,7 +39,10 @@ end
 defmodule Plrl.AnthropicConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.AnthropicConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :baseUrl, 1, proto3_optional: true, type: :string
   field :apiKey, 2, proto3_optional: true, type: :string
@@ -46,7 +55,10 @@ end
 defmodule Plrl.VertexAiConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.VertexAiConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :apiKey, 1, proto3_optional: true, type: :string
   field :model, 2, proto3_optional: true, type: :string
@@ -62,7 +74,11 @@ end
 defmodule Plrl.BedrockConfig.DeploymentsEntry do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.BedrockConfig.DeploymentsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :key, 1, type: :string
   field :value, 2, type: :string
@@ -71,7 +87,10 @@ end
 defmodule Plrl.BedrockConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.BedrockConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :modelId, 1, proto3_optional: true, type: :string
   field :toolModelId, 2, proto3_optional: true, type: :string
@@ -87,7 +106,11 @@ end
 defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.AzureOpenAiConfig.DeploymentsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :key, 1, type: :string
   field :value, 2, type: :string
@@ -96,7 +119,10 @@ end
 defmodule Plrl.AzureOpenAiConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.AzureOpenAiConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :apiVersion, 1, proto3_optional: true, type: :string
   field :model, 2, proto3_optional: true, type: :string
@@ -111,7 +137,10 @@ end
 defmodule Plrl.ProxyAuthenticationRequest do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.ProxyAuthenticationRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :token, 1, type: :string
 end
@@ -119,7 +148,10 @@ end
 defmodule Plrl.ProxyAuthenticationResponse do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.ProxyAuthenticationResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :authenticated, 1, type: :bool
 end
@@ -127,7 +159,10 @@ end
 defmodule Plrl.ObservabilityConfig do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.ObservabilityConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :prometheusUsername, 1, proto3_optional: true, type: :string
   field :prometheusPassword, 2, proto3_optional: true, type: :string
@@ -141,7 +176,10 @@ end
 defmodule Plrl.MeterMetricsRequest do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.MeterMetricsRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :bytes, 1, type: :int64
 end
@@ -149,7 +187,10 @@ end
 defmodule Plrl.MeterMetricsResponse do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.MeterMetricsResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :success, 1, type: :bool
 end
@@ -157,13 +198,16 @@ end
 defmodule Plrl.ObservabilityConfigRequest do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "plrl.ObservabilityConfigRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 end
 
 defmodule Plrl.PluralServer.Service do
   @moduledoc false
 
-  use GRPC.Service, name: "plrl.PluralServer", protoc_gen_elixir_version: "0.15.0"
+  use GRPC.Service, name: "plrl.PluralServer", protoc_gen_elixir_version: "0.16.0"
 
   rpc :MeterMetrics, Plrl.MeterMetricsRequest, Plrl.MeterMetricsResponse
 

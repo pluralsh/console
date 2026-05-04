@@ -30,9 +30,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   @default_schema Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
   @azure_schema Console.priv_file!("tools/workbench/observability/metrics_azure.json") |> Jason.decode!()
 
+  def json_schema(%{tool: %{tool: :azure, configuration: %{azure: %{prometheus_url: url}}}}) when is_binary(url),
+    do: @default_schema
   def json_schema(%{tool: %{tool: :azure}}), do: @azure_schema
   def json_schema(_), do: @default_schema
+
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_metrics_#{n}"
+
   def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather metrics from the #{n} observability connection. #{provider_hint(t)}")
 
   def changeset(model, attrs) do
@@ -78,29 +82,30 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     end
   end
 
-  defp metrics_options(%{tool: :azure}, options) do
-    query_azure = Map.get(options || %{}, :azure)
-    resource_id = blank_to_nil(Map.get(query_azure || %{}, :resource_id))
+  defp metrics_options(%{tool: :azure} = tool, options) do
+    query_azure = azure_opts(options)
 
     %MetricsOptions{azure: %AzureMetricsOptions{
-      resource_id: resource_id || "",
-      metrics_namespace: Map.get(query_azure || %{}, :metrics_namespace) || "",
-      aggregation: Map.get(query_azure || %{}, :aggregation),
-      filter: Map.get(query_azure || %{}, :filter),
-      order_by: Map.get(query_azure || %{}, :order_by),
-      roll_up_by: Map.get(query_azure || %{}, :roll_up_by),
-      metrics_endpoint: Map.get(query_azure || %{}, :metrics_endpoint),
+      resource_id: resource_id(query_azure),
+      metrics_namespace: Map.get(query_azure, :metrics_namespace) || "",
+      aggregation: Map.get(query_azure, :aggregation),
+      filter: Map.get(query_azure, :filter),
+      order_by: Map.get(query_azure, :order_by),
+      roll_up_by: Map.get(query_azure, :roll_up_by),
+      metrics_endpoint: Map.get(query_azure, :metrics_endpoint),
+      prometheus_url: azure_prom_url(tool),
     }}
   end
   defp metrics_options(_, _), do: nil
 
-  defp blank_to_nil(v) do
-    case String.trim(to_string(v || "")) do
-      "" -> nil
-      val -> val
-    end
-  end
+  def azure_prom_url(%{tool: :azure, configuration: %{azure: %{prometheus_url: url}}}) when is_binary(url), do: url
+  def azure_prom_url(_), do: nil
 
+  def resource_id(%{resource_id: r}) when is_binary(r), do: r
+  def resource_id(_), do: ""
+
+  def azure_opts(%{azure: %{} = az}), do: az
+  def azure_opts(_), do: %{}
 
   @known_providers ~w(prometheus datadog elastic loki splunk tempo dynatrace newrelic)a
 

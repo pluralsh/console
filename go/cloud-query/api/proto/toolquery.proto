@@ -119,6 +119,7 @@ message AzureMetricsOptions {
   optional string order_by = 5;
   optional string roll_up_by = 6;
   optional string metrics_endpoint = 7;
+  optional string prometheus_url = 8;
 }
 
 message LogsQueryFacet {
@@ -196,6 +197,7 @@ message MetricsSearchOptions {
 
 message AzureMetricsSearchOptions {
   string resource_id = 1;
+  optional string prometheus_url = 2;
 }
 
 message MetricsSearchResult {
