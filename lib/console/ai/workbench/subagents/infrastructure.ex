@@ -130,8 +130,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
   defp manifests_tools(_, _, _), do: []
 
-  defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user),
-    do: [%VulnReports{user: user}, %Vulns{user: user}]
+  defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user), do: [%Vulns{user: user}]
   defp vuln_tools(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])

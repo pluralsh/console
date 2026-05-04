@@ -95,3 +95,13 @@ This service is owned by a GlobalService resource, which itself has this basic s
 
 If it has a parent, you can inspect that service itself to see how its GitOps configuration is managed.
 <% end %>
+
+<%= if is_list(@vulns) && !Enum.empty?(@vulns) do %>
+# Vulnerability Reports
+
+This service also has the following vulnerability reports (you can query each individually with the plrl_vulns tool):
+
+```json
+<%= Jason.encode!(@vulns) %>
+```
+<% end %>

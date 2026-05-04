@@ -92,6 +92,7 @@ defmodule Console.MixProject do
       {:absinthe_client, "~> 0.1.0"},
       {:postgrex, ">= 0.0.0"},
       {:grpc, "~> 0.11"},
+      # {:grpc_server, "~> 0.11"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_pubsub, "~> 2.0"},

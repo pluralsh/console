@@ -171,6 +171,7 @@ fragment WorkbenchTool on WorkbenchTool {
       subscriptionId
       tenantId
       clientId
+      prometheusUrl
     }
     dynatrace {
       url

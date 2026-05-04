@@ -2774,6 +2774,9 @@ input WorkbenchToolAzureConnectionAttributes {
 
   "azure client secret"
   clientSecret: String!
+
+  "Optional azure managed prometheus url if you wish to use it for metrics"
+  prometheusUrl: String
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -3675,6 +3678,9 @@ type WorkbenchToolAzureConnection {
 
   "azure client id"
   clientId: String
+
+  "optional Azure Managed Prometheus query URL for metrics tools"
+  prometheusUrl: String
 }
 
 type WorkbenchToolLinearConnection {

@@ -33,7 +33,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.VulnReports do
     end)
   end
 
-  defp simplify(vuln_report) do
+  def simplify(vuln_report) do
     Map.take(vuln_report, [:id, :artifact_url, :grade])
     |> Map.merge(counts(vuln_report))
   end

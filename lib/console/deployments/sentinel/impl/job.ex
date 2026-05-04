@@ -40,6 +40,7 @@ defmodule Console.Deployments.Sentinel.Impl.Job do
         {:stop, :normal, {run, check, pid}}
     end
   end
+  def handle_info(_, state), do: {:noreply, state}
 
   defp compile_statistics(%SentinelRun{id: id}, %SentinelCheck{name: name}) do
     SentinelRunJob.for_sentinel_run(id)

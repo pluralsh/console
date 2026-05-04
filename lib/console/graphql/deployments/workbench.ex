@@ -758,6 +758,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :subscription_id, :string, description: "azure subscription id"
     field :tenant_id,       :string, description: "azure tenant id"
     field :client_id,       :string, description: "azure client id"
+    field :prometheus_url,  :string, description: "optional Azure Managed Prometheus query URL for metrics tools"
   end
 
   object :workbench_tool_linear_connection do

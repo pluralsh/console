@@ -543,6 +543,15 @@ function AzureFormFields({
         value={c.clientSecret ?? ''}
         onChange={(e) => set({ ...c, clientSecret: e.target.value })}
       />
+      <InputField
+        label="Azure Managed Prometheus query URL (optional)"
+        hint="When set, metrics tools use PromQL against this endpoint instead of Azure Monitor REST metrics. Use your workspace query URL (for example from Azure Monitor workspace settings)."
+        placeholder="https://…"
+        value={c.prometheusUrl ?? ''}
+        onChange={(e) =>
+          set({ ...c, prometheusUrl: e.target.value || undefined })
+        }
+      />
     </>
   )
 }

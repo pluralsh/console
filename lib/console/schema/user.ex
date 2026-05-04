@@ -1,5 +1,5 @@
 defmodule Console.Schema.User do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     RoleBinding,
     Group,
@@ -143,6 +143,8 @@ defmodule Console.Schema.User do
     |> unique_constraint(:bot_name)
     |> validate_length(:password, min: 10)
     |> validate_length(:email, max: 255)
+    |> truncate_fields([:profile], 1000)
+    |> truncate_fields([:name], 255)
     |> validate_format(:email, @email_re)
     |> validate_required([:email, :name])
     |> put_new_change(:assume_policy_id, &Ecto.UUID.generate/0)

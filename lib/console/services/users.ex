@@ -184,7 +184,9 @@ defmodule Console.Services.Users do
   def bootstrap_user_impl(%{"email" => email} = attrs) when is_binary(email) do
     email = sanitize_email(email)
     attrs = token_attrs(attrs)
+            |> clean_profile()
             |> Map.put("email", email)
+
     groups = group_attrs(attrs)
     start_transaction()
     |> add_operation(:user, fn _ ->
@@ -374,8 +376,11 @@ defmodule Console.Services.Users do
   defp group_attrs(_), do: []
 
   defp token_attrs(%{"admin" => true} = attrs), do: Map.put(attrs, "roles", %{"admin" => true})
-  # defp token_attrs(%{"admin" => false} = attrs), do: Map.put(attrs, "roles", %{"admin" => false})
   defp token_attrs(attrs), do: maybe_admin(attrs)
+
+  defp clean_profile(%{"profile" => profile} = attrs) when is_binary(profile),
+    do: Map.put(attrs, "profile", profile)
+  defp clean_profile(attrs), do: Map.delete(attrs, "profile")
 
   defp maybe_admin(%{"email" => email} = attrs) do
     Console.conf(:admin_emails)

@@ -167,6 +167,40 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
 
       assert {:error, _} = ServiceInspect.implement(parsed)
     end
+
+    test "when vuln_reports is true, includes simplified vulnerability reports in the response" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      service = insert(:service, cluster: cluster)
+
+      report =
+        insert(:vulnerability_report,
+          cluster: cluster,
+          artifact_url: "docker.io/app:v1",
+          summary: %VulnerabilityReport.Summary{
+            critical_count: 1,
+            high_count: 0,
+            medium_count: 0,
+            low_count: 0,
+            unknown_count: 0,
+            none_count: 0
+          }
+        )
+
+      insert(:service_vuln, service: service, report: report)
+
+      assert {:ok, parsed} =
+               Tool.validate(%ServiceInspect{user: user}, %{
+                 "service_id" => service.id,
+                 "vuln_reports" => true
+               })
+
+      assert {:ok, content} = ServiceInspect.implement(parsed)
+      assert content =~ "# Vulnerability Reports"
+      assert content =~ "docker.io/app:v1"
+      assert content =~ "\"critical_count\":1"
+      assert content =~ report.id
+    end
   end
 
   describe "StackList (plrl_stacks)" do

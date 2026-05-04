@@ -10227,6 +10227,8 @@ type WorkbenchToolAzureConnection struct {
 	TenantID *string `json:"tenantId,omitempty"`
 	// azure client id
 	ClientID *string `json:"clientId,omitempty"`
+	// optional Azure Managed Prometheus query URL for metrics tools
+	PrometheusURL *string `json:"prometheusUrl,omitempty"`
 }
 
 type WorkbenchToolAzureConnectionAttributes struct {
@@ -10238,6 +10240,8 @@ type WorkbenchToolAzureConnectionAttributes struct {
 	ClientID string `json:"clientId"`
 	// azure client secret
 	ClientSecret string `json:"clientSecret"`
+	// Optional azure managed prometheus url if you wish to use it for metrics
+	PrometheusURL *string `json:"prometheusUrl,omitempty"`
 }
 
 type WorkbenchToolCloudwatchConnection struct {
