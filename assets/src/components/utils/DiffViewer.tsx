@@ -1,4 +1,6 @@
-import ReactDiffViewer, { ReactDiffViewerProps } from 'react-diff-viewer'
+import ReactDiffViewer, {
+  ReactDiffViewerProps,
+} from 'react-diff-viewer-continued'
 import { useTheme } from 'styled-components'
 import { Card, CardProps, WrapWithIf } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
@@ -13,6 +15,7 @@ export default function DiffViewer({
   styles,
   asCard = true,
   cardProps,
+  hideSummary = true,
   ...props
 }: Omit<ReactDiffViewerProps, 'leftTitle' | 'rightTitle'> & {
   asCard?: boolean
@@ -28,6 +31,10 @@ export default function DiffViewer({
     }
     return merge(
       {
+        content: {
+          width: '100%',
+          overflow: 'visible',
+        },
         line: { ...theme.partials.text.code },
         gutter: {
           '&& pre': { opacity: 1, color: theme.colors['text-xlight'] },
@@ -38,9 +45,9 @@ export default function DiffViewer({
         },
         codeFold: { '& a': { color: theme.colors['text-xlight'] } },
         codeFoldContent: { color: theme.colors['text-xlight'] },
-        contentText: { paddingRight: theme.spacing.medium },
+        contentText: { paddingRight: theme.spacing.medium, lineBreak: 'auto' },
         emptyLine: { backgroundColor: 'transparent' },
-        diffContainer: { wordBreak: 'break-word', tabSize: 2 },
+        diffContainer: { wordBreak: 'break-word', tabSize: 2, minWidth: 0 },
         variables: {
           dark: {
             ...commonColors,
@@ -84,6 +91,7 @@ export default function DiffViewer({
       <ReactDiffViewer
         useDarkTheme={theme.mode === 'dark'}
         styles={mergedStyles}
+        hideSummary={hideSummary}
         {...props}
       />
     </WrapWithIf>

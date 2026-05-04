@@ -4,13 +4,11 @@ import {
   CopyIcon,
   Flex,
   Input,
-  WrapWithIf,
+  useCopyText,
 } from '@pluralsh/design-system'
 
 import { useCreateAccessTokenMutation } from 'generated/graphql'
-import CopyToClipboard from 'react-copy-to-clipboard'
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GqlErrorType } from './Alert'
 
 export function GenerateAccessToken({
@@ -19,24 +17,18 @@ export function GenerateAccessToken({
   setError: (error?: GqlErrorType) => void
 }) {
   const [token, setToken] = useState('')
-  const [copied, setCopied] = useState(false)
+  const { copied, handleCopy } = useCopyText(token, 3000)
   const [mutation, { loading }] = useCreateAccessTokenMutation({
     onError: (e) => setError(e),
     onCompleted: (data) => {
-      const token = data.createAccessToken?.token ?? ''
-
-      setToken(token)
+      setToken(data.createAccessToken?.token ?? '')
       setError(undefined)
-      navigator.clipboard
-        .writeText(token)
-        .then(() => showCopied())
-        .catch((e) => console.error("Couldn't copy URL to clipboard", e))
     },
   })
-  const showCopied = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 3000)
-  }
+
+  useEffect(() => {
+    if (token) handleCopy()
+  }, [token, handleCopy])
 
   return (
     <Flex gap="medium">
@@ -46,22 +38,13 @@ export function GenerateAccessToken({
         value={token}
       />
       {token ? (
-        <WrapWithIf
-          condition={!copied}
-          wrapper={
-            <CopyToClipboard
-              text={token}
-              onCopy={showCopied}
-            />
-          }
+        <Button
+          floating
+          startIcon={copied ? <CheckIcon /> : <CopyIcon />}
+          onClick={handleCopy}
         >
-          <Button
-            floating
-            startIcon={copied ? <CheckIcon /> : <CopyIcon />}
-          >
-            {copied ? 'Copied!' : 'Copy token'}
-          </Button>
-        </WrapWithIf>
+          {copied ? 'Copied!' : 'Copy token'}
+        </Button>
       ) : (
         <Button
           loading={loading}

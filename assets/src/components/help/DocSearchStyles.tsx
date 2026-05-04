@@ -3,13 +3,20 @@ import { createGlobalStyle } from 'styled-components'
 const GlobalStyles = createGlobalStyle(({ theme }) => ({
   ':root': {
     '--docsearch-primary-color': theme.colors['action-primary'],
+    '--docsearch-soft-primary-color': theme.colors['fill-zero-hover'],
+    '--docsearch-subtle-color': theme.colors.border,
     '--docsearch-text-color': 'rgb(28, 30, 33)',
+    '--docsearch-secondary-text-color': 'rgb(68, 73, 80)',
+    '--docsearch-background-color': theme.colors['fill-zero'],
     '--docsearch-spacing': `${theme.spacing.medium}px`,
     '--docsearch-icon-stroke-width': '1.4',
+    '--docsearch-focus-color': theme.colors['action-primary'],
     '--docsearch-highlight-color': theme.colors['action-primary'],
     '--docsearch-muted-color': 'rgb(150, 159, 175)',
+    '--docsearch-icon-color': 'rgb(150, 159, 175)',
     '--docsearch-container-background': 'rgba(101, 108, 133, 0.8)',
     '--docsearch-logo-color': theme.colors['action-primary'],
+    '--docsearch-border-radius': `${theme.borderRadiuses.medium}px`,
 
     /* modal */
     '--docsearch-modal-width': '620px',
@@ -20,13 +27,16 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
 
     /* searchbox */
     '--docsearch-searchbox-height': '48px',
+    '--docsearch-searchbox-initial-height': '48px',
     '--docsearch-searchbox-background': theme.colors['fill-zero'],
     '--docsearch-searchbox-focus-background': '#fff',
     '--docsearch-searchbox-shadow': `inset 0 0 0 1px ${theme.colors.border}`,
+    '--docsearch-actions-height': '40px',
 
     /* hit */
     '--docsearch-hit-height': `${theme.spacing.xxxlarge}px`,
     '--docsearch-hit-color': 'rgb(68, 73, 80)',
+    '--docsearch-hit-highlight-color': theme.colors['fill-zero-hover'],
     '--docsearch-hit-active-color': '#fff',
     '--docsearch-hit-background': '#fff',
     '--docsearch-hit-shadow': '0 1px 3px 0 rgb(212, 217, 225)',
@@ -51,6 +61,9 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
 
   ':root ': {
     '--docsearch-text-color': theme.colors.text,
+    '--docsearch-secondary-text-color': theme.colors['text-light'],
+    '--docsearch-subtle-color': theme.colors.border,
+    '--docsearch-background-color': theme.colors['fill-zero'],
     '--docsearch-container-background': 'rgba(23, 26, 33, 0.6)',
     '--docsearch-modal-background': theme.colors['fill-one'],
     '--docsearch-modal-shadow': 'none',
@@ -65,6 +78,7 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     '--docsearch-footer-shadow': 'none',
     '--docsearch-logo-color': theme.colors['text-xlight'],
     '--docsearch-muted-color': theme.colors['text-xlight'],
+    '--docsearch-icon-color': theme.colors['text-xlight'],
   },
 
   /* Overrides */
@@ -108,6 +122,46 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
   '.DocSearch-Form': {
     paddingLeft: theme.spacing.medium,
     paddingRight: theme.spacing.medium,
+  },
+  '.DocSearch-Actions': { width: 'auto', gap: 0, padding: 0 },
+  '.DocSearch-Close, .DocSearch-Divider': { display: 'none' },
+  '.DocSearch-Action, .DocSearch-Clear, .DocSearch-Close, .DocSearch-AskAi-Return':
+    {
+      ...theme.partials.reset.button,
+      color: theme.colors['text-xlight'],
+      borderRadius: theme.borderRadiuses.medium,
+      '&:hover': {
+        backgroundColor: theme.colors['fill-zero-hover'],
+        color: theme.colors.text,
+      },
+      '&:focus, &:focus-visible': { outline: 'none', boxShadow: 'none' },
+      '&:focus-visible': { ...theme.partials.focus.default },
+    },
+  '.DocSearch-Clear': {
+    position: 'relative',
+    width: 24,
+    height: 24,
+    minWidth: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginInlineStart: 0,
+    fontSize: 0,
+    color: 'transparent',
+    overflow: 'visible',
+    '&::before, &::after': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      width: 12,
+      height: 2,
+      borderRadius: 1,
+      backgroundColor: theme.colors['text-xlight'],
+    },
+    '&::before': { transform: 'translate(-50%, -50%) rotate(45deg)' },
+    '&::after': { transform: 'translate(-50%, -50%) rotate(-45deg)' },
+    '&:hover::before, &:hover::after': { backgroundColor: theme.colors.text },
   },
   '.DocSearch-Input': {
     ...theme.partials.text.body1,

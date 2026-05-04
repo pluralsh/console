@@ -11,7 +11,7 @@ import {
   IconFrameProps,
   Spinner,
   TrashCanIcon,
-  WrapWithIf,
+  useCopyText,
 } from '@pluralsh/design-system'
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
@@ -27,7 +27,6 @@ import {
 } from 'generated/graphql'
 
 import { ComponentPropsWithRef, useRef, useState } from 'react'
-import CopyToClipboard from 'react-copy-to-clipboard'
 import styled, { StyledObject, useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { useChatbot } from '../AIContext'
@@ -158,12 +157,7 @@ export function ChatMessageActions({
   iconFrameType?: IconFrameProps['type']
 } & Omit<ComponentPropsWithRef<typeof ActionsWrapperSC>, '$show' | '$side'>) {
   const { forkThread, currentThread, mutationLoading } = useChatbot()
-  const [copied, setCopied] = useState(false)
-
-  const showCopied = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const { copied, handleCopy } = useCopyText(content, 2000)
 
   const onDelete = () => !deleteLoading && deleteMessage({ variables: { id } })
   const onFork = () =>
@@ -187,29 +181,23 @@ export function ChatMessageActions({
         </CaptionP>
       )}
       <Flex gap="xxsmall">
-        <WrapWithIf
-          condition={!copied}
-          wrapper={
-            <CopyToClipboard
-              text={content}
-              onCopy={showCopied}
-            />
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Copy to clipboard"
+          type={iconFrameType}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCopy()
+          }}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
           }
-        >
-          <IconFrame
-            clickable
-            as="div"
-            tooltip="Copy to clipboard"
-            type={iconFrameType}
-            icon={
-              copied ? (
-                <CheckIcon color="icon-success" />
-              ) : (
-                <CopyIcon color="icon-xlight" />
-              )
-            }
-          />
-        </WrapWithIf>
+        />
         <IconFrame
           clickable
           as="div"
