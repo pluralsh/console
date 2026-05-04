@@ -383,20 +383,42 @@ def generate(current_tag, limit=None):
     return "\n".join(lines)
 
 
-def update_changelog(tag, notes, changelog_path="CHANGELOG.md"):
-    """Prepend release notes to the changelog file."""
-    from datetime import date
+def write_release_file(tag, notes, releases_dir="releases"):
+    """Write per-version release notes to releases/<tag>.md."""
+    os.makedirs(releases_dir, exist_ok=True)
+    path = os.path.join(releases_dir, f"{tag}.md")
 
-    header = f"# {tag} ({date.today().isoformat()})\n\n"
-    entry = header + notes + "\n\n"
+    header = f"# {tag}\n\n"
+    with open(path, "w") as f:
+        f.write(header + notes + "\n")
 
-    existing = ""
+    print(f"Wrote {path}", file=sys.stderr)
+    return path
+
+
+def update_changelog(tag, release_path, changelog_path="CHANGELOG.md"):
+    """Prepend a link to the new release file at the top of the changelog."""
+    link = f"- [{tag}]({release_path})\n"
+
     if os.path.exists(changelog_path):
         with open(changelog_path, "r") as f:
             existing = f.read()
+    else:
+        existing = "# Changelog\n\nLinks to release notes for each version.\n\n"
+
+    if f"]({release_path})" in existing:
+        print(f"{tag} link already present in {changelog_path}", file=sys.stderr)
+        return
+
+    if existing.lstrip().startswith("# "):
+        head, _, tail = existing.partition("\n")
+        body = tail.lstrip("\n")
+        new_content = f"{head}\n\n{link}{body}"
+    else:
+        new_content = link + existing
 
     with open(changelog_path, "w") as f:
-        f.write(entry + existing)
+        f.write(new_content)
 
     print(f"Updated {changelog_path}", file=sys.stderr)
 
@@ -408,7 +430,9 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=None,
                         help="Max number of PRs to process (most recent first)")
     parser.add_argument("--changelog", default=None,
-                        help="Path to CHANGELOG.md to prepend notes to")
+                        help="Path to CHANGELOG.md to append a link to")
+    parser.add_argument("--releases-dir", default="releases",
+                        help="Directory to write per-version release notes to")
     args = parser.parse_args()
 
     if not args.tag:
@@ -420,8 +444,10 @@ if __name__ == "__main__":
     with open(out_path, "w") as f:
         f.write(notes)
 
+    release_file = write_release_file(args.tag, notes, args.releases_dir)
+
     changelog_path = args.changelog or os.environ.get("CHANGELOG_FILE")
     if changelog_path:
-        update_changelog(args.tag, notes, changelog_path)
+        update_changelog(args.tag, release_file, changelog_path)
 
     print(notes)
