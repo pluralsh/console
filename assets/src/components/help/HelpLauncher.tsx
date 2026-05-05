@@ -2,10 +2,10 @@ import { use, useRef, useState } from 'react'
 
 import {
   Button,
-  CaretRightIcon,
   Divider,
   DocumentIcon,
   GitHubLogoIcon,
+  HelpIcon,
   IconFrame,
   LinkoutIcon,
   SearchDocsIcon,
@@ -28,12 +28,11 @@ export function HelpLauncher() {
 
   return (
     <>
-      <div css={{ position: 'relative', alignSelf: 'flex-start' }}>
+      <div css={{ position: 'relative' }}>
         <IconFrame
           clickable
           ref={menuBtnRef}
-          type="secondary"
-          icon={isMenuOpen ? <CaretRightIcon /> : <span>?</span>}
+          icon={<HelpIcon color="icon-xlight" />}
           onClick={(e) => {
             e.stopPropagation()
             setIsMenuOpen((open) => !open)

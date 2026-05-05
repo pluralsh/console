@@ -314,7 +314,7 @@ const ConsoleVersionSC = styled.span(({ theme }) => ({
   color: theme.colors['text-xlight'],
   fontSize: 10,
   letterSpacing: '-0.35px',
-  margin: theme.spacing.xsmall,
+  margin: theme.spacing.xxsmall,
   textAlign: 'center',
 }))
 
