@@ -41,6 +41,9 @@ fragment ServiceContextFragment on ServiceContext {
     id
     name
     configuration
+    project {
+        ...TinyProjectFragment
+    }
 }
 
 fragment ComponentContentFragment on ComponentContent {
