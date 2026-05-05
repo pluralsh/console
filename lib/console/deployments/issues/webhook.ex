@@ -45,6 +45,30 @@ defmodule Console.Deployments.Issues.Webhook do
     |> ok()
   end
 
+  def payload(%IssueWebhook{provider: :github} = webhook, %{"pull_request" => _} = payload) do
+    build_attributes(Github, payload)
+    |> Map.put(:provider, :github)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :github} = webhook, %{"comment" => _, "pull_request" => _} = payload) do
+    build_attributes(Github, payload)
+    |> Map.put(:provider, :github)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :github} = webhook, %{"comment" => _, "issue" => %{"pull_request" => _}} = payload) do
+    build_attributes(Github, payload)
+    |> Map.put(:provider, :github)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
   def payload(%IssueWebhook{provider: :gitlab} = webhook, %{"object_attributes" => _, "object_kind" => "issue"} = payload) do
     build_attributes(Gitlab, payload)
     |> Map.put(:provider, :gitlab)

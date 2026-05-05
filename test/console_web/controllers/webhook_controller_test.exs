@@ -1025,7 +1025,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [issue] = Console.Repo.all(Console.Schema.Issue)
       assert issue.provider == :github
       assert issue.workbench_id == wh.workbench.id
-      assert issue.external_id == "12345678"
+      assert issue.external_id == "myorg/myrepo:issue:12345678"
       assert issue.title == "Bug: Application crashes on startup"
       assert issue.url == "https://github.com/myorg/myrepo/issues/42"
       assert issue.body == "Steps to reproduce: 1. Start app 2. See crash"
@@ -1034,7 +1034,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it marks issue as completed when closed with completed reason", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :github)
-      insert(:issue, provider: :github, external_id: "12345679")
+      insert(:issue, provider: :github, external_id: "myorg/myrepo:issue:12345679")
       github_payload = %{
         "action" => "closed",
         "issue" => %{
@@ -1062,7 +1062,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it marks issue as cancelled when closed with not_planned reason", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :github)
-      insert(:issue, provider: :github, external_id: "12345680")
+      insert(:issue, provider: :github, external_id: "myorg/myrepo:issue:12345680")
       github_payload = %{
         "action" => "closed",
         "issue" => %{
@@ -1117,12 +1117,12 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it upserts issue when external_id already exists", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :github)
-      external_id = "99999999"
+      external_id = "myorg/myrepo:issue:99999999"
       insert(:issue, external_id: external_id, provider: :github, title: "Old GitHub title", url: "https://github.com/old/issue", body: "Old body", status: :open)
       github_payload = %{
         "action" => "edited",
         "issue" => %{
-          "id" => String.to_integer(external_id),
+          "id" => 99999999,
           "title" => "Updated GitHub title",
           "body" => "Updated GitHub body",
           "html_url" => "https://github.com/myorg/myrepo/issues/99",
@@ -1145,6 +1145,82 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert issue.title == "Updated GitHub title"
       assert issue.body == "Updated GitHub body"
       assert issue.status == :completed
+    end
+
+    test "it handles GitHub pull request payloads", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :github)
+      insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Add retries for flaky tests\nThis adds retry handling for CI flakes."}
+      )
+
+      github_payload = %{
+        "action" => "opened",
+        "pull_request" => %{
+          "id" => 22334455,
+          "title" => "Add retries for flaky tests",
+          "body" => "This adds retry handling for CI flakes.",
+          "html_url" => "https://github.com/myorg/myrepo/pull/101",
+          "state" => "open"
+        }
+      }
+
+      payload = Jason.encode!(github_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "myorg/myrepo:pull_request:22334455"
+      assert issue.title == "Add retries for flaky tests"
+      assert issue.body == "This adds retry handling for CI flakes."
+      assert issue.url == "https://github.com/myorg/myrepo/pull/101"
+      assert issue.status == :open
+    end
+
+    test "it handles GitHub pull request review comment payloads", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :github)
+      insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Comment on PR: Refactor deployment worker (#99887766)\nCan we add a test for the rollback path?"}
+      )
+
+      github_payload = %{
+        "action" => "created",
+        "pull_request" => %{
+          "id" => 55667788,
+          "title" => "Refactor deployment worker",
+          "body" => "Moves side effects behind a service boundary.",
+          "html_url" => "https://github.com/myorg/myrepo/pull/202",
+          "state" => "open"
+        },
+        "comment" => %{
+          "id" => 99887766,
+          "body" => "Can we add a test for the rollback path?"
+        }
+      }
+
+      payload = Jason.encode!(github_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "myorg/myrepo:comment:99887766"
+      assert issue.title == "Comment on PR: Refactor deployment worker (#99887766)"
+      assert issue.body == "Can we add a test for the rollback path?"
+      assert issue.url == "https://github.com/myorg/myrepo/pull/202"
+      assert issue.status == :open
     end
   end
 
