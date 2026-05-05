@@ -8,7 +8,6 @@ import {
   GearTrainIcon,
   GitPullIcon,
   HomeIcon,
-  IconFrame,
   KubernetesAltIcon,
   MenuCollapseIcon,
   MenuOpenIcon,
@@ -278,30 +277,34 @@ export function Sidebar() {
           <ConsoleVersion version={configuration.consoleVersion} />
         )}
       </SidebarSection>
-      <SidebarSection>
-        <Flex
-          width="100%"
-          justifyContent={isExpanded ? 'flex-end' : 'center'}
+      <div css={{ height: 40, width: '100%' }}>
+        <WrapWithIf
+          condition={!isExpanded}
+          wrapper={
+            <Tooltip
+              label="Expand sidebar"
+              placement="right"
+              css={{ whiteSpace: 'nowrap' }}
+            />
+          }
         >
-          <IconFrame
-            clickable
-            icon={
-              isExpanded ? (
-                <MenuCollapseIcon color="icon-xlight" />
-              ) : (
-                <MenuOpenIcon color="icon-xlight" />
-              )
-            }
+          <ToggleSidebarButtonSC
+            type="button"
+            $isExpanded={isExpanded}
             onClick={(e) => {
               e.stopPropagation()
               setIsExpanded((x: boolean) => !x)
             }}
-            tooltip={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-            tooltipProps={{ placement: 'right' }}
             aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          />
-        </Flex>
-      </SidebarSection>
+          >
+            {isExpanded ? (
+              <MenuCollapseIcon color="icon-xlight" />
+            ) : (
+              <MenuOpenIcon color="icon-xlight" />
+            )}
+          </ToggleSidebarButtonSC>
+        </WrapWithIf>
+      </div>
     </SidebarSC>
   )
 }
@@ -327,6 +330,26 @@ const ConsoleVersionSC = styled.span(({ theme }) => ({
   letterSpacing: '-0.35px',
   margin: theme.spacing.xsmall,
   textAlign: 'center',
+}))
+
+const ToggleSidebarButtonSC = styled.button<{
+  $isExpanded: boolean
+}>(({ theme, $isExpanded }) => ({
+  ...theme.partials.reset.button,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: $isExpanded ? 'flex-end' : 'center',
+  padding: theme.spacing.small,
+  color: theme.colors['icon-xlight'],
+  cursor: 'pointer',
+  '&:hover': {
+    background: theme.colors['fill-zero-hover'],
+  },
+  '&:focus-visible': {
+    outline: theme.borders['outline-focused'],
+  },
 }))
 
 const SidebarSC = styled.div<{
