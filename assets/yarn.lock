@@ -10392,7 +10392,6 @@ __metadata:
     jwt-decode: 4.0.0
     kubernetes-resource-parser: 0.1.0
     lint-staged: 16.4.0
-    lodash: 4.18.0
     npm-run-all2: 5.0.0
     phoenix: 1.7.14
     pluralize: 8.0.0
@@ -14998,13 +14997,6 @@ __metadata:
   version: 4.4.2
   resolution: "lodash.truncate@npm:4.4.2"
   checksum: b463d8a382cfb5f0e71c504dcb6f807a7bd379ff1ea216669aa42c52fc28c54e404bfbd96791aa09e6df0de2c1d7b8f1b7f4b1a61f324d38fe98bc535aeee4f5
-  languageName: node
-  linkType: hard
-
-"lodash@npm:4.18.0":
-  version: 4.18.0
-  resolution: "lodash@npm:4.18.0"
-  checksum: 220e1b40f80425cbde3fcdd0915c0ef87e29cbce5fe9a6c82ad80a1d50cfab713eed7dc97a2f7697b11760796ec45cd1d9daf9767a9bee26da5502af487c9f45
   languageName: node
   linkType: hard
 
