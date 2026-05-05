@@ -296,7 +296,7 @@ export function Sidebar() {
               e.stopPropagation()
               setIsExpanded((x: boolean) => !x)
             }}
-            tooltip={isExpanded ? 'Collapse' : 'Expand'}
+            tooltip={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             tooltipProps={{ placement: 'right' }}
             aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
           />

@@ -16,11 +16,13 @@ import { DocSearch } from './DocSearch'
 
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
+import { SidebarContext } from 'components/layout/Sidebar'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 export function HelpLauncher() {
   const theme = useTheme()
+  const { isExpanded } = use(SidebarContext)
   const { docsSearchOpen, setDocsSearchOpen } = use(CommandPaletteContext)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuBtnRef = useRef<HTMLDivElement>(null)
@@ -28,20 +30,48 @@ export function HelpLauncher() {
 
   return (
     <>
-      <div css={{ position: 'relative' }}>
-        <IconFrame
-          clickable
-          ref={menuBtnRef}
-          icon={<HelpIcon color="icon-xlight" />}
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsMenuOpen((open) => !open)
-          }}
-          tooltip={isMenuOpen ? undefined : 'Open help menu'}
-          aria-haspopup="menu"
-          aria-expanded={isMenuOpen}
-          aria-label="Open help menu"
-        />
+      <div
+        ref={menuBtnRef}
+        css={{ position: 'relative' }}
+      >
+        {isExpanded ? (
+          <Button
+            small
+            tertiary
+            justifyContent="flex-start"
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMenuOpen((open) => !open)
+            }}
+            css={{
+              width: '100%',
+              fontWeight: 'normal',
+              '&&, &&:hover, &&:active, &&:focus-visible': {
+                color: theme.colors['text-xlight'],
+              },
+            }}
+            innerFlexProps={{ gap: 'xsmall' }}
+            aria-haspopup="menu"
+            aria-expanded={isMenuOpen}
+            aria-label="Open help menu"
+          >
+            <HelpIcon color="icon-xlight" />
+            <span>Help and docs</span>
+          </Button>
+        ) : (
+          <IconFrame
+            clickable
+            icon={<HelpIcon color="icon-xlight" />}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMenuOpen((open) => !open)
+            }}
+            tooltip={isMenuOpen ? undefined : 'Open help menu'}
+            aria-haspopup="menu"
+            aria-expanded={isMenuOpen}
+            aria-label="Open help menu"
+          />
+        )}
         <SimplePopupMenu
           isOpen={isMenuOpen}
           setIsOpen={setIsMenuOpen}
@@ -71,7 +101,6 @@ export function HelpLauncher() {
             small
             tertiary
             justifyContent="flex-start"
-            endIcon={<ArrowTopRightIcon size={12} />}
             as={Link}
             target="_blank"
             rel="noopener noreferrer"
@@ -81,12 +110,12 @@ export function HelpLauncher() {
           >
             <DocumentIcon />
             Docs
+            <ArrowTopRightIcon size={12} />
           </Button>
           <Button
             small
             tertiary
             justifyContent="flex-start"
-            endIcon={<ArrowTopRightIcon size={12} />}
             as={Link}
             target="_blank"
             rel="noopener noreferrer"
@@ -96,6 +125,7 @@ export function HelpLauncher() {
           >
             <GitHubLogoIcon />
             GitHub
+            <ArrowTopRightIcon size={12} />
           </Button>
         </SimplePopupMenu>
       </div>
