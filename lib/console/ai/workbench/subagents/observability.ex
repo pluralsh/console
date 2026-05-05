@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user}, %Environment{} = environment) do
     tools(environment, user)
-    |> MemoryEngine.new(50, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(50, system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs

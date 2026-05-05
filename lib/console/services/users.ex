@@ -188,12 +188,11 @@ defmodule Console.Services.Users do
             |> Map.put("email", email)
 
     groups = group_attrs(attrs)
+
     start_transaction()
     |> add_operation(:user, fn _ ->
       case get_user_by_email(email) do
-        %User{} = u ->
-          User.changeset(u, attrs)
-          |> Repo.update()
+        %User{} = u -> User.changeset(u, attrs) |> Repo.update()
         _ -> create_user(attrs)
       end
     end)

@@ -22,7 +22,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.CloudQuery,
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
-    Infrastructure.VulnReports,
     Infrastructure.Vulns,
     Infrastructure.Manifests
   }
@@ -32,9 +31,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
-    system_prompt = String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools)))
     tools(job, environment, FileCache.new())
-    |> MemoryEngine.new(50, system_prompt: system_prompt, acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(50,
+      system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
+      acc: %{},
+      callback: &callback(activity, &1)
+    )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
