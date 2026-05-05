@@ -34,6 +34,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Azure]: extractAzureMetadata,
   [WorkbenchToolType.Jaeger]: extractJaegerMetadata,
   [WorkbenchToolType.Exa]: extractExaMetadata,
+  [WorkbenchToolType.Github]: extractGithubMetadata,
   [WorkbenchToolType.Cloud]: () => [],
 }
 
@@ -201,6 +202,15 @@ function extractExaMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.exa?.url }]
+}
+
+function extractGithubMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'URL', value: configuration?.github?.url },
+    { label: 'Toolset', value: configuration?.github?.toolset },
+  ]
 }
 
 function getConfiguredHeadersCount(

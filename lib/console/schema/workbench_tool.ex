@@ -21,7 +21,9 @@ defmodule Console.Schema.WorkbenchTool do
     azure: 13,
     cloud: 14,
     jaeger: 15,
-    exa: 16
+    exa: 16,
+    github: 17
+
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -50,6 +52,12 @@ defmodule Console.Schema.WorkbenchTool do
         field :access_token, EncryptedString
         field :path,         :string
         field :agent_mode,   :boolean
+      end
+
+      embeds_one :github, GithubConnection, on_replace: :update do
+        field :url,          :string
+        field :access_token, EncryptedString
+        field :toolset,      :string
       end
 
       embeds_one :linear, LinearConnection, on_replace: :update do
@@ -249,6 +257,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:tempo), do: [:traces]
   defp categories(:jaeger), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
+  defp categories(:github), do: [:integration]
   defp categories(:linear), do: [:ticketing]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
@@ -270,6 +279,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:cloudwatch, with: &cloudwatch_configuration_changeset/2)
     |> cast_embed(:azure, with: &azure_configuration_changeset/2)
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
+    |> cast_embed(:github, with: &github_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
@@ -375,6 +385,12 @@ defmodule Console.Schema.WorkbenchTool do
         _ -> validate_required(cs, [:api_token, :email])
       end
     end)
+  end
+
+  defp github_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url access_token toolset)a)
+    |> validate_required([:access_token])
   end
 
   defp header_changeset(model, attrs) do

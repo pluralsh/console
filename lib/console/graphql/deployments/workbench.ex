@@ -145,6 +145,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
+    field :github,     :workbench_tool_github_connection_attributes, description: "github connection (integration)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -233,6 +234,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_exa_connection_attributes do
     field :api_key, :string, description: "exa API key"
+  end
+
+  input_object :workbench_tool_github_connection_attributes do
+    field :url,          :string, description: "github MCP URL (defaults to public github MCP server)"
+    field :access_token, :string, description: "github token for MCP authentication"
+    field :toolset,      :string, description: "optional github MCP toolset query parameter"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -703,6 +710,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
+    field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -775,6 +783,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_exa_connection do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://api.exa.ai"} end,
       description: "static API URL for Exa (credentials never exposed)"
+  end
+
+  object :workbench_tool_github_connection do
+    field :url, non_null(:string), resolve: fn conn, _ ->
+      {:ok, conn.url || "https://api.githubcopilot.com/mcp"}
+    end, description: "github MCP URL (credentials never exposed)"
+    field :toolset, :string, description: "configured github MCP toolset"
   end
 
   object :workbench_tool_http_configuration do

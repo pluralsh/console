@@ -2288,6 +2288,7 @@ enum WorkbenchToolType {
   CLOUD
   JAEGER
   EXA
+  GITHUB
 }
 
 enum WorkbenchToolCategory {
@@ -2625,6 +2626,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "exa connection (search)"
   exa: WorkbenchToolExaConnectionAttributes
+
+  "github connection (integration)"
+  github: WorkbenchToolGithubConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2798,6 +2802,17 @@ input WorkbenchToolAtlassianConnectionAttributes {
 input WorkbenchToolExaConnectionAttributes {
   "exa API key"
   apiKey: String
+}
+
+input WorkbenchToolGithubConnectionAttributes {
+  "github MCP URL (defaults to public github MCP server)"
+  url: String
+
+  "github token for MCP authentication"
+  accessToken: String
+
+  "optional github MCP toolset query parameter"
+  toolset: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -3583,6 +3598,9 @@ type WorkbenchToolConfiguration {
 
   "exa connection (no secrets)"
   exa: WorkbenchToolExaConnection
+
+  "github connection (no secrets)"
+  github: WorkbenchToolGithubConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -3699,6 +3717,14 @@ type WorkbenchToolAtlassianConnection {
 type WorkbenchToolExaConnection {
   "static API URL for Exa (credentials never exposed)"
   url: String!
+}
+
+type WorkbenchToolGithubConnection {
+  "github MCP URL (credentials never exposed)"
+  url: String!
+
+  "configured github MCP toolset"
+  toolset: String
 }
 
 type WorkbenchToolHttpConfiguration {

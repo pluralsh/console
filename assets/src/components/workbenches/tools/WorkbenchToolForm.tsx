@@ -343,6 +343,16 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { atlassian: { email: email ?? '' } }
   },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),
+  [WorkbenchToolType.Github]: (config) => {
+    const { url, toolset } = config?.github ?? {}
+    return {
+      github: {
+        url: url ?? '',
+        accessToken: '',
+        toolset: toolset ?? undefined,
+      },
+    }
+  },
   [WorkbenchToolType.Splunk]: (config) => {
     const { url, username } = config?.splunk ?? {}
     return { splunk: { url: url ?? '', username } }

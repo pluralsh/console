@@ -10301,6 +10301,8 @@ type WorkbenchToolConfiguration struct {
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 	// exa connection (no secrets)
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
+	// github connection (no secrets)
+	Github *WorkbenchToolGithubConnection `json:"github,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -10332,6 +10334,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 	// exa connection (search)
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
+	// github connection (integration)
+	Github *WorkbenchToolGithubConnectionAttributes `json:"github,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -10398,6 +10402,22 @@ type WorkbenchToolExaConnection struct {
 type WorkbenchToolExaConnectionAttributes struct {
 	// exa API key
 	APIKey *string `json:"apiKey,omitempty"`
+}
+
+type WorkbenchToolGithubConnection struct {
+	// github MCP URL (credentials never exposed)
+	URL string `json:"url"`
+	// configured github MCP toolset
+	Toolset *string `json:"toolset,omitempty"`
+}
+
+type WorkbenchToolGithubConnectionAttributes struct {
+	// github MCP URL (defaults to public github MCP server)
+	URL *string `json:"url,omitempty"`
+	// github token for MCP authentication
+	AccessToken *string `json:"accessToken,omitempty"`
+	// optional github MCP toolset query parameter
+	Toolset *string `json:"toolset,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -16989,6 +17009,7 @@ const (
 	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
 	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
 	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
+	WorkbenchToolTypeGithub     WorkbenchToolType = "GITHUB"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17009,11 +17030,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeCloud,
 	WorkbenchToolTypeJaeger,
 	WorkbenchToolTypeExa,
+	WorkbenchToolTypeGithub,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub:
 		return true
 	}
 	return false

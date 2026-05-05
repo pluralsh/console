@@ -83,6 +83,8 @@ export function WorkbenchToolFormFields({
       return render(type, LinearFormFields)
     case WorkbenchToolType.Exa:
       return render(type, ExaFormFields)
+    case WorkbenchToolType.Github:
+      return render(type, GithubFormFields)
     case WorkbenchToolType.Splunk:
       return render(type, SplunkFormFields)
     case WorkbenchToolType.Cloudwatch:
@@ -379,6 +381,66 @@ function ExaFormFields({
       value={c.apiKey ?? ''}
       onChange={(e) => set({ ...c, apiKey: e.target.value || undefined })}
     />
+  )
+}
+
+const GITHUB_MCP_TOOLSET_OPTIONS = [
+  { key: 'repos', label: 'repos' },
+  { key: 'issues', label: 'issues' },
+  { key: 'pull_requests', label: 'pull_requests' },
+  { key: 'actions', label: 'actions' },
+  { key: 'code_security', label: 'code_security' },
+  { key: 'secret_protection', label: 'secret_protection' },
+  { key: 'copilot', label: 'copilot (remote only)' },
+  {
+    key: 'github_support_docs_search',
+    label: 'github_support_docs_search (remote only)',
+  },
+  { key: 'all', label: 'all (enable all toolsets)' },
+  { key: 'default', label: 'default (repos, issues, pull_requests)' },
+] as const
+
+function GithubFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Github>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        hint="Defaults to the public GitHub MCP server when omitted."
+        placeholder="https://api.githubcopilot.com/mcp"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access token"
+        required
+        revealer
+        value={c.accessToken ?? ''}
+        onChange={(e) => set({ ...c, accessToken: e.target.value })}
+      />
+      <FormField
+        label="Toolset"
+        hint="Optional. Use a single toolset value; leave blank to use the default GitHub MCP toolsets."
+      >
+        <Select
+          selectedKey={c.toolset ?? null}
+          onSelectionChange={(key) =>
+            set({ ...c, toolset: typeof key === 'string' ? key : undefined })
+          }
+          selectionMode="single"
+          label="GitHub MCP toolset"
+        >
+          {GITHUB_MCP_TOOLSET_OPTIONS.map((option) => (
+            <ListBoxItem
+              key={option.key}
+              label={option.label}
+            />
+          ))}
+        </Select>
+      </FormField>
+    </>
   )
 }
 
