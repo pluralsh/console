@@ -1,13 +1,13 @@
 import { use, useRef, useState } from 'react'
 
 import {
+  ArrowTopRightIcon,
   Button,
   Divider,
   DocumentIcon,
   GitHubLogoIcon,
   HelpIcon,
   IconFrame,
-  LinkoutIcon,
   SearchDocsIcon,
 } from '@pluralsh/design-system'
 import { CommandPaletteContext } from 'components/commandpalette/CommandPaletteContext'
@@ -71,7 +71,7 @@ export function HelpLauncher() {
             small
             tertiary
             justifyContent="flex-start"
-            endIcon={<LinkoutIcon />}
+            endIcon={<ArrowTopRightIcon size={12} />}
             as={Link}
             target="_blank"
             rel="noopener noreferrer"
@@ -86,7 +86,7 @@ export function HelpLauncher() {
             small
             tertiary
             justifyContent="flex-start"
-            endIcon={<LinkoutIcon />}
+            endIcon={<ArrowTopRightIcon size={12} />}
             as={Link}
             target="_blank"
             rel="noopener noreferrer"
