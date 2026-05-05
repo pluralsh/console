@@ -50,8 +50,8 @@ export default function Header() {
         <HeaderProjectSelect />
         <Flex grow={1} />
         <BillingLegacyUserMessage />
-        <NotificationsLauncher />
         <ChatbotLauncher />
+        <NotificationsLauncher />
         <ProfileMenu />
       </HeaderContentSC>
     </HeaderSC>
