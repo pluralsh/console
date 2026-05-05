@@ -1547,7 +1547,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       [issue] = Console.Repo.all(Console.Schema.Issue)
       assert issue.provider == :azure_devops
-      assert issue.external_id == "42"
+      assert issue.external_id == "00000000-0000-0000-0000-000000000000:workitem:42"
       assert issue.title == "Fix pipeline failure"
       assert issue.url == "https://dev.azure.com/org/project/_workitems/edit/42"
 
@@ -1558,7 +1558,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it maps Closed state to completed", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :azure_devops)
-      insert(:issue, provider: :azure_devops, external_id: "99")
+      insert(:issue, provider: :azure_devops, external_id: "00000000-0000-0000-0000-000000000000:workitem:99")
 
       closed =
         azure_workitem_payload()
@@ -1579,7 +1579,8 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it upserts issue when external_id already exists", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :azure_devops)
-      external_id = "100"
+      workitem_id = 100
+      external_id = "00000000-0000-0000-0000-000000000000:workitem:#{workitem_id}"
 
       insert(:issue,
         external_id: external_id,
@@ -1592,7 +1593,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       updated =
         azure_workitem_payload()
-        |> put_in(["resource", "id"], String.to_integer(external_id))
+        |> put_in(["resource", "id"], workitem_id)
         |> put_in(["resource", "fields", "System.Title"], "New title")
         |> put_in(["resource", "fields", "System.Description"], "New body")
         |> put_in(["resource", "fields", "System.State"], "Resolved")
@@ -1613,6 +1614,44 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       assert issue.status == :in_progress
     end
+
+    test "it handles pull request webhooks", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Refactor release pipeline\nSimplifies promotion orchestration."})
+
+      payload = Jason.encode!(azure_pull_request_payload())
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "00000000-0000-0000-0000-000000000000:pull_request:77"
+      assert issue.title == "Refactor release pipeline"
+      assert issue.body == "Simplifies promotion orchestration."
+      assert issue.status == :open
+    end
+
+    test "it handles pull request comment webhooks", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :azure_devops)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Comment on PR: Refactor release pipeline (#551)\nPlease add test coverage for rollback handling."})
+
+      payload = Jason.encode!(azure_pull_request_comment_payload())
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/azure_devops/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "00000000-0000-0000-0000-000000000000:comment:551"
+      assert issue.title == "Comment on PR: Refactor release pipeline (#551)"
+      assert issue.body == "Please add test coverage for rollback handling."
+      assert issue.status == :open
+    end
   end
 
   defp azure_workitem_payload do
@@ -1620,6 +1659,9 @@ defmodule ConsoleWeb.WebhookControllerTest do
       "subscriptionId" => "00000000-0000-0000-0000-000000000000",
       "notificationId" => 1,
       "eventType" => "workitem.updated",
+      "resourceContainers" => %{
+        "project" => %{"id" => "00000000-0000-0000-0000-000000000000"}
+      },
       "resource" => %{
         "id" => 42,
         "rev" => 3,
@@ -1632,6 +1674,49 @@ defmodule ConsoleWeb.WebhookControllerTest do
           "System.Description" => "Steps to reproduce the failure.",
           "System.State" => "Active",
           "System.WorkItemType" => "Bug"
+        }
+      }
+    }
+  end
+
+  defp azure_pull_request_payload do
+    %{
+      "eventType" => "git.pullrequest.created",
+      "resourceContainers" => %{
+        "project" => %{"id" => "00000000-0000-0000-0000-000000000000"}
+      },
+      "resource" => %{
+        "pullRequest" => %{
+          "pullRequestId" => 77,
+          "title" => "Refactor release pipeline",
+          "description" => "Simplifies promotion orchestration.",
+          "status" => "active",
+          "url" => "https://dev.azure.com/org/project/_git/repo/pullrequest/77"
+        }
+      }
+    }
+  end
+
+  defp azure_pull_request_comment_payload do
+    %{
+      "eventType" => "git.pullrequest.commented",
+      "resourceContainers" => %{
+        "project" => %{"id" => "00000000-0000-0000-0000-000000000000"}
+      },
+      "resource" => %{
+        "comment" => %{
+          "id" => 551,
+          "content" => "Please add test coverage for rollback handling.",
+          "_links" => %{
+            "html" => %{"href" => "https://dev.azure.com/org/project/_git/repo/pullrequest/77?discussionId=12"}
+          }
+        },
+        "pullRequest" => %{
+          "pullRequestId" => 77,
+          "title" => "Refactor release pipeline",
+          "description" => "Simplifies promotion orchestration.",
+          "status" => "active",
+          "url" => "https://dev.azure.com/org/project/_git/repo/pullrequest/77"
         }
       }
     }
