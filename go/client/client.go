@@ -2448,9 +2448,10 @@ func (t *ServiceDeploymentIDFragment) GetID() string {
 }
 
 type ServiceContextFragment struct {
-	ID            string         "json:\"id\" graphql:\"id\""
-	Name          string         "json:\"name\" graphql:\"name\""
-	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
+	ID            string               "json:\"id\" graphql:\"id\""
+	Name          string               "json:\"name\" graphql:\"name\""
+	Configuration map[string]any       "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Project       *TinyProjectFragment "json:\"project,omitempty\" graphql:\"project\""
 }
 
 func (t *ServiceContextFragment) GetID() string {
@@ -2470,6 +2471,12 @@ func (t *ServiceContextFragment) GetConfiguration() map[string]any {
 		t = &ServiceContextFragment{}
 	}
 	return t.Configuration
+}
+func (t *ServiceContextFragment) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &ServiceContextFragment{}
+	}
+	return t.Project
 }
 
 type ComponentContentFragment struct {
@@ -44091,6 +44098,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -44322,6 +44332,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -44785,6 +44798,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -45016,6 +45032,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -46010,6 +46029,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -46431,6 +46453,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -46915,6 +46940,14 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
 }
 `
 
@@ -46969,6 +47002,14 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
 }
 `
 
@@ -46999,6 +47040,14 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
 }
 `
 
@@ -47348,6 +47397,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -47578,6 +47630,9 @@ fragment ServiceContextFragment on ServiceContext {
 	id
 	name
 	configuration
+	project {
+		... TinyProjectFragment
+	}
 }
 fragment KustomizeFragment on Kustomize {
 	path

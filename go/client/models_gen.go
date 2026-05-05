@@ -1215,8 +1215,8 @@ type BedrockAiAttributes struct {
 
 // Settings for usage of AWS Bedrock for LLMs
 type BedrockAiSettings struct {
-	// the bedrock model to use
-	ModelID string `json:"modelId"`
+	// the bedrock model to use (omit for Plural defaults)
+	ModelID *string `json:"modelId,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock aws access key id to use (DEPRECATED)
