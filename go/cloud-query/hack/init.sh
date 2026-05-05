@@ -13,14 +13,16 @@ configure_pg_hba() {
 
     # Allow container-to-container TCP connections.
     while IFS= read -r line; do
-        case "$line" in
-            "host all all 0.0.0.0/0 scram-sha-256")
-                has_ipv4_rule=true
-                ;;
-            "host all all ::/0 scram-sha-256")
-                has_ipv6_rule=true
-                ;;
-        esac
+        set -- $line
+        if [ "$#" -lt 5 ]; then
+            continue
+        fi
+        if [ "$1" = "host" ] && [ "$2" = "all" ] && [ "$3" = "all" ] && [ "$4" = "0.0.0.0/0" ] && [ "$5" = "scram-sha-256" ]; then
+            has_ipv4_rule=true
+        fi
+        if [ "$1" = "host" ] && [ "$2" = "all" ] && [ "$3" = "all" ] && [ "$4" = "::/0" ] && [ "$5" = "scram-sha-256" ]; then
+            has_ipv6_rule=true
+        fi
     done < "$pg_hba"
 
     if [ "$has_ipv4_rule" = false ]; then
@@ -61,7 +63,15 @@ EOSQL
 fi
 
 # Create database if it doesn't exist (connect to postgres to avoid PGDATABASE override)
-DB_EXISTS=$(psql -U "$POSTGRES_USER" -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$POSTGRES_DB'")
+DB_EXISTS=$(
+    psql -v ON_ERROR_STOP=1 \
+      --set=postgres_db="$POSTGRES_DB" \
+      -U "$POSTGRES_USER" \
+      -d postgres \
+      -tA <<-'EOSQL'
+      SELECT 1 FROM pg_database WHERE datname = :'postgres_db';
+EOSQL
+)
 if [ "$DB_EXISTS" != "1" ]; then
   createdb -U "$POSTGRES_USER" "$POSTGRES_DB"
   echo "Database '$POSTGRES_DB' created successfully."
