@@ -273,6 +273,9 @@ export function Sidebar() {
         ))}
         <Flex flex={1} />
         <HelpLauncher />
+        {configuration?.consoleVersion && (
+          <ConsoleVersion version={configuration.consoleVersion} />
+        )}
         <SidebarItem
           tooltip="Expand"
           expandedLabel="Collapse"
@@ -287,9 +290,6 @@ export function Sidebar() {
             <HamburgerMenuCollapsedIcon />
           )}
         </SidebarItem>
-        {configuration?.consoleVersion && (
-          <ConsoleVersion version={configuration.consoleVersion} />
-        )}
       </SidebarSection>
     </SidebarSC>
   )
@@ -302,24 +302,21 @@ function ConsoleVersion({ version }: { version: string }) {
       condition={!isExpanded}
       wrapper={<Tooltip label={`Console version: v${version}`} />}
     >
-      <ConsoleVersionSC $isExpanded={isExpanded}>
-        {isExpanded ? 'Console version: v' : 'v'}
+      <ConsoleVersionSC>
+        {isExpanded ? 'Console version: ' : 'v'}
         {version}
       </ConsoleVersionSC>
     </WrapWithIf>
   )
 }
-const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
-  ({ theme, $isExpanded }) => ({
-    ...TRUNCATE,
-    width: '100%',
-    textAlign: $isExpanded ? 'left' : 'center',
-    padding: theme.spacing.xxsmall,
-    fontFamily: theme.fontFamilies.sans,
-    fontSize: 10,
-    letterSpacing: '-0.35px',
-  })
-)
+const ConsoleVersionSC = styled.span(({ theme }) => ({
+  ...TRUNCATE,
+  color: theme.colors['text-xlight'],
+  fontSize: 10,
+  letterSpacing: '-0.35px',
+  margin: theme.spacing.xsmall,
+  textAlign: 'center',
+}))
 
 const SidebarSC = styled.div<{
   $isExpanded: boolean
