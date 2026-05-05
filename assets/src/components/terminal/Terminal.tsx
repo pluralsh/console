@@ -60,6 +60,7 @@ export function TerminalScreen({
   const xtermRef = useRef<Terminal | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
   const channelRef = useRef<any>(null)
+  const themeRef = useRef(terminalTheme)
 
   const onResize = useCallback(() => {
     const fitAddon = fitAddonRef.current
@@ -81,7 +82,7 @@ export function TerminalScreen({
 
     const xterm = new Terminal({
       cursorBlink: true,
-      theme: normalizedThemes[terminalTheme],
+      theme: normalizedThemes[themeRef.current],
     })
     const fitAddon = new FitAddon()
     xterm.loadAddon(fitAddon)
@@ -119,7 +120,13 @@ export function TerminalScreen({
       channelRef.current = null
       isFirstConnect.current = true
     }
-  }, [terminalTheme, header, command, room, onResize])
+  }, [header, command, room, onResize])
+
+  useEffect(() => {
+    themeRef.current = terminalTheme
+    if (xtermRef.current)
+      xtermRef.current.options.theme = normalizedThemes[terminalTheme]
+  }, [terminalTheme])
 
   useEffect(() => {
     const el = containerRef.current
