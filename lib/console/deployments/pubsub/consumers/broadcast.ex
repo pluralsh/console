@@ -32,6 +32,7 @@ defmodule Console.Deployments.PubSub.Broadcast do
   end
   defp gql_broadcast(_, _, _), do: :ok
 
+  defp event_to_resource("sentinel" <> _), do: :sentinel_run
   defp event_to_resource("gate" <> _), do: :gate
   defp event_to_resource("agent" <> _), do: :agent_run
   defp event_to_resource("stack" <> _), do: :stack_run

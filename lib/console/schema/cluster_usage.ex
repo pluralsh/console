@@ -57,6 +57,10 @@ defmodule Console.Schema.ClusterUsage do
     from(cu in query, preload: ^preloads)
   end
 
+  def stream(query \\ __MODULE__) do
+    from(cu in query, order_by: [asc: :id])
+  end
+
   def ordered(query, order) do
     from(cu in query, order_by: ^order)
   end

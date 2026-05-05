@@ -144,4 +144,6 @@ COPY --from=builder /opt/app/_build/prod/rel/console .
 
 USER console
 
+EXPOSE 4000 6000 4369 50051
+
 CMD mkdir -p /tmp/sqlite; /opt/app/bin/console start

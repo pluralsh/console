@@ -34,6 +34,10 @@ defmodule Console.Schema.ClusterNamespaceUsage do
     from(cu in query, preload: ^preloads)
   end
 
+  def stream(query \\ __MODULE__) do
+    from(cn in query, order_by: [asc: :id])
+  end
+
   def for_cluster(query \\ __MODULE__, cid) do
     from(cn in query, where: cn.cluster_id == ^cid)
   end

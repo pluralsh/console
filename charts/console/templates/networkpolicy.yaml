@@ -24,9 +24,6 @@ spec:
     - protocol: TCP
       port: 8080
     {{- end }}
-  # Erlang/OTP EPMD (4369): name-to-port lookups for RELEASE_DISTRIBUTION=name clustering.
-  # Restrict to peer console replicas only — any other workload in the namespace can otherwise
-  # query registered node names and learn distribution ports without authentication.
   - from:
     - podSelector:
         matchLabels:
@@ -38,6 +35,8 @@ spec:
     ports:
     - protocol: TCP
       port: 4369
+    - protocol: TCP
+      port: 6000
   - from:
     - namespaceSelector:
         matchLabels:
