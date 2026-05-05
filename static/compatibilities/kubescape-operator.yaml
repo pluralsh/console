@@ -4,8 +4,50 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
+- version: 1.40.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **No explicit required values changes called out in the provided
+      notes.**
+
+      - Review your current values for any references to the legacy **host-sensor**
+      components/settings; upstream notes indicate a migration to **node-agent sensing**.
+
+      - If you set resource limits for **node-agent** and/or **kubevuln**, be aware
+      the chart now sets **`GOMEMLIMIT` to ~80% of the container memory limit** (and
+      the operator autoscaler can compute `GOMEMLIMIT` per node group). This can change
+      runtime memory behavior without you changing limits.
+
+      - **CRD change:** rules CRD adds `profileDataRequired` (used for rule-aware
+      profile projection). Ensure your CRDs are upgraded and any GitOps tooling applies
+      CRDs correctly.
+
+      - If adopting GitOps, the chart adds **Argo CD GitOps support** (review any
+      new annotations/packaging expectations in your environment).'
+    chart_updates: ['Templates: remove redundant `GOMAXPROCS` wiring.', Argo CD GitOps
+        support added for the chart., Helm chart releases now include artifact provenance
+        attestations., 'Node-agent + kubevuln: set `GOMEMLIMIT` to ~80% of container
+        memory limit.', Rules CRD updated with `profileDataRequired` to support rule-aware
+        projection., 'Runtime sensing architecture change: host sensor replaced with
+        node-agent sensing.']
+    features: ["Argo CD\u2013friendly GitOps support for deploying Kubescape via Helm.",
+      'Supply-chain enhancement: Helm chart releases now publish artifact provenance
+        attestations.', 'Improved memory management: node-agent and kubevuln set `GOMEMLIMIT`
+        relative to pod memory limits; operator autoscaler can compute it per node
+        group.', Rule-aware profile projection support via new `profileDataRequired`
+        field in the rules CRD., 'Multiple performance and correctness improvements
+        across scanning, OPA processing, and error surfacing in partial resource collection.']
+    breaking_changes: ['Runtime sensing change: **host sensor is replaced by node-agent
+        sensing**. If you relied on host-sensor behavior, config, or DaemonSet specifics,
+        validate equivalent coverage and update any assumptions/allowlists.', CRD
+        schema changes (rules CRD adds `profileDataRequired`) require CRDs to be updated;
+        mismatched CRDs can cause reconciliation/validation issues during upgrade.]
+  chart_version: 1.40.0
+  images: []
 - version: 1.30.7
-  kube: ['1.35', '1.34', '1.33']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
