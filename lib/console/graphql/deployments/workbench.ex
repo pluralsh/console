@@ -786,9 +786,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_github_connection do
-    field :url, non_null(:string), resolve: fn conn, _ ->
-      {:ok, conn.url || "https://api.githubcopilot.com/mcp"}
-    end, description: "github MCP URL (credentials never exposed)"
+    field :url, non_null(:string), description: "github MCP URL (credentials never exposed)", resolve: fn
+      %{url: url}, _ when is_binary(url) -> {:ok, url}
+      _, _ -> {:ok, "https://api.githubcopilot.com"}
+    end
     field :toolset, :string, description: "configured github MCP toolset"
   end
 
