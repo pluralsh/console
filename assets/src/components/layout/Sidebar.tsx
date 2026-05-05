@@ -7,7 +7,6 @@ import {
   FlowIcon,
   GearTrainIcon,
   GitPullIcon,
-  HomeIcon,
   KubernetesAltIcon,
   MenuCollapseIcon,
   MenuOpenIcon,
@@ -29,7 +28,7 @@ import {
   useMemo,
 } from 'react'
 import { useLocation } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -61,6 +60,8 @@ import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
 
 const SIDEBAR_WIDTH = 64
 const SIDEBAR_EXPANDED_WIDTH = 180
+const APP_ICON_LIGHT = '/plural-logo.png'
+const APP_ICON_DARK = '/plural-logo-white.png'
 
 type MenuItem = {
   text: string
@@ -99,18 +100,20 @@ function getMenuItems({
   featureFlags,
   cdPath,
   personaConfig,
+  homeIcon,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
   featureFlags: FeatureFlags
   cdPath: string
   personaConfig: Nullable<PersonaConfigurationFragment>
+  homeIcon: ReactElement<any>
 }): MenuItem[] {
   return [
     {
       text: 'Home',
       expandedLabel: 'Home',
-      icon: <HomeIcon />,
+      icon: homeIcon,
       path: '/',
       hotkeys: ['shift H'],
     },
@@ -221,6 +224,7 @@ export function Sidebar() {
   const { me, configuration, personaConfiguration } = useLogin()
   const { featureFlags } = use(FeatureFlagContext)
   const { pathname } = useLocation()
+  const theme = useTheme()
   const isActive = useCallback(
     (menuItem: MenuItemPath) => isActiveMenuItem(menuItem, pathname),
     [pathname]
@@ -236,6 +240,12 @@ export function Sidebar() {
         featureFlags,
         cdPath: defaultCDPath,
         personaConfig: personaConfiguration,
+        homeIcon: (
+          <SidebarLogoSC
+            src={theme.mode === 'light' ? APP_ICON_LIGHT : APP_ICON_DARK}
+            alt="Plural console"
+          />
+        ),
       }),
     [
       configuration?.isSandbox,
@@ -243,6 +253,7 @@ export function Sidebar() {
       featureFlags,
       defaultCDPath,
       personaConfiguration,
+      theme.mode,
     ]
   )
 
@@ -331,6 +342,14 @@ const ConsoleVersionSC = styled.span(({ theme }) => ({
   margin: theme.spacing.xsmall,
   textAlign: 'center',
 }))
+
+const SidebarLogoSC = styled.img({
+  width: 24,
+  height: 24,
+  objectFit: 'contain',
+  marginLeft: '-4px',
+  marginRight: '-4px',
+})
 
 const ToggleSidebarButtonSC = styled.button<{
   $isExpanded: boolean
