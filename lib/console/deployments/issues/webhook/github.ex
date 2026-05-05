@@ -38,10 +38,6 @@ defmodule Console.Deployments.Issues.Webhook.Github do
     payload
     |> url()
     |> parse_repo_from_url()
-    |> case do
-      repo when is_binary(repo) -> repo
-      _ -> "unknown"
-    end
   end
 
   defp parse_repo_from_url(url) when is_binary(url) do
@@ -50,10 +46,10 @@ defmodule Console.Deployments.Issues.Webhook.Github do
          [owner, repo | _] <- String.split(path, "/", trim: true) do
       "#{owner}/#{repo}"
     else
-      _ -> nil
+      _ -> "unknown"
     end
   end
-  defp parse_repo_from_url(_), do: nil
+  defp parse_repo_from_url(_), do: "unknown"
 
   defp map_status("open", _), do: :open
   defp map_status("closed", "completed"), do: :completed

@@ -1278,7 +1278,10 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it can handle a valid GitLab issue webhook and creates the issue", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :gitlab)
-      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Fix CI pipeline failure"})
+      wh = insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Fix CI pipeline failure\nThe pipeline fails on the test stage"}
+      )
       gitlab_payload = %{
         "object_kind" => "issue",
         "object_attributes" => %{
@@ -1303,16 +1306,48 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       [issue] = Console.Repo.all(Console.Schema.Issue)
       assert issue.provider == :gitlab
-      assert issue.external_id == "42"
+      assert issue.external_id == "mygroup/myproject:issue:42"
       assert issue.title == "Fix CI pipeline failure"
       assert issue.url == "https://gitlab.com/mygroup/myproject/-/issues/42"
       assert issue.body == "The pipeline fails on the test stage"
       assert issue.status == :open
+      assert issue.workbench_webhook_id == wh.id
+    end
+
+    test "it matches workbench webhook using title and body format", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :gitlab)
+      wh = insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Improve release process\nRelease pipeline fails when tag is missing."}
+      )
+
+      gitlab_payload = %{
+        "object_kind" => "issue",
+        "object_attributes" => %{
+          "iid" => 460,
+          "title" => "Improve release process",
+          "description" => "Release pipeline fails when tag is missing.",
+          "url" => "https://gitlab.com/mygroup/myproject/-/issues/460",
+          "state" => "opened"
+        }
+      }
+
+      payload = Jason.encode!(gitlab_payload)
+
+      conn
+      |> put_req_header("x-gitlab-token", hook.secret)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/gitlab/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "mygroup/myproject:issue:460"
+      assert issue.workbench_webhook_id == wh.id
     end
 
     test "it marks issue as completed when state is closed", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :gitlab)
-      insert(:issue, provider: :gitlab, external_id: "43")
+      insert(:issue, provider: :gitlab, external_id: "mygroup/myproject:issue:43")
       gitlab_payload = %{
         "object_kind" => "issue",
         "object_attributes" => %{
@@ -1337,7 +1372,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it handles reopened issues", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :gitlab)
-      insert(:issue, provider: :gitlab, external_id: "44")
+      insert(:issue, provider: :gitlab, external_id: "mygroup/myproject:issue:44")
       gitlab_payload = %{
         "object_kind" => "issue",
         "object_attributes" => %{
@@ -1387,7 +1422,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     test "it upserts issue when external_id already exists", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :gitlab)
-      external_id = "999"
+      external_id = "mygroup/myproject:issue:999"
       insert(:issue, external_id: external_id, provider: :gitlab, title: "Old GitLab title", url: "https://gitlab.com/old/issue", body: "Old body", status: :open)
       gitlab_payload = %{
         "object_kind" => "issue",
@@ -1412,6 +1447,47 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert issue.title == "Updated GitLab title"
       assert issue.body == "Updated GitLab body"
       assert issue.status == :completed
+    end
+
+    test "it handles GitLab merge request note payloads", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :gitlab)
+      wh = insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Can we add a test for the rollback path?"}
+      )
+
+      gitlab_payload = %{
+        "object_kind" => "note",
+        "object_attributes" => %{
+          "id" => 99887766,
+          "note" => "Can we add a test for the rollback path?",
+          "noteable_type" => "MergeRequest",
+          "url" => "https://gitlab.com/mygroup/myproject/-/merge_requests/202#note_99887766"
+        },
+        "merge_request" => %{
+          "iid" => 202,
+          "title" => "Refactor deployment worker",
+          "description" => "Moves side effects behind a service boundary.",
+          "url" => "https://gitlab.com/mygroup/myproject/-/merge_requests/202",
+          "state" => "opened"
+        }
+      }
+
+      payload = Jason.encode!(gitlab_payload)
+
+      conn
+      |> put_req_header("x-gitlab-token", hook.secret)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/gitlab/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "mygroup/myproject:comment:99887766"
+      assert issue.title == "Comment on MR: Refactor deployment worker (#99887766)"
+      assert issue.body == "Can we add a test for the rollback path?"
+      assert issue.url == "https://gitlab.com/mygroup/myproject/-/merge_requests/202#note_99887766"
+      assert issue.status == :open
+      assert issue.workbench_webhook_id == wh.id
     end
   end
 
