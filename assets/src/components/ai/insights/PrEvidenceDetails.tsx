@@ -10,12 +10,12 @@ import {
 } from '@pluralsh/design-system'
 import DiffViewer from 'components/utils/DiffViewer'
 import { StackedText } from 'components/utils/table/StackedText'
-import { applyPatch, parsePatch, reversePatch } from 'diff'
 import { useMemo } from 'react'
-import { DiffMethod } from 'react-diff-viewer'
+import { DiffMethod } from 'react-diff-viewer-continued'
 import styled from 'styled-components'
 import pluralize from 'pluralize'
 import { getURLPath } from 'utils/url'
+import { getOldContentFromUnifiedDiff } from 'utils/unifiedDiff'
 import { GroupedPrEvidence } from './PrEvidencePanel'
 
 export function PrEvidenceDetails({
@@ -31,7 +31,7 @@ export function PrEvidenceDetails({
       files.map((file) => ({
         filename: file.filename,
         newContent: file.contents ?? '',
-        ...getOldContent(file.contents, file.patch),
+        ...getOldContentFromUnifiedDiff(file.contents, file.patch),
       })),
     [files]
   )
@@ -143,22 +143,3 @@ const WrapperSC = styled.div(({ theme }) => ({
   padding: theme.spacing.xsmall,
   width: 850,
 }))
-
-const getOldContent = (
-  newContent: Nullable<string>,
-  patch: Nullable<string>
-): { numChanges: number; oldContent: string } => {
-  const patchObj = parsePatch(patch ?? '')
-  try {
-    return {
-      numChanges: patchObj?.[0]?.hunks?.length ?? 0,
-      oldContent: applyPatch(newContent ?? '', reversePatch(patchObj)) ?? '',
-    }
-  } catch (error) {
-    console.error('Error applying reverse patch:', error)
-    return {
-      numChanges: 0,
-      oldContent: newContent ?? '',
-    }
-  }
-}

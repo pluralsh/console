@@ -18,7 +18,7 @@ import { LayoutOptions } from 'elkjs'
 import Fuse from 'fuse.js'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
-import { useDebounce } from 'usehooks-ts'
+import { useDebounce } from '@react-hooks-library/core'
 import { StackStateGraphNode } from './StackStateGraphNode'
 
 const nodeTypes = {

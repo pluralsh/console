@@ -1,10 +1,8 @@
 import { IconFrame, ReloadIcon, Spinner, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { ComponentProps, createRef, useEffect, useMemo, useState } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { useWindowSize } from 'usehooks-ts'
-
 import { Pod, usePodLogsQuery } from '../../../../../generated/graphql'
 import LoadingIndicator from '../../../../utils/LoadingIndicator'
 import { determineLevel, logLevelToColor } from '../../../logs/LogLine'
@@ -145,19 +143,8 @@ export function ContainerLogsTable({
   loading,
   logs,
 }: ContainerLogsTableProps) {
-  const size = useWindowSize()
-  const containerRef = createRef<HTMLDivElement>()
-  const [containerHeight, setContainerHeight] = useState(0)
-
-  useEffect(() => {
-    if (!containerRef.current) return
-
-    setContainerHeight(containerRef.current.clientHeight)
-  }, [containerRef, size])
-
   return (
     <div
-      ref={containerRef}
       css={{
         minHeight: 0,
         height: '100%',
@@ -167,7 +154,6 @@ export function ContainerLogsTable({
     >
       <Table
         fullHeightWrap
-        height={containerHeight}
         reactTableOptions={{ meta: { refetch, container, loading } }}
         virtualizeRows
         onRowClick={() => {}}

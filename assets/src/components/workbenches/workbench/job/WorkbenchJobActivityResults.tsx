@@ -38,7 +38,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { DiffMethod } from 'react-diff-viewer'
+import { DiffMethod } from 'react-diff-viewer-continued'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'

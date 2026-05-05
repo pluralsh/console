@@ -13,7 +13,7 @@ import {
 import { isEmpty, isNil } from 'lodash'
 import { useCallback, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useDebounce } from 'usehooks-ts'
+import { useDebounce } from '@react-hooks-library/core'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'

@@ -1,32 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
+import { ReactNode, useMemo } from 'react'
 
-import TerminalThemeContext from './TerminalThemeContext'
+import usePersistedState from 'components/hooks/usePersistedState'
 
-import { getTheme, setTheme } from './themes'
+import TerminalThemeContext, {
+  type TerminalThemeContextValue,
+} from './TerminalThemeContext'
 
-function TerminalThemeProvider({ children }: any) {
-  const [terminalTheme, setTerminalTheme] = useState(
-    getTheme() || 'dark_pastel'
+const THEME_KEY = 'shell-theme'
+
+function TerminalThemeProvider({ children }: { children: ReactNode }) {
+  const [terminalTheme, setTerminalTheme] = usePersistedState<string>(
+    THEME_KEY,
+    'dark_pastel'
   )
-  const terminalThemeValue = useMemo(
+  const terminalThemeValue = useMemo<TerminalThemeContextValue>(
     () => [terminalTheme, setTerminalTheme],
-    [terminalTheme]
+    [terminalTheme, setTerminalTheme]
   )
-
-  // If the theme change, persist in localstorage
-  useEffect(() => {
-    const previousTerminalTheme = getTheme()
-
-    if (previousTerminalTheme !== terminalTheme) {
-      setTheme(terminalTheme)
-      window.location.reload()
-    }
-  }, [terminalTheme])
 
   return (
-    <TerminalThemeContext.Provider value={terminalThemeValue}>
+    <TerminalThemeContext value={terminalThemeValue}>
       {children}
-    </TerminalThemeContext.Provider>
+    </TerminalThemeContext>
   )
 }
 
