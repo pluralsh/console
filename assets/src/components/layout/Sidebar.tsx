@@ -7,10 +7,11 @@ import {
   FlowIcon,
   GearTrainIcon,
   GitPullIcon,
-  HamburgerMenuCollapsedIcon,
-  HamburgerMenuCollapseIcon,
   HomeIcon,
+  IconFrame,
   KubernetesAltIcon,
+  MenuCollapseIcon,
+  MenuOpenIcon,
   StackIcon,
   Tooltip,
   WarningShieldIcon,
@@ -276,20 +277,30 @@ export function Sidebar() {
         {configuration?.consoleVersion && (
           <ConsoleVersion version={configuration.consoleVersion} />
         )}
-        <SidebarItem
-          tooltip="Expand"
-          expandedLabel="Collapse"
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsExpanded((x: boolean) => !x)
-          }}
+      </SidebarSection>
+      <SidebarSection>
+        <Flex
+          width="100%"
+          justifyContent={isExpanded ? 'flex-end' : 'center'}
         >
-          {isExpanded ? (
-            <HamburgerMenuCollapseIcon />
-          ) : (
-            <HamburgerMenuCollapsedIcon />
-          )}
-        </SidebarItem>
+          <IconFrame
+            clickable
+            icon={
+              isExpanded ? (
+                <MenuCollapseIcon color="icon-xlight" />
+              ) : (
+                <MenuOpenIcon color="icon-xlight" />
+              )
+            }
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsExpanded((x: boolean) => !x)
+            }}
+            tooltip={isExpanded ? 'Collapse' : 'Expand'}
+            tooltipProps={{ placement: 'right' }}
+            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          />
+        </Flex>
       </SidebarSection>
     </SidebarSC>
   )
@@ -314,7 +325,7 @@ const ConsoleVersionSC = styled.span(({ theme }) => ({
   color: theme.colors['text-xlight'],
   fontSize: 10,
   letterSpacing: '-0.35px',
-  margin: theme.spacing.xxsmall,
+  margin: theme.spacing.xsmall,
   textAlign: 'center',
 }))
 
@@ -324,11 +335,12 @@ const SidebarSC = styled.div<{
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  flexGrow: 1,
+  flexShrink: 0,
   justifyContent: 'flex-start',
   height: '100%',
-  transition: 'max-width 0.2s ease-in-out',
-  width: '100%',
+  transition: 'width 0.2s ease-in-out',
+  width: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
+  minWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
   maxWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
   backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders.default,
