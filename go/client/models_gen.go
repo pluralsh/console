@@ -5620,6 +5620,8 @@ type OpenaiSettings struct {
 	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// OAuth2 client credentials configured for token endpoint exchange
+	TokenExchange *OpenaiTokenExchange `json:"tokenExchange,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5634,6 +5636,24 @@ type OpenaiSettingsAttributes struct {
 	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// OAuth2 client credentials against a token endpoint to obtain access tokens
+	TokenExchange *OpenaiTokenExchangeAttributes `json:"tokenExchange,omitempty"`
+}
+
+// OAuth2 token endpoint client credentials for OpenAI-compatible APIs
+type OpenaiTokenExchange struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// token endpoint URL
+	TokenURL *string `json:"tokenUrl,omitempty"`
+	ClientID *string `json:"clientId,omitempty"`
+}
+
+type OpenaiTokenExchangeAttributes struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// token endpoint URL
+	TokenURL     *string `json:"tokenUrl,omitempty"`
+	ClientID     *string `json:"clientId,omitempty"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 }
 
 type OpensearchConnection struct {

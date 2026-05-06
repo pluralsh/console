@@ -5035,6 +5035,20 @@ input OpenaiSettingsAttributes {
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
+
+  "OAuth2 client credentials against a token endpoint to obtain access tokens"
+  tokenExchange: OpenaiTokenExchangeAttributes
+}
+
+input OpenaiTokenExchangeAttributes {
+  enabled: Boolean
+
+  "token endpoint URL"
+  tokenUrl: String
+
+  clientId: String
+
+  clientSecret: String
 }
 
 input AnthropicSettingsAttributes {
@@ -5418,6 +5432,19 @@ type OpenaiSettings {
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
+
+  "OAuth2 client credentials configured for token endpoint exchange"
+  tokenExchange: OpenaiTokenExchange
+}
+
+"OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
+type OpenaiTokenExchange {
+  enabled: Boolean
+
+  "token endpoint URL"
+  tokenUrl: String
+
+  clientId: String
 }
 
 "Anthropic connection information"

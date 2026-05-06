@@ -6857,6 +6857,8 @@ export type OpenaiSettings = {
   model?: Maybe<Scalars['String']['output']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** OAuth2 client credentials configured for token endpoint exchange */
+  tokenExchange?: Maybe<OpenaiTokenExchange>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: Maybe<Scalars['String']['output']>;
 };
@@ -6871,8 +6873,27 @@ export type OpenaiSettingsAttributes = {
   model?: InputMaybe<Scalars['String']['input']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** OAuth2 client credentials against a token endpoint to obtain access tokens */
+  tokenExchange?: InputMaybe<OpenaiTokenExchangeAttributes>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** OAuth2 token endpoint client credentials for OpenAI-compatible APIs */
+export type OpenaiTokenExchange = {
+  __typename?: 'OpenaiTokenExchange';
+  clientId?: Maybe<Scalars['String']['output']>;
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** token endpoint URL */
+  tokenUrl?: Maybe<Scalars['String']['output']>;
+};
+
+export type OpenaiTokenExchangeAttributes = {
+  clientId?: InputMaybe<Scalars['String']['input']>;
+  clientSecret?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** token endpoint URL */
+  tokenUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type OpensearchConnection = {
