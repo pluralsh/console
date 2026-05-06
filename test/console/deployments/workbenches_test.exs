@@ -502,6 +502,21 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "pause_job/1" do
+    test "marks the job paused, cancels running activities, and notifies subscribers" do
+      job = insert(:workbench_job, status: :running)
+      activity = insert(:workbench_job_activity, workbench_job: job, status: :running)
+
+      {:ok, paused} = Workbenches.pause_job(job)
+
+      assert paused.id == job.id
+      assert paused.status == :paused
+      assert refetch(job).status == :paused
+      assert refetch(activity).status == :cancelled
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
+    end
+  end
+
   describe "create_message/3" do
     test "job owner can create a user message for their job" do
       user = insert(:user)

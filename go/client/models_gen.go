@@ -16777,6 +16777,7 @@ const (
 	WorkbenchJobStatusSuccessful WorkbenchJobStatus = "SUCCESSFUL"
 	WorkbenchJobStatusFailed     WorkbenchJobStatus = "FAILED"
 	WorkbenchJobStatusCancelled  WorkbenchJobStatus = "CANCELLED"
+	WorkbenchJobStatusPaused     WorkbenchJobStatus = "PAUSED"
 )
 
 var AllWorkbenchJobStatus = []WorkbenchJobStatus{
@@ -16785,11 +16786,12 @@ var AllWorkbenchJobStatus = []WorkbenchJobStatus{
 	WorkbenchJobStatusSuccessful,
 	WorkbenchJobStatusFailed,
 	WorkbenchJobStatusCancelled,
+	WorkbenchJobStatusPaused,
 }
 
 func (e WorkbenchJobStatus) IsValid() bool {
 	switch e {
-	case WorkbenchJobStatusPending, WorkbenchJobStatusRunning, WorkbenchJobStatusSuccessful, WorkbenchJobStatusFailed, WorkbenchJobStatusCancelled:
+	case WorkbenchJobStatusPending, WorkbenchJobStatusRunning, WorkbenchJobStatusSuccessful, WorkbenchJobStatusFailed, WorkbenchJobStatusCancelled, WorkbenchJobStatusPaused:
 		return true
 	}
 	return false

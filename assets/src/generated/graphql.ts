@@ -15617,6 +15617,7 @@ export type WorkbenchJobResultTodo = {
 export enum WorkbenchJobStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
+  Paused = 'PAUSED',
   Pending = 'PENDING',
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'

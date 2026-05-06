@@ -533,6 +533,27 @@ defmodule Console.Deployments.Workbenches do
   def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
 
   @doc """
+  Marks a workbench job as paused, and cancels its activities so they can be restarted later.
+  """
+  @spec pause_job(WorkbenchJob.t()) :: job_resp
+  def pause_job(%WorkbenchJob{} = job) do
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      job
+      |> WorkbenchJob.changeset(%{status: :paused})
+      |> Repo.update()
+    end)
+    |> add_operation(:activities, fn _ ->
+      WorkbenchJobActivity.for_workbench_job(job.id)
+      |> WorkbenchJobActivity.for_status(:running)
+      |> Repo.update_all(set: [status: :cancelled])
+      |> ok()
+    end)
+    |> execute(extract: :job)
+    |> notify(:update)
+  end
+
+  @doc """
   Heartbeats a job by setting status to running and updating the updated_at timestamp to the current time.
   """
   @spec heartbeat(WorkbenchJob.t(), boolean) :: job_resp

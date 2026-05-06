@@ -2326,6 +2326,7 @@ enum WorkbenchJobStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  PAUSED
 }
 
 enum WorkbenchJobActivityStatus {

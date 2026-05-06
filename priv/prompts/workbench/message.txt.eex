@@ -85,6 +85,9 @@ The key job attributes you updated were:
 <%= Console.clean(@activity.result.job_update) |> Jason.encode!() %>
 ```
 <% end %>
-<% else %>
+<% else %><%= if @activity.status == :running do %>
 Subagent is still running, waiting for the result...
+<% end %><%= if @activity.status == :cancelled do %>
+Subagent was cancelled, you might want to restart it.
+<% end %>
 <% end %>
