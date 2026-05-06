@@ -8,11 +8,13 @@ import {
   ReturnIcon,
   Select,
   SidePanelOpenIcon,
+  Stepper,
   TicketIcon,
   VisualInspectionIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -22,6 +24,7 @@ import {
   IssueWebhookProvider,
   ObservabilityWebhook,
   ObservabilityWebhookType,
+  PolicyBindingFragment,
   useCreateIssueWebhookMutation,
   useUpsertObservabilityWebhookMutation,
   useWorkbenchQuery,
@@ -48,6 +51,12 @@ import {
 } from 'utils/webhookLabels'
 import { useWebhookSetupGuidePanel } from './WebhookSetupGuidePanel'
 import { Body2P } from 'components/utils/typography/Text'
+import { WebhookAccessPolicyStep } from './WebhookAccessPolicyStep'
+import {
+  WEBHOOK_ACCESS_FORM_STEPS,
+  WebhookAccessFormStep,
+} from './webhookFormSteps'
+import { isNonNullable } from 'utils/isNonNullable'
 
 type CreateWebhookType = 'observability' | 'issue'
 
@@ -59,6 +68,8 @@ type CreateWebhookFormState = {
   issueProvider: Nullable<IssueWebhookProvider>
   issueName: string
   issueSecret: string
+  readBindings: PolicyBindingFragment[]
+  writeBindings: PolicyBindingFragment[]
 }
 
 type RouteState = {
@@ -157,7 +168,13 @@ function getInitialCreateWebhookFormState(): CreateWebhookFormState {
     issueProvider: null,
     issueName: '',
     issueSecret: '',
+    readBindings: [],
+    writeBindings: [],
   }
+}
+
+function policyBindingsAttributes(bindings: PolicyBindingFragment[]) {
+  return bindings.filter(isNonNullable).map(bindingToBindingAttributes)
 }
 
 function getWebhookTypeIcon(type: CreateWebhookType) {
@@ -358,8 +375,12 @@ function CreateWebhookForm({
   const [formState, setFormState] = useState<CreateWebhookFormState>(
     getInitialCreateWebhookFormState
   )
+  const [currentStep, setCurrentStep] = useState<WebhookAccessFormStep>('setup')
   const [newWebHook, setNewWebHook] =
     useState<Nullable<IssueWebhook | ObservabilityWebhook>>(null)
+  const stepIndex = WEBHOOK_ACCESS_FORM_STEPS.findIndex(
+    (s) => s.key === currentStep
+  )
 
   const [upsertObservabilityWebhook, upsertObservabilityWebhookState] =
     useUpsertObservabilityWebhookMutation()
@@ -410,6 +431,8 @@ function CreateWebhookForm({
             type: formState.observabilityType!,
             name: formState.observabilityName.trim(),
             secret: formState.observabilitySecret.trim(),
+            readBindings: policyBindingsAttributes(formState.readBindings),
+            writeBindings: policyBindingsAttributes(formState.writeBindings),
           },
         },
         refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
@@ -434,6 +457,8 @@ function CreateWebhookForm({
           provider: formState.issueProvider!,
           name: formState.issueName.trim(),
           secret: formState.issueSecret.trim(),
+          readBindings: policyBindingsAttributes(formState.readBindings),
+          writeBindings: policyBindingsAttributes(formState.writeBindings),
         },
       },
       refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
@@ -485,171 +510,229 @@ function CreateWebhookForm({
           </Button>
         </>
       )}
-      <FormField
-        label="Type of webhook"
-        required
-      >
-        <Select
-          selectedKey={formState.webhookType}
-          label="Type of webhook"
-          leftContent={getWebhookTypeIcon(formState.webhookType)}
-          onSelectionChange={(key) =>
-            setFormState((prev) => ({
-              ...prev,
-              webhookType: String(key) as CreateWebhookType,
-            }))
-          }
+      {!newWebHook && (
+        <Flex
+          css={{ paddingTop: 2 }}
+          direction="column"
+          gap="medium"
         >
-          <ListBoxItem
-            key="observability"
-            leftContent={<VisualInspectionIcon />}
-            label="Observability"
+          <Stepper
+            compact
+            steps={WEBHOOK_ACCESS_FORM_STEPS}
+            stepIndex={stepIndex}
           />
-          <ListBoxItem
-            key="issue"
-            leftContent={<TicketIcon />}
-            label="Ticketing"
-          />
-        </Select>
-      </FormField>
-      {formState.webhookType === 'observability' ? (
-        <>
-          <FormField
-            label="Provider type"
-            required
-          >
-            <Select
-              selectedKey={formState.observabilityType}
-              label="Provider type"
-              leftContent={getObservabilityWebhookTypeIcon(
-                formState.observabilityType
+          {currentStep === 'setup' ? (
+            <>
+              <FormField
+                label="Type of webhook"
+                required
+              >
+                <Select
+                  selectedKey={formState.webhookType}
+                  label="Type of webhook"
+                  leftContent={getWebhookTypeIcon(formState.webhookType)}
+                  onSelectionChange={(key) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      webhookType: String(key) as CreateWebhookType,
+                    }))
+                  }
+                >
+                  <ListBoxItem
+                    key="observability"
+                    leftContent={<VisualInspectionIcon />}
+                    label="Observability"
+                  />
+                  <ListBoxItem
+                    key="issue"
+                    leftContent={<TicketIcon />}
+                    label="Ticketing"
+                  />
+                </Select>
+              </FormField>
+              {formState.webhookType === 'observability' ? (
+                <>
+                  <FormField
+                    label="Provider type"
+                    required
+                  >
+                    <Select
+                      selectedKey={formState.observabilityType}
+                      label="Provider type"
+                      leftContent={getObservabilityWebhookTypeIcon(
+                        formState.observabilityType
+                      )}
+                      onSelectionChange={(key) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          observabilityType: key as ObservabilityWebhookType,
+                        }))
+                      }
+                    >
+                      {Object.values(ObservabilityWebhookType).map((type) => (
+                        <ListBoxItem
+                          key={type}
+                          leftContent={getObservabilityWebhookTypeIcon(type)}
+                          label={humanizeObservabilityWebhookType(type)}
+                        />
+                      ))}
+                    </Select>
+                  </FormField>
+                  <FormField
+                    label="Name"
+                    required
+                  >
+                    <Input2
+                      value={formState.observabilityName}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          observabilityName: e.target.value,
+                        }))
+                      }
+                    />
+                  </FormField>
+                  <FormField
+                    label="Secret"
+                    required
+                  >
+                    <InputRevealer
+                      defaultRevealed={false}
+                      value={formState.observabilitySecret}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          observabilitySecret: e.target.value,
+                        }))
+                      }
+                    />
+                  </FormField>
+                </>
+              ) : (
+                <>
+                  <FormField
+                    label="Provider type"
+                    required
+                  >
+                    <Select
+                      selectedKey={formState.issueProvider}
+                      label="Provider type"
+                      leftContent={getIssueWebhookProviderIcon(
+                        formState.issueProvider
+                      )}
+                      onSelectionChange={(key) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          issueProvider: key as IssueWebhookProvider,
+                        }))
+                      }
+                    >
+                      {Object.values(IssueWebhookProvider).map((provider) => (
+                        <ListBoxItem
+                          key={provider}
+                          leftContent={getIssueWebhookProviderIcon(provider)}
+                          label={humanizeIssueWebhookProvider(provider)}
+                        />
+                      ))}
+                    </Select>
+                  </FormField>
+                  <FormField
+                    label="Name"
+                    required
+                  >
+                    <Input2
+                      value={formState.issueName}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          issueName: e.target.value,
+                        }))
+                      }
+                    />
+                  </FormField>
+                  <FormField
+                    label="Secret"
+                    required
+                    hint={
+                      formState.issueProvider ===
+                      IssueWebhookProvider.AzureDevops
+                        ? 'Use this value as the HTTP Basic authentication password in the Azure DevOps Web Hook action (HTTPS required). Any username is accepted.'
+                        : formState.issueProvider ===
+                            IssueWebhookProvider.BitbucketDatacenter
+                          ? 'Use this value as the HTTP Basic authentication password in Bitbucket Data Center webhook settings. Any username is accepted.'
+                          : undefined
+                    }
+                  >
+                    <Input2
+                      value={formState.issueSecret}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          issueSecret: e.target.value,
+                        }))
+                      }
+                    />
+                  </FormField>
+                </>
               )}
-              onSelectionChange={(key) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  observabilityType: key as ObservabilityWebhookType,
-                }))
+            </>
+          ) : (
+            <WebhookAccessPolicyStep
+              readBindings={formState.readBindings.filter(isNonNullable)}
+              writeBindings={formState.writeBindings.filter(isNonNullable)}
+              onReadBindingsChange={(next) =>
+                setFormState((prev) => ({ ...prev, readBindings: next }))
               }
-            >
-              {Object.values(ObservabilityWebhookType).map((type) => (
-                <ListBoxItem
-                  key={type}
-                  leftContent={getObservabilityWebhookTypeIcon(type)}
-                  label={humanizeObservabilityWebhookType(type)}
-                />
-              ))}
-            </Select>
-          </FormField>
-          <FormField
-            label="Name"
-            required
-          >
-            <Input2
-              value={formState.observabilityName}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  observabilityName: e.target.value,
-                }))
+              onWriteBindingsChange={(next) =>
+                setFormState((prev) => ({ ...prev, writeBindings: next }))
               }
             />
-          </FormField>
-          <FormField
-            label="Secret"
-            required
-          >
-            <InputRevealer
-              defaultRevealed={false}
-              value={formState.observabilitySecret}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  observabilitySecret: e.target.value,
-                }))
-              }
-            />
-          </FormField>
-        </>
-      ) : (
-        <>
-          <FormField
-            label="Provider type"
-            required
-          >
-            <Select
-              selectedKey={formState.issueProvider}
-              label="Provider type"
-              leftContent={getIssueWebhookProviderIcon(formState.issueProvider)}
-              onSelectionChange={(key) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  issueProvider: key as IssueWebhookProvider,
-                }))
-              }
-            >
-              {Object.values(IssueWebhookProvider).map((provider) => (
-                <ListBoxItem
-                  key={provider}
-                  leftContent={getIssueWebhookProviderIcon(provider)}
-                  label={humanizeIssueWebhookProvider(provider)}
-                />
-              ))}
-            </Select>
-          </FormField>
-          <FormField
-            label="Name"
-            required
-          >
-            <Input2
-              value={formState.issueName}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  issueName: e.target.value,
-                }))
-              }
-            />
-          </FormField>
-          <FormField
-            label="Secret"
-            required
-            hint={
-              formState.issueProvider === IssueWebhookProvider.AzureDevops
-                ? 'Use this value as the HTTP Basic authentication password in the Azure DevOps Web Hook action (HTTPS required). Any username is accepted.'
-                : formState.issueProvider ===
-                    IssueWebhookProvider.BitbucketDatacenter
-                  ? 'Use this value as the HTTP Basic authentication password in Bitbucket Data Center webhook settings. Any username is accepted.'
-                  : undefined
-            }
-          >
-            <Input2
-              value={formState.issueSecret}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  issueSecret: e.target.value,
-                }))
-              }
-            />
-          </FormField>
-        </>
+          )}
+        </Flex>
       )}
-      <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
-        <Button
-          secondary
-          startIcon={returnPathIsList ? <ReturnIcon /> : undefined}
-          onClick={onReturn}
-          disabled={isSaving}
+      <StickyActionsFooterSC css={{ justifyContent: 'stretch' }}>
+        <Flex
+          justify="space-between"
+          align="center"
+          width="100%"
+          gap="small"
         >
-          {returnPathIsList ? 'Back to all webhooks' : 'Back'}
-        </Button>
-        <Button
-          onClick={() => void handleCreateNewWebhook()}
-          loading={isSaving}
-          disabled={!canCreateWebhook}
-        >
-          Create new webhook
-        </Button>
+          <Button
+            secondary
+            startIcon={returnPathIsList ? <ReturnIcon /> : undefined}
+            onClick={onReturn}
+            disabled={isSaving}
+          >
+            {returnPathIsList ? 'Back to all webhooks' : 'Back'}
+          </Button>
+          {!newWebHook && currentStep === 'setup' ? (
+            <Flex gap="small">
+              <Button
+                secondary
+                onClick={() => setCurrentStep('access-policy')}
+                disabled={isSaving}
+              >
+                Configure access policy
+              </Button>
+              <Button
+                onClick={() => void handleCreateNewWebhook()}
+                loading={isSaving}
+                disabled={!canCreateWebhook}
+              >
+                Create new webhook
+              </Button>
+            </Flex>
+          ) : null}
+          {!newWebHook && currentStep === 'access-policy' ? (
+            <Button
+              secondary
+              onClick={() => setCurrentStep('setup')}
+              disabled={isSaving}
+            >
+              Back to setup
+            </Button>
+          ) : null}
+        </Flex>
       </StickyActionsFooterSC>
     </Flex>
   )

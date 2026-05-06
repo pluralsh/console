@@ -12,21 +12,44 @@ import {
   PluralLogoIcon,
   Select,
   SentryLogoIcon,
+  Stepper,
   WebhooksIcon,
 } from '@pluralsh/design-system'
-import { ComponentPropsWithoutRef, useCallback } from 'react'
+import {
+  ComponentPropsWithoutRef,
+  useCallback,
+  useMemo,
+  useState,
+  type FormEvent,
+} from 'react'
 import styled from 'styled-components'
 
 import {
   ObservabilityWebhookFragment,
   ObservabilityWebhookType,
+  PolicyBindingFragment,
   useUpsertObservabilityWebhookMutation,
 } from 'generated/graphql'
 
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { useUpdateState } from 'components/hooks/useUpdateState'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
+import { WebhookAccessPolicyStep } from 'components/workbenches/workbench/webhooks/WebhookAccessPolicyStep'
+import {
+  WEBHOOK_ACCESS_FORM_STEPS,
+  WebhookAccessFormStep,
+} from 'components/workbenches/workbench/webhooks/webhookFormSteps'
 import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
+import { isNonNullable } from 'utils/isNonNullable'
+
+type ObservabilityWebhookFormState = {
+  type: ObservabilityWebhookType
+  name: string
+  secret: string
+  readBindings: PolicyBindingFragment[]
+  writeBindings: PolicyBindingFragment[]
+}
 
 export function EditObservabilityWebhookModal({
   open,
@@ -41,10 +64,13 @@ export function EditObservabilityWebhookModal({
       open={open}
       onClose={onClose}
     >
-      <EditObservabilityWebhook
-        onClose={onClose}
-        {...props}
-      />
+      {open ? (
+        <EditObservabilityWebhook
+          key={`${props.operationType}-${props.observabilityWebhook?.id ?? 'new'}`}
+          onClose={onClose}
+          {...props}
+        />
+      ) : null}
     </Modal>
   )
 }
@@ -60,103 +86,222 @@ export function EditObservabilityWebhook({
   refetch?: () => void
   onClose: () => void
 }) {
+  const initialFormState = useMemo(
+    (): ObservabilityWebhookFormState => ({
+      type: observabilityWebhook?.type ?? ObservabilityWebhookType.Grafana,
+      name: observabilityWebhook?.name ?? '',
+      secret: '',
+      readBindings:
+        observabilityWebhook?.readBindings?.filter(isNonNullable) ?? [],
+      writeBindings:
+        observabilityWebhook?.writeBindings?.filter(isNonNullable) ?? [],
+    }),
+    [
+      observabilityWebhook?.type,
+      observabilityWebhook?.name,
+      observabilityWebhook?.readBindings,
+      observabilityWebhook?.writeBindings,
+    ]
+  )
+
   const {
     state: formState,
     update: updateFormState,
     hasUpdates,
-  } = useUpdateState({
-    type: observabilityWebhook?.type || ObservabilityWebhookType.Grafana,
-    name: observabilityWebhook?.name || '',
-    secret: '',
-  })
+  } = useUpdateState<ObservabilityWebhookFormState>(initialFormState)
 
-  const { name, type, secret } = formState
+  const [currentStep, setCurrentStep] = useState<WebhookAccessFormStep>('setup')
 
-  const allowSubmit = name && type && secret && hasUpdates
-
-  const [mutation, { loading, error }] = useUpsertObservabilityWebhookMutation({
-    variables: { attributes: { name, type, secret } },
-    onCompleted: () => {
-      refetch?.()
-      onClose()
-    },
-  })
-
-  const onSubmit = useCallback(
-    (e) => {
-      e.preventDefault()
-      if (allowSubmit) mutation()
-    },
-    [allowSubmit, mutation]
+  const stepIndex = WEBHOOK_ACCESS_FORM_STEPS.findIndex(
+    (s) => s.key === currentStep
   )
 
+  const { type, name, secret, readBindings, writeBindings } = formState
+
+  const allowSubmitSetup =
+    !!name?.trim() && !!type && !!secret?.trim() && hasUpdates
+
+  const allowSavePolicy =
+    operationType === 'update' &&
+    !!name?.trim() &&
+    !!type &&
+    !!secret?.trim() &&
+    hasUpdates
+
+  const [upsertWebhook, { loading, error }] =
+    useUpsertObservabilityWebhookMutation()
+
+  const runUpsert = useCallback(async () => {
+    await upsertWebhook({
+      variables: {
+        attributes: {
+          name: name.trim(),
+          type,
+          secret: secret.trim(),
+          readBindings: readBindings
+            .filter(isNonNullable)
+            .map(bindingToBindingAttributes),
+          writeBindings: writeBindings
+            .filter(isNonNullable)
+            .map(bindingToBindingAttributes),
+        },
+      },
+      onCompleted: () => {
+        refetch?.()
+        onClose()
+      },
+    })
+  }, [
+    upsertWebhook,
+    name,
+    type,
+    secret,
+    readBindings,
+    writeBindings,
+    refetch,
+    onClose,
+  ])
+
+  const onSubmitSetup = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault()
+      if (!allowSubmitSetup) return
+      await runUpsert()
+    },
+    [allowSubmitSetup, runUpsert]
+  )
+
+  const onSavePolicy = useCallback(async () => {
+    if (!allowSavePolicy) return
+    await runUpsert()
+  }, [allowSavePolicy, runUpsert])
+
   return (
-    <WrapperFormSC onSubmit={onSubmit}>
+    <WrapperSC onSubmit={onSubmitSetup}>
       {error && <GqlError error={error} />}
-      <FormField
-        label="Provider type"
-        required
+      <Flex
+        css={{ paddingTop: 2 }}
+        direction="column"
+        gap="medium"
       >
-        <Select
-          selectedKey={type}
-          leftContent={getObservabilityWebhookTypeIcon(type)}
-          label="Select provider type"
-          onSelectionChange={(key) =>
-            updateFormState({ type: key as ObservabilityWebhookType })
-          }
-        >
-          {Object.values(ObservabilityWebhookType).map((type) => (
-            <ListBoxItem
-              key={type}
-              leftContent={getObservabilityWebhookTypeIcon(type)}
-              label={humanizeObservabilityWebhookType(type)}
-            />
-          ))}
-        </Select>
-      </FormField>
-      <FormField
-        label="Name"
-        required
-      >
-        <Input2
-          value={formState.name}
-          onChange={(e) => updateFormState({ name: e.target.value })}
-          disabled={operationType === 'update'}
+        <Stepper
+          compact
+          steps={WEBHOOK_ACCESS_FORM_STEPS}
+          stepIndex={stepIndex}
         />
-      </FormField>
-      <FormField
-        label="Secret"
-        required
-      >
-        <InputRevealer
-          defaultRevealed={false}
-          value={formState.secret}
-          onChange={(e) => updateFormState({ secret: e.target.value })}
-        />
-      </FormField>
+        {currentStep === 'setup' ? (
+          <>
+            <FormField
+              label="Provider type"
+              required
+            >
+              <Select
+                selectedKey={type}
+                leftContent={getObservabilityWebhookTypeIcon(type)}
+                label="Select provider type"
+                onSelectionChange={(key) =>
+                  updateFormState({ type: key as ObservabilityWebhookType })
+                }
+              >
+                {Object.values(ObservabilityWebhookType).map((providerType) => (
+                  <ListBoxItem
+                    key={providerType}
+                    leftContent={getObservabilityWebhookTypeIcon(providerType)}
+                    label={humanizeObservabilityWebhookType(providerType)}
+                  />
+                ))}
+              </Select>
+            </FormField>
+            <FormField
+              label="Name"
+              required
+            >
+              <Input2
+                value={formState.name}
+                onChange={(e) => updateFormState({ name: e.target.value })}
+                disabled={operationType === 'update'}
+              />
+            </FormField>
+            <FormField
+              label="Secret"
+              required
+            >
+              <InputRevealer
+                defaultRevealed={false}
+                value={formState.secret}
+                onChange={(e) => updateFormState({ secret: e.target.value })}
+              />
+            </FormField>
+          </>
+        ) : (
+          <WebhookAccessPolicyStep
+            readBindings={readBindings.filter(isNonNullable)}
+            writeBindings={writeBindings.filter(isNonNullable)}
+            onReadBindingsChange={(next) =>
+              updateFormState({ readBindings: next })
+            }
+            onWriteBindingsChange={(next) =>
+              updateFormState({ writeBindings: next })
+            }
+          />
+        )}
+      </Flex>
       <Flex
         gap="small"
-        justify="flex-end"
+        justify="space-between"
+        width="100%"
       >
         <Button
           secondary
+          type="button"
           onClick={() => onClose?.()}
         >
           Cancel
         </Button>
-        <Button
-          type="submit"
-          loading={loading}
-          disabled={!allowSubmit}
-        >
-          {operationType === 'create' ? 'Create' : 'Update'}
-        </Button>
+        {currentStep === 'setup' ? (
+          <Flex gap="small">
+            <Button
+              secondary
+              type="button"
+              onClick={() => setCurrentStep('access-policy')}
+            >
+              Configure access policy
+            </Button>
+            <Button
+              type="submit"
+              loading={loading}
+              disabled={!allowSubmitSetup}
+            >
+              {operationType === 'create' ? 'Create' : 'Update'}
+            </Button>
+          </Flex>
+        ) : (
+          <Flex gap="small">
+            <Button
+              secondary
+              type="button"
+              onClick={() => setCurrentStep('setup')}
+            >
+              Back to setup
+            </Button>
+            {operationType === 'update' ? (
+              <Button
+                type="button"
+                loading={loading}
+                disabled={!allowSavePolicy}
+                onClick={() => void onSavePolicy()}
+              >
+                Save access policy
+              </Button>
+            ) : null}
+          </Flex>
+        )}
       </Flex>
-    </WrapperFormSC>
+    </WrapperSC>
   )
 }
 
-const WrapperFormSC = styled.form(({ theme }) => ({
+const WrapperSC = styled.form(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
