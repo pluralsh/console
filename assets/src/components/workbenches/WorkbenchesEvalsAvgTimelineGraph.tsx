@@ -31,12 +31,12 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (error) return <GqlError error={error} />
-
   const series = useMemo(
     () => buildSeries(data?.averageWorkbenchEvalResults ?? [], theme),
     [data?.averageWorkbenchEvalResults, theme]
   )
+
+  if (error) return <GqlError error={error} />
 
   const selectableSeries = series
   const selectableIdSet = new Set(selectableSeries.map((item) => item.id))
