@@ -209,6 +209,7 @@ export function WorkbenchEvalSettings() {
                     disabled={!evalsEnabled}
                     options={{
                       readOnly: !evalsEnabled,
+                      wordWrap: 'on',
                       minimap: { enabled: false },
                     }}
                   />
@@ -224,6 +225,7 @@ export function WorkbenchEvalSettings() {
                   disabled={!evalsEnabled}
                   options={{
                     readOnly: !evalsEnabled,
+                    wordWrap: 'on',
                     minimap: { enabled: false },
                   }}
                 />
@@ -238,6 +240,7 @@ export function WorkbenchEvalSettings() {
                   disabled={!evalsEnabled}
                   options={{
                     readOnly: !evalsEnabled,
+                    wordWrap: 'on',
                     minimap: { enabled: false },
                   }}
                 />
