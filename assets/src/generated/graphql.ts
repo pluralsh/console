@@ -19883,6 +19883,13 @@ export type WorkbenchDashboardQueryVariables = Exact<{
 
 export type WorkbenchDashboardQuery = { __typename?: 'RootQueryType', workbenchPullRequests: number, workbenchAggregates: { __typename?: 'WorkbenchAggregates', pullRequests?: number | null, pullRequestMergeRate?: number | null, evalResults?: number | null }, workbenchPrMergeRates?: Array<{ __typename?: 'WorkbenchPrMergeRateEntry', timestamp?: string | null, mergeRate?: number | null } | null> | null, workbenchPrMergeRatesByWorkbench?: Array<{ __typename?: 'WorkbenchPrMergeRateByWorkbenchEntry', timestamp?: string | null, mergeRate?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
 
+export type WorkbenchesEvalsMergeRateGraphQueryVariables = Exact<{
+  period?: InputMaybe<EvalResultsPeriod>;
+}>;
+
+
+export type WorkbenchesEvalsMergeRateGraphQuery = { __typename?: 'RootQueryType', workbenchPrMergeRates?: Array<{ __typename?: 'WorkbenchPrMergeRateEntry', timestamp?: string | null, mergeRate?: number | null } | null> | null };
+
 export type WorkbenchesAlertsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -41113,6 +41120,50 @@ export type WorkbenchDashboardQueryHookResult = ReturnType<typeof useWorkbenchDa
 export type WorkbenchDashboardLazyQueryHookResult = ReturnType<typeof useWorkbenchDashboardLazyQuery>;
 export type WorkbenchDashboardSuspenseQueryHookResult = ReturnType<typeof useWorkbenchDashboardSuspenseQuery>;
 export type WorkbenchDashboardQueryResult = Apollo.QueryResult<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>;
+export const WorkbenchesEvalsMergeRateGraphDocument = gql`
+    query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {
+  workbenchPrMergeRates(period: $period) {
+    timestamp
+    mergeRate
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchesEvalsMergeRateGraphQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchesEvalsMergeRateGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchesEvalsMergeRateGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchesEvalsMergeRateGraphQuery({
+ *   variables: {
+ *      period: // value for 'period'
+ *   },
+ * });
+ */
+export function useWorkbenchesEvalsMergeRateGraphQuery(baseOptions?: Apollo.QueryHookOptions<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>(WorkbenchesEvalsMergeRateGraphDocument, options);
+      }
+export function useWorkbenchesEvalsMergeRateGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>(WorkbenchesEvalsMergeRateGraphDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchesEvalsMergeRateGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>;
+export function useWorkbenchesEvalsMergeRateGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchesEvalsMergeRateGraphQuery | undefined, WorkbenchesEvalsMergeRateGraphQueryVariables>;
+export function useWorkbenchesEvalsMergeRateGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>(WorkbenchesEvalsMergeRateGraphDocument, options);
+        }
+export type WorkbenchesEvalsMergeRateGraphQueryHookResult = ReturnType<typeof useWorkbenchesEvalsMergeRateGraphQuery>;
+export type WorkbenchesEvalsMergeRateGraphLazyQueryHookResult = ReturnType<typeof useWorkbenchesEvalsMergeRateGraphLazyQuery>;
+export type WorkbenchesEvalsMergeRateGraphSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesEvalsMergeRateGraphSuspenseQuery>;
+export type WorkbenchesEvalsMergeRateGraphQueryResult = Apollo.QueryResult<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>;
 export const WorkbenchesAlertsDocument = gql`
     query WorkbenchesAlerts($first: Int = 100, $after: String) {
   workbenchAlerts(first: $first, after: $after) {
@@ -43324,6 +43375,7 @@ export const namedOperations = {
     ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate',
     Workbenches: 'Workbenches',
     WorkbenchDashboard: 'WorkbenchDashboard',
+    WorkbenchesEvalsMergeRateGraph: 'WorkbenchesEvalsMergeRateGraph',
     WorkbenchesAlerts: 'WorkbenchesAlerts',
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',

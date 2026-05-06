@@ -1807,6 +1807,11 @@
          "name": "WorkbenchDashboard",
          "body": "query WorkbenchDashboard($period: EvalResultsPeriod = WEEK) {\n  workbenchPullRequests\n  workbenchAggregates {\n    pullRequests\n    pullRequestMergeRate\n    evalResults\n    __typename\n  }\n  workbenchPrMergeRates(period: $period) {\n    timestamp\n    mergeRate\n    __typename\n  }\n  workbenchPrMergeRatesByWorkbench(period: $period) {\n    timestamp\n    mergeRate\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
       },
+      "sha256:c4f4c207c42b50e3b6de8acac5a4c77a56202e0cb5188b356e2dd15499d6b70d": {
+         "type": "query",
+         "name": "WorkbenchesEvalsMergeRateGraph",
+         "body": "query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {\n  workbenchPrMergeRates(period: $period) {\n    timestamp\n    mergeRate\n    __typename\n  }\n}"
+      },
       "sha256:93feb848735e2cf2f085fa3f602a6ad916b353383522b68cb9480cf001019b3a": {
          "type": "query",
          "name": "WorkbenchesAlerts",
