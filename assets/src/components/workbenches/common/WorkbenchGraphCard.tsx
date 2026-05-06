@@ -21,14 +21,6 @@ export function WorkbenchGraphCard({
 }) {
   const theme = useTheme()
 
-  if (loading)
-    return (
-      <RectangleSkeleton
-        $height={MIN_HEIGHT}
-        $width="100%"
-      />
-    )
-
   return (
     <Card
       css={{
@@ -51,8 +43,17 @@ export function WorkbenchGraphCard({
         <Body1P>{title}</Body1P>
         {rightContent}
       </div>
-      <div>{children}</div>
-      {hint ? <CaptionP $color="text-xlight">{hint}</CaptionP> : null}
+      <div css={{ minHeight: 0, flex: 1 }}>
+        {loading ? (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        ) : (
+          children
+        )}
+      </div>
+      {hint && <CaptionP $color="text-xlight">{hint}</CaptionP>}
     </Card>
   )
 }
