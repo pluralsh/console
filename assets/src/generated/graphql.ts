@@ -19876,6 +19876,13 @@ export type WorkbenchesQueryVariables = Exact<{
 
 export type WorkbenchesQuery = { __typename?: 'RootQueryType', workbenches?: { __typename?: 'WorkbenchConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchEdge', node?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null } | null> | null } | null };
 
+export type WorkbenchDashboardQueryVariables = Exact<{
+  period?: InputMaybe<EvalResultsPeriod>;
+}>;
+
+
+export type WorkbenchDashboardQuery = { __typename?: 'RootQueryType', workbenchPullRequests: number, workbenchAggregates: { __typename?: 'WorkbenchAggregates', pullRequests?: number | null, pullRequestMergeRate?: number | null, evalResults?: number | null }, workbenchPrMergeRates?: Array<{ __typename?: 'WorkbenchPrMergeRateEntry', timestamp?: string | null, mergeRate?: number | null } | null> | null, workbenchPrMergeRatesByWorkbench?: Array<{ __typename?: 'WorkbenchPrMergeRateByWorkbenchEntry', timestamp?: string | null, mergeRate?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
+
 export type WorkbenchesAlertsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -41048,6 +41055,64 @@ export type WorkbenchesQueryHookResult = ReturnType<typeof useWorkbenchesQuery>;
 export type WorkbenchesLazyQueryHookResult = ReturnType<typeof useWorkbenchesLazyQuery>;
 export type WorkbenchesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesSuspenseQuery>;
 export type WorkbenchesQueryResult = Apollo.QueryResult<WorkbenchesQuery, WorkbenchesQueryVariables>;
+export const WorkbenchDashboardDocument = gql`
+    query WorkbenchDashboard($period: EvalResultsPeriod = WEEK) {
+  workbenchPullRequests
+  workbenchAggregates {
+    pullRequests
+    pullRequestMergeRate
+    evalResults
+  }
+  workbenchPrMergeRates(period: $period) {
+    timestamp
+    mergeRate
+  }
+  workbenchPrMergeRatesByWorkbench(period: $period) {
+    timestamp
+    mergeRate
+    workbench {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchDashboardQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchDashboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchDashboardQuery({
+ *   variables: {
+ *      period: // value for 'period'
+ *   },
+ * });
+ */
+export function useWorkbenchDashboardQuery(baseOptions?: Apollo.QueryHookOptions<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>(WorkbenchDashboardDocument, options);
+      }
+export function useWorkbenchDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>(WorkbenchDashboardDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchDashboardSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>;
+export function useWorkbenchDashboardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDashboardQuery | undefined, WorkbenchDashboardQueryVariables>;
+export function useWorkbenchDashboardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>(WorkbenchDashboardDocument, options);
+        }
+export type WorkbenchDashboardQueryHookResult = ReturnType<typeof useWorkbenchDashboardQuery>;
+export type WorkbenchDashboardLazyQueryHookResult = ReturnType<typeof useWorkbenchDashboardLazyQuery>;
+export type WorkbenchDashboardSuspenseQueryHookResult = ReturnType<typeof useWorkbenchDashboardSuspenseQuery>;
+export type WorkbenchDashboardQueryResult = Apollo.QueryResult<WorkbenchDashboardQuery, WorkbenchDashboardQueryVariables>;
 export const WorkbenchesAlertsDocument = gql`
     query WorkbenchesAlerts($first: Int = 100, $after: String) {
   workbenchAlerts(first: $first, after: $after) {
@@ -43258,6 +43323,7 @@ export const namedOperations = {
     VulnerabilityStatistics: 'VulnerabilityStatistics',
     ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate',
     Workbenches: 'Workbenches',
+    WorkbenchDashboard: 'WorkbenchDashboard',
     WorkbenchesAlerts: 'WorkbenchesAlerts',
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',
