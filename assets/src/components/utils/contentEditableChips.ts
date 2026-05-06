@@ -1,37 +1,27 @@
 /**
  * Generic chip primitives for `contenteditable` editors.
  *
- * A "chip" is a non-editable inline `<span data-chip="true">` whose stored
- * payload is reconstructed from `data-attr-*` attributes when the editor's
- * value is serialized. Mention-specific code (e.g. `mentionShorthand.ts`)
- * builds chips on top of these primitives by emitting the right attributes.
+ * A "chip" is a non-editable inline `<span data-chip="true">` whose payload is
+ * stored in `data-attr-*` attributes and reconstructed when the editor value
+ * is serialized.
  */
 
 export const CHIP_DATA_ATTR = 'data-chip'
 export const CHIP_TAG_ATTR = 'data-plrl-tag'
 export const CHIP_ATTR_PREFIX = 'data-attr-'
 
-export const ZWSP = '​'
+const ZWSP = '​'
 
-export function stripZwsp(text: string): string {
+function stripZwsp(text: string): string {
   return text.replace(/​/g, '')
 }
 
-export function escapeXmlAttr(value: string): string {
+function escapeXmlAttr(value: string): string {
   return value
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-}
-
-export function attrsToString(
-  attrs: Record<string, string | null | undefined>
-): string {
-  return Object.entries(attrs)
-    .filter(([, v]) => v != null && v !== '')
-    .map(([k, v]) => `${k}="${escapeXmlAttr(String(v))}"`)
-    .join(' ')
 }
 
 export function isChipNode(node: Node | null | undefined): boolean {

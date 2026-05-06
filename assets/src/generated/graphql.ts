@@ -17268,6 +17268,7 @@ export type ClusterWithMetricsFragment = { __typename?: 'Cluster', protect?: boo
 export type ClustersTinyQueryVariables = Exact<{
   projectId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -29569,8 +29570,8 @@ export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery
 export type ClustersSuspenseQueryHookResult = ReturnType<typeof useClustersSuspenseQuery>;
 export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
 export const ClustersTinyDocument = gql`
-    query ClustersTiny($projectId: ID, $first: Int) {
-  clusters(first: $first, projectId: $projectId) {
+    query ClustersTiny($projectId: ID, $first: Int, $q: String) {
+  clusters(first: $first, projectId: $projectId, q: $q) {
     edges {
       node {
         ...ClusterTiny
@@ -29594,6 +29595,7 @@ export const ClustersTinyDocument = gql`
  *   variables: {
  *      projectId: // value for 'projectId'
  *      first: // value for 'first'
+ *      q: // value for 'q'
  *   },
  * });
  */

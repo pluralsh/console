@@ -23,7 +23,6 @@ export function EditableDiv({
   onKeyDown: onKeyDownProp,
   placeholder,
   disabled,
-  chipsEnabled = false,
   ...props
 }: {
   initialValue?: string
@@ -31,7 +30,6 @@ export function EditableDiv({
   onEnter?: () => void
   placeholder?: string
   disabled?: boolean
-  chipsEnabled?: boolean
 } & ComponentPropsWithRef<'div'>) {
   const internalRef = useRef<HTMLDivElement>(null)
   const isFirstRender = useRef(true)
@@ -50,14 +48,12 @@ export function EditableDiv({
   const onInput = useCallback(
     (e: FormEvent<HTMLDivElement>) => {
       const node = e.currentTarget
-      const content = chipsEnabled
-        ? serializeEditableValue(node)
-        : node.innerText || ''
+      const content = serializeEditableValue(node)
       // sometimes clearing the input manually leaves a straggler newline
       setValue(content === '\n' ? '' : content)
       if (content === '\n' || content === '') node.innerHTML = ''
     },
-    [setValue, chipsEnabled]
+    [setValue]
   )
 
   const onKeyDown = useCallback(
@@ -72,7 +68,7 @@ export function EditableDiv({
         onEnter?.()
         return
       }
-      if (chipsEnabled && e.key === 'Backspace' && internalRef.current) {
+      if (e.key === 'Backspace' && internalRef.current) {
         const chip = chipBeforeCaret(internalRef.current)
         if (chip) {
           e.preventDefault()
@@ -84,7 +80,7 @@ export function EditableDiv({
         }
       }
     },
-    [onEnter, onKeyDownProp, chipsEnabled]
+    [onEnter, onKeyDownProp]
   )
 
   const onPaste = useCallback(
@@ -98,15 +94,9 @@ export function EditableDiv({
       selection.getRangeAt(0).insertNode(document.createTextNode(text))
       selection.collapseToEnd()
       const node = internalRef.current
-      setValue(
-        node
-          ? chipsEnabled
-            ? serializeEditableValue(node)
-            : node.innerText
-          : ''
-      )
+      setValue(node ? serializeEditableValue(node) : '')
     },
-    [setValue, chipsEnabled]
+    [setValue]
   )
 
   return (

@@ -52,20 +52,16 @@ export function WorkbenchJobPromptInput({
   const isRunning = isJobRunning(job?.status)
   const prevIsRunning = usePrevious(isRunning)
 
-  const readPrompt = () =>
-    chatInputRef.current?.getSerializedValue?.() ?? newMessage
-
   const submitJob = () => {
-    const prompt = readPrompt()
     if (isRunning) {
       setChatQueue((prev) => [
         ...prev,
-        { id: Math.random().toString(), message: prompt },
+        { id: Math.random().toString(), message: newMessage },
       ])
       resetInput()
     } else
       createMessage({
-        variables: { jobId: job?.id ?? '', attributes: { prompt } },
+        variables: { jobId: job?.id ?? '', attributes: { prompt: newMessage } },
       })
   }
 

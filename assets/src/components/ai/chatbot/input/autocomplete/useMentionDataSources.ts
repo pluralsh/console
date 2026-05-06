@@ -1,6 +1,7 @@
+import Fuse from 'fuse.js'
 import { useThrottle } from 'components/hooks/useThrottle'
 import {
-  useClusterSelectorQuery,
+  useClustersTinyQuery,
   useServiceDeploymentsQuery,
   useStacksQuery,
   useWorkbenchSkillsQuery,
@@ -8,16 +9,21 @@ import {
 import { useMemo } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import {
-  ClusterMentionItem,
-  MentionItem,
+  ChipAttrs,
+  ClusterChipAttrs,
+  MentionKind,
   MentionTrigger,
-  ServiceMentionItem,
-  SkillMentionItem,
-  StackMentionItem,
+  ServiceChipAttrs,
+  SkillChipAttrs,
+  StackChipAttrs,
 } from './mentionTypes'
+import { isEmpty } from 'lodash'
+import { isNonNullable } from 'utils/isNonNullable'
 
 const MAX_PER_KIND = 8
 const QUERY_THROTTLE_MS = 200
+
+const skillFuseOptions = { keys: ['item-name', 'description'], threshold: 0.5 }
 
 export function useMentionDataSources({
   trigger,
@@ -29,84 +35,120 @@ export function useMentionDataSources({
   query: string
   workbenchId?: Nullable<string>
   enabled: boolean
-}): { items: MentionItem[]; loading: boolean } {
+}): { items: ChipAttrs[]; loading: boolean } {
   const throttled = useThrottle(query, QUERY_THROTTLE_MS)
   const wantsAt = enabled && trigger === '@'
   const wantsSlash = enabled && trigger === '/'
-
-  const { data: clusterData, loading: clustersLoading } =
-    useClusterSelectorQuery({
-      variables: { q: throttled || null, first: MAX_PER_KIND },
-      skip: !wantsAt,
-      fetchPolicy: 'cache-and-network',
-    })
-
-  const { data: serviceData, loading: servicesLoading } =
-    useServiceDeploymentsQuery({
-      variables: { q: throttled || undefined, first: MAX_PER_KIND },
-      skip: !wantsAt,
-      fetchPolicy: 'cache-and-network',
-    })
-
-  const { data: stackData, loading: stacksLoading } = useStacksQuery({
+  const atOptions = {
     variables: { q: throttled || undefined, first: MAX_PER_KIND },
     skip: !wantsAt,
-    fetchPolicy: 'cache-and-network',
-  })
+    fetchPolicy: 'cache-and-network' as const,
+  }
+  const {
+    data: cluCur,
+    previousData: cluPrev,
+    loading: clustersLoading,
+  } = useClustersTinyQuery(atOptions)
+  const clusterData = cluCur || cluPrev
 
-  const { data: skillData, loading: skillsLoading } = useWorkbenchSkillsQuery({
+  const {
+    data: svcCur,
+    previousData: svcPrev,
+    loading: servicesLoading,
+  } = useServiceDeploymentsQuery(atOptions)
+  const serviceData = svcCur || svcPrev
+
+  const {
+    data: stkCur,
+    previousData: stkPrev,
+    loading: stacksLoading,
+  } = useStacksQuery(atOptions)
+  const stackData = stkCur || stkPrev
+
+  const {
+    data: sklData,
+    previousData: sklPreviousData,
+    loading: skillsLoading,
+  } = useWorkbenchSkillsQuery({
     variables: { id: workbenchId ?? '', first: 500 },
     skip: !wantsSlash || !workbenchId,
     fetchPolicy: 'cache-and-network',
   })
+  const skillData = sklData || sklPreviousData
 
-  const clusters = useMemo<ClusterMentionItem[]>(() => {
-    if (!wantsAt) return []
-    return mapExistingNodes(clusterData?.clusters)
-      .filter((n) => !!n.id)
-      .map((n) => ({ kind: 'cluster' as const, ...n }))
-  }, [clusterData, wantsAt])
+  const clusters = useMemo<ClusterChipAttrs[]>(
+    () =>
+      mapExistingNodes(clusterData?.clusters)
+        .filter((n) => !!n.id)
+        .map(({ id, name, handle, distro, provider }) => ({
+          kind: MentionKind.Cluster,
+          'item-id': id,
+          'item-name': name ?? '',
+          handle,
+          distro,
+          provider: provider?.cloud ?? undefined,
+        })),
+    [clusterData]
+  )
 
-  const services = useMemo<ServiceMentionItem[]>(() => {
-    if (!wantsAt) return []
-    return mapExistingNodes(serviceData?.serviceDeployments)
-      .filter((n) => !!n.id)
-      .map((n) => ({ kind: 'service' as const, ...n }))
-  }, [serviceData, wantsAt])
+  const services = useMemo<ServiceChipAttrs[]>(
+    () =>
+      mapExistingNodes(serviceData?.serviceDeployments)
+        .filter((n) => !!n.id)
+        .map((n) => ({
+          kind: MentionKind.Service,
+          'item-id': n.id,
+          'item-name': n.name,
+          namespace: n.namespace ?? undefined,
+          'cluster-id': n.cluster?.id ?? undefined,
+          'cluster-name': n.cluster?.name ?? undefined,
+        })),
+    [serviceData]
+  )
 
-  const stacks = useMemo<StackMentionItem[]>(() => {
-    if (!wantsAt) return []
-    return mapExistingNodes(stackData?.infrastructureStacks)
-      .filter((n): n is typeof n & { id: string } => !!n.id)
-      .map((n) => ({ kind: 'stack' as const, ...n }))
-  }, [stackData, wantsAt])
+  const stacks = useMemo<StackChipAttrs[]>(
+    () =>
+      mapExistingNodes(stackData?.infrastructureStacks)
+        .filter((n): n is typeof n & { id: string } => !!n.id)
+        .map((n) => ({
+          kind: MentionKind.Stack,
+          'item-id': n.id,
+          'item-name': n.name,
+          type: n.type ?? undefined,
+        })),
+    [stackData]
+  )
 
-  const skills = useMemo<SkillMentionItem[]>(() => {
-    if (!wantsSlash) return []
-    const all: SkillMentionItem[] = mapExistingNodes(
-      skillData?.workbench?.workbenchSkills
-    ).map((n) => ({ kind: 'skill' as const, ...n }))
+  const skills = useMemo<SkillChipAttrs[]>(() => {
+    const all = mapExistingNodes(skillData?.workbench?.workbenchSkills).map(
+      (n): SkillChipAttrs => ({
+        kind: MentionKind.Skill,
+        'item-id': n.id,
+        'item-name': n.name ?? '',
+        description: n.description ?? undefined,
+        subagents: n.subagents?.filter(isNonNullable).join(','),
+      })
+    )
     if (!throttled) return all.slice(0, MAX_PER_KIND)
-    const q = throttled.toLowerCase()
-    return all
-      .filter(
-        (s) =>
-          (s.name ?? '').toLowerCase().includes(q) ||
-          (s.description ?? '').toLowerCase().includes(q)
-      )
+    return new Fuse(all, skillFuseOptions)
+      .search(throttled)
       .slice(0, MAX_PER_KIND)
-  }, [skillData, wantsSlash, throttled])
+      .map(({ item }) => item)
+  }, [skillData, throttled])
 
-  const items = useMemo<MentionItem[]>(() => {
+  const items = useMemo<ChipAttrs[]>(() => {
     if (wantsAt) return [...clusters, ...services, ...stacks]
     if (wantsSlash) return skills
     return []
   }, [wantsAt, wantsSlash, clusters, services, stacks, skills])
 
   const loading = wantsAt
-    ? clustersLoading || servicesLoading || stacksLoading
+    ? isEmpty(clusters) &&
+      isEmpty(services) &&
+      isEmpty(stacks) &&
+      (clustersLoading || servicesLoading || stacksLoading)
     : wantsSlash
-      ? skillsLoading
+      ? isEmpty(skills) && skillsLoading
       : false
 
   return { items, loading }

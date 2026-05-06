@@ -1,4 +1,7 @@
 import {
+  CHIP_ATTR_PREFIX,
+  CHIP_DATA_ATTR,
+  CHIP_TAG_ATTR,
   insertChipAtRange,
   isChipNode,
 } from 'components/utils/contentEditableChips'
@@ -10,8 +13,12 @@ import {
   useRef,
   useState,
 } from 'react'
-import { buildChipNode } from './mentionShorthand'
-import { MENTION_TRIGGERS, MentionItem, MentionTrigger } from './mentionTypes'
+import {
+  ChipAttrs,
+  MENTION_TRIGGERS,
+  MentionKind,
+  MentionTrigger,
+} from './mentionTypes'
 import { useMentionDataSources } from './useMentionDataSources'
 
 type TriggerPosition = {
@@ -20,11 +27,11 @@ type TriggerPosition = {
   offset: number
 }
 
-export type MentionAutocompleteState = {
+type MentionAutocompleteState = {
   isOpen: boolean
   trigger: MentionTrigger | null
   query: string
-  items: MentionItem[]
+  items: ChipAttrs[]
   highlightedIndex: number
   anchorRect: DOMRect | null
   loading: boolean
@@ -33,10 +40,8 @@ export type MentionAutocompleteState = {
 const isTrigger = (ch: string): ch is MentionTrigger =>
   (MENTION_TRIGGERS as ReadonlyArray<string>).includes(ch)
 
-/**
- * Trigger is valid only at the start of an editor or immediately after
- * whitespace or another chip — same convention as Slack/Cursor.
- */
+// Trigger is valid only at the start of the editor or immediately after
+// whitespace or another chip — same convention as Slack/Cursor.
 function triggerHasValidContext(textNode: Text, offset: number): boolean {
   if (offset > 0) {
     const prev = textNode.nodeValue?.[offset - 1]
@@ -52,6 +57,21 @@ function triggerHasValidContext(textNode: Text, offset: number): boolean {
     return !lastChar || /\s/.test(lastChar)
   }
   return false
+}
+
+function buildChipNode(attrs: ChipAttrs): HTMLElement {
+  const { kind, ...rest } = attrs
+  const span = document.createElement('span')
+  span.setAttribute(CHIP_DATA_ATTR, 'true')
+  span.setAttribute(CHIP_TAG_ATTR, kind)
+  span.setAttribute('contenteditable', 'false')
+  for (const [k, v] of Object.entries(rest)) {
+    if (v == null || v === '') continue
+    span.setAttribute(`${CHIP_ATTR_PREFIX}${k}`, String(v))
+  }
+  const name = attrs['item-name']
+  span.textContent = kind === MentionKind.Skill ? `/${name}` : name
+  return span
 }
 
 export function useMentionAutocomplete({
@@ -181,7 +201,7 @@ export function useMentionAutocomplete({
   }, [enabled, trigger, updateFromCaret])
 
   const commit = useCallback(
-    (item: MentionItem) => {
+    (item: ChipAttrs) => {
       const pos = triggerPosRef.current
       const container = containerRef.current
       if (!pos || !container) {

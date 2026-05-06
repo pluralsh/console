@@ -6,31 +6,27 @@ import {
 } from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { MentionItem } from './mentionTypes'
+import { ChipAttrs, KIND_LABELS, MentionKind } from './mentionTypes'
+import { isEmpty } from 'lodash'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
-function iconForItem(item: MentionItem): ReactNode {
-  switch (item.kind) {
-    case 'cluster':
-      return <ClusterIcon size={14} />
-    case 'service':
-      return <DeploymentIcon size={14} />
-    case 'stack':
-      return <StackIcon size={14} />
-    case 'skill':
-      return <WorkbenchIcon size={14} />
-  }
+const itemToIcon: Record<MentionKind, ReactNode> = {
+  [MentionKind.Cluster]: <ClusterIcon size={14} />,
+  [MentionKind.Service]: <DeploymentIcon size={14} />,
+  [MentionKind.Stack]: <StackIcon size={14} />,
+  [MentionKind.Skill]: <WorkbenchIcon size={14} />,
 }
 
-function subtitleForItem(item: MentionItem): string | undefined {
+function subtitleForItem(item: ChipAttrs) {
   switch (item.kind) {
-    case 'cluster':
-      return item.handle ?? item.provider?.cloud ?? undefined
-    case 'service':
-      return item.cluster?.name ?? item.namespace ?? undefined
-    case 'stack':
-      return item.type ?? undefined
-    case 'skill':
-      return item.description ?? undefined
+    case MentionKind.Cluster:
+      return item.handle ?? item.provider
+    case MentionKind.Service:
+      return item['cluster-name'] ?? item.namespace
+    case MentionKind.Stack:
+      return item.type
+    case MentionKind.Skill:
+      return item.description
   }
 }
 
@@ -41,46 +37,55 @@ export function MentionResults({
   onSelect,
   onHover,
 }: {
-  items: MentionItem[]
+  items: ChipAttrs[]
   highlightedIndex: number
   loading: boolean
-  onSelect: (item: MentionItem) => void
+  onSelect: (item: ChipAttrs) => void
   onHover: (index: number) => void
 }) {
   const theme = useTheme()
-  if (loading && items.length === 0) {
-    return <EmptyStateSC>Loading…</EmptyStateSC>
-  }
-  if (items.length === 0) {
-    return <EmptyStateSC>No matches</EmptyStateSC>
-  }
+
+  if (isEmpty(items))
+    return (
+      <EmptyStateSC>
+        {loading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="xlarge"
+          />
+        ) : (
+          'No matches'
+        )}
+      </EmptyStateSC>
+    )
   return (
     <ResultsListSC role="listbox">
-      {items.map((item, idx) => (
-        <ResultRowSC
-          key={`${item.kind}:${item.id}`}
-          role="option"
-          aria-selected={idx === highlightedIndex}
-          $highlighted={idx === highlightedIndex}
-          onMouseEnter={() => onHover(idx)}
-          // mousedown to fire before the editor loses focus
-          onMouseDown={(e) => {
-            e.preventDefault()
-            onSelect(item)
-          }}
-        >
-          <span css={{ color: theme.colors['icon-light'] }}>
-            {iconForItem(item)}
-          </span>
-          <RowTextSC>
-            <RowTitleSC>{item.name ?? ''}</RowTitleSC>
-            {subtitleForItem(item) && (
-              <RowSubtitleSC>{subtitleForItem(item)}</RowSubtitleSC>
-            )}
-          </RowTextSC>
-          <RowKindSC>{item.kind}</RowKindSC>
-        </ResultRowSC>
-      ))}
+      {items.map((item, idx) => {
+        const subtitle = subtitleForItem(item)
+        return (
+          <ResultRowSC
+            key={`${item.kind}:${item['item-id']}`}
+            role="option"
+            aria-selected={idx === highlightedIndex}
+            $highlighted={idx === highlightedIndex}
+            onMouseEnter={() => onHover(idx)}
+            // mousedown to fire before the editor loses focus
+            onMouseDown={(e) => {
+              e.preventDefault()
+              onSelect(item)
+            }}
+          >
+            <span css={{ color: theme.colors['icon-light'] }}>
+              {itemToIcon[item.kind]}
+            </span>
+            <RowTextSC>
+              <RowTitleSC>{item['item-name']}</RowTitleSC>
+              {subtitle && <RowSubtitleSC>{subtitle}</RowSubtitleSC>}
+            </RowTextSC>
+            <RowKindSC>{KIND_LABELS[item.kind]}</RowKindSC>
+          </ResultRowSC>
+        )
+      })}
     </ResultsListSC>
   )
 }

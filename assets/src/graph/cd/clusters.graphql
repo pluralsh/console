@@ -458,8 +458,8 @@ fragment ClusterWithMetrics on Cluster {
   }
 }
 
-query ClustersTiny($projectId: ID, $first: Int) {
-  clusters(first: $first, projectId: $projectId) {
+query ClustersTiny($projectId: ID, $first: Int, $q: String) {
+  clusters(first: $first, projectId: $projectId, q: $q) {
     edges {
       node {
         ...ClusterTiny

@@ -29,7 +29,6 @@ import {
   useState,
 } from 'react'
 import styled, { StyledObject, useTheme } from 'styled-components'
-import { serializeEditableValue } from 'components/utils/contentEditableChips.ts'
 import { useChatbot } from '../../AIContext.tsx'
 import { MentionMenu } from './autocomplete/MentionMenu.tsx'
 import { useMentionAutocomplete } from './autocomplete/useMentionAutocomplete.ts'
@@ -150,10 +149,7 @@ export function ChatInput({
   )
 }
 
-export type ChatInputSimpleRef = {
-  resetInput: () => void
-  getSerializedValue: () => string
-} & HTMLElement
+export type ChatInputSimpleRef = { resetInput: () => void } & HTMLElement
 
 export function ChatInputSimple({
   ref,
@@ -197,8 +193,6 @@ export function ChatInputSimple({
         resetInput: () => {
           node.innerHTML = ''
         },
-        getSerializedValue: () =>
-          enableAutoComplete ? serializeEditableValue(node) : node.innerText,
       })
   })
 
@@ -218,7 +212,6 @@ export function ChatInputSimple({
       <EditableDiv
         ref={divRef}
         {...props}
-        chipsEnabled={enableAutoComplete}
         onEnter={handleSubmit}
         onKeyDown={onKeyDown}
         setValue={(value) => {

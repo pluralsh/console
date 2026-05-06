@@ -85,9 +85,7 @@ export function WorkbenchJobCreateInput({
     })
 
   const handleSubmitPrompt = (nextPrompt?: string) => {
-    const source =
-      nextPrompt ?? inputRef.current?.getSerializedValue?.() ?? prompt
-    const trimmedPrompt = source.trim()
+    const trimmedPrompt = (nextPrompt ?? prompt).trim()
 
     if (!trimmedPrompt || !workbenchId) return
 

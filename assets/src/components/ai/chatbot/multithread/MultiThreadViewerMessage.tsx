@@ -12,16 +12,35 @@ import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil, truncate } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
-import ReactMarkdown, { Components } from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
-import { plrlChipComponents } from './chip-renderers/PlrlChipRenderers'
-import { PLRL_CHIP_TAG_NAMES } from '../input/autocomplete/mentionShorthand'
 
-const PLRL_TAG_RE = new RegExp(`<(?:${PLRL_CHIP_TAG_NAMES.join('|')})\\b`, 'i')
+import {
+  CHIP_ATTRIBUTE_SCHEMA,
+  PLRL_CHIP_TAG_NAMES,
+} from '../input/autocomplete/mentionTypes'
+import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
+
+const chipSanitizeSchema = {
+  ...markdownSanitizeSchema,
+  tagNames: [
+    ...(markdownSanitizeSchema.tagNames ?? []),
+    ...PLRL_CHIP_TAG_NAMES,
+  ],
+  attributes: {
+    ...markdownSanitizeSchema.attributes,
+    ...CHIP_ATTRIBUTE_SCHEMA,
+  },
+}
+
+const REHYPE_PLUGINS: ComponentProps<typeof ReactMarkdown>['rehypePlugins'] = [
+  rehypeRaw,
+  [rehypeSanitize, chipSanitizeSchema],
+]
 
 export function MultiThreadViewerMessage({
   message,
@@ -182,18 +201,13 @@ function CodeBlockLabel({
 }
 
 export function SimplifiedMarkdown({ text }: { text: string }) {
-  const hasPlrlTag = PLRL_TAG_RE.test(text)
   return (
     <SimpleMarkdownSC>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={
-          hasPlrlTag
-            ? [rehypeRaw, [rehypeSanitize, markdownSanitizeSchema]]
-            : undefined
-        }
+        rehypePlugins={REHYPE_PLUGINS}
         components={{
-          ...(hasPlrlTag ? (plrlChipComponents as unknown as Components) : {}),
+          ...plrlChipComponents,
           // Headers are bold
           h1: ({ children }) => <strong>{children}</strong>,
           h2: ({ children }) => <strong>{children}</strong>,

@@ -1,7 +1,7 @@
 import { CSSProperties, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
-import { MentionItem } from './mentionTypes'
+import { ChipAttrs } from './mentionTypes'
 import { MentionResults } from './MentionResults'
 
 const MENU_GAP = 4
@@ -19,10 +19,10 @@ export function MentionMenu({
 }: {
   isOpen: boolean
   anchorRect: DOMRect | null
-  items: MentionItem[]
+  items: ChipAttrs[]
   highlightedIndex: number
   loading: boolean
-  onSelect: (item: MentionItem) => void
+  onSelect: (item: ChipAttrs) => void
   onHover: (index: number) => void
 }) {
   const style = useMemo<CSSProperties | null>(() => {
