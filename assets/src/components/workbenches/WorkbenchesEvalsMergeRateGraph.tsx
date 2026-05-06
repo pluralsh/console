@@ -50,7 +50,7 @@ export function WorkbenchesEvalsMergeRateGraph() {
       hint="The ratio of PRs/MRs that get merged."
       loading={loading}
     >
-      <div css={{ minHeight: 260, width: '100%' }}>
+      <div css={{ minHeight: 200, width: '100%' }}>
         <ResponsiveLine
           data={[{ id: 'Merge rate', data: mergeRateSeries }]}
           animate
@@ -62,6 +62,7 @@ export function WorkbenchesEvalsMergeRateGraph() {
           axisLeft={{
             tickSize: 0,
             tickPadding: 8,
+            tickValues: [0, 20, 40, 60, 80, 100],
             format: (v) => `${v}%`,
           }}
           axisBottom={{
@@ -71,6 +72,7 @@ export function WorkbenchesEvalsMergeRateGraph() {
           }}
           enableGridX={false}
           enableGridY
+          gridYValues={[0, 20, 40, 60, 80, 100]}
           enablePoints={false}
           useMesh
           curve="linear"

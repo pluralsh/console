@@ -48,7 +48,7 @@ export function WorkbenchesEvalsAvgGraph() {
         direction="column"
         gap="xsmall"
         css={{
-          maxHeight: 260,
+          maxHeight: 200,
           overflowY: 'auto',
           paddingRight: theme.spacing.xxsmall,
         }}

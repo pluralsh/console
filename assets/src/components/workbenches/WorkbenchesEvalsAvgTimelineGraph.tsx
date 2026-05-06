@@ -100,7 +100,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
           ))}
         </div>
 
-        <div css={{ minHeight: 280, width: '100%', flex: 1 }}>
+        <div css={{ minHeight: 200, width: '100%', flex: 1 }}>
           <ResponsiveLine
             data={visibleSeries.map((item) => ({
               id: item.label,
@@ -111,11 +111,16 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
             margin={{ top: 8, right: 16, bottom: 32, left: 48 }}
             xScale={{ type: 'point' }}
             yScale={{ type: 'linear', min: 0, max: MAX_GRADE, stacked: false }}
-            axisLeft={{ tickSize: 0, tickPadding: 8 }}
+            axisLeft={{
+              tickSize: 0,
+              tickPadding: 8,
+              tickValues: [0, 2, 4, 6, 8, 10],
+            }}
             axisBottom={{ tickSize: 0, tickPadding: 8, tickRotation: 0 }}
             enablePoints={false}
             enableGridX={false}
             enableGridY
+            gridYValues={[0, 2, 4, 6, 8, 10]}
             useMesh
             curve="linear"
           />

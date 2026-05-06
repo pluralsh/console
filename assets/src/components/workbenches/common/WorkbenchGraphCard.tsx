@@ -40,7 +40,7 @@ export function WorkbenchGraphCard({
         <Body1P>{title}</Body1P>
         {rightContent}
       </div>
-      <div css={{ minHeight: 260, flex: 1 }}>
+      <div css={{ minHeight: 200, flex: 1 }}>
         {loading ? (
           <RectangleSkeleton
             $height="100%"

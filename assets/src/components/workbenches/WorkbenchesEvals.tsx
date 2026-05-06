@@ -38,7 +38,7 @@ export function WorkbenchesEvals() {
       <div
         css={{
           display: 'grid',
-          gap: theme.spacing.medium,
+          gap: theme.spacing.large,
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         }}
       >
@@ -64,7 +64,7 @@ export function WorkbenchesEvals() {
       <div
         css={{
           display: 'grid',
-          gap: theme.spacing.medium,
+          gap: theme.spacing.large,
           gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
           [`@container (max-width: 1200px)`]: { gridTemplateColumns: '1fr' },
         }}
