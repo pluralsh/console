@@ -38,6 +38,7 @@ export function WorkbenchStatCard({
         <div
           css={{
             fontSize: 36,
+            fontWeight: 600,
             letterSpacing: '-0.25px',
             lineHeight: '32px',
             color: valueColor,
