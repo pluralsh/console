@@ -8,8 +8,9 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import {
   WorkbenchEvalAttributes,
   useCreateWorkbenchEvalMutation,
@@ -70,6 +71,7 @@ export function WorkbenchEvalSettings() {
   })
   const workbench = data?.workbench
   const workbenchEval = evalData?.workbench?.eval
+  const formLoading = (!data && loading) || (!evalData && evalLoading)
 
   useEffect(() => {
     if (evalLoading) return
@@ -187,23 +189,46 @@ export function WorkbenchEvalSettings() {
               </SidebarBtnSC>
             ))}
           </Flex>
-          <FormCardSC>
-            {saveError && <GqlError error={saveError} />}
-            {curStep === 'Prompt quality' ? (
-              <Flex
-                direction="column"
-                gap="large"
-              >
-                <Switch
-                  checked={evalsEnabled}
-                  onChange={(checked) => setEvalsEnabled(checked)}
+          {formLoading ? (
+            <RectangleSkeleton
+              $width="100%"
+              $height="100%"
+            />
+          ) : (
+            <FormCardSC>
+              {saveError && <GqlError error={saveError} />}
+              {curStep === 'Prompt quality' && (
+                <Flex
+                  direction="column"
+                  gap="large"
                 >
-                  Turn on evals for {workbench?.name ?? 'workbench-name'}
-                </Switch>
-                <FormField label="Prompt quality rules">
+                  <Switch
+                    checked={evalsEnabled}
+                    onChange={(checked) => setEvalsEnabled(checked)}
+                  >
+                    Turn on evals for {workbench?.name ?? 'workbench-name'}
+                  </Switch>
+                  <FormField label="Prompt quality rules">
+                    <CodeEditor
+                      value={promptQualityRules}
+                      onChange={(value) => setPromptQualityRules(value ?? '')}
+                      language="markdown"
+                      height={320}
+                      disabled={!evalsEnabled}
+                      options={{
+                        readOnly: !evalsEnabled,
+                        wordWrap: 'on',
+                        minimap: { enabled: false },
+                      }}
+                    />
+                  </FormField>
+                </Flex>
+              )}
+              {curStep === 'Conclusion rules' && (
+                <FormField label="Conclusion rules">
                   <CodeEditor
-                    value={promptQualityRules}
-                    onChange={(value) => setPromptQualityRules(value ?? '')}
+                    value={conclusionRules}
+                    onChange={(value) => setConclusionRules(value ?? '')}
                     language="markdown"
                     height={320}
                     disabled={!evalsEnabled}
@@ -214,99 +239,72 @@ export function WorkbenchEvalSettings() {
                     }}
                   />
                 </FormField>
-              </Flex>
-            ) : curStep === 'Conclusion rules' ? (
-              <FormField label="Conclusion rules">
-                <CodeEditor
-                  value={conclusionRules}
-                  onChange={(value) => setConclusionRules(value ?? '')}
-                  language="markdown"
-                  height={320}
-                  disabled={!evalsEnabled}
-                  options={{
-                    readOnly: !evalsEnabled,
-                    wordWrap: 'on',
-                    minimap: { enabled: false },
-                  }}
-                />
-              </FormField>
-            ) : curStep === 'Progress thought rules' ? (
-              <FormField label="Progress and thoughts rules">
-                <CodeEditor
-                  value={progressAndThoughtsRules}
-                  onChange={(value) => setProgressAndThoughtsRules(value ?? '')}
-                  language="markdown"
-                  height={320}
-                  disabled={!evalsEnabled}
-                  options={{
-                    readOnly: !evalsEnabled,
-                    wordWrap: 'on',
-                    minimap: { enabled: false },
-                  }}
-                />
-              </FormField>
-            ) : (
-              <>
-                <Body2P
-                  $color="text-light"
-                  css={{ margin: 0 }}
-                >
-                  {curStep}
-                </Body2P>
-                <Body2P
-                  $color="text-xlight"
-                  css={{ margin: 0 }}
-                >
-                  ...
-                </Body2P>
-              </>
-            )}
-            <StickyActionsFooterSC>
-              <Flex
-                align="center"
-                justify="space-between"
-                width="100%"
-                gap="medium"
-              >
-                <CaptionP
-                  $color="text-xlight"
-                  css={{ margin: 0, maxWidth: 320 }}
-                >
-                  Evals are generated daily at midnight. Leave any section blank
-                  to use the default heuristic.
-                </CaptionP>
-                <Flex gap="small">
-                  <Button
-                    secondary
-                    onClick={() => {
-                      setEvalsEnabled(true)
-                      setPromptQualityRules('')
-                      setConclusionRules('')
-                      setProgressAndThoughtsRules('')
+              )}
+              {curStep === 'Progress thought rules' && (
+                <FormField label="Progress and thoughts rules">
+                  <CodeEditor
+                    value={progressAndThoughtsRules}
+                    onChange={(value) =>
+                      setProgressAndThoughtsRules(value ?? '')
+                    }
+                    language="markdown"
+                    height={320}
+                    disabled={!evalsEnabled}
+                    options={{
+                      readOnly: !evalsEnabled,
+                      wordWrap: 'on',
+                      minimap: { enabled: false },
                     }}
+                  />
+                </FormField>
+              )}
+              <StickyActionsFooterSC>
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  width="100%"
+                  gap="medium"
+                >
+                  <CaptionP
+                    $color="text-xlight"
+                    css={{ margin: 0, maxWidth: 320 }}
                   >
-                    Reset to default
-                  </Button>
-                  {isLastStep ? (
+                    Evals are generated daily at midnight. Leave any section
+                    blank to use the default heuristic.
+                  </CaptionP>
+                  <Flex gap="small">
                     <Button
-                      loading={saveLoading}
-                      onClick={() => void handleSave()}
+                      secondary
+                      onClick={() => {
+                        setEvalsEnabled(true)
+                        setPromptQualityRules('')
+                        setConclusionRules('')
+                        setProgressAndThoughtsRules('')
+                      }}
                     >
-                      {workbenchEval?.id ? 'Save eval' : 'Create new eval'}
+                      Reset to default
                     </Button>
-                  ) : (
-                    <Button
-                      onClick={() =>
-                        setCurStep(EVAL_SETTINGS_STEPS[curStepIndex + 1])
-                      }
-                    >
-                      Next
-                    </Button>
-                  )}
+                    {isLastStep ? (
+                      <Button
+                        loading={saveLoading}
+                        onClick={() => void handleSave()}
+                      >
+                        {workbenchEval?.id ? 'Save eval' : 'Create new eval'}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() =>
+                          setCurStep(EVAL_SETTINGS_STEPS[curStepIndex + 1])
+                        }
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </Flex>
                 </Flex>
-              </Flex>
-            </StickyActionsFooterSC>
-          </FormCardSC>
+              </StickyActionsFooterSC>
+            </FormCardSC>
+          )}
         </WorkbenchSplitLayoutSC>
       </Flex>
     </Flex>
