@@ -34,6 +34,7 @@ export function WorkbenchesEvals() {
     <Flex
       direction="column"
       gap="medium"
+      overflowY="auto"
     >
       <div
         css={{
