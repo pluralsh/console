@@ -50,12 +50,7 @@ export function WorkbenchesEvalsAvgGraph() {
         <Flex
           direction="column"
           gap="xsmall"
-          css={{
-            minHeight: 200,
-            maxHeight: 200,
-            overflowY: 'auto',
-            paddingRight: theme.spacing.xxsmall,
-          }}
+          css={{ paddingRight: theme.spacing.xxsmall }}
         >
           {workbenchAverages.map(({ id, name, score }) => {
             const color = evalGradeToColor(score)
