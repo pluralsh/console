@@ -80,8 +80,8 @@ defmodule Console.Schema.AiInsight do
     end
   end
 
-  defp rate(:fast), do: -20
-  defp rate(:slow), do: -45
+  defp rate(:fast), do: -120
+  defp rate(:slow), do: -240
 
   defp expiry(rate) when rate in [:fast, :slow],
     do: Timex.shift(Timex.now(), minutes: expiry_minutes(rate))

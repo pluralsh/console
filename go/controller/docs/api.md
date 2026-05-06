@@ -1334,6 +1334,13 @@ Example usage:
 	      tokenSecretRef:
 	        name: "openai-secret"
 	        key: "token"
+	      tokenExchange:
+	        enabled: true
+	        tokenUrl: "https://idp.example.com/oauth/token"
+	        clientId: "console-ai"
+	        clientSecretSecretRef:
+	          name: "openai-oauth-client"
+	          key: "clientSecret"
 	  cost:
 	    recommendationCushion: 20
 	    recommendationThreshold: 100
@@ -2517,6 +2524,25 @@ _Appears in:_
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
+#### OAuth2TokenExchange
+
+
+
+OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
+
+
+
+_Appears in:_
+- [OpenAISettings](#openaisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled turns token exchange on for obtaining access tokens via the configured token endpoint. |  | Optional: \{\} <br /> |
+| `tokenUrl` _string_ | TokenURL is the OAuth2 token endpoint URL. |  | Optional: \{\} <br /> |
+| `clientId` _string_ | ClientID is the OAuth2 client identifier. |  | Optional: \{\} <br /> |
+| `clientSecretSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ClientSecretSecretRef is a reference to a Kubernetes secret key holding the OAuth2 client secret. |  | Optional: \{\} <br /> |
+
+
 #### OIDCProvider
 
 
@@ -3000,6 +3026,7 @@ _Appears in:_
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations<br />of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: \{\} <br /> |
+| `tokenExchange` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs. |  | Optional: \{\} <br /> |
 | `method` _[OpenAiMethod](#openaimethod)_ | Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies) |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
