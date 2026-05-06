@@ -1,5 +1,6 @@
 import { WorkbenchStatCard } from 'components/workbenches/common/WorkbenchStatCard'
 import { WorkbenchesEvalsAvgGraph } from 'components/workbenches/WorkbenchesEvalsAvgGraph'
+import { WorkbenchesEvalsAvgTimelineGraph } from 'components/workbenches/WorkbenchesEvalsAvgTimelineGraph'
 import { WorkbenchesEvalsMergeRateGraph } from 'components/workbenches/WorkbenchesEvalsMergeRateGraph'
 import { GqlError } from 'components/utils/Alert'
 import { useWorkbenchDashboardQuery } from 'generated/graphql'
@@ -64,12 +65,15 @@ export function WorkbenchesEvals() {
         css={{
           display: 'grid',
           gap: theme.spacing.medium,
-          gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
           [`@container (max-width: 1200px)`]: { gridTemplateColumns: '1fr' },
         }}
       >
+        <WorkbenchesEvalsAvgTimelineGraph />
         <WorkbenchesEvalsMergeRateGraph />
-        <WorkbenchesEvalsAvgGraph />
+        <div css={{ gridColumn: '1 / -1' }}>
+          <WorkbenchesEvalsAvgGraph />
+        </div>
       </div>
     </Flex>
   )
