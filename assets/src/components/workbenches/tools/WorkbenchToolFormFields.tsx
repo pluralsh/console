@@ -385,19 +385,22 @@ function ExaFormFields({
 }
 
 const GITHUB_MCP_TOOLSET_OPTIONS = [
-  { key: 'repos', label: 'repos' },
-  { key: 'issues', label: 'issues' },
-  { key: 'pull_requests', label: 'pull_requests' },
-  { key: 'actions', label: 'actions' },
-  { key: 'code_security', label: 'code_security' },
-  { key: 'secret_protection', label: 'secret_protection' },
-  { key: 'copilot', label: 'copilot (remote only)' },
+  { key: 'repos', label: 'Repos' },
+  { key: 'issues', label: 'Issues' },
+  { key: 'pull_requests', label: 'Pull requests' },
+  { key: 'actions', label: 'Actions' },
+  { key: 'code_security', label: 'Code security' },
+  { key: 'secret_protection', label: 'Secret protection' },
+  { key: 'copilot', label: 'Copilot (remote only)' },
   {
     key: 'github_support_docs_search',
-    label: 'github_support_docs_search (remote only)',
+    label: 'GitHub support docs search (remote only)',
   },
-  { key: 'all', label: 'all (enable all toolsets)' },
-  { key: 'default', label: 'default (repos, issues, pull_requests)' },
+  { key: 'all', label: 'All (every toolset)' },
+  {
+    key: 'default',
+    label: 'Default (repos, issues, pull requests)',
+  },
 ] as const
 
 function GithubFormFields({
