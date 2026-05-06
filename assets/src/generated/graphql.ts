@@ -19893,7 +19893,7 @@ export type WorkbenchesEvalsAvgGraphQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchesEvalsAvgGraphQuery = { __typename?: 'RootQueryType', workbenchPrMergeRatesByWorkbench?: Array<{ __typename?: 'WorkbenchPrMergeRateByWorkbenchEntry', timestamp?: string | null, mergeRate?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
+export type WorkbenchesEvalsAvgGraphQuery = { __typename?: 'RootQueryType', averageWorkbenchEvalResults?: Array<{ __typename?: 'WorkbenchEvalResultsWorkbenchAverage', timestamp?: string | null, average?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
 
 export type WorkbenchesAlertsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -41157,9 +41157,9 @@ export type WorkbenchesEvalsMergeRateGraphSuspenseQueryHookResult = ReturnType<t
 export type WorkbenchesEvalsMergeRateGraphQueryResult = Apollo.QueryResult<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>;
 export const WorkbenchesEvalsAvgGraphDocument = gql`
     query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
-  workbenchPrMergeRatesByWorkbench(period: $period) {
+  averageWorkbenchEvalResults(period: $period) {
     timestamp
-    mergeRate
+    average
     workbench {
       id
       name

@@ -1812,10 +1812,10 @@
          "name": "WorkbenchesEvalsMergeRateGraph",
          "body": "query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {\n  workbenchPrMergeRates(period: $period) {\n    timestamp\n    mergeRate\n    __typename\n  }\n}"
       },
-      "sha256:ac25f7e6767b122ad32f7b412855f62386a0c780100527e48ca9d63c74db1484": {
+      "sha256:e16dfe07dd164791fe18921a021ab87312a0a8b3a6b921e913d01e0b4c59dc10": {
          "type": "query",
          "name": "WorkbenchesEvalsAvgGraph",
-         "body": "query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {\n  workbenchPrMergeRatesByWorkbench(period: $period) {\n    timestamp\n    mergeRate\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
+         "body": "query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {\n  averageWorkbenchEvalResults(period: $period) {\n    timestamp\n    average\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
       },
       "sha256:93feb848735e2cf2f085fa3f602a6ad916b353383522b68cb9480cf001019b3a": {
          "type": "query",
