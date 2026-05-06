@@ -4,8 +4,6 @@ import { Body1P, CaptionP } from 'components/utils/typography/Text'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
-const MIN_HEIGHT = 360
-
 export function WorkbenchGraphCard({
   title,
   rightContent,
@@ -29,7 +27,6 @@ export function WorkbenchGraphCard({
         flexDirection: 'column',
         gap: theme.spacing.medium,
         padding: theme.spacing.large,
-        minHeight: MIN_HEIGHT,
       }}
     >
       <div
@@ -43,7 +40,7 @@ export function WorkbenchGraphCard({
         <Body1P>{title}</Body1P>
         {rightContent}
       </div>
-      <div css={{ minHeight: 0, flex: 1 }}>
+      <div css={{ minHeight: 260, flex: 1 }}>
         {loading ? (
           <RectangleSkeleton
             $height="100%"
