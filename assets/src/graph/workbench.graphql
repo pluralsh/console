@@ -486,24 +486,11 @@ query Workbenches($first: Int = 100, $after: String, $q: String) {
   }
 }
 
-query WorkbenchDashboard($period: EvalResultsPeriod = WEEK) {
+query WorkbenchDashboard {
   workbenchPullRequests
   workbenchAggregates {
-    pullRequests
     pullRequestMergeRate
     evalResults
-  }
-  workbenchPrMergeRates(period: $period) {
-    timestamp
-    mergeRate
-  }
-  workbenchPrMergeRatesByWorkbench(period: $period) {
-    timestamp
-    mergeRate
-    workbench {
-      id
-      name
-    }
   }
 }
 

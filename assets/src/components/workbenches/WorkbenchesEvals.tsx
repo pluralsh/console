@@ -2,10 +2,7 @@ import { WorkbenchStatCard } from 'components/workbenches/common/WorkbenchStatCa
 import { WorkbenchesEvalsAvgGraph } from 'components/workbenches/WorkbenchesEvalsAvgGraph'
 import { WorkbenchesEvalsMergeRateGraph } from 'components/workbenches/WorkbenchesEvalsMergeRateGraph'
 import { GqlError } from 'components/utils/Alert'
-import {
-  EvalResultsPeriod,
-  useWorkbenchDashboardQuery,
-} from 'generated/graphql'
+import { useWorkbenchDashboardQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Flex } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -14,19 +11,16 @@ export function WorkbenchesEvals() {
   const theme = useTheme()
 
   const { data, loading, error } = useWorkbenchDashboardQuery({
-    variables: { period: EvalResultsPeriod.Week },
     fetchPolicy: 'cache-and-network',
+    pollInterval: 30_000,
   })
 
   const { totalPrsMerged, overallWorkbenchAvg, mergeRateAvg } = useMemo(() => {
     return {
-      totalPrsMerged:
-        data?.workbenchPullRequests ??
-        data?.workbenchAggregates?.pullRequests ??
-        0,
+      totalPrsMerged: data?.workbenchPullRequests ?? 0,
       overallWorkbenchAvg: data?.workbenchAggregates?.evalResults ?? 0,
       mergeRateAvg: clamp(
-        data?.workbenchAggregates?.pullRequestMergeRate ?? 0 * 100,
+        (data?.workbenchAggregates?.pullRequestMergeRate ?? 0) * 100,
         0,
         100
       ),
@@ -54,7 +48,7 @@ export function WorkbenchesEvals() {
           loading={loading}
         />
         <WorkbenchStatCard
-          label="PR merge rate (7d)"
+          label="PR merge rate"
           value={`${mergeRateAvg.toFixed(1)}%`}
           helper="Average merged ratio"
           loading={loading}
@@ -74,8 +68,8 @@ export function WorkbenchesEvals() {
           [`@container (max-width: 1200px)`]: { gridTemplateColumns: '1fr' },
         }}
       >
-        <WorkbenchesEvalsAvgGraph />
         <WorkbenchesEvalsMergeRateGraph />
+        <WorkbenchesEvalsAvgGraph />
       </div>
     </Flex>
   )
