@@ -1,5 +1,10 @@
 import { ResponsiveLine } from '@nivo/line'
-import { ListBoxItem, Select, SemanticColorKey } from '@pluralsh/design-system'
+import {
+  ListBoxItem,
+  Select,
+  SemanticColorKey,
+  WorkbenchIcon,
+} from '@pluralsh/design-system'
 import { WorkbenchGraphCard } from 'components/workbenches/common/WorkbenchGraphCard'
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
@@ -70,7 +75,8 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
           <>
             {selectableSeries.length > 6 ? (
               <Select
-                label="Filter workbenches"
+                label="Filter by workbenches"
+                leftContent={<WorkbenchIcon size={16} />}
                 selectionMode="multiple"
                 selectedKeys={activeSelectedIds}
                 onSelectionChange={(keys) =>
