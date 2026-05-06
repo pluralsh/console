@@ -69,6 +69,7 @@ fragment Workbench on Workbench {
   workbenchSkills(first: 500) {
     edges {
       node {
+        id
         name
         description
         contents
@@ -588,6 +589,29 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+
+fragment WorkbenchSkillTiny on WorkbenchSkill {
+  id
+  name
+  description
+  subagents
+}
+
+query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {
+  workbench(id: $id) {
+    id
+    workbenchSkills(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchSkillTiny
         }
       }
     }

@@ -1,6 +1,7 @@
 import { Children, ReactElement, ReactNode, useMemo } from 'react'
 import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
 
@@ -17,6 +18,29 @@ type MarkdownProps = {
   mainBranch?: string
   isStreaming?: boolean
 } & ReactMarkdownOptions
+
+const PLRL_CHIP_TAG_NAMES = [
+  'plrl-cluster',
+  'plrl-service',
+  'plrl-stack',
+  'plrl-skill',
+] as const
+
+// Default GitHub-style schema + our `plrl-*` chip tags. `clobber: []` opts out
+// of the `user-content-` id/name prefix; harmless here since our markdown
+// doesn't render next to id-based DOM lookups.
+export const markdownSanitizeSchema = {
+  ...defaultSchema,
+  clobber: [],
+  tagNames: [...(defaultSchema.tagNames ?? []), ...PLRL_CHIP_TAG_NAMES],
+  attributes: {
+    ...defaultSchema.attributes,
+    'plrl-cluster': ['id', 'name', 'handle', 'provider', 'distro'],
+    'plrl-service': ['id', 'name', 'namespace', 'cluster-id', 'cluster-name'],
+    'plrl-stack': ['id', 'name', 'type'],
+    'plrl-skill': ['id', 'name', 'description', 'subagents'],
+  },
+}
 
 export function getLastStringChild(children: any, depth = 0): any {
   let lastChild = null
@@ -325,7 +349,7 @@ function Markdown({
     () => (
       <ReactMarkdown
         {...props}
-        rehypePlugins={[rehypeRaw]}
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, markdownSanitizeSchema]]}
         remarkPlugins={[remarkGfm]}
         components={{
           blockquote: (props) => <MdBlockquote {...props} />,

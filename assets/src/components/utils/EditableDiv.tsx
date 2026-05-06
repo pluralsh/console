@@ -9,6 +9,11 @@ import {
 } from 'react'
 import styled from 'styled-components'
 import { applyNodeToRefs } from 'utils/applyNodeToRefs'
+import {
+  chipBeforeCaret,
+  deleteChip,
+  serializeEditableValue,
+} from './contentEditableChips'
 
 export function EditableDiv({
   ref,
@@ -18,6 +23,7 @@ export function EditableDiv({
   onKeyDown: onKeyDownProp,
   placeholder,
   disabled,
+  chipsEnabled = false,
   ...props
 }: {
   initialValue?: string
@@ -25,6 +31,7 @@ export function EditableDiv({
   onEnter?: () => void
   placeholder?: string
   disabled?: boolean
+  chipsEnabled?: boolean
 } & ComponentPropsWithRef<'div'>) {
   const internalRef = useRef<HTMLDivElement>(null)
   const isFirstRender = useRef(true)
@@ -42,26 +49,42 @@ export function EditableDiv({
 
   const onInput = useCallback(
     (e: FormEvent<HTMLDivElement>) => {
-      const content = e.currentTarget.innerText || ''
+      const node = e.currentTarget
+      const content = chipsEnabled
+        ? serializeEditableValue(node)
+        : node.innerText || ''
       // sometimes clearing the input manually leaves a straggler newline
       setValue(content === '\n' ? '' : content)
-      if (content === '\n') e.currentTarget.innerHTML = ''
+      if (content === '\n' || content === '') node.innerHTML = ''
     },
-    [setValue]
+    [setValue, chipsEnabled]
   )
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       onKeyDownProp?.(e)
+      if (e.defaultPrevented) return
       // for handling enter key when onEnter callback is defined
       // if any modifier key is pressed, just allow default behavior (which is adding a new line usually)
       if (e.key === 'Enter' && onEnter) {
         if (e.shiftKey || e.ctrlKey || e.altKey) return
         e.preventDefault()
         onEnter?.()
+        return
+      }
+      if (chipsEnabled && e.key === 'Backspace' && internalRef.current) {
+        const chip = chipBeforeCaret(internalRef.current)
+        if (chip) {
+          e.preventDefault()
+          deleteChip(chip)
+          // dispatch input so React state syncs
+          internalRef.current.dispatchEvent(
+            new InputEvent('input', { bubbles: true })
+          )
+        }
       }
     },
-    [onEnter, onKeyDownProp]
+    [onEnter, onKeyDownProp, chipsEnabled]
   )
 
   const onPaste = useCallback(
@@ -74,9 +97,16 @@ export function EditableDiv({
       selection.deleteFromDocument()
       selection.getRangeAt(0).insertNode(document.createTextNode(text))
       selection.collapseToEnd()
-      setValue(internalRef.current?.innerText ?? '')
+      const node = internalRef.current
+      setValue(
+        node
+          ? chipsEnabled
+            ? serializeEditableValue(node)
+            : node.innerText
+          : ''
+      )
     },
-    [setValue]
+    [setValue, chipsEnabled]
   )
 
   return (
@@ -107,6 +137,22 @@ const ContentEditableDivSC = styled.div<{ $disabled?: boolean }>(
       content: 'attr(data-placeholder)',
       color: theme.colors['text-xlight'],
       pointerEvents: 'none',
+    },
+    '[data-chip="true"]': {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: theme.spacing.xxsmall,
+      padding: `0 ${theme.spacing.xsmall}px`,
+      margin: `0 1px`,
+      borderRadius: theme.borderRadiuses.medium,
+      background: theme.colors['fill-three'],
+      border: theme.borders['fill-three'],
+      color: theme.colors.text,
+      fontSize: '0.92em',
+      lineHeight: '1.6em',
+      verticalAlign: 'baseline',
+      userSelect: 'none',
+      cursor: 'default',
     },
   })
 )

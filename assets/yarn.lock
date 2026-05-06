@@ -4550,7 +4550,7 @@ __metadata:
     react-stately: 3.42.0
     react-transition-group: 4.4.5
     react-use-measure: 2.1.1
-    rehype-raw: 7.0.0
+    rehype-sanitize: 6.0.0
     resize-observer-polyfill: 1.5.1
     rimraf: 5.0.5
     storybook: 9.1.19
@@ -10409,6 +10409,8 @@ __metadata:
     react-query-swagger: 15.13.1
     react-router-dom: 6.30.3
     react-virtualized-auto-sizer: 1.0.26
+    rehype-raw: 7.0.0
+    rehype-sanitize: 6.0.0
     remark-gfm: 4.0.0
     semver: 7.5.4
     streamsaver: 2.0.6
@@ -13477,6 +13479,17 @@ __metadata:
     web-namespaces: ^2.0.0
     zwitch: ^2.0.0
   checksum: 778961e2d3140362665b306caade3c12df3d03c48827a2cba3534411bb443323a86ad10ed8ef798dd7ebcccb1709edc8df7a62cedc67f69dc40482b6a855f14f
+  languageName: node
+  linkType: hard
+
+"hast-util-sanitize@npm:^5.0.0":
+  version: 5.0.2
+  resolution: "hast-util-sanitize@npm:5.0.2"
+  dependencies:
+    "@types/hast": ^3.0.0
+    "@ungap/structured-clone": ^1.0.0
+    unist-util-position: ^5.0.0
+  checksum: 2ab506b847e0ef799dafabae764893bd6ee43dfdf10e65154436c3ded5210abcc637d8e630354f2efd0aa771cd9de78624e2ed9a82c7054029f2b9e18ca7bb70
   languageName: node
   linkType: hard
 
@@ -18034,6 +18047,16 @@ __metadata:
     hast-util-raw: ^9.0.0
     vfile: ^6.0.0
   checksum: f9e28dcbf4c6c7d91a97c10a840310f18ef3268aa45abb3e0428b6b191ff3c4fa8f753b910d768588a2dac5c7da7e557b4ddc3f1b6cd252e8d20cb62d60c65ed
+  languageName: node
+  linkType: hard
+
+"rehype-sanitize@npm:6.0.0":
+  version: 6.0.0
+  resolution: "rehype-sanitize@npm:6.0.0"
+  dependencies:
+    "@types/hast": ^3.0.0
+    hast-util-sanitize: ^5.0.0
+  checksum: 8f1b44323a6012fbfa83ee6bc48163b846398952c60e5ddbd3d2275cb46cec4fb8d98a919ffce1b3322af469c6dcef9a0127bcf0a1d96203a5c193d07cd26742
   languageName: node
   linkType: hard
 

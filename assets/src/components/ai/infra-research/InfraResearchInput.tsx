@@ -3,12 +3,12 @@ import { useCreateInfraResearchMutation } from 'generated/graphql'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts'
-import { ChatInputSimple } from '../chatbot/input/ChatInput'
+import { ChatInputSimple, ChatInputSimpleRef } from '../chatbot/input/ChatInput'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 
 export function InfraResearchInput() {
   const navigate = useNavigate()
-  const inputRef = useAutofocusRef()
+  const inputRef = useAutofocusRef<ChatInputSimpleRef>()
   const [prompt, setPrompt] = useState('')
 
   const [mutation, { loading, error }] = useCreateInfraResearchMutation({

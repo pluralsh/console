@@ -29,7 +29,7 @@ import {
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import truncate from 'lodash/truncate'
-import type { ComponentProps, RefObject } from 'react'
+import type { ComponentProps } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -61,7 +61,7 @@ export function WorkbenchJobCreateInput({
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
   const navigate = useNavigate()
-  const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
+  const inputRef = useAutofocusRef<ChatInputSimpleRef>()
   const [prompt, setPrompt] = useState('')
 
   const [createWorkbenchJob, { loading, error }] =
@@ -84,8 +84,10 @@ export function WorkbenchJobCreateInput({
       awaitRefetchQueries: true,
     })
 
-  const handleSubmitPrompt = (nextPrompt = prompt) => {
-    const trimmedPrompt = nextPrompt.trim()
+  const handleSubmitPrompt = (nextPrompt?: string) => {
+    const source =
+      nextPrompt ?? inputRef.current?.getSerializedValue?.() ?? prompt
+    const trimmedPrompt = source.trim()
 
     if (!trimmedPrompt || !workbenchId) return
 
@@ -116,6 +118,8 @@ export function WorkbenchJobCreateInput({
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
           allowSubmit={!!prompt.trim() && !!workbenchId && !disabled}
+          enableAutoComplete
+          workbenchId={workbenchId}
           options={
             <Flex
               gap="xsmall"

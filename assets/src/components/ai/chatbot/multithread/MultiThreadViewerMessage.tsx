@@ -4,6 +4,7 @@ import {
   Code,
   Flex,
   getLastStringChild,
+  markdownSanitizeSchema,
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -11,10 +12,16 @@ import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil, truncate } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { Components } from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
+import { plrlChipComponents } from './chip-renderers/PlrlChipRenderers'
+import { PLRL_CHIP_TAG_NAMES } from '../input/autocomplete/mentionShorthand'
+
+const PLRL_TAG_RE = new RegExp(`<(?:${PLRL_CHIP_TAG_NAMES.join('|')})\\b`, 'i')
 
 export function MultiThreadViewerMessage({
   message,
@@ -175,11 +182,18 @@ function CodeBlockLabel({
 }
 
 export function SimplifiedMarkdown({ text }: { text: string }) {
+  const hasPlrlTag = PLRL_TAG_RE.test(text)
   return (
     <SimpleMarkdownSC>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={
+          hasPlrlTag
+            ? [rehypeRaw, [rehypeSanitize, markdownSanitizeSchema]]
+            : undefined
+        }
         components={{
+          ...(hasPlrlTag ? (plrlChipComponents as unknown as Components) : {}),
           // Headers are bold
           h1: ({ children }) => <strong>{children}</strong>,
           h2: ({ children }) => <strong>{children}</strong>,

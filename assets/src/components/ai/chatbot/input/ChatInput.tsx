@@ -19,15 +19,20 @@ import {
   ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   Dispatch,
+  KeyboardEvent,
   ReactNode,
   RefObject,
   SetStateAction,
+  useCallback,
   useImperativeHandle,
   useRef,
   useState,
 } from 'react'
 import styled, { StyledObject, useTheme } from 'styled-components'
+import { serializeEditableValue } from 'components/utils/contentEditableChips.ts'
 import { useChatbot } from '../../AIContext.tsx'
+import { MentionMenu } from './autocomplete/MentionMenu.tsx'
+import { useMentionAutocomplete } from './autocomplete/useMentionAutocomplete.ts'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
@@ -63,7 +68,7 @@ export function ChatInput({
   const newMessage = stateless ? localMessage : persistedMessage
   const setNewMessage = stateless ? setLocalMessage : setPersistedMessage
 
-  const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
+  const inputRef = useAutofocusRef<ChatInputSimpleRef>()
 
   const handleSubmit = () => {
     const content = newMessage.trim()
@@ -147,6 +152,7 @@ export function ChatInput({
 
 export type ChatInputSimpleRef = {
   resetInput: () => void
+  getSerializedValue: () => string
 } & HTMLElement
 
 export function ChatInputSimple({
@@ -158,6 +164,10 @@ export function ChatInputSimple({
   bgColor = 'fill-zero-selected',
   options,
   wrapperStyles,
+  enableAutoComplete = false,
+  workbenchId,
+  onKeyDown: onKeyDownProp,
+  setValue: setValueProp,
   ...props
 }: {
   ref?: RefObject<Nullable<ChatInputSimpleRef>>
@@ -167,10 +177,19 @@ export function ChatInputSimple({
   bgColor?: SemanticColorKey
   options?: ReactNode
   wrapperStyles?: StyledObject
+  enableAutoComplete?: boolean
+  workbenchId?: Nullable<string>
 } & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
   const divRef = useRef<HTMLDivElement>(null)
   const handleSubmit = () => allowSubmit && onSubmit()
+
+  const autocomplete = useMentionAutocomplete({
+    containerRef: divRef,
+    workbenchId,
+    enabled: enableAutoComplete,
+  })
+
   useImperativeHandle(ref, () => {
     const node = divRef.current
     if (node)
@@ -178,8 +197,19 @@ export function ChatInputSimple({
         resetInput: () => {
           node.innerHTML = ''
         },
+        getSerializedValue: () =>
+          enableAutoComplete ? serializeEditableValue(node) : node.innerText,
       })
   })
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (autocomplete.onKeyDown(e)) return
+      onKeyDownProp?.(e)
+    },
+    [autocomplete, onKeyDownProp]
+  )
+
   return (
     <EditableContentWrapperSC
       $bgColor={bgColor}
@@ -188,7 +218,13 @@ export function ChatInputSimple({
       <EditableDiv
         ref={divRef}
         {...props}
+        chipsEnabled={enableAutoComplete}
         onEnter={handleSubmit}
+        onKeyDown={onKeyDown}
+        setValue={(value) => {
+          setValueProp(value)
+          autocomplete.onInput()
+        }}
         disabled={loading || disabled}
       />
       <div css={{ width: '100%', paddingRight: spacing.xlarge }}>{options}</div>
@@ -202,6 +238,15 @@ export function ChatInputSimple({
           bottom: spacing.small,
           right: spacing.small,
         }}
+      />
+      <MentionMenu
+        isOpen={autocomplete.state.isOpen}
+        anchorRect={autocomplete.state.anchorRect}
+        items={autocomplete.state.items}
+        highlightedIndex={autocomplete.state.highlightedIndex}
+        loading={autocomplete.state.loading}
+        onSelect={autocomplete.commit}
+        onHover={autocomplete.setHighlightedIndex}
       />
     </EditableContentWrapperSC>
   )

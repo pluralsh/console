@@ -43,7 +43,6 @@ export function WorkbenchJobPromptInput({
     createMessage,
     { loading: createMessageLoading, error: createMessageError },
   ] = useCreateWorkbenchMessageMutation({
-    variables: { jobId: job?.id ?? '', attributes: { prompt: newMessage } },
     update: (cache, { data }) =>
       appendActivityToCache(cache, job?.id ?? '', data?.createWorkbenchMessage),
     onCompleted: () => resetInput(),
@@ -53,14 +52,21 @@ export function WorkbenchJobPromptInput({
   const isRunning = isJobRunning(job?.status)
   const prevIsRunning = usePrevious(isRunning)
 
+  const readPrompt = () =>
+    chatInputRef.current?.getSerializedValue?.() ?? newMessage
+
   const submitJob = () => {
+    const prompt = readPrompt()
     if (isRunning) {
       setChatQueue((prev) => [
         ...prev,
-        { id: Math.random().toString(), message: newMessage },
+        { id: Math.random().toString(), message: prompt },
       ])
       resetInput()
-    } else createMessage()
+    } else
+      createMessage({
+        variables: { jobId: job?.id ?? '', attributes: { prompt } },
+      })
   }
 
   const sendTopQueueMessage = useEffectEvent(() => {
@@ -129,6 +135,8 @@ export function WorkbenchJobPromptInput({
           onSubmit={submitJob}
           allowSubmit={!!newMessage}
           wrapperStyles={{ minHeight: 90 }}
+          enableAutoComplete
+          workbenchId={job?.workbench?.id}
         />
       </div>
     </>

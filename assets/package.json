@@ -107,6 +107,8 @@
     "react-query-swagger": "15.13.1",
     "react-router-dom": "6.30.3",
     "react-virtualized-auto-sizer": "1.0.26",
+    "rehype-raw": "7.0.0",
+    "rehype-sanitize": "6.0.0",
     "remark-gfm": "4.0.0",
     "semver": "7.5.4",
     "streamsaver": "2.0.6",
