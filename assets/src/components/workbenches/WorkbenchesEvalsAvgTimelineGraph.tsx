@@ -1,10 +1,11 @@
 import { ResponsiveLine } from '@nivo/line'
-import { SemanticColorKey } from '@pluralsh/design-system'
+import { ListBoxItem, Select, SemanticColorKey } from '@pluralsh/design-system'
 import { WorkbenchGraphCard } from 'components/workbenches/common/WorkbenchGraphCard'
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
 import { useChartTheme } from 'components/utils/charts'
 import { TRUNCATE } from 'components/utils/truncate'
+import { InlineA } from 'components/utils/typography/Text'
 import {
   EvalResultsPeriod,
   WorkbenchEvalResultsWorkbenchAverage,
@@ -14,12 +15,12 @@ import { useMemo, useState } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 
 const MAX_GRADE = 10
-const MAX_WORKBENCH_SERIES = 6
 
 export function WorkbenchesEvalsAvgTimelineGraph() {
   const theme = useTheme()
   const chartTheme = useChartTheme()
   const [range, setRange] = useState<RangeSelectorOption>('1W')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const { data, loading, error } = useWorkbenchesEvalsAvgTimelineGraphQuery({
     variables: { period: rangeToPeriod[range] },
     fetchPolicy: 'cache-and-network',
@@ -32,7 +33,12 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
     [data?.averageWorkbenchEvalResults, theme]
   )
 
-  const visibleSeries = series.slice(0, MAX_WORKBENCH_SERIES)
+  const selectableSeries = series
+  const selectableIdSet = new Set(selectableSeries.map((item) => item.id))
+  const activeSelectedIds = selectedIds.filter((id) => selectableIdSet.has(id))
+  const visibleSeries = activeSelectedIds.length
+    ? selectableSeries.filter((item) => activeSelectedIds.includes(item.id))
+    : selectableSeries
   const hasData = visibleSeries.length > 0
 
   return (
@@ -62,46 +68,120 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
       >
         {hasData ? (
           <>
-            <div
-              css={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                gap: theme.spacing.small,
-              }}
-            >
-              {visibleSeries.map((item) => (
-                <div
-                  key={item.id}
-                  css={{
-                    border: theme.borders.default,
-                    borderRadius: theme.borderRadiuses.medium,
-                    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: theme.spacing.xsmall,
-                  }}
-                >
-                  <span
-                    css={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 2,
-                      background: item.color,
-                      flexShrink: 0,
-                    }}
+            {selectableSeries.length > 6 ? (
+              <Select
+                label="Filter workbenches"
+                selectionMode="multiple"
+                selectedKeys={activeSelectedIds}
+                onSelectionChange={(keys) =>
+                  setSelectedIds(Array.from(keys).map(String))
+                }
+                dropdownFooterFixed={
+                  activeSelectedIds.length > 0 ? (
+                    <div
+                      css={{
+                        borderTop: theme.borders.default,
+                        padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+                        width: '100%',
+                      }}
+                    >
+                      <InlineA
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setSelectedIds([])
+                        }}
+                      >
+                        Clear selection
+                      </InlineA>
+                    </div>
+                  ) : null
+                }
+              >
+                {selectableSeries.map((item) => (
+                  <ListBoxItem
+                    key={item.id}
+                    label={item.label}
+                    leftContent={
+                      <span
+                        css={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 2,
+                          background: item.color,
+                          flexShrink: 0,
+                        }}
+                      />
+                    }
                   />
-                  <div
-                    css={{
-                      ...theme.partials.text.body2,
-                      color: theme.colors['text-light'],
-                      ...TRUNCATE,
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </Select>
+            ) : (
+              <div
+                css={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                  gap: theme.spacing.small,
+                }}
+              >
+                {selectableSeries.map((item) => {
+                  const selected = activeSelectedIds.includes(item.id)
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        setSelectedIds((current) =>
+                          current.includes(item.id)
+                            ? current.filter((id) => id !== item.id)
+                            : [...current, item.id]
+                        )
+                      }
+                      css={{
+                        appearance: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        border: theme.borders.default,
+                        borderRadius: theme.borderRadiuses.medium,
+                        padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: theme.spacing.xsmall,
+                        background: selected
+                          ? theme.colors['fill-two-selected']
+                          : theme.colors['fill-zero'],
+                        transition: 'background 120ms ease',
+                        '&:hover': {
+                          background: selected
+                            ? theme.colors['fill-two-selected']
+                            : theme.colors['fill-one-hover'],
+                        },
+                      }}
+                    >
+                      <span
+                        css={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 2,
+                          background: item.color,
+                          flexShrink: 0,
+                        }}
+                      />
+                      <div
+                        css={{
+                          ...theme.partials.text.caption,
+                          color: theme.colors['text-xlight'],
+                          ...TRUNCATE,
+                        }}
+                      >
+                        {item.label}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
             <div css={{ minHeight: 200, width: '100%', flex: 1 }}>
               <ResponsiveLine
