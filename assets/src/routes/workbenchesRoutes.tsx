@@ -1,4 +1,5 @@
 import { Workbenches } from 'components/workbenches/Workbenches'
+import { WorkbenchesEvals } from 'components/workbenches/WorkbenchesEvals'
 import { WorkbenchesList } from 'components/workbenches/WorkbenchesList'
 import { WorkbenchesAlerts } from 'components/workbenches/WorkbenchesAlerts'
 import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
@@ -26,6 +27,7 @@ import {
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
+  WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
@@ -50,6 +52,10 @@ export const workbenchesRoutes = [
     <Route
       index
       element={<WorkbenchesList />}
+    />
+    <Route
+      path={WORKBENCHES_EVALS_REL_PATH}
+      element={<WorkbenchesEvals />}
     />
     <Route
       path={WORKBENCHES_TOOLS_ADD_REL_PATH}

@@ -10,6 +10,7 @@ import {
 } from 'generated/graphql'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
+import { GqlError } from 'components/utils/Alert'
 
 export function WorkbenchesEvalsMergeRateGraph() {
   const theme = useTheme()
@@ -21,7 +22,7 @@ export function WorkbenchesEvalsMergeRateGraph() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (error) return null
+  if (error) return <GqlError error={error} />
 
   const mergeRateEntries = (data?.workbenchPrMergeRates ?? []).filter(
     (point): point is WorkbenchPrMergeRateEntry => point != null
