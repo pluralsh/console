@@ -8,9 +8,17 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
-import { useWorkbenchQuery } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import {
+  WorkbenchEvalAttributes,
+  useCreateWorkbenchEvalMutation,
+  useDeleteWorkbenchEvalMutation,
+  useUpdateWorkbenchEvalMutation,
+  useWorkbenchEvalSettingsQuery,
+  useWorkbenchQuery,
+} from 'generated/graphql'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   WORKBENCH_PARAM_ID,
@@ -35,6 +43,7 @@ type EvalSettingsStep = (typeof EVAL_SETTINGS_STEPS)[number]
 
 export function WorkbenchEvalSettings() {
   const navigate = useNavigate()
+  const { popToast } = useSimpleToast()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [curStep, setCurStep] = useState<EvalSettingsStep>('Prompt quality')
   const [evalsEnabled, setEvalsEnabled] = useState(true)
@@ -44,12 +53,43 @@ export function WorkbenchEvalSettings() {
   const curStepIndex = EVAL_SETTINGS_STEPS.findIndex((step) => step === curStep)
   const isLastStep = curStepIndex === EVAL_SETTINGS_STEPS.length - 1
 
+  const {
+    data: evalData,
+    loading: evalLoading,
+    error: evalError,
+  } = useWorkbenchEvalSettingsQuery({
+    variables: { id: workbenchId },
+    skip: !workbenchId,
+    fetchPolicy: 'cache-and-network',
+  })
+
   const { data, loading, error } = useWorkbenchQuery({
     variables: { id: workbenchId },
     fetchPolicy: 'cache-and-network',
     skip: !workbenchId,
   })
   const workbench = data?.workbench
+  const workbenchEval = evalData?.workbench?.eval
+
+  useEffect(() => {
+    if (evalLoading) return
+    setEvalsEnabled(!!workbenchEval)
+    setPromptQualityRules(workbenchEval?.promptRules ?? '')
+    setConclusionRules(workbenchEval?.conclusionRules ?? '')
+    setProgressAndThoughtsRules(workbenchEval?.progressRules ?? '')
+  }, [evalLoading, workbenchEval])
+
+  const [createWorkbenchEval, { loading: createLoading, error: createError }] =
+    useCreateWorkbenchEvalMutation()
+
+  const [updateWorkbenchEval, { loading: updateLoading, error: updateError }] =
+    useUpdateWorkbenchEvalMutation()
+
+  const [deleteWorkbenchEval, { loading: deleteLoading, error: deleteError }] =
+    useDeleteWorkbenchEvalMutation()
+
+  const saveError = createError ?? updateError ?? deleteError
+  const saveLoading = createLoading || updateLoading || deleteLoading
 
   useSetBreadcrumbs(
     useMemo(
@@ -62,7 +102,48 @@ export function WorkbenchEvalSettings() {
     return <EmptyState message="Workbench not found." />
   }
 
+  if (evalError) return <GqlError error={evalError} />
   if (error) return <GqlError error={error} />
+
+  const handleSave = async () => {
+    if (!workbenchId) return
+
+    if (!evalsEnabled) {
+      if (workbenchEval?.id) {
+        await deleteWorkbenchEval({
+          variables: { id: workbenchEval.id },
+          refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+          awaitRefetchQueries: true,
+        })
+      }
+      popToast({ content: 'Eval settings updated', severity: 'success' })
+      navigate(getWorkbenchAbsPath(workbenchId))
+      return
+    }
+
+    const attributes: WorkbenchEvalAttributes = {
+      promptRules: promptQualityRules || null,
+      conclusionRules: conclusionRules || null,
+      progressRules: progressAndThoughtsRules || null,
+    }
+
+    if (workbenchEval?.id) {
+      await updateWorkbenchEval({
+        variables: { id: workbenchEval.id, attributes },
+        refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+        awaitRefetchQueries: true,
+      })
+    } else {
+      await createWorkbenchEval({
+        variables: { workbenchId, attributes },
+        refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+        awaitRefetchQueries: true,
+      })
+    }
+
+    popToast({ content: 'Eval settings updated', severity: 'success' })
+    navigate(getWorkbenchAbsPath(workbenchId))
+  }
 
   return (
     <Flex
@@ -107,6 +188,7 @@ export function WorkbenchEvalSettings() {
             ))}
           </Flex>
           <FormCardSC>
+            {saveError && <GqlError error={saveError} />}
             {curStep === 'Prompt quality' ? (
               <Flex
                 direction="column"
@@ -204,7 +286,8 @@ export function WorkbenchEvalSettings() {
                   </Button>
                   {isLastStep ? (
                     <Button
-                      onClick={() => navigate(getWorkbenchAbsPath(workbenchId))}
+                      loading={saveLoading}
+                      onClick={() => void handleSave()}
                     >
                       Create new eval
                     </Button>
