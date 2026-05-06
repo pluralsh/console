@@ -45,17 +45,18 @@ export function WorkbenchesEvalsAvgGraph() {
       }
       loading={loading}
     >
-      <Flex
-        direction="column"
-        gap="xsmall"
-        css={{
-          maxHeight: 200,
-          overflowY: 'auto',
-          paddingRight: theme.spacing.xxsmall,
-        }}
-      >
-        {hasData ? (
-          workbenchAverages.map(({ id, name, score }) => {
+      {hasData ? (
+        <Flex
+          direction="column"
+          gap="xsmall"
+          css={{
+            minHeight: 200,
+            maxHeight: 200,
+            overflowY: 'auto',
+            paddingRight: theme.spacing.xxsmall,
+          }}
+        >
+          {workbenchAverages.map(({ id, name, score }) => {
             const colorKey = rowColorKey(score)
             const color = theme.colors[colorKey]
 
@@ -99,21 +100,22 @@ export function WorkbenchesEvalsAvgGraph() {
                 </div>
               </div>
             )
-          })
-        ) : (
-          <div
-            css={{
-              ...theme.partials.text.body2,
-              color: theme.colors['text-xlight'],
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            No workbench grades yet.
-          </div>
-        )}
-      </Flex>
+          })}
+        </Flex>
+      ) : (
+        <div
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-xlight'],
+            minHeight: 200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          No workbench grades yet.
+        </div>
+      )}
     </WorkbenchGraphCard>
   )
 }

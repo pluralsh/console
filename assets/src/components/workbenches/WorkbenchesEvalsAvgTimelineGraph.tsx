@@ -142,6 +142,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              height: '100%',
             }}
           >
             No workbench grade timeline yet.
