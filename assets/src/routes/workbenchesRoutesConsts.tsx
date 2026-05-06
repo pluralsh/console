@@ -10,6 +10,7 @@ export const WORKBENCHES_EDIT_REL_PATH = 'edit'
 export const WORKBENCHES_CRON_SCHEDULES_REL_PATH = 'cron-schedules'
 export const WORKBENCHES_SAVED_PROMPTS_REL_PATH = 'saved-prompts'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH = 'webhook-triggers'
+export const WORKBENCH_EVAL_SETTINGS_REL_PATH = 'eval-settings'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH =
   'create-webhook'
 export const WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM = 'selectedWebhook'
@@ -97,6 +98,10 @@ export const getWorkbenchWebhookTriggerEditAbsPath = ({
   webhookId: Nullable<string>
 }) =>
   `${getWorkbenchWebhookTriggersAbsPath(workbenchId)}/${webhookId ?? ''}/${WORKBENCHES_EDIT_REL_PATH}`
+
+export const getWorkbenchEvalSettingsAbsPath = (
+  workbenchId: Nullable<string>
+) => `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCH_EVAL_SETTINGS_REL_PATH}`
 
 export const getWorkbenchJobAbsPath = ({
   workbenchId,

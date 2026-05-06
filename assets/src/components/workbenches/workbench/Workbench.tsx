@@ -10,6 +10,7 @@ import {
   useSetBreadcrumbs,
   WebhooksIcon,
   ToolsIcon,
+  TuningIcon,
 } from '@pluralsh/design-system'
 import { SubTabs } from 'components/utils/SubTabs'
 import { GqlError } from 'components/utils/Alert'
@@ -37,6 +38,7 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
   WORKBENCHES_SAVED_PROMPTS_REL_PATH,
+  WORKBENCH_EVAL_SETTINGS_REL_PATH,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
@@ -73,6 +75,7 @@ export enum WorkbenchMoreMenuKey {
   Webhook = 'webhook',
   Tools = 'tools',
   SavedPrompts = 'saved-prompts',
+  EvalSettings = 'eval-settings',
   Delete = 'delete',
 }
 
@@ -100,6 +103,9 @@ export function Workbench() {
         return
       case WorkbenchMoreMenuKey.SavedPrompts:
         navigate(WORKBENCHES_SAVED_PROMPTS_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.EvalSettings:
+        navigate(WORKBENCH_EVAL_SETTINGS_REL_PATH)
         return
       case WorkbenchMoreMenuKey.Delete:
         setDeleteModalOpen(true)
@@ -205,6 +211,11 @@ export function Workbench() {
               key={WorkbenchMoreMenuKey.SavedPrompts}
               leftContent={<BookmarkIcon />}
               label="Saved prompts"
+            />
+            <ListBoxItem
+              key={WorkbenchMoreMenuKey.EvalSettings}
+              leftContent={<TuningIcon />}
+              label="Eval settings"
             />
             <ListBoxItem
               key={WorkbenchMoreMenuKey.Delete}
