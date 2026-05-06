@@ -292,7 +292,7 @@ export function WorkbenchEvalSettings() {
                       loading={saveLoading}
                       onClick={() => void handleSave()}
                     >
-                      Create new eval
+                      {workbenchEval?.id ? 'Save eval' : 'Create new eval'}
                     </Button>
                   ) : (
                     <Button
