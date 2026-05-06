@@ -27,7 +27,7 @@ type TriggerPosition = {
   offset: number
 }
 
-type MentionAutocompleteState = {
+export type MentionAutocompleteState = {
   isOpen: boolean
   trigger: MentionTrigger | null
   query: string

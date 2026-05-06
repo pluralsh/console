@@ -233,11 +233,7 @@ export function ChatInputSimple({
         }}
       />
       <MentionMenu
-        isOpen={autocomplete.state.isOpen}
-        anchorRect={autocomplete.state.anchorRect}
-        items={autocomplete.state.items}
-        highlightedIndex={autocomplete.state.highlightedIndex}
-        loading={autocomplete.state.loading}
+        autoCompleteState={autocomplete.state}
         onSelect={autocomplete.commit}
         onHover={autocomplete.setHighlightedIndex}
       />

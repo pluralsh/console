@@ -3,25 +3,18 @@ import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 import { ChipAttrs } from './mentionTypes'
 import { MentionResults } from './MentionResults'
+import { MentionAutocompleteState } from './useMentionAutocomplete'
 
-const MENU_GAP = 4
+const MENU_GAP = 12
 const MENU_MAX_HEIGHT = 320
 const MENU_WIDTH = 320
 
 export function MentionMenu({
-  isOpen,
-  anchorRect,
-  items,
-  highlightedIndex,
-  loading,
+  autoCompleteState: { isOpen, anchorRect, items, highlightedIndex, loading },
   onSelect,
   onHover,
 }: {
-  isOpen: boolean
-  anchorRect: DOMRect | null
-  items: ChipAttrs[]
-  highlightedIndex: number
-  loading: boolean
+  autoCompleteState: MentionAutocompleteState
   onSelect: (item: ChipAttrs) => void
   onHover: (index: number) => void
 }) {
@@ -29,24 +22,24 @@ export function MentionMenu({
     if (!isOpen || !anchorRect) return null
     const viewportH = window.innerHeight
     const viewportW = window.innerWidth
-    // Prefer placing below; flip up if not enough room.
+
     const placeAbove =
       anchorRect.bottom + MENU_GAP + MENU_MAX_HEIGHT > viewportH &&
-      anchorRect.top > MENU_MAX_HEIGHT
-    const top = placeAbove
-      ? Math.max(8, anchorRect.top - MENU_GAP - MENU_MAX_HEIGHT)
-      : anchorRect.bottom + MENU_GAP
-    const left = Math.min(
-      Math.max(8, anchorRect.left),
-      viewportW - MENU_WIDTH - 8
-    )
+      anchorRect.top > viewportH - anchorRect.bottom
     return {
       position: 'fixed',
-      top,
-      left,
+      left: Math.min(Math.max(8, anchorRect.left), viewportW - MENU_WIDTH - 8),
+      ...(placeAbove
+        ? { bottom: viewportH - anchorRect.top + MENU_GAP }
+        : { top: anchorRect.bottom + MENU_GAP }),
       width: MENU_WIDTH,
-      maxHeight: MENU_MAX_HEIGHT,
       zIndex: 9999,
+      maxHeight: Math.min(
+        MENU_MAX_HEIGHT,
+        (placeAbove ? anchorRect.top : viewportH - anchorRect.bottom) -
+          MENU_GAP -
+          8
+      ),
     }
   }, [isOpen, anchorRect])
 

@@ -4,7 +4,7 @@ import {
   StackIcon,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { ChipAttrs, KIND_LABELS, MentionKind } from './mentionTypes'
 import { isEmpty } from 'lodash'
@@ -44,6 +44,14 @@ export function MentionResults({
   onHover: (index: number) => void
 }) {
   const theme = useTheme()
+  const listRef = useRef<HTMLUListElement>(null)
+
+  useEffect(() => {
+    const row = listRef.current?.children[highlightedIndex] as
+      | HTMLElement
+      | undefined
+    row?.scrollIntoView({ block: 'nearest' })
+  }, [highlightedIndex])
 
   if (isEmpty(items))
     return (
@@ -59,7 +67,10 @@ export function MentionResults({
       </EmptyStateSC>
     )
   return (
-    <ResultsListSC role="listbox">
+    <ResultsListSC
+      ref={listRef}
+      role="listbox"
+    >
       {items.map((item, idx) => {
         const subtitle = subtitleForItem(item)
         return (
