@@ -1193,10 +1193,10 @@ defmodule Console.Deployments.WorkbenchesTest do
 
   describe "create_workbench_webhook/3" do
     test "project writers can create a webhook with observability webhook" do
-      user = insert(:user)
+      user = admin_user()
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      obs_webhook = insert(:observability_webhook)
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
 
       {:ok, webhook} = Workbenches.create_workbench_webhook(%{
         name: "my-webhook",
@@ -1213,7 +1213,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      issue_wh = insert(:issue_webhook)
+      issue_wh = insert(:issue_webhook, read_bindings: [%{user_id: user.id}])
 
       {:ok, webhook} = Workbenches.create_workbench_webhook(%{
         name: "issue-webhook-trigger",
@@ -1256,7 +1256,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      webhook = insert(:workbench_webhook, workbench: workbench, name: "original", user: user)
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, name: "original", user: user)
 
       {:ok, updated} = Workbenches.update_workbench_webhook(%{
         name: "updated-name"
@@ -1268,14 +1269,15 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
 
     test "project writers can update a webhook with matches" do
-      user = insert(:user)
+      user = admin_user()
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      webhook = insert(:workbench_webhook, workbench: workbench, name: "existing")
+      webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: webhook, name: "existing")
 
       {:ok, updated} = Workbenches.update_workbench_webhook(%{
         matches: %{substring: "error", case_insensitive: true}
-      }, webhook.id, user)
+      }, webhook.id, admin_user())
 
       assert updated.id == webhook.id
       assert updated.name == "existing"
@@ -1289,7 +1291,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       other_owner = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: writer.id}])
       workbench = insert(:workbench, project: project)
-      webhook = insert(:workbench_webhook, workbench: workbench, user: other_owner, name: "takeover")
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: other_owner, name: "takeover")
 
       {:ok, updated} =
         Workbenches.update_workbench_webhook(
@@ -1307,7 +1310,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       owner_b = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: writer.id}])
       workbench = insert(:workbench, project: project)
-      webhook = insert(:workbench_webhook, workbench: workbench, user: owner_a, name: "reassign")
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: owner_a, name: "reassign")
 
       {:ok, updated} =
         Workbenches.update_workbench_webhook(

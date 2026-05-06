@@ -74,6 +74,7 @@ defmodule Console.Deployments.Integrations do
   @spec update_issue_webhook(map, binary, User.t) :: issue_webhook_resp
   def update_issue_webhook(attrs, id, %User{} = user) do
     get_issue_webhook!(id)
+    |> Repo.preload([:read_bindings, :write_bindings])
     |> IssueWebhook.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)

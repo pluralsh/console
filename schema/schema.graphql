@@ -1594,6 +1594,8 @@ enum IssueWebhookProvider {
   GITHUB
   GITLAB
   AZURE_DEVOPS
+  BITBUCKET
+  BITBUCKET_DATACENTER
 }
 
 enum IssueStatus {
@@ -1662,6 +1664,8 @@ input IssueWebhookAttributes {
   provider: IssueWebhookProvider
   name: String
   secret: String
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
 }
 
 "A webhook receiver for an issue provider like Linear"
@@ -1671,6 +1675,12 @@ type IssueWebhook {
   provider: IssueWebhookProvider!
 
   name: String!
+
+  "read policy bindings for this webhook"
+  readBindings: [PolicyBinding]
+
+  "write policy bindings for this webhook"
+  writeBindings: [PolicyBinding]
 
   "the url for this specific webhook"
   url: String!
@@ -5809,6 +5819,12 @@ input ObservabilityWebhookAttributes {
 
   "Optional shared secret used to validate incoming webhook payloads"
   secret: String
+
+  "Users or groups who can read this webhook"
+  readBindings: [PolicyBindingAttributes]
+
+  "Users or groups who can modify this webhook"
+  writeBindings: [PolicyBindingAttributes]
 }
 
 "Configuration for an external observability provider such as Datadog or New Relic"
@@ -5853,6 +5869,12 @@ type ObservabilityWebhook {
 
   "Human‑readable name for this webhook"
   name: String!
+
+  "Read policy bindings for this webhook"
+  readBindings: [PolicyBinding]
+
+  "Write policy bindings for this webhook"
+  writeBindings: [PolicyBinding]
 
   "the url for this specific webhook"
   url: String!

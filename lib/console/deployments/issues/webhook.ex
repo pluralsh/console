@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Issues.Webhook do
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Issues.Webhook.{Linear, Jira, Asana, Github, Gitlab, AzureDevops}
+  alias Console.Deployments.Issues.Webhook.{Linear, Jira, Asana, Github, Gitlab, AzureDevops, Bitbucket, BitbucketDatacenter}
   alias Console.Deployments.Workbenches
   alias Console.Deployments.Observability.Webhook.Raw
   alias Console.Schema.{WorkbenchWebhook, IssueWebhook}
@@ -110,6 +110,79 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :azure_devops} = webhook, %{"resource" => %{"id" => _}, "eventType" => "workitem." <> _} = payload) do
     build_attributes(AzureDevops, payload)
     |> Map.put(:provider, :azure_devops)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(
+        %IssueWebhook{provider: :bitbucket} = webhook,
+        %{"comment" => _, "pullrequest" => _} = payload
+      ) do
+    build_attributes(Bitbucket, payload)
+    |> Map.put(:provider, :bitbucket)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :bitbucket} = webhook, %{"pullrequest" => _} = payload) do
+    build_attributes(Bitbucket, payload)
+    |> Map.put(:provider, :bitbucket)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :bitbucket} = webhook, %{"comment" => _, "issue" => _} = payload) do
+    build_attributes(Bitbucket, payload)
+    |> Map.put(:provider, :bitbucket)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :bitbucket} = webhook, %{"issue" => _} = payload) do
+    build_attributes(Bitbucket, payload)
+    |> Map.put(:provider, :bitbucket)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(
+        %IssueWebhook{provider: :bitbucket_datacenter} = webhook,
+        %{"comment" => _, "pullRequest" => _} = payload
+      ) do
+    build_attributes(BitbucketDatacenter, payload)
+    |> Map.put(:provider, :bitbucket_datacenter)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(
+        %IssueWebhook{provider: :bitbucket_datacenter} = webhook,
+        %{"comment" => _, "pullrequest" => _} = payload
+      ) do
+    build_attributes(BitbucketDatacenter, payload)
+    |> Map.put(:provider, :bitbucket_datacenter)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :bitbucket_datacenter} = webhook, %{"pullRequest" => _} = payload) do
+    build_attributes(BitbucketDatacenter, payload)
+    |> Map.put(:provider, :bitbucket_datacenter)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :bitbucket_datacenter} = webhook, %{"pullrequest" => _} = payload) do
+    build_attributes(BitbucketDatacenter, payload)
+    |> Map.put(:provider, :bitbucket_datacenter)
     |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()

@@ -78,6 +78,23 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  defp verify(conn, %ScmWebhook{type: :bitbucket, hmac: hmac}) do
+    with [signature] <- get_req_header(conn, "x-hub-signature"),
+         computed = :crypto.mac(:hmac, :sha256, hmac, Enum.reverse(conn.assigns.raw_body)),
+         true <- Plug.Crypto.secure_compare(signature, "sha256=#{Base.encode16(computed, case: :lower)}") do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(conn, %ScmWebhook{type: :bitbucket_datacenter, hmac: hmac}) do
+    case Plug.BasicAuth.parse_basic_auth(conn) do
+      {_, ^hmac} -> :ok
+      _ -> :reject
+    end
+  end
+
   defp verify(conn, %ObservabilityWebhook{type: :grafana, secret: secret}) do
     with {_, password} <- Plug.BasicAuth.parse_basic_auth(conn),
          true <- Plug.Crypto.secure_compare(secret, password) do
@@ -174,6 +191,12 @@ defmodule ConsoleWeb.WebhookController do
 
   defp verify(conn, %IssueWebhook{provider: :azure_devops, secret: secret}),
     do: verify(conn, %ScmWebhook{type: :azure_devops, hmac: secret})
+
+  defp verify(conn, %IssueWebhook{provider: :bitbucket, secret: secret}),
+    do: verify(conn, %ScmWebhook{type: :bitbucket, hmac: secret})
+
+  defp verify(conn, %IssueWebhook{provider: :bitbucket_datacenter, secret: secret}),
+    do: verify(conn, %ScmWebhook{type: :bitbucket_datacenter, hmac: secret})
 
   defp verify(_, _), do: :reject
 end

@@ -15,6 +15,8 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchEval,
     WorkbenchEvalResult,
     WorkbenchWebhook,
+    ObservabilityWebhook,
+    IssueWebhook,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
   }
@@ -369,10 +371,15 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec create_workbench_webhook(map, binary, User.t()) :: webhook_resp
   def create_workbench_webhook(attrs, workbench_id, %User{id: uid} = user) do
-    %WorkbenchWebhook{workbench_id: workbench_id, user_id: uid}
-    |> WorkbenchWebhook.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:webhook, fn _ ->
+      %WorkbenchWebhook{workbench_id: workbench_id, user_id: uid}
+      |> WorkbenchWebhook.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
+    |> execute(extract: :webhook)
     |> notify(:create, user)
   end
 
@@ -381,11 +388,25 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec update_workbench_webhook(map, binary, User.t()) :: webhook_resp
   def update_workbench_webhook(attrs, id, %User{} = user) do
-    get_workbench_webhook!(id)
-    |> allow(user, :write)
-    |> when_ok(&WorkbenchWebhook.changeset(&1, override_webhook_user(attrs, user)))
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:webhook, fn _ ->
+      get_workbench_webhook!(id)
+      |> allow(user, :write)
+      |> when_ok(&WorkbenchWebhook.changeset(&1, override_webhook_user(attrs, user)))
+      |> when_ok(:update)
+    end)
+    |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
+    |> execute(extract: :webhook)
     |> notify(:update, user)
+  end
+
+  defp hook_access(%WorkbenchWebhook{} = hook, %User{} = user) do
+    Repo.preload(hook, [:webhook, :issue_webhook])
+    |> case do
+      %WorkbenchWebhook{webhook: %ObservabilityWebhook{} = hook} -> allow(hook, user, :read)
+      %WorkbenchWebhook{issue_webhook: %IssueWebhook{} = hook} -> allow(hook, user, :read)
+      _ -> {:error, "workbench webhook does not have an observability webhook or issue webhook"}
+    end
   end
 
   @doc """

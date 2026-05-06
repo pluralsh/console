@@ -1491,6 +1491,343 @@ defmodule ConsoleWeb.WebhookControllerTest do
     end
   end
 
+  describe "#issue/2 (Bitbucket)" do
+    test "it returns 403 when x-hub-signature is missing", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      payload = Jason.encode!(%{"issue" => %{"id" => 1, "title" => "Bug"}})
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it returns 403 when x-hub-signature is invalid", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      payload = Jason.encode!(%{"issue" => %{"id" => 1, "title" => "Bug"}})
+
+      conn
+      |> put_req_header("x-hub-signature", "sha256=invalid-signature")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it will ignore if payload is invalid (missing issue and pullrequest)", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      payload = Jason.encode!(%{"actor" => %{"display_name" => "test"}})
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("x-hub-signature", "sha256=#{signature}")
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+
+    test "it can handle a valid Bitbucket issue webhook and creates the issue", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Fix deployment failure\nSteps to reproduce deployment failure"})
+      bitbucket_payload = %{
+        "issue" => %{
+          "id" => 42,
+          "title" => "Fix deployment failure",
+          "content" => %{"raw" => "Steps to reproduce deployment failure"},
+          "links" => %{"html" => %{"href" => "https://bitbucket.org/myorg/myrepo/issues/42"}},
+          "state" => "open"
+        },
+        "repository" => %{"full_name" => "myorg/myrepo"}
+      }
+      payload = Jason.encode!(bitbucket_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("x-hub-signature", "sha256=#{signature}")
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+      refute result["ignored"]
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :bitbucket
+      assert issue.external_id == "myorg/myrepo:issue:42"
+      assert issue.title == "Fix deployment failure"
+      assert issue.url == "https://bitbucket.org/myorg/myrepo/issues/42"
+      assert issue.body == "Steps to reproduce deployment failure"
+      assert issue.status == :open
+      assert issue.workbench_webhook_id == wh.id
+    end
+
+    test "it maps resolved issue state to completed", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      insert(:issue, provider: :bitbucket, external_id: "myorg/myrepo:issue:43")
+      bitbucket_payload = %{
+        "issue" => %{
+          "id" => 43,
+          "title" => "Closed issue",
+          "content" => %{"raw" => "Done"},
+          "links" => %{"html" => %{"href" => "https://bitbucket.org/myorg/myrepo/issues/43"}},
+          "state" => "resolved"
+        },
+        "repository" => %{"full_name" => "myorg/myrepo"}
+      }
+      payload = Jason.encode!(bitbucket_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.status == :completed
+    end
+
+    test "it handles Bitbucket pull request payloads", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Refactor release pipeline\nSimplifies promotion orchestration."}
+      )
+      bitbucket_payload = %{
+        "pullrequest" => %{
+          "id" => 77,
+          "title" => "Refactor release pipeline",
+          "description" => "Simplifies promotion orchestration.",
+          "state" => "OPEN",
+          "links" => %{"html" => %{"href" => "https://bitbucket.org/myorg/myrepo/pull-requests/77"}}
+        },
+        "repository" => %{"full_name" => "myorg/myrepo"}
+      }
+
+      payload = Jason.encode!(bitbucket_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "myorg/myrepo:pull_request:77"
+      assert issue.title == "Refactor release pipeline"
+      assert issue.body == "Simplifies promotion orchestration."
+      assert issue.url == "https://bitbucket.org/myorg/myrepo/pull-requests/77"
+      assert issue.status == :open
+    end
+
+    test "it handles Bitbucket pull request comment payloads", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket)
+      insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Comment on PR: Refactor release pipeline (#551)\nPlease add test coverage for rollback handling."}
+      )
+      bitbucket_payload = %{
+        "comment" => %{
+          "id" => 551,
+          "content" => %{"raw" => "Please add test coverage for rollback handling."},
+          "links" => %{"html" => %{"href" => "https://bitbucket.org/myorg/myrepo/pull-requests/77#comment-551"}}
+        },
+        "pullrequest" => %{
+          "id" => 77,
+          "title" => "Refactor release pipeline",
+          "description" => "Simplifies promotion orchestration.",
+          "state" => "OPEN",
+          "links" => %{"html" => %{"href" => "https://bitbucket.org/myorg/myrepo/pull-requests/77"}}
+        },
+        "repository" => %{"full_name" => "myorg/myrepo"}
+      }
+
+      payload = Jason.encode!(bitbucket_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "myorg/myrepo:comment:551"
+      assert issue.title == "Comment on PR: Refactor release pipeline (#551)"
+      assert issue.body == "Please add test coverage for rollback handling."
+      assert issue.url == "https://bitbucket.org/myorg/myrepo/pull-requests/77#comment-551"
+      assert issue.status == :open
+    end
+  end
+
+  describe "#issue/2 (Bitbucket Data Center)" do
+    test "it returns 403 without basic auth", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket_datacenter)
+      payload = Jason.encode!(%{"pullRequest" => %{"id" => 1, "title" => "PR"}})
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it returns 403 with invalid basic auth password", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket_datacenter)
+      payload = Jason.encode!(%{"pullRequest" => %{"id" => 1, "title" => "PR"}})
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", "wrong-secret"))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it will ignore if payload is invalid (missing pullRequest)", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket_datacenter)
+      payload = Jason.encode!(%{"actor" => %{"name" => "admin"}})
+
+      result =
+        conn
+        |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+
+    test "it can handle a valid Bitbucket Data Center pull request webhook", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket_datacenter)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Refactor release pipeline\nSimplifies promotion orchestration."})
+
+      payload = Jason.encode!(%{
+        "eventKey" => "pr:opened",
+        "pullRequest" => %{
+          "id" => 77,
+          "title" => "Refactor release pipeline",
+          "description" => "Simplifies promotion orchestration.",
+          "state" => "OPEN",
+          "toRef" => %{"repository" => %{"slug" => "repo", "project" => %{"key" => "PROJ"}}},
+          "links" => %{"self" => [%{"href" => "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/77"}]}
+        }
+      })
+
+      result =
+        conn
+        |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+      refute result["ignored"]
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :bitbucket_datacenter
+      assert issue.external_id == "PROJ/repo:pull_request:77"
+      assert issue.title == "Refactor release pipeline"
+      assert issue.body == "Simplifies promotion orchestration."
+      assert issue.url == "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/77"
+      assert issue.status == :open
+      assert issue.workbench_webhook_id == wh.id
+    end
+
+    test "it handles Bitbucket Data Center PR comment payloads", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket_datacenter)
+      insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Comment on PR: Refactor release pipeline (#551)\nPlease add test coverage for rollback handling."}
+      )
+
+      payload = Jason.encode!(%{
+        "eventKey" => "pr:comment:added",
+        "pullRequest" => %{
+          "id" => 77,
+          "title" => "Refactor release pipeline",
+          "description" => "Simplifies promotion orchestration.",
+          "state" => "OPEN",
+          "toRef" => %{"repository" => %{"slug" => "repo", "project" => %{"key" => "PROJ"}}},
+          "links" => %{"self" => [%{"href" => "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/77"}]}
+        },
+        "comment" => %{
+          "id" => 551,
+          "text" => "Please add test coverage for rollback handling."
+        }
+      })
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "PROJ/repo:comment:551"
+      assert issue.title == "Comment on PR: Refactor release pipeline (#551)"
+      assert issue.body == "Please add test coverage for rollback handling."
+      assert issue.url == "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/77#comment-551"
+      assert issue.status == :open
+    end
+
+    test "it maps merged and declined states", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :bitbucket_datacenter)
+      insert(:issue, provider: :bitbucket_datacenter, external_id: "PROJ/repo:pull_request:77")
+
+      merged = Jason.encode!(%{
+        "eventKey" => "pr:merged",
+        "pullRequest" => %{
+          "id" => 77,
+          "title" => "Merged PR",
+          "description" => "done",
+          "state" => "MERGED",
+          "toRef" => %{"repository" => %{"slug" => "repo", "project" => %{"key" => "PROJ"}}},
+          "links" => %{"self" => [%{"href" => "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/77"}]}
+        }
+      })
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", merged)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.status == :completed
+
+      declined = Jason.encode!(%{
+        "eventKey" => "pr:declined",
+        "pullRequest" => %{
+          "id" => 77,
+          "title" => "Declined PR",
+          "description" => "no",
+          "state" => "DECLINED",
+          "toRef" => %{"repository" => %{"slug" => "repo", "project" => %{"key" => "PROJ"}}},
+          "links" => %{"self" => [%{"href" => "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/77"}]}
+        }
+      })
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/bitbucket_datacenter/#{hook.external_id}", declined)
+      |> response(200)
+
+      [updated] = Console.Repo.all(Console.Schema.Issue)
+      assert updated.status == :cancelled
+    end
+  end
+
   describe "#issue/2 (Azure DevOps)" do
     test "it returns 403 without basic auth", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :azure_devops)

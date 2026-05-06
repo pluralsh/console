@@ -5180,16 +5180,22 @@ export type IssueWebhook = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   provider: IssueWebhookProvider;
+  /** read policy bindings for this webhook */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the url for this specific webhook */
   url: Scalars['String']['output'];
+  /** write policy bindings for this webhook */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required. */
 export type IssueWebhookAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   provider?: InputMaybe<IssueWebhookProvider>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   secret?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type IssueWebhookConnection = {
@@ -5207,6 +5213,8 @@ export type IssueWebhookEdge = {
 export enum IssueWebhookProvider {
   Asana = 'ASANA',
   AzureDevops = 'AZURE_DEVOPS',
+  Bitbucket = 'BITBUCKET',
+  BitbucketDatacenter = 'BITBUCKET_DATACENTER',
   Github = 'GITHUB',
   Gitlab = 'GITLAB',
   Jira = 'JIRA',
@@ -6396,21 +6404,29 @@ export type ObservabilityWebhook = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Human‑readable name for this webhook */
   name: Scalars['String']['output'];
+  /** Read policy bindings for this webhook */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** Type of observability webhook (for example :grafana) */
   type: ObservabilityWebhookType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the url for this specific webhook */
   url: Scalars['String']['output'];
+  /** Write policy bindings for this webhook */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** input data to persist a webhook receiver for an observability provider like grafana or datadog */
 export type ObservabilityWebhookAttributes = {
   /** Unique name used to reference this webhook */
   name: Scalars['String']['input'];
+  /** Users or groups who can read this webhook */
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** Optional shared secret used to validate incoming webhook payloads */
   secret?: InputMaybe<Scalars['String']['input']>;
   /** Type of webhook endpoint (for example Grafana alerting) */
   type: ObservabilityWebhookType;
+  /** Users or groups who can modify this webhook */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type ObservabilityWebhookConnection = {

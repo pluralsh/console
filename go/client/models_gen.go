@@ -4211,6 +4211,10 @@ type IssueWebhook struct {
 	ID       string               `json:"id"`
 	Provider IssueWebhookProvider `json:"provider"`
 	Name     string               `json:"name"`
+	// read policy bindings for this webhook
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy bindings for this webhook
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the url for this specific webhook
 	URL        string  `json:"url"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -4219,9 +4223,11 @@ type IssueWebhook struct {
 
 // input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required.
 type IssueWebhookAttributes struct {
-	Provider *IssueWebhookProvider `json:"provider,omitempty"`
-	Name     *string               `json:"name,omitempty"`
-	Secret   *string               `json:"secret,omitempty"`
+	Provider      *IssueWebhookProvider      `json:"provider,omitempty"`
+	Name          *string                    `json:"name,omitempty"`
+	Secret        *string                    `json:"secret,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type IssueWebhookConnection struct {
@@ -5240,6 +5246,10 @@ type ObservabilityWebhook struct {
 	Type ObservabilityWebhookType `json:"type"`
 	// Human‑readable name for this webhook
 	Name string `json:"name"`
+	// Read policy bindings for this webhook
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// Write policy bindings for this webhook
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the url for this specific webhook
 	URL        string  `json:"url"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -5254,6 +5264,10 @@ type ObservabilityWebhookAttributes struct {
 	Name string `json:"name"`
 	// Optional shared secret used to validate incoming webhook payloads
 	Secret *string `json:"secret,omitempty"`
+	// Users or groups who can read this webhook
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// Users or groups who can modify this webhook
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ObservabilityWebhookConnection struct {
@@ -13067,12 +13081,14 @@ func (e IssueStatus) MarshalJSON() ([]byte, error) {
 type IssueWebhookProvider string
 
 const (
-	IssueWebhookProviderLinear      IssueWebhookProvider = "LINEAR"
-	IssueWebhookProviderJira        IssueWebhookProvider = "JIRA"
-	IssueWebhookProviderAsana       IssueWebhookProvider = "ASANA"
-	IssueWebhookProviderGithub      IssueWebhookProvider = "GITHUB"
-	IssueWebhookProviderGitlab      IssueWebhookProvider = "GITLAB"
-	IssueWebhookProviderAzureDevops IssueWebhookProvider = "AZURE_DEVOPS"
+	IssueWebhookProviderLinear              IssueWebhookProvider = "LINEAR"
+	IssueWebhookProviderJira                IssueWebhookProvider = "JIRA"
+	IssueWebhookProviderAsana               IssueWebhookProvider = "ASANA"
+	IssueWebhookProviderGithub              IssueWebhookProvider = "GITHUB"
+	IssueWebhookProviderGitlab              IssueWebhookProvider = "GITLAB"
+	IssueWebhookProviderAzureDevops         IssueWebhookProvider = "AZURE_DEVOPS"
+	IssueWebhookProviderBitbucket           IssueWebhookProvider = "BITBUCKET"
+	IssueWebhookProviderBitbucketDatacenter IssueWebhookProvider = "BITBUCKET_DATACENTER"
 )
 
 var AllIssueWebhookProvider = []IssueWebhookProvider{
@@ -13082,11 +13098,13 @@ var AllIssueWebhookProvider = []IssueWebhookProvider{
 	IssueWebhookProviderGithub,
 	IssueWebhookProviderGitlab,
 	IssueWebhookProviderAzureDevops,
+	IssueWebhookProviderBitbucket,
+	IssueWebhookProviderBitbucketDatacenter,
 }
 
 func (e IssueWebhookProvider) IsValid() bool {
 	switch e {
-	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops:
+	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops, IssueWebhookProviderBitbucket, IssueWebhookProviderBitbucketDatacenter:
 		return true
 	}
 	return false

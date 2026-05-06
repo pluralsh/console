@@ -87,6 +87,9 @@ const OBSERVABILITY_SETUP_GUIDE_PATHS: Record<
 const ISSUE_SETUP_GUIDE_PATHS: Record<IssueWebhookProvider, string> = {
   [IssueWebhookProvider.Asana]: '/setup-guides/webhooks/asana.md',
   [IssueWebhookProvider.AzureDevops]: '/setup-guides/webhooks/azure_devops.md',
+  [IssueWebhookProvider.Bitbucket]: '/setup-guides/webhooks/bitbucket.md',
+  [IssueWebhookProvider.BitbucketDatacenter]:
+    '/setup-guides/webhooks/bitbucket_datacenter.md',
   [IssueWebhookProvider.Github]: '/setup-guides/webhooks/github.md',
   [IssueWebhookProvider.Gitlab]: '/setup-guides/webhooks/gitlab.md',
   [IssueWebhookProvider.Jira]: '/setup-guides/webhooks/jira.md',
@@ -107,6 +110,10 @@ const ISSUE_SETUP_GUIDE_DOCUMENTATION_URLS: Partial<
 > = {
   [IssueWebhookProvider.AzureDevops]:
     'https://learn.microsoft.com/en-us/azure/devops/service-hooks/services/webhooks?view=azure-devops',
+  [IssueWebhookProvider.Bitbucket]:
+    'https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks',
+  [IssueWebhookProvider.BitbucketDatacenter]:
+    'https://confluence.atlassian.com/display/BitbucketServer/Manage+webhooks',
 }
 
 function getSetupGuideMarkdownPath({
@@ -609,7 +616,10 @@ function CreateWebhookForm({
             hint={
               formState.issueProvider === IssueWebhookProvider.AzureDevops
                 ? 'Use this value as the HTTP Basic authentication password in the Azure DevOps Web Hook action (HTTPS required). Any username is accepted.'
-                : undefined
+                : formState.issueProvider ===
+                    IssueWebhookProvider.BitbucketDatacenter
+                  ? 'Use this value as the HTTP Basic authentication password in Bitbucket Data Center webhook settings. Any username is accepted.'
+                  : undefined
             }
           >
             <Input2

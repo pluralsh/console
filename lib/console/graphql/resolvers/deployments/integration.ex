@@ -34,8 +34,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Integration do
     do: {:ok, Integrations.get_issue_webhook_by_name!(name)}
   def issue_webhook(_, _), do: {:error, "Must specify either id or name"}
 
-  def issue_webhooks(args, _) do
-    IssueWebhook.ordered()
+  def issue_webhooks(args, %{context: %{current_user: user}}) do
+    IssueWebhook.for_user(user)
+    |> IssueWebhook.ordered()
     |> paginate(args)
   end
 
