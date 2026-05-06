@@ -19893,7 +19893,14 @@ export type WorkbenchesEvalsAvgGraphQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchesEvalsAvgGraphQuery = { __typename?: 'RootQueryType', averageWorkbenchEvalResults?: Array<{ __typename?: 'WorkbenchEvalResultsWorkbenchAverage', timestamp?: string | null, average?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
+export type WorkbenchesEvalsAvgGraphQuery = { __typename?: 'RootQueryType', averageWorkbenchEvalResults?: Array<{ __typename?: 'WorkbenchEvalResultsWorkbenchAverage', average?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
+
+export type WorkbenchesEvalsAvgTimelineGraphQueryVariables = Exact<{
+  period?: InputMaybe<EvalResultsPeriod>;
+}>;
+
+
+export type WorkbenchesEvalsAvgTimelineGraphQuery = { __typename?: 'RootQueryType', averageWorkbenchEvalResults?: Array<{ __typename?: 'WorkbenchEvalResultsWorkbenchAverage', timestamp?: string | null, average?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
 
 export type WorkbenchesAlertsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -41158,7 +41165,6 @@ export type WorkbenchesEvalsMergeRateGraphQueryResult = Apollo.QueryResult<Workb
 export const WorkbenchesEvalsAvgGraphDocument = gql`
     query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
   averageWorkbenchEvalResults(period: $period) {
-    timestamp
     average
     workbench {
       id
@@ -41203,6 +41209,54 @@ export type WorkbenchesEvalsAvgGraphQueryHookResult = ReturnType<typeof useWorkb
 export type WorkbenchesEvalsAvgGraphLazyQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgGraphLazyQuery>;
 export type WorkbenchesEvalsAvgGraphSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgGraphSuspenseQuery>;
 export type WorkbenchesEvalsAvgGraphQueryResult = Apollo.QueryResult<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>;
+export const WorkbenchesEvalsAvgTimelineGraphDocument = gql`
+    query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {
+  averageWorkbenchEvalResults(period: $period) {
+    timestamp
+    average
+    workbench {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchesEvalsAvgTimelineGraphQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchesEvalsAvgTimelineGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchesEvalsAvgTimelineGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchesEvalsAvgTimelineGraphQuery({
+ *   variables: {
+ *      period: // value for 'period'
+ *   },
+ * });
+ */
+export function useWorkbenchesEvalsAvgTimelineGraphQuery(baseOptions?: Apollo.QueryHookOptions<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>(WorkbenchesEvalsAvgTimelineGraphDocument, options);
+      }
+export function useWorkbenchesEvalsAvgTimelineGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>(WorkbenchesEvalsAvgTimelineGraphDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchesEvalsAvgTimelineGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>;
+export function useWorkbenchesEvalsAvgTimelineGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchesEvalsAvgTimelineGraphQuery | undefined, WorkbenchesEvalsAvgTimelineGraphQueryVariables>;
+export function useWorkbenchesEvalsAvgTimelineGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>(WorkbenchesEvalsAvgTimelineGraphDocument, options);
+        }
+export type WorkbenchesEvalsAvgTimelineGraphQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgTimelineGraphQuery>;
+export type WorkbenchesEvalsAvgTimelineGraphLazyQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgTimelineGraphLazyQuery>;
+export type WorkbenchesEvalsAvgTimelineGraphSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgTimelineGraphSuspenseQuery>;
+export type WorkbenchesEvalsAvgTimelineGraphQueryResult = Apollo.QueryResult<WorkbenchesEvalsAvgTimelineGraphQuery, WorkbenchesEvalsAvgTimelineGraphQueryVariables>;
 export const WorkbenchesAlertsDocument = gql`
     query WorkbenchesAlerts($first: Int = 100, $after: String) {
   workbenchAlerts(first: $first, after: $after) {
@@ -43416,6 +43470,7 @@ export const namedOperations = {
     WorkbenchDashboard: 'WorkbenchDashboard',
     WorkbenchesEvalsMergeRateGraph: 'WorkbenchesEvalsMergeRateGraph',
     WorkbenchesEvalsAvgGraph: 'WorkbenchesEvalsAvgGraph',
+    WorkbenchesEvalsAvgTimelineGraph: 'WorkbenchesEvalsAvgTimelineGraph',
     WorkbenchesAlerts: 'WorkbenchesAlerts',
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',

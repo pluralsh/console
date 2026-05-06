@@ -503,6 +503,16 @@ query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {
 
 query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
   averageWorkbenchEvalResults(period: $period) {
+    average
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {
+  averageWorkbenchEvalResults(period: $period) {
     timestamp
     average
     workbench {

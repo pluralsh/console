@@ -1812,10 +1812,15 @@
          "name": "WorkbenchesEvalsMergeRateGraph",
          "body": "query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {\n  workbenchPrMergeRates(period: $period) {\n    timestamp\n    mergeRate\n    __typename\n  }\n}"
       },
-      "sha256:e16dfe07dd164791fe18921a021ab87312a0a8b3a6b921e913d01e0b4c59dc10": {
+      "sha256:908ae1eb6f0e4c760f211718210e41924ae19bd9eb719d303bc7e01da39a8a1c": {
          "type": "query",
          "name": "WorkbenchesEvalsAvgGraph",
-         "body": "query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {\n  averageWorkbenchEvalResults(period: $period) {\n    timestamp\n    average\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
+         "body": "query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {\n  averageWorkbenchEvalResults(period: $period) {\n    average\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
+      },
+      "sha256:52a0601dd9a2788a8eb8faacd06caf1d1a5bbc2a4c5f73559279a6b23b1cf074": {
+         "type": "query",
+         "name": "WorkbenchesEvalsAvgTimelineGraph",
+         "body": "query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {\n  averageWorkbenchEvalResults(period: $period) {\n    timestamp\n    average\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
       },
       "sha256:93feb848735e2cf2f085fa3f602a6ad916b353383522b68cb9480cf001019b3a": {
          "type": "query",
