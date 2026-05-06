@@ -101,7 +101,7 @@ export function DecoratedServiceDeployment({
         </DecoratedName>
       }
       second={serviceDeployment.namespace}
-      gap="xxsmall"
+      gap="xxxsmall"
     />
   )
 }
