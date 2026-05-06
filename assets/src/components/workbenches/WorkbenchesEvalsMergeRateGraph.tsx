@@ -32,6 +32,7 @@ export function WorkbenchesEvalsMergeRateGraph() {
     x: point.timestamp ? compactDateLabel(point.timestamp) : `t${idx + 1}`,
     y: clamp((point.mergeRate ?? 0) * 100, 0, 100),
   }))
+  const hasData = mergeRateSeries.length > 0
 
   return (
     <WorkbenchGraphCard
@@ -51,39 +52,54 @@ export function WorkbenchesEvalsMergeRateGraph() {
       loading={loading}
     >
       <div css={{ minHeight: 200, width: '100%' }}>
-        <ResponsiveLine
-          data={[{ id: 'Merge rate', data: mergeRateSeries }]}
-          animate
-          theme={chartTheme}
-          colors={[theme.colors['icon-info']]}
-          margin={{ top: 16, right: 16, bottom: 24, left: 48 }}
-          xScale={{ type: 'point' }}
-          yScale={{ type: 'linear', min: 0, max: 100, stacked: false }}
-          axisLeft={{
-            tickSize: 0,
-            tickPadding: 8,
-            tickValues: [0, 20, 40, 60, 80, 100],
-            format: (v) => `${v}%`,
-          }}
-          axisBottom={{
-            tickSize: 0,
-            tickPadding: 8,
-            tickRotation: 0,
-          }}
-          enableGridX={false}
-          enableGridY
-          gridYValues={[0, 20, 40, 60, 80, 100]}
-          enablePoints={false}
-          useMesh
-          curve="linear"
-          tooltip={({ point }) => (
-            <ChartTooltip
-              color={String(point.color)}
-              label={String(point.data.x)}
-              value={`${Number(point.data.y).toFixed(2)}%`}
-            />
-          )}
-        />
+        {hasData ? (
+          <ResponsiveLine
+            data={[{ id: 'Merge rate', data: mergeRateSeries }]}
+            animate
+            theme={chartTheme}
+            colors={[theme.colors['icon-info']]}
+            margin={{ top: 16, right: 16, bottom: 24, left: 48 }}
+            xScale={{ type: 'point' }}
+            yScale={{ type: 'linear', min: 0, max: 100, stacked: false }}
+            axisLeft={{
+              tickSize: 0,
+              tickPadding: 8,
+              tickValues: [0, 20, 40, 60, 80, 100],
+              format: (v) => `${v}%`,
+            }}
+            axisBottom={{
+              tickSize: 0,
+              tickPadding: 8,
+              tickRotation: 0,
+            }}
+            enableGridX={false}
+            enableGridY
+            gridYValues={[0, 20, 40, 60, 80, 100]}
+            enablePoints={false}
+            useMesh
+            curve="linear"
+            tooltip={({ point }) => (
+              <ChartTooltip
+                color={String(point.color)}
+                label={String(point.data.x)}
+                value={`${Number(point.data.y).toFixed(2)}%`}
+              />
+            )}
+          />
+        ) : (
+          <div
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-xlight'],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            }}
+          >
+            No PR merge rate data yet.
+          </div>
+        )}
       </div>
     </WorkbenchGraphCard>
   )

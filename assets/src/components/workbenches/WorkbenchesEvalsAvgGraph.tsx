@@ -27,6 +27,7 @@ export function WorkbenchesEvalsAvgGraph() {
   const workbenchAverages = deriveWorkbenchAverages(
     data?.averageWorkbenchEvalResults ?? []
   )
+  const hasData = workbenchAverages.length > 0
 
   return (
     <WorkbenchGraphCard
@@ -53,51 +54,65 @@ export function WorkbenchesEvalsAvgGraph() {
           paddingRight: theme.spacing.xxsmall,
         }}
       >
-        {workbenchAverages.map(({ id, name, score }) => {
-          const colorKey = rowColorKey(score)
-          const color = theme.colors[colorKey]
+        {hasData ? (
+          workbenchAverages.map(({ id, name, score }) => {
+            const colorKey = rowColorKey(score)
+            const color = theme.colors[colorKey]
 
-          return (
-            <div
-              key={id}
-              css={{
-                display: 'grid',
-                gridTemplateColumns: 'minmax(50px, 120px) 1fr auto',
-                gap: theme.spacing.small,
-                alignItems: 'center',
-              }}
-            >
+            return (
               <div
+                key={id}
                 css={{
-                  ...TRUNCATE,
-                  ...theme.partials.text.caption,
-                  fontFamily: theme.fontFamilies.mono,
-                  color: theme.colors['text-input-disabled'],
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(50px, 120px) 1fr auto',
+                  gap: theme.spacing.small,
+                  alignItems: 'center',
                 }}
               >
-                {name}
+                <div
+                  css={{
+                    ...TRUNCATE,
+                    ...theme.partials.text.caption,
+                    fontFamily: theme.fontFamilies.mono,
+                    color: theme.colors['text-input-disabled'],
+                  }}
+                >
+                  {name}
+                </div>
+                <ProgressBar
+                  css={{ marginTop: 0, width: '100%' }}
+                  height={6}
+                  mode="determinate"
+                  progress={clamp(score / MAX_EVAL_SCORE, 0, 1)}
+                  progressColor={color}
+                  completeColor={theme.colors['fill-three']}
+                />
+                <div
+                  css={{
+                    ...TRUNCATE,
+                    ...theme.partials.text.caption,
+                    fontFamily: theme.fontFamilies.mono,
+                    color: theme.colors[colorKey],
+                  }}
+                >
+                  {formatScore(score)}
+                </div>
               </div>
-              <ProgressBar
-                css={{ marginTop: 0, width: '100%' }}
-                height={6}
-                mode="determinate"
-                progress={clamp(score / MAX_EVAL_SCORE, 0, 1)}
-                progressColor={color}
-                completeColor={theme.colors['fill-three']}
-              />
-              <div
-                css={{
-                  ...TRUNCATE,
-                  ...theme.partials.text.caption,
-                  fontFamily: theme.fontFamilies.mono,
-                  color: theme.colors[colorKey],
-                }}
-              >
-                {formatScore(score)}
-              </div>
-            </div>
-          )
-        })}
+            )
+          })
+        ) : (
+          <div
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-xlight'],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            No workbench grades yet.
+          </div>
+        )}
       </Flex>
     </WorkbenchGraphCard>
   )

@@ -33,6 +33,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
   )
 
   const visibleSeries = series.slice(0, MAX_WORKBENCH_SERIES)
+  const hasData = visibleSeries.length > 0
 
   return (
     <WorkbenchGraphCard
@@ -59,72 +60,93 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
           height: '100%',
         }}
       >
-        <div
-          css={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-            gap: theme.spacing.small,
-          }}
-        >
-          {visibleSeries.map((item) => (
+        {hasData ? (
+          <>
             <div
-              key={item.id}
               css={{
-                border: theme.borders.default,
-                borderRadius: theme.borderRadiuses.medium,
-                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: theme.spacing.xsmall,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                gap: theme.spacing.small,
               }}
             >
-              <span
-                css={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 2,
-                  background: item.color,
-                  flexShrink: 0,
-                }}
-              />
-              <div
-                css={{
-                  ...theme.partials.text.body2,
-                  color: theme.colors['text-light'],
-                  ...TRUNCATE,
-                }}
-              >
-                {item.label}
-              </div>
+              {visibleSeries.map((item) => (
+                <div
+                  key={item.id}
+                  css={{
+                    border: theme.borders.default,
+                    borderRadius: theme.borderRadiuses.medium,
+                    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: theme.spacing.xsmall,
+                  }}
+                >
+                  <span
+                    css={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 2,
+                      background: item.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div
+                    css={{
+                      ...theme.partials.text.body2,
+                      color: theme.colors['text-light'],
+                      ...TRUNCATE,
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div css={{ minHeight: 200, width: '100%', flex: 1 }}>
-          <ResponsiveLine
-            data={visibleSeries.map((item) => ({
-              id: item.label,
-              data: item.data,
-            }))}
-            theme={chartTheme}
-            colors={visibleSeries.map((item) => item.color)}
-            margin={{ top: 8, right: 16, bottom: 32, left: 48 }}
-            xScale={{ type: 'point' }}
-            yScale={{ type: 'linear', min: 0, max: MAX_GRADE, stacked: false }}
-            axisLeft={{
-              tickSize: 0,
-              tickPadding: 8,
-              tickValues: [0, 2, 4, 6, 8, 10],
+            <div css={{ minHeight: 200, width: '100%', flex: 1 }}>
+              <ResponsiveLine
+                data={visibleSeries.map((item) => ({
+                  id: item.label,
+                  data: item.data,
+                }))}
+                theme={chartTheme}
+                colors={visibleSeries.map((item) => item.color)}
+                margin={{ top: 8, right: 16, bottom: 32, left: 48 }}
+                xScale={{ type: 'point' }}
+                yScale={{
+                  type: 'linear',
+                  min: 0,
+                  max: MAX_GRADE,
+                  stacked: false,
+                }}
+                axisLeft={{
+                  tickSize: 0,
+                  tickPadding: 8,
+                  tickValues: [0, 2, 4, 6, 8, 10],
+                }}
+                axisBottom={{ tickSize: 0, tickPadding: 8, tickRotation: 0 }}
+                enablePoints={false}
+                enableGridX={false}
+                enableGridY
+                gridYValues={[0, 2, 4, 6, 8, 10]}
+                useMesh
+                curve="linear"
+              />
+            </div>
+          </>
+        ) : (
+          <div
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-xlight'],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-            axisBottom={{ tickSize: 0, tickPadding: 8, tickRotation: 0 }}
-            enablePoints={false}
-            enableGridX={false}
-            enableGridY
-            gridYValues={[0, 2, 4, 6, 8, 10]}
-            useMesh
-            curve="linear"
-          />
-        </div>
+          >
+            No workbench grade timeline yet.
+          </div>
+        )}
       </div>
     </WorkbenchGraphCard>
   )
