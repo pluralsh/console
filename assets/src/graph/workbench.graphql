@@ -514,6 +514,17 @@ query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {
   }
 }
 
+query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
+  workbenchPrMergeRatesByWorkbench(period: $period) {
+    timestamp
+    mergeRate
+    workbench {
+      id
+      name
+    }
+  }
+}
+
 query WorkbenchesAlerts($first: Int = 100, $after: String) {
   workbenchAlerts(first: $first, after: $after) {
     pageInfo {

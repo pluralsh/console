@@ -19890,6 +19890,13 @@ export type WorkbenchesEvalsMergeRateGraphQueryVariables = Exact<{
 
 export type WorkbenchesEvalsMergeRateGraphQuery = { __typename?: 'RootQueryType', workbenchPrMergeRates?: Array<{ __typename?: 'WorkbenchPrMergeRateEntry', timestamp?: string | null, mergeRate?: number | null } | null> | null };
 
+export type WorkbenchesEvalsAvgGraphQueryVariables = Exact<{
+  period?: InputMaybe<EvalResultsPeriod>;
+}>;
+
+
+export type WorkbenchesEvalsAvgGraphQuery = { __typename?: 'RootQueryType', workbenchPrMergeRatesByWorkbench?: Array<{ __typename?: 'WorkbenchPrMergeRateByWorkbenchEntry', timestamp?: string | null, mergeRate?: number | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null> | null };
+
 export type WorkbenchesAlertsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -41164,6 +41171,54 @@ export type WorkbenchesEvalsMergeRateGraphQueryHookResult = ReturnType<typeof us
 export type WorkbenchesEvalsMergeRateGraphLazyQueryHookResult = ReturnType<typeof useWorkbenchesEvalsMergeRateGraphLazyQuery>;
 export type WorkbenchesEvalsMergeRateGraphSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesEvalsMergeRateGraphSuspenseQuery>;
 export type WorkbenchesEvalsMergeRateGraphQueryResult = Apollo.QueryResult<WorkbenchesEvalsMergeRateGraphQuery, WorkbenchesEvalsMergeRateGraphQueryVariables>;
+export const WorkbenchesEvalsAvgGraphDocument = gql`
+    query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
+  workbenchPrMergeRatesByWorkbench(period: $period) {
+    timestamp
+    mergeRate
+    workbench {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchesEvalsAvgGraphQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchesEvalsAvgGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchesEvalsAvgGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchesEvalsAvgGraphQuery({
+ *   variables: {
+ *      period: // value for 'period'
+ *   },
+ * });
+ */
+export function useWorkbenchesEvalsAvgGraphQuery(baseOptions?: Apollo.QueryHookOptions<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>(WorkbenchesEvalsAvgGraphDocument, options);
+      }
+export function useWorkbenchesEvalsAvgGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>(WorkbenchesEvalsAvgGraphDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchesEvalsAvgGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>;
+export function useWorkbenchesEvalsAvgGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchesEvalsAvgGraphQuery | undefined, WorkbenchesEvalsAvgGraphQueryVariables>;
+export function useWorkbenchesEvalsAvgGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>(WorkbenchesEvalsAvgGraphDocument, options);
+        }
+export type WorkbenchesEvalsAvgGraphQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgGraphQuery>;
+export type WorkbenchesEvalsAvgGraphLazyQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgGraphLazyQuery>;
+export type WorkbenchesEvalsAvgGraphSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesEvalsAvgGraphSuspenseQuery>;
+export type WorkbenchesEvalsAvgGraphQueryResult = Apollo.QueryResult<WorkbenchesEvalsAvgGraphQuery, WorkbenchesEvalsAvgGraphQueryVariables>;
 export const WorkbenchesAlertsDocument = gql`
     query WorkbenchesAlerts($first: Int = 100, $after: String) {
   workbenchAlerts(first: $first, after: $after) {
@@ -43376,6 +43431,7 @@ export const namedOperations = {
     Workbenches: 'Workbenches',
     WorkbenchDashboard: 'WorkbenchDashboard',
     WorkbenchesEvalsMergeRateGraph: 'WorkbenchesEvalsMergeRateGraph',
+    WorkbenchesEvalsAvgGraph: 'WorkbenchesEvalsAvgGraph',
     WorkbenchesAlerts: 'WorkbenchesAlerts',
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',
