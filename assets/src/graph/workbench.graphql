@@ -541,6 +541,18 @@ query Workbench($id: ID, $name: String) {
   }
 }
 
+query WorkbenchEvalSettings($id: ID!) {
+  workbench(id: $id) {
+    id
+    eval {
+      id
+      promptRules
+      conclusionRules
+      progressRules
+    }
+  }
+}
+
 query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
@@ -821,6 +833,33 @@ mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
 mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
   updateWorkbench(id: $id, attributes: $attributes) {
     ...Workbench
+  }
+}
+
+mutation CreateWorkbenchEval(
+  $workbenchId: ID!
+  $attributes: WorkbenchEvalAttributes!
+) {
+  createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    promptRules
+    conclusionRules
+    progressRules
+  }
+}
+
+mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
+  updateWorkbenchEval(id: $id, attributes: $attributes) {
+    id
+    promptRules
+    conclusionRules
+    progressRules
+  }
+}
+
+mutation DeleteWorkbenchEval($id: ID!) {
+  deleteWorkbenchEval(id: $id) {
+    id
   }
 }
 
