@@ -51,6 +51,7 @@ export function WorkbenchEvalSettings() {
   const [promptQualityRules, setPromptQualityRules] = useState('')
   const [conclusionRules, setConclusionRules] = useState('')
   const [progressAndThoughtsRules, setProgressAndThoughtsRules] = useState('')
+  const [isEvalStateInitialized, setIsEvalStateInitialized] = useState(false)
   const curStepIndex = EVAL_SETTINGS_STEPS.findIndex((step) => step === curStep)
   const isLastStep = curStepIndex === EVAL_SETTINGS_STEPS.length - 1
 
@@ -71,15 +72,17 @@ export function WorkbenchEvalSettings() {
   })
   const workbench = data?.workbench
   const workbenchEval = evalData?.workbench?.eval
-  const formLoading = (!data && loading) || (!evalData && evalLoading)
+  const formLoading =
+    (!data && loading) || (!evalData && evalLoading) || !isEvalStateInitialized
 
   useEffect(() => {
-    if (evalLoading) return
+    if (evalLoading || isEvalStateInitialized) return
     setEvalsEnabled(!!workbenchEval)
     setPromptQualityRules(workbenchEval?.promptRules ?? '')
     setConclusionRules(workbenchEval?.conclusionRules ?? '')
     setProgressAndThoughtsRules(workbenchEval?.progressRules ?? '')
-  }, [evalLoading, workbenchEval])
+    setIsEvalStateInitialized(true)
+  }, [evalLoading, isEvalStateInitialized, workbenchEval])
 
   const [createWorkbenchEval, { loading: createLoading, error: createError }] =
     useCreateWorkbenchEvalMutation()
