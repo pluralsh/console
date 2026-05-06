@@ -9,11 +9,13 @@ export function WorkbenchStatCard({
   value,
   helper,
   loading,
+  valueColor,
 }: {
   label: string
   value: string
   helper: string
   loading?: boolean
+  valueColor?: string
 }) {
   const theme = useTheme()
 
@@ -34,7 +36,12 @@ export function WorkbenchStatCard({
         />
       ) : (
         <div
-          css={{ fontSize: 36, letterSpacing: '-0.25px', lineHeight: '32px' }}
+          css={{
+            fontSize: 36,
+            letterSpacing: '-0.25px',
+            lineHeight: '32px',
+            color: valueColor,
+          }}
         >
           {value}
         </div>

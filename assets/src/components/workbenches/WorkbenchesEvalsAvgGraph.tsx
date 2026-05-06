@@ -1,4 +1,5 @@
 import { WorkbenchGraphCard } from 'components/workbenches/common/WorkbenchGraphCard'
+import { evalGradeToColor } from 'components/workbenches/common/evalGradeColor'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
 import { Flex, ProgressBar } from '@pluralsh/design-system'
 import {
@@ -57,8 +58,7 @@ export function WorkbenchesEvalsAvgGraph() {
           }}
         >
           {workbenchAverages.map(({ id, name, score }) => {
-            const colorKey = rowColorKey(score)
-            const color = theme.colors[colorKey]
+            const color = evalGradeToColor(score)
 
             return (
               <div
@@ -93,7 +93,7 @@ export function WorkbenchesEvalsAvgGraph() {
                     ...TRUNCATE,
                     ...theme.partials.text.caption,
                     fontFamily: theme.fontFamilies.mono,
-                    color: theme.colors[colorKey],
+                    color,
                   }}
                 >
                   {formatScore(score)}
@@ -164,13 +164,4 @@ const rangeToPeriod: Record<RangeSelectorOption, EvalResultsPeriod> = {
   '1D': EvalResultsPeriod.Day,
   '1W': EvalResultsPeriod.Week,
   '1M': EvalResultsPeriod.Month,
-}
-
-type ScoreColorKey = 'icon-success' | 'border-warning' | 'icon-danger'
-
-function rowColorKey(score: number): ScoreColorKey {
-  const ratio = clamp(score / MAX_EVAL_SCORE, 0, 1)
-  if (ratio >= 0.75) return 'icon-success'
-  if (ratio >= 0.45) return 'border-warning'
-  return 'icon-danger'
 }

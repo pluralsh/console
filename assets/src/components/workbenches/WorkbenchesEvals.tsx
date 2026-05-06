@@ -1,4 +1,5 @@
 import { WorkbenchStatCard } from 'components/workbenches/common/WorkbenchStatCard'
+import { evalGradeToColor } from 'components/workbenches/common/evalGradeColor'
 import { WorkbenchesEvalsAvgGraph } from 'components/workbenches/WorkbenchesEvalsAvgGraph'
 import { WorkbenchesEvalsAvgTimelineGraph } from 'components/workbenches/WorkbenchesEvalsAvgTimelineGraph'
 import { WorkbenchesEvalsMergeRateGraph } from 'components/workbenches/WorkbenchesEvalsMergeRateGraph'
@@ -60,6 +61,7 @@ export function WorkbenchesEvals() {
           value={`${overallWorkbenchAvg.toFixed(1)}`}
           helper="Average score across workbenches"
           loading={loading}
+          valueColor={evalGradeToColor(overallWorkbenchAvg)}
         />
       </div>
       <div
