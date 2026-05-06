@@ -696,33 +696,46 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
-  - version: 3.2.2
+  - version: 3.3.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- No Helm values changes are explicitly called out in the provided\
-        \ release notes for **v3.2.2**.\n- Note from **v3.2.0** (already in your starting\
-        \ version): the Helm chart previously **backfilled/exposed concurrency controls**\
-        \ and added **namespace selectors** for Service/Ingress webhooks; ensure your\
-        \ current values don\u2019t conflict if you pinned older chart defaults.\n\
-        - For this upgrade step (**3.2.0 \u2192 3.2.2**), plan for a standard `helm\
-        \ upgrade` with the new image tag and re-apply CRDs as instructed."
-      chart_updates: [No Helm chart-specific changes are described in the v3.2.2 notes
-          you provided (most changes are controller code/docs/CI).]
-      features: ['Ingress-to-Gateway (i2g) translation now supports additional annotations/features:
-          `ssl-redirect`, `auth`, and `jwt-validation` translation.', "ListenerSet\
-          \ handling is safer when Gateway API CRDs are missing: the controller will\
-          \ ignore ListenerSet resources if the CRD isn\u2019t installed (reduces\
-          \ noisy errors in mixed/partial Gateway API installs).", User-Agent override
-          support was added (useful for identifying controller traffic in AWS API
-          logs/metrics).]
-      breaking_changes: ['No breaking changes are called out for v3.2.2 in the provided
-          notes. (The major breaking items in this minor line were introduced in v3.2.0:
-          Gateway API v1.5 move and stricter multi-tag VPC lookup behavior.)']
-    chart_version: 3.2.2
-    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.2']
+      helm_changes: "- **CRDs must be updated before/with the upgrade** (same command\
+        \ as prior releases):\n  ```bash\n  kubectl apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
+        \n  ```\n- **Gateway API CRDs**: ensure the LBC Gateway-specific CRDs are\
+        \ installed:\n  ```bash\n  kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml\n\
+        \  ```\n  Then install upstream Gateway API CRDs depending on usage:\n  -\
+        \ ALB Gateway only:\n    ```bash\n    kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml\n\
+        \    ```\n  - NLB Gateway: release notes call out **experimental-install.yaml**;\
+        \ verify the version you apply (notes mention v1.3.0 for experimental in v3.3.0\
+        \ docs\u2014this is likely a doc inconsistency vs the v1.5.0 standard install).\
+        \ Use the version recommended by your cluster/LBC docs and ensure TLSRoute\
+        \ availability.\n- **IAM/RBAC**:\n  - If enabling **Certificate Management**\
+        \ (`EnableCertificateManagement`), you must add IAM permissions for **ACM\
+        \ + Route53** (and **Private CA** if used). See docs.\n  - Helm chart RBAC\
+        \ is now automated/synced from kubebuilder; expect possible **ClusterRole/ClusterRoleBinding\
+        \ diffs** during the upgrade\u2014review before applying in locked-down clusters.\n\
+        - **Feature gates / flags**:\n  - To use the new cert feature: `--feature-gates=EnableCertificateManagement=true`\
+        \ plus ingress annotation `create-acm-cert: \"true\"`.\n  - Gateway API auto-detection\
+        \ continues; feature flags still exist to disable if needed.\n"
+      chart_updates: [Gateway API auto-detection improvements and **LBC-specific CRD
+          handling in Helm** (behavioral improvements around detecting/handling CRDs).,
+        Helm **ClusterRole RBAC sync** is automated from kubebuilder (RBAC manifest
+          generation change).]
+      features: ['ACM Certificate Management (feature-gated): controller can create/manage
+          ACM certificates from Ingress hostnames, supporting Amazon-issued DNS validation
+          via Route53 and private certs via AWS Private CA.', 'Gateway API: improved
+          auto-detection behavior and Helm handling around LBC-specific Gateway CRDs.']
+      breaking_changes: ['No explicit breaking changes called out for v3.3.0 vs v3.2.x,
+          but enabling `EnableCertificateManagement` without updating IAM will cause
+          reconciliation failures for certificate creation/validation.', "Gateway\
+          \ API CRD install instructions include a potential **version mismatch**\
+          \ for experimental CRDs; applying incompatible CRDs could break NLB Gateway/TLSRoute\
+          \ behavior\u2014validate CRD versions before upgrading."]
+    chart_version: 3.3.0
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.3.0']
   - version: 3.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -15800,6 +15813,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
+  - version: 9.4.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 9.4.0
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.4.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.3.4
     kube: ['1.36', '1.35', '1.34']
     requirements: []
