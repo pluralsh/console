@@ -591,6 +591,28 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query WorkbenchEvals($id: ID!, $first: Int = 100) {
+  workbench(id: $id) {
+    id
+    runs(first: $first) {
+      edges {
+        node {
+          id
+          prompt
+          insertedAt
+          evalResult {
+            id
+            grade
+            feedback {
+              summary
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 query RecentWorkbenchJobs($count: Int) {
   recentWorkbenchJobs(count: $count) {
     ...WorkbenchJobTiny

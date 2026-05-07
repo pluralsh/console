@@ -20022,6 +20022,14 @@ export type WorkbenchJobsQueryVariables = Exact<{
 
 export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null } | null } | null> | null } | null } | null };
 
+export type WorkbenchEvalsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type WorkbenchEvalsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null } | null } | null } | null } | null> | null } | null } | null };
+
 export type RecentWorkbenchJobsQueryVariables = Exact<{
   count?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -41615,6 +41623,66 @@ export type WorkbenchJobsQueryHookResult = ReturnType<typeof useWorkbenchJobsQue
 export type WorkbenchJobsLazyQueryHookResult = ReturnType<typeof useWorkbenchJobsLazyQuery>;
 export type WorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobsSuspenseQuery>;
 export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
+export const WorkbenchEvalsDocument = gql`
+    query WorkbenchEvals($id: ID!, $first: Int = 100) {
+  workbench(id: $id) {
+    id
+    runs(first: $first) {
+      edges {
+        node {
+          id
+          prompt
+          insertedAt
+          evalResult {
+            id
+            grade
+            feedback {
+              summary
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchEvalsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchEvalsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchEvalsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchEvalsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useWorkbenchEvalsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables> & ({ variables: WorkbenchEvalsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>(WorkbenchEvalsDocument, options);
+      }
+export function useWorkbenchEvalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>(WorkbenchEvalsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchEvalsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>;
+export function useWorkbenchEvalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchEvalsQuery | undefined, WorkbenchEvalsQueryVariables>;
+export function useWorkbenchEvalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>(WorkbenchEvalsDocument, options);
+        }
+export type WorkbenchEvalsQueryHookResult = ReturnType<typeof useWorkbenchEvalsQuery>;
+export type WorkbenchEvalsLazyQueryHookResult = ReturnType<typeof useWorkbenchEvalsLazyQuery>;
+export type WorkbenchEvalsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchEvalsSuspenseQuery>;
+export type WorkbenchEvalsQueryResult = Apollo.QueryResult<WorkbenchEvalsQuery, WorkbenchEvalsQueryVariables>;
 export const RecentWorkbenchJobsDocument = gql`
     query RecentWorkbenchJobs($count: Int) {
   recentWorkbenchJobs(count: $count) {
@@ -43815,6 +43883,7 @@ export const namedOperations = {
     Workbench: 'Workbench',
     WorkbenchEvalSettings: 'WorkbenchEvalSettings',
     WorkbenchJobs: 'WorkbenchJobs',
+    WorkbenchEvals: 'WorkbenchEvals',
     RecentWorkbenchJobs: 'RecentWorkbenchJobs',
     WorkbenchAlerts: 'WorkbenchAlerts',
     WorkbenchesIssues: 'WorkbenchesIssues',
