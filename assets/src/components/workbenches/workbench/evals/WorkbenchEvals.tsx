@@ -1,4 +1,5 @@
 import {
+  Button,
   EmptyState,
   Flex,
   Markdown,
@@ -13,10 +14,12 @@ import { GqlError } from 'components/utils/Alert'
 import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import {
   WorkbenchEvalJobFragment,
+  useWorkbenchEvalSkillMutation,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { mapExistingNodes } from 'utils/graphql'
 
 type QualityTab = 'prompt' | 'conclusion' | 'logic'
@@ -78,7 +81,8 @@ const MOCK_EVAL_JOBS: WorkbenchEvalJobFragment[] = [
 
 export function WorkbenchEvals() {
   const theme = useTheme()
-  const { workbenchId, setSideContent, setShowDescription } =
+  const { popToast } = useSimpleToast()
+  const { workbenchId, setSideContent, setShowDescription, setHeaderActions } =
     useOutletContext<WorkbenchOutletContext>()
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
@@ -104,6 +108,48 @@ export function WorkbenchEvals() {
   useEffect(() => {
     if (jobs.length && !selectedJobId) setSelectedJobId(jobs[0].id)
   }, [jobs, selectedJobId])
+
+  const [workbenchEvalSkill, { loading: skillMutationLoading }] =
+    useWorkbenchEvalSkillMutation({
+      onCompleted: () => {
+        popToast({
+          content: 'Skills update job started for this eval.',
+          severity: 'success',
+        })
+      },
+      onError: (e) => {
+        popToast({
+          content: e.message,
+          severity: 'danger',
+        })
+      },
+    })
+
+  useEffect(() => {
+    const evalResultId = selectedJob?.evalResult?.id
+
+    setHeaderActions(
+      <Button
+        disabled={!evalResultId || skillMutationLoading || (loading && !data)}
+        loading={skillMutationLoading}
+        onClick={() => {
+          if (!evalResultId) return
+          workbenchEvalSkill({ variables: { id: evalResultId } })
+        }}
+      >
+        Create skills from eval
+      </Button>
+    )
+
+    return () => setHeaderActions(null)
+  }, [
+    data,
+    loading,
+    selectedJob?.evalResult?.id,
+    setHeaderActions,
+    skillMutationLoading,
+    workbenchEvalSkill,
+  ])
 
   useEffect(() => {
     setSideContent(
