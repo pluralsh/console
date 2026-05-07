@@ -209,8 +209,10 @@ export function WorkbenchEvalsSidePanel({
     <WrapperSC>
       <ContentSC>
         <Flex
-          gap="xxsmall"
+          gap="xsmall"
+          padding="medium"
           wrap="wrap"
+          css={{ borderBottom: theme.borders['fill-one'] }}
         >
           {filterOptions.map(({ key, count, severity }) => (
             <EvalFilterChip
@@ -337,8 +339,8 @@ const WrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   flexGrow: 1,
   minHeight: 0,
-  minWidth: 340,
-  maxWidth: 340,
+  minWidth: 350,
+  maxWidth: 350,
   overflowX: 'hidden',
   overflowY: 'hidden',
 }))
@@ -346,14 +348,15 @@ const WrapperSC = styled.div(({ theme }) => ({
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
   height: '100%',
-  padding: theme.spacing.medium,
+  minHeight: 0,
+  overflow: 'hidden',
 }))
 
 const ListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   gap: theme.spacing.small,
   minHeight: 0,
   overflowY: 'auto',
@@ -365,7 +368,7 @@ const EvalLinkSC = styled.button(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   width: '100%',
-  padding: theme.spacing.xsmall,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   textAlign: 'left',
 
   '&:hover': {

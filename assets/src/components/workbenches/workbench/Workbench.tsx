@@ -294,5 +294,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   minHeight: 0,
   minWidth: 0,
   overflow: 'auto',
-  padding: theme.spacing.large,
+  padding: theme.spacing.medium,
 }))
