@@ -495,6 +495,24 @@ fragment WorkbenchJob on WorkbenchJob {
   }
 }
 
+fragment WorkbenchEvalJob on WorkbenchJob {
+  id
+  prompt
+  insertedAt
+  startedAt
+  completedAt
+  evalResult {
+    id
+    grade
+    feedback {
+      summary
+      prompt
+      result
+      logic
+    }
+  }
+}
+
 query Workbenches($first: Int = 100, $after: String, $q: String) {
   workbenches(first: $first, after: $after, q: $q) {
     pageInfo {
@@ -597,21 +615,7 @@ query WorkbenchEvals($id: ID!, $first: Int = 100) {
     runs(first: $first) {
       edges {
         node {
-          id
-          prompt
-          insertedAt
-          startedAt
-          completedAt
-          evalResult {
-            id
-            grade
-            feedback {
-              summary
-              prompt
-              result
-              logic
-            }
-          }
+          ...WorkbenchEvalJob
         }
       }
     }
