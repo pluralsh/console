@@ -215,7 +215,7 @@ defmodule Console.Schema.PullRequest do
             avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status))
           )
       },
-      order_by: [desc: 1]
+      order_by: [asc: 1]
     )
   end
 

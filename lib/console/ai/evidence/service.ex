@@ -9,7 +9,15 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
 
   def custom(_), do: false
 
+  def generate(%Service{component_status: "0 / 0", errors: [%{message: "folder is empty"}]}), do: {:ok, [], %{}}
   def generate(%Service{} = service) do
+    case changed?(service) do
+      true -> do_generate(service)
+      false -> {:ok, [], %{}}
+    end
+  end
+
+  defp do_generate(%Service{} = service) do
     components = ServiceComponent.for_service(service.id)
                  |> ServiceComponent.for_states([:failed, :pending])
                  |> ServiceComponent.synced()
@@ -37,6 +45,16 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
   def insight(%Service{insight: insight}), do: insight
 
   def preload(comp), do: Console.Repo.preload(comp, [:cluster, :errors, :repository, :flow, insight: :evidence])
+
+  defp changed?(%Service{errors: [], component_status: status}) do
+    String.split(status, "/")
+    |> Enum.map(&String.trim/1)
+    |> case do
+      [a, a] -> false
+      _ -> true
+    end
+  end
+  defp changed?(_), do: true
 
   defp description(%Service{status: s, namespace: ns, name: name, cluster: %Cluster{name: cluster} = c} = svc) do
     [

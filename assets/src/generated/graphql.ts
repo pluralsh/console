@@ -19970,7 +19970,7 @@ export type WorkbenchesQuery = { __typename?: 'RootQueryType', workbenches?: { _
 export type WorkbenchDashboardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type WorkbenchDashboardQuery = { __typename?: 'RootQueryType', workbenchPullRequests: number, workbenchAggregates: { __typename?: 'WorkbenchAggregates', pullRequestMergeRate?: number | null, evalResults?: number | null } };
+export type WorkbenchDashboardQuery = { __typename?: 'RootQueryType', workbenchAggregates: { __typename?: 'WorkbenchAggregates', pullRequests?: number | null, pullRequestMergeRate?: number | null, evalResults?: number | null } };
 
 export type WorkbenchesEvalsMergeRateGraphQueryVariables = Exact<{
   period?: InputMaybe<EvalResultsPeriod>;
@@ -20082,16 +20082,14 @@ export type WorkbenchCronsQueryVariables = Exact<{
 
 export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
-export type WorkbenchSkillTinyFragment = { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null };
+export type UnifiedWorkbenchSkillTinyFragment = { __typename?: 'UnifiedWorkbenchSkill', id?: string | null, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null };
 
 export type WorkbenchSkillsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
-  first?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type WorkbenchSkillsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null } | null };
+export type WorkbenchSkillsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, allSkills?: Array<{ __typename?: 'UnifiedWorkbenchSkill', id?: string | null, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null> | null } | null };
 
 export type WorkbenchPromptsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -25712,8 +25710,8 @@ export const WorkbenchEvalJobFragmentDoc = gql`
   }
 }
     `;
-export const WorkbenchSkillTinyFragmentDoc = gql`
-    fragment WorkbenchSkillTiny on WorkbenchSkill {
+export const UnifiedWorkbenchSkillTinyFragmentDoc = gql`
+    fragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {
   id
   name
   description
@@ -41292,8 +41290,8 @@ export type WorkbenchesSuspenseQueryHookResult = ReturnType<typeof useWorkbenche
 export type WorkbenchesQueryResult = Apollo.QueryResult<WorkbenchesQuery, WorkbenchesQueryVariables>;
 export const WorkbenchDashboardDocument = gql`
     query WorkbenchDashboard {
-  workbenchPullRequests
   workbenchAggregates {
+    pullRequests
     pullRequestMergeRate
     evalResults
   }
@@ -42022,30 +42020,15 @@ export type WorkbenchCronsLazyQueryHookResult = ReturnType<typeof useWorkbenchCr
 export type WorkbenchCronsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchCronsSuspenseQuery>;
 export type WorkbenchCronsQueryResult = Apollo.QueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
 export const WorkbenchSkillsDocument = gql`
-    query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {
+    query WorkbenchSkills($id: ID!) {
   workbench(id: $id) {
     id
-    skills {
-      ref {
-        ref
-        folder
-      }
-      files
-    }
-    workbenchSkills(first: $first, after: $after) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...WorkbenchSkillTiny
-        }
-      }
+    allSkills {
+      ...UnifiedWorkbenchSkillTiny
     }
   }
 }
-    ${PageInfoFragmentDoc}
-${WorkbenchSkillTinyFragmentDoc}`;
+    ${UnifiedWorkbenchSkillTinyFragmentDoc}`;
 
 /**
  * __useWorkbenchSkillsQuery__
@@ -42060,8 +42043,6 @@ ${WorkbenchSkillTinyFragmentDoc}`;
  * const { data, loading, error } = useWorkbenchSkillsQuery({
  *   variables: {
  *      id: // value for 'id'
- *      first: // value for 'first'
- *      after: // value for 'after'
  *   },
  * });
  */
@@ -44546,6 +44527,6 @@ export const namedOperations = {
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchEvalJob: 'WorkbenchEvalJob',
-    WorkbenchSkillTiny: 'WorkbenchSkillTiny'
+    UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny'
   }
 }

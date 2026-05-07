@@ -48,15 +48,18 @@ defmodule Console.AI.Bedrock do
   Calls an openai tool call interface w/ strict mode
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = bedrock, messages, tools, _opts) do
+  def tool_call(%__MODULE__{} = bedrock, messages, tools, opts) do
+    provider_opts = Keyword.put(provider_options(bedrock), :tools, reqllm_tools(tools))
+
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{bedrock.tool_model_id}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, reqllm_tools(tools)))
+    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client] || :tool)}", bedrock.stream, provider_opts)
     |> reqllm_result()
     |> tool_calls()
   end
 
   def embeddings(%__MODULE__{} = bedrock, text) do
+    bedrock = choose_region(bedrock)
     chunked = Utils.chunk(text, 8000)
     provider_options(bedrock)
     |> Keyword.put(:dimensions, Utils.embedding_dims())
@@ -81,6 +84,10 @@ defmodule Console.AI.Bedrock do
     |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
   end
+
+  defp choose_region(%__MODULE__{embedding_model: "cohere.embed-english-v3"} = rock),
+    do: %{rock | region: "us-east-1"}
+  defp choose_region(rock), do: rock
 
   defp aws_auth(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
     when is_binary(aid) and is_binary(sak), do: [access_key_id: aid, secret_access_key: sak]

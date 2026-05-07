@@ -10,7 +10,7 @@ defmodule Console.AI.Workbench.Eval do
   require EEx
 
   def evaluate(%WorkbenchJob{} = job) do
-    case Repo.preload(job, [:activities, workbench: :eval]) do
+    case Repo.preload(job, [:activities, :result, workbench: :eval]) do
       %WorkbenchJob{workbench: %Workbench{eval: %WorkbenchEval{} = eval}} = job ->
         do_eval(eval, job)
       _ -> {:error, "no eval found for workbench"}

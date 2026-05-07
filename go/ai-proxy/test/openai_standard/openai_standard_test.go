@@ -30,7 +30,8 @@ var (
 )
 
 const (
-	endpointChat = "/openai/chat/completions"
+	endpointChat      = "/openai/chat/completions"
+	endpointResponses = "/openai/v1/responses"
 )
 
 func TestMain(m *testing.M) {
@@ -195,5 +196,44 @@ func TestOpenAIEmbeddingsProxy(t *testing.T) {
 				t.Errorf("\nwant:\n%s\ngot:\n%s", tc.WantData, res)
 			}
 		})
+	}
+}
+
+func TestOpenAIResponsesProxy(t *testing.T) {
+	requestBody := map[string]any{
+		"model": "testmodel",
+		"input": "test prompt",
+		"response_format": map[string]any{
+			"type": "json_object",
+		},
+	}
+
+	wantResponse := map[string]any{
+		"id":     "resp_123",
+		"object": "response",
+		"model":  "testmodel",
+	}
+
+	wantDataBytes, err := json.Marshal(wantResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := helpers.MockResponse(endpointResponses, wantDataBytes, nil, http.StatusOK)(handlers); err != nil {
+		t.Fatal(err)
+	}
+
+	requestFunc := helpers.CreateRequestWithResponse(http.MethodPost, endpointResponses, requestBody)
+	resBody, resp, err := requestFunc(server, providerServer)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want status: %d, got: %d", http.StatusOK, resp.StatusCode)
+	}
+
+	if !bytes.Equal(wantDataBytes, resBody) {
+		t.Errorf("\nwant:\n%s\ngot:\n%s", wantDataBytes, resBody)
 	}
 }

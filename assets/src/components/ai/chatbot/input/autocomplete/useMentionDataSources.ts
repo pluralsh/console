@@ -18,7 +18,6 @@ import {
   StackChipAttrs,
 } from './mentionTypes'
 import { isEmpty } from 'lodash'
-import { isNonNullable } from 'utils/isNonNullable'
 
 const MAX_PER_KIND = 8
 const QUERY_THROTTLE_MS = 200
@@ -70,7 +69,7 @@ export function useMentionDataSources({
     previousData: sklPreviousData,
     loading: skillsLoading,
   } = useWorkbenchSkillsQuery({
-    variables: { id: workbenchId ?? '', first: 500 },
+    variables: { id: workbenchId ?? '' },
     skip: !wantsSlash || !workbenchId,
     fetchPolicy: 'cache-and-network',
   })
@@ -120,32 +119,17 @@ export function useMentionDataSources({
   )
 
   const skills = useMemo<SkillChipAttrs[]>(() => {
-    const workbenchSkills = mapExistingNodes(
-      skillData?.workbench?.workbenchSkills
-    ).map(
-      (n): SkillChipAttrs => ({
-        kind: MentionKind.Skill,
-        'item-id': n.id,
-        'item-name': n.name ?? '',
-        description: n.description ?? undefined,
-        subagents: n.subagents?.filter(isNonNullable).join(','),
-      })
-    )
-
-    const gitSkills = (skillData?.workbench?.skills?.files ?? [])
-      .filter(isNonNullable)
-      .map((path): SkillChipAttrs => {
-        const fileName = path.split('/').filter(Boolean).at(-1) ?? path
-        const name = fileName.replace(/\.[^.]+$/, '')
-        return {
+    const all = (skillData?.workbench?.allSkills ?? [])
+      .flatMap((n) => (n ? [n] : []))
+      .map(
+        (n): SkillChipAttrs => ({
           kind: MentionKind.Skill,
-          'item-id': `git-skill:${path}`,
-          'item-name': name || path,
-          description: path,
-        }
-      })
-
-    const all = [...workbenchSkills, ...gitSkills]
+          'item-id': n.id ?? `skill:${n.name ?? ''}`,
+          'item-name': n.name ?? '',
+          description: n.description ?? undefined,
+          subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
+        })
+      )
 
     if (!throttled) return all.slice(0, MAX_PER_KIND)
     return new Fuse(all, skillFuseOptions)

@@ -46,10 +46,10 @@ defmodule Console.AI.Azure do
   Calls an openai tool call interface w/ strict mode
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = az, messages, tools, _opts) do
+  def tool_call(%__MODULE__{} = az, messages, tools, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("azure:#{az.tool_model}", az.stream, provider_options(az, az.tool_model) ++ [tools: reqllm_tools(tools)])
+    |> generate_text("azure:#{select_model(az, opts[:client])}", az.stream, provider_options(az, az.tool_model) ++ [tools: reqllm_tools(tools)])
     |> reqllm_result()
     |> tool_calls()
   end

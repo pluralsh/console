@@ -528,8 +528,8 @@ query Workbenches($first: Int = 100, $after: String, $q: String) {
 }
 
 query WorkbenchDashboard {
-  workbenchPullRequests
   workbenchAggregates {
+    pullRequests
     pullRequestMergeRate
     evalResults
   }
@@ -696,32 +696,18 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-fragment WorkbenchSkillTiny on WorkbenchSkill {
+fragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {
   id
   name
   description
   subagents
 }
 
-query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {
+query WorkbenchSkills($id: ID!) {
   workbench(id: $id) {
     id
-    skills {
-      ref {
-        ref
-        folder
-      }
-      files
-    }
-    workbenchSkills(first: $first, after: $after) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...WorkbenchSkillTiny
-        }
-      }
+    allSkills {
+      ...UnifiedWorkbenchSkillTiny
     }
   }
 }

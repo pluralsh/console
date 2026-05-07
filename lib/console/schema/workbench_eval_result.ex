@@ -50,7 +50,7 @@ defmodule Console.Schema.WorkbenchEvalResult do
         timestamp: r.timestamp,
         average: r.average
       },
-      order_by: [desc: r.timestamp]
+      order_by: [asc: r.timestamp]
     )
   end
 
@@ -58,7 +58,7 @@ defmodule Console.Schema.WorkbenchEvalResult do
     from(r in query,
       select: %Aggregate{
         average_grade: fragment("?::float", avg(r.grade))
-}
+      }
     )
   end
 
@@ -77,7 +77,7 @@ defmodule Console.Schema.WorkbenchEvalResult do
         timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, e.inserted_at),
         average: fragment("?::float", avg(r.grade))
       },
-      order_by: [desc: 2]
+      order_by: [asc: 2]
     )
   end
 
@@ -93,7 +93,7 @@ defmodule Console.Schema.WorkbenchEvalResult do
         timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, r.inserted_at),
         average: fragment("?::float", avg(r.grade))
       },
-      order_by: [desc: 1]
+      order_by: [asc: 1]
     )
   end
 

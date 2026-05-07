@@ -129,7 +129,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
 
   def aggregates(_, _) do
-    with [pr] <- Console.Repo.all(PullRequest.aggregates()),
+    prs = PullRequest.for_workbench_jobs()
+          |> PullRequest.aggregates()
+
+    with [pr] <- Console.Repo.all(prs),
          [eval] <- Console.Repo.all(WorkbenchEvalResult.aggregates()) do
       {:ok, %{
         pull_requests: pr.merged,

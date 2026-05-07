@@ -49,10 +49,10 @@ defmodule Console.AI.Anthropic do
   defp model(%{model: model}, _), do: model
 
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = anthropic, messages, tools, _opts) do
+  def tool_call(%__MODULE__{} = anthropic, messages, tools, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("anthropic:#{anthropic.tool_model}", anthropic.stream, provider_options(anthropic) ++ [tools: reqllm_tools(tools)])
+    |> generate_text("anthropic:#{model(anthropic, opts[:client] || :tool)}", anthropic.stream, provider_options(anthropic) ++ [tools: reqllm_tools(tools)])
     |> reqllm_result()
     |> tool_calls()
   end

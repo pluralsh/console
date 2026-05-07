@@ -3,10 +3,8 @@ import { SubTabs } from 'components/utils/SubTabs'
 import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
-  WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EVALS_REL_PATH,
-  WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
@@ -17,8 +15,6 @@ const directory = [
   { label: 'Workbenches', path: '' },
   { label: 'Integrations', path: WORKBENCHES_TOOLS_ADD_REL_PATH },
   { label: 'Configured Tools', path: WORKBENCHES_TOOLS_YOUR_REL_PATH },
-  { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
-  { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
   { label: 'Evals', path: WORKBENCHES_EVALS_REL_PATH },
 ]
 

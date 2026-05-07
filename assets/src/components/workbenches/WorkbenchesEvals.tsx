@@ -19,7 +19,7 @@ export function WorkbenchesEvals() {
 
   const { totalPrsMerged, overallWorkbenchAvg, mergeRateAvg } = useMemo(() => {
     return {
-      totalPrsMerged: data?.workbenchPullRequests ?? 0,
+      totalPrsMerged: data?.workbenchAggregates?.pullRequests ?? 0,
       overallWorkbenchAvg: data?.workbenchAggregates?.evalResults ?? 0,
       mergeRateAvg: clamp(
         (data?.workbenchAggregates?.pullRequestMergeRate ?? 0) * 100,
