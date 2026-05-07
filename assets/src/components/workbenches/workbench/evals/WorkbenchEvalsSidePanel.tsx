@@ -1,7 +1,7 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { type ComponentProps, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
   evalGradeToColor,
