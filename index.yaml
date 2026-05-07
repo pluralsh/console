@@ -96,6 +96,33 @@ entries:
     version: 0.0.1
   console:
   - apiVersion: v2
+    appVersion: 0.12.18
+    created: "2026-05-07T03:36:47.042362767Z"
+    dependencies:
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.186
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.34.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 6595b11a19572c4e8677845ff9669129e7b2d83b3a8eced8c4cc2d7a4384b22f
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.4.17/console-0.4.17.tgz
+    version: 0.4.17
+  - apiVersion: v2
     appVersion: 0.12.17
     created: "2026-05-02T23:32:04.837542732Z"
     dependencies:
@@ -11226,6 +11253,16 @@ entries:
     version: 0.0.1
   datastore:
   - apiVersion: v2
+    appVersion: 0.12.18
+    created: "2026-05-07T03:36:47.283525297Z"
+    description: deploys the datastore operator for plural cd
+    digest: 7c5b7266cfad9e4e3147e438d6e2102c13b8447d2b733b3c0d568d0378deafc9
+    name: datastore
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.62/datastore-0.0.62.tgz
+    version: 0.0.62
+  - apiVersion: v2
     appVersion: 0.12.17
     created: "2026-05-02T23:32:05.025115732Z"
     description: deploys the datastore operator for plural cd
@@ -12055,4 +12092,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-07T03:20:55.876007035Z"
+generated: "2026-05-07T03:36:47.28497069Z"
