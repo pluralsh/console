@@ -10,5 +10,5 @@
       "description": "Raw JSON payload string sent to the function."
     }
   },
-  "required": ["identifier", "payload_json"]
+  "required": ["identifier"]
 }
