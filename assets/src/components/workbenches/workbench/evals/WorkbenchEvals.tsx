@@ -1,36 +1,281 @@
-import { useEffect } from 'react'
+import { EmptyState, Flex, Markdown } from '@pluralsh/design-system'
+import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { Flex } from '@pluralsh/design-system'
 import { WorkbenchOutletContext } from '../Workbench'
+import styled, { useTheme } from 'styled-components'
+import { GqlError } from 'components/utils/Alert'
+import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
+import {
+  WorkbenchEvalJobFragment,
+  useWorkbenchEvalsQuery,
+} from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
-import { useTheme } from 'styled-components'
+
+type QualityTab = 'prompt' | 'conclusion' | 'logic'
+
+const qualityTabs: { key: QualityTab; label: string }[] = [
+  { key: 'prompt', label: 'Prompt' },
+  { key: 'conclusion', label: 'Conclusion' },
+  { key: 'logic', label: 'Logic and thoughts' },
+]
+
+const MOCK_EVAL_JOBS: WorkbenchEvalJobFragment[] = [
+  {
+    __typename: 'WorkbenchJob',
+    id: 'mock-job-1',
+    prompt: 'deploy the opentelemetry-demo helm chart upgrade',
+    insertedAt: '2026-04-27T10:15:00.000Z',
+    startedAt: '2026-04-27T10:14:10.000Z',
+    completedAt: '2026-04-27T10:14:53.000Z',
+    evalResult: {
+      __typename: 'WorkbenchEvalResult',
+      id: 'mock-eval-1',
+      grade: 8,
+      feedback: {
+        __typename: 'WorkbenchEvalFeedback',
+        summary:
+          'The job demonstrated strong overall performance today. Prompt construction was clear and well-scoped in most runs.',
+        prompt:
+          'Prompts were specific, relevant to the triggering alert, and provided sufficient context.',
+        result:
+          'Conclusions were actionable and referenced relevant evidence. Minor weaknesses were observed in a few runs.',
+        logic:
+          '- Collaboration: Breaking down silos between development and operations teams.\n- Automation: Streamlining processes to reduce human error.\n- Continuous Integration (CI): Regularly merging code for automated validation.',
+      },
+    },
+  },
+  {
+    __typename: 'WorkbenchJob',
+    id: 'mock-job-2',
+    prompt: 'Job prompt text',
+    insertedAt: '2026-04-27T10:05:00.000Z',
+    startedAt: '2026-04-27T10:03:10.000Z',
+    completedAt: '2026-04-27T10:03:45.000Z',
+    evalResult: {
+      __typename: 'WorkbenchEvalResult',
+      id: 'mock-eval-2',
+      grade: 5,
+      feedback: {
+        __typename: 'WorkbenchEvalFeedback',
+        summary:
+          'Mixed quality results with inconsistent conclusion structure.',
+        prompt: 'Prompt lacked concrete acceptance criteria in several steps.',
+        result:
+          'Some outcomes were useful but references to evidence were shallow.',
+        logic: '- Needs clearer progression from hypotheses to validation.',
+      },
+    },
+  },
+]
 
 export function WorkbenchEvals() {
   const theme = useTheme()
   const { workbenchId, setSideContent, setShowDescription } =
     useOutletContext<WorkbenchOutletContext>()
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
+  const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
+
+  const { data, loading, error } = useWorkbenchEvalsQuery({
+    variables: { id: workbenchId, first: 100 },
+    skip: !workbenchId,
+    fetchPolicy: 'cache-and-network',
+  })
+  const jobs = useMemo(() => {
+    const fetched =
+      data?.workbench?.runs?.edges
+        ?.flatMap((edge) => (edge?.node ? [edge.node] : []))
+        .filter((job) => !!job.evalResult) ?? []
+    const source = fetched.length ? fetched : MOCK_EVAL_JOBS
+
+    return source.sort(
+      (a, b) =>
+        (b.insertedAt ? new Date(b.insertedAt).getTime() : 0) -
+        (a.insertedAt ? new Date(a.insertedAt).getTime() : 0)
+    )
+  }, [data])
+  const selectedJob =
+    jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null
 
   useEffect(() => {
-    setSideContent(<WorkbenchEvalsSidePanel workbenchId={workbenchId} />)
+    if (jobs.length && !selectedJobId) {
+      setSelectedJobId(jobs[0].id)
+    }
+  }, [jobs, selectedJobId])
+
+  useEffect(() => {
+    setSideContent(
+      <WorkbenchEvalsSidePanel
+        jobs={jobs}
+        loading={loading && !data}
+        selectedJobId={selectedJob?.id}
+        onSelectJobId={setSelectedJobId}
+      />
+    )
     setShowDescription(false)
 
     return () => {
       setSideContent(null)
       setShowDescription(true)
     }
-  }, [setShowDescription, setSideContent, workbenchId])
+  }, [data, jobs, loading, selectedJob?.id, setShowDescription, setSideContent])
+
+  const feedback = selectedJob?.evalResult?.feedback
+  const durationSeconds = getDurationSeconds(selectedJob)
+
+  if (error) return <GqlError error={error} />
 
   return (
     <Flex
       direction="column"
       gap="medium"
       overflowY="auto"
-      css={{
-        borderTop: theme.borders['fill-one'],
-        padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-      }}
+      css={{ borderTop: theme.borders['fill-one'] }}
     >
-      ...
+      {!selectedJob ? (
+        <EmptyState message="No evals available yet." />
+      ) : (
+        <ColumnsSC>
+          <PanelSC>
+            <PanelHeaderSC>Summary</PanelHeaderSC>
+            <PanelBodySC>
+              <Flex
+                align="center"
+                gap="medium"
+              >
+                <ScoreBadgeSC
+                  $color={evalGradeToColor(selectedJob.evalResult?.grade ?? 0)}
+                >
+                  {Math.round(selectedJob.evalResult?.grade ?? 0)}
+                </ScoreBadgeSC>
+                <Flex direction="column">
+                  <span css={theme.partials.text.subtitle2}>
+                    Overall grade:{' '}
+                    {(selectedJob.evalResult?.grade ?? 0).toFixed(0)}/10
+                  </span>
+                  <span
+                    css={{
+                      ...theme.partials.text.body2,
+                      color: theme.colors['text-light'],
+                    }}
+                  >
+                    {durationSeconds
+                      ? `${durationSeconds} seconds`
+                      : 'Duration unavailable'}
+                  </span>
+                </Flex>
+              </Flex>
+              <Flex
+                direction="column"
+                gap="small"
+                css={{ marginTop: theme.spacing.medium }}
+              >
+                <strong css={theme.partials.text.subtitle2}>Summary</strong>
+                <Markdown text={feedback?.summary ?? ''} />
+              </Flex>
+            </PanelBodySC>
+          </PanelSC>
+
+          <PanelSC>
+            <PanelHeaderSC>Quality breakdown</PanelHeaderSC>
+            <Flex
+              gap="medium"
+              padding="medium"
+              css={{ borderBottom: theme.borders['fill-one'] }}
+            >
+              {qualityTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setQualityTab(tab.key)}
+                  css={{
+                    ...theme.partials.reset.button,
+                    ...theme.partials.text.body2,
+                    color:
+                      qualityTab === tab.key
+                        ? theme.colors.text
+                        : theme.colors['text-light'],
+                    borderBottom:
+                      qualityTab === tab.key
+                        ? theme.borders['fill-six']
+                        : '1px solid transparent',
+                    paddingBottom: theme.spacing.xsmall,
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </Flex>
+            <PanelBodySC>
+              <Markdown
+                text={
+                  qualityTab === 'prompt'
+                    ? (feedback?.prompt ?? '')
+                    : qualityTab === 'conclusion'
+                      ? (feedback?.result ?? '')
+                      : (feedback?.logic ?? '')
+                }
+              />
+            </PanelBodySC>
+          </PanelSC>
+        </ColumnsSC>
+      )}
     </Flex>
   )
 }
+
+function getDurationSeconds(job: WorkbenchEvalJobFragment | null) {
+  if (!job?.startedAt || !job.completedAt) return null
+
+  return Math.max(
+    Math.round(
+      (new Date(job.completedAt).getTime() -
+        new Date(job.startedAt).getTime()) /
+        1000
+    ),
+    0
+  )
+}
+
+const ColumnsSC = styled.div({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+  minHeight: 0,
+})
+
+const PanelSC = styled.section(({ theme }) => ({
+  borderRight: theme.borders['fill-one'],
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0,
+  overflow: 'hidden',
+}))
+
+const PanelHeaderSC = styled.header(({ theme }) => ({
+  ...theme.partials.text.overline,
+  backgroundColor: theme.colors['fill-one'],
+  color: theme.colors['text-xlight'],
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  borderBottom: theme.borders['fill-one'],
+}))
+
+const PanelBodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  minHeight: 0,
+  overflow: 'auto',
+  padding: theme.spacing.medium,
+}))
+
+const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
+  alignItems: 'center',
+  backgroundColor: theme.colors['fill-one'],
+  border: `1px solid ${$color}`,
+  borderRadius: '50%',
+  color: $color,
+  display: 'flex',
+  fontWeight: 600,
+  height: 40,
+  justifyContent: 'center',
+  minWidth: 40,
+}))

@@ -1,7 +1,7 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { type ComponentProps, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { CaptionP } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
   evalGradeToColor,
@@ -170,12 +170,14 @@ export function WorkbenchEvalsSidePanel({
               ))}
             </Flex>
           ) : (
-            <CaptionP
+            <Body2P
               $color="text-xlight"
-              css={{ margin: 0 }}
+              css={{ margin: `${theme.spacing.large}px auto` }}
             >
-              No evals available for this filter.
-            </CaptionP>
+              {activeFilter === 'all'
+                ? 'No evals available.'
+                : 'No evals available for this filter.'}
+            </Body2P>
           )}
         </Flex>
       </Flex>
