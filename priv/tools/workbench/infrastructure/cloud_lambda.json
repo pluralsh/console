@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "description": "Canonical function identifier. AWS: Lambda ARN (arn:aws:lambda:{region}:{account}:function:{name}). GCP Cloud Run: projects/{project}/locations/{location}/services/{name} (or full service URL). Azure Function: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/functions/{func} (must include leading '/')."
+    },
+    "payload_json": {
+      "type": "string",
+      "description": "Raw JSON payload string sent to the function."
+    }
+  },
+  "required": ["identifier", "payload_json"]
+}

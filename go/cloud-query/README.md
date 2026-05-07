@@ -83,6 +83,8 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | CloudWatch | Yes | Yes | No | AWS SDK v2 (`GetMetricData`, Logs Insights `StartQuery`/`GetQueryResults`) with optional assume-role |
 | Azure | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials                                                |
 
+ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lambda, GCP Cloud Run services (Gen2), and Azure Functions using canonical identifiers and cloud connection credentials.
+
 ### Tool Provider Credentials and Permissions
 
 - `Dynatrace`:
@@ -126,9 +128,18 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
     - `options.azure.metrics_endpoint` overrides the metrics endpoint per request. If omitted, Cloud Query falls back to `https://global.metrics.monitor.azure.com`.
   - Logs use `azlogs.QueryResource`:
     - `query` is Azure Log Analytics query syntax (KQL).
-    - `options.azure.resource_id` is required and used as the target resource.
-  - Metrics search uses Azure Monitor metric definitions for `options.azure.resource_id`; `MetricsSearchInput.query` is used as a name filter.
-  - For Azure metrics, `step` is required and must be an ISO 8601 duration (for example `PT5M` or `PT1H`).
+
+### InvokeLambda Provider Permissions
+
+- `AWS`:
+  - Caller needs permission to invoke the target Lambda function (`lambda:InvokeFunction`).
+- `GCP`:
+  - Caller needs:
+    - `run.routes.invoke`
+    - `run.services.get`
+  - These map to Cloud Run IAM roles such as `roles/run.invoker` (invoke) and `roles/run.viewer` (service read).
+- `Azure`:
+  - Caller needs permissions to read function metadata/secrets and invoke the function endpoint.
 
 For provider-specific request payloads, query formats, and examples, see the [API Reference Documentation](docs/api-reference.md).
 

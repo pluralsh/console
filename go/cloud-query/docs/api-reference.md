@@ -283,7 +283,7 @@ Each error response includes a descriptive message explaining the specific issue
 
 # ToolQuery API Reference
 
-ToolQuery exposes a gRPC service for querying external observability tools (metrics, logs, traces).
+ToolQuery exposes a gRPC service for querying external observability tools (metrics, logs, traces) and invoking cloud functions across AWS/GCP/Azure.
 
 ## Compatibility Matrix
 
@@ -332,6 +332,7 @@ service ToolQuery {
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
+  rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
 }
 ```
 
@@ -1294,6 +1295,44 @@ message JaegerTracesOptions {
   optional string duration_max = 4;
 }
 ```
+
+## Invoke Lambda
+
+`InvokeLambda` invokes serverless functions using canonical provider identifiers only.
+
+```protobuf
+message InvokeLambdaInput {
+  cloudquery.Connection connection = 1;
+  string identifier = 2;
+  string payload_json = 3;
+}
+
+message InvokeLambdaOutput {
+  string result = 1;
+  string error = 2;
+}
+```
+
+Identifier formats:
+- AWS: Lambda ARN (for example `arn:aws:lambda:us-east-1:123456789012:function:my-func`)
+- GCP Cloud Run services: `projects/{project}/locations/{location}/services/{name}` (or direct service URL limited to `https://*.run.app`, for example `https://{service}-{hash}-{region}.a.run.app`)
+- Azure: `/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/functions/{func}` (must include leading `/`)
+
+Provider identifier examples:
+- AWS: `arn:aws:lambda:us-east-1:123456789012:function:my-func`
+- GCP: `projects/my-project/locations/us-central1/services/my-service`
+- Azure: `/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Web/sites/my-func-app/functions/my-handler`
+
+Required permissions:
+- AWS: `lambda:InvokeFunction` on the target function.
+- GCP:
+  - `run.routes.invoke`
+  - `run.services.get`
+- Azure: permissions to read function metadata/secrets and invoke the function endpoint.
+
+Response behavior:
+- Successful invocation: `result` populated, `error` empty.
+- Function/provider invocation failure: `error` populated (with optional `result` payload when available).
 
 #### Response
 

@@ -2,8 +2,9 @@ syntax = "proto3";
 
 package toolquery;
 
-option go_package = "internal/proto/toolquery";
+option go_package = "github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery";
 
+import "cloudquery.proto";
 import "google/protobuf/timestamp.proto";
 
 message ElasticConnection {
@@ -59,7 +60,7 @@ message SplunkConnection {
 
 message DynatraceConnection {
   string url = 1;
-   string platformToken = 2;
+  string platformToken = 2;
 }
 
 message CloudwatchConnection {
@@ -232,9 +233,21 @@ message TracesQueryOutput {
   repeated TraceSpan spans = 1;
 }
 
+message InvokeLambdaInput {
+  cloudquery.Connection connection = 1;
+  string identifier = 2;
+  string payload_json = 3;
+}
+
+message InvokeLambdaOutput {
+  string result = 1;
+  string error = 2;
+}
+
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
+  rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
 }
