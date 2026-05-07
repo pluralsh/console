@@ -128,12 +128,21 @@ export function WorkbenchEvals() {
   return (
     <Flex
       direction="column"
+      flex={1}
       gap="medium"
-      overflowY="auto"
+      minHeight={0}
+      overflow="hidden"
       css={{ borderTop: theme.borders['fill-one'] }}
     >
       {!selectedJob ? (
-        <EmptyState message="No evals available yet." />
+        <Flex
+          align="center"
+          flex={1}
+          justify="center"
+          minHeight={0}
+        >
+          <EmptyState message="No evals available yet." />
+        </Flex>
       ) : (
         <ColumnsSC>
           <PanelSC>
@@ -149,7 +158,9 @@ export function WorkbenchEvals() {
                   {Math.round(selectedJob.evalResult?.grade ?? 0)}
                 </ScoreBadgeSC>
                 <Flex direction="column">
-                  <span css={theme.partials.text.subtitle2}>
+                  <span
+                    css={{ ...theme.partials.text.subtitle2, fontWeight: 400 }}
+                  >
                     Overall grade:{' '}
                     {(selectedJob.evalResult?.grade ?? 0).toFixed(0)}/10
                   </span>
@@ -178,6 +189,7 @@ export function WorkbenchEvals() {
           <PanelSC>
             <PanelHeaderSC>Quality breakdown</PanelHeaderSC>
             <Flex
+              flexShrink={0}
               gap="medium"
               padding="medium"
               css={{ borderBottom: theme.borders['fill-one'] }}
@@ -238,7 +250,9 @@ function getDurationSeconds(job: WorkbenchEvalJobFragment | null) {
 
 const ColumnsSC = styled.div({
   display: 'grid',
+  flex: 1,
   gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+  gridTemplateRows: 'minmax(0, 1fr)',
   minHeight: 0,
 })
 
@@ -254,12 +268,14 @@ const PanelHeaderSC = styled.header(({ theme }) => ({
   ...theme.partials.text.overline,
   backgroundColor: theme.colors['fill-one'],
   color: theme.colors['text-xlight'],
+  flexShrink: 0,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   borderBottom: theme.borders['fill-one'],
 }))
 
 const PanelBodySC = styled.div(({ theme }) => ({
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
   gap: theme.spacing.small,
   minHeight: 0,
