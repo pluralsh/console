@@ -204,9 +204,10 @@ function EvalFilterChip({
     <Chip
       size="small"
       severity={severity}
-      clickable
+      clickable={count > 0}
       $active={active}
-      onClick={onClick}
+      inactive={count === 0}
+      onClick={count === 0 ? undefined : onClick}
       css={{
         borderRadius: 12,
         backgroundColor: active ? theme.colors['fill-one-selected'] : undefined,
