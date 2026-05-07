@@ -1,8 +1,6 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { type ComponentProps, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
@@ -11,156 +9,26 @@ import {
 } from 'components/workbenches/common/evalGrade'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
-import { WorkbenchEvalsQuery, useWorkbenchEvalsQuery } from 'generated/graphql'
+import { WorkbenchEvalJobFragment } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import { groupBy } from 'lodash'
 
 type EvalFilter = 'all' | EvalGradeCategory
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 
-type EvalJobRow = NonNullable<
-  NonNullable<
-    NonNullable<NonNullable<WorkbenchEvalsQuery['workbench']>['runs']>['edges']
-  >[number]
->['node']
-
-const MOCK_WORKBENCH_EVALS_SIDEPANEL_DATA: WorkbenchEvalsQuery = {
-  workbench: {
-    id: 'mock-workbench',
-    runs: {
-      edges: [
-        {
-          node: {
-            id: 'mock-job-1',
-            prompt: 'deploy the opentelemetry-demo helm chart upgrade',
-            insertedAt: '2026-04-27T10:15:00.000Z',
-            evalResult: {
-              id: 'mock-eval-1',
-              grade: 1,
-              feedback: { summary: 'Low confidence in rollout safety checks.' },
-            },
-          },
-        },
-        {
-          node: {
-            id: 'mock-job-2',
-            prompt: 'Job prompt text',
-            insertedAt: '2026-04-27T10:05:00.000Z',
-            evalResult: {
-              id: 'mock-eval-2',
-              grade: 8,
-              feedback: { summary: 'Good plan with clear remediation steps.' },
-            },
-          },
-        },
-        {
-          node: {
-            id: 'mock-job-3',
-            prompt: 'deploy the opentelemetry-demo helm values update',
-            insertedAt: '2026-04-27T09:55:00.000Z',
-            evalResult: {
-              id: 'mock-eval-3',
-              grade: 5,
-              feedback: {
-                summary: 'Needs more explicit verification criteria.',
-              },
-            },
-          },
-        },
-        {
-          node: {
-            id: 'mock-job-4',
-            prompt: 'deploy the opentelemetry-demo helm rollback check',
-            insertedAt: '2026-04-27T09:45:00.000Z',
-            evalResult: {
-              id: 'mock-eval-4',
-              grade: 10,
-              feedback: { summary: 'Excellent execution and communication.' },
-            },
-          },
-        },
-        {
-          node: {
-            id: 'mock-job-5',
-            prompt: 'deploy the opentelemetry-demo helm canary strategy',
-            insertedAt: '2026-04-27T09:35:00.000Z',
-            evalResult: {
-              id: 'mock-eval-5',
-              grade: 4,
-              feedback: {
-                summary: 'Partially complete reasoning around risk.',
-              },
-            },
-          },
-        },
-        {
-          node: {
-            id: 'mock-job-6',
-            prompt: 'deploy the opentelemetry-demo helm SLO verification',
-            insertedAt: '2026-04-27T09:25:00.000Z',
-            evalResult: {
-              id: 'mock-eval-6',
-              grade: 4,
-              feedback: {
-                summary: 'Insufficient evidence for production safety.',
-              },
-            },
-          },
-        },
-        {
-          node: {
-            id: 'mock-job-7',
-            prompt: 'deploy the opentelemetry-demo helm final rollout',
-            insertedAt: '2026-04-27T09:15:00.000Z',
-            evalResult: {
-              id: 'mock-eval-7',
-              grade: 10,
-              feedback: {
-                summary: 'Great quality and complete runbook coverage.',
-              },
-            },
-          },
-        },
-      ],
-    },
-  },
-}
-
 export function WorkbenchEvalsSidePanel({
-  workbenchId,
+  jobs,
+  loading,
+  selectedJobId,
+  onSelectJobId,
 }: {
-  workbenchId: string
+  jobs: WorkbenchEvalJobFragment[]
+  loading: boolean
+  selectedJobId?: string | null
+  onSelectJobId: (jobId: string) => void
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
-
-  // We fetch only the first 100 evals as filtering is done on the client side.
-  const { data, loading } = useWorkbenchEvalsQuery({
-    variables: { id: workbenchId, first: 100 },
-    skip: !workbenchId,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const jobs = useMemo(() => {
-    const fromEdges = (
-      edges: Array<{ node?: EvalJobRow | null } | null> | null | undefined = []
-    ) =>
-      (edges ?? [])
-        .flatMap((edge) => (edge?.node ? [edge.node] : []))
-        .filter((job) => !!job.evalResult)
-
-    const fetched = fromEdges(data?.workbench?.runs?.edges)
-    const source = fetched.length
-      ? fetched
-      : fromEdges(MOCK_WORKBENCH_EVALS_SIDEPANEL_DATA.workbench?.runs?.edges)
-
-    return source.sort(
-      (a, b) =>
-        (b.insertedAt ? new Date(b.insertedAt).getTime() : 0) -
-        (a.insertedAt ? new Date(a.insertedAt).getTime() : 0)
-    )
-  }, [data])
 
   const { filteredJobs, counts } = useMemo(() => {
     const byCategory = groupBy(jobs, (job) =>
@@ -248,37 +116,27 @@ export function WorkbenchEvalsSidePanel({
           minHeight={0}
           overflowY="auto"
         >
-          {loading && !data ? (
+          {loading ? (
             <Flex
               direction="column"
               gap="xsmall"
+              padding="small"
             >
-              <RectangleSkeleton
-                $height={52}
-                $width="100%"
-              />
-              <RectangleSkeleton
-                $height={52}
-                $width="100%"
-              />
-              <RectangleSkeleton
-                $height={52}
-                $width="100%"
-              />
+              {Array.from({ length: 3 }).map((_, index) => (
+                <RectangleSkeleton
+                  key={index}
+                  $height={52}
+                  $width="100%"
+                />
+              ))}
             </Flex>
           ) : filteredJobs.length ? (
-            <Flex
-              direction="column"
-              gap="xxsmall"
-            >
+            <Flex direction="column">
               {filteredJobs.map((job) => (
                 <EvalLinkSC
                   key={job.id}
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })
-                    )
-                  }
+                  $active={selectedJobId === job.id}
+                  onClick={() => onSelectJobId(job.id)}
                 >
                   <ScoreBadgeSC
                     $color={evalGradeToColor(job.evalResult?.grade ?? 0)}
@@ -360,19 +218,22 @@ function EvalFilterChip({
   )
 }
 
-const EvalLinkSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  width: '100%',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  textAlign: 'left',
+const EvalLinkSC = styled.button<{ $active?: boolean }>(
+  ({ theme, $active }) => ({
+    ...theme.partials.reset.button,
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.small,
+    width: '100%',
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    textAlign: 'left',
+    backgroundColor: $active ? theme.colors['fill-two'] : undefined,
 
-  '&:hover': {
-    backgroundColor: theme.colors['fill-two'],
-  },
-}))
+    '&:hover': {
+      backgroundColor: theme.colors['fill-two'],
+    },
+  })
+)
 
 const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
   ...theme.partials.text.caption,
