@@ -12,9 +12,7 @@ export function evalGradeToColor(score: number): string {
 
   if (normalized < 8) return '#6AF1C2' // green[300]
   if (normalized < 9) return '#3CECAF' // green[400]
-  if (normalized < 10) return '#17E8A0' // green[500]
-
-  return '#AEB3C0' // grey[300]
+  return '#17E8A0' // green[500]
 }
 
 function clamp(value: number, min: number, max: number) {
