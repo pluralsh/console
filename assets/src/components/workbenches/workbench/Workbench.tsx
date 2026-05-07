@@ -23,7 +23,7 @@ import {
   useWorkbenchQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { Key, useMemo, useState } from 'react'
+import { Key, ReactNode, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -41,6 +41,7 @@ import {
   WORKBENCH_EVAL_SETTINGS_REL_PATH,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
+  WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -54,6 +55,7 @@ const directory = [
   { label: 'Jobs', path: '' },
   { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
   { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
+  { label: 'Eval', path: WORKBENCHES_EVALS_REL_PATH },
 ]
 
 export const getWorkbenchBreadcrumbs = (
@@ -68,6 +70,7 @@ export const getWorkbenchBreadcrumbs = (
 export type WorkbenchOutletContext = {
   workbenchId: string
   isLoading: boolean
+  setSideContent: (content: ReactNode | null) => void
 }
 
 export enum WorkbenchMoreMenuKey {
@@ -89,6 +92,7 @@ export function Workbench() {
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [toolsEditOpen, setToolsEditOpen] = useState(false)
+  const [sideContent, setSideContent] = useState<ReactNode | null>(null)
 
   const handleMoreMenuSelection = (selectedKey: Key) => {
     switch (selectedKey) {
@@ -166,10 +170,12 @@ export function Workbench() {
       minHeight={0}
       overflow="hidden"
     >
-      <WorkbenchSidePanel
-        workbenchId={id}
-        onOpenToolsEdit={() => setToolsEditOpen(true)}
-      />
+      {sideContent ?? (
+        <WorkbenchSidePanel
+          workbenchId={id}
+          onOpenToolsEdit={() => setToolsEditOpen(true)}
+        />
+      )}
       <WrapperSC>
         <Flex
           align="center"
@@ -240,7 +246,7 @@ export function Workbench() {
             </Subtitle2H1>
           )}
         </StretchedFlex>
-        <Outlet context={{ workbenchId: id, isLoading }} />
+        <Outlet context={{ workbenchId: id, isLoading, setSideContent }} />
         <Confirm
           open={deleteModalOpen}
           close={() => setDeleteModalOpen(false)}

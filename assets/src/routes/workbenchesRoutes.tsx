@@ -20,6 +20,7 @@ import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookFo
 import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
 import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
 import { WorkbenchEvalSettings } from 'components/workbenches/workbench/evals/WorkbenchEvalSettings'
+import { WorkbenchEvals } from 'components/workbenches/workbench/evals/WorkbenchEvals'
 import { Route } from 'react-router-dom'
 import {
   WORKBENCH_EVAL_SETTINGS_REL_PATH,
@@ -107,6 +108,10 @@ export const workbenchesRoutes = [
     <Route
       path={WORKBENCHES_ALERTS_REL_PATH}
       element={<WorkbenchAlerts />}
+    />
+    <Route
+      path={WORKBENCHES_EVALS_REL_PATH}
+      element={<WorkbenchEvals />}
     />
   </Route>,
   <Route
