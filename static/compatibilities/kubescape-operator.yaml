@@ -4,6 +4,29 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
+- version: 1.40.1
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **kubevuln image tag bumped** to `v0.3.137` (from `v0.3.136`).\n\
+      - **New kubevuln setting:** a `riskAcceptance` flag was added to support SecurityException\
+      \ CRD integration (configure this only if you\u2019re using/plan to use SecurityException-based\
+      \ risk acceptance).\n- **Behavior change in chart templating:** `operator.httpExporterConfig`\
+      \ is now **gated by** `synchronizer.enabled`. If you previously set `operator.httpExporterConfig`\
+      \ while `synchronizer.enabled=false`, it will no longer render/apply; enable\
+      \ the synchronizer or move to the supported configuration path.\n"
+    chart_updates: [Update kubevuln component image tag to v0.3.137 and expose configuration
+        for risk acceptance integration., Fix templating so operator `httpExporterConfig`
+        is only applied when `synchronizer.enabled` is enabled.]
+    features: [Kubevuln adds a `riskAcceptance` flag to integrate with SecurityException
+        CRDs for risk acceptance workflows., Chart now supports/threads through the
+        kubevuln risk acceptance configuration (when enabled).]
+    breaking_changes: ['If you rely on `operator.httpExporterConfig` with `synchronizer.enabled=false`,
+        that configuration will no longer be deployed because it is now gated; you
+        must enable the synchronizer or adjust your configuration approach.']
+  chart_version: 1.40.1
+  images: []
 - version: 1.40.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []

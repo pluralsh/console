@@ -4,18 +4,34 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.3.9
+- version: 3.4.1
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: []
-  chart_version: 9.5.11
+    features: ['Cluster generator K8s version label format changes to match Helm:
+        ApplicationSets using Cluster Generator with `argocd.argoproj.io/auto-label-cluster-info`
+        must switch from `Major.Minor` to `argocd.argoproj.io/kubernetes-version`
+        in `vMajor.Minor.Patch` format.', 'ApplicationSet improvements: status now
+        includes a Health field, plus new watch/listResourceEvents APIs and multiple
+        UI enhancements for AppSets.', 'Controller features: can pause reconciliation
+        for a specific cluster via an annotation; adds application-level sync option
+        for Prune+Delete.', 'Helm rendering enhancement: supports wildcard/glob patterns
+        for `valueFiles`; also supports custom User-Agent headers when fetching Helm
+        repos.', 'Hydrator enhancements: configurable authorName/Email for hydration
+        commits and multiple correctness fixes; UI adds hydrator support in app create/summary.',
+      'Observability/security: adds OpenTelemetry instrumentation for auth/handlers;
+        disables gRPC DNS TXT lookups by default; adds tighter cert/known-hosts limits
+        during stream parsing.']
+    breaking_changes: ['Cluster version format change impacts ApplicationSet Cluster
+        Generators: update any selectors/templating that rely on Kubernetes version
+        labels to use `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
+        (e.g., `v1.30.2`) instead of `Major.Minor` (e.g., `1.30`).']
+  chart_version: 9.5.12
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-    'quay.io/argoproj/argocd:v3.3.9']
+    'quay.io/argoproj/argocd:v3.4.1']
 - version: 3.3.8
   kube: ['1.36', '1.35', '1.34']
   requirements: []
