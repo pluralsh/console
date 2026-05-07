@@ -72,6 +72,7 @@ export type WorkbenchOutletContext = {
   isLoading: boolean
   setSideContent: (content: ReactNode | null) => void
   setShowDescription: (show: boolean) => void
+  setHeaderActions: (content: ReactNode | null) => void
 }
 
 export enum WorkbenchMoreMenuKey {
@@ -94,6 +95,7 @@ export function Workbench() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [toolsEditOpen, setToolsEditOpen] = useState(false)
   const [sideContent, setSideContent] = useState<ReactNode | null>(null)
+  const [headerActions, setHeaderActions] = useState<ReactNode | null>(null)
   const [showDescription, setShowDescription] = useState(true)
 
   const handleMoreMenuSelection = (selectedKey: Key) => {
@@ -208,6 +210,7 @@ export function Workbench() {
             >
               Edit workbench
             </Button>
+            {headerActions}
             <MoreMenu
               disabled={!workbench}
               triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
@@ -270,6 +273,7 @@ export function Workbench() {
             isLoading,
             setSideContent,
             setShowDescription,
+            setHeaderActions,
           }}
         />
         <Confirm
