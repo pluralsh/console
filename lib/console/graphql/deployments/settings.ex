@@ -126,6 +126,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :method,          :open_ai_method, description: "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
+    field :token_exchange,  :openai_token_exchange_attributes, description: "OAuth2 client credentials against a token endpoint to obtain access tokens"
+  end
+
+  input_object :openai_token_exchange_attributes do
+    field :enabled,       :boolean
+    field :token_url,     :string, description: "token endpoint URL"
+    field :client_id,     :string
+    field :client_secret, :string
   end
 
   input_object :anthropic_settings_attributes do
@@ -361,6 +369,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :method,          :open_ai_method, description: "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
+    field :token_exchange,  :openai_token_exchange, description: "OAuth2 client credentials configured for token endpoint exchange"
+  end
+
+  @desc "OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
+  object :openai_token_exchange do
+    field :enabled,   :boolean
+    field :token_url, :string, description: "token endpoint URL"
+    field :client_id, :string
   end
 
   @desc "Anthropic connection information"

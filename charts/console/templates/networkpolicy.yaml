@@ -25,12 +25,23 @@ spec:
       port: 8080
     {{- end }}
   - from:
-    - namespaceSelector:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: console
+          app.kubernetes.io/instance: {{ .Release.Name }}
+      namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: {{ .Release.Namespace }}
     ports:
     - protocol: TCP
       port: 4369
+    - protocol: TCP
+      port: 6000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace }}
+    ports:
     - protocol: TCP
       port: 50051
 {{- end }}

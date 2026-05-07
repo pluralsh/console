@@ -14,7 +14,7 @@ defmodule Console.Schema.WorkbenchJob do
   }
   alias Console.Deployments.Policies.Rbac
 
-  defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
+  defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, paused: 5
   defenum Type, job: 0, skill: 1
 
   schema "workbench_jobs" do
@@ -47,9 +47,11 @@ defmodule Console.Schema.WorkbenchJob do
     |> Timex.after?(at || iat)
   end
 
+  @pollable_statuses ~w(pending paused)a
+
   def pollable(query \\ __MODULE__) do
     from(j in query,
-      where: j.status == ^:pending,
+      where: j.status in @pollable_statuses,
       order_by: [asc: :inserted_at]
     )
   end

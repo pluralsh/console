@@ -4,6 +4,10 @@
         "service_id": {
             "type": "string",
             "description": "UUID of the Plural service (from plrl_cluster_services or the API)"
+        },
+        "vuln_reports": {
+            "type": "boolean",
+            "description": "If true, include simplified vulnerability reports for the service in the response"
         }
     },
     "required": ["service_id"]

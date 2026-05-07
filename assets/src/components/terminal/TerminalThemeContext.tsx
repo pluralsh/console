@@ -1,3 +1,11 @@
-import { createContext } from 'react'
+import { type Dispatch, type SetStateAction, createContext } from 'react'
 
-export default createContext<any>(null)
+export type TerminalThemeContextValue = [
+  string,
+  Dispatch<SetStateAction<string>>,
+]
+
+export default createContext<TerminalThemeContextValue>([
+  'dark_pastel',
+  () => {},
+])

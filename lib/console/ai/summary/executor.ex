@@ -11,7 +11,7 @@ defmodule Console.AI.Summary.Executor do
 
   @spec execute(Provider.history, binary) :: {:ok, binary, boolean} | Console.error
   def execute(history, prompt) do
-    case Provider.simple_tool_call(history ++ [{:user, "And here is what I what to understand about this: #{prompt}"}], Summary, preface: @preface) do
+    case Provider.simple_tool_call(history ++ [{:user, "And here is what I what to understand about this: #{prompt}"}], Summary, preface: @preface, client: :default) do
       {:ok, %Summary{relevant: r, summary: summary}} -> {:ok, summary, r}
       error -> error
     end

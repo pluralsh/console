@@ -15,8 +15,7 @@ import {
 } from '@pluralsh/design-system'
 
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
-
-import { useDebounce } from 'usehooks-ts'
+import { useDebounce } from '@react-hooks-library/core'
 
 import { useNamespaces } from '../Cluster'
 

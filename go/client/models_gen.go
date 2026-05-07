@@ -4211,6 +4211,10 @@ type IssueWebhook struct {
 	ID       string               `json:"id"`
 	Provider IssueWebhookProvider `json:"provider"`
 	Name     string               `json:"name"`
+	// read policy bindings for this webhook
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy bindings for this webhook
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the url for this specific webhook
 	URL        string  `json:"url"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -4219,9 +4223,11 @@ type IssueWebhook struct {
 
 // input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required.
 type IssueWebhookAttributes struct {
-	Provider *IssueWebhookProvider `json:"provider,omitempty"`
-	Name     *string               `json:"name,omitempty"`
-	Secret   *string               `json:"secret,omitempty"`
+	Provider      *IssueWebhookProvider      `json:"provider,omitempty"`
+	Name          *string                    `json:"name,omitempty"`
+	Secret        *string                    `json:"secret,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type IssueWebhookConnection struct {
@@ -5240,6 +5246,10 @@ type ObservabilityWebhook struct {
 	Type ObservabilityWebhookType `json:"type"`
 	// Human‑readable name for this webhook
 	Name string `json:"name"`
+	// Read policy bindings for this webhook
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// Write policy bindings for this webhook
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the url for this specific webhook
 	URL        string  `json:"url"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -5254,6 +5264,10 @@ type ObservabilityWebhookAttributes struct {
 	Name string `json:"name"`
 	// Optional shared secret used to validate incoming webhook payloads
 	Secret *string `json:"secret,omitempty"`
+	// Users or groups who can read this webhook
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// Users or groups who can modify this webhook
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ObservabilityWebhookConnection struct {
@@ -5606,6 +5620,8 @@ type OpenaiSettings struct {
 	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// OAuth2 client credentials configured for token endpoint exchange
+	TokenExchange *OpenaiTokenExchange `json:"tokenExchange,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5620,6 +5636,24 @@ type OpenaiSettingsAttributes struct {
 	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// OAuth2 client credentials against a token endpoint to obtain access tokens
+	TokenExchange *OpenaiTokenExchangeAttributes `json:"tokenExchange,omitempty"`
+}
+
+// OAuth2 token endpoint client credentials for OpenAI-compatible APIs
+type OpenaiTokenExchange struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// token endpoint URL
+	TokenURL *string `json:"tokenUrl,omitempty"`
+	ClientID *string `json:"clientId,omitempty"`
+}
+
+type OpenaiTokenExchangeAttributes struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// token endpoint URL
+	TokenURL     *string `json:"tokenUrl,omitempty"`
+	ClientID     *string `json:"clientId,omitempty"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 }
 
 type OpensearchConnection struct {
@@ -9009,6 +9043,20 @@ type ToolThought struct {
 	Content *string `json:"content,omitempty"`
 }
 
+// A representation of a skill sourced from either the API or git
+type UnifiedWorkbenchSkill struct {
+	// the id of the saved skill (if it's API-derived, otherwise null)
+	ID *string `json:"id,omitempty"`
+	// the saved skill name
+	Name *string `json:"name,omitempty"`
+	// the saved skill description
+	Description *string `json:"description,omitempty"`
+	// the saved skill contents
+	Contents *string `json:"contents,omitempty"`
+	// subagent roles this skill applies to
+	Subagents []*WorkbenchSkillSubagent `json:"subagents,omitempty"`
+}
+
 // How to enforce uniqueness for a field
 type UniqByAttributes struct {
 	// the scope this name is uniq w/in
@@ -9514,6 +9562,7 @@ type Workbench struct {
 	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
 	Alerts      *AlertConnection               `json:"alerts,omitempty"`
 	Issues      *IssueConnection               `json:"issues,omitempty"`
+	AllSkills   []*UnifiedWorkbenchSkill       `json:"allSkills,omitempty"`
 	InsertedAt  *string                        `json:"insertedAt,omitempty"`
 	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
 }
@@ -9755,6 +9804,8 @@ type WorkbenchInfrastructure struct {
 	Kubernetes *bool `json:"kubernetes,omitempty"`
 	// pod logs capability enabled
 	PodLogs *bool `json:"podLogs,omitempty"`
+	// vulnerabilities capability enabled
+	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
 }
 
 type WorkbenchInfrastructureAttributes struct {
@@ -9766,6 +9817,8 @@ type WorkbenchInfrastructureAttributes struct {
 	Kubernetes *bool `json:"kubernetes,omitempty"`
 	// enable pod logs capability
 	PodLogs *bool `json:"podLogs,omitempty"`
+	// enable vulnerabilities capability
+	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
 }
 
 type WorkbenchJob struct {
@@ -10208,6 +10261,8 @@ type WorkbenchToolAzureConnection struct {
 	TenantID *string `json:"tenantId,omitempty"`
 	// azure client id
 	ClientID *string `json:"clientId,omitempty"`
+	// optional Azure Managed Prometheus query URL for metrics tools
+	PrometheusURL *string `json:"prometheusUrl,omitempty"`
 }
 
 type WorkbenchToolAzureConnectionAttributes struct {
@@ -10219,6 +10274,8 @@ type WorkbenchToolAzureConnectionAttributes struct {
 	ClientID string `json:"clientId"`
 	// azure client secret
 	ClientSecret string `json:"clientSecret"`
+	// Optional azure managed prometheus url if you wish to use it for metrics
+	PrometheusURL *string `json:"prometheusUrl,omitempty"`
 }
 
 type WorkbenchToolCloudwatchConnection struct {
@@ -10278,6 +10335,8 @@ type WorkbenchToolConfiguration struct {
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 	// exa connection (no secrets)
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
+	// github connection (no secrets)
+	Github *WorkbenchToolGithubConnection `json:"github,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -10309,6 +10368,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 	// exa connection (search)
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
+	// github connection (integration)
+	Github *WorkbenchToolGithubConnectionAttributes `json:"github,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -10375,6 +10436,22 @@ type WorkbenchToolExaConnection struct {
 type WorkbenchToolExaConnectionAttributes struct {
 	// exa API key
 	APIKey *string `json:"apiKey,omitempty"`
+}
+
+type WorkbenchToolGithubConnection struct {
+	// github MCP URL (credentials never exposed)
+	URL string `json:"url"`
+	// configured github MCP toolset
+	Toolset *string `json:"toolset,omitempty"`
+}
+
+type WorkbenchToolGithubConnectionAttributes struct {
+	// github MCP URL (defaults to public github MCP server)
+	URL *string `json:"url,omitempty"`
+	// github token for MCP authentication
+	AccessToken *string `json:"accessToken,omitempty"`
+	// optional github MCP toolset query parameter
+	Toolset *string `json:"toolset,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -13024,12 +13101,14 @@ func (e IssueStatus) MarshalJSON() ([]byte, error) {
 type IssueWebhookProvider string
 
 const (
-	IssueWebhookProviderLinear      IssueWebhookProvider = "LINEAR"
-	IssueWebhookProviderJira        IssueWebhookProvider = "JIRA"
-	IssueWebhookProviderAsana       IssueWebhookProvider = "ASANA"
-	IssueWebhookProviderGithub      IssueWebhookProvider = "GITHUB"
-	IssueWebhookProviderGitlab      IssueWebhookProvider = "GITLAB"
-	IssueWebhookProviderAzureDevops IssueWebhookProvider = "AZURE_DEVOPS"
+	IssueWebhookProviderLinear              IssueWebhookProvider = "LINEAR"
+	IssueWebhookProviderJira                IssueWebhookProvider = "JIRA"
+	IssueWebhookProviderAsana               IssueWebhookProvider = "ASANA"
+	IssueWebhookProviderGithub              IssueWebhookProvider = "GITHUB"
+	IssueWebhookProviderGitlab              IssueWebhookProvider = "GITLAB"
+	IssueWebhookProviderAzureDevops         IssueWebhookProvider = "AZURE_DEVOPS"
+	IssueWebhookProviderBitbucket           IssueWebhookProvider = "BITBUCKET"
+	IssueWebhookProviderBitbucketDatacenter IssueWebhookProvider = "BITBUCKET_DATACENTER"
 )
 
 var AllIssueWebhookProvider = []IssueWebhookProvider{
@@ -13039,11 +13118,13 @@ var AllIssueWebhookProvider = []IssueWebhookProvider{
 	IssueWebhookProviderGithub,
 	IssueWebhookProviderGitlab,
 	IssueWebhookProviderAzureDevops,
+	IssueWebhookProviderBitbucket,
+	IssueWebhookProviderBitbucketDatacenter,
 }
 
 func (e IssueWebhookProvider) IsValid() bool {
 	switch e {
-	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops:
+	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops, IssueWebhookProviderBitbucket, IssueWebhookProviderBitbucketDatacenter:
 		return true
 	}
 	return false
@@ -16696,6 +16777,7 @@ const (
 	WorkbenchJobStatusSuccessful WorkbenchJobStatus = "SUCCESSFUL"
 	WorkbenchJobStatusFailed     WorkbenchJobStatus = "FAILED"
 	WorkbenchJobStatusCancelled  WorkbenchJobStatus = "CANCELLED"
+	WorkbenchJobStatusPaused     WorkbenchJobStatus = "PAUSED"
 )
 
 var AllWorkbenchJobStatus = []WorkbenchJobStatus{
@@ -16704,11 +16786,12 @@ var AllWorkbenchJobStatus = []WorkbenchJobStatus{
 	WorkbenchJobStatusSuccessful,
 	WorkbenchJobStatusFailed,
 	WorkbenchJobStatusCancelled,
+	WorkbenchJobStatusPaused,
 }
 
 func (e WorkbenchJobStatus) IsValid() bool {
 	switch e {
-	case WorkbenchJobStatusPending, WorkbenchJobStatusRunning, WorkbenchJobStatusSuccessful, WorkbenchJobStatusFailed, WorkbenchJobStatusCancelled:
+	case WorkbenchJobStatusPending, WorkbenchJobStatusRunning, WorkbenchJobStatusSuccessful, WorkbenchJobStatusFailed, WorkbenchJobStatusCancelled, WorkbenchJobStatusPaused:
 		return true
 	}
 	return false
@@ -16966,6 +17049,7 @@ const (
 	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
 	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
 	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
+	WorkbenchToolTypeGithub     WorkbenchToolType = "GITHUB"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16986,11 +17070,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeCloud,
 	WorkbenchToolTypeJaeger,
 	WorkbenchToolTypeExa,
+	WorkbenchToolTypeGithub,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub:
 		return true
 	}
 	return false

@@ -88,5 +88,22 @@ defmodule Console.GraphQl.Deployments.IntegrationQueriesTest do
       assert from_connection(found)
              |> ids_equal(webhooks)
     end
+
+    test "it lists only issue webhooks accessible to the current user" do
+      user = insert(:user)
+      allowed = insert(:issue_webhook, read_bindings: [%{user_id: user.id}])
+      _denied = insert(:issue_webhook)
+
+      {:ok, %{data: %{"issueWebhooks" => found}}} = run_query("""
+        query {
+          issueWebhooks(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([allowed])
+    end
   end
 end

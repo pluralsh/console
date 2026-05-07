@@ -18,6 +18,7 @@ fragment ServiceDeploymentRevision on Revision {
 fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
+  namespace
   protect
   promotion
   message

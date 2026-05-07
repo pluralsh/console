@@ -146,6 +146,12 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :secret, :string,
       description: "Optional shared secret used to validate incoming webhook payloads"
+
+    field :read_bindings, list_of(:policy_binding_attributes),
+      description: "Users or groups who can read this webhook"
+
+    field :write_bindings, list_of(:policy_binding_attributes),
+      description: "Users or groups who can modify this webhook"
   end
 
   @desc "Configuration for an external observability provider such as Datadog or New Relic"
@@ -187,6 +193,14 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :name, non_null(:string),
       description: "Human‑readable name for this webhook"
+
+    field :read_bindings, list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "Read policy bindings for this webhook"
+
+    field :write_bindings, list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "Write policy bindings for this webhook"
 
     field :url, non_null(:string),
       description: "the url for this specific webhook",

@@ -34,6 +34,25 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
     end
   end
 
+  describe "observabilityWebhooks" do
+    test "it lists only observability webhooks accessible to the current user" do
+      user = insert(:user)
+      allowed = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
+      _denied = insert(:observability_webhook)
+
+      {:ok, %{data: %{"observabilityWebhooks" => found}}} = run_query("""
+        query {
+          observabilityWebhooks(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([allowed])
+    end
+  end
+
   describe "monitor" do
     test "it can fetch a monitor by id" do
       monitor = insert(:monitor)

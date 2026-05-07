@@ -1,10 +1,10 @@
-import { Button, Flex, ToolIcon, Tooltip } from '@pluralsh/design-system'
+import { Button, Flex, Tooltip } from '@pluralsh/design-system'
 
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
 
-import { ShellContext, TerminalScreen } from '../../terminal/Terminal'
+import { TerminalScreen } from '../../terminal/Terminal'
 
 import { CODELINE_HEIGHT, ShellCommandEditor } from './ShellCommandEditor'
 
@@ -43,7 +43,7 @@ const useCommand = (initialCommand?: string | null) => {
   }
 }
 
-export function ShellWithContext({
+export function Shell({
   namespace,
   name,
   container,
@@ -56,7 +56,6 @@ export function ShellWithContext({
 }) {
   const { command, setCommand, defaultCommand, isDefault } = useCommand(null)
 
-  const shellContext = useContext(ShellContext)
   const cluster = clusterId ?? ''
   const room = `pod:${cluster}:${namespace}:${name}:${container}`
 
@@ -76,12 +75,6 @@ export function ShellWithContext({
           isDefault={isDefault}
           setCommand={setCommand}
         />
-        <HeaderIconButton
-          tooltipProps={{ label: 'Repair viewport' }}
-          onClick={shellContext.current?.handleResetSize()}
-        >
-          <ToolIcon size={16} />
-        </HeaderIconButton>
         <TerminalThemeSelector />
       </Flex>
       <TerminalScreen

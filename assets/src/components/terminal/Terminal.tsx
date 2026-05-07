@@ -1,17 +1,7 @@
 import 'xterm/css/xterm.css'
 
-import {
-  RefObject,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import { useResizeDetector } from 'react-resize-detector'
+import { debounce } from 'lodash'
+import { use, useCallback, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
@@ -31,18 +21,6 @@ const onConnectionError = (err) =>
   console.error(
     `Unknown error during booting into your shell: ${JSON.stringify(err)}`
   )
-
-const resize = (fitAddon: FitAddon, channel: any, terminal: Terminal) => {
-  let { cols = 0, rows = 0 } = fitAddon.proposeDimensions() || {}
-
-  cols = Number.isNaN(cols) ? 0 : cols
-  rows = Number.isNaN(rows) ? 0 : rows
-
-  terminal.resize(cols, rows)
-  if (channel) {
-    channel.push(ChannelEvent.OnResize, { width: cols, height: rows })
-  }
-}
 
 const TerminalWrapper = styled.div<{ $backgroundColor: string }>(
   ({ theme, $backgroundColor }) => ({
@@ -65,7 +43,6 @@ const TerminalWrapper = styled.div<{ $backgroundColor: string }>(
   })
 )
 
-/* Stolen and adapted from app.plural.sh */
 export function TerminalScreen({
   room,
   header,
@@ -75,116 +52,105 @@ export function TerminalScreen({
   header: string
   command: string
 }) {
-  const shellContext = useContext(ShellContext)
+  const [terminalTheme] = use(TerminalThemeContext)
   const isFirstConnect = useRef(true)
 
-  const terminalRef = useRef<HTMLDivElement>(null)
-  const [terminalTheme] = useContext(TerminalThemeContext)
-
-  const [channel, setChannel] = useState()
-  const [loaded, setLoaded] = useState(false)
-
-  const terminal = useMemo(
-    () =>
-      new Terminal({
-        cursorBlink: true,
-        theme: normalizedThemes[terminalTheme],
-      }),
-    [terminalTheme]
-  )
-  const fitAddon = useMemo(() => new FitAddon(), [])
+  const terminalElRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const xtermRef = useRef<Terminal | null>(null)
+  const fitAddonRef = useRef<FitAddon | null>(null)
+  const channelRef = useRef<any>(null)
+  const themeRef = useRef(terminalTheme)
 
   const onResize = useCallback(() => {
-    resize(fitAddon, channel, terminal)
-  }, [channel, fitAddon, terminal])
+    const fitAddon = fitAddonRef.current
+    const xterm = xtermRef.current
+    if (!fitAddon || !xterm) return
 
-  useImperativeHandle(shellContext, () => ({ handleResetSize: onResize }), [
-    onResize,
-  ])
+    let { cols = 0, rows = 0 } = fitAddon.proposeDimensions() || {}
+    cols = Number.isNaN(cols) ? 0 : cols
+    rows = Number.isNaN(rows) ? 0 : rows
+    xterm.resize(cols, rows)
+    channelRef.current?.push(ChannelEvent.OnResize, {
+      width: cols,
+      height: rows,
+    })
+  }, [])
 
   useEffect(() => {
-    onResize()
-  }, [onResize])
+    if (!terminalElRef.current) return
 
-  const { ref: terminalContainerRef } = useResizeDetector({
-    onResize,
-    refreshMode: 'debounce',
-    refreshRate: 250,
-  })
-
-  const [terminalMounted, setTerminalMounted] = useState(false)
-
-  // Mount the terminal
-  useEffect(() => {
-    if (!terminalRef.current) return
-
-    // Load addon
-    terminal.loadAddon(fitAddon)
-
-    // Set up the terminal
-    terminal.open(terminalRef.current!)
-
-    // Welcome message
-    // terminal.write(`${isFirstConnect.current ? '' : '\r\n\r\n'}${header}\r\n`)
-    setTerminalMounted(true)
-  }, [fitAddon, terminal])
-
-  // Init the connection
-  //   Needs to be separate so we don't open new terminals every time we connect
-  //   with a new command
-  useEffect(() => {
-    if (!terminalMounted) return
-
-    // Welcome message
-    terminal.write(`${isFirstConnect.current ? '' : '\r\n\r\n'}${header}\r\n`)
-
-    // Fit the size of terminal element
+    const xterm = new Terminal({
+      cursorBlink: true,
+      theme: normalizedThemes[themeRef.current],
+    })
+    const fitAddon = new FitAddon()
+    xterm.loadAddon(fitAddon)
+    xterm.open(terminalElRef.current)
+    xterm.write(`${isFirstConnect.current ? '' : '\r\n\r\n'}${header}\r\n`)
     fitAddon.fit()
 
-    // Init the connection
-    const params = command ? { command } : {}
-    const channel = socket.channel(room, params)
+    xtermRef.current = xterm
+    fitAddonRef.current = fitAddon
 
-    // Handle input
-    terminal.onData((text) => channel.push(ChannelEvent.OnData, { cmd: text }))
+    const channel = socket.channel(room, command ? { command } : {})
+    channelRef.current = channel
 
+    xterm.onData((text) => channel.push(ChannelEvent.OnData, { cmd: text }))
     channel.onError(onConnectionError)
-    channel.on(ChannelEvent.OnResponse, ({ message }) => {
-      if (message.trim() !== '') {
-        setLoaded(true)
-      }
 
-      terminal.write(message)
+    let didResizeAfterFirstMessage = false
+    channel.on(ChannelEvent.OnResponse, ({ message }) => {
+      xterm.write(message)
+      if (!didResizeAfterFirstMessage && message.trim() !== '') {
+        didResizeAfterFirstMessage = true
+        onResize()
+      }
     })
     channel.join()
 
-    setChannel(channel)
+    onResize()
     isFirstConnect.current = false
 
-    return () => channel.leave() || terminal.dispose()
-  }, [terminalMounted, fitAddon, header, command, room, terminal])
+    return () => {
+      channel.leave()
+      xterm.dispose()
+      xtermRef.current = null
+      fitAddonRef.current = null
+      channelRef.current = null
+      isFirstConnect.current = true
+    }
+  }, [header, command, room, onResize])
 
-  // Resize after initial response when shell is loaded
   useEffect(() => {
-    if (loaded) resize(fitAddon, channel, terminal)
-  }, [channel, fitAddon, loaded, terminal])
+    themeRef.current = terminalTheme
+    if (xtermRef.current)
+      xtermRef.current.options.theme = normalizedThemes[terminalTheme]
+  }, [terminalTheme])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const debounced = debounce(onResize, 250)
+    const observer = new ResizeObserver(() => debounced())
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      debounced.cancel()
+    }
+  }, [onResize])
 
   return (
     <TerminalWrapper
       id="terminal-wrapper"
-      ref={terminalContainerRef}
+      ref={containerRef}
       $backgroundColor={normalizedThemes[terminalTheme].background}
     >
       <div
         id="terminal"
         className="terminal"
-        ref={terminalRef}
+        ref={terminalElRef}
       />
     </TerminalWrapper>
   )
 }
-
-export type TerminalActions = { handleResetSize: () => void }
-export const ShellContext = createContext<RefObject<TerminalActions>>({
-  current: { handleResetSize: () => {} },
-})

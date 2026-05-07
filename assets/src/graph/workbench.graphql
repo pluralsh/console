@@ -19,6 +19,26 @@ fragment WorkbenchTiny on Workbench {
   }
 }
 
+fragment IssueWebhook on IssueWebhook {
+  id
+  name
+  provider
+  url
+  insertedAt
+  updatedAt
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment IssueWebhookTiny on IssueWebhook {
+  id
+  provider
+}
+
 fragment WorkbenchWebhookTiny on WorkbenchWebhook {
   id
   name
@@ -27,8 +47,7 @@ fragment WorkbenchWebhookTiny on WorkbenchWebhook {
     type
   }
   issueWebhook {
-    id
-    provider
+    ...IssueWebhookTiny
   }
 }
 
@@ -48,6 +67,7 @@ fragment Workbench on Workbench {
       stacks
       kubernetes
       podLogs
+      vulnerabilities
     }
     observability {
       logs
@@ -170,9 +190,14 @@ fragment WorkbenchTool on WorkbenchTool {
       subscriptionId
       tenantId
       clientId
+      prometheusUrl
     }
     dynatrace {
       url
+    }
+    github {
+      url
+      toolset
     }
   }
 }
@@ -388,10 +413,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
     url
   }
   issueWebhook {
-    id
-    name
-    url
-    provider
+    ...IssueWebhook
   }
 }
 
@@ -684,10 +706,7 @@ query IssueWebhooks($first: Int, $after: String) {
   issueWebhooks(first: $first, after: $after) {
     edges {
       node {
-        id
-        name
-        provider
-        url
+        ...IssueWebhook
       }
     }
     pageInfo {
@@ -726,10 +745,7 @@ query WorkbenchTriggersSummary($id: ID!) {
             url
           }
           issueWebhook {
-            id
-            name
-            url
-            provider
+            ...IssueWebhook
           }
         }
       }
@@ -986,10 +1002,13 @@ mutation DeleteWorkbenchWebhook($id: ID!) {
 
 mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
   createIssueWebhook(attributes: $attributes) {
-    id
-    name
-    provider
-    url
+    ...IssueWebhook
+  }
+}
+
+mutation UpdateIssueWebhook($id: ID!, $attributes: IssueWebhookAttributes!) {
+  updateIssueWebhook(id: $id, attributes: $attributes) {
+    ...IssueWebhook
   }
 }
 

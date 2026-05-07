@@ -53,6 +53,7 @@
     value :stack_run
     value :agent_run
     value :gate
+    value :sentinel_run
   end
 
   input_object :rbac_attributes do

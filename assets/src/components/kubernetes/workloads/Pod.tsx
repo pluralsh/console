@@ -13,7 +13,7 @@ import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs
 import { GqlError } from 'components/utils/Alert'
 
 import { reverse } from 'lodash'
-import { ReactElement, useMemo, useRef, useState } from 'react'
+import { ReactElement, useMemo, useState } from 'react'
 import {
   Outlet,
   useNavigate,
@@ -43,10 +43,9 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
-import { ShellWithContext } from '../../cluster/containers/ContainerShell'
+import { Shell } from '../../cluster/containers/ContainerShell'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 
-import { ShellContext, TerminalActions } from '../../terminal/Terminal'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
@@ -339,7 +338,6 @@ export function PodExec(): ReactElement<any> {
   const { clusterId, name = '', namespace = '' } = useParams()
   const [searchParams] = useSearchParams()
   const container = searchParams.get('container')
-  const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
 
   const containers: Array<string> = useMemo(
     () => [
@@ -380,14 +378,12 @@ export function PodExec(): ReactElement<any> {
           />
         ))}
       </Select>
-      <ShellContext.Provider value={ref}>
-        <ShellWithContext
-          name={name}
-          namespace={namespace}
-          container={selected}
-          clusterId={clusterId}
-        />
-      </ShellContext.Provider>
+      <Shell
+        name={name}
+        namespace={namespace}
+        container={selected}
+        clusterId={clusterId}
+      />
     </div>
   )
 }

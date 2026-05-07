@@ -58,6 +58,7 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchEvalResult,
     WorkbenchWebhook,
     IssueWebhook,
+    ObservabilityWebhook,
     Monitor
   }
 
@@ -89,6 +90,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%Project{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%IssueWebhook{} = webhook, %User{} = user, action),
+    do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%ObservabilityWebhook{} = webhook, %User{} = user, action),
     do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, & [&1.project, &1.flow])
@@ -309,6 +312,10 @@ defmodule Console.Deployments.Policies.Rbac do
       ])
   def preload(%WorkbenchWebhook{} = webhook),
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%ObservabilityWebhook{} = webhook),
+    do: Repo.preload(webhook, [:read_bindings, :write_bindings])
+  def preload(%IssueWebhook{} = webhook),
+    do: Repo.preload(webhook, [:read_bindings, :write_bindings])
   def preload(%Monitor{} = monitor),
     do: Repo.preload(monitor, [service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads]])
   def preload(pass), do: pass

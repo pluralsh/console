@@ -359,7 +359,7 @@ defmodule Console.Deployments.Global do
     |> Service.preloaded([:context_bindings, :dependencies, :cluster])
     |> Repo.all()
     |> Map.new(& {&1.cluster_id, &1})
-    |> then(& Enum.map(clusters, fn cluster -> %Cluster{cluster | gs_instance: &1[cluster.id]} end))
+    |> then(& Enum.map(clusters, fn %Cluster{} = cluster -> %Cluster{cluster | gs_instance: &1[cluster.id]} end))
   end
 
   @doc """

@@ -49,6 +49,8 @@ defmodule Console.GraphQl.Deployments.Integration do
     field :provider, :issue_webhook_provider
     field :name,     :string
     field :secret,   :string
+    field :read_bindings,  list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
   end
 
   @desc "A webhook receiver for an issue provider like Linear"
@@ -56,6 +58,8 @@ defmodule Console.GraphQl.Deployments.Integration do
     field :id,       non_null(:id)
     field :provider, non_null(:issue_webhook_provider)
     field :name,     non_null(:string)
+    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy bindings for this webhook"
+    field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy bindings for this webhook"
 
     field :url, non_null(:string),
       description: "the url for this specific webhook",

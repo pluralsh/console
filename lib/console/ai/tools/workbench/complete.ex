@@ -8,6 +8,7 @@ defmodule Console.AI.Tools.Workbench.Complete do
   embedded_schema do
     field :conclusion, :string
     field :topology, :string
+
     embeds_many :todos, WorkbenchJobResult.Todo, on_replace: :delete
     embeds_one :metrics_query, ToolQuery, on_replace: :update
     embeds_many :logs, Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Log, on_replace: :delete

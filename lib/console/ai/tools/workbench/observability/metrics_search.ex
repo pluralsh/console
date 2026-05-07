@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   use Console.AI.Tools.Workbench.Base
+  import Console.AI.Tools.Workbench.Observability.Metrics, only: [azure_prom_url: 1, resource_id: 1, azure_opts: 1]
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{MetricsSearchInput, MetricsSearchOutput, MetricsSearchOptions, AzureMetricsSearchOptions}
@@ -21,9 +22,13 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   @default_schema Console.priv_file!("tools/workbench/observability/metric_search.json") |> Jason.decode!()
   @azure_schema Console.priv_file!("tools/workbench/observability/metric_search_azure.json") |> Jason.decode!()
 
+  def json_schema(%{tool: %{tool: :azure, configuration: %{azure: %{prometheus_url: url}}}}) when is_binary(url),
+    do: @default_schema
   def json_schema(%{tool: %{tool: :azure}}), do: @azure_schema
   def json_schema(_), do: @default_schema
+
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_metric_search_#{n}"
+
   def description(%__MODULE__{tool: %{name: n}}), do: "Search for metric names in the #{n} observability connection"
 
   def changeset(model, attrs) do
@@ -51,17 +56,13 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
     end
   end
 
-  defp metrics_search_options(%{tool: :azure}, options) do
-    query_azure = Map.get(options || %{}, :azure)
-    resource_id = blank_to_nil(Map.get(query_azure || %{}, :resource_id))
-    %MetricsSearchOptions{azure: %AzureMetricsSearchOptions{resource_id: resource_id || ""}}
+  defp metrics_search_options(%{tool: :azure} = tool, options) do
+    query_azure = azure_opts(options)
+
+    %MetricsSearchOptions{azure: %AzureMetricsSearchOptions{
+      resource_id: resource_id(query_azure),
+      prometheus_url: azure_prom_url(tool)
+    }}
   end
   defp metrics_search_options(_, _), do: nil
-
-  defp blank_to_nil(v) do
-    case String.trim(to_string(v || "")) do
-      "" -> nil
-      val -> val
-    end
-  end
 end

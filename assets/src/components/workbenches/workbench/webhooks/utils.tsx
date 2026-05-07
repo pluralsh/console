@@ -1,6 +1,7 @@
 import {
   AsanaLogoIcon,
   AzureDevopsLogoIcon,
+  BitBucketIcon,
   DatadogLogoIcon,
   GitHubLogoIcon,
   GitLabLogoIcon,
@@ -64,6 +65,9 @@ export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
   switch (provider) {
     case IssueWebhookProvider.AzureDevops:
       return <AzureDevopsLogoIcon fullColor />
+    case IssueWebhookProvider.Bitbucket:
+    case IssueWebhookProvider.BitbucketDatacenter:
+      return <BitBucketIcon fullColor />
     case IssueWebhookProvider.Github:
       return <GitHubLogoIcon />
     case IssueWebhookProvider.Gitlab:

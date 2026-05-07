@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "properties": {
+        "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Plural service ID whose GitOps manifest tarball should be searched. This is a UUID, not a human-readable service name. Provide this or stack_id (at least one is required). When both are present, the implementation resolves the service first."
+        },
+        "stack_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Plural stack ID whose GitOps manifest files should be searched. This is a UUID, not a stack name. Provide this or service_id (at least one is required)."
+        },
+        "glob": {
+            "type": "string",
+            "description": "Optional path glob (PathGlob syntax) matched against manifest paths. Returns a JSON array of matching relative paths only. It's ok to use broad globs if unsure since the returned dataset size will likely not be large."
+        },
+        "grep": {
+            "type": "string",
+            "description": "Optional regular expression (Elixir/PCRE-style) searched across each file's contents. Returns matches grouped by file; only files with at least one match are included. Each hit includes a snippet with surrounding line context plus start_line and end_line. Invalid regex patterns produce a tool error."
+        },
+        "read": {
+            "type": "string",
+            "description": "Optional exact manifest path (as returned in the file list) whose full contents should be returned as a path/content object. The path must match exactly; otherwise the tool returns file not found."
+        }
+    }
+}

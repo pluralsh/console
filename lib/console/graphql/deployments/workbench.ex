@@ -11,6 +11,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
   ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
+
   enum :eval_results_period do
     value :day
     value :week
@@ -53,10 +54,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_infrastructure_attributes do
-    field :services,   :boolean, description: "enable services capability"
-    field :stacks,     :boolean, description: "enable stacks capability"
-    field :kubernetes, :boolean, description: "enable kubernetes capability"
-    field :pod_logs,   :boolean, description: "enable pod logs capability"
+    field :services,        :boolean, description: "enable services capability"
+    field :stacks,          :boolean, description: "enable stacks capability"
+    field :kubernetes,      :boolean, description: "enable kubernetes capability"
+    field :pod_logs,        :boolean, description: "enable pod logs capability"
+    field :vulnerabilities, :boolean, description: "enable vulnerabilities capability"
   end
 
   input_object :workbench_coding_attributes do
@@ -143,6 +145,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
+    field :github,     :workbench_tool_github_connection_attributes, description: "github connection (integration)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -216,6 +219,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id,       non_null(:string), description: "azure tenant id"
     field :client_id,       non_null(:string), description: "azure client id"
     field :client_secret,   non_null(:string), description: "azure client secret"
+    field :prometheus_url,  :string, description: "Optional azure managed prometheus url if you wish to use it for metrics"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -230,6 +234,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_exa_connection_attributes do
     field :api_key, :string, description: "exa API key"
+  end
+
+  input_object :workbench_tool_github_connection_attributes do
+    field :url,          :string, description: "github MCP URL (defaults to public github MCP server)"
+    field :access_token, :string, description: "github token for MCP authentication"
+    field :toolset,      :string, description: "optional github MCP toolset query parameter"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -304,6 +314,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     connection field :issues, node_type: :issue do
       resolve &Deployments.list_issues/3
     end
+
+    field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
 
     timestamps()
   end
@@ -519,10 +531,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_infrastructure do
-    field :services,   :boolean, description: "services capability enabled"
-    field :stacks,     :boolean, description: "stacks capability enabled"
-    field :kubernetes, :boolean, description: "kubernetes capability enabled"
-    field :pod_logs,   :boolean, description: "pod logs capability enabled"
+    field :services,        :boolean, description: "services capability enabled"
+    field :stacks,          :boolean, description: "stacks capability enabled"
+    field :kubernetes,      :boolean, description: "kubernetes capability enabled"
+    field :pod_logs,        :boolean, description: "pod logs capability enabled"
+    field :vulnerabilities, :boolean, description: "vulnerabilities capability enabled"
   end
 
   object :workbench_coding do
@@ -572,6 +585,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this skill belongs to"
 
     timestamps()
+  end
+
+  @desc "A representation of a skill sourced from either the API or git"
+  object :unified_workbench_skill do
+    field :id,          :string, description: "the id of the saved skill (if it's API-derived, otherwise null)"
+    field :name,        :string, description: "the saved skill name"
+    field :description, :string, description: "the saved skill description"
+    field :contents,    :string, description: "the saved skill contents"
+    field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
   end
 
   object :workbench_eval do
@@ -688,6 +710,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
+    field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -743,6 +766,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :subscription_id, :string, description: "azure subscription id"
     field :tenant_id,       :string, description: "azure tenant id"
     field :client_id,       :string, description: "azure client id"
+    field :prometheus_url,  :string, description: "optional Azure Managed Prometheus query URL for metrics tools"
   end
 
   object :workbench_tool_linear_connection do
@@ -759,6 +783,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_exa_connection do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://api.exa.ai"} end,
       description: "static API URL for Exa (credentials never exposed)"
+  end
+
+  object :workbench_tool_github_connection do
+    field :url, non_null(:string), description: "github MCP URL (credentials never exposed)", resolve: fn
+      %{url: url}, _ when is_binary(url) -> {:ok, url}
+      _, _ -> {:ok, "https://api.githubcopilot.com"}
+    end
+    field :toolset, :string, description: "configured github MCP toolset"
   end
 
   object :workbench_tool_http_configuration do

@@ -1117,6 +1117,7 @@ type AzureMetricsOptions struct {
 	OrderBy          *string                `protobuf:"bytes,5,opt,name=order_by,json=orderBy,proto3,oneof" json:"order_by,omitempty"`
 	RollUpBy         *string                `protobuf:"bytes,6,opt,name=roll_up_by,json=rollUpBy,proto3,oneof" json:"roll_up_by,omitempty"`
 	MetricsEndpoint  *string                `protobuf:"bytes,7,opt,name=metrics_endpoint,json=metricsEndpoint,proto3,oneof" json:"metrics_endpoint,omitempty"`
+	PrometheusUrl    *string                `protobuf:"bytes,8,opt,name=prometheus_url,json=prometheusUrl,proto3,oneof" json:"prometheus_url,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -1196,6 +1197,13 @@ func (x *AzureMetricsOptions) GetRollUpBy() string {
 func (x *AzureMetricsOptions) GetMetricsEndpoint() string {
 	if x != nil && x.MetricsEndpoint != nil {
 		return *x.MetricsEndpoint
+	}
+	return ""
+}
+
+func (x *AzureMetricsOptions) GetPrometheusUrl() string {
+	if x != nil && x.PrometheusUrl != nil {
+		return *x.PrometheusUrl
 	}
 	return ""
 }
@@ -1896,6 +1904,7 @@ func (x *MetricsSearchOptions) GetAzure() *AzureMetricsSearchOptions {
 type AzureMetricsSearchOptions struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ResourceId    string                 `protobuf:"bytes,1,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	PrometheusUrl *string                `protobuf:"bytes,2,opt,name=prometheus_url,json=prometheusUrl,proto3,oneof" json:"prometheus_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1933,6 +1942,13 @@ func (*AzureMetricsSearchOptions) Descriptor() ([]byte, []int) {
 func (x *AzureMetricsSearchOptions) GetResourceId() string {
 	if x != nil {
 		return x.ResourceId
+	}
+	return ""
+}
+
+func (x *AzureMetricsSearchOptions) GetPrometheusUrl() string {
+	if x != nil && x.PrometheusUrl != nil {
+		return *x.PrometheusUrl
 	}
 	return ""
 }
@@ -2395,7 +2411,7 @@ const file_toolquery_proto_rawDesc = "" +
 	"\b_options\"U\n" +
 	"\x0eMetricsOptions\x129\n" +
 	"\x05azure\x18\x01 \x01(\v2\x1e.toolquery.AzureMetricsOptionsH\x00R\x05azure\x88\x01\x01B\b\n" +
-	"\x06_azure\"\xe6\x02\n" +
+	"\x06_azure\"\xa5\x03\n" +
 	"\x13AzureMetricsOptions\x12\x1f\n" +
 	"\vresource_id\x18\x01 \x01(\tR\n" +
 	"resourceId\x12+\n" +
@@ -2405,12 +2421,14 @@ const file_toolquery_proto_rawDesc = "" +
 	"\border_by\x18\x05 \x01(\tH\x02R\aorderBy\x88\x01\x01\x12!\n" +
 	"\n" +
 	"roll_up_by\x18\x06 \x01(\tH\x03R\brollUpBy\x88\x01\x01\x12.\n" +
-	"\x10metrics_endpoint\x18\a \x01(\tH\x04R\x0fmetricsEndpoint\x88\x01\x01B\x0e\n" +
+	"\x10metrics_endpoint\x18\a \x01(\tH\x04R\x0fmetricsEndpoint\x88\x01\x01\x12*\n" +
+	"\x0eprometheus_url\x18\b \x01(\tH\x05R\rprometheusUrl\x88\x01\x01B\x0e\n" +
 	"\f_aggregationB\t\n" +
 	"\a_filterB\v\n" +
 	"\t_order_byB\r\n" +
 	"\v_roll_up_byB\x13\n" +
-	"\x11_metrics_endpoint\":\n" +
+	"\x11_metrics_endpointB\x11\n" +
+	"\x0f_prometheus_url\":\n" +
 	"\x0eLogsQueryFacet\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value\"\xa8\x02\n" +
@@ -2481,10 +2499,12 @@ const file_toolquery_proto_rawDesc = "" +
 	"\b_options\"a\n" +
 	"\x14MetricsSearchOptions\x12?\n" +
 	"\x05azure\x18\x01 \x01(\v2$.toolquery.AzureMetricsSearchOptionsH\x00R\x05azure\x88\x01\x01B\b\n" +
-	"\x06_azure\"<\n" +
+	"\x06_azure\"{\n" +
 	"\x19AzureMetricsSearchOptions\x12\x1f\n" +
 	"\vresource_id\x18\x01 \x01(\tR\n" +
-	"resourceId\")\n" +
+	"resourceId\x12*\n" +
+	"\x0eprometheus_url\x18\x02 \x01(\tH\x00R\rprometheusUrl\x88\x01\x01B\x11\n" +
+	"\x0f_prometheus_url\")\n" +
 	"\x13MetricsSearchResult\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"O\n" +
 	"\x13MetricsSearchOutput\x128\n" +
@@ -2661,6 +2681,7 @@ func file_toolquery_proto_init() {
 	file_toolquery_proto_msgTypes[22].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[25].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[26].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[27].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
