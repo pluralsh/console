@@ -20238,6 +20238,14 @@ export type DeleteWorkbenchEvalMutationVariables = Exact<{
 
 export type DeleteWorkbenchEvalMutation = { __typename?: 'RootMutationType', deleteWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string } | null };
 
+export type WorkbenchEvalSkillMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  prompt?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchEvalSkillMutation = { __typename?: 'RootMutationType', workbenchEvalSkill?: { __typename?: 'WorkbenchJob', id: string } | null };
+
 export type DeleteWorkbenchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -42905,6 +42913,40 @@ export function useDeleteWorkbenchEvalMutation(baseOptions?: Apollo.MutationHook
 export type DeleteWorkbenchEvalMutationHookResult = ReturnType<typeof useDeleteWorkbenchEvalMutation>;
 export type DeleteWorkbenchEvalMutationResult = Apollo.MutationResult<DeleteWorkbenchEvalMutation>;
 export type DeleteWorkbenchEvalMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchEvalMutation, DeleteWorkbenchEvalMutationVariables>;
+export const WorkbenchEvalSkillDocument = gql`
+    mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {
+  workbenchEvalSkill(id: $id, prompt: $prompt) {
+    id
+  }
+}
+    `;
+export type WorkbenchEvalSkillMutationFn = Apollo.MutationFunction<WorkbenchEvalSkillMutation, WorkbenchEvalSkillMutationVariables>;
+
+/**
+ * __useWorkbenchEvalSkillMutation__
+ *
+ * To run a mutation, you first call `useWorkbenchEvalSkillMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchEvalSkillMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [workbenchEvalSkillMutation, { data, loading, error }] = useWorkbenchEvalSkillMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      prompt: // value for 'prompt'
+ *   },
+ * });
+ */
+export function useWorkbenchEvalSkillMutation(baseOptions?: Apollo.MutationHookOptions<WorkbenchEvalSkillMutation, WorkbenchEvalSkillMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WorkbenchEvalSkillMutation, WorkbenchEvalSkillMutationVariables>(WorkbenchEvalSkillDocument, options);
+      }
+export type WorkbenchEvalSkillMutationHookResult = ReturnType<typeof useWorkbenchEvalSkillMutation>;
+export type WorkbenchEvalSkillMutationResult = Apollo.MutationResult<WorkbenchEvalSkillMutation>;
+export type WorkbenchEvalSkillMutationOptions = Apollo.BaseMutationOptions<WorkbenchEvalSkillMutation, WorkbenchEvalSkillMutationVariables>;
 export const DeleteWorkbenchDocument = gql`
     mutation DeleteWorkbench($id: ID!) {
   deleteWorkbench(id: $id) {
@@ -44073,6 +44115,7 @@ export const namedOperations = {
     CreateWorkbenchEval: 'CreateWorkbenchEval',
     UpdateWorkbenchEval: 'UpdateWorkbenchEval',
     DeleteWorkbenchEval: 'DeleteWorkbenchEval',
+    WorkbenchEvalSkill: 'WorkbenchEvalSkill',
     DeleteWorkbench: 'DeleteWorkbench',
     CreateWorkbenchTool: 'CreateWorkbenchTool',
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',

@@ -1977,6 +1977,11 @@
          "name": "DeleteWorkbenchEval",
          "body": "mutation DeleteWorkbenchEval($id: ID!) {\n  deleteWorkbenchEval(id: $id) {\n    id\n    __typename\n  }\n}"
       },
+      "sha256:c8d36e8cfb4e7cfb055373c504b0b5f88e71e99e32aa094dcc51410bee0a05e5": {
+         "type": "mutation",
+         "name": "WorkbenchEvalSkill",
+         "body": "mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {\n  workbenchEvalSkill(id: $id, prompt: $prompt) {\n    id\n    __typename\n  }\n}"
+      },
       "sha256:7b6b450c0f286e31340ab42bfb2ab3d7137c56ed0885c120769c51d006ac14e2": {
          "type": "mutation",
          "name": "DeleteWorkbench",
