@@ -4,13 +4,18 @@ import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { CaptionP } from 'components/utils/typography/Text'
-import { evalGradeToColor } from 'components/workbenches/common/evalGradeColor'
+import {
+  evalGradeToCategory,
+  evalGradeToColor,
+  EvalGradeCategory,
+} from 'components/workbenches/common/evalGrade'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalsQuery, useWorkbenchEvalsQuery } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
+import { groupBy } from 'lodash'
 
-type EvalFilter = 'all' | 'bad' | 'rating' | 'okay' | 'great'
+type EvalFilter = 'all' | EvalGradeCategory
 
 type EvalJobRow = NonNullable<
   NonNullable<
@@ -128,11 +133,14 @@ export function WorkbenchEvalsSidePanel({
   const theme = useTheme()
   const navigate = useNavigate()
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
+
+  // We fetch only the first 100 evals as filtering is done on the client side.
   const { data, loading } = useWorkbenchEvalsQuery({
     variables: { id: workbenchId, first: 100 },
     skip: !workbenchId,
     fetchPolicy: 'cache-and-network',
   })
+
   const jobs = useMemo(() => {
     const fromEdges = (
       edges: Array<{ node?: EvalJobRow | null } | null> | null | undefined = []
@@ -152,34 +160,23 @@ export function WorkbenchEvalsSidePanel({
         (a.insertedAt ? new Date(a.insertedAt).getTime() : 0)
     )
   }, [data])
-  const filteredJobs = useMemo(() => {
-    if (activeFilter === 'all') return jobs
 
-    return jobs.filter((job) => {
-      const grade = job.evalResult?.grade ?? 0
-      if (activeFilter === 'bad') return grade < 4
-      if (activeFilter === 'rating') return grade >= 4 && grade < 6
-      if (activeFilter === 'okay') return grade >= 6 && grade < 8
+  const { filteredJobs, counts } = useMemo(() => {
+    const byCategory = groupBy(jobs, (job) =>
+      evalGradeToCategory(job.evalResult?.grade ?? 0)
+    )
 
-      return grade >= 8
-    })
+    return {
+      filteredJobs:
+        activeFilter === 'all' ? jobs : (byCategory[activeFilter] ?? []),
+      counts: {
+        all: jobs.length,
+        bad: byCategory.bad?.length ?? 0,
+        okay: byCategory.okay?.length ?? 0,
+        great: byCategory.great?.length ?? 0,
+      },
+    }
   }, [activeFilter, jobs])
-  const counts = useMemo(
-    () => ({
-      all: jobs.length,
-      bad: jobs.filter((job) => (job.evalResult?.grade ?? 0) < 4).length,
-      rating: jobs.filter((job) => {
-        const grade = job.evalResult?.grade ?? 0
-        return grade >= 4 && grade < 6
-      }).length,
-      okay: jobs.filter((job) => {
-        const grade = job.evalResult?.grade ?? 0
-        return grade >= 6 && grade < 8
-      }).length,
-      great: jobs.filter((job) => (job.evalResult?.grade ?? 0) >= 8).length,
-    }),
-    [jobs]
-  )
 
   return (
     <WrapperSC>
@@ -195,23 +192,15 @@ export function WorkbenchEvalsSidePanel({
           <FilterChipSC
             clickable
             $active={activeFilter === 'bad'}
-            $color="#C44DFF"
+            $color={evalGradeToColor(2)}
             onClick={() => setActiveFilter('bad')}
           >
             Bad ({counts.bad})
           </FilterChipSC>
           <FilterChipSC
             clickable
-            $active={activeFilter === 'rating'}
-            $color="#FF5C8A"
-            onClick={() => setActiveFilter('rating')}
-          >
-            Rating ({counts.rating})
-          </FilterChipSC>
-          <FilterChipSC
-            clickable
             $active={activeFilter === 'okay'}
-            $color="#F0B45F"
+            $color={evalGradeToColor(5)}
             onClick={() => setActiveFilter('okay')}
           >
             Okay ({counts.okay})
@@ -219,7 +208,7 @@ export function WorkbenchEvalsSidePanel({
           <FilterChipSC
             clickable
             $active={activeFilter === 'great'}
-            $color="#31C2A5"
+            $color={evalGradeToColor(8)}
             onClick={() => setActiveFilter('great')}
           >
             Great ({counts.great})

@@ -1,5 +1,5 @@
 import { WorkbenchStatCard } from 'components/workbenches/common/WorkbenchStatCard'
-import { evalGradeToColor } from 'components/workbenches/common/evalGradeColor'
+import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import { WorkbenchesEvalsAvgGraph } from 'components/workbenches/WorkbenchesEvalsAvgGraph'
 import { WorkbenchesEvalsAvgTimelineGraph } from 'components/workbenches/WorkbenchesEvalsAvgTimelineGraph'
 import { WorkbenchesEvalsMergeRateGraph } from 'components/workbenches/WorkbenchesEvalsMergeRateGraph'

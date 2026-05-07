@@ -1,5 +1,5 @@
 import { WorkbenchGraphCard } from 'components/workbenches/common/WorkbenchGraphCard'
-import { evalGradeToColor } from 'components/workbenches/common/evalGradeColor'
+import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
 import { Flex, ProgressBar } from '@pluralsh/design-system'
 import {
