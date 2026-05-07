@@ -264,7 +264,6 @@ const DescriptionReserveSC = styled.div(({ theme }) => ({
 
 const MetadataFootSC = styled.div({
   flexShrink: 0,
-  marginTop: 'auto',
   minWidth: 0,
 })
 
