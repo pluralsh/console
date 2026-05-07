@@ -29,6 +29,8 @@ type azureFunctionRef struct {
 	functionName   string
 }
 
+const azureWebsitesHostSuffix = ".azurewebsites.net"
+
 func NewAzureProvider(conn *cloudquery.Connection) *AzureProvider {
 	return &AzureProvider{conn: conn}
 }
@@ -51,6 +53,10 @@ func (p *AzureProvider) Invoke(ctx context.Context, input InvocationInput) (*Inv
 
 	invokeURL, err := p.resolveInvokeURL(ctx, webAppsClient, ref)
 	if err != nil {
+		return nil, err
+	}
+
+	if err = p.validateInvokeURL(invokeURL); err != nil {
 		return nil, err
 	}
 
@@ -159,6 +165,29 @@ func (p *AzureProvider) getFunctionInvokeURL(ctx context.Context, webAppsClient 
 	}
 
 	return strings.TrimSpace(lo.FromPtr(function.Properties.InvokeURLTemplate)), nil
+}
+
+func (p *AzureProvider) validateInvokeURL(invokeURL string) error {
+	parsed, err := url.ParseRequestURI(strings.TrimSpace(invokeURL))
+	if err != nil {
+		return fmt.Errorf("invalid azure function invocation URL")
+	}
+	if !strings.EqualFold(parsed.Scheme, "https") {
+		return fmt.Errorf("azure function invocation URL must use https")
+	}
+	if parsed.Hostname() == "" || parsed.Port() != "" {
+		return fmt.Errorf("azure function invocation URL must not include a custom port")
+	}
+	if parsed.User != nil || parsed.Fragment != "" {
+		return fmt.Errorf("azure function invocation URL must not include user info or fragments")
+	}
+
+	host := strings.ToLower(parsed.Hostname())
+	if !strings.HasSuffix(host, azureWebsitesHostSuffix) {
+		return fmt.Errorf("azure function invocation URL host mismatch")
+	}
+
+	return nil
 }
 
 func (p *AzureProvider) invoke(ctx context.Context, invokeURL string, payload []byte) (*InvocationOutput, error) {

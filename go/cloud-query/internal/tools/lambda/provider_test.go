@@ -119,6 +119,51 @@ func TestSelectHostKey(t *testing.T) {
 	})
 }
 
+func TestValidateAzureInvokeURL(t *testing.T) {
+	t.Parallel()
+	provider := &AzureProvider{}
+
+	t.Run("valid azure invoke url", func(t *testing.T) {
+		t.Parallel()
+		err := provider.validateInvokeURL("https://my-func-app.azurewebsites.net/api/handler?code=abc")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("allows dynamic azure subdomain", func(t *testing.T) {
+		t.Parallel()
+		err := provider.validateInvokeURL("https://my-func-app-westus2-01.azurewebsites.net/api/handler")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("requires https", func(t *testing.T) {
+		t.Parallel()
+		err := provider.validateInvokeURL("http://my-func-app.azurewebsites.net/api/handler")
+		if err == nil {
+			t.Fatal("expected validation error")
+		}
+	})
+
+	t.Run("rejects host mismatch", func(t *testing.T) {
+		t.Parallel()
+		err := provider.validateInvokeURL("https://example.com/api/handler")
+		if err == nil {
+			t.Fatal("expected validation error")
+		}
+	})
+
+	t.Run("rejects custom ports", func(t *testing.T) {
+		t.Parallel()
+		err := provider.validateInvokeURL("https://my-func-app.azurewebsites.net:8443/api/handler")
+		if err == nil {
+			t.Fatal("expected validation error")
+		}
+	})
+}
+
 func TestToServiceName(t *testing.T) {
 	t.Parallel()
 	provider := &GCPProvider{}
@@ -180,6 +225,33 @@ func TestValidateCloudRunURL(t *testing.T) {
 	t.Run("rejects custom ports", func(t *testing.T) {
 		t.Parallel()
 		err := provider.validateCloudRunURL("https://my-svc-abcde-uc.a.run.app:8443")
+		if err == nil {
+			t.Fatal("expected validation error")
+		}
+		if !errors.Is(err, tools.ErrInvalidArgument) {
+			t.Fatalf("expected invalid argument error, got: %v", err)
+		}
+	})
+}
+
+func TestTokenAudienceFromURI(t *testing.T) {
+	t.Parallel()
+	provider := &GCPProvider{}
+
+	t.Run("uses scheme and host only", func(t *testing.T) {
+		t.Parallel()
+		aud, err := provider.tokenAudienceFromURI("https://my-svc-abcde-uc.a.run.app/path?q=v")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if aud != "https://my-svc-abcde-uc.a.run.app" {
+			t.Fatalf("unexpected audience: %q", aud)
+		}
+	})
+
+	t.Run("returns invalid argument for malformed uri", func(t *testing.T) {
+		t.Parallel()
+		_, err := provider.tokenAudienceFromURI("not a uri")
 		if err == nil {
 			t.Fatal("expected validation error")
 		}

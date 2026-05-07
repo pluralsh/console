@@ -127,7 +127,12 @@ func (in *GCPProvider) getServiceURI(ctx context.Context, serviceAccountJSON []b
 }
 
 func (in *GCPProvider) invoke(ctx context.Context, uri string, serviceAccountJSON []byte, input InvocationInput) (*InvocationOutput, error) {
-	httpClient, err := idtoken.NewClient(ctx, uri, option.WithCredentialsJSON(serviceAccountJSON))
+	audience, err := in.tokenAudienceFromURI(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient, err := idtoken.NewClient(ctx, audience, option.WithCredentialsJSON(serviceAccountJSON))
 	if err != nil {
 		return nil, err
 	}
@@ -158,4 +163,16 @@ func (in *GCPProvider) invoke(ctx context.Context, uri string, serviceAccountJSO
 	}
 
 	return output, nil
+}
+
+func (in *GCPProvider) tokenAudienceFromURI(value string) (string, error) {
+	parsed, err := url.ParseRequestURI(strings.TrimSpace(value))
+	if err != nil {
+		return "", fmt.Errorf("%w: invalid gcp cloud run url", tools.ErrInvalidArgument)
+	}
+	if parsed.Scheme == "" || parsed.Host == "" {
+		return "", fmt.Errorf("%w: invalid gcp cloud run url", tools.ErrInvalidArgument)
+	}
+
+	return parsed.Scheme + "://" + parsed.Host, nil
 }
