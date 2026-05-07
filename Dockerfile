@@ -1,9 +1,9 @@
-ARG ELIXIR_VERSION=1.18.3
-ARG OTP_VERSION=27.3.2
+ARG ELIXIR_VERSION=1.19.4
+ARG OTP_VERSION=28.5
 ARG OS_VARIANT=alpine
-ARG OS_VERSION=3.21.3
+ARG OS_VERSION=3.23.4
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
-ARG RUNNER_IMAGE=alpine:3.23 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
+ARG RUNNER_IMAGE=alpine:3.23.4 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
 
 FROM node:22.22.0-alpine as node
 
@@ -85,7 +85,7 @@ RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.48
+ENV CLI_VERSION=v0.12.49
 
 COPY AGENT_VERSION AGENT_VERSION
 
@@ -143,5 +143,7 @@ RUN chmod +x /opt/app/bin/.git-askpass && \
 COPY --from=builder /opt/app/_build/prod/rel/console .
 
 USER console
+
+EXPOSE 4000 6000 4369 50051
 
 CMD mkdir -p /tmp/sqlite; /opt/app/bin/console start

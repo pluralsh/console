@@ -5180,16 +5180,22 @@ export type IssueWebhook = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   provider: IssueWebhookProvider;
+  /** read policy bindings for this webhook */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the url for this specific webhook */
   url: Scalars['String']['output'];
+  /** write policy bindings for this webhook */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required. */
 export type IssueWebhookAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   provider?: InputMaybe<IssueWebhookProvider>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   secret?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type IssueWebhookConnection = {
@@ -5207,6 +5213,8 @@ export type IssueWebhookEdge = {
 export enum IssueWebhookProvider {
   Asana = 'ASANA',
   AzureDevops = 'AZURE_DEVOPS',
+  Bitbucket = 'BITBUCKET',
+  BitbucketDatacenter = 'BITBUCKET_DATACENTER',
   Github = 'GITHUB',
   Gitlab = 'GITLAB',
   Jira = 'JIRA',
@@ -6396,21 +6404,29 @@ export type ObservabilityWebhook = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Human‑readable name for this webhook */
   name: Scalars['String']['output'];
+  /** Read policy bindings for this webhook */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** Type of observability webhook (for example :grafana) */
   type: ObservabilityWebhookType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the url for this specific webhook */
   url: Scalars['String']['output'];
+  /** Write policy bindings for this webhook */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** input data to persist a webhook receiver for an observability provider like grafana or datadog */
 export type ObservabilityWebhookAttributes = {
   /** Unique name used to reference this webhook */
   name: Scalars['String']['input'];
+  /** Users or groups who can read this webhook */
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** Optional shared secret used to validate incoming webhook payloads */
   secret?: InputMaybe<Scalars['String']['input']>;
   /** Type of webhook endpoint (for example Grafana alerting) */
   type: ObservabilityWebhookType;
+  /** Users or groups who can modify this webhook */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type ObservabilityWebhookConnection = {
@@ -6841,6 +6857,8 @@ export type OpenaiSettings = {
   model?: Maybe<Scalars['String']['output']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** OAuth2 client credentials configured for token endpoint exchange */
+  tokenExchange?: Maybe<OpenaiTokenExchange>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: Maybe<Scalars['String']['output']>;
 };
@@ -6855,8 +6873,27 @@ export type OpenaiSettingsAttributes = {
   model?: InputMaybe<Scalars['String']['input']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** OAuth2 client credentials against a token endpoint to obtain access tokens */
+  tokenExchange?: InputMaybe<OpenaiTokenExchangeAttributes>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** OAuth2 token endpoint client credentials for OpenAI-compatible APIs */
+export type OpenaiTokenExchange = {
+  __typename?: 'OpenaiTokenExchange';
+  clientId?: Maybe<Scalars['String']['output']>;
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** token endpoint URL */
+  tokenUrl?: Maybe<Scalars['String']['output']>;
+};
+
+export type OpenaiTokenExchangeAttributes = {
+  clientId?: InputMaybe<Scalars['String']['input']>;
+  clientSecret?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** token endpoint URL */
+  tokenUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type OpensearchConnection = {
@@ -14341,6 +14378,21 @@ export type ToolThought = {
   id: Scalars['ID']['output'];
 };
 
+/** A representation of a skill sourced from either the API or git */
+export type UnifiedWorkbenchSkill = {
+  __typename?: 'UnifiedWorkbenchSkill';
+  /** the saved skill contents */
+  contents?: Maybe<Scalars['String']['output']>;
+  /** the saved skill description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the id of the saved skill (if it's API-derived, otherwise null) */
+  id?: Maybe<Scalars['String']['output']>;
+  /** the saved skill name */
+  name?: Maybe<Scalars['String']['output']>;
+  /** subagent roles this skill applies to */
+  subagents?: Maybe<Array<Maybe<WorkbenchSkillSubagent>>>;
+};
+
 /** How to enforce uniqueness for a field */
 export type UniqByAttributes = {
   /** the scope this name is uniq w/in */
@@ -14898,6 +14950,7 @@ export type Workbench = {
   /** the agent runtime for this workbench */
   agentRuntime?: Maybe<AgentRuntime>;
   alerts?: Maybe<AlertConnection>;
+  allSkills?: Maybe<Array<Maybe<UnifiedWorkbenchSkill>>>;
   /** the service account user used for automated workbench agent runs */
   botUser?: Maybe<User>;
   /** workbench configuration */
@@ -15269,6 +15322,8 @@ export type WorkbenchInfrastructure = {
   services?: Maybe<Scalars['Boolean']['output']>;
   /** stacks capability enabled */
   stacks?: Maybe<Scalars['Boolean']['output']>;
+  /** vulnerabilities capability enabled */
+  vulnerabilities?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type WorkbenchInfrastructureAttributes = {
@@ -15280,6 +15335,8 @@ export type WorkbenchInfrastructureAttributes = {
   services?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable stacks capability */
   stacks?: InputMaybe<Scalars['Boolean']['input']>;
+  /** enable vulnerabilities capability */
+  vulnerabilities?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type WorkbenchJob = {
@@ -15560,6 +15617,7 @@ export type WorkbenchJobResultTodo = {
 export enum WorkbenchJobStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
+  Paused = 'PAUSED',
   Pending = 'PENDING',
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
@@ -15823,6 +15881,8 @@ export type WorkbenchToolAzureConnection = {
   __typename?: 'WorkbenchToolAzureConnection';
   /** azure client id */
   clientId?: Maybe<Scalars['String']['output']>;
+  /** optional Azure Managed Prometheus query URL for metrics tools */
+  prometheusUrl?: Maybe<Scalars['String']['output']>;
   /** azure subscription id */
   subscriptionId?: Maybe<Scalars['String']['output']>;
   /** azure tenant id */
@@ -15834,6 +15894,8 @@ export type WorkbenchToolAzureConnectionAttributes = {
   clientId: Scalars['String']['input'];
   /** azure client secret */
   clientSecret: Scalars['String']['input'];
+  /** Optional azure managed prometheus url if you wish to use it for metrics */
+  prometheusUrl?: InputMaybe<Scalars['String']['input']>;
   /** azure subscription id */
   subscriptionId: Scalars['String']['input'];
   /** azure tenant id */
@@ -15896,6 +15958,8 @@ export type WorkbenchToolConfiguration = {
   elastic?: Maybe<WorkbenchToolElasticConnection>;
   /** exa connection (no secrets) */
   exa?: Maybe<WorkbenchToolExaConnection>;
+  /** github connection (no secrets) */
+  github?: Maybe<WorkbenchToolGithubConnection>;
   /** http tool configuration */
   http?: Maybe<WorkbenchToolHttpConfiguration>;
   /** jaeger connection (no secrets) */
@@ -15927,6 +15991,8 @@ export type WorkbenchToolConfigurationAttributes = {
   elastic?: InputMaybe<WorkbenchToolElasticConnectionAttributes>;
   /** exa connection (search) */
   exa?: InputMaybe<WorkbenchToolExaConnectionAttributes>;
+  /** github connection (integration) */
+  github?: InputMaybe<WorkbenchToolGithubConnectionAttributes>;
   /** http tool configuration */
   http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
   /** jaeger connection (traces) */
@@ -16013,6 +16079,23 @@ export type WorkbenchToolExaConnection = {
 export type WorkbenchToolExaConnectionAttributes = {
   /** exa API key */
   apiKey?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchToolGithubConnection = {
+  __typename?: 'WorkbenchToolGithubConnection';
+  /** configured github MCP toolset */
+  toolset?: Maybe<Scalars['String']['output']>;
+  /** github MCP URL (credentials never exposed) */
+  url: Scalars['String']['output'];
+};
+
+export type WorkbenchToolGithubConnectionAttributes = {
+  /** github token for MCP authentication */
+  accessToken?: InputMaybe<Scalars['String']['input']>;
+  /** optional github MCP toolset query parameter */
+  toolset?: InputMaybe<Scalars['String']['input']>;
+  /** github MCP URL (defaults to public github MCP server) */
+  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolHttpConfiguration = {
@@ -16198,6 +16281,7 @@ export enum WorkbenchToolType {
   Dynatrace = 'DYNATRACE',
   Elastic = 'ELASTIC',
   Exa = 'EXA',
+  Github = 'GITHUB',
   Http = 'HTTP',
   Jaeger = 'JAEGER',
   Linear = 'LINEAR',
@@ -17673,7 +17757,7 @@ export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id
 
 export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
-export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null };
+export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -17694,7 +17778,7 @@ export type ObservabilityWebhooksQueryVariables = Exact<{
 }>;
 
 
-export type ObservabilityWebhooksQuery = { __typename?: 'RootQueryType', observabilityWebhooks?: { __typename?: 'ObservabilityWebhookConnection', edges?: Array<{ __typename?: 'ObservabilityWebhookEdge', node?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type ObservabilityWebhooksQuery = { __typename?: 'RootQueryType', observabilityWebhooks?: { __typename?: 'ObservabilityWebhookConnection', edges?: Array<{ __typename?: 'ObservabilityWebhookEdge', node?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type UpdateDeploymentSettingsMutationVariables = Exact<{
   attributes: DeploymentSettingsAttributes;
@@ -17715,7 +17799,7 @@ export type UpsertObservabilityWebhookMutationVariables = Exact<{
 }>;
 
 
-export type UpsertObservabilityWebhookMutation = { __typename?: 'RootMutationType', upsertObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type UpsertObservabilityWebhookMutation = { __typename?: 'RootMutationType', upsertObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DeleteObservabilityProviderMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -17729,7 +17813,7 @@ export type DeleteObservabilityWebhookMutationVariables = Exact<{
 }>;
 
 
-export type DeleteObservabilityWebhookMutation = { __typename?: 'RootMutationType', deleteObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type DeleteObservabilityWebhookMutation = { __typename?: 'RootMutationType', deleteObservabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DissmissOnboardingMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -19818,13 +19902,17 @@ export type ClusterVulnerabilityAggregateQuery = { __typename?: 'RootQueryType',
 
 export type WorkbenchTinyFragment = { __typename?: 'Workbench', id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null };
 
+export type IssueWebhookFragment = { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type IssueWebhookTinyFragment = { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider };
+
 export type WorkbenchWebhookTinyFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null };
 
-export type WorkbenchFragment = { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null };
+export type WorkbenchFragment = { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null };
 
 export type WorkbenchToolTinyFragment = { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null };
 
-export type WorkbenchToolFragment = { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null };
+export type WorkbenchToolFragment = { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null };
 
 export type WorkbenchJobThoughtFragment = { __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null };
 
@@ -19860,7 +19948,7 @@ export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, 
 
 export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
-export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null };
+export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
@@ -19891,7 +19979,7 @@ export type WorkbenchQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19978,14 +20066,14 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
 export type GetWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type IssueWebhooksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -19993,14 +20081,14 @@ export type IssueWebhooksQueryVariables = Exact<{
 }>;
 
 
-export type IssueWebhooksQuery = { __typename?: 'RootQueryType', issueWebhooks?: { __typename?: 'IssueWebhookConnection', edges?: Array<{ __typename?: 'IssueWebhookEdge', node?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type IssueWebhooksQuery = { __typename?: 'RootQueryType', issueWebhooks?: { __typename?: 'IssueWebhookConnection', edges?: Array<{ __typename?: 'IssueWebhookEdge', node?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type WorkbenchTriggersSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20079,14 +20167,14 @@ export type WorkbenchToolQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchToolQuery = { __typename?: 'RootQueryType', workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null };
+export type WorkbenchToolQuery = { __typename?: 'RootQueryType', workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null };
 
 export type CreateWorkbenchMutationVariables = Exact<{
   attributes: WorkbenchAttributes;
 }>;
 
 
-export type CreateWorkbenchMutation = { __typename?: 'RootMutationType', createWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type CreateWorkbenchMutation = { __typename?: 'RootMutationType', createWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type UpdateWorkbenchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20094,7 +20182,7 @@ export type UpdateWorkbenchMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchMutation = { __typename?: 'RootMutationType', updateWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type UpdateWorkbenchMutation = { __typename?: 'RootMutationType', updateWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type DeleteWorkbenchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20108,7 +20196,7 @@ export type CreateWorkbenchToolMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchToolMutation = { __typename?: 'RootMutationType', createWorkbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null };
+export type CreateWorkbenchToolMutation = { __typename?: 'RootMutationType', createWorkbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null };
 
 export type UpdateWorkbenchToolMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20116,7 +20204,7 @@ export type UpdateWorkbenchToolMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchToolMutation = { __typename?: 'RootMutationType', updateWorkbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null };
+export type UpdateWorkbenchToolMutation = { __typename?: 'RootMutationType', updateWorkbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null };
 
 export type DeleteWorkbenchToolMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20200,7 +20288,7 @@ export type CreateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type UpdateWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20208,7 +20296,7 @@ export type UpdateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string, provider: IssueWebhookProvider } | null } | null };
+export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type DeleteWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20222,7 +20310,15 @@ export type CreateIssueWebhookMutationVariables = Exact<{
 }>;
 
 
-export type CreateIssueWebhookMutation = { __typename?: 'RootMutationType', createIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null };
+export type CreateIssueWebhookMutation = { __typename?: 'RootMutationType', createIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type UpdateIssueWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: IssueWebhookAttributes;
+}>;
+
+
+export type UpdateIssueWebhookMutation = { __typename?: 'RootMutationType', updateIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -22261,8 +22357,14 @@ export const ObservabilityWebhookFragmentDoc = gql`
   url
   insertedAt
   updatedAt
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
 }
-    `;
+    ${PolicyBindingFragmentDoc}`;
 export const ObserverTargetFragmentDoc = gql`
     fragment ObserverTarget on ObserverTarget {
   target
@@ -24986,6 +25088,12 @@ export const WorkbenchToolTinyFragmentDoc = gql`
   }
 }
     ${CloudConnectionTinyFragmentDoc}`;
+export const IssueWebhookTinyFragmentDoc = gql`
+    fragment IssueWebhookTiny on IssueWebhook {
+  id
+  provider
+}
+    `;
 export const WorkbenchWebhookTinyFragmentDoc = gql`
     fragment WorkbenchWebhookTiny on WorkbenchWebhook {
   id
@@ -24995,11 +25103,10 @@ export const WorkbenchWebhookTinyFragmentDoc = gql`
     type
   }
   issueWebhook {
-    id
-    provider
+    ...IssueWebhookTiny
   }
 }
-    `;
+    ${IssueWebhookTinyFragmentDoc}`;
 export const WorkbenchTinyFragmentDoc = gql`
     fragment WorkbenchTiny on Workbench {
   id
@@ -25091,9 +25198,14 @@ export const WorkbenchToolFragmentDoc = gql`
       subscriptionId
       tenantId
       clientId
+      prometheusUrl
     }
     dynatrace {
       url
+    }
+    github {
+      url
+      toolset
     }
   }
 }
@@ -25116,6 +25228,7 @@ export const WorkbenchFragmentDoc = gql`
       stacks
       kubernetes
       podLogs
+      vulnerabilities
     }
     observability {
       logs
@@ -25361,6 +25474,22 @@ export const WorkbenchPromptFragmentDoc = gql`
   updatedAt
 }
     `;
+export const IssueWebhookFragmentDoc = gql`
+    fragment IssueWebhook on IssueWebhook {
+  id
+  name
+  provider
+  url
+  insertedAt
+  updatedAt
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
 export const WorkbenchWebhookFragmentDoc = gql`
     fragment WorkbenchWebhook on WorkbenchWebhook {
   id
@@ -25380,13 +25509,10 @@ export const WorkbenchWebhookFragmentDoc = gql`
     url
   }
   issueWebhook {
-    id
-    name
-    url
-    provider
+    ...IssueWebhook
   }
 }
-    `;
+    ${IssueWebhookFragmentDoc}`;
 export const WorkbenchIssueFragmentDoc = gql`
     fragment WorkbenchIssue on Issue {
   id
@@ -41725,10 +41851,7 @@ export const IssueWebhooksDocument = gql`
   issueWebhooks(first: $first, after: $after) {
     edges {
       node {
-        id
-        name
-        provider
-        url
+        ...IssueWebhook
       }
     }
     pageInfo {
@@ -41736,7 +41859,8 @@ export const IssueWebhooksDocument = gql`
     }
   }
 }
-    ${PageInfoFragmentDoc}`;
+    ${IssueWebhookFragmentDoc}
+${PageInfoFragmentDoc}`;
 
 /**
  * __useIssueWebhooksQuery__
@@ -41805,17 +41929,15 @@ export const WorkbenchTriggersSummaryDocument = gql`
             url
           }
           issueWebhook {
-            id
-            name
-            url
-            provider
+            ...IssueWebhook
           }
         }
       }
     }
   }
 }
-    ${WorkbenchToolTinyFragmentDoc}`;
+    ${WorkbenchToolTinyFragmentDoc}
+${IssueWebhookFragmentDoc}`;
 
 /**
  * __useWorkbenchTriggersSummaryQuery__
@@ -42930,13 +43052,10 @@ export type DeleteWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<D
 export const CreateIssueWebhookDocument = gql`
     mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
   createIssueWebhook(attributes: $attributes) {
-    id
-    name
-    provider
-    url
+    ...IssueWebhook
   }
 }
-    `;
+    ${IssueWebhookFragmentDoc}`;
 export type CreateIssueWebhookMutationFn = Apollo.MutationFunction<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
 
 /**
@@ -42963,6 +43082,40 @@ export function useCreateIssueWebhookMutation(baseOptions?: Apollo.MutationHookO
 export type CreateIssueWebhookMutationHookResult = ReturnType<typeof useCreateIssueWebhookMutation>;
 export type CreateIssueWebhookMutationResult = Apollo.MutationResult<CreateIssueWebhookMutation>;
 export type CreateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
+export const UpdateIssueWebhookDocument = gql`
+    mutation UpdateIssueWebhook($id: ID!, $attributes: IssueWebhookAttributes!) {
+  updateIssueWebhook(id: $id, attributes: $attributes) {
+    ...IssueWebhook
+  }
+}
+    ${IssueWebhookFragmentDoc}`;
+export type UpdateIssueWebhookMutationFn = Apollo.MutationFunction<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>;
+
+/**
+ * __useUpdateIssueWebhookMutation__
+ *
+ * To run a mutation, you first call `useUpdateIssueWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateIssueWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateIssueWebhookMutation, { data, loading, error }] = useUpdateIssueWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateIssueWebhookMutation(baseOptions?: Apollo.MutationHookOptions<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>(UpdateIssueWebhookDocument, options);
+      }
+export type UpdateIssueWebhookMutationHookResult = ReturnType<typeof useUpdateIssueWebhookMutation>;
+export type UpdateIssueWebhookMutationResult = Apollo.MutationResult<UpdateIssueWebhookMutation>;
+export type UpdateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>;
 export const WorkbenchJobDeltaDocument = gql`
     subscription WorkbenchJobDelta($id: ID!) {
   workbenchJobDelta(id: $id) {
@@ -43531,7 +43684,8 @@ export const namedOperations = {
     CreateWorkbenchWebhook: 'CreateWorkbenchWebhook',
     UpdateWorkbenchWebhook: 'UpdateWorkbenchWebhook',
     DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook',
-    CreateIssueWebhook: 'CreateIssueWebhook'
+    CreateIssueWebhook: 'CreateIssueWebhook',
+    UpdateIssueWebhook: 'UpdateIssueWebhook'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
@@ -43827,6 +43981,8 @@ export const namedOperations = {
     CvssBundle: 'CvssBundle',
     VulnerabilityReportConnection: 'VulnerabilityReportConnection',
     WorkbenchTiny: 'WorkbenchTiny',
+    IssueWebhook: 'IssueWebhook',
+    IssueWebhookTiny: 'IssueWebhookTiny',
     WorkbenchWebhookTiny: 'WorkbenchWebhookTiny',
     Workbench: 'Workbench',
     WorkbenchToolTiny: 'WorkbenchToolTiny',

@@ -1,7 +1,8 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
+  alias Console.Repo
   alias Console.Deployments.Workbenches
-  alias Console.AI.Workbench.Toolchain
+  alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.Schema.{
     Alert,
     Issue,
@@ -205,6 +206,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> workbench_tool_filters(args)
     |> maybe_search(WorkbenchTool, args)
     |> paginate(args)
+  end
+
+  def all_skills(workbench, _args, _ctx) do
+    Repo.preload(workbench, [:workbench_skills, :repository])
+    |> Skills.skills()
   end
 
   def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)

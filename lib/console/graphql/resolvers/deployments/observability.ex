@@ -30,8 +30,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def get_observability_webhook(%{id: id}, _) when is_binary(id), do: {:ok, Observability.get_webhook!(id)}
   def get_observability_webhook(%{name: n}, _) when is_binary(n), do: {:ok, Observability.get_webhook_by_name!(n)}
 
-  def list_observability_webhooks(args, _) do
-    ObservabilityWebhook.ordered()
+  def list_observability_webhooks(args, %{context: %{current_user: user}}) do
+    ObservabilityWebhook.for_user(user)
+    |> ObservabilityWebhook.ordered()
     |> paginate(args)
   end
 

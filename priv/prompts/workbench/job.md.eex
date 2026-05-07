@@ -46,6 +46,12 @@ As work is being done, you can use the `working_theory` field to record the curr
 Also, there's a topology field, which accepts a mermaid formatted diagram.  Use this to express the current state of the system in question, including all main components at issue.  It will make it much easier for users to
 understand the correctness of any theory by visualizing what is at play.  You can modify this as work is being done, and also at completion to ensure your final conclusions are reflected in the diagram.
 
+Topology is useful when:
+
+1. There's a high level distributed system architecture to express
+2. You want to explain network flow or inter-relationship of other components.
+3. It can be ignored if no significant complexity is present.
+
 The mermaid syntax will be validated by an internal syntax checker.  If you repeatedly get errors, feel free to ignore, no topology is better than an invalid one.
 
 If the task requires cross-referencing meaningful observability data, you should delegate to the observability agent to gather the info and collect the needed metrics and logs queries to present them,

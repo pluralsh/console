@@ -384,6 +384,7 @@ const statusToSeverity: Record<
   [AgentRunStatus.Cancelled]: 'neutral',
   [AgentRunStatus.Successful]: 'success',
   [AgentRunStatus.Babysitting]: 'neutral',
+  [WorkbenchJobStatus.Paused]: 'neutral',
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

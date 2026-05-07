@@ -84,7 +84,7 @@ defmodule Console.AI.Evidence.Logs do
 
   defp use_logs?(_, true), do: true
   defp use_logs?(history, _) do
-    case Provider.simple_tool_call(history, Logging, preface: @preface, default_model: true) do
+    case Provider.simple_tool_call(history, Logging, preface: @preface, client: :default, default_model: true) do
       {:ok, %Logging{required: true}} -> true
       _ -> false
     end

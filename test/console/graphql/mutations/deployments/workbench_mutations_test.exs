@@ -1092,8 +1092,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
 
   describe "createWorkbenchWebhook" do
     test "it can create a workbench webhook with observability webhook" do
+      user = admin_user()
       workbench = insert(:workbench)
-      obs_webhook = insert(:observability_webhook)
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
 
       {:ok, %{data: %{"createWorkbenchWebhook" => webhook}}} = run_query("""
         mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
@@ -1104,7 +1105,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             webhook { id }
           }
         }
-      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "my-webhook", "webhookId" => obs_webhook.id}}, %{current_user: admin_user()})
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "my-webhook", "webhookId" => obs_webhook.id}}, %{current_user: user})
 
       assert webhook["workbench"]["id"] == workbench.id
       assert webhook["name"] == "my-webhook"
@@ -1112,8 +1113,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
 
     test "it can create a workbench webhook with issue webhook and query association" do
+      user = admin_user()
       workbench = insert(:workbench)
-      issue_wh = insert(:issue_webhook)
+      issue_wh = insert(:issue_webhook, read_bindings: [%{user_id: user.id}])
 
       {:ok, %{data: %{"createWorkbenchWebhook" => webhook}}} = run_query("""
         mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
@@ -1124,32 +1126,12 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             issueWebhook { id name }
           }
         }
-      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "issue-trigger", "issueWebhookId" => issue_wh.id}}, %{current_user: admin_user()})
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "issue-trigger", "issueWebhookId" => issue_wh.id}}, %{current_user: user})
 
       assert webhook["workbench"]["id"] == workbench.id
       assert webhook["name"] == "issue-trigger"
       assert webhook["issueWebhook"]["id"] == issue_wh.id
       assert webhook["issueWebhook"]["name"] == issue_wh.name
-    end
-
-    test "project writers can create a webhook" do
-      user = insert(:user)
-      project = insert(:project, write_bindings: [%{user_id: user.id}])
-      workbench = insert(:workbench, project: project)
-      obs_webhook = insert(:observability_webhook)
-
-      {:ok, %{data: %{"createWorkbenchWebhook" => webhook}}} = run_query("""
-        mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
-          createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
-            id
-            name
-            workbench { id }
-          }
-        }
-      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "writer-webhook", "webhookId" => obs_webhook.id}}, %{current_user: user})
-
-      assert webhook["name"] == "writer-webhook"
-      assert webhook["workbench"]["id"] == workbench.id
     end
 
     test "project readers cannot create a webhook" do
@@ -1167,12 +1149,30 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         }
       """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "forbidden", "webhookId" => obs_webhook.id}}, %{current_user: user})
     end
+
+    test "project writers cannot create a webhook for an inaccessible observability webhook" do
+      user = insert(:user)
+      other = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: other.id}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "forbidden-by-webhook", "webhookId" => obs_webhook.id}}, %{current_user: user})
+    end
   end
 
   describe "updateWorkbenchWebhook" do
     test "it can update a workbench webhook" do
-      workbench = insert(:workbench)
-      webhook = insert(:workbench_webhook, workbench: workbench, name: "original", user: admin_user())
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: webhook, name: "original", user: admin_user())
 
       {:ok, %{data: %{"updateWorkbenchWebhook" => updated}}} = run_query("""
         mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
@@ -1206,6 +1206,26 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => webhook.id, "attributes" => %{"name" => "updated"}}, %{current_user: user})
 
       assert refetch(webhook).name == "original"
+    end
+
+    test "project writers cannot update a webhook to an inaccessible issue webhook" do
+      user = insert(:user)
+      other = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      allowed_obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
+      denied_issue_webhook = insert(:issue_webhook, read_bindings: [%{user_id: other.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: allowed_obs_webhook, name: "original", user: user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{"id" => webhook.id, "attributes" => %{"issueWebhookId" => denied_issue_webhook.id}}, %{current_user: user})
+
+      assert refetch(webhook).issue_webhook_id == nil
     end
   end
 

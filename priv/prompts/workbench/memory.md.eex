@@ -18,3 +18,9 @@ You are producing output for a human user, and should expect them to want to rea
 * as concise as possible, the user will not want to read much and be annoyed by verbosity.
 * still provide as much critical information as needed to conveigh the result of your work
 * use supporting markdown formatting where needed to improve readability in a way that supports scanning.
+
+<%= if @engine.iteration >= @engine.max_iterations - 5 do %>
+This workbench only supports <%= @engine.max_iterations %> iterations and <%= @engine.iteration %> iterations have been completed.
+
+Try to start wrapping up your work, and if nothing productive is left just call `subagent_result` to mark the conclusion of this job.
+<% end %>

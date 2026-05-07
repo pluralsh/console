@@ -758,7 +758,9 @@ defmodule Console.Factory do
       type: :grafana,
       name: sequence(:obs_hook, & "obs-wh-#{&1}"),
       external_id: sequence(:obs_id, & "obs-wh-id-#{&1}"),
-      secret: Ecto.UUID.generate()
+      secret: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate()
     }
   end
 
@@ -1262,7 +1264,6 @@ defmodule Console.Factory do
     %Schema.WorkbenchWebhook{
       name: sequence(:workbench_webhook, & "workbench-webhook-#{&1}"),
       workbench: build(:workbench),
-      webhook: build(:observability_webhook),
       user: build(:user)
     }
   end
@@ -1321,6 +1322,8 @@ defmodule Console.Factory do
       name: sequence(:issue_webhook, & "issue-wh-#{&1}"),
       secret: "test-secret-#{Ecto.UUID.generate()}",
       external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),
+      read_policy_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate(),
     }
   end
 

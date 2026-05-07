@@ -159,7 +159,7 @@ defmodule Console.Deployments.Observability do
   """
   @spec upsert_webhook(map, User.t) :: webhook_resp
   def upsert_webhook(%{name: name} = attrs, %User{} = user) do
-    existing = get_webhook_by_name(name)
+    existing = get_webhook_by_name(name) |> Repo.preload([:read_bindings, :write_bindings])
     action = if existing, do: :update, else: :create
 
     (existing || %ObservabilityWebhook{})

@@ -10,8 +10,11 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
     Projects,
     ServiceInspect,
     StackInspect,
-    StackList
+    StackList,
+    VulnReports,
+    Vulns
   }
+  alias Console.Schema.VulnerabilityReport
 
   describe "ClusterList (plrl_clusters)" do
     test "returns {:ok, json} including clusters the user can read" do
@@ -164,6 +167,40 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
 
       assert {:error, _} = ServiceInspect.implement(parsed)
     end
+
+    test "when vuln_reports is true, includes simplified vulnerability reports in the response" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      service = insert(:service, cluster: cluster)
+
+      report =
+        insert(:vulnerability_report,
+          cluster: cluster,
+          artifact_url: "docker.io/app:v1",
+          summary: %VulnerabilityReport.Summary{
+            critical_count: 1,
+            high_count: 0,
+            medium_count: 0,
+            low_count: 0,
+            unknown_count: 0,
+            none_count: 0
+          }
+        )
+
+      insert(:service_vuln, service: service, report: report)
+
+      assert {:ok, parsed} =
+               Tool.validate(%ServiceInspect{user: user}, %{
+                 "service_id" => service.id,
+                 "vuln_reports" => true
+               })
+
+      assert {:ok, content} = ServiceInspect.implement(parsed)
+      assert content =~ "# Vulnerability Reports"
+      assert content =~ "docker.io/app:v1"
+      assert content =~ "\"critical_count\":1"
+      assert content =~ report.id
+    end
   end
 
   describe "StackList (plrl_stacks)" do
@@ -239,6 +276,181 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert content =~ run.id
       assert content =~ "terraform"
       assert content =~ "Error: something broke"
+    end
+  end
+
+  describe "VulnReports (plrl_vuln_reports)" do
+    test "returns {:ok, json} listing reports linked to the service when the user can read the service" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      service = insert(:service, cluster: cluster)
+
+      report =
+        insert(:vulnerability_report,
+          cluster: cluster,
+          artifact_url: "docker.io/app:v1",
+          summary: %VulnerabilityReport.Summary{
+            critical_count: 1,
+            high_count: 0,
+            medium_count: 0,
+            low_count: 0,
+            unknown_count: 0,
+            none_count: 0
+          }
+        )
+
+      insert(:service_vuln, service: service, report: report)
+
+      assert {:ok, parsed} =
+               Tool.validate(%VulnReports{user: user}, %{"service_id" => service.id})
+
+      assert {:ok, json} = VulnReports.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert length(list) == 1
+      row = hd(list)
+      assert row["id"] == report.id
+      assert row["artifact_url"] == report.artifact_url
+      assert row["critical_count"] == 1
+    end
+
+    test "returns {:ok, empty list} when the service has no reports and the user can read the service" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      service = insert(:service, cluster: cluster)
+
+      assert {:ok, parsed} =
+               Tool.validate(%VulnReports{user: user}, %{"service_id" => service.id})
+
+      assert {:ok, json} = VulnReports.implement(parsed)
+      assert {:ok, []} = Jason.decode(json)
+    end
+
+    test "returns {:error, _} when the user cannot read the service" do
+      owner = insert(:user)
+      other = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: owner.id}])
+      service = insert(:service, cluster: cluster)
+
+      assert {:ok, parsed} =
+               Tool.validate(%VulnReports{user: other}, %{"service_id" => service.id})
+
+      assert {:error, _} = VulnReports.implement(parsed)
+    end
+
+    test "returns {:error, _} when the service id does not exist" do
+      user = insert(:user)
+
+      assert {:ok, parsed} =
+               Tool.validate(%VulnReports{user: user}, %{"service_id" => Ecto.UUID.generate()})
+
+      assert {:error, _} = VulnReports.implement(parsed)
+    end
+
+    test "returns {:error, _} when service_id is not a valid UUID" do
+      assert {:error, cs} = Tool.validate(%VulnReports{}, %{"service_id" => "not-a-uuid"})
+      assert Keyword.has_key?(cs.errors, :service_id)
+    end
+  end
+
+  describe "Vulns (plrl_vulns)" do
+    test "returns {:ok, json} listing vulnerabilities for the report when the user can read the report" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+
+      report =
+        insert(:vulnerability_report,
+          cluster: cluster,
+          summary: %VulnerabilityReport.Summary{
+            critical_count: 0,
+            high_count: 0,
+            medium_count: 0,
+            low_count: 0,
+            unknown_count: 0,
+            none_count: 0
+          }
+        )
+
+      insert(:vulnerability,
+        report: report,
+        title: "CVE-2024-1234",
+        severity: :high,
+        score: 7.5,
+        primary_link: "https://example.test/cve"
+      )
+
+      assert {:ok, parsed} =
+               Tool.validate(%Vulns{user: user}, %{"report_id" => report.id})
+
+      assert {:ok, json} = Vulns.implement(parsed)
+      assert {:ok, list} = Jason.decode(json)
+      assert length(list) == 1
+      row = hd(list)
+      assert row["title"] == "CVE-2024-1234"
+      assert row["severity"] == "high"
+      assert row["score"] == 7.5
+      assert row["primary_link"] == "https://example.test/cve"
+    end
+
+    test "returns {:ok, empty list} when the report has no vulnerabilities and the user can read the report" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+
+      report =
+        insert(:vulnerability_report,
+          cluster: cluster,
+          summary: %VulnerabilityReport.Summary{
+            critical_count: 0,
+            high_count: 0,
+            medium_count: 0,
+            low_count: 0,
+            unknown_count: 0,
+            none_count: 0
+          }
+        )
+
+      assert {:ok, parsed} =
+               Tool.validate(%Vulns{user: user}, %{"report_id" => report.id})
+
+      assert {:ok, json} = Vulns.implement(parsed)
+      assert {:ok, []} = Jason.decode(json)
+    end
+
+    test "returns {:error, _} when the user cannot read the vulnerability report" do
+      owner = insert(:user)
+      other = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: owner.id}])
+
+      report =
+        insert(:vulnerability_report,
+          cluster: cluster,
+          summary: %VulnerabilityReport.Summary{
+            critical_count: 0,
+            high_count: 0,
+            medium_count: 0,
+            low_count: 0,
+            unknown_count: 0,
+            none_count: 0
+          }
+        )
+
+      assert {:ok, parsed} =
+               Tool.validate(%Vulns{user: other}, %{"report_id" => report.id})
+
+      assert {:error, _} = Vulns.implement(parsed)
+    end
+
+    test "returns {:error, _} when the report id does not exist" do
+      user = insert(:user)
+
+      assert {:ok, parsed} =
+               Tool.validate(%Vulns{user: user}, %{"report_id" => Ecto.UUID.generate()})
+
+      assert {:error, _} = Vulns.implement(parsed)
+    end
+
+    test "returns {:error, _} when report_id is not a valid UUID" do
+      assert {:error, cs} = Tool.validate(%Vulns{}, %{"report_id" => "bad"})
+      assert Keyword.has_key?(cs.errors, :report_id)
     end
   end
 end

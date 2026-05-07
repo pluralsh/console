@@ -4,7 +4,8 @@ defmodule Console.AI.OpenAI do
   """
   @behaviour Console.AI.Provider
   import Console.AI.Provider.Base
-  alias Console.AI.{Utils, Stream}
+  alias Console.AI.{Utils, Stream, Provider.TokenExchange}
+  alias Console.Schema.DeploymentSettings.OauthToken
 
   require Logger
 
@@ -15,7 +16,7 @@ defmodule Console.AI.OpenAI do
   def default_model(), do: @model
   def default_embedding_model(), do: @embedding_model
 
-  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method]
+  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange]
 
   @type t :: %__MODULE__{}
 
@@ -32,6 +33,7 @@ defmodule Console.AI.OpenAI do
       embedding_model: Map.get(opts, :embedding_model) || @embedding_model,
       azure_token: Map.get(opts, :azure_token),
       method: Map.get(opts, :method) || :auto,
+      token_exchange: Map.get(opts, :token_exchange),
       stream: Stream.stream()
     }
   end
@@ -53,10 +55,12 @@ defmodule Console.AI.OpenAI do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
-    messages
-    |> reqllm_messages()
-    |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_options(openai) ++ [tools: tools(opts)])
-    |> reqllm_result()
+    with {:ok, provider_opts} <- provider_options(openai) do
+      messages
+      |> reqllm_messages()
+      |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_opts ++ [tools: tools(opts)])
+      |> reqllm_result()
+    end
   end
 
   defp model_type(:tool), do: :tool_model
@@ -67,21 +71,25 @@ defmodule Console.AI.OpenAI do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = openai, messages, tools, _opts) do
-    messages
-    |> reqllm_messages()
-    |> generate_text(openai_model(openai, :tool_model), openai.stream, provider_options(openai) ++ [tools: reqllm_tools(tools), tool_choice: :required])
-    |> reqllm_result()
-    |> tool_calls()
+    with {:ok, provider_opts} <- provider_options(openai) do
+      messages
+      |> reqllm_messages()
+      |> generate_text(openai_model(openai, :tool_model), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
+      |> reqllm_result()
+      |> tool_calls()
+    end
   end
 
   def embeddings(%__MODULE__{} = openai, text) do
     chunked = Utils.chunk(text, 8000)
-    provider_options(openai)
-    |> Keyword.put(:dimensions, Utils.embedding_dims())
-    |> then(&ReqLLM.embed(openai_model(openai, :embedding_model), chunked, &1))
-    |> case do
-      {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
-      error -> error
+    with {:ok, provider_opts} <- provider_options(openai) do
+      provider_opts
+      |> Keyword.put(:dimensions, Utils.embedding_dims())
+      |> then(&ReqLLM.embed(openai_model(openai, :embedding_model), chunked, &1))
+      |> case do
+        {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
+        error -> error
+      end
     end
   end
 
@@ -94,9 +102,15 @@ defmodule Console.AI.OpenAI do
 
   def tools?(), do: true
 
-  defp provider_options(%__MODULE__{base_url: base_url, access_key: key}) do
-    Enum.filter([base_url: base_url, api_key: key || "ignore"], fn {_, v} -> not is_nil(v) end)
+  defp provider_options(%__MODULE__{base_url: base_url} = openai) do
+    with {:ok, key} <- api_key(openai),
+      do: {:ok, Enum.filter([base_url: base_url, api_key: key], fn {_, v} -> not is_nil(v) end)}
   end
+
+  defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}),
+    do: TokenExchange.exchange(token.token_url, token.client_id, token.client_secret)
+  defp api_key(%__MODULE__{access_key: key}) when is_binary(key), do: {:ok, key}
+  defp api_key(_), do: {:ok, "ignore"}
 
   defp openai_model(%__MODULE__{base_url: base_url, method: method} = openai, model) when is_binary(base_url) do
     model_name = Map.get(openai, model)

@@ -32,13 +32,18 @@ defmodule Console.Application do
       :hackney_pool.child_spec(:ai_pool, [max_connections: 100, max_per_host: 100]),
       :hackney_pool.child_spec(:kazan_pool, [max_connections: 100, max_per_host: 100]),
       Console.Bootstrapper,
+      ConsoleWeb.Endpoint,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Stacks.Supervisor,
       Console.Deployments.Helm.Server,
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
-      ConsoleWeb.Endpoint,
+      {GRPC.Server.Supervisor,
+        endpoint: Console.GRPC.Endpoint,
+        port: 50051,
+        start_server: Console.conf(:initialize)
+      },
       Console.Plural.Config,
       Console.Features,
       Console.Cron.Scheduler,
@@ -58,11 +63,7 @@ defmodule Console.Application do
       Console.AI.GothManager,
       Console.PromEx,
       Console.Chat.Supervisor,
-      {GRPC.Server.Supervisor,
-        endpoint: Console.GRPC.Endpoint,
-        port: 50051,
-        start_server: Console.conf(:initialize)
-      }
+      {GRPC.Client.Supervisor, []}
     ] ++ consumers()
       ++ oidc_providers()
       ++ [Piazza.GracefulShutdown]

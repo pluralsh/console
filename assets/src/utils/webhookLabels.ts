@@ -18,6 +18,8 @@ const OBSERVABILITY_WEBHOOK_TYPE_LABELS: Record<
 const ISSUE_WEBHOOK_PROVIDER_LABELS: Record<IssueWebhookProvider, string> = {
   [IssueWebhookProvider.Asana]: 'Asana',
   [IssueWebhookProvider.AzureDevops]: 'Azure DevOps',
+  [IssueWebhookProvider.Bitbucket]: 'Bitbucket',
+  [IssueWebhookProvider.BitbucketDatacenter]: 'Bitbucket Data Center',
   [IssueWebhookProvider.Github]: 'GitHub',
   [IssueWebhookProvider.Gitlab]: 'GitLab',
   [IssueWebhookProvider.Jira]: 'Jira',

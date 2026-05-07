@@ -83,6 +83,8 @@ export function WorkbenchToolFormFields({
       return render(type, LinearFormFields)
     case WorkbenchToolType.Exa:
       return render(type, ExaFormFields)
+    case WorkbenchToolType.Github:
+      return render(type, GithubFormFields)
     case WorkbenchToolType.Splunk:
       return render(type, SplunkFormFields)
     case WorkbenchToolType.Cloudwatch:
@@ -382,6 +384,69 @@ function ExaFormFields({
   )
 }
 
+const GITHUB_MCP_TOOLSET_OPTIONS = [
+  { key: 'repos', label: 'Repos' },
+  { key: 'issues', label: 'Issues' },
+  { key: 'pull_requests', label: 'Pull requests' },
+  { key: 'actions', label: 'Actions' },
+  { key: 'code_security', label: 'Code security' },
+  { key: 'secret_protection', label: 'Secret protection' },
+  { key: 'copilot', label: 'Copilot (remote only)' },
+  {
+    key: 'github_support_docs_search',
+    label: 'GitHub support docs search (remote only)',
+  },
+  { key: 'all', label: 'All (every toolset)' },
+  {
+    key: 'default',
+    label: 'Default (repos, issues, pull requests)',
+  },
+] as const
+
+function GithubFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Github>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        hint="Defaults to the public GitHub MCP server when omitted."
+        placeholder="https://api.githubcopilot.com/mcp"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access token"
+        required
+        revealer
+        value={c.accessToken ?? ''}
+        onChange={(e) => set({ ...c, accessToken: e.target.value })}
+      />
+      <FormField
+        label="Toolset"
+        hint="Optional. Use a single toolset value; leave blank to use the default GitHub MCP toolsets."
+      >
+        <Select
+          selectedKey={c.toolset ?? null}
+          onSelectionChange={(key) =>
+            set({ ...c, toolset: typeof key === 'string' ? key : undefined })
+          }
+          selectionMode="single"
+          label="GitHub MCP toolset"
+        >
+          {GITHUB_MCP_TOOLSET_OPTIONS.map((option) => (
+            <ListBoxItem
+              key={option.key}
+              label={option.label}
+            />
+          ))}
+        </Select>
+      </FormField>
+    </>
+  )
+}
+
 function SplunkFormFields({
   config: c,
   setConfig: set,
@@ -542,6 +607,15 @@ function AzureFormFields({
         revealer
         value={c.clientSecret ?? ''}
         onChange={(e) => set({ ...c, clientSecret: e.target.value })}
+      />
+      <InputField
+        label="Azure Managed Prometheus query URL (optional)"
+        hint="When set, metrics tools use PromQL against this endpoint instead of Azure Monitor REST metrics. Use your workspace query URL (for example from Azure Monitor workspace settings)."
+        placeholder="https://…"
+        value={c.prometheusUrl ?? ''}
+        onChange={(e) =>
+          set({ ...c, prometheusUrl: e.target.value || undefined })
+        }
       />
     </>
   )
