@@ -36,6 +36,7 @@ import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 
 export function WorkbenchJob() {
   const theme = useTheme()
@@ -69,7 +70,7 @@ export function WorkbenchJob() {
   const workbenchId = job?.workbench?.id ?? ''
   const workbenchName = job?.workbench?.name ?? 'workbench'
   const trimmedPrompt = job?.prompt?.trim() ?? ''
-  const breadcrumbPrompt = trimmedPrompt || 'workbench job'
+  const breadcrumbPrompt = prettifyPrompt(trimmedPrompt) || 'workbench job'
 
   const [cancelWorkbenchJob, { loading: cancelLoading, error: cancelError }] =
     useCancelWorkbenchJobMutation({

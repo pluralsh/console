@@ -73,7 +73,6 @@ export function ChatInput({
     const content = newMessage.trim()
     if (!content) return
     sendMessage(content)
-    setNewMessage('')
     inputRef.current?.resetInput()
   }
 
@@ -192,6 +191,8 @@ export function ChatInputSimple({
       return Object.assign(node, {
         resetInput: () => {
           node.innerHTML = ''
+          // notify React state so callers don't have to also reset state locally
+          node.dispatchEvent(new InputEvent('input', { bubbles: true }))
         },
       })
   })

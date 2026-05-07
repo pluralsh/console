@@ -36,17 +36,13 @@ export function WorkbenchJobPromptInput({
     []
   )
 
-  const resetInput = () => {
-    setNewMessage('')
-    chatInputRef.current?.resetInput?.()
-  }
   const [
     createMessage,
     { loading: createMessageLoading, error: createMessageError },
   ] = useCreateWorkbenchMessageMutation({
     update: (cache, { data }) =>
       appendActivityToCache(cache, job?.id ?? '', data?.createWorkbenchMessage),
-    onCompleted: () => resetInput(),
+    onCompleted: () => chatInputRef.current?.resetInput?.(),
     refetchQueries: ['WorkbenchJob'],
   })
 
@@ -59,7 +55,7 @@ export function WorkbenchJobPromptInput({
         ...prev,
         { id: Math.random().toString(), message: newMessage },
       ])
-      resetInput()
+      chatInputRef.current?.resetInput?.()
     } else
       createMessage({
         variables: { jobId: job?.id ?? '', attributes: { prompt: newMessage } },

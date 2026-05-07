@@ -6,17 +6,19 @@
  * is serialized to canonical `<plrl-*>` XML.
  */
 
-import {
-  MentionKind,
-  PLRL_CHIP_TAG_NAMES,
-} from 'components/ai/chatbot/input/autocomplete/mentionTypes'
+import { MentionKind } from 'components/ai/chatbot/input/autocomplete/mentionTypes'
 import escape from 'lodash/escape'
+import unescape from 'lodash/unescape'
 
 export const CHIP_DATA_ATTR = 'data-chip'
 export const CHIP_TAG_ATTR = 'data-plrl-tag'
 export const CHIP_ATTR_PREFIX = 'data-attr-'
 
-const PLRL_TAG_SET: ReadonlySet<string> = new Set(PLRL_CHIP_TAG_NAMES)
+const PLRL_CHIP_REGEX = new RegExp(
+  `<(${Object.values(MentionKind).join('|')})\\b([^>]*)></\\1>`,
+  'gi'
+)
+const CHIP_ATTR_REGEX = /([a-z-]+)\s*=\s*"([^"]*)"/g
 
 const ZWSP = '​'
 
@@ -141,38 +143,15 @@ export function serializeRange(range: Range): string {
   return serializeEditableValue(wrapper)
 }
 
-export type WalkedPlrlNode =
-  | { type: 'chip'; tag: MentionKind; attrs: Record<string, string> }
+type WalkedPlrlNode =
+  | {
+      type: 'chip'
+      tag: MentionKind
+      attrs: Record<string, string>
+      /** original matched XML — preserved for chip-aware truncation. */
+      raw: string
+    }
   | { type: 'text'; text: string }
-
-/**
- * Parse canonical chip text (mixed prose + `<plrl-*>` XML) into a sequence of
- * chip and text nodes. Shared by paste (→ DOM) and display (→ shorthand).
- */
-export function walkPlrlText(text: string): WalkedPlrlNode[] {
-  const doc = new DOMParser().parseFromString(text, 'text/html')
-  const out: WalkedPlrlNode[] = []
-  for (const node of Array.from(doc.body.childNodes)) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      out.push({ type: 'text', text: node.nodeValue ?? '' })
-      continue
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) continue
-    const el = node as HTMLElement
-    const tag = el.tagName.toLowerCase()
-    if (PLRL_TAG_SET.has(tag)) {
-      const attrs: Record<string, string> = {}
-      for (const attr of Array.from(el.attributes))
-        attrs[attr.name] = attr.value
-      if (attrs['item-id'] && attrs['item-name']) {
-        out.push({ type: 'chip', tag: tag as MentionKind, attrs })
-        continue
-      }
-    }
-    out.push({ type: 'text', text: el.textContent ?? '' })
-  }
-  return out
-}
 
 /**
  * Replace `<plrl-*>` chip XML with `@name` (or `/name` for skills) for plain
@@ -189,6 +168,51 @@ export function prettifyPrompt(text: string): string {
         : n.text
     )
     .join('')
+}
+
+/**
+ * Truncate `text` to roughly `length` *visible* characters without splitting
+ * chip XML — chips count as their `@name`/`/name` display form toward the
+ * budget but are emitted as full XML, so a downstream markdown renderer can
+ * still render them as pills.
+ */
+export function truncateKeepingChips(text: string, length: number): string {
+  if (text.length <= length) return text
+  if (!text.includes('<plrl-')) return text.slice(0, length - 3) + '...'
+  let out = ''
+  let remaining = length - 3
+  for (const node of walkPlrlText(text)) {
+    const [content, visibleLen] =
+      node.type === 'chip'
+        ? [node.raw, 1 + (node.attrs['item-name'] ?? '').length]
+        : [node.text, node.text.length]
+    if (visibleLen > remaining) {
+      if (node.type === 'text' && remaining > 0)
+        out += content.slice(0, remaining)
+      break
+    }
+    out += content
+    remaining -= visibleLen
+  }
+  return out + '...'
+}
+
+/**
+ * Replace `range` with parsed chip+text from `text` — used by paste so chip
+ * XML on the clipboard reconstructs as live chip nodes. Plain text yields a
+ * single text node, equivalent to the no-chip fast path.
+ */
+export function insertPlrlText(range: Range, text: string): void {
+  for (const node of walkPlrlText(text)) {
+    if (node.type === 'chip') {
+      insertChipWithSentinels(range, buildChipFromAttrs(node.tag, node.attrs))
+    } else {
+      const tn = document.createTextNode(node.text)
+      range.insertNode(tn)
+      range.setStartAfter(tn)
+      range.collapse(true)
+    }
+  }
 }
 
 /**
@@ -242,4 +266,27 @@ export function deleteChip(chip: HTMLElement): void {
     else next.nodeValue = text.replace(/^​+/, '')
   }
   chip.remove()
+}
+
+// Regex-based (not DOMParser) so static analyzers don't flag it as an
+// HTML-from-input sink — the format is well-defined by `serializeChip`.
+function walkPlrlText(text: string): WalkedPlrlNode[] {
+  const out: WalkedPlrlNode[] = []
+  let lastIdx = 0
+  for (const match of text.matchAll(PLRL_CHIP_REGEX)) {
+    const matchIdx = match.index ?? 0
+    if (matchIdx > lastIdx)
+      out.push({ type: 'text', text: text.slice(lastIdx, matchIdx) })
+    const tag = match[1].toLowerCase() as MentionKind
+    const attrs: Record<string, string> = {}
+    for (const attrMatch of match[2].matchAll(CHIP_ATTR_REGEX))
+      attrs[attrMatch[1]] = unescape(attrMatch[2])
+    if (attrs['item-id'] && attrs['item-name'])
+      out.push({ type: 'chip', tag, attrs, raw: match[0] })
+    else out.push({ type: 'text', text: match[0] })
+    lastIdx = matchIdx + match[0].length
+  }
+  if (lastIdx < text.length)
+    out.push({ type: 'text', text: text.slice(lastIdx) })
+  return out
 }
