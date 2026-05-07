@@ -40,6 +40,7 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { Body2P } from '../../utils/typography/Text.tsx'
 import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
+import { prettifyPrompt } from 'components/utils/contentEditableChips.ts'
 
 const MAX_WIDTH = 924
 
@@ -308,7 +309,7 @@ function SavedPromptsOverlay({
           skeletonProps={{ numRows: 6, gap: 'small' }}
           renderer={({ rowData }) => (
             <SavedPromptsChip
-              label={rowData.prompt ?? ''}
+              label={prettifyPrompt(rowData.prompt ?? '')}
               fillLevel={2}
               rightContent={
                 <ArrowUpIcon

@@ -767,6 +767,9 @@ query WorkbenchJobActivities($id: ID!) {
     id
     status
     prompt
+    workbench {
+      id
+    }
     activities(first: 100) {
       edges {
         node {

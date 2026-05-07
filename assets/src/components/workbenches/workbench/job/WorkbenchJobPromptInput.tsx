@@ -1,6 +1,6 @@
 import {
   useCreateWorkbenchMessageMutation,
-  WorkbenchJobFragment,
+  WorkbenchJobActivitiesQuery,
 } from 'generated/graphql'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
@@ -28,7 +28,7 @@ import { isJobRunning } from './WorkbenchJobActivity'
 export function WorkbenchJobPromptInput({
   job,
 }: {
-  job: Nullable<WorkbenchJobFragment>
+  job: Nullable<WorkbenchJobActivitiesQuery['workbenchJob']>
 }) {
   const [newMessage, setNewMessage] = useState('')
   const chatInputRef = useRef<ChatInputSimpleRef>(null)

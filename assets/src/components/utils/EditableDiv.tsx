@@ -12,10 +12,11 @@ import {
 import styled from 'styled-components'
 import { applyNodeToRefs } from 'utils/applyNodeToRefs'
 import {
+  CHIP_DATA_ATTR,
   chipBeforeCaret,
   deleteChip,
   insertPlrlText,
-  serializeEditableValue,
+  serializeEditableDiv,
   serializeRange,
 } from './contentEditableChips'
 
@@ -52,7 +53,7 @@ export function EditableDiv({
   const onInput = useCallback(
     (e: FormEvent<HTMLDivElement>) => {
       const node = e.currentTarget
-      const content = serializeEditableValue(node)
+      const content = serializeEditableDiv(node)
       // sometimes clearing the input manually leaves a straggler newline
       setValue(content === '\n' ? '' : content)
       if (content === '\n' || content === '') node.innerHTML = ''
@@ -96,7 +97,7 @@ export function EditableDiv({
       selection.deleteFromDocument()
       insertPlrlText(selection.getRangeAt(0), text)
       const node = internalRef.current
-      setValue(node ? serializeEditableValue(node) : '')
+      setValue(node ? serializeEditableDiv(node) : '')
     },
     [setValue]
   )
@@ -118,6 +119,23 @@ export function EditableDiv({
     internalRef.current?.dispatchEvent(
       new InputEvent('input', { bubbles: true })
     )
+  }, [])
+
+  // allows us to apply styles to highlighted chips
+  useEffect(() => {
+    const handler = () => {
+      const sel = document.getSelection()
+      const range = sel?.rangeCount ? sel.getRangeAt(0) : null
+      internalRef.current
+        ?.querySelectorAll<HTMLElement>(`[${CHIP_DATA_ATTR}="true"]`)
+        .forEach((chip) =>
+          range?.intersectsNode(chip)
+            ? (chip.dataset.selected = 'true')
+            : delete chip.dataset.selected
+        )
+    }
+    document.addEventListener('selectionchange', handler)
+    return () => document.removeEventListener('selectionchange', handler)
   }, [])
 
   return (
@@ -151,21 +169,21 @@ const ContentEditableDivSC = styled.div<{ $disabled?: boolean }>(
       color: theme.colors['text-xlight'],
       pointerEvents: 'none',
     },
-    '[data-chip="true"]': {
+    [`[${CHIP_DATA_ATTR}="true"]`]: {
+      ...theme.partials.text.caption,
       display: 'inline-flex',
       alignItems: 'center',
       gap: theme.spacing.xxsmall,
       padding: `0 ${theme.spacing.xsmall}px`,
-      margin: `0 1px`,
       borderRadius: theme.borderRadiuses.medium,
-      background: theme.colors['fill-three'],
-      border: theme.borders['fill-three'],
-      color: theme.colors.text,
-      fontSize: '0.92em',
+      background: theme.colors['fill-two'],
+      border: theme.borders['fill-two'],
+      color: theme.colors['text-light'],
       lineHeight: '1.6em',
-      verticalAlign: 'baseline',
       userSelect: 'none',
       cursor: 'default',
+      margin: 1,
     },
+    [`[${CHIP_DATA_ATTR}][data-selected] > span`]: { background: 'Highlight' },
   })
 )

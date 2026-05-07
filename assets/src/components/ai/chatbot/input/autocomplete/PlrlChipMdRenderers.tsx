@@ -134,14 +134,14 @@ const ChipBodySC = styled.span(({ theme }) => ({
   fontSize: 12,
   lineHeight: '16px',
   color: theme.colors.text,
-  backgroundColor: theme.colors['fill-two'],
   border: theme.borders['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
+  background: theme.colors['fill-two'],
+  transition: 'background 0.1s ease-in-out',
+  margin: 1,
 }))
 
 const ChipLinkSC = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
-  '&:hover': {
-    filter: `drop-shadow(0 0 2px ${theme.colors['border-fill-three']})`,
-  },
+  '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))

@@ -22,17 +22,11 @@ const CHIP_ATTR_REGEX = /([a-z-]+)\s*=\s*"([^"]*)"/g
 
 const ZWSP = '​'
 
-export function stripZwsp(text: string): string {
-  return text.replace(/​/g, '')
-}
-
-export function isChipNode(node: Node | null | undefined): boolean {
-  return (
-    !!node &&
-    node.nodeType === Node.ELEMENT_NODE &&
-    (node as HTMLElement).getAttribute?.(CHIP_DATA_ATTR) === 'true'
-  )
-}
+export const stripZwsp = (text: string): string => text.replace(/​/g, '')
+export const isChipNode = (node: Nullable<Node>): boolean =>
+  !!node &&
+  node.nodeType === Node.ELEMENT_NODE &&
+  (node as HTMLElement).getAttribute?.(CHIP_DATA_ATTR) === 'true'
 
 /**
  * Convert a chip DOM node back to its XML form by reading its `data-attr-*`
@@ -50,11 +44,18 @@ export function serializeChip(el: HTMLElement): string {
   return `<${tag}${attrs.length ? ' ' + attrs.join(' ') : ''}></${tag}>`
 }
 
+/** Serialize the contents of a Range to canonical text (chips → XML). */
+export function serializeRange(range: Range): string {
+  const wrapper = document.createElement('div')
+  wrapper.appendChild(range.cloneContents())
+  return serializeEditableDiv(wrapper)
+}
+
 /**
  * Walk the editor DOM and emit canonical text — chip nodes serialize to XML,
  * other nodes contribute their text (with ZWSP sentinels stripped).
  */
-export function serializeEditableValue(container: HTMLElement): string {
+export function serializeEditableDiv(container: HTMLElement): string {
   let out = ''
   const walk = (node: Node) => {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -79,22 +80,15 @@ export function serializeEditableValue(container: HTMLElement): string {
 }
 
 /**
- * Insert ZWSP+chip+ZWSP at `range` and advance the range to just after the
- * trailing ZWSP. Sentinels let the caret land on either side of the
- * non-editable chip span.
+ * Insert the chip followed by a trailing ZWSP — the sentinel gives the caret
+ * a landing site after the non-editable chip, which Safari/Firefox need
  */
 export function insertChipWithSentinels(range: Range, chip: HTMLElement): void {
-  const before = document.createTextNode(ZWSP)
-  const after = document.createTextNode(ZWSP)
-  range.insertNode(before)
-  range.setStartAfter(before)
-  range.collapse(true)
+  const sentinel = document.createTextNode(ZWSP)
   range.insertNode(chip)
   range.setStartAfter(chip)
-  range.collapse(true)
-  range.insertNode(after)
-  range.setStartAfter(after)
-  range.collapse(true)
+  range.insertNode(sentinel)
+  range.setStartAfter(sentinel)
 }
 
 export function insertChipAtRange(
@@ -132,15 +126,11 @@ export function buildChipFromAttrs(
     span.setAttribute(`${CHIP_ATTR_PREFIX}${k}`, v)
   }
   const name = attrs['item-name'] ?? ''
-  span.textContent = tag === MentionKind.Skill ? `/${name}` : name
+  // wrap text in an inner span for highlight styling
+  const inner = document.createElement('span')
+  inner.textContent = tag === MentionKind.Skill ? `/${name}` : name
+  span.appendChild(inner)
   return span
-}
-
-/** Serialize the contents of a Range to canonical text (chips → XML). */
-export function serializeRange(range: Range): string {
-  const wrapper = document.createElement('div')
-  wrapper.appendChild(range.cloneContents())
-  return serializeEditableValue(wrapper)
 }
 
 type WalkedPlrlNode =
@@ -250,19 +240,12 @@ export function chipBeforeCaret(container: HTMLElement): HTMLElement | null {
 }
 
 export function deleteChip(chip: HTMLElement): void {
-  const prev = chip.previousSibling
   const next = chip.nextSibling
-  // pure-ZWSP siblings get removed entirely; siblings fused with typed text
-  // (Chrome will append a typed char to a ZWSP text node) get their leading
-  // or trailing ZWSPs stripped so no leftover ZWSP confuses caret-context code.
-  if (prev?.nodeType === Node.TEXT_NODE) {
-    const text = prev.nodeValue ?? ''
-    if (stripZwsp(text).length === 0) prev.parentNode?.removeChild(prev)
-    else prev.nodeValue = text.replace(/​+$/, '')
-  }
+  // strip our trailing sentinel — pure ZWSP node gets removed entirely
+  // if Chrome fused a typed char into the ZWSP node, just strip the leading ZWSP
   if (next?.nodeType === Node.TEXT_NODE) {
     const text = next.nodeValue ?? ''
-    if (stripZwsp(text).length === 0) next.parentNode?.removeChild(next)
+    if (stripZwsp(text).length === 0) next.remove()
     else next.nodeValue = text.replace(/^​+/, '')
   }
   chip.remove()
