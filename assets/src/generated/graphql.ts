@@ -20028,7 +20028,7 @@ export type WorkbenchEvalsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchEvalsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchEvalsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, startedAt?: string | null, completedAt?: string | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null, prompt?: string | null, result?: string | null, logic?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type RecentWorkbenchJobsQueryVariables = Exact<{
   count?: InputMaybe<Scalars['Int']['input']>;
@@ -41633,11 +41633,16 @@ export const WorkbenchEvalsDocument = gql`
           id
           prompt
           insertedAt
+          startedAt
+          completedAt
           evalResult {
             id
             grade
             feedback {
               summary
+              prompt
+              result
+              logic
             }
           }
         }

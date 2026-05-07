@@ -600,11 +600,16 @@ query WorkbenchEvals($id: ID!, $first: Int = 100) {
           id
           prompt
           insertedAt
+          startedAt
+          completedAt
           evalResult {
             id
             grade
             feedback {
               summary
+              prompt
+              result
+              logic
             }
           }
         }
