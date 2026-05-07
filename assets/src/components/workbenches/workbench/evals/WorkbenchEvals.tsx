@@ -17,6 +17,7 @@ import {
 } from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { mapExistingNodes } from 'utils/graphql'
 
 type QualityTab = 'prompt' | 'conclusion' | 'logic'
 
@@ -88,26 +89,20 @@ export function WorkbenchEvals() {
     skip: !workbenchId,
     fetchPolicy: 'cache-and-network',
   })
-  const jobs = useMemo(() => {
-    const fetched =
-      data?.workbench?.runs?.edges
-        ?.flatMap((edge) => (edge?.node ? [edge.node] : []))
-        .filter((job) => !!job.evalResult) ?? []
-    const source = fetched.length ? fetched : MOCK_EVAL_JOBS
 
-    return source.sort(
-      (a, b) =>
-        (b.insertedAt ? new Date(b.insertedAt).getTime() : 0) -
-        (a.insertedAt ? new Date(a.insertedAt).getTime() : 0)
+  const jobs = useMemo(() => {
+    const fetched = mapExistingNodes(data?.workbench?.runs).filter(
+      (job) => !!job.evalResult
     )
+
+    return fetched.length ? fetched : MOCK_EVAL_JOBS
   }, [data])
+
   const selectedJob =
     jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null
 
   useEffect(() => {
-    if (jobs.length && !selectedJobId) {
-      setSelectedJobId(jobs[0].id)
-    }
+    if (jobs.length && !selectedJobId) setSelectedJobId(jobs[0].id)
   }, [jobs, selectedJobId])
 
   useEffect(() => {
@@ -177,9 +172,7 @@ export function WorkbenchEvals() {
                       color: theme.colors['text-light'],
                     }}
                   >
-                    {durationSeconds
-                      ? `${durationSeconds} seconds`
-                      : 'Duration unavailable'}
+                    {durationSeconds && `${durationSeconds} seconds`}
                   </span>
                 </Flex>
               </Flex>
