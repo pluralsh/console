@@ -153,7 +153,10 @@ config :hammer,
 config :tzdata, :autoupdate, :disabled
 
 config :console, Console.Mailer,
-  adapter: Bamboo.SMTPAdapter
+  adapter: Swoosh.Adapters.SMTP
+
+# We only use SMTP, so disable the API client to avoid hackney deprecation warnings.
+config :swoosh, :api_client, false
 
 config :console, Console.PromEx,
   disabled: false,

@@ -172,11 +172,12 @@ defmodule Console.MixProject do
       {:http_stream, "~> 1.0.0"},
       {:solid, "~> 1.0.0-rc.0"},
       {:x509, "~> 0.9.2"},
-      {:bamboo_phoenix, "~> 1.0"},
+      {:swoosh, "~> 1.18"},
+      # phoenix_swoosh is pinned to 0.3.x because newer versions require
+      # phoenix_html ~> 3.0, but the rest of the project still uses ~> 2.11.
+      {:phoenix_swoosh, "~> 0.3.4"},
       {:gen_smtp, "~> 1.3", override: true},
       {:slipstream, "~> 1.0"},
-      {:bamboo_smtp, "~> 4.2"},
-      {:bamboo, "~> 2.3", override: true},
       {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
       {:tesla, "~> 1.13"},

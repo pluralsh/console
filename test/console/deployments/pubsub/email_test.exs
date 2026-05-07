@@ -1,10 +1,12 @@
 defmodule Console.Deployments.PubSub.EmailTest do
   use Console.DataCase, async: false
-  use Bamboo.Test, shared: true
+  import Swoosh.TestAssertions
 
   alias Console.PubSub
   alias Console.Email.Builder
   alias Console.Deployments.PubSub.Email
+
+  setup :set_swoosh_global
 
   setup do
     [settings: deployment_settings(smtp: %{
@@ -25,7 +27,7 @@ defmodule Console.Deployments.PubSub.EmailTest do
       event = %PubSub.SharedSecretCreated{item: share, actor: actor}
       Email.handle_event(event)
 
-      assert_delivered_email Builder.Secret.email(share, actor)
+      assert_email_sent Builder.Secret.email(share, actor)
     end
   end
 
@@ -36,7 +38,7 @@ defmodule Console.Deployments.PubSub.EmailTest do
       event = %PubSub.AppNotificationCreated{item: notif}
       Email.handle_event(event)
 
-      assert_delivered_email Builder.Notification.email(notif)
+      assert_email_sent Builder.Notification.email(notif)
     end
 
     test "it will ignore if an app notification is not urgent" do
@@ -45,7 +47,7 @@ defmodule Console.Deployments.PubSub.EmailTest do
       event = %PubSub.AppNotificationCreated{item: notif}
       Email.handle_event(event)
 
-      refute_delivered_email Builder.Notification.email(notif)
+      assert_email_not_sent Builder.Notification.email(notif)
     end
   end
 end

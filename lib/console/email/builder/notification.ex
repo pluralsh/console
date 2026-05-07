@@ -11,7 +11,7 @@ defmodule Console.Email.Builder.Notification do
     |> subject(grab_title(notif))
     |> assign(:notification, notif)
     |> assign(:user, user)
-    |> render(:notification)
+    |> render_body(:notification)
   end
 
   defp grab_title(%AppNotification{text: text}) do

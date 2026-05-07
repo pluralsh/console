@@ -4,7 +4,7 @@ defprotocol Console.Deployments.PubSub.Emailable do
   @doc """
   Returns the payload and topics for a graphql subscription event
   """
-  @spec email(term) :: %Bamboo.Email{} | :ok
+  @spec email(term) :: Swoosh.Email.t() | :ok
   def email(event)
 end
 
