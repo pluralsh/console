@@ -71,6 +71,7 @@ export type WorkbenchOutletContext = {
   workbenchId: string
   isLoading: boolean
   setSideContent: (content: ReactNode | null) => void
+  setShowDescription: (show: boolean) => void
 }
 
 export enum WorkbenchMoreMenuKey {
@@ -93,6 +94,7 @@ export function Workbench() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [toolsEditOpen, setToolsEditOpen] = useState(false)
   const [sideContent, setSideContent] = useState<ReactNode | null>(null)
+  const [showDescription, setShowDescription] = useState(true)
 
   const handleMoreMenuSelection = (selectedKey: Key) => {
     switch (selectedKey) {
@@ -231,22 +233,31 @@ export function Workbench() {
             />
           </MoreMenu>
         </Flex>
-        <StretchedFlex>
-          {isLoading ? (
-            <RectangleSkeleton
-              $height={18}
-              $width="100%"
-            />
-          ) : (
-            <Subtitle2H1
-              $color="text-xlight"
-              css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
-            >
-              {workbench?.description}
-            </Subtitle2H1>
-          )}
-        </StretchedFlex>
-        <Outlet context={{ workbenchId: id, isLoading, setSideContent }} />
+        {showDescription && (
+          <StretchedFlex>
+            {isLoading ? (
+              <RectangleSkeleton
+                $height={18}
+                $width="100%"
+              />
+            ) : (
+              <Subtitle2H1
+                $color="text-xlight"
+                css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
+              >
+                {workbench?.description}
+              </Subtitle2H1>
+            )}
+          </StretchedFlex>
+        )}
+        <Outlet
+          context={{
+            workbenchId: id,
+            isLoading,
+            setSideContent,
+            setShowDescription,
+          }}
+        />
         <Confirm
           open={deleteModalOpen}
           close={() => setDeleteModalOpen(false)}
