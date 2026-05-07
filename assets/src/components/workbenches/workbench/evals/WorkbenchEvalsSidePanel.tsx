@@ -206,10 +206,26 @@ export function WorkbenchEvalsSidePanel({
   )
 
   return (
-    <WrapperSC>
-      <ContentSC>
+    <Flex
+      direction="column"
+      minHeight={0}
+      overflow="hidden"
+      css={{
+        borderRight: theme.borders['fill-one'],
+        minWidth: 350,
+        maxWidth: 350,
+      }}
+    >
+      <Flex
+        direction="column"
+        height="100%"
+        minHeight={0}
+        overflow="hidden"
+      >
         <Flex
+          alignItems="center"
           gap="xsmall"
+          height={73}
           padding="medium"
           wrap="wrap"
           css={{ borderBottom: theme.borders['fill-one'] }}
@@ -225,7 +241,13 @@ export function WorkbenchEvalsSidePanel({
             />
           ))}
         </Flex>
-        <ListSC>
+        <Flex
+          direction="column"
+          gap="small"
+          flex={1}
+          minHeight={0}
+          overflowY="auto"
+        >
           {loading && !data ? (
             <Flex
               direction="column"
@@ -263,7 +285,11 @@ export function WorkbenchEvalsSidePanel({
                   >
                     {Math.round(job.evalResult?.grade ?? 0)}
                   </ScoreBadgeSC>
-                  <EvalTextWrapSC>
+                  <Flex
+                    direction="column"
+                    gap="xxxsmall"
+                    minWidth={0}
+                  >
                     <span
                       css={{
                         ...TRUNCATE,
@@ -281,7 +307,7 @@ export function WorkbenchEvalsSidePanel({
                     >
                       {formatDateTime(job.insertedAt, 'MMMM D, YYYY')}
                     </span>
-                  </EvalTextWrapSC>
+                  </Flex>
                 </EvalLinkSC>
               ))}
             </Flex>
@@ -293,9 +319,9 @@ export function WorkbenchEvalsSidePanel({
               No evals available for this filter.
             </CaptionP>
           )}
-        </ListSC>
-      </ContentSC>
-    </WrapperSC>
+        </Flex>
+      </Flex>
+    </Flex>
   )
 }
 
@@ -324,6 +350,7 @@ function EvalFilterChip({
       css={{
         borderRadius: 12,
         backgroundColor: active ? theme.colors['fill-one-selected'] : undefined,
+        height: 'fit-content',
       }}
     >
       <span css={{ textTransform: 'capitalize' }}>
@@ -332,35 +359,6 @@ function EvalFilterChip({
     </Chip>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  borderRight: theme.borders['fill-one'],
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-  minHeight: 0,
-  minWidth: 350,
-  maxWidth: 350,
-  overflowX: 'hidden',
-  overflowY: 'hidden',
-}))
-
-const ContentSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  minHeight: 0,
-  overflow: 'hidden',
-}))
-
-const ListSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.small,
-  minHeight: 0,
-  overflowY: 'auto',
-}))
 
 const EvalLinkSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
@@ -374,13 +372,6 @@ const EvalLinkSC = styled.button(({ theme }) => ({
   '&:hover': {
     backgroundColor: theme.colors['fill-two'],
   },
-}))
-
-const EvalTextWrapSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxxsmall,
-  minWidth: 0,
 }))
 
 const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
