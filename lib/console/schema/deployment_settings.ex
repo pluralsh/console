@@ -33,6 +33,24 @@ defmodule Console.Schema.DeploymentSettings do
     end
   end
 
+  defmodule OauthToken do
+    use Piazza.Ecto.Schema
+    alias Piazza.Ecto.EncryptedString
+
+    embedded_schema do
+      field :enabled,       :boolean
+      field :token_url,     :string
+      field :client_id,     :string
+      field :client_secret, EncryptedString
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(enabled token_url client_id client_secret)a)
+      |> validate_required([:token_url, :client_id, :client_secret])
+    end
+  end
+
   defmodule Elastic do
     use Piazza.Ecto.Schema
 
@@ -219,6 +237,8 @@ defmodule Console.Schema.DeploymentSettings do
         field :embedding_model, :string
         field :method,          OpenAIMethod, default: :auto
 
+        embeds_one :token_exchange, Console.Schema.DeploymentSettings.OauthToken, on_replace: :update
+
         field :proxy_models, {:array, :string}
       end
 
@@ -378,6 +398,7 @@ defmodule Console.Schema.DeploymentSettings do
   defp openai_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
+    |> cast_embed(:token_exchange)
   end
 
   defp ollama_changeset(model, attrs) do

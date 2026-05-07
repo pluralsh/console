@@ -3271,7 +3271,8 @@
               "running",
               "successful",
               "failed",
-              "cancelled"
+              "cancelled",
+              "paused"
             ],
             "type": "string"
           },

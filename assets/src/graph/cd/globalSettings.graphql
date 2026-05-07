@@ -108,6 +108,12 @@ fragment ObservabilityWebhook on ObservabilityWebhook {
   url
   insertedAt
   updatedAt
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
 }
 
 query DeploymentSettings {

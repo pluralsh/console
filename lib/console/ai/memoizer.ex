@@ -47,7 +47,7 @@ defmodule Console.AI.Memoizer do
 
   defp insight_attrs(%{insight_id: id}, history, attrs, sha) do
     history = Engine.fit_context_window(history, Provider.system())
-    with {:ok, insight} <- Provider.simple_tool_call(history, Insight),
+    with {:ok, insight} <- Provider.simple_tool_call(history, Insight, client: :default),
          {:ok, summary} <- Provider.summary(insight) do
       %{
         ai_poll_at: next_poll_at(),

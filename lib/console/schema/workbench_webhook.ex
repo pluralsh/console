@@ -60,13 +60,15 @@ defmodule Console.Schema.WorkbenchWebhook do
     |> foreign_key_constraint(:user_id)
     |> unique_constraint([:workbench_id, :name])
     |> validate_required([:name, :workbench_id, :user_id])
-    |> validate_webhook_or_issue_webhook()
+    |> validate_exactly_one_webhook_source()
   end
 
-  defp validate_webhook_or_issue_webhook(changeset) do
+  defp validate_exactly_one_webhook_source(changeset) do
     case {get_field(changeset, :webhook_id), get_field(changeset, :issue_webhook_id)} do
       {nil, nil} -> add_error(changeset, :webhook_id, "must have either webhook_id or issue_webhook_id")
-      {_, _} -> changeset
+      {_, nil} -> changeset
+      {nil, _} -> changeset
+      {_, _} -> add_error(changeset, :webhook_id, "must set only one of webhook_id or issue_webhook_id")
     end
   end
 

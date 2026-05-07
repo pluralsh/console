@@ -239,7 +239,7 @@ defmodule Console.AI.Workbench.Engine do
     [
       %Skills{skills: skills},
       %Skill{skills: skills},
-      %Subagents{subagents: subagents, categories: categories},
+      %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Calculator,

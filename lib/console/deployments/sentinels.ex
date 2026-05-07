@@ -157,7 +157,9 @@ defmodule Console.Deployments.Sentinels do
           repository_id: test.repository_id,
         }) end)
 
-        {count, _} = Repo.insert_all(SentinelRunJob, attrs)
+        {count, jobs} = Repo.insert_all(SentinelRunJob, attrs, returning: true)
+        Enum.each(jobs, &handle_notify(PubSub.SentinelRunJobCreated, &1))
+
         count
       end)
       |> Enum.sum()

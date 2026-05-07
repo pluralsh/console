@@ -94,6 +94,13 @@ type DeploymentSettingsList struct {
 //	      tokenSecretRef:
 //	        name: "openai-secret"
 //	        key: "token"
+//	      tokenExchange:
+//	        enabled: true
+//	        tokenUrl: "https://idp.example.com/oauth/token"
+//	        clientId: "console-ai"
+//	        clientSecretSecretRef:
+//	          name: "openai-oauth-client"
+//	          key: "clientSecret"
 //	  cost:
 //	    recommendationCushion: 20
 //	    recommendationThreshold: 100
@@ -634,6 +641,13 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Method:         in.OpenAI.Method,
 			ProxyModels:    lo.ToSlicePtr(in.OpenAI.ProxyModels),
 		}
+		if in.OpenAI.TokenExchange != nil {
+			tokenExchange, err := in.OpenAI.TokenExchange.Attributes(ctx, c, namespace)
+			if err != nil {
+				return nil, err
+			}
+			attr.Openai.TokenExchange = tokenExchange
+		}
 	}
 
 	if in.Anthropic != nil {
@@ -886,6 +900,11 @@ type OpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	BaseUrl *string `json:"baseUrl,omitempty"`
 
+	// TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs.
+	//
+	// +kubebuilder:validation:Optional
+	TokenExchange *OAuth2TokenExchange `json:"tokenExchange,omitempty"`
+
 	// Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies)
 	//
 	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
@@ -897,6 +916,48 @@ type OpenAISettings struct {
 	//
 	// +kubebuilder:validation:Required
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
+}
+
+// OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
+type OAuth2TokenExchange struct {
+	// Enabled turns token exchange on for obtaining access tokens via the configured token endpoint.
+	//
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// TokenURL is the OAuth2 token endpoint URL.
+	//
+	// +kubebuilder:validation:Optional
+	TokenURL *string `json:"tokenUrl,omitempty"`
+
+	// ClientID is the OAuth2 client identifier.
+	//
+	// +kubebuilder:validation:Optional
+	ClientID *string `json:"clientId,omitempty"`
+
+	// ClientSecretSecretRef is a reference to a Kubernetes secret key holding the OAuth2 client secret.
+	//
+	// +kubebuilder:validation:Optional
+	ClientSecretSecretRef *corev1.SecretKeySelector `json:"clientSecretSecretRef,omitempty"`
+}
+
+func (in *OAuth2TokenExchange) Attributes(ctx context.Context, c client.Client, namespace string) (*console.OpenaiTokenExchangeAttributes, error) {
+	if in == nil {
+		return nil, nil
+	}
+	attr := &console.OpenaiTokenExchangeAttributes{
+		Enabled:  in.Enabled,
+		TokenURL: in.TokenURL,
+		ClientID: in.ClientID,
+	}
+	if in.ClientSecretSecretRef != nil {
+		clientSecret, err := utils.GetSecretKey(ctx, c, in.ClientSecretSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.ClientSecret = lo.ToPtr(clientSecret)
+	}
+	return attr, nil
 }
 
 // OllamaSettings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama

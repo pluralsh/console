@@ -37,6 +37,15 @@ func (in *AzureProvider) Metrics(ctx context.Context, input *toolquery.MetricsQu
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
 
+	if input.GetOptions() == nil || input.GetOptions().GetAzure() == nil {
+		return nil, fmt.Errorf("%w: azure metrics options are required", ErrInvalidArgument)
+	}
+
+	opts := input.GetOptions().GetAzure()
+	if u := opts.GetPrometheusUrl(); u != "" {
+		return in.metricsManagedPrometheus(ctx, input, u)
+	}
+
 	request, err := datasource.NewAzureMetricsRequest(input)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidArgument, err)
@@ -57,13 +66,38 @@ func (in *AzureProvider) Metrics(ctx context.Context, input *toolquery.MetricsQu
 	return datasource.NewAzureMetricsResponse(resp).ToMetricsQueryOutput(), nil
 }
 
+func (in *AzureProvider) metricsManagedPrometheus(ctx context.Context, input *toolquery.MetricsQueryInput, url string) (*toolquery.MetricsQueryOutput, error) {
+	token, err := in.client.PrometheusAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tok := token
+	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
+		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
+		Token: &tok,
+	})
+
+	return prom.Metrics(ctx, input)
+}
+
 func (in *AzureProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
 	if input == nil || len(input.GetQuery()) == 0 {
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
-	resourceID := strings.TrimSpace(input.GetOptions().GetAzure().GetResourceId())
+
+	if input.GetOptions() == nil || input.GetOptions().GetAzure() == nil {
+		return nil, fmt.Errorf("%w: azure metrics search options are required", ErrInvalidArgument)
+	}
+
+	opts := input.GetOptions().GetAzure()
+	if u := opts.GetPrometheusUrl(); u != "" {
+		return in.metricsSearchManagedPrometheus(ctx, input, u)
+	}
+
+	resourceID := strings.TrimSpace(opts.GetResourceId())
 	if resourceID == "" {
-		return nil, fmt.Errorf("%w: azure metrics search options require resource_id", ErrInvalidArgument)
+		return nil, fmt.Errorf("%w: azure metrics search requires resource_id unless prometheus_query_url is set", ErrInvalidArgument)
 	}
 
 	definitions, err := in.client.MetricsSearch(ctx, resourceID, nil)
@@ -78,6 +112,21 @@ func (in *AzureProvider) MetricsSearch(ctx context.Context, input *toolquery.Met
 	}
 
 	return datasource.AzureMetricsSearchResponse(definitions).ToMetricsSearchOutput(input.GetQuery(), limit), nil
+}
+
+func (in *AzureProvider) metricsSearchManagedPrometheus(ctx context.Context, input *toolquery.MetricsSearchInput, url string) (*toolquery.MetricsSearchOutput, error) {
+	token, err := in.client.PrometheusAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tok := token
+	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
+		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
+		Token: &tok,
+	})
+
+	return prom.MetricsSearch(ctx, input)
 }
 
 func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {

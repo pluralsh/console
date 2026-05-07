@@ -222,6 +222,18 @@ export function WorkbenchSetupStep({
                 })
               }
             />
+            <CapabilityCheckbox
+              label="Vulnerabilities"
+              checked={infra?.vulnerabilities ?? false}
+              tooltip="Lists vulnerabilities from Trivy that are auto-associated with Plural Services."
+              onCheckedChange={(checked) =>
+                update((d) => {
+                  d.configuration ??= {}
+                  d.configuration.infrastructure ??= {}
+                  d.configuration.infrastructure.vulnerabilities = checked
+                })
+              }
+            />
           </Flex>
         </FormField>
         <FormField label="Enable Observability">

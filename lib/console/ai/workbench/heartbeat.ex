@@ -20,6 +20,8 @@ defmodule Console.AI.Workbench.Heartbeat do
 
   def handle_cast(:cancel, {job, booted}), do: {:stop, :cancel, {job, booted}}
 
+  def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
+
   def handle_info(:heartbeat, {job, booted}) do
     case Workbenches.heartbeat(job, booted) do
       {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :cancel, {job, false}}
@@ -29,6 +31,7 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def terminate(:cancel, _), do: :ok
+  def terminate(:shutdown, {job, _}), do: Workbenches.pause_job(job)
   def terminate(_, {job, _}) do
     case Workbenches.get_workbench_job(job.id) do
       %WorkbenchJob{status: :running} = job -> Workbenches.fail_job("job crashed prematurely",job)

@@ -1,7 +1,10 @@
 defmodule Toolquery.ElasticConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.ElasticConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :username, 2, type: :string
@@ -12,7 +15,10 @@ end
 defmodule Toolquery.DatadogConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.DatadogConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :site, 1, proto3_optional: true, type: :string
   field :apiKey, 2, type: :string
@@ -22,7 +28,10 @@ end
 defmodule Toolquery.PrometheusConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.PrometheusConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :token, 2, proto3_optional: true, type: :string
@@ -34,7 +43,10 @@ end
 defmodule Toolquery.LokiConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LokiConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :token, 2, proto3_optional: true, type: :string
@@ -46,7 +58,10 @@ end
 defmodule Toolquery.TempoConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TempoConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :token, 2, proto3_optional: true, type: :string
@@ -58,7 +73,10 @@ end
 defmodule Toolquery.JaegerConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.JaegerConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :token, 2, proto3_optional: true, type: :string
@@ -69,7 +87,10 @@ end
 defmodule Toolquery.SplunkConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.SplunkConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :token, 2, proto3_optional: true, type: :string
@@ -80,7 +101,10 @@ end
 defmodule Toolquery.DynatraceConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.DynatraceConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :url, 1, type: :string
   field :platformToken, 2, type: :string
@@ -89,7 +113,10 @@ end
 defmodule Toolquery.CloudwatchConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.CloudwatchConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :region, 1, type: :string
   field :log_group_names, 2, repeated: true, type: :string, json_name: "logGroupNames"
@@ -103,7 +130,10 @@ end
 defmodule Toolquery.AzureConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.AzureConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :subscription_id, 1, type: :string, json_name: "subscriptionId"
   field :tenant_id, 2, type: :string, json_name: "tenantId"
@@ -114,7 +144,10 @@ end
 defmodule Toolquery.ToolConnection do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.ToolConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   oneof :connection, 0
 
@@ -133,7 +166,10 @@ end
 defmodule Toolquery.TimeRange do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TimeRange",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :start, 1, type: Google.Protobuf.Timestamp
   field :end, 2, type: Google.Protobuf.Timestamp
@@ -142,7 +178,10 @@ end
 defmodule Toolquery.MetricsQueryInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsQueryInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
@@ -154,7 +193,10 @@ end
 defmodule Toolquery.MetricsOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsOptions
 end
@@ -162,7 +204,10 @@ end
 defmodule Toolquery.AzureMetricsOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.AzureMetricsOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :resource_id, 1, type: :string, json_name: "resourceId"
   field :metrics_namespace, 2, type: :string, json_name: "metricsNamespace"
@@ -171,12 +216,16 @@ defmodule Toolquery.AzureMetricsOptions do
   field :order_by, 5, proto3_optional: true, type: :string, json_name: "orderBy"
   field :roll_up_by, 6, proto3_optional: true, type: :string, json_name: "rollUpBy"
   field :metrics_endpoint, 7, proto3_optional: true, type: :string, json_name: "metricsEndpoint"
+  field :prometheus_url, 8, proto3_optional: true, type: :string, json_name: "prometheusUrl"
 end
 
 defmodule Toolquery.LogsQueryFacet do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LogsQueryFacet",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :name, 1, type: :string
   field :value, 2, type: :string
@@ -185,7 +234,10 @@ end
 defmodule Toolquery.LogsQueryInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LogsQueryInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
@@ -198,7 +250,10 @@ end
 defmodule Toolquery.LogsOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LogsOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :azure, 1, proto3_optional: true, type: Toolquery.AzureLogsOptions
 end
@@ -206,7 +261,10 @@ end
 defmodule Toolquery.AzureLogsOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.AzureLogsOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :resource_id, 1, type: :string, json_name: "resourceId"
 end
@@ -214,7 +272,10 @@ end
 defmodule Toolquery.TracesQueryInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TracesQueryInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
@@ -226,7 +287,10 @@ end
 defmodule Toolquery.TracesOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TracesOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :jaeger, 1, proto3_optional: true, type: Toolquery.JaegerTracesOptions
 end
@@ -234,7 +298,10 @@ end
 defmodule Toolquery.JaegerTraceQueryAttribute do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.JaegerTraceQueryAttribute",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :name, 1, type: :string
   field :value, 2, type: :string
@@ -243,7 +310,10 @@ end
 defmodule Toolquery.JaegerTracesOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.JaegerTracesOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :operation_name, 1, proto3_optional: true, type: :string, json_name: "operationName"
   field :attributes, 2, repeated: true, type: Toolquery.JaegerTraceQueryAttribute
@@ -254,7 +324,11 @@ end
 defmodule Toolquery.MetricPoint.LabelsEntry do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricPoint.LabelsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :key, 1, type: :string
   field :value, 2, type: :string
@@ -263,7 +337,10 @@ end
 defmodule Toolquery.MetricPoint do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricPoint",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :timestamp, 1, type: Google.Protobuf.Timestamp
   field :name, 2, type: :string
@@ -274,7 +351,10 @@ end
 defmodule Toolquery.MetricsQueryOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsQueryOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :metrics, 1, repeated: true, type: Toolquery.MetricPoint
 end
@@ -282,7 +362,10 @@ end
 defmodule Toolquery.MetricsSearchInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsSearchInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
@@ -293,7 +376,10 @@ end
 defmodule Toolquery.MetricsSearchOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsSearchOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsSearchOptions
 end
@@ -301,15 +387,22 @@ end
 defmodule Toolquery.AzureMetricsSearchOptions do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.AzureMetricsSearchOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :resource_id, 1, type: :string, json_name: "resourceId"
+  field :prometheus_url, 2, proto3_optional: true, type: :string, json_name: "prometheusUrl"
 end
 
 defmodule Toolquery.MetricsSearchResult do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsSearchResult",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :name, 1, type: :string
 end
@@ -317,7 +410,10 @@ end
 defmodule Toolquery.MetricsSearchOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.MetricsSearchOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :metrics, 1, repeated: true, type: Toolquery.MetricsSearchResult
 end
@@ -325,7 +421,11 @@ end
 defmodule Toolquery.LogEntry.LabelsEntry do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LogEntry.LabelsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :key, 1, type: :string
   field :value, 2, type: :string
@@ -334,7 +434,10 @@ end
 defmodule Toolquery.LogEntry do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LogEntry",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :timestamp, 1, type: Google.Protobuf.Timestamp
   field :message, 2, type: :string
@@ -344,7 +447,10 @@ end
 defmodule Toolquery.LogsQueryOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.LogsQueryOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :logs, 1, repeated: true, type: Toolquery.LogEntry
 end
@@ -352,7 +458,11 @@ end
 defmodule Toolquery.TraceSpan.TagsEntry do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TraceSpan.TagsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :key, 1, type: :string
   field :value, 2, type: :string
@@ -361,7 +471,10 @@ end
 defmodule Toolquery.TraceSpan do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TraceSpan",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :trace_id, 1, type: :string, json_name: "traceId"
   field :span_id, 2, type: :string, json_name: "spanId"
@@ -376,7 +489,10 @@ end
 defmodule Toolquery.TracesQueryOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.TracesQueryOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :spans, 1, repeated: true, type: Toolquery.TraceSpan
 end
@@ -384,7 +500,7 @@ end
 defmodule Toolquery.ToolQuery.Service do
   @moduledoc false
 
-  use GRPC.Service, name: "toolquery.ToolQuery", protoc_gen_elixir_version: "0.15.0"
+  use GRPC.Service, name: "toolquery.ToolQuery", protoc_gen_elixir_version: "0.16.0"
 
   rpc :Metrics, Toolquery.MetricsQueryInput, Toolquery.MetricsQueryOutput
 

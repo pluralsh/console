@@ -10,8 +10,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Calculator,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
-    Infrastructure.ServiceFiles,
-    Infrastructure.StackFiles,
     Infrastructure.Cluster,
     Infrastructure.ClusterList,
     Infrastructure.ClusterTags,
@@ -23,17 +21,22 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.CloudSchema,
     Infrastructure.CloudQuery,
     Infrastructure.CloudTables,
-    Infrastructure.PodLogs
+    Infrastructure.PodLogs,
+    Infrastructure.Vulns,
+    Infrastructure.Manifests
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
-  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.{Environment, FileCache}
 
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
-    system_prompt = String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools)))
-    tools(job, environment)
-    |> MemoryEngine.new(50, system_prompt: system_prompt, acc: %{}, callback: &callback(activity, &1))
+    tools(job, environment, FileCache.new())
+    |> MemoryEngine.new(50,
+      system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
+      acc: %{},
+      callback: &callback(activity, &1)
+    )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -51,12 +54,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment) do
+  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
     svc_tools(bench, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(pod_logs_tools(bench, user))
+    |> Enum.concat(vuln_tools(bench, user))
     |> Enum.concat(cloud_tools(environment))
+    |> Enum.concat(manifests_tools(bench, user, cache))
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
@@ -87,7 +92,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, user) do
     [
       ServiceComponent,
-      ServiceFiles,
       %ServiceInspect{user: user},
       %ClusterServices{user: user},
       %Cluster{user: user},
@@ -101,7 +105,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}, user) do
     [
       Stack,
-      StackFiles,
       %StackInspect{user: user},
       %StackList{user: user}
     ]
@@ -120,6 +123,17 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp pod_logs_tools(%Workbench{configuration: %{infrastructure: %{pod_logs: true}}}, %User{} = user),
     do: [%PodLogs{user: user}]
   defp pod_logs_tools(_, _), do: []
+
+  defp manifests_tools(%Workbench{configuration: %{infrastructure: %{services: s, stacks: st}}}, %User{} = user, %FileCache{} = cache) do
+    case s || st do
+      true -> [%Manifests{user: user, cache: cache}]
+      _ -> []
+    end
+  end
+  defp manifests_tools(_, _, _), do: []
+
+  defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user), do: [%Vulns{user: user}]
+  defp vuln_tools(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])
 end

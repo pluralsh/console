@@ -49,7 +49,7 @@ defmodule Console.Schema.AiInsight do
   @spec freshness(t()) :: :fresh | :stale | :expired
   def freshness(%__MODULE__{} = insight) do
     at = ts(insight)
-    slow_minutes = expiry_minutes(:slow)
+    slow_minutes = expiry_minutes(:slow) |> min(45)
     cond do
       Timex.before?(at, Timex.shift(Timex.now(), minutes: round(slow_minutes * 1.5))) -> :expired
       Timex.before?(at, Timex.shift(Timex.now(), minutes: slow_minutes)) -> :stale
@@ -80,8 +80,8 @@ defmodule Console.Schema.AiInsight do
     end
   end
 
-  defp rate(:fast), do: -20
-  defp rate(:slow), do: -45
+  defp rate(:fast), do: -120
+  defp rate(:slow), do: -240
 
   defp expiry(rate) when rate in [:fast, :slow],
     do: Timex.shift(Timex.now(), minutes: expiry_minutes(rate))

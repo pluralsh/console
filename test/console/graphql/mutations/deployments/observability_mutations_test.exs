@@ -38,22 +38,60 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
   end
 
   describe "upsertObservabilityWebhook" do
-    test "it can create a webhook" do
+    test "it can create a webhook with policy bindings" do
+      reader = insert(:user)
+      writer = insert(:user)
+
       {:ok, %{data: %{"upsertObservabilityWebhook" => webhook}}} = run_query("""
         mutation Upsert($attrs: ObservabilityWebhookAttributes!) {
           upsertObservabilityWebhook(attributes: $attrs) {
             id
             type
             name
+            readBindings { user { id } }
+            writeBindings { user { id } }
           }
         }
       """, %{"attrs" => %{
         "name" => "webhook",
-        "type" => "GRAFANA"
+        "type" => "GRAFANA",
+        "readBindings" => [%{"userId" => reader.id}],
+        "writeBindings" => [%{"userId" => writer.id}]
       }}, %{current_user: admin_user()})
 
       assert webhook["name"] == "webhook"
       assert webhook["type"] == "GRAFANA"
+      assert [read_binding] = webhook["readBindings"]
+      assert [write_binding] = webhook["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
+    end
+
+    test "it can update webhook bindings while preserving policy ids" do
+      webhook = insert(:observability_webhook)
+      reader = insert(:user)
+      writer = insert(:user)
+
+      {:ok, %{data: %{"upsertObservabilityWebhook" => updated}}} = run_query("""
+        mutation Upsert($attrs: ObservabilityWebhookAttributes!) {
+          upsertObservabilityWebhook(attributes: $attrs) {
+            id
+            readBindings { user { id } }
+            writeBindings { user { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => webhook.name,
+        "type" => "GRAFANA",
+        "readBindings" => [%{"userId" => reader.id}],
+        "writeBindings" => [%{"userId" => writer.id}]
+      }}, %{current_user: admin_user()})
+
+      assert updated["id"] == webhook.id
+      assert [read_binding] = updated["readBindings"]
+      assert [write_binding] = updated["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
     end
   end
 

@@ -32,8 +32,11 @@ spec:
           \   user: \"monitoring\"\n\t    passwordSecretRef:\n\t      name: \"prometheus-creds\"\n\t
           \     key: \"password\"\n\t  ai:\n\t    enabled: true\n\t    provider: OPENAI\n\t
           \   openAI:\n\t      model: \"gpt-4\"\n\t      tokenSecretRef:\n\t        name:
-          \"openai-secret\"\n\t        key: \"token\"\n\t  cost:\n\t    recommendationCushion:
-          20\n\t    recommendationThreshold: 100\n\t```"
+          \"openai-secret\"\n\t        key: \"token\"\n\t      tokenExchange:\n\t
+          \       enabled: true\n\t        tokenUrl: \"https://idp.example.com/oauth/token\"\n\t
+          \       clientId: \"console-ai\"\n\t        clientSecretSecretRef:\n\t          name:
+          \"openai-oauth-client\"\n\t          key: \"clientSecret\"\n\t  cost:\n\t
+          \   recommendationCushion: 20\n\t    recommendationThreshold: 100\n\t```"
         properties:
           apiVersion:
             description: |-
@@ -483,6 +486,47 @@ spec:
                         items:
                           type: string
                         type: array
+                      tokenExchange:
+                        description: TokenExchange configures OAuth2 client credentials
+                          against a token endpoint to obtain access tokens for OpenAI-compatible
+                          APIs.
+                        properties:
+                          clientId:
+                            description: ClientID is the OAuth2 client identifier.
+                            type: string
+                          clientSecretSecretRef:
+                            description: ClientSecretSecretRef is a reference to a
+                              Kubernetes secret key holding the OAuth2 client secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          enabled:
+                            description: Enabled turns token exchange on for obtaining
+                              access tokens via the configured token endpoint.
+                            type: boolean
+                          tokenUrl:
+                            description: TokenURL is the OAuth2 token endpoint URL.
+                            type: string
+                        type: object
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access

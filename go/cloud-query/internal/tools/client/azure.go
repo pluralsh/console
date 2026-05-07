@@ -3,19 +3,25 @@ package client
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azlogs"
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 )
 
-const azureMetricsEndpoint = "https://global.metrics.monitor.azure.com"
+const (
+	azureMetricsEndpoint = "https://global.metrics.monitor.azure.com"
+	azurePrometheusScope = "https://prometheus.monitor.azure.com/.default"
+)
 
 type AzureClient struct {
 	subscriptionID string
 	credential     azcore.TokenCredential
+	promToken      *azcore.AccessToken
 }
 
 func NewAzureClient(subscriptionID, tenantID, clientID, clientSecret string) (*AzureClient, error) {
@@ -60,6 +66,25 @@ func (in *AzureClient) Metrics(ctx context.Context, metricsEndpoint string, metr
 	}
 
 	return resp, nil
+}
+
+// PrometheusAccessToken returns an Azure AD bearer token for the Azure Monitor
+// managed Prometheus query API.
+func (in *AzureClient) PrometheusAccessToken(ctx context.Context) (string, error) {
+	if in.promToken != nil && in.promToken.ExpiresOn.After(time.Now()) {
+		return in.promToken.Token, nil
+	}
+
+	tk, err := in.credential.GetToken(ctx, policy.TokenRequestOptions{
+		Scopes: []string{azurePrometheusScope},
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("azure token for managed prometheus: %w", err)
+	}
+
+	in.promToken = &tk
+	return tk.Token, nil
 }
 
 func (in *AzureClient) MetricsSearch(ctx context.Context, resourceURI string, options *armmonitor.MetricDefinitionsClientListOptions) ([]*armmonitor.MetricDefinition, error) {

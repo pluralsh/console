@@ -39,6 +39,8 @@ import { getWebhookIcon } from './workbench/webhooks/utils'
 const MAX_VISIBLE_METADATA_ITEMS = 5
 const METADATA_ICON_SIZE = 12
 const WORKBENCH_CARD_MIN_WIDTH = 340
+const WORKBENCH_CARD_DESC_VISIBLE_LINES = 2
+const WORKBENCH_LIST_CARD_MIN_HEIGHT_PX = 168
 
 const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
@@ -132,80 +134,86 @@ export function WorkbenchCard({
       to={getWorkbenchAbsPath(id)}
     >
       <Body2BoldP>{name}</Body2BoldP>
-      {description && (
-        <Body2P
-          css={{
-            color: theme.colors['text-light'],
-            display: '-webkit-box',
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 3,
-            overflow: 'hidden',
-          }}
-        >
-          {description}
-        </Body2P>
-      )}
+      <DescriptionReserveSC>
+        {description && (
+          <Body2P
+            css={{
+              color: theme.colors['text-light'],
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: WORKBENCH_CARD_DESC_VISIBLE_LINES,
+              overflow: 'hidden',
+            }}
+          >
+            {description}
+          </Body2P>
+        )}
+      </DescriptionReserveSC>
       {hasAnyMetadata && (
-        <MetadataGridSC>
-          {hasCodingAgent && (
-            <>
-              <MetadataLabelSC>coding agent</MetadataLabelSC>
-              <MetadataValueSC>
-                <Flex
-                  align="center"
-                  gap="xxsmall"
-                  minWidth={0}
-                >
-                  <RuntimeIcon
-                    fullColor
-                    size={12}
-                  />
-                  <CaptionP
-                    $color="text-xlight"
-                    css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+        <MetadataFootSC>
+          <MetadataGridSC>
+            {hasCodingAgent && (
+              <>
+                <MetadataLabelSC>coding agent</MetadataLabelSC>
+                <MetadataValueSC>
+                  <Flex
+                    align="center"
+                    gap="xxsmall"
+                    minWidth={0}
                   >
-                    {agentRuntime?.name}
-                  </CaptionP>
-                </Flex>
-              </MetadataValueSC>
-            </>
-          )}
-          {hasWebhooks && (
-            <>
-              <MetadataLabelSC>webhooks</MetadataLabelSC>
-              <MetadataValueSC>
-                <MetadataIcons
-                  items={webhooks.map((webhook) => ({
-                    id: webhook.id,
-                    label: webhook.name ?? 'Webhook',
-                    icon: <span>{withIconSize(getWebhookIcon(webhook))}</span>,
-                  }))}
-                />
-              </MetadataValueSC>
-            </>
-          )}
-          {hasTools && (
-            <>
-              <MetadataLabelSC>bound tools</MetadataLabelSC>
-              <MetadataValueSC>
-                <MetadataIcons
-                  maxVisibleItems={MAX_VISIBLE_METADATA_ITEMS}
-                  items={tools.map((tool) => ({
-                    id: tool.id,
-                    label: tool.name,
-                    icon: (
-                      <WorkbenchToolIcon
-                        type={tool.tool}
-                        provider={tool.cloudConnection?.provider}
-                        size={METADATA_ICON_SIZE}
-                      />
-                    ),
-                  }))}
-                />
-              </MetadataValueSC>
-            </>
-          )}
-        </MetadataGridSC>
+                    <RuntimeIcon
+                      fullColor
+                      size={12}
+                    />
+                    <CaptionP
+                      $color="text-xlight"
+                      css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
+                    >
+                      {agentRuntime?.name}
+                    </CaptionP>
+                  </Flex>
+                </MetadataValueSC>
+              </>
+            )}
+            {hasWebhooks && (
+              <>
+                <MetadataLabelSC>webhooks</MetadataLabelSC>
+                <MetadataValueSC>
+                  <MetadataIcons
+                    items={webhooks.map((webhook) => ({
+                      id: webhook.id,
+                      label: webhook.name ?? 'Webhook',
+                      icon: (
+                        <span>{withIconSize(getWebhookIcon(webhook))}</span>
+                      ),
+                    }))}
+                  />
+                </MetadataValueSC>
+              </>
+            )}
+            {hasTools && (
+              <>
+                <MetadataLabelSC>bound tools</MetadataLabelSC>
+                <MetadataValueSC>
+                  <MetadataIcons
+                    maxVisibleItems={MAX_VISIBLE_METADATA_ITEMS}
+                    items={tools.map((tool) => ({
+                      id: tool.id,
+                      label: tool.name,
+                      icon: (
+                        <WorkbenchToolIcon
+                          type={tool.tool}
+                          provider={tool.cloudConnection?.provider}
+                          size={METADATA_ICON_SIZE}
+                        />
+                      ),
+                    }))}
+                  />
+                </MetadataValueSC>
+              </>
+            )}
+          </MetadataGridSC>
+        </MetadataFootSC>
       )}
       <CardArrowSC>
         <ArrowRightIcon
@@ -226,12 +234,13 @@ function withIconSize(icon: ReactElement): ReactElement {
 }
 
 const CardSC = styled(Card)(({ theme }) => ({
+  boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
   height: '100%',
-  minHeight: 120,
+  minHeight: WORKBENCH_LIST_CARD_MIN_HEIGHT_PX,
   textDecoration: 'none',
 }))
 
@@ -246,6 +255,17 @@ const CardArrowSC = styled.div(({ theme }) => ({
   bottom: theme.spacing.medium,
   lineHeight: 0,
 }))
+
+const DescriptionReserveSC = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  minHeight: `calc((${theme.partials.text.body2.lineHeight}) * ${WORKBENCH_CARD_DESC_VISIBLE_LINES})`,
+  minWidth: 0,
+}))
+
+const MetadataFootSC = styled.div({
+  flexShrink: 0,
+  minWidth: 0,
+})
 
 const MetadataGridSC = styled.div(({ theme }) => ({
   display: 'grid',
