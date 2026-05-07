@@ -1,3 +1,5 @@
+// should probably consider moving to something like Lexical
+// if we decide to add any more complexity to this
 import {
   ClipboardEvent,
   ComponentPropsWithRef,
@@ -10,9 +12,13 @@ import {
 import styled from 'styled-components'
 import { applyNodeToRefs } from 'utils/applyNodeToRefs'
 import {
+  buildChipFromAttrs,
   chipBeforeCaret,
   deleteChip,
+  insertChipWithSentinels,
   serializeEditableValue,
+  serializeRange,
+  walkPlrlText,
 } from './contentEditableChips'
 
 export function EditableDiv({
@@ -86,18 +92,52 @@ export function EditableDiv({
   const onPaste = useCallback(
     (e: ClipboardEvent<HTMLDivElement>) => {
       e.preventDefault()
-      const text = e.clipboardData?.getData('text/plain')
-      // take the current selection, remove whatever's there if anything, and insert the pasted text
+      const text = e.clipboardData?.getData('text/plain') ?? ''
       const selection = document.getSelection()
       if (!selection?.rangeCount || !text) return
       selection.deleteFromDocument()
-      selection.getRangeAt(0).insertNode(document.createTextNode(text))
-      selection.collapseToEnd()
+      const range = selection.getRangeAt(0)
+      const walked = walkPlrlText(text)
+      const hasChip = walked.some((n) => n.type === 'chip')
+      if (!hasChip) {
+        range.insertNode(document.createTextNode(text))
+        selection.collapseToEnd()
+      } else {
+        for (const w of walked) {
+          if (w.type === 'chip') {
+            insertChipWithSentinels(range, buildChipFromAttrs(w.tag, w.attrs))
+          } else {
+            const tn = document.createTextNode(w.text)
+            range.insertNode(tn)
+            range.setStartAfter(tn)
+            range.collapse(true)
+          }
+        }
+      }
       const node = internalRef.current
       setValue(node ? serializeEditableValue(node) : '')
     },
     [setValue]
   )
+
+  const onCopy = useCallback((e: ClipboardEvent<HTMLDivElement>) => {
+    const sel = document.getSelection()
+    if (!sel?.rangeCount || sel.isCollapsed) return
+    e.clipboardData?.setData('text/plain', serializeRange(sel.getRangeAt(0)))
+    e.preventDefault()
+  }, [])
+
+  const onCut = useCallback((e: ClipboardEvent<HTMLDivElement>) => {
+    const sel = document.getSelection()
+    if (!sel?.rangeCount || sel.isCollapsed) return
+    const range = sel.getRangeAt(0)
+    e.clipboardData?.setData('text/plain', serializeRange(range))
+    e.preventDefault()
+    range.deleteContents()
+    internalRef.current?.dispatchEvent(
+      new InputEvent('input', { bubbles: true })
+    )
+  }, [])
 
   return (
     <ContentEditableDivSC
@@ -106,6 +146,8 @@ export function EditableDiv({
       data-placeholder={placeholder}
       onInput={onInput}
       onPaste={onPaste}
+      onCopy={onCopy}
+      onCut={onCut}
       onKeyDown={onKeyDown}
       $disabled={disabled}
       {...props}

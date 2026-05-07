@@ -1,4 +1,5 @@
 import { Confirm } from 'components/utils/Confirm'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StrongSC } from 'components/utils/typography/Text'
 import {
@@ -21,7 +22,7 @@ export function CronScheduleDeleteModal({
     variables: { id: cron?.id ?? '' },
     onCompleted: () => {
       popToast({
-        content: `${cron?.prompt ?? 'schedule'} deleted`,
+        content: `${prettifyPrompt(cron?.prompt ?? '') || 'schedule'} deleted`,
         severity: 'danger',
       })
       onClose()
@@ -44,7 +45,7 @@ export function CronScheduleDeleteModal({
         <span>
           Are you sure you want to delete schedule{' '}
           <StrongSC $color="text-danger">
-            {truncate(cron?.prompt ?? '', { length: 30 })}
+            {truncate(prettifyPrompt(cron?.prompt ?? ''), { length: 30 })}
           </StrongSC>
           ?
         </span>

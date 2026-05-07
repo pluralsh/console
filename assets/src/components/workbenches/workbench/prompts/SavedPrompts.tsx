@@ -12,6 +12,7 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -233,7 +234,7 @@ function getColumns({
         return (
           <StackedText
             truncate
-            first={savedPrompt.prompt || 'Saved prompt'}
+            first={prettifyPrompt(savedPrompt.prompt ?? '') || 'Saved prompt'}
           />
         )
       },

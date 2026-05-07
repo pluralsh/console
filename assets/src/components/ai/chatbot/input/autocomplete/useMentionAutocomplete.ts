@@ -1,9 +1,8 @@
 import {
-  CHIP_ATTR_PREFIX,
-  CHIP_DATA_ATTR,
-  CHIP_TAG_ATTR,
+  buildChipFromAttrs,
   insertChipAtRange,
   isChipNode,
+  stripZwsp,
 } from 'components/utils/contentEditableChips'
 import {
   KeyboardEvent,
@@ -13,12 +12,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import {
-  ChipAttrs,
-  MENTION_TRIGGERS,
-  MentionKind,
-  MentionTrigger,
-} from './mentionTypes'
+import { ChipAttrs, MENTION_TRIGGERS, MentionTrigger } from './mentionTypes'
 import { useMentionDataSources } from './useMentionDataSources'
 
 type TriggerPosition = {
@@ -44,34 +38,19 @@ const isTrigger = (ch: string): ch is MentionTrigger =>
 // whitespace or another chip — same convention as Slack/Cursor.
 function triggerHasValidContext(textNode: Text, offset: number): boolean {
   if (offset > 0) {
-    const prev = textNode.nodeValue?.[offset - 1]
-    if (prev && !/\s/.test(prev)) return false
-    return true
+    const before = stripZwsp(textNode.nodeValue?.slice(0, offset) ?? '')
+    if (before.length === 0) return true
+    return /\s/.test(before[before.length - 1])
   }
   const prevSibling = textNode.previousSibling
   if (!prevSibling) return true
   if (isChipNode(prevSibling)) return true
   if (prevSibling.nodeType === Node.TEXT_NODE) {
-    const text = prevSibling.nodeValue ?? ''
+    const text = stripZwsp(prevSibling.nodeValue ?? '')
     const lastChar = text[text.length - 1]
     return !lastChar || /\s/.test(lastChar)
   }
   return false
-}
-
-function buildChipNode(attrs: ChipAttrs): HTMLElement {
-  const { kind, ...rest } = attrs
-  const span = document.createElement('span')
-  span.setAttribute(CHIP_DATA_ATTR, 'true')
-  span.setAttribute(CHIP_TAG_ATTR, kind)
-  span.setAttribute('contenteditable', 'false')
-  for (const [k, v] of Object.entries(rest)) {
-    if (v == null || v === '') continue
-    span.setAttribute(`${CHIP_ATTR_PREFIX}${k}`, String(v))
-  }
-  const name = attrs['item-name']
-  span.textContent = kind === MentionKind.Skill ? `/${name}` : name
-  return span
 }
 
 export function useMentionAutocomplete({
@@ -201,7 +180,7 @@ export function useMentionAutocomplete({
   }, [enabled, trigger, updateFromCaret])
 
   const commit = useCallback(
-    (item: ChipAttrs) => {
+    ({ kind, ...attrs }: ChipAttrs) => {
       const pos = triggerPosRef.current
       const container = containerRef.current
       if (!pos || !container) {
@@ -224,7 +203,11 @@ export function useMentionAutocomplete({
         close()
         return
       }
-      insertChipAtRange(container, buildChipNode(item), replaceRange)
+      insertChipAtRange(
+        container,
+        buildChipFromAttrs(kind, attrs),
+        replaceRange
+      )
       // notify the editor so React state syncs
       container.dispatchEvent(new InputEvent('input', { bubbles: true }))
       close()

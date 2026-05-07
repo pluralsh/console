@@ -17,6 +17,7 @@ import {
 } from 'components/ai/chatbot/input/ChatInput'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
@@ -106,7 +107,7 @@ export function WorkbenchJobPromptInput({
                     $color="text-light"
                     css={{ ...TRUNCATE, flex: 1 }}
                   >
-                    {message}
+                    {prettifyPrompt(message)}
                   </Body2P>
                   <IconFrame
                     clickable
