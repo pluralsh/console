@@ -10,6 +10,7 @@ import {
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
+import { Subtitle1H1 } from 'components/utils/typography/Text'
 
 type QualityTab = 'prompt' | 'conclusion' | 'logic'
 
@@ -166,10 +167,9 @@ export function WorkbenchEvals() {
               </Flex>
               <Flex
                 direction="column"
-                gap="small"
                 css={{ marginTop: theme.spacing.medium }}
               >
-                <strong css={theme.partials.text.subtitle2}>Summary</strong>
+                <Subtitle1H1>Summary</Subtitle1H1>
                 <Markdown text={feedback?.summary ?? ''} />
               </Flex>
             </PanelBodySC>
