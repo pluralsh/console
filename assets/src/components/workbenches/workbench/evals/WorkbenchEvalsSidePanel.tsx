@@ -1,5 +1,5 @@
 import { Chip, Flex } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { type ComponentProps, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -16,6 +16,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { groupBy } from 'lodash'
 
 type EvalFilter = 'all' | EvalGradeCategory
+type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 
 type EvalJobRow = NonNullable<
   NonNullable<
@@ -178,42 +179,50 @@ export function WorkbenchEvalsSidePanel({
     }
   }, [activeFilter, jobs])
 
+  const filterOptions = useMemo(
+    () => [
+      {
+        key: 'all' as const,
+        count: counts.all,
+        severity: 'neutral' as ChipSeverity,
+      },
+      {
+        key: 'bad' as const,
+        count: counts.bad,
+        severity: 'danger' as ChipSeverity,
+      },
+      {
+        key: 'okay' as const,
+        count: counts.okay,
+        severity: 'warning' as ChipSeverity,
+      },
+      {
+        key: 'great' as const,
+        count: counts.great,
+        severity: 'success' as ChipSeverity,
+      },
+    ],
+    [counts]
+  )
+
   return (
     <WrapperSC>
       <ContentSC>
-        <FiltersSC>
-          <FilterChipSC
-            clickable
-            $active={activeFilter === 'all'}
-            onClick={() => setActiveFilter('all')}
-          >
-            All ({counts.all})
-          </FilterChipSC>
-          <FilterChipSC
-            clickable
-            $active={activeFilter === 'bad'}
-            $color={evalGradeToColor(2)}
-            onClick={() => setActiveFilter('bad')}
-          >
-            Bad ({counts.bad})
-          </FilterChipSC>
-          <FilterChipSC
-            clickable
-            $active={activeFilter === 'okay'}
-            $color={evalGradeToColor(5)}
-            onClick={() => setActiveFilter('okay')}
-          >
-            Okay ({counts.okay})
-          </FilterChipSC>
-          <FilterChipSC
-            clickable
-            $active={activeFilter === 'great'}
-            $color={evalGradeToColor(8)}
-            onClick={() => setActiveFilter('great')}
-          >
-            Great ({counts.great})
-          </FilterChipSC>
-        </FiltersSC>
+        <Flex
+          gap="xxsmall"
+          wrap="wrap"
+        >
+          {filterOptions.map(({ key, count, severity }) => (
+            <EvalFilterChip
+              key={key}
+              filterKey={key}
+              active={activeFilter === key}
+              count={count}
+              severity={severity}
+              onClick={() => setActiveFilter(key)}
+            />
+          ))}
+        </Flex>
         <ListSC>
           {loading && !data ? (
             <Flex
@@ -288,6 +297,40 @@ export function WorkbenchEvalsSidePanel({
   )
 }
 
+function EvalFilterChip({
+  filterKey,
+  active,
+  count,
+  severity,
+  onClick,
+}: {
+  filterKey: EvalFilter
+  active: boolean
+  count: number
+  severity: ChipSeverity
+  onClick: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <Chip
+      size="small"
+      severity={severity}
+      clickable
+      $active={active}
+      onClick={onClick}
+      css={{
+        borderRadius: 12,
+        backgroundColor: active ? theme.colors['fill-one-selected'] : undefined,
+      }}
+    >
+      <span css={{ textTransform: 'capitalize' }}>
+        {filterKey} ({count})
+      </span>
+    </Chip>
+  )
+}
+
 const WrapperSC = styled.div(({ theme }) => ({
   borderRight: theme.borders['fill-one'],
   display: 'flex',
@@ -307,25 +350,6 @@ const ContentSC = styled.div(({ theme }) => ({
   height: '100%',
   padding: theme.spacing.medium,
 }))
-
-const FiltersSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: theme.spacing.xsmall,
-}))
-
-const FilterChipSC = styled(Chip)<{ $active: boolean; $color?: string }>(
-  ({ theme, $active, $color }) => ({
-    ...theme.partials.text.caption,
-    color: $color ?? theme.colors['text-light'],
-    border: theme.borders['fill-two'],
-    borderRadius: 12,
-    backgroundColor: $active
-      ? theme.colors['fill-two']
-      : theme.colors['fill-one'],
-    opacity: $active ? 1 : 0.85,
-  })
-)
 
 const ListSC = styled.div(({ theme }) => ({
   display: 'flex',
