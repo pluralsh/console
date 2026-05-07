@@ -1,4 +1,5 @@
 import { Confirm } from 'components/utils/Confirm'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StrongSC } from 'components/utils/typography/Text'
 import {
@@ -21,7 +22,7 @@ export function SavedPromptDeleteModal({
     variables: { id: savedPrompt?.id ?? '' },
     onCompleted: () => {
       popToast({
-        content: `${savedPrompt?.prompt ?? 'saved prompt'} deleted`,
+        content: `${prettifyPrompt(savedPrompt?.prompt ?? '') || 'saved prompt'} deleted`,
         severity: 'danger',
       })
       onClose()
@@ -44,7 +45,9 @@ export function SavedPromptDeleteModal({
         <span>
           Are you sure you want to delete saved prompt{' '}
           <StrongSC $color="text-danger">
-            {truncate(savedPrompt?.prompt ?? '', { length: 30 })}
+            {truncate(prettifyPrompt(savedPrompt?.prompt ?? ''), {
+              length: 30,
+            })}
           </StrongSC>
           ?
         </span>

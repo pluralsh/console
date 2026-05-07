@@ -13,6 +13,7 @@ import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import {
   VirtualSlice,
   useFetchPaginatedData,
@@ -103,7 +104,7 @@ export function WorkbenchJobsTableContent({
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
 
 export const promptColumn = columnHelper.accessor(
-  ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
+  ({ prompt }) => truncate(prettifyPrompt(prompt ?? ''), { length: 150 }),
   { id: 'prompt', meta: { gridTemplate: '1fr' } }
 )
 

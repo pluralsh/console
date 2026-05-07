@@ -1,6 +1,6 @@
 import {
   useCreateWorkbenchMessageMutation,
-  WorkbenchJobFragment,
+  WorkbenchJobActivitiesQuery,
 } from 'generated/graphql'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
@@ -17,6 +17,7 @@ import {
 } from 'components/ai/chatbot/input/ChatInput'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
@@ -27,7 +28,7 @@ import { isJobRunning } from './WorkbenchJobActivity'
 export function WorkbenchJobPromptInput({
   job,
 }: {
-  job: Nullable<WorkbenchJobFragment>
+  job: Nullable<WorkbenchJobActivitiesQuery['workbenchJob']>
 }) {
   const [newMessage, setNewMessage] = useState('')
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
@@ -35,18 +36,13 @@ export function WorkbenchJobPromptInput({
     []
   )
 
-  const resetInput = () => {
-    setNewMessage('')
-    chatInputRef.current?.resetInput?.()
-  }
   const [
     createMessage,
     { loading: createMessageLoading, error: createMessageError },
   ] = useCreateWorkbenchMessageMutation({
-    variables: { jobId: job?.id ?? '', attributes: { prompt: newMessage } },
     update: (cache, { data }) =>
       appendActivityToCache(cache, job?.id ?? '', data?.createWorkbenchMessage),
-    onCompleted: () => resetInput(),
+    onCompleted: () => chatInputRef.current?.resetInput?.(),
     refetchQueries: ['WorkbenchJob'],
   })
 
@@ -59,8 +55,11 @@ export function WorkbenchJobPromptInput({
         ...prev,
         { id: Math.random().toString(), message: newMessage },
       ])
-      resetInput()
-    } else createMessage()
+      chatInputRef.current?.resetInput?.()
+    } else
+      createMessage({
+        variables: { jobId: job?.id ?? '', attributes: { prompt: newMessage } },
+      })
   }
 
   const sendTopQueueMessage = useEffectEvent(() => {
@@ -104,7 +103,7 @@ export function WorkbenchJobPromptInput({
                     $color="text-light"
                     css={{ ...TRUNCATE, flex: 1 }}
                   >
-                    {message}
+                    {prettifyPrompt(message)}
                   </Body2P>
                   <IconFrame
                     clickable
@@ -129,6 +128,8 @@ export function WorkbenchJobPromptInput({
           onSubmit={submitJob}
           allowSubmit={!!newMessage}
           wrapperStyles={{ minHeight: 90 }}
+          enableAutoComplete
+          workbenchId={job?.workbench?.id}
         />
       </div>
     </>

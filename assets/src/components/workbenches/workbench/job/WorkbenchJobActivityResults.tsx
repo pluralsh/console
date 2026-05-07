@@ -17,6 +17,10 @@ import {
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
+import {
+  prettifyPrompt,
+  truncateKeepingChips,
+} from 'components/utils/contentEditableChips'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -86,7 +90,7 @@ export function ExpandableUserPrompt({
         text={
           !isExpandable || isExpanded
             ? prompt
-            : truncate(prompt, { length: EXPANDABLE_PROMPT_LENGTH })
+            : truncateKeepingChips(prompt, EXPANDABLE_PROMPT_LENGTH)
         }
       />
       {isExpandable && (
@@ -413,7 +417,7 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
       label={
         <span>
           <strong>Prompt: </strong>
-          {truncate(prompt, { length: 40 })}
+          {truncate(prettifyPrompt(prompt), { length: 40 })}
         </span>
       }
     >
