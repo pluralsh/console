@@ -69,7 +69,7 @@ export function WorkbenchesEvals() {
           display: 'grid',
           gap: theme.spacing.large,
           gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-          [`@container (max-width: 1200px)`]: { gridTemplateColumns: '1fr' },
+          [`@media (max-width: 1200px)`]: { gridTemplateColumns: '1fr' },
         }}
       >
         <WorkbenchesEvalsAvgTimelineGraph />
