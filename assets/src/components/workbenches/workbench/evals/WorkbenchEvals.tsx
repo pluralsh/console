@@ -1,5 +1,11 @@
-import { EmptyState, Flex, Markdown } from '@pluralsh/design-system'
-import { useEffect, useMemo, useState } from 'react'
+import {
+  EmptyState,
+  Flex,
+  Markdown,
+  Tab,
+  TabList,
+} from '@pluralsh/design-system'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { WorkbenchOutletContext } from '../Workbench'
 import styled, { useTheme } from 'styled-components'
@@ -75,6 +81,7 @@ export function WorkbenchEvals() {
     useOutletContext<WorkbenchOutletContext>()
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
+  const qualityTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error } = useWorkbenchEvalsQuery({
     variables: { id: workbenchId, first: 100 },
@@ -189,42 +196,43 @@ export function WorkbenchEvals() {
           <PanelSC>
             <PanelHeaderSC>Quality breakdown</PanelHeaderSC>
             <Flex
-              flexShrink={0}
-              gap="medium"
-              padding="medium"
-              css={{ borderBottom: theme.borders['fill-one'] }}
+              css={{ backgroundColor: theme.colors['fill-one'], width: '100%' }}
             >
-              {qualityTabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setQualityTab(tab.key)}
-                  css={{
-                    ...theme.partials.reset.button,
-                    ...theme.partials.text.body2,
-                    color:
-                      qualityTab === tab.key
-                        ? theme.colors.text
-                        : theme.colors['text-light'],
-                    borderBottom:
-                      qualityTab === tab.key
-                        ? theme.borders['fill-six']
-                        : '1px solid transparent',
-                    paddingBottom: theme.spacing.xsmall,
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              <TabList
+                stateRef={qualityTabsStateRef}
+                stateProps={{
+                  orientation: 'horizontal',
+                  selectedKey: qualityTab,
+                  onSelectionChange: (key) => setQualityTab(key as QualityTab),
+                }}
+                flexShrink={0}
+              >
+                {qualityTabs.map((tab) => (
+                  <Tab
+                    key={tab.key}
+                    textValue={tab.label}
+                  >
+                    {tab.label}
+                  </Tab>
+                ))}
+              </TabList>
+              <Flex
+                flex={1}
+                minWidth={0}
+                css={{
+                  alignSelf: 'stretch',
+                  borderBottom: theme.borders.default,
+                }}
+              />
             </Flex>
             <PanelBodySC>
               <Markdown
                 text={
                   qualityTab === 'prompt'
-                    ? (feedback?.prompt ?? '')
+                    ? (feedback?.prompt ?? 'No prompt available')
                     : qualityTab === 'conclusion'
-                      ? (feedback?.result ?? '')
-                      : (feedback?.logic ?? '')
+                      ? (feedback?.result ?? 'No conclusion available')
+                      : (feedback?.logic ?? 'No logic available')
                 }
               />
             </PanelBodySC>
