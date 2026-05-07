@@ -1,3 +1,5 @@
+export type EvalGradeCategory = 'bad' | 'okay' | 'great'
+
 export function evalGradeToColor(score: number): string {
   const normalized = clamp(score, 0, 10)
 
@@ -13,6 +15,14 @@ export function evalGradeToColor(score: number): string {
   if (normalized < 8) return '#6AF1C2' // green[300]
   if (normalized < 9) return '#3CECAF' // green[400]
   return '#17E8A0' // green[500]
+}
+
+export function evalGradeToCategory(score: number): EvalGradeCategory {
+  const normalized = clamp(score, 0, 10)
+
+  if (normalized < 4) return 'bad'
+  if (normalized < 7) return 'okay'
+  return 'great'
 }
 
 function clamp(value: number, min: number, max: number) {
