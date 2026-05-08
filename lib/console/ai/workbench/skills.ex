@@ -56,7 +56,8 @@ defmodule Console.AI.Workbench.Skills do
   def plural?(name, %Workbench{workbench_skills: [_ | _] = db}) do
     Enum.any?(db, fn %WorkbenchSkill{name: n} -> n == name end)
   end
-  def plural?(_), do: false
+
+  def plural?(_name, _workbench), do: false
 
   def skill_file(name, %Workbench{repository: %GitRepository{} = r, skills: %Workbench.Skills{ref: ref, files: [_ | _] = files}}) do
     with {:ok, contents} <- Git.fetch(r, ref) do

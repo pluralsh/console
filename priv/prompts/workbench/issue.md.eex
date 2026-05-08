@@ -19,9 +19,7 @@ For reference, this is the webhook result from the original <%= @issue.provider 
 
 The user has provided the following notes attached to this webhook receiver, which could be useful for your investigation as well:
 
-```
 <%= @issue.workbench_webhook.prompt %>
-```
 <% end %>
 
 <%= if @issue.provider == :linear do %>

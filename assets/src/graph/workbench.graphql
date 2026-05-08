@@ -496,21 +496,21 @@ fragment WorkbenchJob on WorkbenchJob {
   }
 }
 
-fragment WorkbenchEvalJob on WorkbenchJob {
+fragment WorkbenchEvalResultRow on WorkbenchEvalResult {
   id
-  prompt
-  insertedAt
-  startedAt
-  completedAt
-  evalResult {
+  grade
+  feedback {
+    summary
+    prompt
+    result
+    logic
+  }
+  workbenchJob {
     id
-    grade
-    feedback {
-      summary
-      prompt
-      result
-      logic
-    }
+    prompt
+    insertedAt
+    startedAt
+    completedAt
   }
 }
 
@@ -528,8 +528,8 @@ query Workbenches($first: Int = 100, $after: String, $q: String) {
 }
 
 query WorkbenchDashboard {
-  workbenchPullRequests
   workbenchAggregates {
+    pullRequests
     pullRequestMergeRate
     evalResults
   }
@@ -610,13 +610,16 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchEvals($id: ID!, $first: Int = 100) {
+query WorkbenchEvals($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
-    runs(first: $first) {
+    evalResults(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
       edges {
         node {
-          ...WorkbenchEvalJob
+          ...WorkbenchEvalResultRow
         }
       }
     }
@@ -696,32 +699,18 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-fragment WorkbenchSkillTiny on WorkbenchSkill {
+fragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {
   id
   name
   description
   subagents
 }
 
-query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {
+query WorkbenchSkills($id: ID!) {
   workbench(id: $id) {
     id
-    skills {
-      ref {
-        ref
-        folder
-      }
-      files
-    }
-    workbenchSkills(first: $first, after: $after) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...WorkbenchSkillTiny
-        }
-      }
+    allSkills {
+      ...UnifiedWorkbenchSkillTiny
     }
   }
 }

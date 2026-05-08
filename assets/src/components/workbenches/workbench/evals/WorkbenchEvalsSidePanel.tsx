@@ -9,41 +9,47 @@ import {
 } from 'components/workbenches/common/evalGrade'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
-import { WorkbenchEvalJobFragment } from 'generated/graphql'
+import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import { groupBy } from 'lodash'
+
+type EvalRow = WorkbenchEvalResultRowFragment & {
+  workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
+}
 
 type EvalFilter = 'all' | EvalGradeCategory
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 
 export function WorkbenchEvalsSidePanel({
-  jobs,
+  evalRows,
   loading,
-  selectedJobId,
-  onSelectJobId,
+  selectedEvalResultId,
+  onSelectEvalResultId,
 }: {
-  jobs: WorkbenchEvalJobFragment[]
+  evalRows: EvalRow[]
   loading: boolean
-  selectedJobId?: string | null
-  onSelectJobId: (jobId: string) => void
+  selectedEvalResultId?: string | null
+  onSelectEvalResultId: (evalResultId: string) => void
 }) {
   const theme = useTheme()
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
 
-  const { filteredJobs, filterOptions } = useMemo(() => {
-    const byCategory = groupBy(jobs, (job) =>
-      evalGradeToCategory(job.evalResult?.grade ?? 0)
+  const { filteredEvalRows, filterOptions } = useMemo(() => {
+    const byCategory = groupBy(evalRows, (row) =>
+      evalGradeToCategory(row.grade ?? 0)
     )
     const counts = {
-      all: jobs.length,
+      all: evalRows.length,
       bad: byCategory.bad?.length ?? 0,
       okay: byCategory.okay?.length ?? 0,
       great: byCategory.great?.length ?? 0,
     }
 
     return {
-      filteredJobs:
-        activeFilter === 'all' ? jobs : (byCategory[activeFilter] ?? []),
+      filteredEvalRows:
+        activeFilter === 'all'
+          ? evalRows
+          : ((byCategory[activeFilter] as EvalRow[] | undefined) ?? []),
       filterOptions: [
         {
           key: 'all' as const,
@@ -67,7 +73,7 @@ export function WorkbenchEvalsSidePanel({
         },
       ],
     }
-  }, [activeFilter, jobs])
+  }, [activeFilter, evalRows])
 
   return (
     <Flex
@@ -121,18 +127,16 @@ export function WorkbenchEvalsSidePanel({
               />
             ))}
           </Flex>
-        ) : filteredJobs.length ? (
+        ) : filteredEvalRows.length ? (
           <Flex direction="column">
-            {filteredJobs.map((job) => (
+            {filteredEvalRows.map((row) => (
               <EvalLinkSC
-                key={job.id}
-                $active={selectedJobId === job.id}
-                onClick={() => onSelectJobId(job.id)}
+                key={row.id}
+                $active={selectedEvalResultId === row.id}
+                onClick={() => onSelectEvalResultId(row.id)}
               >
-                <ScoreBadgeSC
-                  $color={evalGradeToColor(job.evalResult?.grade ?? 0)}
-                >
-                  {Math.round(job.evalResult?.grade ?? 0)}
+                <ScoreBadgeSC $color={evalGradeToColor(row.grade ?? 0)}>
+                  {Math.round(row.grade ?? 0)}
                 </ScoreBadgeSC>
                 <Flex
                   direction="column"
@@ -146,7 +150,7 @@ export function WorkbenchEvalsSidePanel({
                       color: theme.colors['text-light'],
                     }}
                   >
-                    {job.prompt}
+                    {row.workbenchJob.prompt}
                   </span>
                   <span
                     css={{
@@ -154,7 +158,10 @@ export function WorkbenchEvalsSidePanel({
                       color: theme.colors['text-light'],
                     }}
                   >
-                    {formatDateTime(job.insertedAt, 'MMMM D, YYYY')}
+                    {formatDateTime(
+                      row.workbenchJob.insertedAt,
+                      'MMMM D, YYYY'
+                    )}
                   </span>
                 </Flex>
               </EvalLinkSC>

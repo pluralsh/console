@@ -210,7 +210,7 @@ defmodule Console.Deployments.Git.Agent do
       {{:ok, %GitRepository{url: url, health: :failed} = git}, cache} ->
         Logger.info "failed to clone #{url}, retrying in 30 seconds"
         Process.send_after(self(), :clone, :timer.seconds(30))
-        {:noreply, %{state | git: git, cache: cache}}
+        {:noreply, %{state | git: git, cache: Cache.rebuild(cache)}}
       err ->
         Logger.info "unknown git failure: #{inspect(err)}"
         {:stop, {:shutdown, :unknown}, state}

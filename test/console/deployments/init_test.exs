@@ -57,6 +57,111 @@ defmodule Console.Deployments.InitTest do
     end
   end
 
+  describe "#migrate_openai/0" do
+    @legacy_bedrock_ai %{
+      enabled: true,
+      provider: :bedrock,
+      bedrock: %{region: "us-east-1"}
+    }
+
+    test "updates global settings from Bedrock to OpenAI when cloud and AWS" do
+      insert(:deployment_settings, ai: @legacy_bedrock_ai)
+
+      stub(Console, :conf, fn
+        :cloud -> true
+        :provider -> :aws
+      end)
+
+      assert {:ok, %DeploymentSettings{}} = Init.migrate_openai()
+
+      updated = Settings.fetch_consistent()
+      assert updated.ai.provider == :openai
+      assert updated.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
+    end
+
+    test "does not update settings when conf indicates not cloud" do
+      insert(:deployment_settings, ai: @legacy_bedrock_ai)
+
+      stub(Console, :conf, fn
+        :cloud -> false
+        :provider -> :aws
+      end)
+
+      assert {:ok, %{}} = Init.migrate_openai()
+
+      unchanged = Settings.fetch_consistent()
+      assert unchanged.ai.provider == :bedrock
+      assert unchanged.ai.bedrock.region == "us-east-1"
+    end
+
+    test "does not update settings when conf provider is not AWS" do
+      insert(:deployment_settings, ai: @legacy_bedrock_ai)
+
+      stub(Console, :conf, fn
+        :cloud -> true
+        :provider -> :azure
+      end)
+
+      assert {:ok, %{}} = Init.migrate_openai()
+
+      unchanged = Settings.fetch_consistent()
+      assert unchanged.ai.provider == :bedrock
+      assert unchanged.ai.bedrock.region == "us-east-1"
+    end
+  end
+
+  describe "#force_flip/0" do
+    test "routes to migrate_openai when cloud_override is openai" do
+      insert(:deployment_settings, ai: %{enabled: true, provider: :bedrock, bedrock: %{region: "us-east-1"}})
+
+      stub(Console, :conf, fn
+        :cloud_override -> "openai"
+        :cloud -> true
+        :provider -> :aws
+      end)
+
+      assert {:ok, %DeploymentSettings{}} = Init.force_flip()
+
+      updated = Settings.fetch_consistent()
+      assert updated.ai.provider == :openai
+      assert updated.ai.openai.base_url == "http://ai-proxy.ai-proxy:8000/openai/v1"
+    end
+
+    test "routes to migrate_bedrock when cloud_override is bedrock" do
+      insert(:deployment_settings, ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
+      })
+
+      stub(Console, :conf, fn
+        :cloud_override -> "bedrock"
+        :cloud -> true
+        :provider -> :aws
+      end)
+
+      assert {:ok, %DeploymentSettings{}} = Init.force_flip()
+
+      updated = Settings.fetch_consistent()
+      assert updated.ai.provider == :bedrock
+      assert updated.ai.bedrock.region == "us-east-1"
+    end
+
+    test "returns ok without changes for unknown cloud_override" do
+      insert(:deployment_settings, ai: %{enabled: true, provider: :bedrock, bedrock: %{region: "us-east-1"}})
+
+      stub(Console, :conf, fn
+        :cloud_override -> "noop"
+      end)
+
+      assert {:ok, %{}} = Init.force_flip()
+
+      unchanged = Settings.fetch_consistent()
+      assert unchanged.ai.provider == :bedrock
+      assert unchanged.ai.bedrock.region == "us-east-1"
+    end
+  end
+
   describe "#setup/0" do
     test "it will setup some initial resources" do
       insert(:user, bot_name: "console", roles: %{admin: true})

@@ -123,6 +123,14 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  def force_flip() do
+    case Console.conf(:cloud_override) do
+      "bedrock" -> migrate_bedrock()
+      "openai"  -> migrate_openai()
+      _ -> {:ok, %{}}
+    end
+  end
+
   def migrate_bedrock() do
     with {true, :aws} <- {Console.cloud?(), Console.conf(:provider)},
          %DeploymentSettings{ai: %{
@@ -132,6 +140,22 @@ defmodule Console.Deployments.Init do
       DeploymentSettings.changeset(settings, %{ai: %{
         provider: :bedrock,
         bedrock: %{region: "us-east-1"}
+      }})
+      |> Repo.update()
+    else
+      _ -> {:ok, %{}}
+    end
+  end
+
+  def migrate_openai() do
+    with {true, :aws} <- {Console.cloud?(), Console.conf(:provider)},
+         %DeploymentSettings{ai: %{
+           provider: :bedrock,
+           bedrock: %{region: "us-east-1"}}
+         } = settings <- Settings.fetch_consistent() do
+      DeploymentSettings.changeset(settings, %{ai: %{
+        provider: :openai,
+        openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
       }})
       |> Repo.update()
     else

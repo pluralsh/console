@@ -9,7 +9,7 @@ You should avoid being unnecessarily verbose in your response, since we want to 
 
 In addition, the overarching task this investigation is related to is as follows:
 
-<%= @query %>
+<%= @prompt %>
 
 ## Tone of Voice Gudiance
 

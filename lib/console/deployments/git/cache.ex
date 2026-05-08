@@ -59,6 +59,12 @@ defmodule Console.Deployments.Git.Cache do
     %__MODULE__{git: git, dir: dir, table: table}
   end
 
+  def rebuild(%__MODULE__{dir: dir} = cache) do
+    File.rm_rf!(dir)
+    {:ok, dir} = Briefly.create(directory: true)
+    %__MODULE__{cache | dir: dir}
+  end
+
   def get(%__MODULE__{table: t}, ref), do: get(t, ref)
 
   def get(tid, %Git{ref: ref, folder: folder, files: [_ | _] = files}),

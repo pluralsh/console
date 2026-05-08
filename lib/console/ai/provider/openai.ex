@@ -9,8 +9,8 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  @model "gpt-4.1-mini"
-  @tool_model "gpt-4.1"
+  @model "gpt-5.4-mini"
+  @tool_model "gpt-5.4"
   @embedding_model "text-embedding-3-large"
 
   def default_model(), do: @model
@@ -20,7 +20,7 @@ defmodule Console.AI.OpenAI do
 
   @type t :: %__MODULE__{}
 
-  def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
+  def defaults(), do: %{model: @model, tool_model: @tool_model, embedding_model: @embedding_model}
 
   def new(opts) do
     model_defaults = model_defaults(Map.get(opts, :base_url))
@@ -38,7 +38,7 @@ defmodule Console.AI.OpenAI do
     }
   end
 
-  defp model_defaults(base) when is_binary(base), do: %{model: @model, tool_model: @tool_model}
+  # defp model_defaults(base) when is_binary(base), do: %{model: @model, tool_model: @tool_model}
   defp model_defaults(_), do: %{model: "gpt-5.4-mini", tool_model: "gpt-5.4"}
 
   def proxy(%__MODULE__{} = openai) do
@@ -70,11 +70,11 @@ defmodule Console.AI.OpenAI do
   Calls an openai tool call interface w/ strict mode
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = openai, messages, tools, _opts) do
+  def tool_call(%__MODULE__{} = openai, messages, tools, opts) do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, :tool_model), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
+      |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
       |> reqllm_result()
       |> tool_calls()
     end

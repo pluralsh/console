@@ -1,6 +1,6 @@
 import {
   ClusterIcon,
-  DeploymentIcon,
+  GitPullIcon,
   StackIcon,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
@@ -12,7 +12,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 const itemToIcon: Record<MentionKind, ReactNode> = {
   [MentionKind.Cluster]: <ClusterIcon size={14} />,
-  [MentionKind.Service]: <DeploymentIcon size={14} />,
+  [MentionKind.Service]: <GitPullIcon size={14} />,
   [MentionKind.Stack]: <StackIcon size={14} />,
   [MentionKind.Skill]: <WorkbenchIcon size={14} />,
 }

@@ -10,13 +10,14 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { WorkbenchOutletContext } from '../Workbench'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
 import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import {
-  WorkbenchEvalJobFragment,
+  WorkbenchEvalResultRowFragment,
   useWorkbenchEvalSkillMutation,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
@@ -27,6 +28,10 @@ import { mapExistingNodes } from 'utils/graphql'
 
 type QualityTab = 'prompt' | 'conclusion' | 'logic'
 
+type EvalRow = WorkbenchEvalResultRowFragment & {
+  workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
+}
+
 const qualityTabs: { key: QualityTab; label: string }[] = [
   { key: 'prompt', label: 'Prompt' },
   { key: 'conclusion', label: 'Conclusion' },
@@ -35,10 +40,13 @@ const qualityTabs: { key: QualityTab; label: string }[] = [
 
 export function WorkbenchEvals() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const { workbenchId, setSideContent, setShowDescription, setHeaderActions } =
     useOutletContext<WorkbenchOutletContext>()
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
+  const [selectedEvalResultId, setSelectedEvalResultId] = useState<
+    string | null
+  >(null)
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
@@ -50,28 +58,30 @@ export function WorkbenchEvals() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const jobs = useMemo(
-    () =>
-      mapExistingNodes(data?.workbench?.runs).filter((job) => !!job.evalResult),
-    [data]
-  )
+  const evalRows = useMemo(() => {
+    return mapExistingNodes(data?.workbench?.evalResults).filter(
+      (r): r is EvalRow => !!r.workbenchJob
+    )
+  }, [data])
 
-  const selectedJob =
-    jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null
+  const selectedEvalRow =
+    evalRows.find((r) => r.id === selectedEvalResultId) ?? evalRows[0] ?? null
 
   const [workbenchEvalSkill, { loading: skillMutationLoading }] =
     useWorkbenchEvalSkillMutation({
-      onCompleted: () => {
+      onCompleted: ({ workbenchEvalSkill }) => {
         popToast({
           content: 'Skills updated successfully',
           severity: 'success',
         })
+        const jobId = workbenchEvalSkill?.id
+        if (jobId) navigate(getWorkbenchJobAbsPath({ workbenchId, jobId }))
       },
       onError: (e) => popToast({ content: e.message, severity: 'danger' }),
     })
 
   useEffect(() => {
-    const evalResultId = selectedJob?.evalResult?.id
+    const evalResultId = selectedEvalRow?.id
 
     setHeaderActions(
       <Button
@@ -90,7 +100,7 @@ export function WorkbenchEvals() {
   }, [
     data,
     loading,
-    selectedJob?.evalResult?.id,
+    selectedEvalRow?.id,
     setHeaderActions,
     skillMutationLoading,
     workbenchEvalSkill,
@@ -99,10 +109,10 @@ export function WorkbenchEvals() {
   useEffect(() => {
     setSideContent(
       <WorkbenchEvalsSidePanel
-        jobs={jobs}
+        evalRows={evalRows}
         loading={loading && !data}
-        selectedJobId={selectedJob?.id}
-        onSelectJobId={setSelectedJobId}
+        selectedEvalResultId={selectedEvalRow?.id}
+        onSelectEvalResultId={setSelectedEvalResultId}
       />
     )
     setShowDescription(false)
@@ -111,16 +121,23 @@ export function WorkbenchEvals() {
       setSideContent(null)
       setShowDescription(true)
     }
-  }, [data, jobs, loading, selectedJob?.id, setShowDescription, setSideContent])
+  }, [
+    data,
+    evalRows,
+    loading,
+    selectedEvalRow?.id,
+    setShowDescription,
+    setSideContent,
+  ])
 
-  const feedback = selectedJob?.evalResult?.feedback
-  const grade = selectedJob?.evalResult?.grade ?? 0
+  const feedback = selectedEvalRow?.feedback
+  const grade = selectedEvalRow?.grade ?? 0
   const feedbackByTab: Record<QualityTab, string> = {
     prompt: feedback?.prompt ?? 'No prompt available',
     conclusion: feedback?.result ?? 'No conclusion available',
     logic: feedback?.logic ?? 'No logic available',
   }
-  const durationSeconds = getDurationSeconds(selectedJob)
+  const durationSeconds = getDurationSeconds(selectedEvalRow?.workbenchJob)
 
   if (error) return <GqlError error={error} />
 
@@ -133,7 +150,7 @@ export function WorkbenchEvals() {
       overflow="hidden"
       css={{ borderTop: theme.borders['fill-one'] }}
     >
-      {!selectedJob ? (
+      {!selectedEvalRow ? (
         <Flex
           align="center"
           flex={1}
@@ -266,7 +283,7 @@ export function WorkbenchEvals() {
   )
 }
 
-function getDurationSeconds(job: WorkbenchEvalJobFragment | null) {
+function getDurationSeconds(job: EvalRow['workbenchJob'] | null | undefined) {
   if (!job?.startedAt || !job.completedAt) return null
 
   return Math.max(

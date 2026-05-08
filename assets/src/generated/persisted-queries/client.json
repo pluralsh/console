@@ -1802,10 +1802,10 @@
          "name": "Workbenches",
          "body": "query Workbenches($first: Int = 100, $after: String, $q: String) {\n  workbenches(first: $first, after: $after, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...WorkbenchTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchTiny on Workbench {\n  id\n  name\n  description\n  agentRuntime {\n    id\n    name\n    type\n    __typename\n  }\n  tools {\n    ...WorkbenchToolTiny\n    __typename\n  }\n  webhooks(first: 50) {\n    edges {\n      node {\n        ...WorkbenchWebhookTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchToolTiny on WorkbenchTool {\n  id\n  name\n  tool\n  categories\n  cloudConnection {\n    ...CloudConnectionTiny\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment WorkbenchWebhookTiny on WorkbenchWebhook {\n  id\n  name\n  webhook {\n    id\n    type\n    __typename\n  }\n  issueWebhook {\n    ...IssueWebhookTiny\n    __typename\n  }\n  __typename\n}\n\nfragment IssueWebhookTiny on IssueWebhook {\n  id\n  provider\n  __typename\n}"
       },
-      "sha256:76bd870f90dc40c37b88b0ab4f8eeadfc7de3576e76e4ba548d03bb042b4d4f0": {
+      "sha256:e24312281ff0bdee07c7efba9eb661487ae11140e5956fb74b9c455c14c916d2": {
          "type": "query",
          "name": "WorkbenchDashboard",
-         "body": "query WorkbenchDashboard {\n  workbenchPullRequests\n  workbenchAggregates {\n    pullRequestMergeRate\n    evalResults\n    __typename\n  }\n}"
+         "body": "query WorkbenchDashboard {\n  workbenchAggregates {\n    pullRequests\n    pullRequestMergeRate\n    evalResults\n    __typename\n  }\n}"
       },
       "sha256:c4f4c207c42b50e3b6de8acac5a4c77a56202e0cb5188b356e2dd15499d6b70d": {
          "type": "query",
@@ -1842,10 +1842,10 @@
          "name": "WorkbenchJobs",
          "body": "query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  insertedAt\n  user {\n    id\n    name\n    profile\n    __typename\n  }\n  workbench {\n    id\n    name\n    __typename\n  }\n  alert {\n    id\n    state\n    url\n    __typename\n  }\n  issue {\n    id\n    status\n    url\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  result {\n    id\n    conclusion\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:c145a2c070b7bc2bb43e71c916c74ea98b45d69c02b9ce178e97af642b02fd3c": {
+      "sha256:d6c30cb98595bff4b3b2450586470473816a3b8da849d9ac895ce02055a3057e": {
          "type": "query",
          "name": "WorkbenchEvals",
-         "body": "query WorkbenchEvals($id: ID!, $first: Int = 100) {\n  workbench(id: $id) {\n    id\n    runs(first: $first) {\n      edges {\n        node {\n          ...WorkbenchEvalJob\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchEvalJob on WorkbenchJob {\n  id\n  prompt\n  insertedAt\n  startedAt\n  completedAt\n  evalResult {\n    id\n    grade\n    feedback {\n      summary\n      prompt\n      result\n      logic\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+         "body": "query WorkbenchEvals($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    evalResults(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchEvalResultRow\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchEvalResultRow on WorkbenchEvalResult {\n  id\n  grade\n  feedback {\n    summary\n    prompt\n    result\n    logic\n    __typename\n  }\n  workbenchJob {\n    id\n    prompt\n    insertedAt\n    startedAt\n    completedAt\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:688124f2b092b83254d1adffc43cff7e2b2983bc960152d4d3d1303abcc3b2ec": {
          "type": "query",
@@ -1877,10 +1877,10 @@
          "name": "WorkbenchCrons",
          "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:6843c3e808c0eda9325fa97e6a059235f9b1c10298172ab0c1aa8558ace1cf2d": {
+      "sha256:827016e22fcc91757ab713668fd457d7c16f7a11e17446aaaed7b55beffbb342": {
          "type": "query",
          "name": "WorkbenchSkills",
-         "body": "query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {\n  workbench(id: $id) {\n    id\n    skills {\n      ref {\n        ref\n        folder\n        __typename\n      }\n      files\n      __typename\n    }\n    workbenchSkills(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchSkillTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchSkillTiny on WorkbenchSkill {\n  id\n  name\n  description\n  subagents\n  __typename\n}"
+         "body": "query WorkbenchSkills($id: ID!) {\n  workbench(id: $id) {\n    id\n    allSkills {\n      ...UnifiedWorkbenchSkillTiny\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {\n  id\n  name\n  description\n  subagents\n  __typename\n}"
       },
       "sha256:739c19841e8d43434d8af177c783bdcb51b8ce37b3202b5b6bbae1dbca3a4e87": {
          "type": "query",

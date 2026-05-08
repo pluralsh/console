@@ -40,6 +40,57 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> response(200)
     end
 
+    test "it ignores azure devops webhook with pull request payload and empty reviewers", %{conn: conn} do
+      hook = insert(:scm_webhook, type: :azure_devops)
+
+      payload =
+        Jason.encode!(%{
+          "eventType" => "git.pullrequest.created",
+          "resource" => %{
+            "pullRequestId" => 77,
+            "title" => "Refactor release pipeline",
+            "description" => "Simplifies promotion orchestration.",
+            "status" => "active",
+            "url" => "https://dev.azure.com/org/project/_git/repo/pullrequest/77",
+            "reviewers" => []
+          }
+        })
+
+      result =
+        conn
+        |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.hmac))
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/azure_devops/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+    end
+
+    test "it ignores azure devops webhook when repository webUrl is missing", %{conn: conn} do
+      hook = insert(:scm_webhook, type: :azure_devops)
+
+      payload =
+        Jason.encode!(%{
+          "eventType" => "git.pullrequest.created",
+          "resource" => %{
+            "pullRequestId" => 77,
+            "title" => "Refactor release pipeline",
+            "description" => "Simplifies promotion orchestration.",
+            "status" => "active",
+            "reviewers" => [%{"displayName" => "Reviewer", "vote" => 10}]
+          }
+        })
+
+      result =
+        conn
+        |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.hmac))
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/azure_devops/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+    end
+
     test "it can handle group memberships", %{conn: conn} do
       hook = insert(:scm_webhook, type: :github)
       group = insert(:group, name: "some-org:some-group")

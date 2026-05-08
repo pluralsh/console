@@ -48,7 +48,7 @@ defmodule Console.AI.MCP.ClientSupervisor do
 
   def mcp_configuration(%McpServer{protocol: :sse}),
     do: Keyword.put(@mcp_client_info, :protocol_version, "2024-11-05")
-  def mcp_configuration(_), do: Keyword.put(@mcp_client_info, :protocol_version, "2025-06-18")
+  def mcp_configuration(_), do: Keyword.merge(@mcp_client_info, protocol_version: "2025-06-18")
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)

@@ -28,6 +28,11 @@ export const isChipNode = (node: Nullable<Node>): boolean =>
   node.nodeType === Node.ELEMENT_NODE &&
   (node as HTMLElement).getAttribute?.(CHIP_DATA_ATTR) === 'true'
 
+/** Length of leading spaces + ZWSP run (auto-inserted after a chip). */
+function leadingChipFillerLen(text: string): number {
+  return /^[\s\u200B]*/.exec(text)?.[0].length ?? 0
+}
+
 /**
  * Convert a chip DOM node back to its XML form by reading its `data-attr-*`
  * attributes. Always emits an explicit close tag — HTML5 doesn't honor
@@ -80,15 +85,16 @@ export function serializeEditableDiv(container: HTMLElement): string {
 }
 
 /**
- * Insert the chip followed by a trailing ZWSP — the sentinel gives the caret
- * a landing site after the non-editable chip, which Safari/Firefox need
+ * Insert the chip followed by a normal space (so the user can keep typing) and a
+ * trailing ZWSP — the sentinel gives the caret a landing site after the
+ * non-editable chip, which Safari/Firefox need.
  */
 export function insertChipWithSentinels(range: Range, chip: HTMLElement): void {
-  const sentinel = document.createTextNode(ZWSP)
+  const trailing = document.createTextNode(` ${ZWSP}`)
   range.insertNode(chip)
   range.setStartAfter(chip)
-  range.insertNode(sentinel)
-  range.setStartAfter(sentinel)
+  range.insertNode(trailing)
+  range.setStartAfter(trailing)
 }
 
 export function insertChipAtRange(
@@ -101,7 +107,7 @@ export function insertChipAtRange(
   if (!range) {
     if (!selection?.rangeCount) {
       container.appendChild(chip)
-      container.appendChild(document.createTextNode(ZWSP))
+      container.appendChild(document.createTextNode(` ${ZWSP}`))
       return
     }
     range = selection.getRangeAt(0).cloneRange()
@@ -221,7 +227,10 @@ export function chipBeforeCaret(container: HTMLElement): HTMLElement | null {
   if (node.nodeType === Node.TEXT_NODE) {
     const text = node.nodeValue ?? ''
     const before = text.slice(0, offset)
-    if (stripZwsp(before).length > 0) return null
+    if (!/^[\s\u200B]*$/.test(before)) return null
+    const endFiller = leadingChipFillerLen(text)
+    if (offset > endFiller) return null
+    if (offset === endFiller && endFiller < text.length) return null
     const prev = node.previousSibling
     if (prev && isChipNode(prev)) return prev as HTMLElement
     return null
@@ -232,21 +241,29 @@ export function chipBeforeCaret(container: HTMLElement): HTMLElement | null {
   if (isChipNode(prev)) return prev as HTMLElement
   if (prev?.nodeType === Node.TEXT_NODE) {
     const text = prev.nodeValue ?? ''
-    if (stripZwsp(text).length > 0) return null
-    const beforePrev = prev.previousSibling
-    if (beforePrev && isChipNode(beforePrev)) return beforePrev as HTMLElement
+    const endFiller = leadingChipFillerLen(text)
+    if (endFiller === text.length) {
+      const beforeChip = prev.previousSibling
+      if (beforeChip && isChipNode(beforeChip)) return beforeChip as HTMLElement
+    }
   }
   return null
 }
 
 export function deleteChip(chip: HTMLElement): void {
-  const next = chip.nextSibling
-  // strip our trailing sentinel — pure ZWSP node gets removed entirely
-  // if Chrome fused a typed char into the ZWSP node, just strip the leading ZWSP
-  if (next?.nodeType === Node.TEXT_NODE) {
+  let next = chip.nextSibling
+  while (next?.nodeType === Node.TEXT_NODE) {
     const text = next.nodeValue ?? ''
-    if (stripZwsp(text).length === 0) next.remove()
-    else next.nodeValue = text.replace(/^​+/, '')
+    const endFiller = leadingChipFillerLen(text)
+    if (endFiller === 0) break
+    if (endFiller === text.length) {
+      const toRemove = next
+      next = next.nextSibling
+      toRemove.remove()
+      continue
+    }
+    next.nodeValue = text.slice(endFiller)
+    break
   }
   chip.remove()
 }

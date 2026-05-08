@@ -49,6 +49,7 @@ func SetupServer() (*httptest.Server, error) {
 			os.Exit(1)
 		}
 		router.HandleFunc(openai.EndpointChat, op.Proxy())
+		router.HandleFunc(openai.EndpointResponses, op.Proxy())
 		router.HandleFunc(openai.EndpointEmbeddings, ep.Proxy())
 	}
 

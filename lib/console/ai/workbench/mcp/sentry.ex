@@ -10,7 +10,7 @@ defmodule Console.AI.Workbench.MCP.Sentry do
     normalize_url(url || "https://mcp.sentry.dev")
     |> sentry_url(path)
     |> sentry_agent_mode(agent_mode)
-    |> then(& [base_url: &1, headers: %{"Authorization" => "Bearer #{access_token}"}])
+    |> then(& [base_url: &1, headers: %{"Authorization" => "Bearer #{access_token}"}, enable_sse: true])
   end
 
   defp sentry_url(base_url, path) when is_binary(path) and byte_size(path) > 0 do

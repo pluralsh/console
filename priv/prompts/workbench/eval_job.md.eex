@@ -8,12 +8,13 @@ Here's the result of the workbench job we're evaluating.
 
 ## Job Activities
 
-This is the work done durin the workbench job, you can use this to evaluate the thought process and the quality of the evidence gathered.
+This is the work done during the workbench job, you can use this to evaluate the thought process and the quality of the evidence gathered.
 
 <%= for activity <- @job.activities do %>
 <%= Console.AI.Workbench.Eval.activity_prompt(activity: activity) %>
 <% end %>
 
+<%= if @job.result do %>
 ## Conclusion
 
 This is the final conclusion drawn by the workbench job.
@@ -34,3 +35,4 @@ A mermaid diagram of the system graph at the time of the analysis.
 
 
 Please use this all to grade the work fairly and descriptively.
+<% end %>

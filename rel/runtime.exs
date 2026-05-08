@@ -197,7 +197,8 @@ config :console,
   workbench_default: get_env("CONSOLE_WORKBENCH_DEFAULT") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
   agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES"),
-  qove_key: get_env("CONSOLE_QOVE_PUBLIC_KEY")
+  qove_key: get_env("CONSOLE_QOVE_PUBLIC_KEY"),
+  cloud_override: get_env("CONSOLE_CLOUD_OVERRIDE")
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,

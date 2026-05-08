@@ -71,7 +71,8 @@ config :console,
   oidc_sync: :upsert,
   refresh_token_expiry: "7d",
   workbench_default: false,
-  qove_key: nil
+  qove_key: nil,
+  cloud_override: "ignore"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

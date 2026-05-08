@@ -12,6 +12,7 @@ import (
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/openai"
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	apioai "github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/polly/algorithms"
 	"k8s.io/klog/v2"
 )
@@ -95,6 +96,11 @@ func NewOllamaProxy(host string) (api.OpenAIProxy, error) {
 
 func (o *OllamaProxy) Proxy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == apioai.EndpointResponses {
+			http.Error(w, "responses endpoint is only supported for openai provider", http.StatusBadRequest)
+			return
+		}
+
 		var openAIReq openai.ChatCompletionRequest
 		if err := json.NewDecoder(r.Body).Decode(&openAIReq); err != nil {
 			http.Error(w, "failed to parse openai request", http.StatusBadRequest)

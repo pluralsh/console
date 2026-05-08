@@ -49,11 +49,11 @@ defmodule Console.AI.Vertex do
   Calls an openai tool call interface w/ strict mode
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = vtx, messages, tools, _opts) do
+  def tool_call(%__MODULE__{} = vtx, messages, tools, opts) do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
-      |> generate_text("google-vertex:#{normalize(vtx.tool_model)}", vtx.stream, Keyword.put(provider_options, :tools, reqllm_tools(tools)))
+      |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client] || :tool))}", vtx.stream, Keyword.put(provider_options, :tools, reqllm_tools(tools)))
       |> reqllm_result()
       |> tool_calls()
     end

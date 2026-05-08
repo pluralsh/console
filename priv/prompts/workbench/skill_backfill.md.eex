@@ -30,6 +30,7 @@ The specific investigation was prompted with:
 
 <%= @job.prompt %>
 
+<%= if @job.result do %>
 And the ultimate conclusion was:
 
 <%= @job.result.conclusion %>
@@ -47,7 +48,7 @@ A mermaid diagram of the system graph at the time of the analysis.
 ```
 <% end %>
 
-<%= if !Enum.empty?(@job.result.canvas) do %>
+<%= if is_list(@job.result.canvas) && !Enum.empty?(@job.result.canvas) do %>
 ## Canvas
 
 A list of canvas blocks that were generated to explain the conclusion.
@@ -55,4 +56,7 @@ A list of canvas blocks that were generated to explain the conclusion.
 ```json
 <%= Console.mapify(@job.result.canvas) |> Jason.encode!() %>
 ```
+<% end %>
+<% else %>
+No final job result yet (investigation still in flight or unavailable).
 <% end %>

@@ -1,5 +1,5 @@
 import {
-  DeploymentIcon,
+  GitPullIcon,
   StackIcon,
   Tooltip,
   WorkbenchIcon,
@@ -79,7 +79,7 @@ function PlrlServiceChip(props: RenderedChipProps<MentionKind.Service>) {
   const id = props['item-id']
   const clusterId = props['cluster-id']
   const name = props['item-name'] || id
-  const icon = <DeploymentIcon size={12} />
+  const icon = <GitPullIcon size={12} />
   return (
     <WrapWithIf
       condition={!!id && !!clusterId}
