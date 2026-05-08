@@ -59,10 +59,6 @@ export function WorkbenchEvals() {
   const selectedJob =
     jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null
 
-  useEffect(() => {
-    if (jobs.length && !selectedJobId) setSelectedJobId(jobs[0].id)
-  }, [jobs, selectedJobId])
-
   const [workbenchEvalSkill, { loading: skillMutationLoading }] =
     useWorkbenchEvalSkillMutation({
       onCompleted: () => {
@@ -118,6 +114,7 @@ export function WorkbenchEvals() {
   }, [data, jobs, loading, selectedJob?.id, setShowDescription, setSideContent])
 
   const feedback = selectedJob?.evalResult?.feedback
+  const grade = selectedJob?.evalResult?.grade ?? 0
   const feedbackByTab: Record<QualityTab, string> = {
     prompt: feedback?.prompt ?? 'No prompt available',
     conclusion: feedback?.result ?? 'No conclusion available',
@@ -174,17 +171,14 @@ export function WorkbenchEvals() {
                 align="center"
                 gap="medium"
               >
-                <ScoreBadgeSC
-                  $color={evalGradeToColor(selectedJob.evalResult?.grade ?? 0)}
-                >
-                  {Math.round(selectedJob.evalResult?.grade ?? 0)}
+                <ScoreBadgeSC $color={evalGradeToColor(grade)}>
+                  {Math.round(grade)}
                 </ScoreBadgeSC>
                 <Flex direction="column">
                   <span
                     css={{ ...theme.partials.text.subtitle2, fontWeight: 400 }}
                   >
-                    Overall grade:{' '}
-                    {(selectedJob.evalResult?.grade ?? 0).toFixed(0)}/10
+                    Overall grade: {grade.toFixed(0)}/10
                   </span>
                   <span
                     css={{
