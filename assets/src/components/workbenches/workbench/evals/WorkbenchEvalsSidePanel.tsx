@@ -189,15 +189,16 @@ function EvalFilterChip({
   onClick: () => void
 }) {
   const theme = useTheme()
+  const hasItems = count > 0
 
   return (
     <Chip
       size="small"
       severity={severity}
-      clickable={count > 0}
+      clickable={hasItems}
       $active={active}
-      inactive={count === 0}
-      onClick={count === 0 ? undefined : onClick}
+      inactive={!hasItems}
+      onClick={hasItems ? onClick : undefined}
       css={{
         borderRadius: 12,
         backgroundColor: active ? theme.colors['fill-one-selected'] : undefined,
