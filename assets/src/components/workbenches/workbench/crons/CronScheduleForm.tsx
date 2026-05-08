@@ -10,6 +10,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -106,7 +107,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const handleCompleted = () => {
     navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
     popToast({
-      content: `${truncate(prompt, { length: 30 })} ${cron ? 'updated' : 'created'}`,
+      content: `${truncate(prettifyPrompt(prompt), { length: 30 })} ${cron ? 'updated' : 'created'}`,
       severity: 'success',
     })
   }

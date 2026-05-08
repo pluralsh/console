@@ -73,7 +73,7 @@
     "react-merge-refs": "2.1.1",
     "react-stately": "3.42.0",
     "react-use-measure": "2.1.1",
-    "rehype-raw": "7.0.0",
+    "rehype-sanitize": "6.0.0",
     "resize-observer-polyfill": "1.5.1",
     "use-immer": "0.11.0"
   },

@@ -4,6 +4,7 @@ import {
   Code,
   Flex,
   getLastStringChild,
+  markdownSanitizeSchema,
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -12,9 +13,34 @@ import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil, truncate } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
+
+import {
+  CHIP_ATTRIBUTE_SCHEMA,
+  PLRL_CHIP_TAG_NAMES,
+} from '../input/autocomplete/mentionTypes'
+import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
+
+const chipSanitizeSchema = {
+  ...markdownSanitizeSchema,
+  tagNames: [
+    ...(markdownSanitizeSchema.tagNames ?? []),
+    ...PLRL_CHIP_TAG_NAMES,
+  ],
+  attributes: {
+    ...markdownSanitizeSchema.attributes,
+    ...CHIP_ATTRIBUTE_SCHEMA,
+  },
+}
+
+const REHYPE_PLUGINS: ComponentProps<typeof ReactMarkdown>['rehypePlugins'] = [
+  rehypeRaw,
+  [rehypeSanitize, chipSanitizeSchema],
+]
 
 export function MultiThreadViewerMessage({
   message,
@@ -179,7 +205,9 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
     <SimpleMarkdownSC>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={REHYPE_PLUGINS}
         components={{
+          ...plrlChipComponents,
           // Headers are bold
           h1: ({ children }) => <strong>{children}</strong>,
           h2: ({ children }) => <strong>{children}</strong>,

@@ -29,7 +29,7 @@ import {
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import truncate from 'lodash/truncate'
-import type { ComponentProps, RefObject } from 'react'
+import type { ComponentProps } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -40,6 +40,7 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { Body2P } from '../../utils/typography/Text.tsx'
 import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
+import { prettifyPrompt } from 'components/utils/contentEditableChips.ts'
 
 const MAX_WIDTH = 924
 
@@ -61,7 +62,7 @@ export function WorkbenchJobCreateInput({
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
   const navigate = useNavigate()
-  const inputRef = useAutofocusRef() as RefObject<Nullable<ChatInputSimpleRef>>
+  const inputRef = useAutofocusRef<ChatInputSimpleRef>()
   const [prompt, setPrompt] = useState('')
 
   const [createWorkbenchJob, { loading, error }] =
@@ -84,8 +85,8 @@ export function WorkbenchJobCreateInput({
       awaitRefetchQueries: true,
     })
 
-  const handleSubmitPrompt = (nextPrompt = prompt) => {
-    const trimmedPrompt = nextPrompt.trim()
+  const handleSubmitPrompt = (nextPrompt?: string) => {
+    const trimmedPrompt = (nextPrompt ?? prompt).trim()
 
     if (!trimmedPrompt || !workbenchId) return
 
@@ -116,6 +117,8 @@ export function WorkbenchJobCreateInput({
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
           allowSubmit={!!prompt.trim() && !!workbenchId && !disabled}
+          enableAutoComplete
+          workbenchId={workbenchId}
           options={
             <Flex
               gap="xsmall"
@@ -306,7 +309,7 @@ function SavedPromptsOverlay({
           skeletonProps={{ numRows: 6, gap: 'small' }}
           renderer={({ rowData }) => (
             <SavedPromptsChip
-              label={rowData.prompt ?? ''}
+              label={prettifyPrompt(rowData.prompt ?? '')}
               fillLevel={2}
               rightContent={
                 <ArrowUpIcon
