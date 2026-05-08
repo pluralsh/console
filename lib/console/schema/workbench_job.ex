@@ -126,7 +126,7 @@ defmodule Console.Schema.WorkbenchJob do
         on: e.workbench_id == j.workbench_id,
       left_join: r in WorkbenchEvalResult,
         on: r.workbench_eval_id == e.id and r.workbench_job_id == j.id,
-      where: j.inserted_at >= e.inserted_at and j.type == ^:job,
+      where: j.inserted_at >= e.inserted_at and j.type == ^:job and j.status == ^:successful,
       where: is_nil(r.id),
       select: j,
       distinct: true
