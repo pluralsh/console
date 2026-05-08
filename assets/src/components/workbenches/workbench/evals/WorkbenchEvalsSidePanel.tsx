@@ -30,54 +30,51 @@ export function WorkbenchEvalsSidePanel({
   const theme = useTheme()
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
 
-  const { filteredJobs, counts } = useMemo(() => {
+  const { filteredJobs, filterOptions } = useMemo(() => {
     const byCategory = groupBy(jobs, (job) =>
       evalGradeToCategory(job.evalResult?.grade ?? 0)
     )
+    const counts = {
+      all: jobs.length,
+      bad: byCategory.bad?.length ?? 0,
+      okay: byCategory.okay?.length ?? 0,
+      great: byCategory.great?.length ?? 0,
+    }
 
     return {
       filteredJobs:
         activeFilter === 'all' ? jobs : (byCategory[activeFilter] ?? []),
-      counts: {
-        all: jobs.length,
-        bad: byCategory.bad?.length ?? 0,
-        okay: byCategory.okay?.length ?? 0,
-        great: byCategory.great?.length ?? 0,
-      },
+      filterOptions: [
+        {
+          key: 'all' as const,
+          count: counts.all,
+          severity: 'neutral' as ChipSeverity,
+        },
+        {
+          key: 'bad' as const,
+          count: counts.bad,
+          severity: 'danger' as ChipSeverity,
+        },
+        {
+          key: 'okay' as const,
+          count: counts.okay,
+          severity: 'warning' as ChipSeverity,
+        },
+        {
+          key: 'great' as const,
+          count: counts.great,
+          severity: 'success' as ChipSeverity,
+        },
+      ],
     }
   }, [activeFilter, jobs])
-
-  const filterOptions = useMemo(
-    () => [
-      {
-        key: 'all' as const,
-        count: counts.all,
-        severity: 'neutral' as ChipSeverity,
-      },
-      {
-        key: 'bad' as const,
-        count: counts.bad,
-        severity: 'danger' as ChipSeverity,
-      },
-      {
-        key: 'okay' as const,
-        count: counts.okay,
-        severity: 'warning' as ChipSeverity,
-      },
-      {
-        key: 'great' as const,
-        count: counts.great,
-        severity: 'success' as ChipSeverity,
-      },
-    ],
-    [counts]
-  )
 
   return (
     <Flex
       direction="column"
       minHeight={0}
       overflow="hidden"
+      height="100%"
       css={{
         borderRight: theme.borders['fill-one'],
         minWidth: 350,
@@ -85,101 +82,94 @@ export function WorkbenchEvalsSidePanel({
       }}
     >
       <Flex
-        direction="column"
-        height="100%"
-        minHeight={0}
-        overflow="hidden"
+        alignItems="center"
+        gap="xsmall"
+        height={73}
+        padding="medium"
+        wrap="wrap"
+        css={{ borderBottom: theme.borders['fill-one'] }}
       >
-        <Flex
-          alignItems="center"
-          gap="xsmall"
-          height={73}
-          padding="medium"
-          wrap="wrap"
-          css={{ borderBottom: theme.borders['fill-one'] }}
-        >
-          {filterOptions.map(({ key, count, severity }) => (
-            <EvalFilterChip
-              key={key}
-              filterKey={key}
-              active={activeFilter === key}
-              count={count}
-              severity={severity}
-              onClick={() => setActiveFilter(key)}
-            />
-          ))}
-        </Flex>
-        <Flex
-          direction="column"
-          gap="small"
-          flex={1}
-          minHeight={0}
-          overflowY="auto"
-        >
-          {loading ? (
-            <Flex
-              direction="column"
-              gap="xsmall"
-              padding="small"
-            >
-              {Array.from({ length: 3 }).map((_, index) => (
-                <RectangleSkeleton
-                  key={index}
-                  $height={52}
-                  $width="100%"
-                />
-              ))}
-            </Flex>
-          ) : filteredJobs.length ? (
-            <Flex direction="column">
-              {filteredJobs.map((job) => (
-                <EvalLinkSC
-                  key={job.id}
-                  $active={selectedJobId === job.id}
-                  onClick={() => onSelectJobId(job.id)}
+        {filterOptions.map(({ key, count, severity }) => (
+          <EvalFilterChip
+            key={key}
+            filterKey={key}
+            active={activeFilter === key}
+            count={count}
+            severity={severity}
+            onClick={() => setActiveFilter(key)}
+          />
+        ))}
+      </Flex>
+      <Flex
+        direction="column"
+        gap="small"
+        flex={1}
+        minHeight={0}
+        overflowY="auto"
+      >
+        {loading ? (
+          <Flex
+            direction="column"
+            gap="xsmall"
+            padding="small"
+          >
+            {Array.from({ length: 3 }).map((_, index) => (
+              <RectangleSkeleton
+                key={index}
+                $height={52}
+                $width="100%"
+              />
+            ))}
+          </Flex>
+        ) : filteredJobs.length ? (
+          <Flex direction="column">
+            {filteredJobs.map((job) => (
+              <EvalLinkSC
+                key={job.id}
+                $active={selectedJobId === job.id}
+                onClick={() => onSelectJobId(job.id)}
+              >
+                <ScoreBadgeSC
+                  $color={evalGradeToColor(job.evalResult?.grade ?? 0)}
                 >
-                  <ScoreBadgeSC
-                    $color={evalGradeToColor(job.evalResult?.grade ?? 0)}
+                  {Math.round(job.evalResult?.grade ?? 0)}
+                </ScoreBadgeSC>
+                <Flex
+                  direction="column"
+                  gap="xxxsmall"
+                  minWidth={0}
+                >
+                  <span
+                    css={{
+                      ...TRUNCATE,
+                      ...theme.partials.text.body2LooseLineHeight,
+                      color: theme.colors['text-light'],
+                    }}
                   >
-                    {Math.round(job.evalResult?.grade ?? 0)}
-                  </ScoreBadgeSC>
-                  <Flex
-                    direction="column"
-                    gap="xxxsmall"
-                    minWidth={0}
+                    {job.prompt}
+                  </span>
+                  <span
+                    css={{
+                      ...theme.partials.text.caption,
+                      color: theme.colors['text-light'],
+                    }}
                   >
-                    <span
-                      css={{
-                        ...TRUNCATE,
-                        ...theme.partials.text.body2LooseLineHeight,
-                        color: theme.colors['text-light'],
-                      }}
-                    >
-                      {job.prompt}
-                    </span>
-                    <span
-                      css={{
-                        ...theme.partials.text.caption,
-                        color: theme.colors['text-light'],
-                      }}
-                    >
-                      {formatDateTime(job.insertedAt, 'MMMM D, YYYY')}
-                    </span>
-                  </Flex>
-                </EvalLinkSC>
-              ))}
-            </Flex>
-          ) : (
-            <Body2P
-              $color="text-xlight"
-              css={{ margin: `${theme.spacing.large}px auto` }}
-            >
-              {activeFilter === 'all'
-                ? 'No evals available yet.'
-                : 'No evals available for this filter.'}
-            </Body2P>
-          )}
-        </Flex>
+                    {formatDateTime(job.insertedAt, 'MMMM D, YYYY')}
+                  </span>
+                </Flex>
+              </EvalLinkSC>
+            ))}
+          </Flex>
+        ) : (
+          <Body2P
+            $color="text-xlight"
+            css={{ margin: `${theme.spacing.large}px auto` }}
+          >
+            {activeFilter === 'all'
+              ? 'No evals available yet.'
+              : 'No evals available for this filter.'}
+          </Body2P>
+        )}
       </Flex>
     </Flex>
   )

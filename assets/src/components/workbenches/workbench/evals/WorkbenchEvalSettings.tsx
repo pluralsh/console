@@ -110,6 +110,17 @@ export function WorkbenchEvalSettings() {
   if (evalError) return <GqlError error={evalError} />
   if (error) return <GqlError error={error} />
 
+  const sharedEditorProps = {
+    language: 'markdown' as const,
+    height: 320,
+    disabled: !evalsEnabled,
+    options: {
+      readOnly: !evalsEnabled,
+      wordWrap: 'on' as const,
+      minimap: { enabled: false },
+    },
+  }
+
   const handleSave = async () => {
     if (!workbenchId) return
 
@@ -220,16 +231,9 @@ export function WorkbenchEvalSettings() {
                   </Switch>
                   <FormField label="Prompt quality rules">
                     <CodeEditor
+                      {...sharedEditorProps}
                       value={promptQualityRules}
                       onChange={(value) => setPromptQualityRules(value ?? '')}
-                      language="markdown"
-                      height={320}
-                      disabled={!evalsEnabled}
-                      options={{
-                        readOnly: !evalsEnabled,
-                        wordWrap: 'on',
-                        minimap: { enabled: false },
-                      }}
                     />
                   </FormField>
                 </Flex>
@@ -237,34 +241,20 @@ export function WorkbenchEvalSettings() {
               {curStep === 'Conclusion rules' && (
                 <FormField label="Conclusion rules">
                   <CodeEditor
+                    {...sharedEditorProps}
                     value={conclusionRules}
                     onChange={(value) => setConclusionRules(value ?? '')}
-                    language="markdown"
-                    height={320}
-                    disabled={!evalsEnabled}
-                    options={{
-                      readOnly: !evalsEnabled,
-                      wordWrap: 'on',
-                      minimap: { enabled: false },
-                    }}
                   />
                 </FormField>
               )}
               {curStep === 'Progress thought rules' && (
                 <FormField label="Progress and thoughts rules">
                   <CodeEditor
+                    {...sharedEditorProps}
                     value={progressAndThoughtsRules}
                     onChange={(value) =>
                       setProgressAndThoughtsRules(value ?? '')
                     }
-                    language="markdown"
-                    height={320}
-                    disabled={!evalsEnabled}
-                    options={{
-                      readOnly: !evalsEnabled,
-                      wordWrap: 'on',
-                      minimap: { enabled: false },
-                    }}
                   />
                 </FormField>
               )}

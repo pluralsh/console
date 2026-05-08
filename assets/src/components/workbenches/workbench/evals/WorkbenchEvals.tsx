@@ -50,11 +50,11 @@ export function WorkbenchEvals() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const jobs = useMemo(() => {
-    return mapExistingNodes(data?.workbench?.runs).filter(
-      (job) => !!job.evalResult
-    )
-  }, [data])
+  const jobs = useMemo(
+    () =>
+      mapExistingNodes(data?.workbench?.runs).filter((job) => !!job.evalResult),
+    [data]
+  )
 
   const selectedJob =
     jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null
@@ -118,6 +118,11 @@ export function WorkbenchEvals() {
   }, [data, jobs, loading, selectedJob?.id, setShowDescription, setSideContent])
 
   const feedback = selectedJob?.evalResult?.feedback
+  const feedbackByTab: Record<QualityTab, string> = {
+    prompt: feedback?.prompt ?? 'No prompt available',
+    conclusion: feedback?.result ?? 'No conclusion available',
+    logic: feedback?.logic ?? 'No logic available',
+  }
   const durationSeconds = getDurationSeconds(selectedJob)
 
   if (error) return <GqlError error={error} />
@@ -257,15 +262,7 @@ export function WorkbenchEvals() {
                 />
               </Flex>
               <PanelBodySC>
-                <Markdown
-                  text={
-                    qualityTab === 'prompt'
-                      ? (feedback?.prompt ?? 'No prompt available')
-                      : qualityTab === 'conclusion'
-                        ? (feedback?.result ?? 'No conclusion available')
-                        : (feedback?.logic ?? 'No logic available')
-                  }
-                />
+                <Markdown text={feedbackByTab[qualityTab]} />
               </PanelBodySC>
             </PanelSC>
           )}
