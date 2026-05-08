@@ -120,7 +120,9 @@ export function useMentionDataSources({
   )
 
   const skills = useMemo<SkillChipAttrs[]>(() => {
-    const all = mapExistingNodes(skillData?.workbench?.workbenchSkills).map(
+    const workbenchSkills = mapExistingNodes(
+      skillData?.workbench?.workbenchSkills
+    ).map(
       (n): SkillChipAttrs => ({
         kind: MentionKind.Skill,
         'item-id': n.id,
@@ -129,6 +131,22 @@ export function useMentionDataSources({
         subagents: n.subagents?.filter(isNonNullable).join(','),
       })
     )
+
+    const gitSkills = (skillData?.workbench?.skills?.files ?? [])
+      .filter(isNonNullable)
+      .map((path): SkillChipAttrs => {
+        const fileName = path.split('/').filter(Boolean).at(-1) ?? path
+        const name = fileName.replace(/\.[^.]+$/, '')
+        return {
+          kind: MentionKind.Skill,
+          'item-id': `git-skill:${path}`,
+          'item-name': name || path,
+          description: path,
+        }
+      })
+
+    const all = [...workbenchSkills, ...gitSkills]
+
     if (!throttled) return all.slice(0, MAX_PER_KIND)
     return new Fuse(all, skillFuseOptions)
       .search(throttled)

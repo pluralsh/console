@@ -1847,10 +1847,10 @@
          "name": "WorkbenchCrons",
          "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:d0ab759801da1ce30f72bac5aaca619c367aaeef25b1cd341569e939f386231d": {
+      "sha256:6843c3e808c0eda9325fa97e6a059235f9b1c10298172ab0c1aa8558ace1cf2d": {
          "type": "query",
          "name": "WorkbenchSkills",
-         "body": "query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {\n  workbench(id: $id) {\n    id\n    workbenchSkills(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchSkillTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchSkillTiny on WorkbenchSkill {\n  id\n  name\n  description\n  subagents\n  __typename\n}"
+         "body": "query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {\n  workbench(id: $id) {\n    id\n    skills {\n      ref {\n        ref\n        folder\n        __typename\n      }\n      files\n      __typename\n    }\n    workbenchSkills(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchSkillTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchSkillTiny on WorkbenchSkill {\n  id\n  name\n  description\n  subagents\n  __typename\n}"
       },
       "sha256:739c19841e8d43434d8af177c783bdcb51b8ce37b3202b5b6bbae1dbca3a4e87": {
          "type": "query",

@@ -20048,7 +20048,7 @@ export type WorkbenchSkillsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchSkillsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null } | null };
+export type WorkbenchSkillsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchPromptsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -41649,6 +41649,13 @@ export const WorkbenchSkillsDocument = gql`
     query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {
   workbench(id: $id) {
     id
+    skills {
+      ref {
+        ref
+        folder
+      }
+      files
+    }
     workbenchSkills(first: $first, after: $after) {
       pageInfo {
         ...PageInfo

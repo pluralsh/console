@@ -7,7 +7,12 @@ import {
 } from '@pluralsh/design-system'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterDistro } from 'generated/graphql'
-import { ComponentType, ReactNode } from 'react'
+import {
+  ComponentPropsWithoutRef,
+  ComponentType,
+  forwardRef,
+  ReactNode,
+} from 'react'
 import type { ExtraProps } from 'react-markdown'
 import { Link } from 'react-router-dom'
 import {
@@ -19,20 +24,25 @@ import styled from 'styled-components'
 import { ChipAttrsByKind, MentionKind } from './mentionTypes'
 
 // span-only so chips can safely render inside markdown <p> (as opposed to our DS chip)
-function ChipBody({
-  icon,
-  children,
-}: {
+type ChipBodyProps = {
   icon: ReactNode
   children: ReactNode
-}) {
+} & ComponentPropsWithoutRef<typeof ChipBodySC>
+
+const ChipBody = forwardRef<HTMLSpanElement, ChipBodyProps>(function ChipBody(
+  { icon, children, ...rest },
+  ref
+) {
   return (
-    <ChipBodySC>
+    <ChipBodySC
+      ref={ref}
+      {...rest}
+    >
       {icon}
       <span>{children}</span>
     </ChipBodySC>
   )
-}
+})
 
 // react-markdown picks the component by tag name and spreads only the XML
 // attributes — so `kind` isn't on the rendered props (it's the tag itself)
@@ -107,6 +117,7 @@ function PlrlSkillChip(props: RenderedChipProps<MentionKind.Skill>) {
         <Tooltip
           label={description}
           placement="top"
+          style={{ maxWidth: 500, overflowWrap: 'break-word' }}
         />
       }
     >
