@@ -30,6 +30,7 @@ import {
 } from 'react'
 import styled, { StyledObject, useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
+import { EditableSkillChipTooltip } from './autocomplete/EditableSkillChipTooltip.tsx'
 import { MentionMenu } from './autocomplete/MentionMenu.tsx'
 import { useMentionAutocomplete } from './autocomplete/useMentionAutocomplete.ts'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
@@ -238,6 +239,7 @@ export function ChatInputSimple({
         onSelect={autocomplete.commit}
         onHover={autocomplete.setHighlightedIndex}
       />
+      <EditableSkillChipTooltip containerRef={divRef} />
     </EditableContentWrapperSC>
   )
 }
