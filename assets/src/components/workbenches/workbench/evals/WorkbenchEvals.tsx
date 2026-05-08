@@ -33,55 +33,6 @@ const qualityTabs: { key: QualityTab; label: string }[] = [
   { key: 'logic', label: 'Logic and thoughts' },
 ]
 
-const MOCK_EVAL_JOBS: WorkbenchEvalJobFragment[] = [
-  {
-    __typename: 'WorkbenchJob',
-    id: 'mock-job-1',
-    prompt: 'deploy the opentelemetry-demo helm chart upgrade',
-    insertedAt: '2026-04-27T10:15:00.000Z',
-    startedAt: '2026-04-27T10:14:10.000Z',
-    completedAt: '2026-04-27T10:14:53.000Z',
-    evalResult: {
-      __typename: 'WorkbenchEvalResult',
-      id: 'mock-eval-1',
-      grade: 8,
-      feedback: {
-        __typename: 'WorkbenchEvalFeedback',
-        summary:
-          'The job demonstrated strong overall performance today. Prompt construction was clear and well-scoped in most runs.',
-        prompt:
-          'Prompts were specific, relevant to the triggering alert, and provided sufficient context.',
-        result:
-          'Conclusions were actionable and referenced relevant evidence. Minor weaknesses were observed in a few runs.',
-        logic:
-          '- Collaboration: Breaking down silos between development and operations teams.\n- Automation: Streamlining processes to reduce human error.\n- Continuous Integration (CI): Regularly merging code for automated validation.',
-      },
-    },
-  },
-  {
-    __typename: 'WorkbenchJob',
-    id: 'mock-job-2',
-    prompt: 'Job prompt text',
-    insertedAt: '2026-04-27T10:05:00.000Z',
-    startedAt: '2026-04-27T10:03:10.000Z',
-    completedAt: '2026-04-27T10:03:45.000Z',
-    evalResult: {
-      __typename: 'WorkbenchEvalResult',
-      id: 'mock-eval-2',
-      grade: 5,
-      feedback: {
-        __typename: 'WorkbenchEvalFeedback',
-        summary:
-          'Mixed quality results with inconsistent conclusion structure.',
-        prompt: 'Prompt lacked concrete acceptance criteria in several steps.',
-        result:
-          'Some outcomes were useful but references to evidence were shallow.',
-        logic: '- Needs clearer progression from hypotheses to validation.',
-      },
-    },
-  },
-]
-
 export function WorkbenchEvals() {
   const theme = useTheme()
   const { popToast } = useSimpleToast()
@@ -100,11 +51,9 @@ export function WorkbenchEvals() {
   })
 
   const jobs = useMemo(() => {
-    const fetched = mapExistingNodes(data?.workbench?.runs).filter(
+    return mapExistingNodes(data?.workbench?.runs).filter(
       (job) => !!job.evalResult
     )
-
-    return fetched.length ? fetched : MOCK_EVAL_JOBS
   }, [data])
 
   const selectedJob =

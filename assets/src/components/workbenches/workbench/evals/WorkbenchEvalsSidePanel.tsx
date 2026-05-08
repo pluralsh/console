@@ -175,7 +175,7 @@ export function WorkbenchEvalsSidePanel({
               css={{ margin: `${theme.spacing.large}px auto` }}
             >
               {activeFilter === 'all'
-                ? 'No evals available.'
+                ? 'No evals available yet.'
                 : 'No evals available for this filter.'}
             </Body2P>
           )}
