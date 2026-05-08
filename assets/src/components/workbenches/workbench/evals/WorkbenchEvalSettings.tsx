@@ -113,41 +113,48 @@ export function WorkbenchEvalSettings() {
   const handleSave = async () => {
     if (!workbenchId) return
 
-    if (!evalsEnabled) {
-      if (workbenchEval?.id) {
-        await deleteWorkbenchEval({
-          variables: { id: workbenchEval.id },
-          refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
-          awaitRefetchQueries: true,
-        })
+    try {
+      if (!evalsEnabled) {
+        if (workbenchEval?.id) {
+          await deleteWorkbenchEval({
+            variables: { id: workbenchEval.id },
+            refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+            awaitRefetchQueries: true,
+          })
+        }
+      } else {
+        const attributes: WorkbenchEvalAttributes = {
+          promptRules: promptQualityRules || null,
+          conclusionRules: conclusionRules || null,
+          progressRules: progressAndThoughtsRules || null,
+        }
+
+        if (workbenchEval?.id) {
+          await updateWorkbenchEval({
+            variables: { id: workbenchEval.id, attributes },
+            refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+            awaitRefetchQueries: true,
+          })
+        } else {
+          await createWorkbenchEval({
+            variables: { workbenchId, attributes },
+            refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+            awaitRefetchQueries: true,
+          })
+        }
       }
+
       popToast({ content: 'Eval settings updated', severity: 'success' })
       navigate(getWorkbenchAbsPath(workbenchId))
-      return
-    }
-
-    const attributes: WorkbenchEvalAttributes = {
-      promptRules: promptQualityRules || null,
-      conclusionRules: conclusionRules || null,
-      progressRules: progressAndThoughtsRules || null,
-    }
-
-    if (workbenchEval?.id) {
-      await updateWorkbenchEval({
-        variables: { id: workbenchEval.id, attributes },
-        refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
-        awaitRefetchQueries: true,
-      })
-    } else {
-      await createWorkbenchEval({
-        variables: { workbenchId, attributes },
-        refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
-        awaitRefetchQueries: true,
+    } catch (e) {
+      popToast({
+        content:
+          e instanceof Error
+            ? e.message
+            : 'Unable to save eval settings. Please try again.',
+        severity: 'danger',
       })
     }
-
-    popToast({ content: 'Eval settings updated', severity: 'success' })
-    navigate(getWorkbenchAbsPath(workbenchId))
   }
 
   return (
