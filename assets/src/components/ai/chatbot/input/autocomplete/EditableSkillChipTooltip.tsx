@@ -1,5 +1,4 @@
 import { Tooltip } from '@pluralsh/design-system'
-import compact from 'lodash/compact'
 import {
   CHIP_ATTR_PREFIX,
   CHIP_DATA_ATTR,
@@ -24,25 +23,18 @@ const TIP_ON_INPUT_STYLE = {
   zIndex: 11_000,
 }
 
-/** Nearest `[data-chip][data-plrl-tag=skill]` under `editorRoot`, if event target lies in the editor. */
-function nearestSkillChipInEditor(
-  editorRoot: HTMLElement | null,
+/** Skill chip + tooltip label, resolved from pointer event target. */
+function skillHintFromTarget(
   eventTarget: EventTarget | null
-): HTMLElement | null {
-  if (!editorRoot || !(eventTarget instanceof Element)) return null
-  const match = eventTarget.closest(SKILL_SELECTOR)
-  return match instanceof HTMLElement && editorRoot.contains(match)
-    ? match
-    : null
-}
-
-function skillChipLabel(chip: Element): string | null {
-  return (
-    compact([
-      chip.getAttribute(DESC_ATTR)?.trim(),
-      chip.getAttribute(NAME_ATTR)?.trim(),
-    ])[0] ?? null
-  )
+): { chip: HTMLElement; label: string } | null {
+  if (!(eventTarget instanceof Element)) return null
+  const chip = eventTarget.closest(SKILL_SELECTOR)
+  if (!(chip instanceof HTMLElement)) return null
+  const label =
+    chip.getAttribute(DESC_ATTR)?.trim() ||
+    chip.getAttribute(NAME_ATTR)?.trim() ||
+    null
+  return label ? { chip, label } : null
 }
 
 const ChipAnchorStub = forwardRef<HTMLSpanElement, { chip: HTMLElement }>(
@@ -97,28 +89,17 @@ export function EditableSkillChipTooltip({
     const editorRoot = containerRef.current
     if (!editorRoot) return
 
-    const setHintFromTarget = (eventTarget: EventTarget | null) => {
-      const chip = nearestSkillChipInEditor(editorRoot, eventTarget)
-      if (!chip)
-        return setHint((current) => (current === null ? current : null))
-
-      const label = skillChipLabel(chip)
-      if (!label) return
-
-      setHint((current) =>
-        current?.chip === chip && current.label === label
-          ? current
-          : { chip, label }
-      )
-    }
-
     const onPointerMove = (event: PointerEvent) => {
-      setHintFromTarget(event.target)
+      const next = skillHintFromTarget(event.target)
+      setHint((current) => {
+        if (!next) return null
+        return current?.chip === next.chip && current.label === next.label
+          ? current
+          : next
+      })
     }
 
-    const onPointerLeave = () => {
-      setHint((current) => (current === null ? current : null))
-    }
+    const onPointerLeave = () => setHint(null)
 
     editorRoot.addEventListener('pointermove', onPointerMove)
     editorRoot.addEventListener('pointerleave', onPointerLeave)
