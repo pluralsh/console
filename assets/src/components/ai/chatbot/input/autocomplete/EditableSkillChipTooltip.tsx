@@ -4,6 +4,7 @@ import {
   CHIP_DATA_ATTR,
   CHIP_TAG_ATTR,
 } from 'components/utils/contentEditableChips'
+import { compact } from 'lodash'
 import {
   forwardRef,
   RefObject,
@@ -16,6 +17,7 @@ import { MentionKind } from './mentionTypes'
 const SKILL_SELECTOR = `[${CHIP_DATA_ATTR}="true"][${CHIP_TAG_ATTR}="${MentionKind.Skill}"]`
 const DESC_ATTR = `${CHIP_ATTR_PREFIX}description`
 const NAME_ATTR = `${CHIP_ATTR_PREFIX}item-name`
+const ITEM_ID_ATTR = `${CHIP_ATTR_PREFIX}item-id`
 
 const TIP_ON_INPUT_STYLE = {
   maxWidth: 500,
@@ -23,32 +25,55 @@ const TIP_ON_INPUT_STYLE = {
   zIndex: 11_000,
 }
 
-/**
- * Mirrors the DOM chip bounds so design-system Tooltip (manual mode) positions
- * the tip like a hover target; the real chip is contenteditable markup.
- */
+function eventTargetInEditor(
+  container: HTMLElement | null,
+  target: EventTarget | null
+): boolean {
+  if (!container || !(target instanceof Node)) return false
+  return container.contains(target)
+}
+
+function nearestSkillChip(target: EventTarget | null): HTMLElement | null {
+  if (!(target instanceof Element)) return null
+  const chip = target.closest(SKILL_SELECTOR)
+  return chip instanceof HTMLElement ? chip : null
+}
+
+function skillChipLabel(chip: Element): string | null {
+  const [label] = compact([
+    chip.getAttribute(DESC_ATTR)?.trim(),
+    chip.getAttribute(NAME_ATTR)?.trim(),
+  ])
+  return label ?? null
+}
+
+function useChipBoundingRect(chip: HTMLElement): DOMRect {
+  const [rect, setRect] = useState(() => chip.getBoundingClientRect())
+
+  useLayoutEffect(() => {
+    let frameHandle = 0
+    const syncRect = () => {
+      cancelAnimationFrame(frameHandle)
+      frameHandle = requestAnimationFrame(() => {
+        if (chip.isConnected) setRect(chip.getBoundingClientRect())
+      })
+    }
+    syncRect()
+    window.addEventListener('scroll', syncRect, true)
+    window.addEventListener('resize', syncRect)
+    return () => {
+      cancelAnimationFrame(frameHandle)
+      window.removeEventListener('scroll', syncRect, true)
+      window.removeEventListener('resize', syncRect)
+    }
+  }, [chip])
+
+  return rect
+}
+
 const ChipAnchorStub = forwardRef<HTMLSpanElement, { chip: HTMLElement }>(
   function ChipAnchorStub({ chip }, ref) {
-    const [rect, setRect] = useState(() => chip.getBoundingClientRect())
-
-    useLayoutEffect(() => {
-      let raf = 0
-      const sync = () => {
-        cancelAnimationFrame(raf)
-        raf = requestAnimationFrame(() => {
-          if (!chip.isConnected) return
-          setRect(chip.getBoundingClientRect())
-        })
-      }
-      sync()
-      window.addEventListener('scroll', sync, true)
-      window.addEventListener('resize', sync)
-      return () => {
-        cancelAnimationFrame(raf)
-        window.removeEventListener('scroll', sync, true)
-        window.removeEventListener('resize', sync)
-      }
-    }, [chip])
+    const rect = useChipBoundingRect(chip)
 
     return (
       <span
@@ -77,50 +102,41 @@ export function EditableSkillChipTooltip({
   )
 
   useEffect(() => {
-    const insideInput = (n: EventTarget | null) => {
-      const root = containerRef.current
-      return root instanceof Node && n instanceof Node && root.contains(n)
-    }
-
-    const labelFor = (chip: Element) =>
-      chip.getAttribute(DESC_ATTR)?.trim() ||
-      chip.getAttribute(NAME_ATTR)?.trim() ||
-      null
-
-    const onOver = (e: PointerEvent) => {
-      if (!insideInput(e.target)) return
-      const chip = (e.target as Element).closest(SKILL_SELECTOR)
+    const onPointerOver = (event: PointerEvent) => {
+      if (!eventTargetInEditor(containerRef.current, event.target)) return
+      const chip = nearestSkillChip(event.target)
       if (!chip) return
-      const label = labelFor(chip)
+      const label = skillChipLabel(chip)
       if (!label) return
-      setHint({ chip: chip as HTMLElement, label })
+      setHint({ chip, label })
     }
 
-    const onOut = (e: PointerEvent) => {
-      if (!insideInput(e.target)) return
-      const from =
-        e.target instanceof Element ? e.target.closest(SKILL_SELECTOR) : null
-      if (!from) return
-      const next = e.relatedTarget
-      if (next instanceof Node && from.contains(next)) return
-      setHint((h) => (h?.chip === from ? null : h))
+    const onPointerOut = (event: PointerEvent) => {
+      if (!eventTargetInEditor(containerRef.current, event.target)) return
+      const chip = nearestSkillChip(event.target)
+      if (!chip) return
+      const next = event.relatedTarget
+      if (next instanceof Node && chip.contains(next)) return
+      setHint((current) => (current?.chip === chip ? null : current))
     }
 
-    document.addEventListener('pointerover', onOver, true)
-    document.addEventListener('pointerout', onOut, true)
+    document.addEventListener('pointerover', onPointerOver, true)
+    document.addEventListener('pointerout', onPointerOut, true)
     return () => {
-      document.removeEventListener('pointerover', onOver, true)
-      document.removeEventListener('pointerout', onOut, true)
+      document.removeEventListener('pointerover', onPointerOver, true)
+      document.removeEventListener('pointerout', onPointerOut, true)
     }
-  }, [])
+  }, [containerRef])
 
   if (!hint) return null
 
+  const tooltipKey = hint.chip.getAttribute(ITEM_ID_ATTR) ?? hint.label
+
   return (
     <Tooltip
-      key={hint.chip.getAttribute(`${CHIP_ATTR_PREFIX}item-id`) ?? hint.label}
-      displayOn="manual"
+      key={tooltipKey}
       dismissable={false}
+      displayOn="manual"
       manualOpen
       label={hint.label}
       placement="top"
