@@ -54,6 +54,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       assert result[:result][:output] == "complete"
     end
 
+    # @tag :skip
     test "it can handle mcp tools in the agent loop" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},

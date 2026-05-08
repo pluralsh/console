@@ -80,6 +80,7 @@ services:
   mcp:
     restart: always
     image: tzolov/mcp-everything-server:v3
+    # image: mcp/everything:latest
     ports:
       - 3001:3001
     command:

@@ -19956,7 +19956,7 @@ export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string
 
 export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, name: string, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, fingerprint?: string | null, annotations?: Record<string, unknown> | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null, issue?: { __typename?: 'Issue', id: string, title: string, externalId: string, insertedAt?: string | null, status: IssueStatus, url: string, provider: IssueWebhookProvider } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null, workingTheory?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
 
-export type WorkbenchEvalJobFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, startedAt?: string | null, completedAt?: string | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null, prompt?: string | null, result?: string | null, logic?: string | null } | null } | null };
+export type WorkbenchEvalResultRowFragment = { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null, prompt?: string | null, result?: string | null, logic?: string | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, startedAt?: string | null, completedAt?: string | null } | null };
 
 export type WorkbenchesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20028,10 +20028,11 @@ export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { _
 export type WorkbenchEvalsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type WorkbenchEvalsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, startedAt?: string | null, completedAt?: string | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null, prompt?: string | null, result?: string | null, logic?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchEvalsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, evalResults?: { __typename?: 'WorkbenchEvalResultConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchEvalResultEdge', node?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null, feedback?: { __typename?: 'WorkbenchEvalFeedback', summary?: string | null, prompt?: string | null, result?: string | null, logic?: string | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, insertedAt?: string | null, startedAt?: string | null, completedAt?: string | null } | null } | null } | null> | null } | null } | null };
 
 export type RecentWorkbenchJobsQueryVariables = Exact<{
   count?: InputMaybe<Scalars['Int']['input']>;
@@ -25691,22 +25692,22 @@ export const WorkbenchJobFragmentDoc = gql`
 ${WorkbenchToolTinyFragmentDoc}
 ${AlertFragmentDoc}
 ${WorkbenchJobResultFragmentDoc}`;
-export const WorkbenchEvalJobFragmentDoc = gql`
-    fragment WorkbenchEvalJob on WorkbenchJob {
+export const WorkbenchEvalResultRowFragmentDoc = gql`
+    fragment WorkbenchEvalResultRow on WorkbenchEvalResult {
   id
-  prompt
-  insertedAt
-  startedAt
-  completedAt
-  evalResult {
+  grade
+  feedback {
+    summary
+    prompt
+    result
+    logic
+  }
+  workbenchJob {
     id
-    grade
-    feedback {
-      summary
-      prompt
-      result
-      logic
-    }
+    prompt
+    insertedAt
+    startedAt
+    completedAt
   }
 }
     `;
@@ -41673,19 +41674,23 @@ export type WorkbenchJobsLazyQueryHookResult = ReturnType<typeof useWorkbenchJob
 export type WorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobsSuspenseQuery>;
 export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
 export const WorkbenchEvalsDocument = gql`
-    query WorkbenchEvals($id: ID!, $first: Int = 100) {
+    query WorkbenchEvals($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
-    runs(first: $first) {
+    evalResults(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
       edges {
         node {
-          ...WorkbenchEvalJob
+          ...WorkbenchEvalResultRow
         }
       }
     }
   }
 }
-    ${WorkbenchEvalJobFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${WorkbenchEvalResultRowFragmentDoc}`;
 
 /**
  * __useWorkbenchEvalsQuery__
@@ -41701,6 +41706,7 @@ export const WorkbenchEvalsDocument = gql`
  *   variables: {
  *      id: // value for 'id'
  *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
@@ -44526,7 +44532,7 @@ export const namedOperations = {
     WorkbenchIssue: 'WorkbenchIssue',
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJob: 'WorkbenchJob',
-    WorkbenchEvalJob: 'WorkbenchEvalJob',
+    WorkbenchEvalResultRow: 'WorkbenchEvalResultRow',
     UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny'
   }
 }

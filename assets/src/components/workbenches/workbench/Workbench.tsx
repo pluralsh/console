@@ -34,6 +34,7 @@ import {
 import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
+  WORKBENCH_JOBS_REL_PATH,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
@@ -55,7 +56,7 @@ const directory = [
   { label: 'Jobs', path: '' },
   { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
   { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
-  { label: 'Eval', path: WORKBENCHES_EVALS_REL_PATH },
+  { label: 'Evals', path: WORKBENCHES_EVALS_REL_PATH },
 ]
 
 export const getWorkbenchBreadcrumbs = (
@@ -200,7 +201,13 @@ export function Workbench() {
           >
             <SubTabs
               directory={directory}
-              activeFn={(path) => path === tab}
+              activeFn={(path) =>
+                path === tab ||
+                (path === '' &&
+                  (tab === '' ||
+                    tab === undefined ||
+                    tab === WORKBENCH_JOBS_REL_PATH))
+              }
             />
             <Flex grow={1} />
             <Button

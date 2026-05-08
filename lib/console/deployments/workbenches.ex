@@ -320,7 +320,7 @@ defmodule Console.Deployments.Workbenches do
   def workbench_eval_skill(%WorkbenchEvalResult{workbench_job_id: job_id} = eval, prompt, %User{} = user) do
     eval = Repo.preload(eval, [:workbench_job])
     create_workbench_job(%{
-      prompt: prompt || "No specific guidance provided, update the skills as necessary",
+      prompt: prompt || "Update the skills as necessary",
       referenced_job_id: job_id,
       type: :skill
     }, eval.workbench_job.workbench_id, user)
