@@ -496,6 +496,24 @@ fragment WorkbenchJob on WorkbenchJob {
   }
 }
 
+fragment WorkbenchEvalJob on WorkbenchJob {
+  id
+  prompt
+  insertedAt
+  startedAt
+  completedAt
+  evalResult {
+    id
+    grade
+    feedback {
+      summary
+      prompt
+      result
+      logic
+    }
+  }
+}
+
 query Workbenches($first: Int = 100, $after: String, $q: String) {
   workbenches(first: $first, after: $after, q: $q) {
     pageInfo {
@@ -505,6 +523,42 @@ query Workbenches($first: Int = 100, $after: String, $q: String) {
       node {
         ...WorkbenchTiny
       }
+    }
+  }
+}
+
+query WorkbenchDashboard {
+  workbenchPullRequests
+  workbenchAggregates {
+    pullRequestMergeRate
+    evalResults
+  }
+}
+
+query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {
+  workbenchPrMergeRates(period: $period) {
+    timestamp
+    mergeRate
+  }
+}
+
+query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
+  averageWorkbenchEvalResults(period: $period) {
+    average
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {
+  averageWorkbenchEvalResults(period: $period) {
+    timestamp
+    average
+    workbench {
+      id
+      name
     }
   }
 }
@@ -528,6 +582,18 @@ query Workbench($id: ID, $name: String) {
   }
 }
 
+query WorkbenchEvalSettings($id: ID!) {
+  workbench(id: $id) {
+    id
+    eval {
+      id
+      promptRules
+      conclusionRules
+      progressRules
+    }
+  }
+}
+
 query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
@@ -538,6 +604,19 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchEvals($id: ID!, $first: Int = 100) {
+  workbench(id: $id) {
+    id
+    runs(first: $first) {
+      edges {
+        node {
+          ...WorkbenchEvalJob
         }
       }
     }
@@ -835,6 +914,39 @@ mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
 mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
   updateWorkbench(id: $id, attributes: $attributes) {
     ...Workbench
+  }
+}
+
+mutation CreateWorkbenchEval(
+  $workbenchId: ID!
+  $attributes: WorkbenchEvalAttributes!
+) {
+  createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    promptRules
+    conclusionRules
+    progressRules
+  }
+}
+
+mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
+  updateWorkbenchEval(id: $id, attributes: $attributes) {
+    id
+    promptRules
+    conclusionRules
+    progressRules
+  }
+}
+
+mutation DeleteWorkbenchEval($id: ID!) {
+  deleteWorkbenchEval(id: $id) {
+    id
+  }
+}
+
+mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {
+  workbenchEvalSkill(id: $id, prompt: $prompt) {
+    id
   }
 }
 

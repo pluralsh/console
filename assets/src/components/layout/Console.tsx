@@ -98,6 +98,7 @@ function ConsoleContent() {
       minHeight={0}
       alignItems="stretch"
     >
+      <Sidebar />
       <Flex
         ref={wrapperRef}
         position="relative"
@@ -105,6 +106,7 @@ function ConsoleContent() {
         overflow="hidden"
         flexDirection="column"
         flexGrow={1}
+        minWidth={0}
         zIndex={0} // needed so chatbot flyovers render over main console content
       >
         {isProduction && <ApplicationUpdateToast />}
@@ -117,7 +119,6 @@ function ConsoleContent() {
           flexGrow={1}
           alignItems="stretch"
         >
-          <Sidebar />
           <Flex
             direction="column"
             flexGrow={1}

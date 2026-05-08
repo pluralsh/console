@@ -1,3 +1,4 @@
+import { Flex } from '@pluralsh/design-system'
 import {
   AlertsTable,
   ColAlertExpander,
@@ -12,9 +13,11 @@ import { useWorkbenchAlertsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 
 export function WorkbenchAlerts() {
+  const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -47,17 +50,23 @@ export function WorkbenchAlerts() {
   )
 
   return (
-    <AlertsTable
-      alerts={alerts}
-      loading={!data && loading}
-      error={error}
-      hasNextPage={pageInfo?.hasNextPage}
-      fetchNextPage={fetchNextPage}
-      setVirtualSlice={setVirtualSlice}
-      hideHeader
-      columns={columns}
-      fillLevel={0}
-      rowBg="stripes"
-    />
+    <Flex
+      css={{
+        padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+      }}
+    >
+      <AlertsTable
+        alerts={alerts}
+        loading={!data && loading}
+        error={error}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        setVirtualSlice={setVirtualSlice}
+        hideHeader
+        columns={columns}
+        fillLevel={0}
+        rowBg="stripes"
+      />
+    </Flex>
   )
 }

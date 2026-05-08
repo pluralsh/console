@@ -12,9 +12,11 @@ import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { useCallback, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export function ProfileMenu() {
   const { me, logout } = useLogin()
+  const theme = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   useOutsideClick(menuBtnRef, () => setIsMenuOpen(false))
@@ -31,6 +33,7 @@ export function ProfileMenu() {
         tertiary
         onClick={() => setIsMenuOpen((open) => !open)}
         css={{
+          borderRadius: '50%',
           padding: 0,
           transition: 'filter 0.1s ease',
           '&:hover': { filter: 'brightness(1.1)' },
@@ -43,6 +46,16 @@ export function ProfileMenu() {
           name={me?.name}
           src={me?.profile}
           size={32}
+          css={{
+            borderRadius: '50%',
+            ...(me?.profile
+              ? {}
+              : {
+                  backgroundColor: theme.colors['fill-three'],
+                  border: theme.borders.input,
+                  fontSize: 12,
+                }),
+          }}
         />
       </Button>
       <SimplePopupMenu

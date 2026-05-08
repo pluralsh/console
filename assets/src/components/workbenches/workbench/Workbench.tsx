@@ -10,6 +10,7 @@ import {
   useSetBreadcrumbs,
   WebhooksIcon,
   ToolsIcon,
+  TuningIcon,
 } from '@pluralsh/design-system'
 import { SubTabs } from 'components/utils/SubTabs'
 import { GqlError } from 'components/utils/Alert'
@@ -22,7 +23,7 @@ import {
   useWorkbenchQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { Key, useMemo, useState } from 'react'
+import { Key, ReactNode, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -37,11 +38,13 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
   WORKBENCHES_SAVED_PROMPTS_REL_PATH,
+  WORKBENCH_EVAL_SETTINGS_REL_PATH,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
+  WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
@@ -52,6 +55,7 @@ const directory = [
   { label: 'Jobs', path: '' },
   { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
   { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
+  { label: 'Eval', path: WORKBENCHES_EVALS_REL_PATH },
 ]
 
 export const getWorkbenchBreadcrumbs = (
@@ -66,6 +70,9 @@ export const getWorkbenchBreadcrumbs = (
 export type WorkbenchOutletContext = {
   workbenchId: string
   isLoading: boolean
+  setSideContent: (content: ReactNode | null) => void
+  setShowDescription: (show: boolean) => void
+  setHeaderActions: (content: ReactNode | null) => void
 }
 
 export enum WorkbenchMoreMenuKey {
@@ -73,6 +80,7 @@ export enum WorkbenchMoreMenuKey {
   Webhook = 'webhook',
   Tools = 'tools',
   SavedPrompts = 'saved-prompts',
+  EvalSettings = 'eval-settings',
   Delete = 'delete',
 }
 
@@ -86,6 +94,9 @@ export function Workbench() {
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [toolsEditOpen, setToolsEditOpen] = useState(false)
+  const [sideContent, setSideContent] = useState<ReactNode | null>(null)
+  const [headerActions, setHeaderActions] = useState<ReactNode | null>(null)
+  const [showDescription, setShowDescription] = useState(true)
 
   const handleMoreMenuSelection = (selectedKey: Key) => {
     switch (selectedKey) {
@@ -100,6 +111,9 @@ export function Workbench() {
         return
       case WorkbenchMoreMenuKey.SavedPrompts:
         navigate(WORKBENCHES_SAVED_PROMPTS_REL_PATH)
+        return
+      case WorkbenchMoreMenuKey.EvalSettings:
+        navigate(WORKBENCH_EVAL_SETTINGS_REL_PATH)
         return
       case WorkbenchMoreMenuKey.Delete:
         setDeleteModalOpen(true)
@@ -160,76 +174,108 @@ export function Workbench() {
       minHeight={0}
       overflow="hidden"
     >
-      <WorkbenchSidePanel
-        workbenchId={id}
-        onOpenToolsEdit={() => setToolsEditOpen(true)}
-      />
-      <WrapperSC>
+      {sideContent ?? (
+        <WorkbenchSidePanel
+          workbenchId={id}
+          onOpenToolsEdit={() => setToolsEditOpen(true)}
+        />
+      )}
+      <Flex
+        direction="column"
+        flex={1}
+        minHeight={0}
+        minWidth={0}
+        overflow="auto"
+      >
         <Flex
-          align="center"
-          gap="small"
+          direction="column"
+          gap="large"
+          css={{
+            padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+          }}
         >
-          <SubTabs
-            directory={directory}
-            activeFn={(path) => path === tab}
-          />
-          <Flex grow={1} />
-          <Button
-            secondary
-            as={Link}
-            to={WORKBENCHES_EDIT_REL_PATH}
+          <Flex
+            align="center"
+            gap="small"
           >
-            Edit workbench
-          </Button>
-          <MoreMenu
-            disabled={!workbench}
-            triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
-            onSelectionChange={handleMoreMenuSelection}
-          >
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Tools}
-              leftContent={<ToolsIcon />}
-              label="Tools"
+            <SubTabs
+              directory={directory}
+              activeFn={(path) => path === tab}
             />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Cron}
-              leftContent={<EventScheduleIcon />}
-              label="Cron schedules"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Webhook}
-              leftContent={<WebhooksIcon />}
-              label="Webhook triggers"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.SavedPrompts}
-              leftContent={<BookmarkIcon />}
-              label="Saved prompts"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Delete}
-              destructive
-              leftContent={<TrashCanIcon color="icon-danger" />}
-              label="Delete workbench"
-            />
-          </MoreMenu>
-        </Flex>
-        <StretchedFlex>
-          {isLoading ? (
-            <RectangleSkeleton
-              $height={18}
-              $width="100%"
-            />
-          ) : (
-            <Subtitle2H1
-              $color="text-xlight"
-              css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
+            <Flex grow={1} />
+            <Button
+              secondary
+              as={Link}
+              to={WORKBENCHES_EDIT_REL_PATH}
             >
-              {workbench?.description}
-            </Subtitle2H1>
+              Edit workbench
+            </Button>
+            {headerActions}
+            <MoreMenu
+              disabled={!workbench}
+              triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
+              onSelectionChange={handleMoreMenuSelection}
+            >
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Tools}
+                leftContent={<ToolsIcon />}
+                label="Tools"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Cron}
+                leftContent={<EventScheduleIcon />}
+                label="Cron schedules"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Webhook}
+                leftContent={<WebhooksIcon />}
+                label="Webhook triggers"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.SavedPrompts}
+                leftContent={<BookmarkIcon />}
+                label="Saved prompts"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.EvalSettings}
+                leftContent={<TuningIcon />}
+                label="Eval settings"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Delete}
+                destructive
+                leftContent={<TrashCanIcon color="icon-danger" />}
+                label="Delete workbench"
+              />
+            </MoreMenu>
+          </Flex>
+          {showDescription && (
+            <StretchedFlex>
+              {isLoading ? (
+                <RectangleSkeleton
+                  $height={18}
+                  $width="100%"
+                />
+              ) : (
+                <Subtitle2H1
+                  $color="text-xlight"
+                  css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
+                >
+                  {workbench?.description}
+                </Subtitle2H1>
+              )}
+            </StretchedFlex>
           )}
-        </StretchedFlex>
-        <Outlet context={{ workbenchId: id, isLoading }} />
+        </Flex>
+        <Outlet
+          context={{
+            workbenchId: id,
+            isLoading,
+            setSideContent,
+            setShowDescription,
+            setHeaderActions,
+          }}
+        />
         <Confirm
           open={deleteModalOpen}
           close={() => setDeleteModalOpen(false)}
@@ -253,18 +299,7 @@ export function Workbench() {
           open={toolsEditOpen}
           onClose={() => setToolsEditOpen(false)}
         />
-      </WrapperSC>
+      </Flex>
     </Flex>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.large,
-  minHeight: 0,
-  minWidth: 0,
-  overflow: 'auto',
-  padding: theme.spacing.large,
-}))

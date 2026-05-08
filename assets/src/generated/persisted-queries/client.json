@@ -1802,6 +1802,26 @@
          "name": "Workbenches",
          "body": "query Workbenches($first: Int = 100, $after: String, $q: String) {\n  workbenches(first: $first, after: $after, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...WorkbenchTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchTiny on Workbench {\n  id\n  name\n  description\n  agentRuntime {\n    id\n    name\n    type\n    __typename\n  }\n  tools {\n    ...WorkbenchToolTiny\n    __typename\n  }\n  webhooks(first: 50) {\n    edges {\n      node {\n        ...WorkbenchWebhookTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchToolTiny on WorkbenchTool {\n  id\n  name\n  tool\n  categories\n  cloudConnection {\n    ...CloudConnectionTiny\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment WorkbenchWebhookTiny on WorkbenchWebhook {\n  id\n  name\n  webhook {\n    id\n    type\n    __typename\n  }\n  issueWebhook {\n    ...IssueWebhookTiny\n    __typename\n  }\n  __typename\n}\n\nfragment IssueWebhookTiny on IssueWebhook {\n  id\n  provider\n  __typename\n}"
       },
+      "sha256:76bd870f90dc40c37b88b0ab4f8eeadfc7de3576e76e4ba548d03bb042b4d4f0": {
+         "type": "query",
+         "name": "WorkbenchDashboard",
+         "body": "query WorkbenchDashboard {\n  workbenchPullRequests\n  workbenchAggregates {\n    pullRequestMergeRate\n    evalResults\n    __typename\n  }\n}"
+      },
+      "sha256:c4f4c207c42b50e3b6de8acac5a4c77a56202e0cb5188b356e2dd15499d6b70d": {
+         "type": "query",
+         "name": "WorkbenchesEvalsMergeRateGraph",
+         "body": "query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {\n  workbenchPrMergeRates(period: $period) {\n    timestamp\n    mergeRate\n    __typename\n  }\n}"
+      },
+      "sha256:908ae1eb6f0e4c760f211718210e41924ae19bd9eb719d303bc7e01da39a8a1c": {
+         "type": "query",
+         "name": "WorkbenchesEvalsAvgGraph",
+         "body": "query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {\n  averageWorkbenchEvalResults(period: $period) {\n    average\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
+      },
+      "sha256:52a0601dd9a2788a8eb8faacd06caf1d1a5bbc2a4c5f73559279a6b23b1cf074": {
+         "type": "query",
+         "name": "WorkbenchesEvalsAvgTimelineGraph",
+         "body": "query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {\n  averageWorkbenchEvalResults(period: $period) {\n    timestamp\n    average\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n}"
+      },
       "sha256:93feb848735e2cf2f085fa3f602a6ad916b353383522b68cb9480cf001019b3a": {
          "type": "query",
          "name": "WorkbenchesAlerts",
@@ -1812,10 +1832,20 @@
          "name": "Workbench",
          "body": "query Workbench($id: ID, $name: String) {\n  workbench(id: $id, name: $name) {\n    ...Workbench\n    __typename\n  }\n}\n\nfragment Workbench on Workbench {\n  ...WorkbenchTiny\n  systemPrompt\n  agentRuntime {\n    id\n    name\n    __typename\n  }\n  repository {\n    id\n    __typename\n  }\n  configuration {\n    infrastructure {\n      services\n      stacks\n      kubernetes\n      podLogs\n      vulnerabilities\n      __typename\n    }\n    observability {\n      logs\n      metrics\n      __typename\n    }\n    coding {\n      mode\n      repositories\n      enableBabysitting\n      __typename\n    }\n    __typename\n  }\n  skills {\n    ref {\n      ref\n      folder\n      __typename\n    }\n    files\n    __typename\n  }\n  workbenchSkills(first: 500) {\n    edges {\n      node {\n        id\n        name\n        description\n        contents\n        subagents\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  tools {\n    ...WorkbenchTool\n    __typename\n  }\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  botUser {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchTiny on Workbench {\n  id\n  name\n  description\n  agentRuntime {\n    id\n    name\n    type\n    __typename\n  }\n  tools {\n    ...WorkbenchToolTiny\n    __typename\n  }\n  webhooks(first: 50) {\n    edges {\n      node {\n        ...WorkbenchWebhookTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchToolTiny on WorkbenchTool {\n  id\n  name\n  tool\n  categories\n  cloudConnection {\n    ...CloudConnectionTiny\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment WorkbenchWebhookTiny on WorkbenchWebhook {\n  id\n  name\n  webhook {\n    id\n    type\n    __typename\n  }\n  issueWebhook {\n    ...IssueWebhookTiny\n    __typename\n  }\n  __typename\n}\n\nfragment IssueWebhookTiny on IssueWebhook {\n  id\n  provider\n  __typename\n}\n\nfragment WorkbenchTool on WorkbenchTool {\n  ...WorkbenchToolTiny\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  configuration {\n    http {\n      url\n      method\n      headers {\n        name\n        value\n        __typename\n      }\n      body\n      inputSchema\n      __typename\n    }\n    datadog {\n      site\n      __typename\n    }\n    elastic {\n      index\n      url\n      username\n      __typename\n    }\n    loki {\n      url\n      username\n      tenantId\n      __typename\n    }\n    prometheus {\n      url\n      username\n      tenantId\n      __typename\n    }\n    tempo {\n      url\n      username\n      tenantId\n      __typename\n    }\n    jaeger {\n      url\n      username\n      __typename\n    }\n    atlassian {\n      email\n      url\n      __typename\n    }\n    linear {\n      url\n      __typename\n    }\n    splunk {\n      url\n      username\n      __typename\n    }\n    cloudwatch {\n      logGroupNames\n      region\n      roleArn\n      roleSessionName\n      __typename\n    }\n    azure {\n      subscriptionId\n      tenantId\n      clientId\n      prometheusUrl\n      __typename\n    }\n    dynatrace {\n      url\n      __typename\n    }\n    github {\n      url\n      toolset\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:ce96d29543e43c8a3051606d97a7bb7ccb82015d4947e3b6958638b048e31af4": {
+         "type": "query",
+         "name": "WorkbenchEvalSettings",
+         "body": "query WorkbenchEvalSettings($id: ID!) {\n  workbench(id: $id) {\n    id\n    eval {\n      id\n      promptRules\n      conclusionRules\n      progressRules\n      __typename\n    }\n    __typename\n  }\n}"
+      },
       "sha256:7d6c866de57aab0aee014cde4d7a39ab1365c96e20876f285dca12aa26bbf145": {
          "type": "query",
          "name": "WorkbenchJobs",
          "body": "query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  insertedAt\n  user {\n    id\n    name\n    profile\n    __typename\n  }\n  workbench {\n    id\n    name\n    __typename\n  }\n  alert {\n    id\n    state\n    url\n    __typename\n  }\n  issue {\n    id\n    status\n    url\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  result {\n    id\n    conclusion\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
+      "sha256:c145a2c070b7bc2bb43e71c916c74ea98b45d69c02b9ce178e97af642b02fd3c": {
+         "type": "query",
+         "name": "WorkbenchEvals",
+         "body": "query WorkbenchEvals($id: ID!, $first: Int = 100) {\n  workbench(id: $id) {\n    id\n    runs(first: $first) {\n      edges {\n        node {\n          ...WorkbenchEvalJob\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchEvalJob on WorkbenchJob {\n  id\n  prompt\n  insertedAt\n  startedAt\n  completedAt\n  evalResult {\n    id\n    grade\n    feedback {\n      summary\n      prompt\n      result\n      logic\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:688124f2b092b83254d1adffc43cff7e2b2983bc960152d4d3d1303abcc3b2ec": {
          "type": "query",
@@ -1936,6 +1966,26 @@
          "type": "mutation",
          "name": "UpdateWorkbench",
          "body": "mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {\n  updateWorkbench(id: $id, attributes: $attributes) {\n    ...Workbench\n    __typename\n  }\n}\n\nfragment Workbench on Workbench {\n  ...WorkbenchTiny\n  systemPrompt\n  agentRuntime {\n    id\n    name\n    __typename\n  }\n  repository {\n    id\n    __typename\n  }\n  configuration {\n    infrastructure {\n      services\n      stacks\n      kubernetes\n      podLogs\n      vulnerabilities\n      __typename\n    }\n    observability {\n      logs\n      metrics\n      __typename\n    }\n    coding {\n      mode\n      repositories\n      enableBabysitting\n      __typename\n    }\n    __typename\n  }\n  skills {\n    ref {\n      ref\n      folder\n      __typename\n    }\n    files\n    __typename\n  }\n  workbenchSkills(first: 500) {\n    edges {\n      node {\n        id\n        name\n        description\n        contents\n        subagents\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  tools {\n    ...WorkbenchTool\n    __typename\n  }\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  botUser {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchTiny on Workbench {\n  id\n  name\n  description\n  agentRuntime {\n    id\n    name\n    type\n    __typename\n  }\n  tools {\n    ...WorkbenchToolTiny\n    __typename\n  }\n  webhooks(first: 50) {\n    edges {\n      node {\n        ...WorkbenchWebhookTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchToolTiny on WorkbenchTool {\n  id\n  name\n  tool\n  categories\n  cloudConnection {\n    ...CloudConnectionTiny\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment WorkbenchWebhookTiny on WorkbenchWebhook {\n  id\n  name\n  webhook {\n    id\n    type\n    __typename\n  }\n  issueWebhook {\n    ...IssueWebhookTiny\n    __typename\n  }\n  __typename\n}\n\nfragment IssueWebhookTiny on IssueWebhook {\n  id\n  provider\n  __typename\n}\n\nfragment WorkbenchTool on WorkbenchTool {\n  ...WorkbenchToolTiny\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  configuration {\n    http {\n      url\n      method\n      headers {\n        name\n        value\n        __typename\n      }\n      body\n      inputSchema\n      __typename\n    }\n    datadog {\n      site\n      __typename\n    }\n    elastic {\n      index\n      url\n      username\n      __typename\n    }\n    loki {\n      url\n      username\n      tenantId\n      __typename\n    }\n    prometheus {\n      url\n      username\n      tenantId\n      __typename\n    }\n    tempo {\n      url\n      username\n      tenantId\n      __typename\n    }\n    jaeger {\n      url\n      username\n      __typename\n    }\n    atlassian {\n      email\n      url\n      __typename\n    }\n    linear {\n      url\n      __typename\n    }\n    splunk {\n      url\n      username\n      __typename\n    }\n    cloudwatch {\n      logGroupNames\n      region\n      roleArn\n      roleSessionName\n      __typename\n    }\n    azure {\n      subscriptionId\n      tenantId\n      clientId\n      prometheusUrl\n      __typename\n    }\n    dynatrace {\n      url\n      __typename\n    }\n    github {\n      url\n      toolset\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:6bdd9295cb14dc91a238b8bb12b0b9b2781f2c6789194acd1364f8fe10bb3f6a": {
+         "type": "mutation",
+         "name": "CreateWorkbenchEval",
+         "body": "mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {\n  createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    promptRules\n    conclusionRules\n    progressRules\n    __typename\n  }\n}"
+      },
+      "sha256:6eda42c4bb7c281b39282fe052a7040ed7acbfb00b62a98ff7e353e856bd0f95": {
+         "type": "mutation",
+         "name": "UpdateWorkbenchEval",
+         "body": "mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {\n  updateWorkbenchEval(id: $id, attributes: $attributes) {\n    id\n    promptRules\n    conclusionRules\n    progressRules\n    __typename\n  }\n}"
+      },
+      "sha256:36f1fefc3306438523902da1d184f401510f2ab8efc781f5f256152278a6dd73": {
+         "type": "mutation",
+         "name": "DeleteWorkbenchEval",
+         "body": "mutation DeleteWorkbenchEval($id: ID!) {\n  deleteWorkbenchEval(id: $id) {\n    id\n    __typename\n  }\n}"
+      },
+      "sha256:c8d36e8cfb4e7cfb055373c504b0b5f88e71e99e32aa094dcc51410bee0a05e5": {
+         "type": "mutation",
+         "name": "WorkbenchEvalSkill",
+         "body": "mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {\n  workbenchEvalSkill(id: $id, prompt: $prompt) {\n    id\n    __typename\n  }\n}"
       },
       "sha256:7b6b450c0f286e31340ab42bfb2ab3d7137c56ed0885c120769c51d006ac14e2": {
          "type": "mutation",

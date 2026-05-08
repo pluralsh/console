@@ -7,10 +7,9 @@ import {
   FlowIcon,
   GearTrainIcon,
   GitPullIcon,
-  HamburgerMenuCollapsedIcon,
-  HamburgerMenuCollapseIcon,
-  HomeIcon,
   KubernetesAltIcon,
+  MenuCollapseIcon,
+  MenuOpenIcon,
   StackIcon,
   Tooltip,
   WarningShieldIcon,
@@ -29,7 +28,7 @@ import {
   useMemo,
 } from 'react'
 import { useLocation } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -61,6 +60,8 @@ import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
 
 const SIDEBAR_WIDTH = 64
 const SIDEBAR_EXPANDED_WIDTH = 180
+const APP_ICON_LIGHT = '/plural-logo.png'
+const APP_ICON_DARK = '/plural-logo-white.png'
 
 type MenuItem = {
   text: string
@@ -99,18 +100,20 @@ function getMenuItems({
   featureFlags,
   cdPath,
   personaConfig,
+  homeIcon,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
   featureFlags: FeatureFlags
   cdPath: string
   personaConfig: Nullable<PersonaConfigurationFragment>
+  homeIcon: ReactElement<any>
 }): MenuItem[] {
   return [
     {
       text: 'Home',
       expandedLabel: 'Home',
-      icon: <HomeIcon />,
+      icon: homeIcon,
       path: '/',
       hotkeys: ['shift H'],
     },
@@ -221,6 +224,7 @@ export function Sidebar() {
   const { me, configuration, personaConfiguration } = useLogin()
   const { featureFlags } = use(FeatureFlagContext)
   const { pathname } = useLocation()
+  const theme = useTheme()
   const isActive = useCallback(
     (menuItem: MenuItemPath) => isActiveMenuItem(menuItem, pathname),
     [pathname]
@@ -236,6 +240,12 @@ export function Sidebar() {
         featureFlags,
         cdPath: defaultCDPath,
         personaConfig: personaConfiguration,
+        homeIcon: (
+          <SidebarLogoSC
+            src={theme.mode === 'light' ? APP_ICON_LIGHT : APP_ICON_DARK}
+            alt="Plural console"
+          />
+        ),
       }),
     [
       configuration?.isSandbox,
@@ -243,6 +253,7 @@ export function Sidebar() {
       featureFlags,
       defaultCDPath,
       personaConfiguration,
+      theme.mode,
     ]
   )
 
@@ -273,24 +284,38 @@ export function Sidebar() {
         ))}
         <Flex flex={1} />
         <HelpLauncher />
-        <SidebarItem
-          tooltip="Expand"
-          expandedLabel="Collapse"
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsExpanded((x: boolean) => !x)
-          }}
-        >
-          {isExpanded ? (
-            <HamburgerMenuCollapseIcon />
-          ) : (
-            <HamburgerMenuCollapsedIcon />
-          )}
-        </SidebarItem>
         {configuration?.consoleVersion && (
           <ConsoleVersion version={configuration.consoleVersion} />
         )}
       </SidebarSection>
+      <div css={{ height: 40, width: '100%' }}>
+        <WrapWithIf
+          condition={!isExpanded}
+          wrapper={
+            <Tooltip
+              label="Expand sidebar"
+              placement="right"
+              css={{ whiteSpace: 'nowrap' }}
+            />
+          }
+        >
+          <ToggleSidebarButtonSC
+            type="button"
+            $isExpanded={isExpanded}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsExpanded((x: boolean) => !x)
+            }}
+            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            {isExpanded ? (
+              <MenuCollapseIcon color="icon-xlight" />
+            ) : (
+              <MenuOpenIcon color="icon-xlight" />
+            )}
+          </ToggleSidebarButtonSC>
+        </WrapWithIf>
+      </div>
     </SidebarSC>
   )
 }
@@ -302,24 +327,49 @@ function ConsoleVersion({ version }: { version: string }) {
       condition={!isExpanded}
       wrapper={<Tooltip label={`Console version: v${version}`} />}
     >
-      <ConsoleVersionSC $isExpanded={isExpanded}>
-        {isExpanded ? 'Console version: v' : 'v'}
+      <ConsoleVersionSC>
+        {isExpanded ? 'Console version: ' : 'v'}
         {version}
       </ConsoleVersionSC>
     </WrapWithIf>
   )
 }
-const ConsoleVersionSC = styled.span<{ $isExpanded?: boolean }>(
-  ({ theme, $isExpanded }) => ({
-    ...TRUNCATE,
-    width: '100%',
-    textAlign: $isExpanded ? 'left' : 'center',
-    padding: theme.spacing.xxsmall,
-    fontFamily: theme.fontFamilies.sans,
-    fontSize: 10,
-    letterSpacing: '-0.35px',
-  })
-)
+const ConsoleVersionSC = styled.span(({ theme }) => ({
+  ...TRUNCATE,
+  color: theme.colors['text-xlight'],
+  fontSize: 10,
+  letterSpacing: '-0.35px',
+  margin: theme.spacing.xsmall,
+  textAlign: 'center',
+}))
+
+const SidebarLogoSC = styled.img({
+  width: 24,
+  height: 24,
+  objectFit: 'contain',
+  marginLeft: '-4px',
+  marginRight: '-4px',
+})
+
+const ToggleSidebarButtonSC = styled.button<{
+  $isExpanded: boolean
+}>(({ theme, $isExpanded }) => ({
+  ...theme.partials.reset.button,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: $isExpanded ? 'flex-end' : 'center',
+  padding: theme.spacing.small,
+  color: theme.colors['icon-xlight'],
+  cursor: 'pointer',
+  '&:hover': {
+    background: theme.colors['fill-zero-hover'],
+  },
+  '&:focus-visible': {
+    outline: theme.borders['outline-focused'],
+  },
+}))
 
 const SidebarSC = styled.div<{
   $isExpanded: boolean
@@ -327,11 +377,12 @@ const SidebarSC = styled.div<{
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  flexGrow: 1,
+  flexShrink: 0,
   justifyContent: 'flex-start',
   height: '100%',
-  transition: 'max-width 0.2s ease-in-out',
-  width: '100%',
+  transition: 'width 0.2s ease-in-out',
+  width: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
+  minWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
   maxWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
   backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders.default,

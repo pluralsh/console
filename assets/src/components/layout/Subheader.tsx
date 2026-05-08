@@ -9,8 +9,8 @@ const SubheaderSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-accent'],
   borderBottom: theme.borders.default,
   minHeight: 48,
-  paddingLeft: theme.spacing.large,
-  paddingRight: theme.spacing.large,
+  paddingLeft: theme.spacing.medium,
+  paddingRight: theme.spacing.medium,
   gap: theme.spacing.medium,
 }))
 

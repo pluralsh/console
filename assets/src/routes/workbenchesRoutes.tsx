@@ -1,4 +1,5 @@
 import { Workbenches } from 'components/workbenches/Workbenches'
+import { WorkbenchesEvals } from 'components/workbenches/WorkbenchesEvals'
 import { WorkbenchesList } from 'components/workbenches/WorkbenchesList'
 import { WorkbenchesAlerts } from 'components/workbenches/WorkbenchesAlerts'
 import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
@@ -18,14 +19,18 @@ import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/Webho
 import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
 import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
 import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
+import { WorkbenchEvalSettings } from 'components/workbenches/workbench/evals/WorkbenchEvalSettings'
+import { WorkbenchEvals } from 'components/workbenches/workbench/evals/WorkbenchEvals'
 import { Route } from 'react-router-dom'
 import {
+  WORKBENCH_EVAL_SETTINGS_REL_PATH,
   WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
+  WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
@@ -50,6 +55,10 @@ export const workbenchesRoutes = [
     <Route
       index
       element={<WorkbenchesList />}
+    />
+    <Route
+      path={WORKBENCHES_EVALS_REL_PATH}
+      element={<WorkbenchesEvals />}
     />
     <Route
       path={WORKBENCHES_TOOLS_ADD_REL_PATH}
@@ -100,6 +109,10 @@ export const workbenchesRoutes = [
       path={WORKBENCHES_ALERTS_REL_PATH}
       element={<WorkbenchAlerts />}
     />
+    <Route
+      path={WORKBENCHES_EVALS_REL_PATH}
+      element={<WorkbenchEvals />}
+    />
   </Route>,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
@@ -144,6 +157,10 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/:${WORKBENCHES_WEBHOOK_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<WebhookTriggerForm mode="edit" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_EVAL_SETTINGS_REL_PATH}`}
+    element={<WorkbenchEvalSettings />}
   />,
   <Route
     path={WORKBENCH_JOB_ABS_PATH}
