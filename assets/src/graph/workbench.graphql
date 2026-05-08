@@ -627,6 +627,13 @@ fragment WorkbenchSkillTiny on WorkbenchSkill {
 query WorkbenchSkills($id: ID!, $first: Int = 500, $after: String) {
   workbench(id: $id) {
     id
+    skills {
+      ref {
+        ref
+        folder
+      }
+      files
+    }
     workbenchSkills(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
