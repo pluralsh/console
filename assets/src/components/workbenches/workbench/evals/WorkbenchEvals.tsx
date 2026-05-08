@@ -2,6 +2,9 @@ import {
   Button,
   EmptyState,
   Flex,
+  HamburgerMenuCollapsedIcon,
+  HamburgerMenuCollapseIcon,
+  IconFrame,
   Markdown,
   Tab,
   TabList,
@@ -86,6 +89,8 @@ export function WorkbenchEvals() {
     useOutletContext<WorkbenchOutletContext>()
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
+  const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
+    useState(false)
   const qualityTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error } = useWorkbenchEvalsQuery({
@@ -113,16 +118,11 @@ export function WorkbenchEvals() {
     useWorkbenchEvalSkillMutation({
       onCompleted: () => {
         popToast({
-          content: 'Skills update job started for this eval.',
+          content: 'Skills updated successfully',
           severity: 'success',
         })
       },
-      onError: (e) => {
-        popToast({
-          content: e.message,
-          severity: 'danger',
-        })
-      },
+      onError: (e) => popToast({ content: e.message, severity: 'danger' }),
     })
 
   useEffect(() => {
@@ -192,9 +192,29 @@ export function WorkbenchEvals() {
           <EmptyState message="No evals available yet." />
         </Flex>
       ) : (
-        <ColumnsSC>
-          <PanelSC>
-            <PanelHeaderSC>Summary</PanelHeaderSC>
+        <ColumnsSC $qualityCollapsed={qualityBreakdownCollapsed}>
+          <PanelSC $trimRightBorder={qualityBreakdownCollapsed}>
+            <PanelHeaderSC>
+              <Flex
+                align="center"
+                justify="space-between"
+                gap="small"
+                width="100%"
+              >
+                <span css={{ flexShrink: 0 }}>Summary</span>
+                {qualityBreakdownCollapsed && (
+                  <IconFrame
+                    clickable
+                    type="tertiary"
+                    size="small"
+                    textValue="Expand quality breakdown"
+                    icon={<HamburgerMenuCollapseIcon />}
+                    tooltip="Expand quality breakdown"
+                    onClick={() => setQualityBreakdownCollapsed(false)}
+                  />
+                )}
+              </Flex>
+            </PanelHeaderSC>
             <PanelBodySC>
               <Flex
                 align="center"
@@ -232,50 +252,74 @@ export function WorkbenchEvals() {
             </PanelBodySC>
           </PanelSC>
 
-          <PanelSC>
-            <PanelHeaderSC>Quality breakdown</PanelHeaderSC>
-            <Flex
-              css={{ backgroundColor: theme.colors['fill-one'], width: '100%' }}
-            >
-              <TabList
-                stateRef={qualityTabsStateRef}
-                stateProps={{
-                  orientation: 'horizontal',
-                  selectedKey: qualityTab,
-                  onSelectionChange: (key) => setQualityTab(key as QualityTab),
-                }}
-                flexShrink={0}
-              >
-                {qualityTabs.map((tab) => (
-                  <Tab
-                    key={tab.key}
-                    textValue={tab.label}
-                  >
-                    {tab.label}
-                  </Tab>
-                ))}
-              </TabList>
+          {!qualityBreakdownCollapsed && (
+            <PanelSC $trimRightBorder>
+              <PanelHeaderSC>
+                <Flex
+                  alignItems="center"
+                  justify="space-between"
+                  gap="small"
+                  width="100%"
+                >
+                  <span css={{ flexShrink: 0 }}>Quality breakdown</span>
+                  <IconFrame
+                    clickable
+                    type="tertiary"
+                    size="small"
+                    textValue="Collapse quality breakdown"
+                    icon={<HamburgerMenuCollapsedIcon />}
+                    tooltip="Collapse quality breakdown"
+                    onClick={() => setQualityBreakdownCollapsed(true)}
+                  />
+                </Flex>
+              </PanelHeaderSC>
               <Flex
-                flex={1}
-                minWidth={0}
                 css={{
-                  alignSelf: 'stretch',
-                  borderBottom: theme.borders.default,
+                  backgroundColor: theme.colors['fill-one'],
+                  width: '100%',
                 }}
-              />
-            </Flex>
-            <PanelBodySC>
-              <Markdown
-                text={
-                  qualityTab === 'prompt'
-                    ? (feedback?.prompt ?? 'No prompt available')
-                    : qualityTab === 'conclusion'
-                      ? (feedback?.result ?? 'No conclusion available')
-                      : (feedback?.logic ?? 'No logic available')
-                }
-              />
-            </PanelBodySC>
-          </PanelSC>
+              >
+                <TabList
+                  stateRef={qualityTabsStateRef}
+                  stateProps={{
+                    orientation: 'horizontal',
+                    selectedKey: qualityTab,
+                    onSelectionChange: (key) =>
+                      setQualityTab(key as QualityTab),
+                  }}
+                  flexShrink={0}
+                >
+                  {qualityTabs.map((tab) => (
+                    <Tab
+                      key={tab.key}
+                      textValue={tab.label}
+                    >
+                      {tab.label}
+                    </Tab>
+                  ))}
+                </TabList>
+                <Flex
+                  flex={1}
+                  minWidth={0}
+                  css={{
+                    alignSelf: 'stretch',
+                    borderBottom: theme.borders.default,
+                  }}
+                />
+              </Flex>
+              <PanelBodySC>
+                <Markdown
+                  text={
+                    qualityTab === 'prompt'
+                      ? (feedback?.prompt ?? 'No prompt available')
+                      : qualityTab === 'conclusion'
+                        ? (feedback?.result ?? 'No conclusion available')
+                        : (feedback?.logic ?? 'No logic available')
+                  }
+                />
+              </PanelBodySC>
+            </PanelSC>
+          )}
         </ColumnsSC>
       )}
     </Flex>
@@ -295,29 +339,41 @@ function getDurationSeconds(job: WorkbenchEvalJobFragment | null) {
   )
 }
 
-const ColumnsSC = styled.div({
-  display: 'grid',
-  flex: 1,
-  gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-  gridTemplateRows: 'minmax(0, 1fr)',
-  minHeight: 0,
-})
+const ColumnsSC = styled.div<{ $qualityCollapsed: boolean }>(
+  ({ $qualityCollapsed }) => ({
+    display: 'grid',
+    flex: 1,
+    gridTemplateColumns: $qualityCollapsed
+      ? 'minmax(0, 1fr)'
+      : 'minmax(0, 1fr) minmax(0, 1fr)',
+    gridTemplateRows: 'minmax(0, 1fr)',
+    minHeight: 0,
+  })
+)
 
-const PanelSC = styled.section(({ theme }) => ({
-  borderRight: theme.borders['fill-one'],
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: 0,
-  overflow: 'hidden',
-}))
+const PanelSC = styled.section<{ $trimRightBorder?: boolean }>(
+  ({ theme, $trimRightBorder }) => ({
+    borderRight: $trimRightBorder ? undefined : theme.borders['fill-one'],
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+    overflow: 'hidden',
+  })
+)
 
 const PanelHeaderSC = styled.header(({ theme }) => ({
   ...theme.partials.text.overline,
   backgroundColor: theme.colors['fill-one'],
+  boxSizing: 'border-box',
   color: theme.colors['text-xlight'],
+  display: 'flex',
+  alignItems: 'center',
   flexShrink: 0,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  lineHeight: 1,
+  minHeight: 40,
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
   borderBottom: theme.borders['fill-one'],
+  width: '100%',
 }))
 
 const PanelBodySC = styled.div(({ theme }) => ({
