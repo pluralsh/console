@@ -52,7 +52,7 @@ export function WorkbenchEvalSettings() {
   const [conclusionRules, setConclusionRules] = useState('')
   const [progressAndThoughtsRules, setProgressAndThoughtsRules] = useState('')
   const [isEvalStateInitialized, setIsEvalStateInitialized] = useState(false)
-  const curStepIndex = EVAL_SETTINGS_STEPS.findIndex((step) => step === curStep)
+  const curStepIndex = EVAL_SETTINGS_STEPS.indexOf(curStep)
   const isLastStep = curStepIndex === EVAL_SETTINGS_STEPS.length - 1
 
   const {
@@ -122,8 +122,6 @@ export function WorkbenchEvalSettings() {
   }
 
   const handleSave = async () => {
-    if (!workbenchId) return
-
     try {
       if (!evalsEnabled) {
         if (workbenchEval?.id) {
