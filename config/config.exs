@@ -74,6 +74,34 @@ config :console,
   qove_key: nil,
   cloud_override: "ignore"
 
+config :console, :ai_defaults,
+  openai: %{
+    model: "gpt-5.4-mini",
+    tool_model: "gpt-5.4",
+    embedding_model: "text-embedding-3-large"
+  },
+  azure: %{
+    model: "gpt-5.4-mini",
+    tool_model: "gpt-5.4",
+    embedding_model: "text-embedding-3-large"
+  },
+  vertex: %{
+    model: "claude-haiku-4-5@20251001",
+    tool_model: "claude-sonnet-4-5@20250929",
+    embedding_model: "gemini-embedding-001"
+  },
+  anthropic: %{
+    model: "claude-4-5-haiku-latest",
+    tool_model: "claude-4-5-sonnet-latest"
+  },
+  bedrock: %{
+    model: "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+    tool_model: "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    embedding_model: "cohere.embed-english-v3"
+  },
+  ollama: %{},
+  nexus: %{}
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

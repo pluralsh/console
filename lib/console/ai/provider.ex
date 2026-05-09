@@ -54,6 +54,8 @@ defmodule Console.AI.Provider do
 
   @callback proxy(struct) :: {:ok, Console.AI.Proxy.t()} | error
 
+  def model_defaults(provider), do: Console.conf(:ai_defaults)[provider] || %{}
+
   @doc """
   Built-in system prompts
   """

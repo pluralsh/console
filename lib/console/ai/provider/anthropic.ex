@@ -8,8 +8,6 @@ defmodule Console.AI.Anthropic do
 
   require Logger
 
-  @default_model "claude-4-5-sonnet-latest"
-
   defstruct [
     :access_key,
     :model,
@@ -20,15 +18,16 @@ defmodule Console.AI.Anthropic do
     body: %{}
   ]
 
-  def defaults(), do: %{model: @default_model, tool_model: @default_model}
+  def defaults(), do: Console.AI.Provider.model_defaults(:anthropic)
 
   @type t :: %__MODULE__{}
 
   def new(opts) do
+    model_defaults = defaults()
     %__MODULE__{
       access_key: opts.access_token,
-      model: opts.model || @default_model,
-      tool_model: opts.tool_model || @default_model,
+      model: opts.model || model_defaults[:model],
+      tool_model: opts.tool_model || model_defaults[:tool_model],
       full_url: Map.get(opts, :full_url),
       body: Map.get(opts, :body, %{}),
       stream: Stream.stream()

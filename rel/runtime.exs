@@ -299,3 +299,16 @@ end
 if get_env("CONSOLE_ASSETS_PROXY_URL") do
   config :console, :assets_proxy_url, get_env("CONSOLE_ASSETS_PROXY_URL")
 end
+
+if is_set("CONSOLE_AI_DEFAULTS") do
+  {:ok, ai_defaults} = JSON.decode(get_env("CONSOLE_AI_DEFAULTS"))
+  Enum.each(ai_defaults, fn
+    {key, %{} = value} when key in ~w(openai azure vertex anthropic bedrock) ->
+      config :console, :ai_defaults, "#{key}": %{
+        model: value["model"],
+        tool_model: value["tool_model"],
+        embedding_model: value["embedding_model"]
+      }
+    _ -> :ok
+  end)
+end

@@ -6,23 +6,21 @@ defmodule Console.AI.Azure do
   import Console.AI.Provider.Base
   alias Console.AI.{Utils, Stream}
 
-  @model "gpt-4.1-mini"
-  @embedding_model "text-embedding-3-large"
-
   defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployments, :stream]
 
   @type t :: %__MODULE__{}
 
-  def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
+  def defaults(), do: Console.AI.Provider.model_defaults(:azure)
 
   def new(opts) do
+    model_defaults = defaults()
     %__MODULE__{
       azure_token: opts.access_token,
       access_token: opts.access_token,
       api_version: opts.api_version,
-      model: opts.model || @model,
-      tool_model: opts.tool_model || @model,
-      embedding_model: opts.embedding_model || @embedding_model,
+      model: opts.model || model_defaults[:model],
+      tool_model: opts.tool_model || model_defaults[:tool_model],
+      embedding_model: opts.embedding_model || model_defaults[:embedding_model],
       base_url: opts.endpoint,
       deployments: opts.deployments,
       stream: Stream.stream(),
