@@ -12,17 +12,14 @@ defmodule Console.AI.Bedrock do
 
   @type t :: %__MODULE__{}
 
-  @small_model "global.anthropic.claude-haiku-4-5-20251001-v1:0"
-  @model "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
-  @embedding_model "cohere.embed-english-v3"
-
-  def defaults(), do: %{model: @small_model, tool_model: @model, embedding_model: @embedding_model}
+  def defaults(), do: Console.AI.Provider.model_defaults(:bedrock)
 
   def new(opts) do
+    model_defaults = defaults()
     %__MODULE__{
-      model_id: opts.model_id || @small_model,
-      tool_model_id: opts.tool_model_id || @model,
-      embedding_model: opts.embedding_model || @embedding_model,
+      model_id: opts.model_id || model_defaults[:model],
+      tool_model_id: opts.tool_model_id || model_defaults[:tool_model],
+      embedding_model: opts.embedding_model || model_defaults[:embedding_model],
       aws_access_key_id: opts.aws_access_key_id,
       aws_secret_access_key: opts.aws_secret_access_key,
       access_token: opts.access_token,

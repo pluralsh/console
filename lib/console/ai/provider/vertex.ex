@@ -7,22 +7,19 @@ defmodule Console.AI.Vertex do
   alias Console.AI.{Utils, Stream}
   alias Console.AI.GothManager
 
-  @small_model "claude-haiku-4-5@20251001"
-  @default_model "claude-sonnet-4-5@20250929"
-  @embedding_model "gemini-embedding-001"
-
   defstruct [:service_account_json, :model, :tool_model, :embedding_model, :project, :location, :endpoint, :stream]
 
   @type t :: %__MODULE__{}
 
-  def defaults(), do: %{model: @small_model, tool_model: @default_model, embedding_model: @embedding_model}
+  def defaults(), do: Console.AI.Provider.model_defaults(:vertex)
 
   def new(opts) do
+    model_defaults = defaults()
     %__MODULE__{
       service_account_json: opts.service_account_json,
-      model: opts.model || @small_model,
-      tool_model: opts.tool_model || @default_model,
-      embedding_model: opts.embedding_model || @embedding_model,
+      model: opts.model || model_defaults[:model],
+      tool_model: opts.tool_model || model_defaults[:tool_model],
+      embedding_model: opts.embedding_model || model_defaults[:embedding_model],
       project: opts.project,
       location: opts.location,
       endpoint: opts.endpoint,

@@ -136,7 +136,7 @@ defmodule Console.AI.Nexus do
     OpenAI.new(%{
       base_url: Path.join(url, "/v1"),
       access_token: token,
-      model: model || OpenAI.default_model()
+      model: model || OpenAI.defaults()[:model]
     })
   end
 end
