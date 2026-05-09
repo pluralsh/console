@@ -525,6 +525,12 @@ cloudQuery:
   tolerations: []
   affinity: { }
 
+  # networkPolicy configures network policy for cloud-query pods.
+  networkPolicy:
+    # enabled controls creation of the cloud-query NetworkPolicy.
+    # When enabled, only allows ingress from console pods in the same namespace.
+    enabled: false
+
 dex:
   enabled: false
 
