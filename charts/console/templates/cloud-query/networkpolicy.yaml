@@ -1,0 +1,29 @@
+{{- if and .Values.cloudQuery.enabled .Values.cloudQuery.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloud-query
+  labels:
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: cloud-query
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloud-query
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: console
+          app.kubernetes.io/instance: {{ .Release.Name }}
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.cloudQuery.service.port }}
+{{- end }}
