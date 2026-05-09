@@ -26,13 +26,16 @@ import {
 import { Key, ReactNode, useMemo, useState } from 'react'
 import {
   Link,
+  matchPath,
   Outlet,
+  useLocation,
   useMatch,
   useNavigate,
   useParams,
 } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
+  WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCH_JOBS_REL_PATH,
   WORKBENCHES_ABS_PATH,
@@ -87,7 +90,11 @@ export enum WorkbenchMoreMenuKey {
 
 export function Workbench() {
   const theme = useTheme()
+  const { pathname } = useLocation()
   const id = useParams()[WORKBENCH_PARAM_ID]
+  const isWorkbenchJobDetailRoute = Boolean(
+    matchPath(WORKBENCH_JOB_ABS_PATH, pathname)
+  )
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
       ?.params ?? {}
@@ -175,12 +182,13 @@ export function Workbench() {
       minHeight={0}
       overflow="hidden"
     >
-      {sideContent ?? (
-        <WorkbenchSidePanel
-          workbenchId={id}
-          onOpenToolsEdit={() => setToolsEditOpen(true)}
-        />
-      )}
+      {!isWorkbenchJobDetailRoute &&
+        (sideContent ?? (
+          <WorkbenchSidePanel
+            workbenchId={id}
+            onOpenToolsEdit={() => setToolsEditOpen(true)}
+          />
+        ))}
       <Flex
         direction="column"
         flex={1}
@@ -188,92 +196,94 @@ export function Workbench() {
         minWidth={0}
         overflow="auto"
       >
-        <Flex
-          direction="column"
-          gap="large"
-          css={{
-            padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-          }}
-        >
+        {!isWorkbenchJobDetailRoute && (
           <Flex
-            align="center"
-            gap="small"
+            direction="column"
+            gap="large"
+            css={{
+              padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+            }}
           >
-            <SubTabs
-              directory={directory}
-              activeFn={(path) =>
-                path === tab ||
-                (path === '' &&
-                  (tab === '' ||
-                    tab === undefined ||
-                    tab === WORKBENCH_JOBS_REL_PATH))
-              }
-            />
-            <Flex grow={1} />
-            <Button
-              secondary
-              as={Link}
-              to={WORKBENCHES_EDIT_REL_PATH}
+            <Flex
+              align="center"
+              gap="small"
             >
-              Edit workbench
-            </Button>
-            {headerActions}
-            <MoreMenu
-              disabled={!workbench}
-              triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
-              onSelectionChange={handleMoreMenuSelection}
-            >
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Tools}
-                leftContent={<ToolsIcon />}
-                label="Tools"
+              <SubTabs
+                directory={directory}
+                activeFn={(path) =>
+                  path === tab ||
+                  (path === '' &&
+                    (tab === '' ||
+                      tab === undefined ||
+                      tab === WORKBENCH_JOBS_REL_PATH))
+                }
               />
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Cron}
-                leftContent={<EventScheduleIcon />}
-                label="Cron schedules"
-              />
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Webhook}
-                leftContent={<WebhooksIcon />}
-                label="Webhook triggers"
-              />
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.SavedPrompts}
-                leftContent={<BookmarkIcon />}
-                label="Saved prompts"
-              />
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.EvalSettings}
-                leftContent={<TuningIcon />}
-                label="Eval settings"
-              />
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Delete}
-                destructive
-                leftContent={<TrashCanIcon color="icon-danger" />}
-                label="Delete workbench"
-              />
-            </MoreMenu>
-          </Flex>
-          {showDescription && (
-            <StretchedFlex>
-              {isLoading ? (
-                <RectangleSkeleton
-                  $height={18}
-                  $width="100%"
+              <Flex grow={1} />
+              <Button
+                secondary
+                as={Link}
+                to={WORKBENCHES_EDIT_REL_PATH}
+              >
+                Edit workbench
+              </Button>
+              {headerActions}
+              <MoreMenu
+                disabled={!workbench}
+                triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
+                onSelectionChange={handleMoreMenuSelection}
+              >
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.Tools}
+                  leftContent={<ToolsIcon />}
+                  label="Tools"
                 />
-              ) : (
-                <Subtitle2H1
-                  $color="text-xlight"
-                  css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
-                >
-                  {workbench?.description}
-                </Subtitle2H1>
-              )}
-            </StretchedFlex>
-          )}
-        </Flex>
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.Cron}
+                  leftContent={<EventScheduleIcon />}
+                  label="Cron schedules"
+                />
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.Webhook}
+                  leftContent={<WebhooksIcon />}
+                  label="Webhook triggers"
+                />
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.SavedPrompts}
+                  leftContent={<BookmarkIcon />}
+                  label="Saved prompts"
+                />
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.EvalSettings}
+                  leftContent={<TuningIcon />}
+                  label="Eval settings"
+                />
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.Delete}
+                  destructive
+                  leftContent={<TrashCanIcon color="icon-danger" />}
+                  label="Delete workbench"
+                />
+              </MoreMenu>
+            </Flex>
+            {showDescription && (
+              <StretchedFlex>
+                {isLoading ? (
+                  <RectangleSkeleton
+                    $height={18}
+                    $width="100%"
+                  />
+                ) : (
+                  <Subtitle2H1
+                    $color="text-xlight"
+                    css={{ ...TRUNCATE, paddingRight: theme.spacing.large }}
+                  >
+                    {workbench?.description}
+                  </Subtitle2H1>
+                )}
+              </StretchedFlex>
+            )}
+          </Flex>
+        )}
         <Outlet
           context={{
             workbenchId: id,
