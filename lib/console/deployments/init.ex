@@ -107,12 +107,12 @@ defmodule Console.Deployments.Init do
 
   defp maybe_ai(attrs) do
     case {Console.cloud?(), Console.conf(:provider)} do
-      {true, :aws} ->
-        Map.put(attrs, :ai, %{
-          provider: :bedrock,
-          enabled: true,
-          bedrock: %{region: "us-east-2"}
-        })
+      # {true, :aws} ->
+      #   Map.put(attrs, :ai, %{
+      #     provider: :bedrock,
+      #     enabled: true,
+      #     bedrock: %{region: "us-east-1"}
+      #   })
       {true, _} ->
         Map.put(attrs, :ai, %{
           provider: :openai,
