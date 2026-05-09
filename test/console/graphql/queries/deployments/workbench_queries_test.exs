@@ -430,6 +430,47 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert node["issueWebhook"]["name"] == "linear-issues"
     end
 
+    test "it can fetch workbench chatbots" do
+      workbench = insert(:workbench)
+      conn = insert(:chat_connection)
+
+      bot1 =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          channel: "C-wb-one-#{System.unique_integer([:positive])}"
+        )
+
+      bot2 =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          channel: "C-wb-two-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            chatbots(first: 5) {
+              edges {
+                node {
+                  id
+                  channel
+                  chatConnection { id }
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["chatbots"])
+      assert ids_equal(nodes, [bot1, bot2])
+      assert Enum.all?(nodes, &(&1["chatConnection"]["id"] == conn.id))
+    end
+
     test "it can fetch workbench runs" do
       workbench = insert(:workbench)
       runs = insert_list(3, :workbench_job, workbench: workbench)
@@ -492,6 +533,136 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert from_connection(found["issues"])
              |> ids_equal(issues)
     end
+
+    test "users field returns users from user and group policy bindings on the workbench" do
+      user_direct = insert(:user)
+      group = insert(:group)
+      user_via_group = insert(:user)
+      insert(:group_member, group: group, user: user_via_group)
+      other = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: user_direct.id}, %{group_id: group.id}]
+        )
+
+      viewer = admin_user()
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            users { id }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: viewer})
+
+      assert found["id"] == workbench.id
+      user_ids = Enum.map(found["users"], & &1["id"]) |> MapSet.new()
+
+      assert MapSet.equal?(
+               user_ids,
+               MapSet.new([user_direct.id, user_via_group.id, viewer.id])
+             )
+
+      refute MapSet.member?(user_ids, other.id)
+    end
+
+    test "users field returns users from user and group bindings on the project" do
+      user_proj = insert(:user)
+      proj_group = insert(:group)
+      user_proj_via_group = insert(:user)
+      insert(:group_member, group: proj_group, user: user_proj_via_group)
+      other = insert(:user)
+
+      project =
+        insert(:project,
+          read_bindings: [%{user_id: user_proj.id}, %{group_id: proj_group.id}]
+        )
+
+      workbench = insert(:workbench, project: project)
+
+      viewer = admin_user()
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            users { id }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: viewer})
+
+      assert found["id"] == workbench.id
+      user_ids = Enum.map(found["users"], & &1["id"]) |> MapSet.new()
+
+      assert MapSet.equal?(
+               user_ids,
+               MapSet.new([user_proj.id, user_proj_via_group.id, viewer.id])
+             )
+
+      refute MapSet.member?(user_ids, other.id)
+    end
+
+    test "users field returns users from user and group bindings on deployment settings (global)" do
+      user_global = insert(:user)
+      global_group = insert(:group)
+      user_global_via_group = insert(:user)
+      insert(:group_member, group: global_group, user: user_global_via_group)
+      other = insert(:user)
+
+      deployment_settings(
+        read_bindings: [%{user_id: user_global.id}, %{group_id: global_group.id}]
+      )
+
+      workbench = insert(:workbench)
+
+      viewer = admin_user()
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            users { id }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: viewer})
+
+      assert found["id"] == workbench.id
+      user_ids = Enum.map(found["users"], & &1["id"]) |> MapSet.new()
+
+      assert MapSet.equal?(
+               user_ids,
+               MapSet.new([user_global.id, user_global_via_group.id, viewer.id])
+             )
+
+      refute MapSet.member?(user_ids, other.id)
+    end
+
+    test "users field includes users marked as admins" do
+      regular = insert(:user)
+      admin = insert(:user, roles: %{admin: true})
+      unrelated = insert(:user)
+
+      workbench =
+        insert(:workbench, read_bindings: [%{user_id: regular.id}])
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            users { id }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      user_ids = Enum.map(found["users"], & &1["id"]) |> MapSet.new()
+
+      assert MapSet.member?(user_ids, regular.id)
+      assert MapSet.member?(user_ids, admin.id)
+      refute MapSet.member?(user_ids, unrelated.id)
+    end
   end
 
   describe "workbenchJob" do
@@ -510,6 +681,29 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == job.id
       assert found["status"] == to_string(job.status) |> String.upcase()
+    end
+
+    test "it can sideload chatbotMessage on a workbench job" do
+      job = insert(:workbench_job)
+      msg = insert(:chatbot_message, workbench_job: job)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            chatbotMessage {
+              id
+              message
+              channel
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["chatbotMessage"]["id"] == msg.id
+      assert found["chatbotMessage"]["message"] == "chatbot message body"
+      assert found["chatbotMessage"]["channel"] == "C-test-channel"
     end
 
     test "users with read access to the workbench can fetch workbench jobs" do
@@ -1266,6 +1460,49 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == tool.id
       assert found["name"] == tool.name
+    end
+  end
+
+  describe "workbench_chatbot" do
+    test "it can fetch a workbench chatbot by id" do
+      workbench = insert(:workbench)
+      conn = insert(:chat_connection)
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          channel: "C-single-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{data: %{"workbenchChatbot" => found}}} = run_query("""
+        query WorkbenchChatbot($id: ID!) {
+          workbenchChatbot(id: $id) {
+            id
+            channel
+            workbench { id }
+            chatConnection { id }
+          }
+        }
+      """, %{"id" => bot.id}, %{current_user: admin_user()})
+
+      assert found["id"] == bot.id
+      assert found["channel"] == bot.channel
+      assert found["workbench"]["id"] == workbench.id
+      assert found["chatConnection"]["id"] == conn.id
+    end
+
+    test "users without read access cannot fetch a chatbot" do
+      user = insert(:user)
+      bot = insert(:workbench_chatbot)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query WorkbenchChatbot($id: ID!) {
+          workbenchChatbot(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => bot.id}, %{current_user: user})
     end
   end
 

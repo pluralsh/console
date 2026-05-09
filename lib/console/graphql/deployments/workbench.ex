@@ -84,6 +84,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_cron_attributes do
     field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
+    field :user_id, :id, description: "user this cron runs as; must have read access to the workbench"
   end
 
   input_object :workbench_prompt_attributes do
@@ -115,7 +116,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
     field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :user_id,                :id, description: "user this webhook runs as; must have read access to the workbench"
     field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
+  end
+
+  input_object :workbench_chatbot_attributes do
+    field :chat_connection_id,      :id, description: "chat provider connection id (required for create)"
+    field :channel,                 :string, description: "external channel identifier (globally unique)"
+    field :prompt,                  :string, description: "optional prompt text applied when this chatbot runs"
+    field :user_id,                 :id, description: "user this chatbot runs as; must have read access to the workbench"
+    field :override_chatbot_user,   :boolean, description: "when true on update, sets userId to the authenticated user"
   end
 
   input_object :workbench_tool_attributes do
@@ -307,6 +317,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_webhooks/3
     end
 
+    connection field :chatbots, node_type: :workbench_chatbot do
+      resolve &Deployments.list_workbench_chatbots/3
+    end
+
     connection field :alerts, node_type: :alert do
       resolve &Deployments.list_alerts/3
     end
@@ -315,7 +329,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_issues/3
     end
 
+    @desc "users that have read or write access to this workbench"
+    field :users, list_of(:user), resolve: &Deployments.accessible_users/3
+
     field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
+
+    timestamps()
+  end
+
+  object :chatbot_message do
+    field :id, non_null(:string), description: "the id of this chatbot message record"
+
+    field :message, :string,
+      description: "serialized message payload associated with this job (internal format)"
+
+    field :channel, :string, description: "external channel identifier (e.g. Slack channel id)"
+
+    field :chat_connection, :chat_provider_connection,
+      resolve: dataloader(Deployments),
+      description: "the chat connection this message was routed through"
+
+    field :workbench_job, :workbench_job,
+      resolve: dataloader(Deployments),
+      description: "the workbench job this message is associated with"
 
     timestamps()
   end
@@ -327,6 +363,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+
+    field :chatbot_message, :chatbot_message,
+      resolve: dataloader(Deployments),
+      description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
@@ -560,6 +600,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,      :string, description: "prompt to run when the cron triggers"
     field :next_run_at, :datetime, description: "when the cron will next run"
     field :last_run_at, :datetime, description: "when the cron last ran"
+    field :user_id,     :id, description: "user this cron runs as"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this cron belongs to"
 
@@ -671,11 +712,25 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,   :string, description: "name of this webhook trigger"
     field :prompt, :string, description: "optional prompt text applied when this webhook matches"
     field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+    field :user_id, :id, description: "user this webhook runs as"
 
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
     field :webhook,       :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
     field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
     field :user,          :user, resolve: dataloader(User), description: "the user who created this webhook"
+
+    timestamps()
+  end
+
+  object :workbench_chatbot do
+    field :id,      non_null(:string), description: "the id of this chatbot binding"
+    field :channel, non_null(:string), description: "external channel identifier (globally unique)"
+    field :prompt,  :string, description: "optional prompt text applied when this chatbot runs"
+    field :user_id, :id, description: "user this chatbot runs as"
+
+    field :workbench,       :workbench, resolve: dataloader(Deployments), description: "the workbench this chatbot is bound to"
+    field :chat_connection, :chat_provider_connection, resolve: dataloader(Deployments), description: "the chat provider connection"
+    field :user,            :user, resolve: dataloader(User), description: "the user who created this binding"
 
     timestamps()
   end
@@ -828,6 +883,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_skill
   connection node_type: :workbench_eval_result
   connection node_type: :workbench_webhook
+  connection node_type: :workbench_chatbot
 
   delta :workbench_job
   delta :workbench_job_activity
@@ -854,6 +910,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :name, :string
 
       resolve &Deployments.workbench_tool/2
+    end
+
+    field :workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_chatbot/2
     end
 
     connection field :workbenches, node_type: :workbench do
@@ -1250,6 +1316,38 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_webhook/2
+    end
+
+    field :create_workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to bind a chatbot for"
+      arg :attributes, non_null(:workbench_chatbot_attributes)
+
+      resolve &Deployments.create_workbench_chatbot/2
+    end
+
+    field :update_workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_chatbot_attributes)
+
+      resolve &Deployments.update_workbench_chatbot/2
+    end
+
+    field :delete_workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_chatbot/2
     end
 
     @desc "Creates a new workbench job. Requires read access to the workbench."

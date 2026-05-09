@@ -1786,9 +1786,13 @@ export type ChatProviderConnection = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this chat connection */
   name: Scalars['String']['output'];
+  /** read policy bindings for this chat connection */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the type of this chat connection */
   type: ChatProviderConnectionType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy bindings for this chat connection */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams */
@@ -1796,8 +1800,12 @@ export type ChatProviderConnectionAttributes = {
   configuration: ChatProviderConnectionConfigurationAttributes;
   /** the name of this chat connection */
   name: Scalars['String']['input'];
+  /** users who can read this chat connection */
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** the type of this chat connection */
   type: ChatProviderConnectionType;
+  /** users who can modify this chat connection */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type ChatProviderConnectionConfiguration = {
@@ -1929,6 +1937,22 @@ export type ChatTypeAttributes = {
   file?: Maybe<ChatFile>;
   prCall?: Maybe<PrCallAttributes>;
   tool?: Maybe<ChatTool>;
+};
+
+export type ChatbotMessage = {
+  __typename?: 'ChatbotMessage';
+  /** external channel identifier (e.g. Slack channel id) */
+  channel?: Maybe<Scalars['String']['output']>;
+  /** the chat connection this message was routed through */
+  chatConnection?: Maybe<ChatProviderConnection>;
+  /** the id of this chatbot message record */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** serialized message payload associated with this job (internal format) */
+  message?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench job this message is associated with */
+  workbenchJob?: Maybe<WorkbenchJob>;
 };
 
 export type CloudAddon = {
@@ -8734,6 +8758,7 @@ export type RootMutationType = {
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   createWorkbench?: Maybe<Workbench>;
+  createWorkbenchChatbot?: Maybe<WorkbenchChatbot>;
   createWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench. */
   createWorkbenchEval?: Maybe<WorkbenchEval>;
@@ -8806,6 +8831,7 @@ export type RootMutationType = {
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
   deleteWorkbench?: Maybe<Workbench>;
+  deleteWorkbenchChatbot?: Maybe<WorkbenchChatbot>;
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Deletes the eval configuration for a workbench. Requires write access to the workbench. */
   deleteWorkbenchEval?: Maybe<WorkbenchEval>;
@@ -8936,6 +8962,7 @@ export type RootMutationType = {
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   updateWorkbench?: Maybe<Workbench>;
+  updateWorkbenchChatbot?: Maybe<WorkbenchChatbot>;
   updateWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Updates the eval configuration for a workbench. Requires write access to the workbench. */
   updateWorkbenchEval?: Maybe<WorkbenchEval>;
@@ -9365,6 +9392,12 @@ export type RootMutationTypeCreateWorkbenchArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchChatbotArgs = {
+  attributes: WorkbenchChatbotAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchCronArgs = {
   attributes: WorkbenchCronAttributes;
   workbenchId: Scalars['ID']['input'];
@@ -9700,6 +9733,11 @@ export type RootMutationTypeDeleteVirtualClusterArgs = {
 
 
 export type RootMutationTypeDeleteWorkbenchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchChatbotArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10268,6 +10306,12 @@ export type RootMutationTypeUpdateWorkbenchArgs = {
 };
 
 
+export type RootMutationTypeUpdateWorkbenchChatbotArgs = {
+  attributes: WorkbenchChatbotAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateWorkbenchCronArgs = {
   attributes: WorkbenchCronAttributes;
   id: Scalars['ID']['input'];
@@ -10663,6 +10707,7 @@ export type RootQueryType = {
   workbench?: Maybe<Workbench>;
   workbenchAggregates: WorkbenchAggregates;
   workbenchAlerts?: Maybe<AlertConnection>;
+  workbenchChatbot?: Maybe<WorkbenchChatbot>;
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
@@ -12050,6 +12095,11 @@ export type RootQueryTypeWorkbenchAlertsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchChatbotArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -14953,6 +15003,7 @@ export type Workbench = {
   allSkills?: Maybe<Array<Maybe<UnifiedWorkbenchSkill>>>;
   /** the service account user used for automated workbench agent runs */
   botUser?: Maybe<User>;
+  chatbots?: Maybe<WorkbenchChatbotConnection>;
   /** workbench configuration */
   configuration?: Maybe<WorkbenchConfiguration>;
   crons?: Maybe<WorkbenchCronConnection>;
@@ -14982,6 +15033,8 @@ export type Workbench = {
   /** tools associated with this workbench */
   tools?: Maybe<Array<Maybe<WorkbenchTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** users that have read or write access to this workbench */
+  users?: Maybe<Array<Maybe<User>>>;
   webhooks?: Maybe<WorkbenchWebhookConnection>;
   workbenchSkills?: Maybe<WorkbenchSkillConnection>;
   /** write policy of this service */
@@ -14990,6 +15043,14 @@ export type Workbench = {
 
 
 export type WorkbenchAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchChatbotsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -15147,6 +15208,51 @@ export type WorkbenchCanvasToolGraph = {
   title?: Maybe<Scalars['String']['output']>;
 };
 
+export type WorkbenchChatbot = {
+  __typename?: 'WorkbenchChatbot';
+  /** external channel identifier (globally unique) */
+  channel: Scalars['String']['output'];
+  /** the chat provider connection */
+  chatConnection?: Maybe<ChatProviderConnection>;
+  /** the id of this chatbot binding */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** optional prompt text applied when this chatbot runs */
+  prompt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who created this binding */
+  user?: Maybe<User>;
+  /** user this chatbot runs as */
+  userId?: Maybe<Scalars['ID']['output']>;
+  /** the workbench this chatbot is bound to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchChatbotAttributes = {
+  /** external channel identifier (globally unique) */
+  channel?: InputMaybe<Scalars['String']['input']>;
+  /** chat provider connection id (required for create) */
+  chatConnectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** when true on update, sets userId to the authenticated user */
+  overrideChatbotUser?: InputMaybe<Scalars['Boolean']['input']>;
+  /** optional prompt text applied when this chatbot runs */
+  prompt?: InputMaybe<Scalars['String']['input']>;
+  /** user this chatbot runs as; must have read access to the workbench */
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type WorkbenchChatbotConnection = {
+  __typename?: 'WorkbenchChatbotConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchChatbotEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchChatbotEdge = {
+  __typename?: 'WorkbenchChatbotEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchChatbot>;
+};
+
 export type WorkbenchCoding = {
   __typename?: 'WorkbenchCoding';
   /** whether babysitting is enabled for the coding agent */
@@ -15205,6 +15311,8 @@ export type WorkbenchCron = {
   /** prompt to run when the cron triggers */
   prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** user this cron runs as */
+  userId?: Maybe<Scalars['ID']['output']>;
   /** the workbench this cron belongs to */
   workbench?: Maybe<Workbench>;
 };
@@ -15214,6 +15322,8 @@ export type WorkbenchCronAttributes = {
   crontab?: InputMaybe<Scalars['String']['input']>;
   /** the prompt to run when the cron triggers */
   prompt?: InputMaybe<Scalars['String']['input']>;
+  /** user this cron runs as; must have read access to the workbench */
+  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type WorkbenchCronConnection = {
@@ -15344,6 +15454,8 @@ export type WorkbenchJob = {
   activities?: Maybe<WorkbenchJobActivityConnection>;
   /** the alert this run was spawned from */
   alert?: Maybe<Alert>;
+  /** chatbot integration metadata for this job, when present */
+  chatbotMessage?: Maybe<ChatbotMessage>;
   /** when the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** error message when the job failed */
@@ -16309,6 +16421,8 @@ export type WorkbenchWebhook = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the user who created this webhook */
   user?: Maybe<User>;
+  /** user this webhook runs as */
+  userId?: Maybe<Scalars['ID']['output']>;
   /** the observability webhook that receives events */
   webhook?: Maybe<ObservabilityWebhook>;
   /** the workbench this webhook belongs to */
@@ -16326,6 +16440,8 @@ export type WorkbenchWebhookAttributes = {
   overrideWebhookUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** optional prompt text applied when this webhook matches */
   prompt?: InputMaybe<Scalars['String']['input']>;
+  /** user this webhook runs as; must have read access to the workbench */
+  userId?: InputMaybe<Scalars['ID']['input']>;
   /** observability webhook to receive events (either webhook_id or issue_webhook_id required) */
   webhookId?: InputMaybe<Scalars['ID']['input']>;
 };

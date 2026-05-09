@@ -106,6 +106,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     SentinelRun,
     SentinelRunJob,
     ChatConnection,
+    ChatbotMessage,
     ClusterUpgrade,
     ClusterUpgradeStep,
     Workbench,
@@ -120,6 +121,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     WorkbenchEval,
     WorkbenchEvalResult,
     WorkbenchWebhook,
+    WorkbenchChatbot,
     ObservabilityWebhook,
     IssueWebhook,
     Issue,
@@ -218,6 +220,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(AgentPrompt, _), do: AgentPrompt.ordered()
   def query(AgentMessage, _), do: AgentMessage.ordered()
   def query(ChatConnection, _), do: ChatConnection
+  def query(ChatbotMessage, _), do: ChatbotMessage
   def query(ClusterUpgrade, _), do: ClusterUpgrade
   def query(ClusterUpgradeStep, _), do: ClusterUpgradeStep
   def query(Workbench, _), do: Workbench
@@ -232,6 +235,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(WorkbenchEval, _), do: WorkbenchEval
   def query(WorkbenchEvalResult, _), do: WorkbenchEvalResult.ordered()
   def query(WorkbenchWebhook, _), do: WorkbenchWebhook
+  def query(WorkbenchChatbot, _), do: WorkbenchChatbot
   def query(ObservabilityWebhook, _), do: ObservabilityWebhook.ordered()
   def query(IssueWebhook, _), do: IssueWebhook.ordered()
   def query(Issue, _), do: Issue.ordered()

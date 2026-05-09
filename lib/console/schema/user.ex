@@ -57,9 +57,35 @@ defmodule Console.Schema.User do
     has_many :group_members, GroupMember
     has_one :token,          AccessToken
     has_one :bootstrap,      BootstrapToken
+
     has_many :group_role_bindings, through: [:groups, :role_bindings]
 
     timestamps()
+  end
+
+  def for_policies(query \\ __MODULE__, users, groups)
+  def for_policies(query, [], []) do
+    from(u in query,
+      where: fragment("(coalesce(?->>'admin', 'false'))::boolean", u.roles),
+      distinct: true
+    )
+  end
+
+  def for_policies(query, users, []) when is_list(users) do
+    from(u in query,
+      where: u.id in ^users or fragment("(coalesce(?->>'admin', 'false'))::boolean", u.roles),
+      distinct: true
+    )
+  end
+
+  def for_policies(query, users, [_ | _] = groups) do
+    from(u in query,
+      left_join: gm in GroupMember,
+        on: gm.user_id == u.id,
+      where: u.id in ^users or gm.group_id in ^groups or
+          fragment("(coalesce(?->>'admin', 'false'))::boolean", u.roles),
+      distinct: true
+    )
   end
 
   def service_account(query \\ __MODULE__) do

@@ -380,6 +380,33 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
     end
+
+    test "creates a workbench job with an associated chatbot message" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      chat_connection = insert(:chat_connection)
+
+      {:ok, job} =
+        Workbenches.create_workbench_job(
+          %{
+            prompt: "from chat",
+            chatbot_message: %{
+              message: "serialized payload",
+              channel: "C01234567",
+              chat_connection_id: chat_connection.id
+            }
+          },
+          workbench.id,
+          user
+        )
+
+      job = Console.Repo.preload(job, :chatbot_message)
+
+      assert job.chatbot_message.message == "serialized payload"
+      assert job.chatbot_message.channel == "C01234567"
+      assert job.chatbot_message.chat_connection_id == chat_connection.id
+      assert job.chatbot_message.workbench_job_id == job.id
+    end
   end
 
   describe "update_workbench_job/3" do
@@ -860,7 +887,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      cron = insert(:workbench_cron, workbench: workbench, crontab: "0 * * * *", prompt: "old")
+      cron = insert(:workbench_cron, workbench: workbench, user: user, crontab: "0 * * * *", prompt: "old")
 
       {:ok, updated} = Workbenches.update_workbench_cron(%{
         crontab: "*/10 * * * *",
@@ -871,6 +898,17 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.crontab == "*/10 * * * *"
       assert updated.prompt == "updated prompt"
       assert_receive {:event, %PubSub.WorkbenchCronUpdated{item: ^updated}}
+    end
+
+    test "update rejects user_id when the actor cannot read the workbench" do
+      writer = insert(:user)
+      stranger = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench, user: writer)
+
+      assert {:error, "forbidden"} =
+               Workbenches.update_workbench_cron(%{user_id: stranger.id}, cron.id, writer)
     end
 
     test "project readers cannot update a cron" do
@@ -1288,7 +1326,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
       webhook = insert(:observability_webhook, read_bindings: [%{user_id: user.id}])
-      webhook = insert(:workbench_webhook, workbench: workbench, webhook: webhook, name: "existing")
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: webhook, user: user, name: "existing")
 
       {:ok, updated} = Workbenches.update_workbench_webhook(%{
         matches: %{substring: "error", case_insensitive: true}
@@ -1323,7 +1361,12 @@ defmodule Console.Deployments.WorkbenchesTest do
       writer = insert(:user)
       owner_a = insert(:user)
       owner_b = insert(:user)
-      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      project =
+        insert(:project,
+          write_bindings: [%{user_id: writer.id}],
+          read_bindings: [%{user_id: owner_b.id}]
+        )
+
       workbench = insert(:workbench, project: project)
       obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
       webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: owner_a, name: "reassign")
@@ -1336,6 +1379,18 @@ defmodule Console.Deployments.WorkbenchesTest do
         )
 
       assert updated.user_id == owner_b.id
+    end
+
+    test "update rejects user_id when the actor cannot read the workbench" do
+      writer = insert(:user)
+      stranger = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project)
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: writer, name: "actor-check")
+
+      assert {:error, "forbidden"} =
+               Workbenches.update_workbench_webhook(%{user_id: stranger.id}, webhook.id, writer)
     end
 
     test "project readers cannot update a webhook" do
@@ -1375,6 +1430,218 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_workbench_webhook(webhook.id, user)
 
       assert refetch(webhook)
+    end
+  end
+
+  describe "create_workbench_chatbot/3" do
+    test "project writers can create a chatbot when they can read the chat connection" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+      channel = "C-create-#{System.unique_integer([:positive])}"
+
+      {:ok, bot} =
+        Workbenches.create_workbench_chatbot(
+          %{chat_connection_id: conn.id, channel: channel},
+          workbench.id,
+          user
+        )
+
+      assert bot.workbench_id == workbench.id
+      assert bot.chat_connection_id == conn.id
+      assert bot.channel == channel
+      assert bot.user_id == user.id
+      assert_receive {:event, %PubSub.WorkbenchChatbotCreated{item: ^bot}}
+    end
+
+    test "project readers cannot create a chatbot" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+
+      {:error, _} =
+        Workbenches.create_workbench_chatbot(
+          %{chat_connection_id: conn.id, channel: "C-forbidden-#{System.unique_integer([:positive])}"},
+          workbench.id,
+          user
+        )
+    end
+
+    test "project writers cannot create a chatbot for a chat connection they cannot read" do
+      user = insert(:user)
+      other = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: other.id}])
+
+      {:error, _} =
+        Workbenches.create_workbench_chatbot(
+          %{chat_connection_id: conn.id, channel: "C-denied-#{System.unique_integer([:positive])}"},
+          workbench.id,
+          user
+        )
+    end
+  end
+
+  describe "update_workbench_chatbot/3" do
+    test "project writers can update a chatbot" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+      channel_a = "C-up-a-#{System.unique_integer([:positive])}"
+      channel_b = "C-up-b-#{System.unique_integer([:positive])}"
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: user,
+          channel: channel_a
+        )
+
+      {:ok, updated} =
+        Workbenches.update_workbench_chatbot(%{channel: channel_b}, bot.id, user)
+
+      assert updated.id == bot.id
+      assert updated.channel == channel_b
+      assert_receive {:event, %PubSub.WorkbenchChatbotUpdated{item: ^updated}}
+    end
+
+    test "override_chatbot_user: true sets user_id to the updating user" do
+      writer = insert(:user)
+      other_owner = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: writer.id}])
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: other_owner,
+          channel: "C-override-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, updated} =
+        Workbenches.update_workbench_chatbot(
+          %{override_chatbot_user: true},
+          bot.id,
+          writer
+        )
+
+      assert updated.user_id == writer.id
+    end
+
+    test "project readers cannot update a chatbot" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection)
+      channel = "C-read-only-#{System.unique_integer([:positive])}"
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: insert(:user),
+          channel: channel
+        )
+
+      {:error, _} =
+        Workbenches.update_workbench_chatbot(
+          %{channel: "C-never-applied-#{System.unique_integer([:positive])}"},
+          bot.id,
+          user
+        )
+
+      assert refetch(bot).channel == channel
+    end
+
+    test "project writers cannot update to a chat connection they cannot read" do
+      user = insert(:user)
+      other = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      allowed_conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+      denied_conn = insert(:chat_connection, read_bindings: [%{user_id: other.id}])
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: allowed_conn,
+          user: user,
+          channel: "C-switch-#{System.unique_integer([:positive])}"
+        )
+
+      {:error, _} =
+        Workbenches.update_workbench_chatbot(
+          %{chat_connection_id: denied_conn.id},
+          bot.id,
+          user
+        )
+
+      assert refetch(bot).chat_connection_id == allowed_conn.id
+    end
+
+    test "update rejects user_id when the actor cannot read the workbench" do
+      writer = insert(:user)
+      stranger = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: writer.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: writer.id}])
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: writer,
+          channel: "C-actor-#{System.unique_integer([:positive])}"
+        )
+
+      assert {:error, "forbidden"} =
+               Workbenches.update_workbench_chatbot(%{user_id: stranger.id}, bot.id, writer)
+    end
+  end
+
+  describe "delete_workbench_chatbot/2" do
+    test "project writers can delete a chatbot" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: user,
+          channel: "C-del-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, deleted} = Workbenches.delete_workbench_chatbot(bot.id, user)
+
+      assert deleted.id == bot.id
+      refute refetch(bot)
+      assert_receive {:event, %PubSub.WorkbenchChatbotDeleted{item: ^deleted}}
+    end
+
+    test "project readers cannot delete a chatbot" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          channel: "C-no-del-#{System.unique_integer([:positive])}"
+        )
+
+      {:error, _} = Workbenches.delete_workbench_chatbot(bot.id, user)
+
+      assert refetch(bot)
     end
   end
 end

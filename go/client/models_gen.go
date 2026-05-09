@@ -1464,8 +1464,12 @@ type ChatProviderConnection struct {
 	Type ChatProviderConnectionType `json:"type"`
 	// the configuration for this chat connection
 	Configuration ChatProviderConnectionConfiguration `json:"configuration"`
-	InsertedAt    *string                             `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                             `json:"updatedAt,omitempty"`
+	// read policy bindings for this chat connection
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy bindings for this chat connection
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
+	InsertedAt    *string          `json:"insertedAt,omitempty"`
+	UpdatedAt     *string          `json:"updatedAt,omitempty"`
 }
 
 // A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams
@@ -1475,6 +1479,10 @@ type ChatProviderConnectionAttributes struct {
 	// the type of this chat connection
 	Type          ChatProviderConnectionType                    `json:"type"`
 	Configuration ChatProviderConnectionConfigurationAttributes `json:"configuration"`
+	// users who can read this chat connection
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// users who can modify this chat connection
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ChatProviderConnectionConfiguration struct {
@@ -1572,6 +1580,21 @@ type ChatTypeAttributes struct {
 	File   *ChatFile         `json:"file,omitempty"`
 	Tool   *ChatTool         `json:"tool,omitempty"`
 	PrCall *PrCallAttributes `json:"prCall,omitempty"`
+}
+
+type ChatbotMessage struct {
+	// the id of this chatbot message record
+	ID string `json:"id"`
+	// serialized message payload associated with this job (internal format)
+	Message *string `json:"message,omitempty"`
+	// external channel identifier (e.g. Slack channel id)
+	Channel *string `json:"channel,omitempty"`
+	// the chat connection this message was routed through
+	ChatConnection *ChatProviderConnection `json:"chatConnection,omitempty"`
+	// the workbench job this message is associated with
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
 }
 
 type CloudAddon struct {
@@ -9560,11 +9583,14 @@ type Workbench struct {
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
 	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
+	Chatbots    *WorkbenchChatbotConnection    `json:"chatbots,omitempty"`
 	Alerts      *AlertConnection               `json:"alerts,omitempty"`
 	Issues      *IssueConnection               `json:"issues,omitempty"`
-	AllSkills   []*UnifiedWorkbenchSkill       `json:"allSkills,omitempty"`
-	InsertedAt  *string                        `json:"insertedAt,omitempty"`
-	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
+	// users that have read or write access to this workbench
+	Users      []*User                  `json:"users,omitempty"`
+	AllSkills  []*UnifiedWorkbenchSkill `json:"allSkills,omitempty"`
+	InsertedAt *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                  `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAggregates struct {
@@ -9644,6 +9670,48 @@ type WorkbenchCanvasToolGraph struct {
 	Query   *WorkbenchToolQueryData `json:"query,omitempty"`
 }
 
+type WorkbenchChatbot struct {
+	// the id of this chatbot binding
+	ID string `json:"id"`
+	// external channel identifier (globally unique)
+	Channel string `json:"channel"`
+	// optional prompt text applied when this chatbot runs
+	Prompt *string `json:"prompt,omitempty"`
+	// user this chatbot runs as
+	UserID *string `json:"userId,omitempty"`
+	// the workbench this chatbot is bound to
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// the chat provider connection
+	ChatConnection *ChatProviderConnection `json:"chatConnection,omitempty"`
+	// the user who created this binding
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchChatbotAttributes struct {
+	// chat provider connection id (required for create)
+	ChatConnectionID *string `json:"chatConnectionId,omitempty"`
+	// external channel identifier (globally unique)
+	Channel *string `json:"channel,omitempty"`
+	// optional prompt text applied when this chatbot runs
+	Prompt *string `json:"prompt,omitempty"`
+	// user this chatbot runs as; must have read access to the workbench
+	UserID *string `json:"userId,omitempty"`
+	// when true on update, sets userId to the authenticated user
+	OverrideChatbotUser *bool `json:"overrideChatbotUser,omitempty"`
+}
+
+type WorkbenchChatbotConnection struct {
+	PageInfo PageInfo                `json:"pageInfo"`
+	Edges    []*WorkbenchChatbotEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchChatbotEdge struct {
+	Node   *WorkbenchChatbot `json:"node,omitempty"`
+	Cursor *string           `json:"cursor,omitempty"`
+}
+
 type WorkbenchCoding struct {
 	// the mode of the coding agent
 	Mode *AgentRunMode `json:"mode,omitempty"`
@@ -9696,6 +9764,8 @@ type WorkbenchCron struct {
 	NextRunAt *string `json:"nextRunAt,omitempty"`
 	// when the cron last ran
 	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// user this cron runs as
+	UserID *string `json:"userId,omitempty"`
 	// the workbench this cron belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -9707,6 +9777,8 @@ type WorkbenchCronAttributes struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// the prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// user this cron runs as; must have read access to the workbench
+	UserID *string `json:"userId,omitempty"`
 }
 
 type WorkbenchCronConnection struct {
@@ -9834,6 +9906,8 @@ type WorkbenchJob struct {
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// error message when the job failed
 	Error *string `json:"error,omitempty"`
+	// chatbot integration metadata for this job, when present
+	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
 	// the user who created this run
@@ -10620,6 +10694,8 @@ type WorkbenchWebhook struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
+	// user this webhook runs as
+	UserID *string `json:"userId,omitempty"`
 	// the workbench this webhook belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
 	// the observability webhook that receives events
@@ -10643,6 +10719,8 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// user this webhook runs as; must have read access to the workbench
+	UserID *string `json:"userId,omitempty"`
 	// when true on update, sets userId to the authenticated user
 	OverrideWebhookUser *bool `json:"overrideWebhookUser,omitempty"`
 }

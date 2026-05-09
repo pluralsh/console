@@ -497,6 +497,8 @@ type RootQueryType {
 
   workbenchTool(id: ID, name: String): WorkbenchTool
 
+  workbenchChatbot(id: ID!): WorkbenchChatbot
+
   workbenches(
     after: String
 
@@ -1318,6 +1320,17 @@ type RootMutationType {
 
   deleteWorkbenchWebhook(id: ID!): WorkbenchWebhook
 
+  createWorkbenchChatbot(
+    "the workbench to bind a chatbot for"
+    workbenchId: ID!
+
+    attributes: WorkbenchChatbotAttributes!
+  ): WorkbenchChatbot
+
+  updateWorkbenchChatbot(id: ID!, attributes: WorkbenchChatbotAttributes!): WorkbenchChatbot
+
+  deleteWorkbenchChatbot(id: ID!): WorkbenchChatbot
+
   "Creates a new workbench job. Requires read access to the workbench."
   createWorkbenchJob(
     "the workbench to create a job for"
@@ -1614,6 +1627,12 @@ input ChatProviderConnectionAttributes {
   type: ChatProviderConnectionType!
 
   configuration: ChatProviderConnectionConfigurationAttributes!
+
+  "users who can read this chat connection"
+  readBindings: [PolicyBindingAttributes]
+
+  "users who can modify this chat connection"
+  writeBindings: [PolicyBindingAttributes]
 }
 
 input ChatProviderConnectionConfigurationAttributes {
@@ -1638,6 +1657,12 @@ type ChatProviderConnection {
 
   "the configuration for this chat connection"
   configuration: ChatProviderConnectionConfiguration!
+
+  "read policy bindings for this chat connection"
+  readBindings: [PolicyBinding]
+
+  "write policy bindings for this chat connection"
+  writeBindings: [PolicyBinding]
 
   insertedAt: DateTime
 
@@ -2503,6 +2528,9 @@ input WorkbenchCronAttributes {
 
   "the prompt to run when the cron triggers"
   prompt: String
+
+  "user this cron runs as; must have read access to the workbench"
+  userId: ID
 }
 
 input WorkbenchPromptAttributes {
@@ -2562,8 +2590,28 @@ input WorkbenchWebhookAttributes {
   "optional prompt text applied when this webhook matches"
   prompt: String
 
+  "user this webhook runs as; must have read access to the workbench"
+  userId: ID
+
   "when true on update, sets userId to the authenticated user"
   overrideWebhookUser: Boolean
+}
+
+input WorkbenchChatbotAttributes {
+  "chat provider connection id (required for create)"
+  chatConnectionId: ID
+
+  "external channel identifier (globally unique)"
+  channel: String
+
+  "optional prompt text applied when this chatbot runs"
+  prompt: String
+
+  "user this chatbot runs as; must have read access to the workbench"
+  userId: ID
+
+  "when true on update, sets userId to the authenticated user"
+  overrideChatbotUser: Boolean
 }
 
 input WorkbenchToolAttributes {
@@ -2922,11 +2970,37 @@ type Workbench {
 
   webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
 
+  chatbots(after: String, first: Int, before: String, last: Int): WorkbenchChatbotConnection
+
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   issues(after: String, first: Int, before: String, last: Int): IssueConnection
 
+  "users that have read or write access to this workbench"
+  users: [User]
+
   allSkills: [UnifiedWorkbenchSkill]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ChatbotMessage {
+  "the id of this chatbot message record"
+  id: String!
+
+  "serialized message payload associated with this job (internal format)"
+  message: String
+
+  "external channel identifier (e.g. Slack channel id)"
+  channel: String
+
+  "the chat connection this message was routed through"
+  chatConnection: ChatProviderConnection
+
+  "the workbench job this message is associated with"
+  workbenchJob: WorkbenchJob
 
   insertedAt: DateTime
 
@@ -2951,6 +3025,9 @@ type WorkbenchJob {
 
   "error message when the job failed"
   error: String
+
+  "chatbot integration metadata for this job, when present"
+  chatbotMessage: ChatbotMessage
 
   "the workbench this run belongs to"
   workbench: Workbench
@@ -3328,6 +3405,9 @@ type WorkbenchCron {
   "when the cron last ran"
   lastRunAt: DateTime
 
+  "user this cron runs as"
+  userId: ID
+
   "the workbench this cron belongs to"
   workbench: Workbench
 
@@ -3514,6 +3594,9 @@ type WorkbenchWebhook {
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches
 
+  "user this webhook runs as"
+  userId: ID
+
   "the workbench this webhook belongs to"
   workbench: Workbench
 
@@ -3524,6 +3607,33 @@ type WorkbenchWebhook {
   issueWebhook: IssueWebhook
 
   "the user who created this webhook"
+  user: User
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchChatbot {
+  "the id of this chatbot binding"
+  id: String!
+
+  "external channel identifier (globally unique)"
+  channel: String!
+
+  "optional prompt text applied when this chatbot runs"
+  prompt: String
+
+  "user this chatbot runs as"
+  userId: ID
+
+  "the workbench this chatbot is bound to"
+  workbench: Workbench
+
+  "the chat provider connection"
+  chatConnection: ChatProviderConnection
+
+  "the user who created this binding"
   user: User
 
   insertedAt: DateTime
@@ -3815,6 +3925,11 @@ type WorkbenchEvalResultConnection {
 type WorkbenchWebhookConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchWebhookEdge]
+}
+
+type WorkbenchChatbotConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchChatbotEdge]
 }
 
 type WorkbenchJobDelta {
@@ -15540,6 +15655,11 @@ type SentinelRunEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type WorkbenchChatbotEdge {
+  node: WorkbenchChatbot
   cursor: String
 }
 

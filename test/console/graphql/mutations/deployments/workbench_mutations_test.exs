@@ -629,7 +629,15 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
   describe "updateWorkbenchCron" do
     test "it can update a workbench cron" do
       workbench = insert(:workbench)
-      cron = insert(:workbench_cron, workbench: workbench, crontab: "0 * * * *", prompt: "old")
+      admin = admin_user()
+
+      cron =
+        insert(:workbench_cron,
+          workbench: workbench,
+          user: admin,
+          crontab: "0 * * * *",
+          prompt: "old"
+        )
 
       {:ok, %{data: %{"updateWorkbenchCron" => updated}}} = run_query("""
         mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
@@ -639,11 +647,42 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             prompt
           }
         }
-      """, %{"id" => cron.id, "attributes" => %{"crontab" => "*/10 * * * *", "prompt" => "updated prompt"}}, %{current_user: admin_user()})
+      """, %{"id" => cron.id, "attributes" => %{"crontab" => "*/10 * * * *", "prompt" => "updated prompt"}}, %{current_user: admin})
 
       assert updated["id"] == cron.id
       assert updated["crontab"] == "*/10 * * * *"
       assert updated["prompt"] == "updated prompt"
+    end
+
+    test "it can set userId on a workbench cron" do
+      admin = admin_user()
+      actor = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: actor.id}],
+          write_bindings: [%{user_id: admin.id}]
+        )
+
+      cron =
+        insert(:workbench_cron,
+          workbench: workbench,
+          user: admin,
+          crontab: "0 * * * *",
+          prompt: "old"
+        )
+
+      {:ok, %{data: %{"updateWorkbenchCron" => updated}}} = run_query("""
+        mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+          updateWorkbenchCron(id: $id, attributes: $attributes) {
+            id
+            userId
+          }
+        }
+      """, %{"id" => cron.id, "attributes" => %{"userId" => actor.id}}, %{current_user: admin})
+
+      assert updated["id"] == cron.id
+      assert updated["userId"] == actor.id
     end
 
     test "project readers cannot update a cron" do
@@ -1190,6 +1229,39 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert updated["matches"]["caseInsensitive"] == true
     end
 
+    test "it can set userId on a workbench webhook" do
+      admin = admin_user()
+      actor = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: actor.id}],
+          write_bindings: [%{user_id: admin.id}]
+        )
+
+      obs = insert(:observability_webhook, read_bindings: [%{user_id: admin.id}])
+
+      webhook =
+        insert(:workbench_webhook,
+          workbench: workbench,
+          webhook: obs,
+          user: admin,
+          name: "gql-user-id"
+        )
+
+      {:ok, %{data: %{"updateWorkbenchWebhook" => updated}}} = run_query("""
+        mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+            id
+            userId
+          }
+        }
+      """, %{"id" => webhook.id, "attributes" => %{"userId" => actor.id}}, %{current_user: admin})
+
+      assert updated["id"] == webhook.id
+      assert updated["userId"] == actor.id
+    end
+
     test "project readers cannot update a webhook" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -1295,6 +1367,212 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => webhook.id}, %{current_user: user})
 
       assert refetch(webhook)
+    end
+  end
+
+  describe "createWorkbenchChatbot" do
+    test "it can create a workbench chatbot" do
+      user = admin_user()
+      workbench = insert(:workbench)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+      channel = "C-gql-create-#{System.unique_integer([:positive])}"
+
+      {:ok, %{data: %{"createWorkbenchChatbot" => bot}}} = run_query("""
+        mutation CreateWorkbenchChatbot($workbenchId: ID!, $attributes: WorkbenchChatbotAttributes!) {
+          createWorkbenchChatbot(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            channel
+            workbench { id }
+            chatConnection { id name }
+          }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{"chatConnectionId" => conn.id, "channel" => channel}
+      }, %{current_user: user})
+
+      assert bot["workbench"]["id"] == workbench.id
+      assert bot["channel"] == channel
+      assert bot["chatConnection"]["id"] == conn.id
+    end
+
+    test "project readers cannot create a chatbot" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchChatbot($workbenchId: ID!, $attributes: WorkbenchChatbotAttributes!) {
+          createWorkbenchChatbot(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{
+          "chatConnectionId" => conn.id,
+          "channel" => "C-forbidden-#{System.unique_integer([:positive])}"
+        }
+      }, %{current_user: user})
+    end
+
+    test "project writers cannot create a chatbot for an inaccessible chat connection" do
+      user = insert(:user)
+      other = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: other.id}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchChatbot($workbenchId: ID!, $attributes: WorkbenchChatbotAttributes!) {
+          createWorkbenchChatbot(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{
+          "chatConnectionId" => conn.id,
+          "channel" => "C-inaccessible-#{System.unique_integer([:positive])}"
+        }
+      }, %{current_user: user})
+    end
+  end
+
+  describe "updateWorkbenchChatbot" do
+    test "it can update a workbench chatbot" do
+      user = admin_user()
+      workbench = insert(:workbench)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+      channel_new = "C-gql-updated-#{System.unique_integer([:positive])}"
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: user,
+          channel: "C-gql-original-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{data: %{"updateWorkbenchChatbot" => updated}}} = run_query("""
+        mutation UpdateWorkbenchChatbot($id: ID!, $attributes: WorkbenchChatbotAttributes!) {
+          updateWorkbenchChatbot(id: $id, attributes: $attributes) {
+            id
+            channel
+          }
+        }
+      """, %{"id" => bot.id, "attributes" => %{"channel" => channel_new}}, %{current_user: user})
+
+      assert updated["id"] == bot.id
+      assert updated["channel"] == channel_new
+    end
+
+    test "it can set userId on a workbench chatbot" do
+      admin = admin_user()
+      actor = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: actor.id}],
+          write_bindings: [%{user_id: admin.id}]
+        )
+
+      conn = insert(:chat_connection, read_bindings: [%{user_id: admin.id}])
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: admin,
+          channel: "C-gql-user-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{data: %{"updateWorkbenchChatbot" => updated}}} = run_query("""
+        mutation UpdateWorkbenchChatbot($id: ID!, $attributes: WorkbenchChatbotAttributes!) {
+          updateWorkbenchChatbot(id: $id, attributes: $attributes) {
+            id
+            userId
+          }
+        }
+      """, %{"id" => bot.id, "attributes" => %{"userId" => actor.id}}, %{current_user: admin})
+
+      assert updated["id"] == bot.id
+      assert updated["userId"] == actor.id
+    end
+
+    test "project readers cannot update a chatbot" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection)
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          channel: "C-gql-readonly-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchChatbot($id: ID!, $attributes: WorkbenchChatbotAttributes!) {
+          updateWorkbenchChatbot(id: $id, attributes: $attributes) {
+            id
+            channel
+          }
+        }
+      """, %{"id" => bot.id, "attributes" => %{"channel" => "C-never"}}, %{current_user: user})
+
+      assert refetch(bot).channel != "C-never"
+    end
+  end
+
+  describe "deleteWorkbenchChatbot" do
+    test "it can delete a workbench chatbot" do
+      workbench = insert(:workbench)
+      conn = insert(:chat_connection)
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          channel: "C-gql-delete-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{data: %{"deleteWorkbenchChatbot" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchChatbot($id: ID!) {
+          deleteWorkbenchChatbot(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => bot.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == bot.id
+      refute refetch(bot)
+    end
+
+    test "project readers cannot delete a chatbot" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection)
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          channel: "C-gql-nodelete-#{System.unique_integer([:positive])}"
+        )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchChatbot($id: ID!) {
+          deleteWorkbenchChatbot(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => bot.id}, %{current_user: user})
+
+      assert refetch(bot)
     end
   end
 end

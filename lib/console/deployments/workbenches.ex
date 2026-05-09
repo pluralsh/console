@@ -17,6 +17,8 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchWebhook,
     ObservabilityWebhook,
     IssueWebhook,
+    ChatConnection,
+    WorkbenchChatbot,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
   }
@@ -35,6 +37,7 @@ defmodule Console.Deployments.Workbenches do
   @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
   @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
+  @type chatbot_resp :: {:ok, WorkbenchChatbot.t()} | error
 
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.hours(6)
@@ -65,11 +68,21 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
 
+  def get_workbench_chatbot!(id), do: Repo.get!(WorkbenchChatbot, id)
+  def get_workbench_chatbot(id), do: Repo.get(WorkbenchChatbot, id)
+
   def get_workbench_eval!(id), do: Repo.get!(WorkbenchEval, id)
   def get_workbench_eval(id), do: Repo.get(WorkbenchEval, id)
 
   def get_workbench_eval_result!(id), do: Repo.get!(WorkbenchEvalResult, id)
   def get_workbench_eval_result(id), do: Repo.get(WorkbenchEvalResult, id)
+
+  def accessible_users(%Workbench{} = workbench) do
+    {users, groups} = Console.AI.Authorizable.authorize(workbench)
+
+    User.for_policies(users, groups)
+    |> Repo.all()
+  end
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.
@@ -104,6 +117,10 @@ defmodule Console.Deployments.Workbenches do
   defp override_webhook_user(%{override_webhook_user: true} = attrs, %User{id: id}),
     do: Map.put(attrs, :user_id, id)
   defp override_webhook_user(attrs, _), do: attrs
+
+  defp override_chatbot_user(%{override_chatbot_user: true} = attrs, %User{id: id}),
+    do: Map.put(attrs, :user_id, id)
+  defp override_chatbot_user(attrs, _), do: attrs
 
   @doc """
   Deletes a workbench.
@@ -159,10 +176,15 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec create_workbench_cron(map, binary, User.t()) :: cron_resp
   def create_workbench_cron(attrs, workbench_id, %User{id: uid} = user) do
-    %WorkbenchCron{workbench_id: workbench_id, user_id: uid}
-    |> WorkbenchCron.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:cron, fn _ ->
+      %WorkbenchCron{workbench_id: workbench_id, user_id: uid}
+      |> WorkbenchCron.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:actor, fn %{cron: cron} -> actor_access(cron) end)
+    |> execute(extract: :cron)
     |> notify(:create, user)
   end
 
@@ -171,10 +193,15 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec update_workbench_cron(map, binary, User.t()) :: cron_resp
   def update_workbench_cron(attrs, id, %User{} = user) do
-    get_workbench_cron!(id)
-    |> WorkbenchCron.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:cron, fn _ ->
+      get_workbench_cron!(id)
+      |> WorkbenchCron.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:actor, fn %{cron: cron} -> actor_access(cron) end)
+    |> execute(extract: :cron)
     |> notify(:update, user)
   end
 
@@ -379,6 +406,7 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:insert)
     end)
     |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
+    |> add_operation(:actor, fn %{webhook: hook} -> actor_access(hook) end)
     |> execute(extract: :webhook)
     |> notify(:create, user)
   end
@@ -396,6 +424,7 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:update)
     end)
     |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
+    |> add_operation(:actor, fn %{webhook: hook} -> actor_access(hook) end)
     |> execute(extract: :webhook)
     |> notify(:update, user)
   end
@@ -409,12 +438,77 @@ defmodule Console.Deployments.Workbenches do
     end
   end
 
+  defp actor_access(%mod{} = assoc) when mod in [WorkbenchWebhook, WorkbenchChatbot, WorkbenchCron] do
+    Repo.preload(assoc, [user: :groups, workbench: [:read_bindings, :write_bindings, project: [:read_bindings, :write_bindings]]])
+    |> case do
+      %^mod{user: %User{} = user, workbench: %Workbench{} = workbench} -> allow(workbench, user, :read)
+      _ -> {:error, "workbench #{mod} does not have a user and workbench"}
+    end
+  end
+  defp actor_access(_), do: {:error, "invalid association type"}
+
   @doc """
   Deletes a workbench webhook. Requires write permission on the workbench.
   """
   @spec delete_workbench_webhook(binary, User.t()) :: webhook_resp
   def delete_workbench_webhook(id, %User{} = user) do
     get_workbench_webhook!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates a workbench chatbot binding (workbench + chat connection + channel).
+  Requires write permission on the workbench and read access to the chat connection.
+  """
+  @spec create_workbench_chatbot(map, binary, User.t()) :: chatbot_resp
+  def create_workbench_chatbot(attrs, workbench_id, %User{id: uid} = user) do
+    start_transaction()
+    |> add_operation(:chatbot, fn _ ->
+      %WorkbenchChatbot{workbench_id: workbench_id, user_id: uid}
+      |> WorkbenchChatbot.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:access, fn %{chatbot: bot} -> chat_connection_access(bot, user) end)
+    |> add_operation(:actor, fn %{chatbot: bot} -> actor_access(bot) end)
+    |> execute(extract: :chatbot)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a workbench chatbot. Requires write permission on the workbench and read access to the chat connection.
+  """
+  @spec update_workbench_chatbot(map, binary, User.t()) :: chatbot_resp
+  def update_workbench_chatbot(attrs, id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:chatbot, fn _ ->
+      get_workbench_chatbot!(id)
+      |> allow(user, :write)
+      |> when_ok(&WorkbenchChatbot.changeset(&1, override_chatbot_user(attrs, user)))
+      |> when_ok(:update)
+    end)
+    |> add_operation(:access, fn %{chatbot: bot} -> chat_connection_access(bot, user) end)
+    |> add_operation(:actor, fn %{chatbot: bot} -> actor_access(bot) end)
+    |> execute(extract: :chatbot)
+    |> notify(:update, user)
+  end
+
+  defp chat_connection_access(%WorkbenchChatbot{} = bot, %User{} = user) do
+    Repo.preload(bot, [:chat_connection])
+    |> case do
+      %WorkbenchChatbot{chat_connection: %ChatConnection{} = conn} -> allow(conn, user, :read)
+      _ -> {:error, "workbench chatbot does not have a chat connection"}
+    end
+  end
+
+  @doc """
+  Deletes a workbench chatbot. Requires write permission on the workbench.
+  """
+  @spec delete_workbench_chatbot(binary, User.t()) :: chatbot_resp
+  def delete_workbench_chatbot(id, %User{} = user) do
+    get_workbench_chatbot!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
@@ -815,6 +909,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchWebhookUpdated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :delete, user),
     do: handle_notify(PubSub.WorkbenchWebhookDeleted, webhook, actor: user)
+  defp notify({:ok, %WorkbenchChatbot{} = chatbot}, :create, user),
+    do: handle_notify(PubSub.WorkbenchChatbotCreated, chatbot, actor: user)
+  defp notify({:ok, %WorkbenchChatbot{} = chatbot}, :update, user),
+    do: handle_notify(PubSub.WorkbenchChatbotUpdated, chatbot, actor: user)
+  defp notify({:ok, %WorkbenchChatbot{} = chatbot}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchChatbotDeleted, chatbot, actor: user)
   defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create, user),
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
   defp notify(pass, _, _), do: pass
