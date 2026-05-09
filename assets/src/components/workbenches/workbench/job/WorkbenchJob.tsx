@@ -21,8 +21,8 @@ import {
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
-import { Fragment, useLayoutEffect, useMemo, useState } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   getWorkbenchJobAbsPath,
@@ -32,7 +32,6 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { WorkbenchOutletContext } from '../Workbench'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { isJobRunning } from './WorkbenchJobActivity'
@@ -58,17 +57,6 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
-
-  const { setSideContent, setShowDescription } =
-    useOutletContext<WorkbenchOutletContext>()
-  useLayoutEffect(() => {
-    setSideContent(<Fragment />)
-    setShowDescription(false)
-    return () => {
-      setSideContent(null)
-      setShowDescription(true)
-    }
-  }, [setSideContent, setShowDescription])
 
   const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id)
   useSidePanelWidth({
