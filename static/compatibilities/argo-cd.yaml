@@ -29,7 +29,7 @@ versions:
         Generators: update any selectors/templating that rely on Kubernetes version
         labels to use `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
         (e.g., `v1.30.2`) instead of `Major.Minor` (e.g., `1.30`).']
-  chart_version: 9.5.12
+  chart_version: 9.5.13
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.4.1']
 - version: 3.3.8
