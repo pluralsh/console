@@ -4,7 +4,6 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input,
   Input2,
   ReturnIcon,
   useSetBreadcrumbs,
@@ -32,6 +31,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { useLogin } from 'components/contexts'
+import { WorkbenchPromptRichInput } from '../WorkbenchPromptRichInput'
 import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import {
@@ -63,6 +63,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const [formState, setFormState] = useState<CronScheduleFormState>(() =>
     getInitialFormState()
   )
+  const [promptSyncKey, bumpPromptSyncKey] = useState(0)
   const { popToast } = useSimpleToast()
 
   const {
@@ -85,6 +86,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
       if (!loadedCron) return
       setFormState(getInitialFormState(loadedCron))
+      bumpPromptSyncKey((k) => k + 1)
     },
   })
 
@@ -234,17 +236,15 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                 infoTooltip="The instruction your Workbench agent will follow each time this job runs."
                 label="Prompt"
               >
-                <Input
-                  multiline
-                  minRows={3}
-                  maxRows={6}
-                  value={formState.prompt}
-                  onChange={(e) => {
-                    const nextPrompt = e.target.value
-
-                    setFormState((prev) => ({ ...prev, prompt: nextPrompt }))
-                  }}
-                  placeholder="Provide any task for your workbench to handle.  Well-crafted tasks are concise and specific."
+                <WorkbenchPromptRichInput
+                  syncKey={`cron-prompt-${promptSyncKey}`}
+                  workbenchId={workbenchId}
+                  prompt={formState.prompt}
+                  disabled={isSaving}
+                  onPromptChange={(next) =>
+                    setFormState((prev) => ({ ...prev, prompt: next }))
+                  }
+                  placeholder="Provide any task for your workbench to handle. Well-crafted tasks are concise and specific. Type @ for clusters, services, and stacks, or / for skills."
                 />
               </FormField>
               <WorkbenchAccessibleUserSelect

@@ -5,7 +5,6 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input,
   Input2,
   ListBoxFooter,
   ListBoxItem,
@@ -51,6 +50,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import { useLogin } from 'components/contexts'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
+import { WorkbenchPromptRichInput } from '../WorkbenchPromptRichInput'
 import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import {
   FormCardSC,
@@ -573,18 +573,15 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                 infoTooltip="Optional text appended to the agent prompt when an incoming event matches this webhook."
                 label="Custom instructions"
               >
-                <Input
-                  multiline
-                  minRows={3}
-                  maxRows={6}
-                  value={formState.prompt}
-                  onChange={(e) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      prompt: e.target.value,
-                    }))
+                <WorkbenchPromptRichInput
+                  syncKey={`webhook-prompt-${location.key}`}
+                  workbenchId={workbenchId}
+                  prompt={formState.prompt}
+                  disabled={isSaving}
+                  onPromptChange={(next) =>
+                    setFormState((prev) => ({ ...prev, prompt: next }))
                   }
-                  placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only."
+                  placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only. Type @ for clusters, services, and stacks, or / for skills."
                 />
               </FormField>
               <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
