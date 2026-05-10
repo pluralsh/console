@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Edit an existing message in a Slack channel. Requires the channel id and message timestamp (`ts`), typically returned by slack_post_message or from message metadata.",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Slack channel ID containing the message (same format as slack_post_message), not the human-readable name."
+    },
+    "message_ts": {
+      "type": "string",
+      "description": "Message timestamp identifying the message to update (Slack `ts` field), e.g. from a prior post reply or Slack API listing."
+    },
+    "text": {
+      "type": "string",
+      "description": "Replacement plain-text body (Slack mrkdwn is supported)."
+    }
+  },
+  "required": ["channel_id", "message_ts", "text"],
+  "additionalProperties": false
+}

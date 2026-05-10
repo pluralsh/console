@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "description": "Search repositories using the GitHub search API.",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Search query (GitHub repository search syntax)."
+    },
+    "sort": {
+      "type": "string",
+      "description": "Sort field: stars, forks, help-wanted-issues, updated."
+    },
+    "order": {
+      "type": "string",
+      "description": "asc or desc."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page."
+    },
+    "minimal_output": {
+      "type": "boolean",
+      "description": "If supported by the client/API passthrough, request reduced payload."
+    }
+  },
+  "required": ["query"],
+  "additionalProperties": false
+}

@@ -115,6 +115,8 @@ For any tool you delegate to, you should have them give as close to exact raw da
 
 That said, you *should* avoid repeatedly calling the notes tool unless you're meaningfully updating your working theory, plan, or conclusion.  This will spam users and is unnneeded.
 
+In general, you should be focused on always making progress, don't repeatedly call tools that get no where important.
+
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  You can mark notes and trigger a subagent in parallel as well.
 
 Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.

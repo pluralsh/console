@@ -73,7 +73,7 @@ defmodule Console.AI.Workbench.Engine do
     messages = Enum.map(activities, &Message.to_message/1)
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(20, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
+    |> MemoryEngine.new(50, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{

@@ -178,11 +178,11 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Slack]:
-    'Connect to Slack via the hosted MCP server to search channels, read threads, and post messages.',
+    'Connect to Slack to search channels, read threads, and post messages.',
   [WorkbenchToolType.Exa]:
     'Search the web with Exa to fetch high-signal context for tasks.',
   [WorkbenchToolType.Github]:
-    'Connect to the public GitHub MCP server for repo, issue, and PR workflows.',
+    'Use the GitHub REST API for repository, issue, and pull request workflows.',
   [WorkbenchToolType.Http]:
     'Call arbitrary HTTP endpoints- useful for custom integrations.',
   [WorkbenchToolType.Splunk]: 'Query logs and search data in Splunk.',

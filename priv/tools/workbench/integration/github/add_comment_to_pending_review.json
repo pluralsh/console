@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "description": "Create or update a pending pull request review (draft review with optional inline comments).",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "pull_number": {
+      "type": "integer",
+      "description": "Pull request number."
+    },
+    "commit_id": {
+      "type": "string",
+      "description": "HEAD SHA the review applies to (recommended)."
+    },
+    "event": {
+      "type": "string",
+      "description": "Review event when finishing (e.g. COMMENT, APPROVE, REQUEST_CHANGES) if submitting via this endpoint pattern."
+    },
+    "comments": {
+      "type": "array",
+      "description": "Inline review comments; each object should include path, position or line, and body per GitHub API.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["owner", "repo", "pull_number"],
+  "additionalProperties": false
+}

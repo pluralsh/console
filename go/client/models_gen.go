@@ -10520,19 +10520,29 @@ type WorkbenchToolExaConnectionAttributes struct {
 }
 
 type WorkbenchToolGithubConnection struct {
-	// github MCP URL (credentials never exposed)
+	// GitHub REST API base URL in use (defaults to https://api.github.com/)
 	URL string `json:"url"`
-	// configured github MCP toolset
+	// configured native GitHub tool subset
 	Toolset *string `json:"toolset,omitempty"`
+	// GitHub App ID when using app authentication (secrets such as private keys are never exposed)
+	AppID *string `json:"appId,omitempty"`
+	// GitHub App installation ID when using app authentication
+	InstallationID *string `json:"installationId,omitempty"`
 }
 
 type WorkbenchToolGithubConnectionAttributes struct {
-	// github MCP URL (defaults to public github MCP server)
+	// optional GitHub REST API base URL (defaults to https://api.github.com/; set for GitHub Enterprise Server)
 	URL *string `json:"url,omitempty"`
-	// github token for MCP authentication
+	// optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)
 	AccessToken *string `json:"accessToken,omitempty"`
-	// optional github MCP toolset query parameter
+	// optional native tool subset: issues, pull_requests, repos, default/all, or omit for all tools
 	Toolset *string `json:"toolset,omitempty"`
+	// GitHub App ID (use with installation_id and private_key instead of access_token)
+	AppID *string `json:"appId,omitempty"`
+	// GitHub App installation ID for this organization or account
+	InstallationID *string `json:"installationId,omitempty"`
+	// PEM private key for the GitHub App (encrypted at rest); alternative to access_token
+	PrivateKey *string `json:"privateKey,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {

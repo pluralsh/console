@@ -11,7 +11,7 @@ defmodule Console.AI.Workbench.MCP do
   def mcp?(%WorkbenchTool{tool: :linear}), do: true
   def mcp?(%WorkbenchTool{tool: :atlassian}), do: true
   def mcp?(%WorkbenchTool{tool: :exa}), do: true
-  def mcp?(%WorkbenchTool{tool: :github}), do: true
+  def mcp?(%WorkbenchTool{tool: :github}), do: false
   def mcp?(_), do: false
 
   def transport(%WorkbenchTool{tool: :mcp} = t, %WorkbenchJob{} = j), do: Basic.transport(t, j)

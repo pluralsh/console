@@ -155,7 +155,7 @@ function extractLinearMetadata(
 function extractSlackMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
-  return [{ label: 'MCP URL', value: configuration?.slack?.url }]
+  return [{ label: 'URL', value: configuration?.slack?.url }]
 }
 
 function extractSplunkMetadata(
@@ -214,9 +214,16 @@ function extractExaMetadata(
 function extractGithubMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
+  const gh = configuration?.github
   return [
-    { label: 'URL', value: configuration?.github?.url },
-    { label: 'Toolset', value: configuration?.github?.toolset },
+    { label: 'URL', value: gh?.url },
+    { label: 'Toolset', value: gh?.toolset },
+    ...(gh?.appId
+      ? [
+          { label: 'GitHub App ID', value: gh.appId },
+          { label: 'Installation ID', value: gh.installationId },
+        ]
+      : [{ label: 'Auth', value: 'Access token' }]),
   ]
 }
 

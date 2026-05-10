@@ -125,6 +125,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             url
             email
         }
+        github {
+            url
+            toolset
+            appId
+            installationId
+        }
     }
     insertedAt
     updatedAt

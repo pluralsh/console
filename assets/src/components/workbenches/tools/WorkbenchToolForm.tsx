@@ -40,6 +40,35 @@ import {
 } from './workbenchToolsUtils'
 import { Link } from 'react-router-dom'
 
+function githubWorkbenchAuthIsValid(
+  gh: WorkbenchToolConfigurationAttributes['github'] | null | undefined,
+  persistedApp: { appId?: Nullable<string>; installationId?: Nullable<string> }
+): boolean {
+  if (!gh) return false
+  const pat = (gh.accessToken ?? '').trim()
+  if (pat.length > 0) return true
+
+  const appId = (gh.appId ?? '').trim()
+  const installationId = (gh.installationId ?? '').trim()
+  const privateKey = (gh.privateKey ?? '').trim()
+  if (appId && installationId && privateKey) return true
+
+  const persistedAppId = (persistedApp.appId ?? '').trim()
+  const persistedInstallationId = (persistedApp.installationId ?? '').trim()
+  if (
+    appId &&
+    installationId &&
+    persistedAppId &&
+    persistedInstallationId &&
+    appId === persistedAppId &&
+    installationId === persistedInstallationId
+  ) {
+    return true
+  }
+
+  return false
+}
+
 export type WorkbenchToolFormState = Omit<
   Pick<
     WorkbenchToolAttributes,
@@ -101,10 +130,15 @@ export function WorkbenchToolForm({
   })
   const stepIndex = TOOL_FORM_STEPS.findIndex((s) => s.key === currentStep)
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
-  const allowSave =
-    hasUpdates &&
+  const configurationStepComplete =
     !!state.name.trim() &&
-    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId)
+    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId) &&
+    (type !== WorkbenchToolType.Github ||
+      githubWorkbenchAuthIsValid(state.configuration?.github, {
+        appId: tool?.configuration?.github?.appId,
+        installationId: tool?.configuration?.github?.installationId,
+      }))
+  const allowSave = hasUpdates && configurationStepComplete
   return (
     <FormCardSC>
       <Flex css={{ paddingTop: 2 }}>
@@ -206,7 +240,11 @@ export function WorkbenchToolForm({
             {hasUpdates ? 'Cancel' : 'Back'}
           </Button>
           <Button
-            disabled={currentStep === 'configuration' ? false : !allowSave}
+            disabled={
+              currentStep === 'configuration'
+                ? !configurationStepComplete
+                : !allowSave
+            }
             loading={currentStep === 'access-policy' && mutationLoading}
             onClick={() => {
               if (currentStep === 'configuration') {
@@ -344,12 +382,15 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),
   [WorkbenchToolType.Github]: (config) => {
-    const { url, toolset } = config?.github ?? {}
+    const { url, toolset, appId, installationId } = config?.github ?? {}
     return {
       github: {
         url: url ?? '',
         accessToken: '',
         toolset: toolset ?? undefined,
+        appId: appId ?? undefined,
+        installationId: installationId ?? undefined,
+        privateKey: undefined,
       },
     }
   },

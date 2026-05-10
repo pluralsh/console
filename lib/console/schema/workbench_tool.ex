@@ -3,6 +3,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Schema.{Project, PolicyBinding, User, McpServer, CloudConnection, WorkbenchOauthClient}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
+  import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
 
   defenum Tool,
     http: 0,
@@ -56,9 +57,12 @@ defmodule Console.Schema.WorkbenchTool do
       end
 
       embeds_one :github, GithubConnection, on_replace: :update do
-        field :url,          :string
-        field :access_token, EncryptedString
-        field :toolset,      :string
+        field :url,              :string
+        field :access_token,     EncryptedString
+        field :toolset,          :string
+        field :app_id,           :string
+        field :installation_id, :string
+        field :private_key,      EncryptedString
       end
 
       embeds_one :linear, LinearConnection, on_replace: :update do
@@ -402,8 +406,18 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp github_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url access_token toolset)a)
-    |> validate_required([:access_token])
+    |> cast(attrs, ~w(url access_token toolset app_id installation_id private_key)a)
+    |> maybe_validate_app_auth()
+  end
+
+  defp maybe_validate_app_auth(changeset) do
+    case get_field(changeset, :app_id) do
+      app_id when is_binary(app_id) ->
+        validate_required(changeset, [:installation_id, :private_key])
+        |> validate_private_key(:private_key)
+
+      _ -> validate_required(changeset, [:access_token])
+    end
   end
 
   defp header_changeset(model, attrs) do

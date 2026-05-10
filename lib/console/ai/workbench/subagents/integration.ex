@@ -2,7 +2,8 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http}
-  alias Console.AI.Tools.Workbench.Integration.Slack.{FindChannelByName, ListChannels, PostMessage}
+  alias Console.AI.Tools.Workbench.Integration.Slack.{EditMessage, FindChannelByName, ListChannels, PostMessage}
+  alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -37,7 +38,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     ])
   end
 
-  @allowed_tools ~w(http slack)a
+  @allowed_tools ~w(http slack github)a
 
   defp workbench_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
@@ -48,7 +49,13 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     |> Enum.flat_map(fn
       %WorkbenchTool{tool: :http} = tool -> [%Http{tool: tool}]
       %WorkbenchTool{tool: :slack} = tool ->
-        [%ListChannels{tool: tool}, %FindChannelByName{tool: tool}, %PostMessage{tool: tool}]
+        [
+          %ListChannels{tool: tool},
+          %FindChannelByName{tool: tool},
+          %PostMessage{tool: tool},
+          %EditMessage{tool: tool}
+        ]
+      %WorkbenchTool{tool: :github} = tool -> GithubTools.expand(tool)
     end)
   end
 

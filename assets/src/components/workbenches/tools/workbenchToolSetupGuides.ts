@@ -41,7 +41,7 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',
   [WorkbenchToolType.Github]:
-    'https://docs.github.com/en/copilot/how-tos/context/use-mcp/configure-toolsets',
+    'https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens',
   [WorkbenchToolType.Splunk]:
     'https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/latest/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities',
   [WorkbenchToolType.Dynatrace]:

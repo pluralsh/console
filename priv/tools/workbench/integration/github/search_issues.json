@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "description": "Search issues using the GitHub search API. When owner and repo are set, the search is scoped to that repository and is:issue is applied.",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "GitHub search query string (e.g. is:open label:bug)."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Optional. With repo, scopes the search to owner/repo."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Optional. With owner, scopes the search to that repository."
+    },
+    "sort": {
+      "type": "string",
+      "description": "Sort field (GitHub search issues parameters)."
+    },
+    "order": {
+      "type": "string",
+      "description": "asc or desc."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number for pagination."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page."
+    }
+  },
+  "required": ["query"],
+  "additionalProperties": false
+}

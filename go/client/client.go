@@ -13357,6 +13357,38 @@ func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian) 
 	return t.URL
 }
 
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -13364,6 +13396,7 @@ type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Datadog    *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -13408,6 +13441,12 @@ func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetElastic
 		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetGithub() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -13789,6 +13828,38 @@ func (t *WorkbenchToolFragment_Configuration_Atlassian) GetURL() string {
 	return t.URL
 }
 
+type WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type WorkbenchToolFragment_Configuration struct {
 	Atlassian  *WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -13796,6 +13867,7 @@ type WorkbenchToolFragment_Configuration struct {
 	Datadog    *WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -13840,6 +13912,12 @@ func (t *WorkbenchToolFragment_Configuration) GetElastic() *WorkbenchToolFragmen
 		t = &WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *WorkbenchToolFragment_Configuration) GetGithub() *WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *WorkbenchToolFragment_Configuration) GetHTTP() *WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -29778,6 +29856,38 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.URL
 }
 
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -29785,6 +29895,7 @@ type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragme
 	Datadog    *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -29829,6 +29940,12 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetGithub() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -30364,6 +30481,38 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.URL
 }
 
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -30371,6 +30520,7 @@ type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragme
 	Datadog    *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -30415,6 +30565,12 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetGithub() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -30950,6 +31106,38 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.URL
 }
 
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -30957,6 +31145,7 @@ type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragme
 	Datadog    *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -31001,6 +31190,12 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetGithub() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -31382,6 +31577,38 @@ func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.URL
 }
 
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -31389,6 +31616,7 @@ type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration
 	Datadog    *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -31433,6 +31661,12 @@ func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configura
 		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetGithub() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -31814,6 +32048,38 @@ func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.URL
 }
 
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -31821,6 +32087,7 @@ type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration
 	Datadog    *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -31865,6 +32132,12 @@ func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configura
 		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetGithub() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -32246,6 +32519,38 @@ func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.URL
 }
 
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -32253,6 +32558,7 @@ type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration
 	Datadog    *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -32297,6 +32603,12 @@ func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configura
 		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetGithub() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -32832,6 +33144,38 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_Workbenc
 	return t.URL
 }
 
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -32839,6 +33183,7 @@ type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToo
 	Datadog    *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -32883,6 +33228,12 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_Workbenc
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetGithub() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -33447,6 +33798,38 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Co
 	return t.URL
 }
 
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -33454,6 +33837,7 @@ type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Config
 	Datadog    *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -33498,6 +33882,12 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Co
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetGithub() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetHTTP() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -33897,6 +34287,38 @@ func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Conf
 	return t.URL
 }
 
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -33904,6 +34326,7 @@ type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configur
 	Datadog    *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -33948,6 +34371,12 @@ func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Conf
 		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetGithub() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetHTTP() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -34358,6 +34787,38 @@ func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atla
 	return t.URL
 }
 
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github struct {
+	AppID          *string "json:\"appId,omitempty\" graphql:\"appId\""
+	InstallationID *string "json:\"installationId,omitempty\" graphql:\"installationId\""
+	Toolset        *string "json:\"toolset,omitempty\" graphql:\"toolset\""
+	URL            string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetAppID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.AppID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetInstallationID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.InstallationID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetToolset() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.Toolset
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github) GetURL() string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github{}
+	}
+	return t.URL
+}
+
 type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration struct {
 	Atlassian  *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian  "json:\"atlassian,omitempty\" graphql:\"atlassian\""
 	Azure      *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Azure      "json:\"azure,omitempty\" graphql:\"azure\""
@@ -34365,6 +34826,7 @@ type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration struct {
 	Datadog    *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Datadog    "json:\"datadog,omitempty\" graphql:\"datadog\""
 	Dynatrace  *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Dynatrace  "json:\"dynatrace,omitempty\" graphql:\"dynatrace\""
 	Elastic    *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Elastic    "json:\"elastic,omitempty\" graphql:\"elastic\""
+	Github     *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github     "json:\"github,omitempty\" graphql:\"github\""
 	HTTP       *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP       "json:\"http,omitempty\" graphql:\"http\""
 	Jaeger     *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Jaeger     "json:\"jaeger,omitempty\" graphql:\"jaeger\""
 	Linear     *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Linear     "json:\"linear,omitempty\" graphql:\"linear\""
@@ -34409,6 +34871,12 @@ func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) Get
 		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Elastic
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetGithub() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Github {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.Github
 }
 func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetHTTP() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_HTTP {
 	if t == nil {
@@ -60015,6 +60483,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			email
 		}
+		github {
+			url
+			toolset
+			appId
+			installationId
+		}
 	}
 	insertedAt
 	updatedAt
@@ -60232,6 +60706,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 		atlassian {
 			url
 			email
+		}
+		github {
+			url
+			toolset
+			appId
+			installationId
 		}
 	}
 	insertedAt
@@ -60452,6 +60932,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			email
 		}
+		github {
+			url
+			toolset
+			appId
+			installationId
+		}
 	}
 	insertedAt
 	updatedAt
@@ -60597,6 +61083,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 		atlassian {
 			url
 			email
+		}
+		github {
+			url
+			toolset
+			appId
+			installationId
 		}
 	}
 	insertedAt
@@ -60749,6 +61241,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			email
 		}
+		github {
+			url
+			toolset
+			appId
+			installationId
+		}
 	}
 	insertedAt
 	updatedAt
@@ -60900,6 +61398,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 		atlassian {
 			url
 			email
+		}
+		github {
+			url
+			toolset
+			appId
+			installationId
 		}
 	}
 	insertedAt
@@ -61131,6 +61635,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			email
 		}
+		github {
+			url
+			toolset
+			appId
+			installationId
+		}
 	}
 	insertedAt
 	updatedAt
@@ -61357,6 +61867,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			email
 		}
+		github {
+			url
+			toolset
+			appId
+			installationId
+		}
 	}
 	insertedAt
 	updatedAt
@@ -61537,6 +62053,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			email
 		}
+		github {
+			url
+			toolset
+			appId
+			installationId
+		}
 	}
 	insertedAt
 	updatedAt
@@ -61695,6 +62217,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 		atlassian {
 			url
 			email
+		}
+		github {
+			url
+			toolset
+			appId
+			installationId
 		}
 	}
 	insertedAt
