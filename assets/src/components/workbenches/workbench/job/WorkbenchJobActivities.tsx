@@ -115,7 +115,8 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
                 {isJobRunning(job?.status) &&
                   activities.every(({ status }) =>
                     isActivityTerminal(status)
-                  ) && (
+                  ) &&
+                  jobLevelThinking.length === 0 && (
                     <AILoadingText
                       jobId={jobId}
                       marginTop={spacing.small}

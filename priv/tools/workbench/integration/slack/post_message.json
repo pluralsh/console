@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Post a message to a Slack public or private channel. Use the channel id from the list channels tool.",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Slack channel ID (e.g. C12345 or G123 for private channels), not the human-readable name."
+    },
+    "text": {
+      "type": "string",
+      "description": "Plain-text message body for the channel (Slack mrkdwn formatting is supported by Slack when using chat.postMessage)."
+    }
+  },
+  "required": ["channel_id", "text"],
+  "additionalProperties": false
+}

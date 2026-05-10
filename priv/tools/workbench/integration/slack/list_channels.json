@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "description": "Calls Slack conversations.list for public and private channels. Pagination: pass cursor from response_metadata.next_cursor.",
+  "properties": {
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from response_metadata.next_cursor on the prior response."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Page size (subject to Slack’s API limits)."
+    }
+  },
+  "additionalProperties": false
+}

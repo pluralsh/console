@@ -30,6 +30,7 @@ export function WorkbenchPromptRichInput({
       key={syncKey}
       enableAutoComplete
       workbenchId={workbenchId}
+      deserializePlrlInitialValue
       placeholder={placeholder}
       disabled={disabled}
       loading={loading}

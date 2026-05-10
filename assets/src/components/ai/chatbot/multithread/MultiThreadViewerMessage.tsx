@@ -200,9 +200,18 @@ function CodeBlockLabel({
   )
 }
 
-export function SimplifiedMarkdown({ text }: { text: string }) {
+export function SimplifiedMarkdown({
+  text,
+  rootLayout = 'flex',
+}: {
+  text: string
+  /** `block` keeps chip/custom nodes inline inside `<p>`; `flex` stacks each mdast block (can split chips to their own row). */
+  rootLayout?: 'flex' | 'block'
+}) {
+  const Root = rootLayout === 'block' ? SimpleMarkdownBlockSC : SimpleMarkdownSC
+
   return (
-    <SimpleMarkdownSC>
+    <Root>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={REHYPE_PLUGINS}
@@ -267,7 +276,7 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
       >
         {text}
       </ReactMarkdown>
-    </SimpleMarkdownSC>
+    </Root>
   )
 }
 
@@ -340,6 +349,20 @@ const SimpleMarkdownSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
+}))
+
+/** Normal block flow so inline chips stay in the same `<p>`; typography comes from the parent (e.g. caption clamp). */
+const SimpleMarkdownBlockSC = styled.div(({ theme }) => ({
+  color: 'inherit',
+  display: 'block',
+  fontFamily: 'inherit',
+  fontSize: 'inherit',
+  fontWeight: 'inherit',
+  letterSpacing: 'inherit',
+  lineHeight: 'inherit',
+  '& > *:not(:last-child)': {
+    marginBottom: theme.spacing.small,
+  },
 }))
 
 const ParagraphSC = styled.p(() => ({

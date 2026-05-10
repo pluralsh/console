@@ -122,6 +122,15 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   const webhook = fetchWorkbenchWebhookState.data?.getWorkbenchWebhook
   const editing = !!webhook
 
+  const promptInputSyncKeySuffix =
+    mode === 'edit' && webhookId
+      ? `${webhookId}-${
+          fetchWorkbenchWebhookState.data?.getWorkbenchWebhook?.id === webhookId
+            ? 'ready'
+            : 'loading'
+        }`
+      : 'create'
+
   // Source form state is based on the location state (if coming back from create webhook page) or the fetched webhook (if editing),
   // with the selected webhook key from the query param taking precedence if present.
   const sourceFormState = useMemo(() => {
@@ -574,7 +583,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                 label="Custom instructions"
               >
                 <WorkbenchPromptRichInput
-                  syncKey={`webhook-prompt-${location.key}`}
+                  syncKey={`webhook-prompt-${location.key}-${promptInputSyncKeySuffix}`}
                   workbenchId={workbenchId}
                   prompt={formState.prompt}
                   disabled={isSaving}

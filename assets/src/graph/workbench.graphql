@@ -824,6 +824,7 @@ query WorkbenchTriggersSummary($id: ID!) {
         node {
           id
           name
+          prompt
           webhook {
             id
             name

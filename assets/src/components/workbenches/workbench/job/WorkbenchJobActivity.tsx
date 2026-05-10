@@ -36,7 +36,7 @@ import {
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -406,6 +406,18 @@ function WorkbenchJobActivityThought({
   )
 }
 
+/** Cycles 1 → 2 → 3 dots every second for the job-level thinking label. */
+function useThinkingEllipsisCount() {
+  const [count, setCount] = useState(1)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setCount((n) => (n >= 3 ? 1 : n + 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [])
+  return count
+}
+
 /**
  * Job-level tool progress (between activities): same accordion + SimpleToolCall UI as
  * activity thoughts, with a fixed "thinking" label instead of the tool-call count header.
@@ -420,13 +432,27 @@ export function WorkbenchJobJobLevelThinking({
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const last = items.at(-1)
+  const ellipsisCount = useThinkingEllipsisCount()
 
   if (isEmpty(items)) return null
 
   return (
     <>
       <SimpleAccordion
-        label="thinking..."
+        label={
+          <>
+            thinking
+            <span
+              style={{
+                display: 'inline-block',
+                minWidth: '3ch',
+                textAlign: 'left',
+              }}
+            >
+              {'.'.repeat(ellipsisCount)}
+            </span>
+          </>
+        }
         loading={false}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}

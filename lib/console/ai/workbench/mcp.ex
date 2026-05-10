@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.MCP do
   alias Console.AI.MCP.{Agent, Tool}
   alias Console.AI.Tools.Workbench.MCP, as: MCPTool
-  alias Console.AI.Workbench.MCP.{Basic, Sentry, Linear, Atlassian, Exa, Github, Slack}
+  alias Console.AI.Workbench.MCP.{Basic, Sentry, Linear, Atlassian, Exa, Github}
   alias Console.Schema.{WorkbenchTool, WorkbenchJob}
 
   @callback transport(%WorkbenchTool{}, %WorkbenchJob{}) :: {:sse, list} | {:streamable_http, list}
@@ -12,7 +12,6 @@ defmodule Console.AI.Workbench.MCP do
   def mcp?(%WorkbenchTool{tool: :atlassian}), do: true
   def mcp?(%WorkbenchTool{tool: :exa}), do: true
   def mcp?(%WorkbenchTool{tool: :github}), do: true
-  def mcp?(%WorkbenchTool{tool: :slack}), do: true
   def mcp?(_), do: false
 
   def transport(%WorkbenchTool{tool: :mcp} = t, %WorkbenchJob{} = j), do: Basic.transport(t, j)
@@ -21,7 +20,6 @@ defmodule Console.AI.Workbench.MCP do
   def transport(%WorkbenchTool{tool: :atlassian} = t, %WorkbenchJob{} = j), do: Atlassian.transport(t, j)
   def transport(%WorkbenchTool{tool: :exa} = t, %WorkbenchJob{} = j), do: Exa.transport(t, j)
   def transport(%WorkbenchTool{tool: :github} = t, %WorkbenchJob{} = j), do: Github.transport(t, j)
-  def transport(%WorkbenchTool{tool: :slack} = t, %WorkbenchJob{} = j), do: Slack.transport(t, j)
 
   def expand_tools(%{} = tools, job), do: expand_tools(Map.values(tools), job)
   def expand_tools(tools, %WorkbenchJob{} = j) when is_list(tools) do
