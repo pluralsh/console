@@ -10,6 +10,7 @@ defmodule Console.AI.Workbench.Engine do
   3. A complete tool is used to mark the conclusion of the job.
   """
   import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
+  import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -72,7 +73,7 @@ defmodule Console.AI.Workbench.Engine do
     messages = Enum.map(activities, &Message.to_message/1)
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(20, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1)
+    |> MemoryEngine.new(20, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{
@@ -267,6 +268,15 @@ defmodule Console.AI.Workbench.Engine do
 
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
   defp maybe_add_memory(subagents, _), do: subagents
+
+  def callback(%WorkbenchJob{id: id}, {:tool, content, %{name: name, arguments: args}}) when is_binary(content) do
+    publish_absinthe(%{
+      tool: name,
+      arguments: args,
+      text: content
+    }, workbench_job_progress: "workbench_jobs:#{id}:progress")
+  end
+  def callback(_, _), do: :ok
 
   EEx.function_from_file(:defp, :skill_system_prompt, Console.priv_filename(["prompts", "workbench", "eval_skill.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns])

@@ -864,7 +864,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_progress do
-    field :activity_id, non_null(:id)
+    field :activity_id, :id
     field :text,        :string
     field :tool,        :string
     field :arguments,   :map

@@ -10055,7 +10055,7 @@ type WorkbenchJobEdge struct {
 }
 
 type WorkbenchJobProgress struct {
-	ActivityID string         `json:"activityId"`
+	ActivityID *string        `json:"activityId,omitempty"`
 	Text       *string        `json:"text,omitempty"`
 	Tool       *string        `json:"tool,omitempty"`
 	Arguments  map[string]any `json:"arguments,omitempty"`
