@@ -49,7 +49,9 @@ import {
   WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM,
   WORKBENCHES_WEBHOOK_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
+import { useLogin } from 'components/contexts'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
+import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import {
   FormCardSC,
   StickyActionsFooterSC,
@@ -70,6 +72,7 @@ export type WebhookTriggerFormState = {
   substring: string
   caseInsensitive: boolean
   prompt: string
+  userId: string
 }
 
 function parseWebhookKey(key: string): {
@@ -87,6 +90,7 @@ type RouteState = {
 
 export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   const theme = useTheme()
+  const { me } = useLogin()
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -121,14 +125,17 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   // Source form state is based on the location state (if coming back from create webhook page) or the fetched webhook (if editing),
   // with the selected webhook key from the query param taking precedence if present.
   const sourceFormState = useMemo(() => {
-    const base = routeState?.draftState ?? getInitialFormState(webhook)
+    const base =
+      routeState?.draftState ??
+      getInitialFormState(webhook, mode === 'create' ? me?.id : undefined)
 
     return {
       ...base,
       ...(webhookKeyParam ? { selectedWebhookKey: webhookKeyParam } : {}),
       prompt: base.prompt ?? '',
+      userId: base.userId ?? webhook?.userId ?? me?.id ?? '',
     }
-  }, [routeState?.draftState, webhookKeyParam, webhook])
+  }, [routeState?.draftState, webhookKeyParam, webhook, me?.id, mode])
 
   // Local form draft state that can be modified as the user interacts with the form.
   const [formDraft, setFormDraft] =
@@ -224,13 +231,20 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
           }
       : undefined,
     prompt: promptTrimmed || null,
+    userId: formState.userId,
   }
 
   const canSave =
     !!label &&
     !!selectedWebhookKeyValue &&
     !!activeMatchValue &&
-    !isEqual(attributes, getAttributesFromState(getInitialFormState(webhook)))
+    !!formState.userId &&
+    !isEqual(
+      attributes,
+      getAttributesFromState(
+        getInitialFormState(webhook, mode === 'create' ? me?.id : undefined)
+      )
+    )
 
   const handleCompleted = () => {
     popToast({
@@ -474,6 +488,15 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                     ]}
                   </Select>
                 </FormField>
+                <WorkbenchAccessibleUserSelect
+                  key={workbenchId}
+                  workbenchId={workbenchId}
+                  selectedUserId={formState.userId}
+                  onSelectionChange={(userId) =>
+                    setFormState((prev) => ({ ...prev, userId }))
+                  }
+                  disabled={isSaving}
+                />
               </Flex>
               <TabList
                 stateRef={tabStateRef}
@@ -592,7 +615,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function getInitialFormState(
-  webhook?: Nullable<WorkbenchWebhookFragment>
+  webhook?: Nullable<WorkbenchWebhookFragment>,
+  defaultUserIdForCreate?: Nullable<string>
 ): WebhookTriggerFormState {
   const matchType: MatchType = webhook?.matches?.regex ? 'regex' : 'substring'
 
@@ -609,6 +633,7 @@ function getInitialFormState(
     substring: webhook?.matches?.substring ?? '',
     caseInsensitive: webhook?.matches?.caseInsensitive ?? false,
     prompt: webhook?.prompt ?? '',
+    userId: webhook?.userId ?? defaultUserIdForCreate ?? '',
   }
 }
 
@@ -631,5 +656,6 @@ function getAttributesFromState(formState: WebhookTriggerFormState) {
           }
       : undefined,
     prompt: promptTrimmed || null,
+    userId: formState.userId,
   }
 }

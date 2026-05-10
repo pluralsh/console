@@ -20060,11 +20060,11 @@ export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress'
 
 export type WorkbenchTextStreamFragment = { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null };
 
-export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
 export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
-export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
@@ -20124,6 +20124,15 @@ export type WorkbenchQueryVariables = Exact<{
 
 
 export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchAccessibleUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null };
+
+export type WorkbenchAccessibleUsersQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchAccessibleUsersQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, users?: Array<{ __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null> | null } | null };
 
 export type WorkbenchEvalSettingsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20188,7 +20197,7 @@ export type GetWorkbenchCronMutationVariables = Exact<{
 }>;
 
 
-export type GetWorkbenchCronMutation = { __typename?: 'RootMutationType', workbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type GetWorkbenchCronMutation = { __typename?: 'RootMutationType', workbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type WorkbenchCronsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20197,7 +20206,7 @@ export type WorkbenchCronsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
 export type UnifiedWorkbenchSkillTinyFragment = { __typename?: 'UnifiedWorkbenchSkill', id?: string | null, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null };
 
@@ -20224,14 +20233,14 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
 export type GetWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
+export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type IssueWebhooksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20454,7 +20463,7 @@ export type CreateWorkbenchCronMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type UpdateWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20462,7 +20471,7 @@ export type UpdateWorkbenchCronMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchCronMutation = { __typename?: 'RootMutationType', updateWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type UpdateWorkbenchCronMutation = { __typename?: 'RootMutationType', updateWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type DeleteWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20477,7 +20486,7 @@ export type CreateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
+export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type UpdateWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20485,7 +20494,7 @@ export type UpdateWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
+export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type DeleteWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -25649,6 +25658,7 @@ export const WorkbenchCronFragmentDoc = gql`
   id
   crontab
   prompt
+  userId
   lastRunAt
   nextRunAt
   insertedAt
@@ -25684,6 +25694,7 @@ export const WorkbenchWebhookFragmentDoc = gql`
   id
   name
   prompt
+  userId
   matches {
     regex
     substring
@@ -25837,6 +25848,14 @@ export const WorkbenchEvalResultRowFragmentDoc = gql`
     startedAt
     completedAt
   }
+}
+    `;
+export const WorkbenchAccessibleUserFragmentDoc = gql`
+    fragment WorkbenchAccessibleUser on User {
+  id
+  name
+  email
+  profile
 }
     `;
 export const UnifiedWorkbenchSkillTinyFragmentDoc = gql`
@@ -41696,6 +41715,52 @@ export type WorkbenchQueryHookResult = ReturnType<typeof useWorkbenchQuery>;
 export type WorkbenchLazyQueryHookResult = ReturnType<typeof useWorkbenchLazyQuery>;
 export type WorkbenchSuspenseQueryHookResult = ReturnType<typeof useWorkbenchSuspenseQuery>;
 export type WorkbenchQueryResult = Apollo.QueryResult<WorkbenchQuery, WorkbenchQueryVariables>;
+export const WorkbenchAccessibleUsersDocument = gql`
+    query WorkbenchAccessibleUsers($id: ID!) {
+  workbench(id: $id) {
+    id
+    users {
+      ...WorkbenchAccessibleUser
+    }
+  }
+}
+    ${WorkbenchAccessibleUserFragmentDoc}`;
+
+/**
+ * __useWorkbenchAccessibleUsersQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchAccessibleUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchAccessibleUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchAccessibleUsersQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchAccessibleUsersQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables> & ({ variables: WorkbenchAccessibleUsersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>(WorkbenchAccessibleUsersDocument, options);
+      }
+export function useWorkbenchAccessibleUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>(WorkbenchAccessibleUsersDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchAccessibleUsersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>;
+export function useWorkbenchAccessibleUsersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchAccessibleUsersQuery | undefined, WorkbenchAccessibleUsersQueryVariables>;
+export function useWorkbenchAccessibleUsersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>(WorkbenchAccessibleUsersDocument, options);
+        }
+export type WorkbenchAccessibleUsersQueryHookResult = ReturnType<typeof useWorkbenchAccessibleUsersQuery>;
+export type WorkbenchAccessibleUsersLazyQueryHookResult = ReturnType<typeof useWorkbenchAccessibleUsersLazyQuery>;
+export type WorkbenchAccessibleUsersSuspenseQueryHookResult = ReturnType<typeof useWorkbenchAccessibleUsersSuspenseQuery>;
+export type WorkbenchAccessibleUsersQueryResult = Apollo.QueryResult<WorkbenchAccessibleUsersQuery, WorkbenchAccessibleUsersQueryVariables>;
 export const WorkbenchEvalSettingsDocument = gql`
     query WorkbenchEvalSettings($id: ID!) {
   workbench(id: $id) {
@@ -44138,6 +44203,7 @@ export const namedOperations = {
     WorkbenchesEvalsAvgTimelineGraph: 'WorkbenchesEvalsAvgTimelineGraph',
     WorkbenchesAlerts: 'WorkbenchesAlerts',
     Workbench: 'Workbench',
+    WorkbenchAccessibleUsers: 'WorkbenchAccessibleUsers',
     WorkbenchEvalSettings: 'WorkbenchEvalSettings',
     WorkbenchJobs: 'WorkbenchJobs',
     WorkbenchEvals: 'WorkbenchEvals',
@@ -44661,6 +44727,7 @@ export const namedOperations = {
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchEvalResultRow: 'WorkbenchEvalResultRow',
+    WorkbenchAccessibleUser: 'WorkbenchAccessibleUser',
     UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny'
   }
 }

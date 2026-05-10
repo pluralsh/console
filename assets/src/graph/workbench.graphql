@@ -383,6 +383,7 @@ fragment WorkbenchCron on WorkbenchCron {
   id
   crontab
   prompt
+  userId
   lastRunAt
   nextRunAt
   insertedAt
@@ -400,6 +401,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
   prompt
+  userId
   matches {
     regex
     substring
@@ -591,6 +593,22 @@ query WorkbenchesAlerts($first: Int = 100, $after: String) {
 query Workbench($id: ID, $name: String) {
   workbench(id: $id, name: $name) {
     ...Workbench
+  }
+}
+
+fragment WorkbenchAccessibleUser on User {
+  id
+  name
+  email
+  profile
+}
+
+query WorkbenchAccessibleUsers($id: ID!) {
+  workbench(id: $id) {
+    id
+    users {
+      ...WorkbenchAccessibleUser
+    }
   }
 }
 
