@@ -390,6 +390,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { dynatrace: { url: url ?? '', platformToken: '' } }
   },
   [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
+  [WorkbenchToolType.Slack]: () => ({ slack: { botToken: '' } }),
 }
 
 function sanitizeInitialConfiguration(

@@ -2324,6 +2324,7 @@ enum WorkbenchToolType {
   JAEGER
   EXA
   GITHUB
+  SLACK
 }
 
 enum WorkbenchToolCategory {
@@ -2680,6 +2681,9 @@ input WorkbenchToolConfigurationAttributes {
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
+  "slack connection (integration)"
+  slack: WorkbenchToolSlackConnectionAttributes
+
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
 
@@ -2845,6 +2849,11 @@ input WorkbenchToolAzureConnectionAttributes {
 input WorkbenchToolLinearConnectionAttributes {
   "linear API access token"
   accessToken: String
+}
+
+input WorkbenchToolSlackConnectionAttributes {
+  "slack bot user OAuth token (xoxb-...) for MCP"
+  botToken: String
 }
 
 input WorkbenchToolAtlassianConnectionAttributes {
@@ -3718,6 +3727,9 @@ type WorkbenchToolConfiguration {
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
+  "slack connection (no secrets)"
+  slack: WorkbenchToolSlackConnection
+
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
 
@@ -3828,6 +3840,11 @@ type WorkbenchToolAzureConnection {
 
 type WorkbenchToolLinearConnection {
   "static MCP URL for Linear"
+  url: String!
+}
+
+type WorkbenchToolSlackConnection {
+  "Slack hosted MCP endpoint (credentials never exposed)"
   url: String!
 }
 

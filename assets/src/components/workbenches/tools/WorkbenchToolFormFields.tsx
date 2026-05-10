@@ -81,6 +81,8 @@ export function WorkbenchToolFormFields({
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
+    case WorkbenchToolType.Slack:
+      return render(type, SlackFormFields)
     case WorkbenchToolType.Exa:
       return render(type, ExaFormFields)
     case WorkbenchToolType.Github:
@@ -365,6 +367,22 @@ function LinearFormFields({
       revealer
       value={c.accessToken ?? ''}
       onChange={(e) => set({ ...c, accessToken: e.target.value })}
+    />
+  )
+}
+
+function SlackFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Slack>) {
+  return (
+    <InputField
+      label="Bot user OAuth token"
+      hint="Starts with xoxb-. Create a Slack app, add bot scopes, install to your workspace, then copy the Bot User OAuth Token from OAuth & Permissions."
+      required
+      revealer
+      value={c.botToken ?? ''}
+      onChange={(e) => set({ ...c, botToken: e.target.value })}
     />
   )
 }

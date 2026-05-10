@@ -26,6 +26,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
+  [WorkbenchToolType.Slack]: extractSlackMetadata,
   [WorkbenchToolType.Mcp]: () => [],
   [WorkbenchToolType.Sentry]: () => [],
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
@@ -149,6 +150,12 @@ function extractLinearMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.linear?.url }]
+}
+
+function extractSlackMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'MCP URL', value: configuration?.slack?.url }]
 }
 
 function extractSplunkMetadata(

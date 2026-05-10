@@ -11,6 +11,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Jaeger]: '/setup-guides/tools/jaeger.md',
   [WorkbenchToolType.Datadog]: '/setup-guides/tools/datadog.md',
   [WorkbenchToolType.Linear]: '/setup-guides/tools/linear.md',
+  [WorkbenchToolType.Slack]: '/setup-guides/tools/slack.md',
   [WorkbenchToolType.Atlassian]: '/setup-guides/tools/atlassian.md',
   [WorkbenchToolType.Exa]: '/setup-guides/tools/exa.md',
   [WorkbenchToolType.Github]: '/setup-guides/tools/github.md',
@@ -35,6 +36,7 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
   [WorkbenchToolType.Datadog]:
     'https://docs.datadoghq.com/account_management/api-app-keys/',
   [WorkbenchToolType.Linear]: 'https://linear.app/docs/api-and-webhooks',
+  [WorkbenchToolType.Slack]: 'https://docs.slack.dev/ai/mcp-server/',
   [WorkbenchToolType.Atlassian]:
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',

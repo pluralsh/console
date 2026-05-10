@@ -153,6 +153,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
     field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
+    field :slack,      :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,     :workbench_tool_github_connection_attributes, description: "github connection (integration)"
@@ -234,6 +235,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_linear_connection_attributes do
     field :access_token, :string, description: "linear API access token"
+  end
+
+  input_object :workbench_tool_slack_connection_attributes do
+    field :bot_token, :string, description: "slack bot user OAuth token (xoxb-...) for MCP"
   end
 
   input_object :workbench_tool_atlassian_connection_attributes do
@@ -765,6 +770,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
     field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
+    field :slack,     :workbench_tool_slack_connection, description: "slack connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
@@ -829,6 +835,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_linear_connection do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.linear.app/mcp"} end,
       description: "static MCP URL for Linear"
+  end
+
+  object :workbench_tool_slack_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.slack.com/mcp"} end,
+      description: "Slack hosted MCP endpoint (credentials never exposed)"
   end
 
   object :workbench_tool_atlassian_connection do

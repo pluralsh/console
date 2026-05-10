@@ -10408,6 +10408,8 @@ type WorkbenchToolConfiguration struct {
 	Azure *WorkbenchToolAzureConnection `json:"azure,omitempty"`
 	// linear connection (no secrets)
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
+	// slack connection (no secrets)
+	Slack *WorkbenchToolSlackConnection `json:"slack,omitempty"`
 	// atlassian connection (no secrets)
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 	// exa connection (no secrets)
@@ -10441,6 +10443,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Azure *WorkbenchToolAzureConnectionAttributes `json:"azure,omitempty"`
 	// linear connection (ticketing)
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
+	// slack connection (integration)
+	Slack *WorkbenchToolSlackConnectionAttributes `json:"slack,omitempty"`
 	// atlassian/jira connection (ticketing)
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 	// exa connection (search)
@@ -10646,6 +10650,16 @@ type WorkbenchToolQueryData struct {
 	ToolArgs map[string]any `json:"toolArgs,omitempty"`
 	// a short summary describing what this query means
 	Summary *string `json:"summary,omitempty"`
+}
+
+type WorkbenchToolSlackConnection struct {
+	// Slack hosted MCP endpoint (credentials never exposed)
+	URL string `json:"url"`
+}
+
+type WorkbenchToolSlackConnectionAttributes struct {
+	// slack bot user OAuth token (xoxb-...) for MCP
+	BotToken *string `json:"botToken,omitempty"`
 }
 
 type WorkbenchToolSplunkConnection struct {
@@ -17131,6 +17145,7 @@ const (
 	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
 	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
 	WorkbenchToolTypeGithub     WorkbenchToolType = "GITHUB"
+	WorkbenchToolTypeSLACk      WorkbenchToolType = "SLACK"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17152,11 +17167,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeJaeger,
 	WorkbenchToolTypeExa,
 	WorkbenchToolTypeGithub,
+	WorkbenchToolTypeSLACk,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk:
 		return true
 	}
 	return false

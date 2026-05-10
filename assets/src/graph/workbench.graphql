@@ -177,6 +177,9 @@ fragment WorkbenchTool on WorkbenchTool {
     linear {
       url
     }
+    slack {
+      url
+    }
     splunk {
       url
       username

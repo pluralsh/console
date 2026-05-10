@@ -22,7 +22,8 @@ defmodule Console.Schema.WorkbenchTool do
     cloud: 14,
     jaeger: 15,
     exa: 16,
-    github: 17
+    github: 17,
+    slack: 18
 
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
@@ -62,6 +63,10 @@ defmodule Console.Schema.WorkbenchTool do
 
       embeds_one :linear, LinearConnection, on_replace: :update do
         field :access_token, EncryptedString
+      end
+
+      embeds_one :slack, SlackConnection, on_replace: :update do
+        field :bot_token, EncryptedString
       end
 
       embeds_one :atlassian, AtlassianConnection, on_replace: :update do
@@ -259,6 +264,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:sentry), do: [:error_tracking]
   defp categories(:github), do: [:integration]
   defp categories(:linear), do: [:ticketing]
+  defp categories(:slack), do: [:integration]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
@@ -281,6 +287,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
     |> cast_embed(:github, with: &github_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
+    |> cast_embed(:slack, with: &slack_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
   end
@@ -374,6 +381,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(access_token)a)
     |> validate_required([:access_token])
+  end
+
+  defp slack_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(bot_token)a)
+    |> validate_required([:bot_token])
   end
 
   defp atlassian_configuration_changeset(model, attrs) do

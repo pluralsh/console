@@ -12,6 +12,7 @@ import {
   LokiLogoIcon,
   PrometheusLogoIcon,
   SentryLogoIcon,
+  SlackLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
@@ -37,6 +38,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Jaeger,
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
+  WorkbenchToolType.Slack,
   WorkbenchToolType.Exa,
   WorkbenchToolType.Github,
   WorkbenchToolType.Splunk,
@@ -61,6 +63,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Jaeger]: 'jaeger',
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
+  [WorkbenchToolType.Slack]: 'slack',
   [WorkbenchToolType.Atlassian]: 'atlassian',
   [WorkbenchToolType.Exa]: 'exa',
   [WorkbenchToolType.Github]: 'github',
@@ -96,6 +99,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Datadog]: 'Datadog',
   [WorkbenchToolType.Atlassian]: 'Atlassian',
   [WorkbenchToolType.Linear]: 'Linear',
+  [WorkbenchToolType.Slack]: 'Slack',
   [WorkbenchToolType.Mcp]: 'MCP',
   [WorkbenchToolType.Sentry]: 'Sentry',
   [WorkbenchToolType.Splunk]: 'Splunk',
@@ -133,6 +137,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Integration],
   [WorkbenchToolType.Exa]: [WorkbenchToolCategory.Search],
   [WorkbenchToolType.Github]: [WorkbenchToolCategory.Integration],
   [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
@@ -172,6 +177,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Connect to Jira, Confluence, and other Atlassian products.',
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
+  [WorkbenchToolType.Slack]:
+    'Connect to Slack via the hosted MCP server to search channels, read threads, and post messages.',
   [WorkbenchToolType.Exa]:
     'Search the web with Exa to fetch high-signal context for tasks.',
   [WorkbenchToolType.Github]:
@@ -309,6 +316,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Http]: ToolsIcon,
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
+  [WorkbenchToolType.Slack]: SlackLogoIcon,
   [WorkbenchToolType.Exa]: ExaLogoIcon,
   [WorkbenchToolType.Github]: GitHubLogoIcon,
   [WorkbenchToolType.Splunk]: SplunkLogoIcon,
