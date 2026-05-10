@@ -20542,6 +20542,13 @@ export type WorkbenchJobThoughtDeltaSubscriptionVariables = Exact<{
 
 export type WorkbenchJobThoughtDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobThoughtDelta?: { __typename?: 'WorkbenchJobThoughtDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
 
+export type WorkbenchJobProgressSubscriptionVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobProgressSubscription = { __typename?: 'RootSubscriptionType', workbenchJobProgress?: { __typename?: 'WorkbenchJobProgress', activityId?: string | null, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null } | null };
+
 export type WorkbenchTextStreamSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
 }>;
@@ -43932,6 +43939,36 @@ export function useWorkbenchJobThoughtDeltaSubscription(baseOptions: Apollo.Subs
       }
 export type WorkbenchJobThoughtDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchJobThoughtDeltaSubscription>;
 export type WorkbenchJobThoughtDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobThoughtDeltaSubscription>;
+export const WorkbenchJobProgressDocument = gql`
+    subscription WorkbenchJobProgress($jobId: ID!) {
+  workbenchJobProgress(jobId: $jobId) {
+    ...WorkbenchJobProgress
+  }
+}
+    ${WorkbenchJobProgressFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobProgressSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchJobProgressSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobProgressSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobProgressSubscription({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useWorkbenchJobProgressSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobProgressSubscription, WorkbenchJobProgressSubscriptionVariables> & ({ variables: WorkbenchJobProgressSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchJobProgressSubscription, WorkbenchJobProgressSubscriptionVariables>(WorkbenchJobProgressDocument, options);
+      }
+export type WorkbenchJobProgressSubscriptionHookResult = ReturnType<typeof useWorkbenchJobProgressSubscription>;
+export type WorkbenchJobProgressSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobProgressSubscription>;
 export const WorkbenchTextStreamDocument = gql`
     subscription WorkbenchTextStream($jobId: ID!) {
   workbenchTextStream(jobId: $jobId) {
@@ -44418,6 +44455,7 @@ export const namedOperations = {
     WorkbenchJobDelta: 'WorkbenchJobDelta',
     WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',
     WorkbenchJobThoughtDelta: 'WorkbenchJobThoughtDelta',
+    WorkbenchJobProgress: 'WorkbenchJobProgress',
     WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCanvasStream: 'WorkbenchCanvasStream'
   },

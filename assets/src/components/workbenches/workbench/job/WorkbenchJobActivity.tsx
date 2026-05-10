@@ -31,6 +31,7 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobProgressFragment,
   WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
@@ -401,6 +402,75 @@ function WorkbenchJobActivityThought({
           />
         ),
       })}
+    />
+  )
+}
+
+/**
+ * Job-level tool progress (between activities): same accordion + SimpleToolCall UI as
+ * activity thoughts, with a fixed "thinking" label instead of the tool-call count header.
+ */
+export function WorkbenchJobJobLevelThinking({
+  items,
+  jobRunning,
+}: {
+  items: Array<WorkbenchJobProgressFragment & { localKey: number }>
+  jobRunning: boolean
+}) {
+  const { spacing } = useTheme()
+  const [isExpanded, setIsExpanded] = useState(false)
+  const last = items.at(-1)
+
+  if (isEmpty(items)) return null
+
+  return (
+    <>
+      <SimpleAccordion
+        label="thinking..."
+        loading={false}
+        isOpen={isExpanded}
+        setIsOpen={setIsExpanded}
+        caret="right-quarter-mirror"
+        triggerWrapperStyles={{
+          justifyContent: 'flex-start',
+          '.icon': { width: 10 },
+        }}
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginTop={spacing.xsmall}
+        >
+          {items.map((item) => (
+            <WorkbenchJobLevelThinkingCall
+              key={item.localKey}
+              item={item}
+            />
+          ))}
+        </Flex>
+      </SimpleAccordion>
+      {!isExpanded && last && jobRunning && (
+        <EaseIn currentKey={last.localKey}>
+          <WorkbenchJobLevelThinkingCall item={last} />
+        </EaseIn>
+      )}
+    </>
+  )
+}
+
+function WorkbenchJobLevelThinkingCall({
+  item,
+}: {
+  item: WorkbenchJobProgressFragment
+}) {
+  const { text, tool, arguments: toolArgs } = item
+  return (
+    <SimpleToolCall
+      content={text ?? ''}
+      attributes={{
+        tool: { name: tool ?? '', arguments: toolArgs ?? {} },
+      }}
+      isPending
     />
   )
 }

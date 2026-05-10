@@ -1136,6 +1136,12 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
   }
 }
 
+subscription WorkbenchJobProgress($jobId: ID!) {
+  workbenchJobProgress(jobId: $jobId) {
+    ...WorkbenchJobProgress
+  }
+}
+
 subscription WorkbenchTextStream($jobId: ID!) {
   workbenchTextStream(jobId: $jobId) {
     ...WorkbenchTextStream

@@ -15,7 +15,11 @@ import { VirtualList } from 'components/utils/VirtualList'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { useWorkbenchJobStreams } from './useWorkbenchJobStreams'
-import { isJobRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
+import {
+  isJobRunning,
+  WorkbenchJobActivity,
+  WorkbenchJobJobLevelThinking,
+} from './WorkbenchJobActivity'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 
@@ -41,7 +45,10 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     [activities, closedIds]
   )
 
-  const textStreamMap = useWorkbenchJobStreams(jobId, setClosedIds)
+  const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(
+    jobId,
+    setClosedIds
+  )
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent
@@ -96,6 +103,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
             }
             bottomContent={
               <>
+                {jobLevelThinking.length > 0 && (
+                  <WorkbenchJobJobLevelThinking
+                    items={jobLevelThinking}
+                    jobRunning={isJobRunning(job?.status)}
+                  />
+                )}
                 {textStreamMap['none'] && (
                   <SimplifiedMarkdown text={textStreamMap['none']} />
                 )}
