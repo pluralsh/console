@@ -900,15 +900,26 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchCronUpdated{item: ^updated}}
     end
 
-    test "update rejects user_id when the actor cannot read the workbench" do
+    test "update rejects user_id for non-admin when assigning another user" do
       writer = insert(:user)
       stranger = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: writer.id}])
       workbench = insert(:workbench, project: project)
       cron = insert(:workbench_cron, workbench: workbench, user: writer)
 
-      assert {:error, "forbidden"} =
+      assert {:error, "invalid association type"} =
                Workbenches.update_workbench_cron(%{user_id: stranger.id}, cron.id, writer)
+    end
+
+    test "admin update rejects user_id when the selected user cannot read the workbench" do
+      admin = admin_user()
+      stranger = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: admin.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench, user: admin)
+
+      assert {:error, "forbidden"} =
+               Workbenches.update_workbench_cron(%{user_id: stranger.id}, cron.id, admin)
     end
 
     test "project readers cannot update a cron" do
@@ -1358,30 +1369,30 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
 
     test "update can set user_id explicitly when override_webhook_user is not true" do
-      writer = insert(:user)
+      admin = admin_user()
       owner_a = insert(:user)
       owner_b = insert(:user)
       project =
         insert(:project,
-          write_bindings: [%{user_id: writer.id}],
+          write_bindings: [%{user_id: admin.id}],
           read_bindings: [%{user_id: owner_b.id}]
         )
 
       workbench = insert(:workbench, project: project)
-      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: admin.id}])
       webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: owner_a, name: "reassign")
 
       {:ok, updated} =
         Workbenches.update_workbench_webhook(
           %{user_id: owner_b.id},
           webhook.id,
-          writer
+          admin
         )
 
       assert updated.user_id == owner_b.id
     end
 
-    test "update rejects user_id when the actor cannot read the workbench" do
+    test "update rejects user_id for non-admin when assigning another user" do
       writer = insert(:user)
       stranger = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: writer.id}])
@@ -1389,8 +1400,20 @@ defmodule Console.Deployments.WorkbenchesTest do
       obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
       webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: writer, name: "actor-check")
 
-      assert {:error, "forbidden"} =
+      assert {:error, "invalid association type"} =
                Workbenches.update_workbench_webhook(%{user_id: stranger.id}, webhook.id, writer)
+    end
+
+    test "admin update rejects user_id when the selected user cannot read the workbench" do
+      admin = admin_user()
+      stranger = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: admin.id}])
+      workbench = insert(:workbench, project: project)
+      obs_webhook = insert(:observability_webhook, read_bindings: [%{user_id: admin.id}])
+      webhook = insert(:workbench_webhook, workbench: workbench, webhook: obs_webhook, user: admin, name: "actor-check")
+
+      assert {:error, "forbidden"} =
+               Workbenches.update_workbench_webhook(%{user_id: stranger.id}, webhook.id, admin)
     end
 
     test "project readers cannot update a webhook" do
@@ -1586,7 +1609,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert refetch(bot).chat_connection_id == allowed_conn.id
     end
 
-    test "update rejects user_id when the actor cannot read the workbench" do
+    test "update rejects user_id for non-admin when assigning another user" do
       writer = insert(:user)
       stranger = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: writer.id}])
@@ -1601,8 +1624,27 @@ defmodule Console.Deployments.WorkbenchesTest do
           channel: "C-actor-#{System.unique_integer([:positive])}"
         )
 
-      assert {:error, "forbidden"} =
+      assert {:error, "invalid association type"} =
                Workbenches.update_workbench_chatbot(%{user_id: stranger.id}, bot.id, writer)
+    end
+
+    test "admin update rejects user_id when the selected user cannot read the workbench" do
+      admin = admin_user()
+      stranger = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: admin.id}])
+      workbench = insert(:workbench, project: project)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: admin.id}])
+
+      bot =
+        insert(:workbench_chatbot,
+          workbench: workbench,
+          chat_connection: conn,
+          user: admin,
+          channel: "C-actor-admin-#{System.unique_integer([:positive])}"
+        )
+
+      assert {:error, "forbidden"} =
+               Workbenches.update_workbench_chatbot(%{user_id: stranger.id}, bot.id, admin)
     end
   end
 

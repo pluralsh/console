@@ -5,6 +5,7 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
+import { useLogin } from 'components/contexts'
 import { GqlError } from 'components/utils/Alert'
 import UserInfo from 'components/utils/UserInfo'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -31,6 +32,10 @@ export function WorkbenchAccessibleUserSelect({
   disabled?: boolean
   hint?: string
 }) {
+  const { me } = useLogin()
+  const isAdmin = !!me?.roles?.admin
+  const currentUserId = me?.id ?? ''
+
   const [fetchUsers, { data, loading, error }] =
     useWorkbenchAccessibleUsersLazyQuery({
       fetchPolicy: 'cache-first',
@@ -47,6 +52,12 @@ export function WorkbenchAccessibleUserSelect({
     return (wb.users ?? []).filter(isNonNullable)
   }, [data?.workbench, workbenchId])
 
+  /** Non-admins may only pick themselves; admins see everyone with workbench access. */
+  const selectableUsers = useMemo(() => {
+    if (isAdmin || !currentUserId) return accessibleUsers
+    return accessibleUsers.filter((u) => u.id === currentUserId)
+  }, [accessibleUsers, currentUserId, isAdmin])
+
   const usersLoaded = data?.workbench?.id === workbenchId && !loading
 
   const selectedResolved = useMemo(
@@ -56,30 +67,55 @@ export function WorkbenchAccessibleUserSelect({
 
   const isOrphanSelection = !!selectedUserId && usersLoaded && !selectedResolved
 
-  const listEmpty = accessibleUsers.length === 0
+  const listEmpty = selectableUsers.length === 0
 
   const awaitingFirstPayload =
     listEmpty && (loading || data?.workbench?.id !== workbenchId)
 
-  const defaultHint = (
+  const nonAdminActorNote = (
     <CaptionP $color="text-light">
-      Automated runs use this user&apos;s permissions and credentials.
+      Only administrators can assign a different user for automated runs. Your
+      account is always used unless an admin changes this setting.
     </CaptionP>
+  )
+
+  const defaultHint = (
+    <Flex
+      direction="column"
+      gap="xxsmall"
+    >
+      <CaptionP $color="text-light">
+        Automated runs use this user&apos;s permissions and credentials.
+      </CaptionP>
+      {!isAdmin && nonAdminActorNote}
+    </Flex>
   )
 
   const emptyHint = (
-    <CaptionP $color="text-light">
-      No run-as user is selected yet. Choose someone with read access to this
-      workbench — scheduled runs and webhook handling use that user&apos;s
-      identity and credentials.
-    </CaptionP>
+    <Flex
+      direction="column"
+      gap="xxsmall"
+    >
+      <CaptionP $color="text-light">
+        No run-as user is selected yet. Choose someone with read access to this
+        workbench — scheduled runs and webhook handling use that user&apos;s
+        identity and credentials.
+      </CaptionP>
+      {!isAdmin && nonAdminActorNote}
+    </Flex>
   )
 
   const orphanHint = (
-    <CaptionP $color="text-warning">
-      The previously selected user is no longer in this workbench&apos;s
-      accessible users list. Choose another user below.
-    </CaptionP>
+    <Flex
+      direction="column"
+      gap="xxsmall"
+    >
+      <CaptionP $color="text-warning">
+        The previously selected user is no longer in this workbench&apos;s
+        accessible users list. Choose another user below.
+      </CaptionP>
+      {!isAdmin && nonAdminActorNote}
+    </Flex>
   )
 
   const resolvedHint =
@@ -107,7 +143,7 @@ export function WorkbenchAccessibleUserSelect({
       <FormField
         label="Run as user"
         hint={resolvedHint}
-        infoTooltip="The user whose identity is used when this trigger runs. Must have read access to the workbench."
+        infoTooltip="The user whose identity is used when this trigger runs. Must have read access to the workbench. Only administrators can assign a user other than themselves."
       >
         <Select
           selectedKey={selectedUserId || null}
@@ -151,7 +187,7 @@ export function WorkbenchAccessibleUserSelect({
               }
             />
           ) : (
-            accessibleUsers.map((u) => (
+            selectableUsers.map((u) => (
               <ListBoxItem
                 key={u.id}
                 label={

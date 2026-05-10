@@ -308,6 +308,7 @@ fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
+  criticism
   conclusion
   topology
   todos {
@@ -324,6 +325,7 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   jobUpdate {
     diff
     workingTheory
+    criticism
     conclusion
   }
   metricsQuery {

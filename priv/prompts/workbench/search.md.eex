@@ -7,6 +7,8 @@ can help inform your work.  This can take a variety of forms, including:
 
 You will have usage of the mcp servers capable of web search, most likely the Exa MCP server, and also a set of skills that might be useful to guide your search.
 
+Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
+
 The overarching task is as follows:
 
 <%= @prompt %>

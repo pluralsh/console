@@ -34,6 +34,10 @@
                 "working_theory": {
                     "type": "string",
                     "description": "The current working theory you might want to update.  Pass the old theory if no changes are needed."
+                },
+                "criticism": {
+                    "type": "string",
+                    "description": "A markdown-formatted critique of the work done so far.  Use this to highlight any gaps, inconsistencies, missing evidence, unverified assumptions, or weaknesses in the current investigation that should be addressed in subsequent steps."
                 }
             },
             "required": []

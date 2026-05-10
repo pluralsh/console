@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator, History, Infrastructure.PodLogs}
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Time, Plrl}
+  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Plrl}
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -37,7 +37,6 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       %Skills{skills: Environment.subagent_skills(skills, :observability)},
       %Skill{skills: Environment.subagent_skills(skills, :observability)},
       ObservabilityResult,
-      Time,
       Calculator,
       %History{job: job, activities: activities}
     ])

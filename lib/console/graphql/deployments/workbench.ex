@@ -461,6 +461,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_activity_job_update do
     field :diff,            :string
     field :working_theory,  :string
+    field :criticism,       :string
     field :conclusion,      :string
     field :topology,        :string
     field :todos,           list_of(:workbench_job_result_todo)
@@ -493,6 +494,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_result do
     field :id,              non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
+    field :criticism,       :string, description: "a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"
     field :conclusion,      :string, description: "the conclusion for this result"
     field :topology,        :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
     field :todos,           list_of(:workbench_job_result_todo), description: "todos for this result"

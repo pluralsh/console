@@ -9,6 +9,10 @@
             "type": "string",
             "description": "A mermaid diagram of the topology of the system in question in this investigation.  Pass the old topology if no changes are needed.  We will validate mermaid syntax and reply with an error if invalid."
         },
+        "criticism": {
+            "type": "string",
+            "description": "A markdown-formatted critique of the work done in this job.  Use this to highlight any remaining gaps, inconsistencies, unverified assumptions, or weaknesses in the final conclusion that a reviewer should be aware of."
+        },
         "todos": {
             "type": "array",
             "description": "The todos to update.  Pass these if there's still a todo to mark as done",

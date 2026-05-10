@@ -183,7 +183,7 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :write)
       |> when_ok(:insert)
     end)
-    |> add_operation(:actor, fn %{cron: cron} -> actor_access(cron) end)
+    |> add_operation(:actor, fn %{cron: cron} -> actor_access(cron, user) end)
     |> execute(extract: :cron)
     |> notify(:create, user)
   end
@@ -200,7 +200,7 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :write)
       |> when_ok(:update)
     end)
-    |> add_operation(:actor, fn %{cron: cron} -> actor_access(cron) end)
+    |> add_operation(:actor, fn %{cron: cron} -> actor_access(cron, user) end)
     |> execute(extract: :cron)
     |> notify(:update, user)
   end
@@ -406,7 +406,7 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:insert)
     end)
     |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
-    |> add_operation(:actor, fn %{webhook: hook} -> actor_access(hook) end)
+    |> add_operation(:actor, fn %{webhook: hook} -> actor_access(hook, user) end)
     |> execute(extract: :webhook)
     |> notify(:create, user)
   end
@@ -424,7 +424,7 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:update)
     end)
     |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
-    |> add_operation(:actor, fn %{webhook: hook} -> actor_access(hook) end)
+    |> add_operation(:actor, fn %{webhook: hook} -> actor_access(hook, user) end)
     |> execute(extract: :webhook)
     |> notify(:update, user)
   end
@@ -438,14 +438,17 @@ defmodule Console.Deployments.Workbenches do
     end
   end
 
-  defp actor_access(%mod{} = assoc) when mod in [WorkbenchWebhook, WorkbenchChatbot, WorkbenchCron] do
+  defp actor_access(%mod{} = assoc, %User{roles: %{admin: true}}) when mod in [WorkbenchWebhook, WorkbenchChatbot, WorkbenchCron] do
     Repo.preload(assoc, [user: :groups, workbench: [:read_bindings, :write_bindings, project: [:read_bindings, :write_bindings]]])
     |> case do
-      %^mod{user: %User{} = user, workbench: %Workbench{} = workbench} -> allow(workbench, user, :read)
+      %^mod{user: %User{} = user, workbench: %Workbench{} = workbench} ->
+        allow(workbench, user, :read)
       _ -> {:error, "workbench #{mod} does not have a user and workbench"}
     end
   end
-  defp actor_access(_), do: {:error, "invalid association type"}
+  defp actor_access(%mod{user_id: id} = assoc, %User{id: id}) when mod in [WorkbenchWebhook, WorkbenchChatbot, WorkbenchCron],
+    do: {:ok, assoc}
+  defp actor_access(_, _), do: {:error, "invalid association type"}
 
   @doc """
   Deletes a workbench webhook. Requires write permission on the workbench.
@@ -472,7 +475,7 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:insert)
     end)
     |> add_operation(:access, fn %{chatbot: bot} -> chat_connection_access(bot, user) end)
-    |> add_operation(:actor, fn %{chatbot: bot} -> actor_access(bot) end)
+    |> add_operation(:actor, fn %{chatbot: bot} -> actor_access(bot, user) end)
     |> execute(extract: :chatbot)
     |> notify(:create, user)
   end
@@ -490,7 +493,7 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:update)
     end)
     |> add_operation(:access, fn %{chatbot: bot} -> chat_connection_access(bot, user) end)
-    |> add_operation(:actor, fn %{chatbot: bot} -> actor_access(bot) end)
+    |> add_operation(:actor, fn %{chatbot: bot} -> actor_access(bot, user) end)
     |> execute(extract: :chatbot)
     |> notify(:update, user)
   end

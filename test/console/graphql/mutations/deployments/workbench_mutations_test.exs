@@ -685,6 +685,36 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert updated["userId"] == actor.id
     end
 
+    test "non-admin cannot update userId to another user on a workbench cron" do
+      writer = insert(:user)
+      other = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          write_bindings: [%{user_id: writer.id}],
+          read_bindings: [%{user_id: other.id}]
+        )
+
+      cron =
+        insert(:workbench_cron,
+          workbench: workbench,
+          user: writer,
+          crontab: "0 * * * *",
+          prompt: "old"
+        )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+          updateWorkbenchCron(id: $id, attributes: $attributes) {
+            id
+            userId
+          }
+        }
+      """, %{"id" => cron.id, "attributes" => %{"userId" => other.id}}, %{current_user: writer})
+
+      assert refetch(cron).user_id == writer.id
+    end
+
     test "project readers cannot update a cron" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -1260,6 +1290,38 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
 
       assert updated["id"] == webhook.id
       assert updated["userId"] == actor.id
+    end
+
+    test "non-admin cannot update userId to another user on a workbench webhook" do
+      writer = insert(:user)
+      other = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          write_bindings: [%{user_id: writer.id}],
+          read_bindings: [%{user_id: other.id}]
+        )
+
+      obs = insert(:observability_webhook, read_bindings: [%{user_id: writer.id}])
+
+      webhook =
+        insert(:workbench_webhook,
+          workbench: workbench,
+          webhook: obs,
+          user: writer,
+          name: "gql-user-restrict"
+        )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+            id
+            userId
+          }
+        }
+      """, %{"id" => webhook.id, "attributes" => %{"userId" => other.id}}, %{current_user: writer})
+
+      assert refetch(webhook).user_id == writer.id
     end
 
     test "project readers cannot update a webhook" do

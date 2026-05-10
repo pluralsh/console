@@ -3199,6 +3199,7 @@ type WorkbenchJobActivityResult {
 type WorkbenchJobActivityJobUpdate {
   diff: String
   workingTheory: String
+  criticism: String
   conclusion: String
   topology: String
   todos: [WorkbenchJobResultTodo]
@@ -3234,6 +3235,9 @@ type WorkbenchJobResult {
 
   "the working theory for this result"
   workingTheory: String
+
+  "a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"
+  criticism: String
 
   "the conclusion for this result"
   conclusion: String

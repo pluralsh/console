@@ -14,6 +14,16 @@ The ultimate accepted conclusion of the workbenches analysis.
 <%= @job.result.conclusion %>
 ```
 
+<%= if is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
+## Criticism
+
+Recorded critique, caveats, or limitations associated with this result.
+
+```
+<%= @job.result.criticism %>
+```
+<% end %>
+
 ## Topology
 
 A mermaid diagram of the system graph at the time of the analysis.

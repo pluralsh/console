@@ -9975,6 +9975,7 @@ type WorkbenchJobActivityEdge struct {
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
+	Criticism     *string                   `json:"criticism,omitempty"`
 	Conclusion    *string                   `json:"conclusion,omitempty"`
 	Topology      *string                   `json:"topology,omitempty"`
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
@@ -10065,6 +10066,8 @@ type WorkbenchJobResult struct {
 	ID string `json:"id"`
 	// the working theory for this result
 	WorkingTheory *string `json:"workingTheory,omitempty"`
+	// a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation
+	Criticism *string `json:"criticism,omitempty"`
 	// the conclusion for this result
 	Conclusion *string `json:"conclusion,omitempty"`
 	// a mermaid diagram of the topology of the system in question in this investigation

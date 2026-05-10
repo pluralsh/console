@@ -82,12 +82,14 @@ defmodule Console.AI.Workbench.Engine do
         logs: logs,
         traces: traces,
         todos: todos,
-        topology: topology
+        topology: topology,
+        criticism: criticism
       }} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
           topology: topology,
+          criticism: criticism,
           metadata: drop_empty(%{
             metrics_query: metrics_query,
             traces_query: traces_query,

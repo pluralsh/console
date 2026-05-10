@@ -46,6 +46,8 @@ As work is being done, you can use the `working_theory` field to record the curr
 Also, there's a topology field, which accepts a mermaid formatted diagram.  Use this to express the current state of the system in question, including all main components at issue.  It will make it much easier for users to
 understand the correctness of any theory by visualizing what is at play.  You can modify this as work is being done, and also at completion to ensure your final conclusions are reflected in the diagram.
 
+The `criticism` field (optional) is for limitations, risks, or things a follow-up review should know about your conclusion—use it when the answer is directionally right but incomplete or uncertain.
+
 Topology is useful when:
 
 1. There's a high level distributed system architecture to express
@@ -113,7 +115,17 @@ That said, you *should* avoid repeatedly calling the notes tool unless you're me
 
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  You can mark notes and trigger a subagent in parallel as well.
 
-<%= if @job.result && @job.result.conclusion && byte_size(@job.result.conclusion) > 0 do %>
+Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
+
+<%= if @job.result && is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
+### Prior criticism on the saved result
+
+If you are revising a prior run, take this feedback into account:
+
+<%= @job.result.criticism %>
+<% end %>
+
+<%= if @job.result && (((is_binary(@job.result.conclusion) && byte_size(@job.result.conclusion) > 0)) || (is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0)) do %>
 ### Skill Backfill Guidance
 
 You also have a `skill_backfill` tool available.  Usage of this tool has a few rules you must follow:
