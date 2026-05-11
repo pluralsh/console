@@ -101,6 +101,7 @@ type ConsoleClient interface {
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
+	GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
 	PagedClusterServices(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServices, error)
 	PagedClusterServicesForAgent(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServicesForAgent, error)
@@ -20507,6 +20508,24 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	return t.Stack
 }
 
+type GetServiceTarball_ServiceTarball struct {
+	Content string "json:\"content\" graphql:\"content\""
+	Path    string "json:\"path\" graphql:\"path\""
+}
+
+func (t *GetServiceTarball_ServiceTarball) GetContent() string {
+	if t == nil {
+		t = &GetServiceTarball_ServiceTarball{}
+	}
+	return t.Content
+}
+func (t *GetServiceTarball_ServiceTarball) GetPath() string {
+	if t == nil {
+		t = &GetServiceTarball_ServiceTarball{}
+	}
+	return t.Path
+}
+
 type ListServiceDeployment_ServiceDeployments struct {
 	Edges []*ServiceDeploymentEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
 }
@@ -35852,6 +35871,17 @@ func (t *GetServiceDeploymentByHandle) GetServiceDeployment() *ServiceDeployment
 	return t.ServiceDeployment
 }
 
+type GetServiceTarball struct {
+	ServiceTarball []*GetServiceTarball_ServiceTarball "json:\"serviceTarball,omitempty\" graphql:\"serviceTarball\""
+}
+
+func (t *GetServiceTarball) GetServiceTarball() []*GetServiceTarball_ServiceTarball {
+	if t == nil {
+		t = &GetServiceTarball{}
+	}
+	return t.ServiceTarball
+}
+
 type ListServiceDeployment struct {
 	ServiceDeployments *ListServiceDeployment_ServiceDeployments "json:\"serviceDeployments,omitempty\" graphql:\"serviceDeployments\""
 }
@@ -46499,6 +46529,31 @@ func (c *Client) GetServiceDeploymentByHandle(ctx context.Context, cluster strin
 
 	var res GetServiceDeploymentByHandle
 	if err := c.Client.Post(ctx, "GetServiceDeploymentByHandle", GetServiceDeploymentByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceTarballDocument = `query GetServiceTarball ($id: ID!) {
+	serviceTarball(id: $id) {
+		path
+		content
+	}
+}
+`
+
+func (c *Client) GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetServiceTarball
+	if err := c.Client.Post(ctx, "GetServiceTarball", GetServiceTarballDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -62150,6 +62205,7 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
+	GetServiceTarballDocument:                         "GetServiceTarball",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",
 	PagedClusterServicesDocument:                      "PagedClusterServices",
 	PagedClusterServicesForAgentDocument:              "PagedClusterServicesForAgent",
