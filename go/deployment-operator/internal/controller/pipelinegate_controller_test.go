@@ -17,9 +17,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/pkg/test/common"
-	"github.com/pluralsh/deployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/test/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
 )
 
 var _ = Describe("PipelineGate Controller", Ordered, func() {

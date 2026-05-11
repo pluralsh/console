@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
 	"github.com/samber/lo"
 )
 

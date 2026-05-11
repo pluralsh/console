@@ -14,13 +14,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/internal/utils"
-	"github.com/pluralsh/deployment-operator/pkg/cache"
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	configuration "github.com/pluralsh/deployment-operator/pkg/common"
-	"github.com/pluralsh/deployment-operator/pkg/controller/common"
-	"github.com/pluralsh/deployment-operator/pkg/websocket"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	configuration "github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/controller/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/websocket"
 )
 
 const (

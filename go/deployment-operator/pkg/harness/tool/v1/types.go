@@ -5,9 +5,9 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
-	securityv1 "github.com/pluralsh/deployment-operator/pkg/harness/security/v1"
+	securityv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
 
-	stackrunv1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
+	stackrunv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
 )
 
 // Tool handles one of the supported infrastructure management tools.

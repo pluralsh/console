@@ -10,8 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/errors"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 func Fetch(options ...FetchOption) FetchClient {

@@ -2,7 +2,7 @@ package common
 
 import (
 	"github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"

@@ -6,9 +6,9 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
 )
 
 type NamespaceVersion struct {

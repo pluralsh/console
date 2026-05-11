@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/pluralsh/console/go/polly/containers"
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/workqueue"
@@ -19,11 +19,11 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/metrics"
-	"github.com/pluralsh/deployment-operator/pkg/common"
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/godeployment-operator/internal/metrics"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 )
 
 type Synchronizer interface {

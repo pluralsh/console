@@ -10,14 +10,14 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	"github.com/pluralsh/deployment-operator/internal/metrics"
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/common"
-	"github.com/pluralsh/deployment-operator/pkg/controller/service"
-	v1 "github.com/pluralsh/deployment-operator/pkg/controller/v1"
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	"github.com/pluralsh/deployment-operator/pkg/websocket"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/internal/metrics"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/controller/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/websocket"
 )
 
 type Manager struct {

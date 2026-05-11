@@ -12,11 +12,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/cmd/agent/args"
-	"github.com/pluralsh/deployment-operator/pkg/cache"
-	"github.com/pluralsh/deployment-operator/pkg/controller/pipelinegates"
-	"github.com/pluralsh/deployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
+	"github.com/pluralsh/console/godeployment-operator/pkg/controller/pipelinegates"
+	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
 )
 
 var _ = Describe("Reconciler", Ordered, func() {

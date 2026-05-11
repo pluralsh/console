@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 	"github.com/samber/lo"
 	networkv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

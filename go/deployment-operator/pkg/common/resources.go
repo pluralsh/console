@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	controllercommon "github.com/pluralsh/deployment-operator/pkg/controller/common"
+	controllercommon "github.com/pluralsh/console/godeployment-operator/pkg/controller/common"
 )
 
 func ListResources(ctx context.Context, k8sClient ctrclient.Client, gvk schema.GroupVersionKind, opts []ctrclient.ListOption) *algorithms.Pager[unstructured.Unstructured] {

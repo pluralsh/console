@@ -16,7 +16,7 @@ import (
 	"sigs.k8s.io/kustomize/kyaml/kio/kioutil"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 var (

@@ -5,8 +5,8 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 // Setup implements the Environment interface to prepare for the

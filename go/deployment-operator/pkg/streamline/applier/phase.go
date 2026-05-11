@@ -7,8 +7,8 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/pluralsh/deployment-operator/pkg/streamline"
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
 )
 
 type Phase struct {

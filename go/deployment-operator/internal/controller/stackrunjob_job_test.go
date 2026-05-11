@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/pluralsh/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/deployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/kubernetes/scheme"

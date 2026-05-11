@@ -6,10 +6,10 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
-	internalerrors "github.com/pluralsh/deployment-operator/internal/errors"
-	"github.com/pluralsh/deployment-operator/pkg/harness/errors"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	internalerrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 func (c *client) GetStackRunBase(id string) (result *v1.StackRun, err error) {

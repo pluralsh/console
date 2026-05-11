@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 )
 

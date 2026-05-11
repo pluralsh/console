@@ -8,7 +8,7 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/watch"
 
-	"github.com/pluralsh/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
 )
 
 var (

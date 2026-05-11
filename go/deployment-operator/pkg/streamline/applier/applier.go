@@ -13,11 +13,11 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	discoverycache "github.com/pluralsh/deployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 )
 
 type Applier struct {

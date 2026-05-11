@@ -16,9 +16,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/pluralsh/deployment-operator/pkg/streamline/api"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/api"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 )
 
 const (

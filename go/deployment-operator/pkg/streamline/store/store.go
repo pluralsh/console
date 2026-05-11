@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
 )
 
 type Store interface {

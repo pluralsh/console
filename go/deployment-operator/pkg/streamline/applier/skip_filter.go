@@ -4,8 +4,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
 )
 
 const (

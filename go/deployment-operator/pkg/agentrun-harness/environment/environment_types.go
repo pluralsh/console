@@ -1,8 +1,8 @@
 package environment
 
 import (
-	v1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	console "github.com/pluralsh/deployment-operator/pkg/client"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/agentrun/v1"
+	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
 )
 
 // environment implements Environment interface.

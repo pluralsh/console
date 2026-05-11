@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	console "github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/deployment-operator/pkg/harness/sink"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/sink"
 )
 
 func WithStackRun(id string) Option {

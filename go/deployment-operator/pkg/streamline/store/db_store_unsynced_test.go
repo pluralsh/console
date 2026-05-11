@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 )
 
 func TestSetComponentUnsynced(t *testing.T) {

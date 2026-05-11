@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"github.com/pluralsh/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
 )
 
 type ServiceReconcilerOption func(*ServiceReconciler)

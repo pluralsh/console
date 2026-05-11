@@ -1,8 +1,8 @@
 package environment
 
 import (
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
 )
 
 // Environment is responsible for handling harness working directory.

@@ -19,12 +19,12 @@ import (
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 
-	"github.com/pluralsh/deployment-operator/pkg/common"
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/api"
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/api"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
 )
 
 const (

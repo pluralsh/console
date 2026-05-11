@@ -8,9 +8,9 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/environment"
-	console "github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/environment"
+	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
 )
 
 // CreateCommit is an MCP tool that stages all changes, commits them with the

@@ -4,12 +4,12 @@ import (
 	"context"
 	"sync"
 
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	console "github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/deployment-operator/pkg/harness/sink"
-	stackrunv1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
-	toolv1 "github.com/pluralsh/deployment-operator/pkg/harness/tool/v1"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/sink"
+	stackrunv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	toolv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
 )
 
 type Controller interface {

@@ -5,8 +5,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 )
 
 var (

@@ -9,8 +9,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/metrics"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/internal/metrics"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 const defaultRefreshInterval = 5 * time.Minute

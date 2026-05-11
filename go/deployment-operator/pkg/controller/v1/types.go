@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/deployment-operator/pkg/websocket"
+	"github.com/pluralsh/console/godeployment-operator/pkg/websocket"
 )
 
 type Reconciler interface {

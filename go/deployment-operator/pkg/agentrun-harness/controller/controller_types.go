@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	agentrunv1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	v1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/v1"
-	console "github.com/pluralsh/deployment-operator/pkg/client"
+	agentrunv1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/agentrun/v1"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
+	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
 )
 
 type Controller interface {

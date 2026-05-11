@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/deployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
 )
 
 var _ = Describe("Restore Controller", Ordered, func() {

@@ -6,9 +6,9 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
-	v1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/deployment-operator/pkg/scm"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/scm"
 )
 
 const (

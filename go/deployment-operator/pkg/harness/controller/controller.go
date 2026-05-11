@@ -11,19 +11,19 @@ import (
 
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/polly/algorithms"
-	clienterrors "github.com/pluralsh/deployment-operator/internal/errors"
-	harnesserrors "github.com/pluralsh/deployment-operator/pkg/harness/errors"
+	clienterrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
+	harnesserrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/harness/environment"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/deployment-operator/pkg/harness/security"
-	"github.com/pluralsh/deployment-operator/pkg/harness/sink"
-	"github.com/pluralsh/deployment-operator/pkg/harness/stackrun"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
-	"github.com/pluralsh/deployment-operator/pkg/harness/tool"
-	toolv1 "github.com/pluralsh/deployment-operator/pkg/harness/tool/v1"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/environment"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/security"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/sink"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/tool"
+	toolv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 // Start starts the manager and waits indefinitely.

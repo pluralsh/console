@@ -9,12 +9,12 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	"github.com/pluralsh/deployment-operator/pkg/common"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 
-	types "github.com/pluralsh/deployment-operator/pkg/harness/environment"
+	types "github.com/pluralsh/console/godeployment-operator/pkg/harness/environment"
 )
 
 // gitSigningKeyPath is the mount path for the SSH signing key inside the container.

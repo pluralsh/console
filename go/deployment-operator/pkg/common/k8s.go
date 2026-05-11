@@ -14,7 +14,7 @@ import (
 	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 	k8sClient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
 )
 
 func ParseAPIVersion(apiVersion string) (group, version string) {

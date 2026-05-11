@@ -5,8 +5,8 @@ import (
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/deployment-operator/internal/controller"
-	"github.com/pluralsh/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/internal/controller"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
 )
 
 const (

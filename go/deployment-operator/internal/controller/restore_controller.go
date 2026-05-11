@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

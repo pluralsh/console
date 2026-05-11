@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/scraper"
+	"github.com/pluralsh/console/godeployment-operator/pkg/scraper"
 )
 
 func (p *Pinger) pingAttributes(info *version.Info, pods []string, minKubeletVersion, openShiftVersion *string, podCount *int64) console.ClusterPing {

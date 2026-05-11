@@ -6,7 +6,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/polly/cache"
 
-	"github.com/pluralsh/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
 )
 
 var (

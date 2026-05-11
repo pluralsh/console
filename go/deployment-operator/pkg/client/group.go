@@ -1,7 +1,7 @@
 package client
 
 import (
-	internalerror "github.com/pluralsh/deployment-operator/internal/errors"
+	internalerror "github.com/pluralsh/console/godeployment-operator/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )

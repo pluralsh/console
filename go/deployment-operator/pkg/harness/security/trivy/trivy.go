@@ -10,9 +10,9 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/security/v1"
-	loglevel "github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
+	loglevel "github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 const (

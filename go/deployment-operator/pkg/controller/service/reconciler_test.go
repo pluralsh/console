@@ -9,12 +9,12 @@ import (
 	"time"
 
 	pollycache "github.com/pluralsh/console/go/polly/cache"
-	"github.com/pluralsh/deployment-operator/cmd/agent/args"
-	"github.com/pluralsh/deployment-operator/pkg/cache"
-	discoverycache "github.com/pluralsh/deployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/deployment-operator/pkg/manifests/template"
-	"github.com/pluralsh/deployment-operator/pkg/streamline"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
+	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/godeployment-operator/pkg/manifests/template"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo/v2"
@@ -27,8 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/pluralsh/deployment-operator/pkg/controller/service"
-	"github.com/pluralsh/deployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
 )
 
 var _ = Describe("Reconciler", Ordered, func() {

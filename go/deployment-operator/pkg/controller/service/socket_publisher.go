@@ -5,8 +5,8 @@ import (
 	"github.com/pluralsh/console/go/polly/cache"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/manifests"
-	"github.com/pluralsh/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/godeployment-operator/pkg/manifests"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
 
 	"k8s.io/client-go/util/workqueue"
 )

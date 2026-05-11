@@ -10,13 +10,13 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	clienterrors "github.com/pluralsh/deployment-operator/internal/errors"
-	"github.com/pluralsh/deployment-operator/pkg/harness/environment"
-	harnesserrors "github.com/pluralsh/deployment-operator/pkg/harness/errors"
-	securityv1 "github.com/pluralsh/deployment-operator/pkg/harness/security/v1"
-	"github.com/pluralsh/deployment-operator/pkg/harness/stackrun"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	clienterrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/environment"
+	harnesserrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
+	securityv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 var (

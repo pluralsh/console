@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	gqlclient "github.com/pluralsh/console/go/client"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/security/v1"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
 	"github.com/samber/lo"
 )
 

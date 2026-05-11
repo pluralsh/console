@@ -13,8 +13,8 @@ import (
 
 	"github.com/pluralsh/console/go/client"
 
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	smcommon "github.com/pluralsh/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
 )
 
 // ProfiledStore is a wrapper around a Store that adds Datadog tracing

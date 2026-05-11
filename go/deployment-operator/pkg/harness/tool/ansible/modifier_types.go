@@ -1,7 +1,7 @@
 package ansible
 
 import (
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/tool/v1"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
 )
 
 // PassthroughModifier implements [v1.PassthroughModifier] interface.

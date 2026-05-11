@@ -38,8 +38,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	deploymentsv1alpha1 "github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	deploymentsv1alpha1 "github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

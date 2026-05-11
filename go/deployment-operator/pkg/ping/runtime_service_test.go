@@ -11,8 +11,8 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
-	"github.com/pluralsh/deployment-operator/pkg/ping"
-	"github.com/pluralsh/deployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/godeployment-operator/pkg/ping"
+	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

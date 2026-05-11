@@ -10,8 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 
-	internalerrors "github.com/pluralsh/deployment-operator/internal/errors"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	internalerrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 const (

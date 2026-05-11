@@ -7,7 +7,7 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 func (in *executor) Start(ctx context.Context) error {

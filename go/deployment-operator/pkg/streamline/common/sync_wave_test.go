@@ -3,7 +3,7 @@ package common
 import (
 	"testing"
 
-	"github.com/pluralsh/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/godeployment-operator/pkg/common"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 

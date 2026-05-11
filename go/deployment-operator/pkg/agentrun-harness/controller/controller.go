@@ -11,16 +11,16 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
 
-	agentrunv1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/environment"
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool"
-	toolv1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	v1 "github.com/pluralsh/deployment-operator/pkg/harness/stackrun/v1"
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	"github.com/pluralsh/deployment-operator/pkg/scm"
+	agentrunv1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool"
+	toolv1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/scm"
 )
 
 // Start starts the manager and waits indefinitely.

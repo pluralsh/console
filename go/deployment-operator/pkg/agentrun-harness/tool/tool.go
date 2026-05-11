@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/claude"
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/codex"
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/gemini"
-	"github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/opencode"
-	v1 "github.com/pluralsh/deployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/claude"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/codex"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/gemini"
+	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/opencode"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 )
 

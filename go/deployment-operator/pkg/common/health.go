@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/kubectl/pkg/util/podutils"
 
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 )
 
 const (

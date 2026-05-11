@@ -5,7 +5,7 @@ import (
 
 	gqlclient "github.com/pluralsh/console/go/client"
 
-	console "github.com/pluralsh/deployment-operator/pkg/client"
+	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
 )
 
 func StartAgentRun(client console.Client, id string) error {

@@ -2,7 +2,7 @@ package events
 
 import (
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 )
 

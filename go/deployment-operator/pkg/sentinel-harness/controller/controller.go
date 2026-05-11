@@ -17,9 +17,9 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	"github.com/pluralsh/deployment-operator/pkg/manifests"
-	"github.com/pluralsh/deployment-operator/pkg/sentinel-harness/environment"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/manifests"
+	"github.com/pluralsh/console/godeployment-operator/pkg/sentinel-harness/environment"
 )
 
 const (

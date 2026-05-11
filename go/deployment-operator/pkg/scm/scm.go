@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pluralsh/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 )
 
 // PRState is the state of a pull request.
