@@ -7,6 +7,8 @@ replace (
 	github.com/open-policy-agent/opa => github.com/open-policy-agent/opa v1.4.0
 	github.com/pluralsh/console/go/client => ../client
 	github.com/pluralsh/console/go/polly => ../polly
+	k8s.io/cloud-provider => k8s.io/cloud-provider v0.31.1
+	k8s.io/kubelet => k8s.io/kubelet v0.31.1
 )
 
 require (
