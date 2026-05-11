@@ -5,7 +5,7 @@ helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
 - version: 1.40.1
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -28,7 +28,7 @@ versions:
   chart_version: 1.40.1
   images: []
 - version: 1.40.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -69,26 +69,8 @@ versions:
         mismatched CRDs can cause reconciliation/validation issues during upgrade.]
   chart_version: 1.40.0
   images: []
-- version: 1.30.7
-  kube: ['1.36', '1.35', '1.34']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: ['From 1.30.0 release notes: otel-collector deployment fix to allow
-        external OTEL URL without requiring a cloud provider.', 'NetworkPolicy fixes:
-        prometheus-exporter egress + storage ingress rules corrected.', NetworkPolicy
-        fix to allow Prometheus ServiceMonitor traffic to kubescape., 'Feature added:
-        image-based capability (per PR ''Feat/image based'').', No specific changelog
-        items were provided for 1.30.7 in the notes you shared (release exists but
-        has no listed changes).]
-    features: ['Adds an image-based mode/capability (details depend on chart values;
-        see PR #770 in kubescape/helm-charts).']
-    breaking_changes: []
-  chart_version: 1.30.7
-  images: []
 - version: 1.30.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -102,46 +84,8 @@ versions:
     breaking_changes: []
   chart_version: 1.30.0
   images: []
-- version: 1.29.12
-  kube: ['1.35', '1.34', '1.33']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [Bumps component images/versions across the stack (operator and
-        synchronizer) between chart 1.29.1 and 1.29.12., 'Includes dependency refreshes
-        in operator (armoapi-go, registryx) and synchronizer (jose2go v1.7.0).']
-    features: [No new user-facing features called out in the provided 1.29.12 notes;
-        changes appear to be dependency/version bumps for operator and synchronizer.,
-      'From 1.29.1 notes (baseline), notable functional behavior includes improved
-        handling on startup (process existing APs/SBOMs) and vulnerability scanning
-        behavior (error when severity threshold exceeded), plus node-agent performance/robustness
-        improvements and Prometheus support.']
-    breaking_changes: []
-  chart_version: 1.29.12
-  images: []
-- version: 1.29.1
-  kube: ['1.34', '1.33', '1.32']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: ['Bumps bundled component versions across the Kubescape stack (kubescape
-        core, operator, kubevuln, storage, node-agent, synchronizer).', General stability/performance
-        tweaks in node-agent; improved startup behavior in operator; logging noise
-        reduction in storage. No chart-structure changes mentioned in provided notes.]
-    features: ['Kubescape core: image scanning can now return an error when the configured
-        severity threshold is exceeded (enables fail-fast/CI-style enforcement behavior).',
-      'Operator: on startup, it processes existing ApplicationProfiles (APs) and SBOMs
-        instead of only handling newly created ones.', 'Kubevuln: supports non-image
-        source types (broader input support beyond container images).', 'Node-agent:
-        adds Prometheus-related work and introduces configurable worker pool behavior
-        for tuning throughput/resource usage.']
-    breaking_changes: []
-  chart_version: 1.29.1
-  images: []
 - version: 1.29.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -156,7 +100,7 @@ versions:
   chart_version: 1.29.0
   images: []
 - version: 1.28.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -174,30 +118,8 @@ versions:
     breaking_changes: []
   chart_version: 1.28.0
   images: []
-- version: 1.27.3
-  kube: ['1.33', '1.32', '1.31']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [Added Kubernetes recommended labels and other additional labels
-        across resources., Added additional labels for ServiceMonitor resources.,
-      Enabled node SBOM generation (nodeSbomGeneration)., Migrated AppArmor configuration
-        from annotations to native AppArmor fields., Fixed HTTP detection flag wiring/behavior.,
-      "Bumped subcomponents: operator v0.2.82\u2192v0.2.84, kubevuln v0.3.69\u2192\
-        v0.3.72, node-agent v0.2.287\u2192v0.2.298, inspektor-gadget to v0.39.0, and\
-        \ registryx to address a panic."]
-    features: [Consistent Kubernetes recommended labels (and extra chart labels) are
-        applied to resources; ServiceMonitor now supports additional labels., Node
-        SBOM generation can be enabled to produce SBOMs at the node level., Generated
-        SBOMs include an artifact type label for better identification.]
-    breaking_changes: [AppArmor moved from pod annotations to the newer Kubernetes
-        AppArmor fields; clusters relying on legacy annotation-based AppArmor need
-        to validate their policies/manifests still apply.]
-  chart_version: 1.27.3
-  images: []
 - version: 1.27.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -232,7 +154,7 @@ versions:
     'quay.io/kubescape/node-agent:v0.2.282', 'quay.io/kubescape/operator:v0.2.81',
     'quay.io/kubescape/storage:v0.0.172']
 - version: 1.26.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -265,7 +187,7 @@ versions:
     'quay.io/kubescape/node-agent:v0.2.259', 'quay.io/kubescape/operator:v0.2.74',
     'quay.io/kubescape/storage:v0.0.161']
 - version: 1.25.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -289,7 +211,7 @@ versions:
     'quay.io/kubescape/node-agent:v0.2.210', 'quay.io/kubescape/operator:v0.2.63',
     'quay.io/kubescape/storage:v0.0.148']
 - version: 1.24.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -312,26 +234,8 @@ versions:
   images: ['quay.io/kubescape/kubescape:v3.0.22', 'quay.io/kubescape/kubevuln:v0.3.48',
     'quay.io/kubescape/node-agent:v0.2.204', 'quay.io/kubescape/operator:v0.2.55',
     'quay.io/kubescape/storage:v0.0.146']
-- version: 1.23.4
-  kube: ['1.32', '1.31', '1.30']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [Fix node-agent Service selector (was not working)., Fix inspektor-gadget
-        access to Kubernetes node proxy endpoint `api/v1/nodes/<node>/proxy/configz`.,
-      Use released node-agent image (align chart to released node-agent for 1.23.4).,
-      Add imagePullSecret generation capability when registry credentials are provided.]
-    features: [Node-agent can generate SBOMs (new optional feature introduced in 1.23.4).,
-      Chart can generate an imagePullSecret from provided registry credentials to
-        simplify pulling images from private registries.]
-    breaking_changes: []
-  chart_version: 1.23.4
-  images: ['quay.io/kubescape/kubescape:v3.0.21', 'quay.io/kubescape/kubevuln:v0.3.41',
-    'quay.io/kubescape/node-agent:v0.2.197', 'quay.io/kubescape/operator:v0.2.51',
-    'quay.io/kubescape/storage:v0.0.141']
 - version: 1.23.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -347,7 +251,7 @@ versions:
     'quay.io/kubescape/node-agent:v0.2.178', 'quay.io/kubescape/operator:v0.2.41',
     'quay.io/kubescape/storage:v0.0.137']
 - version: 1.22.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -363,7 +267,7 @@ versions:
     'quay.io/kubescape/node-agent:v0.2.141', 'quay.io/kubescape/operator:v0.2.31',
     'quay.io/kubescape/storage:v0.0.117']
 - version: 1.21.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -378,33 +282,8 @@ versions:
   images: ['docker.io/bitnami/kubectl:1.30.3', 'quay.io/kubescape/kubescape:v3.0.16',
     'quay.io/kubescape/kubevuln:v0.3.30', 'quay.io/kubescape/node-agent:v0.2.130',
     'quay.io/kubescape/operator:v0.2.28', 'quay.io/kubescape/storage:v0.0.106']
-- version: 1.20.3
-  kube: ['1.31', '1.30', '1.29']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: "- **kubectl image update**: the chart updates `docker.io/bitnami/kubectl`\
-      \ tag **1.27.6 \u2192 1.30.3**. If you pin or override the kubectl image/tag\
-      \ in `values.yaml`, update your override accordingly.\n- **grype-offline-db\
-      \ image reference flexibility**: you can now specify the image **by tag or by\
-      \ digest** for `grype-offline-db`. If you previously used custom image overrides,\
-      \ you may optionally switch to digest pinning for supply-chain immutability.\n"
-    chart_updates: ['Node-agent bugfix: resource size limits are now enforced again
-        for application profiles and network neighbourhoods (fixes prior non-enforcement).',
-      Updated bundled `docker.io/bitnami/kubectl` image tag from 1.27.6 to 1.30.3.,
-      'Helm chart enhancement: allow specifying `grype-offline-db` image via tag or
-        digest.']
-    features: ['Ability to reference the `grype-offline-db` image by digest (or tag),
-        improving flexibility and enabling immutable image pinning.', (Behavioral
-        fix) Resource size limits for application profiles and network neighbourhoods
-        are enforced again due to node-agent fix.]
-    breaking_changes: []
-  chart_version: 1.20.3
-  images: ['quay.io/kubescape/kubescape:v3.0.15', 'quay.io/kubescape/kubevuln:v0.3.25',
-    'quay.io/kubescape/node-agent:v0.2.109', 'quay.io/kubescape/operator:v0.2.20',
-    'quay.io/kubescape/storage:v0.0.90']
 - version: 1.20.1
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -423,7 +302,7 @@ versions:
     'quay.io/kubescape/node-agent:v0.2.105', 'quay.io/kubescape/operator:v0.2.20',
     'quay.io/kubescape/storage:v0.0.90']
 - version: 1.19.1
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -453,22 +332,8 @@ versions:
   images: ['quay.io/kubescape/kubescape:v3.0.13', 'quay.io/kubescape/kubevuln:v0.3.25',
     'quay.io/kubescape/node-agent:v0.2.93', 'quay.io/kubescape/operator:v0.2.13',
     'quay.io/kubescape/storage:v0.0.89']
-- version: 1.18.11
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: [Adds beta (release-candidate) rule-based alerting support. Enable by
-        setting `runtimeDetection` (unexpected file exec/open) and `malwareDetection`
-        (anti-virus) during install.]
-    breaking_changes: []
-  chart_version: 1.18.11
-  images: ['quay.io/kubescape/kubescape:v3.0.8', 'quay.io/kubescape/kubevuln:v0.3.14',
-    'quay.io/kubescape/node-agent:v0.2.50', 'quay.io/kubescape/operator:v0.2.9', 'quay.io/kubescape/storage:v0.0.81']
 - version: 1.18.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -487,7 +352,7 @@ versions:
   images: ['quay.io/kubescape/kubescape:v3.0.3', 'quay.io/kubescape/kubevuln:v0.3.0',
     'quay.io/kubescape/node-agent:v0.2.4', 'quay.io/kubescape/operator:v0.2.1', 'quay.io/kubescape/storage:v0.0.60']
 - version: 1.17.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -502,15 +367,8 @@ versions:
     breaking_changes: []
   chart_version: 1.17.0
   images: []
-- version: 1.16.5
-  kube: ['1.29', '1.28', '1.27']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 1.16.5
-  images: []
 - version: 1.16.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -521,14 +379,14 @@ versions:
   chart_version: 1.16.0
   images: []
 - version: 1.15.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: []
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.15.0
   images: []
 - version: 0.29.6
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary: null
