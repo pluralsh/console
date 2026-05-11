@@ -23,7 +23,9 @@ defmodule Console.AI.Memoizer do
       {:error, error} ->
         gen_error(model, error)
         {:error, error}
-      _ -> {:ok, insight}
+      _ ->
+        bump_poll(model)
+        {:ok, insight}
     end
   end
 
@@ -73,6 +75,11 @@ defmodule Console.AI.Memoizer do
     |> Repo.update()
   end
 
+  defp bump_poll(%schema{} = model) do
+    schema.changeset(model, %{ai_poll_at: next_poll_at()})
+    |> Repo.update()
+  end
+
   defp sha(history) do
     :erlang.phash2(history)
     |> Integer.to_string(16)
@@ -81,7 +88,7 @@ defmodule Console.AI.Memoizer do
 
   @poll_duration 30 * 60 # 30 minutes
 
-  defp next_poll_at() do
+  def next_poll_at() do
     duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))
     DateTime.shift(DateTime.utc_now(), duration)
   end

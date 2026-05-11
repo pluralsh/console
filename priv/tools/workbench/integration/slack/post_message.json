@@ -8,7 +8,7 @@
     },
     "text": {
       "type": "string",
-      "description": "Plain-text message body for the channel (Slack mrkdwn formatting is supported by Slack when using chat.postMessage)."
+      "description": "Plain-text message body for the channel (Slack mrkdwn formatting is supported by Slack when using chat.postMessage).  This should be in Slack mkdwn format, not necessarily CommonMark markdown"
     }
   },
   "required": ["channel_id", "text"],

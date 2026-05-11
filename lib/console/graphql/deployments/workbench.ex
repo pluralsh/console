@@ -88,7 +88,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_prompt_attributes do
-    field :prompt, non_null(:string), description: "the saved prompt text"
+    field :title,    :string, description: "display title for the saved prompt"
+    field :category, :string, description: "grouping category for the saved prompt"
+    field :prompt,   non_null(:string), description: "the saved prompt text"
   end
 
   input_object :workbench_skill_attributes do
@@ -116,6 +118,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
     field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :priority,               :integer, description: "higher values are preferred when multiple webhooks match the same payload"
     field :user_id,                :id, description: "user this webhook runs as; must have read access to the workbench"
     field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
   end
@@ -623,7 +626,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_prompt do
-    field :id,     non_null(:string), description: "the id of the saved prompt"
+    field :id,    non_null(:string), description: "the id of the saved prompt"
+    field :title, :string, description: "display title for the saved prompt"
+
+    field :category, non_null(:string),
+      description: "grouping category for the saved prompt (Default when unset in storage)" do
+      resolve fn prompt, _, _ ->
+        {:ok, prompt.category || "Default"}
+      end
+    end
+
     field :prompt, :string, description: "the saved prompt text"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this prompt belongs to"
@@ -723,11 +735,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_webhook do
-    field :id,     non_null(:string), description: "the id of the webhook"
-    field :name,   :string, description: "name of this webhook trigger"
-    field :prompt, :string, description: "optional prompt text applied when this webhook matches"
-    field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
-    field :user_id, :id, description: "user this webhook runs as"
+    field :id,       non_null(:string), description: "the id of the webhook"
+    field :name,     :string, description: "name of this webhook trigger"
+    field :prompt,   :string, description: "optional prompt text applied when this webhook matches"
+    field :priority, :integer, description: "higher values are preferred when multiple webhooks match the same payload"
+    field :matches,  :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+    field :user_id,  :id, description: "user this webhook runs as"
 
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
     field :webhook,       :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"

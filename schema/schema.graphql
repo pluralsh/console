@@ -2535,6 +2535,12 @@ input WorkbenchCronAttributes {
 }
 
 input WorkbenchPromptAttributes {
+  "display title for the saved prompt"
+  title: String
+
+  "grouping category for the saved prompt"
+  category: String
+
   "the saved prompt text"
   prompt: String!
 }
@@ -2590,6 +2596,9 @@ input WorkbenchWebhookAttributes {
 
   "optional prompt text applied when this webhook matches"
   prompt: String
+
+  "higher values are preferred when multiple webhooks match the same payload"
+  priority: Int
 
   "user this webhook runs as; must have read access to the workbench"
   userId: ID
@@ -3442,6 +3451,12 @@ type WorkbenchPrompt {
   "the id of the saved prompt"
   id: String!
 
+  "display title for the saved prompt"
+  title: String
+
+  "grouping category for the saved prompt (Default when unset in storage)"
+  category: String!
+
   "the saved prompt text"
   prompt: String
 
@@ -3612,6 +3627,9 @@ type WorkbenchWebhook {
 
   "optional prompt text applied when this webhook matches"
   prompt: String
+
+  "higher values are preferred when multiple webhooks match the same payload"
+  priority: Int
 
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches

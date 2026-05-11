@@ -27,6 +27,8 @@ The overarching task is as follows:
 
 <%= @prompt %>
 
+And wherever needed (for instance when posting job progress in Slack or other integrations), this is the url of the workbench run: <%= Console.url("/workbenches/#{@job.workbench_id}/jobs/#{@job.id}") %>
+
 Leverage any of those tools to accomplish this task.
 
 Once you've completed all the work you believe is necessary, call the `workbench_complete` tool to mark the conclusion of this job.

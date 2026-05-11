@@ -3,16 +3,22 @@ defmodule Console.Pipelines.AI.Base do
   Base module for AI pipelines.
   """
   import Console.Services.Base, only: [handle_notify: 2]
-  alias Console.AI.Worker
+  alias Console.Repo
+  alias Console.AI.{Worker, Memoizer}
   alias Console.Deployments.Settings
   alias Console.Schema.DeploymentSettings
+
+  require Logger
 
   def process_insights(res, event) do
     Worker.generate(res)
     |> Worker.await()
     |> case do
       {:ok, insight} -> handle_notify(event, {res, insight})
-      _ -> :ok
+      err ->
+        Logger.warn("failed to generate insight for #{res.__struct__}{id: #{res.id}}, reason: #{inspect(err)}")
+        bump_poll(res)
+        :ok
     end
   end
 
@@ -22,5 +28,10 @@ defmodule Console.Pipelines.AI.Base do
         fun.()
       _ -> []
     end
+  end
+
+  defp bump_poll(%schema{} = model) do
+    schema.changeset(model, %{ai_poll_at: Memoizer.next_poll_at()})
+    |> Repo.update()
   end
 end

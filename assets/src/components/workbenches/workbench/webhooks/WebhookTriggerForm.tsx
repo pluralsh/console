@@ -73,6 +73,7 @@ export type WebhookTriggerFormState = {
   caseInsensitive: boolean
   prompt: string
   userId: string
+  priority: number
 }
 
 function parseWebhookKey(key: string): {
@@ -131,12 +132,17 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
         }`
       : 'create'
 
-  // Source form state is based on the location state (if coming back from create webhook page) or the fetched webhook (if editing),
-  // with the selected webhook key from the query param taking precedence if present.
+  // Source form state: defaults from the loaded webhook (or empty create state), then any
+  // in-progress draft from router state merged on top so older drafts without new fields
+  // still pick up defaults instead of replacing the whole shape.
   const sourceFormState = useMemo(() => {
-    const base =
-      routeState?.draftState ??
-      getInitialFormState(webhook, mode === 'create' ? me?.id : undefined)
+    const defaults = getInitialFormState(
+      webhook,
+      mode === 'create' ? me?.id : undefined
+    )
+    const base = routeState?.draftState
+      ? { ...defaults, ...routeState.draftState }
+      : defaults
 
     return {
       ...base,
@@ -241,19 +247,20 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
       : undefined,
     prompt: promptTrimmed || null,
     userId: formState.userId,
+    priority: formState.priority,
   }
+
+  const initialFormState = getInitialFormState(
+    webhook,
+    mode === 'create' ? me?.id : undefined
+  )
 
   const canSave =
     !!label &&
     !!selectedWebhookKeyValue &&
     !!activeMatchValue &&
     !!formState.userId &&
-    !isEqual(
-      attributes,
-      getAttributesFromState(
-        getInitialFormState(webhook, mode === 'create' ? me?.id : undefined)
-      )
-    )
+    !isEqual(attributes, getAttributesFromState(initialFormState))
 
   const handleCompleted = () => {
     popToast({
@@ -507,6 +514,28 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                   disabled={isSaving}
                 />
               </Flex>
+              <FormField
+                label="Priority"
+                hint="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
+              >
+                <Input2
+                  value={String(formState.priority)}
+                  inputProps={{
+                    type: 'number',
+                    min: 0,
+                    step: 1,
+                  }}
+                  onChange={(e) => {
+                    const raw = e.target.value
+                    const parsed = parseInt(raw, 10)
+                    setFormState((prev) => ({
+                      ...prev,
+                      priority: raw === '' || Number.isNaN(parsed) ? 0 : parsed,
+                    }))
+                  }}
+                  placeholder="0"
+                />
+              </FormField>
               <TabList
                 stateRef={tabStateRef}
                 stateProps={{
@@ -640,6 +669,7 @@ function getInitialFormState(
     caseInsensitive: webhook?.matches?.caseInsensitive ?? false,
     prompt: webhook?.prompt ?? '',
     userId: webhook?.userId ?? defaultUserIdForCreate ?? '',
+    priority: webhook?.priority ?? 0,
   }
 }
 
@@ -663,5 +693,6 @@ function getAttributesFromState(formState: WebhookTriggerFormState) {
       : undefined,
     prompt: promptTrimmed || null,
     userId: formState.userId,
+    priority: formState.priority,
   }
 }

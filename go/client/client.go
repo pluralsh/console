@@ -6844,6 +6844,7 @@ type WorkbenchWebhookFragment struct {
 	ID           string                                 "json:\"id\" graphql:\"id\""
 	Name         *string                                "json:\"name,omitempty\" graphql:\"name\""
 	Prompt       *string                                "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Priority     *int64                                 "json:\"priority,omitempty\" graphql:\"priority\""
 	Matches      *WorkbenchWebhookFragment_Matches      "json:\"matches,omitempty\" graphql:\"matches\""
 	Webhook      *WorkbenchWebhookFragment_Webhook      "json:\"webhook,omitempty\" graphql:\"webhook\""
 	IssueWebhook *WorkbenchWebhookFragment_IssueWebhook "json:\"issueWebhook,omitempty\" graphql:\"issueWebhook\""
@@ -6867,6 +6868,12 @@ func (t *WorkbenchWebhookFragment) GetPrompt() *string {
 		t = &WorkbenchWebhookFragment{}
 	}
 	return t.Prompt
+}
+func (t *WorkbenchWebhookFragment) GetPriority() *int64 {
+	if t == nil {
+		t = &WorkbenchWebhookFragment{}
+	}
+	return t.Priority
 }
 func (t *WorkbenchWebhookFragment) GetMatches() *WorkbenchWebhookFragment_Matches {
 	if t == nil {
@@ -62463,6 +62470,7 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 	id
 	name
 	prompt
+	priority
 	matches {
 		regex
 		substring
@@ -62510,6 +62518,7 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 	id
 	name
 	prompt
+	priority
 	matches {
 		regex
 		substring
@@ -62557,6 +62566,7 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 	id
 	name
 	prompt
+	priority
 	matches {
 		regex
 		substring
@@ -62603,6 +62613,7 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
 	id
 	name
 	prompt
+	priority
 	matches {
 		regex
 		substring

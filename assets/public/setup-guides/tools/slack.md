@@ -1,47 +1,52 @@
 # Slack tool setup
 
-Workbench connects to Slack’s **hosted MCP server** at `https://mcp.slack.com/mcp`. The backend sends your token as `Authorization: Bearer <token>`.
+Workbench’s Slack integration calls the **Slack Web API** (`https://slack.com/api`) with your app’s **bot user OAuth token** (`xoxb-…`). The backend sends that token as `Authorization: Bearer <token>`.
 
-Use this guide to obtain a credential and scopes that support **finding channels**, **searching Slack**, **reading conversations**, and **posting messages**.
+Use this guide to create a Slack app, install it to your workspace, and grant **bot token scopes** that match the built-in Workbench Slack tools (list/find channels, post and edit messages, create channels, invite members, list user groups).
 
 ## 1) Create or choose a Slack app
 
-1. Open [Slack API: Your Apps](https://api.slack.com/apps) and create an app (**From scratch**), or reuse an integration app you already own.
-2. Slack only allows MCP for **workspace-installed internal apps** or **Marketplace-published** apps—not arbitrary unlisted apps. Confirm your app qualifies for MCP per [Slack MCP overview](https://docs.slack.dev/ai/mcp-server/).
-3. Under **Agents & AI Apps** (or equivalent in your app settings), **enable Model Context Protocol (MCP)** for the app so hosted MCP accepts traffic for it.
-
-Official walkthrough with a manifest example: [Developing a sample app with the Slack MCP Server](https://docs.slack.dev/ai/slack-mcp-server/developing).
+1. Open [Slack API: Your Apps](https://api.slack.com/apps) and create an app (**From scratch**), or reuse an app you already own.
+2. You only need a normal workspace app with a **bot token**; no extra platform features are required beyond OAuth and scopes.
 
 ## 2) Bot token and OAuth install
 
 1. Open **OAuth & Permissions**.
-2. Add **Bot Token Scopes** (see below). For search-oriented tools, Slack’s docs map capabilities to **user** scopes; if you need those, configure **User Token Scopes** and complete a user OAuth install as described in Slack’s MCP documentation.
+2. Under **Scopes** → **Bot Token Scopes**, add the scopes in the next section (or the consolidated list at the end).
 3. Install the app to your workspace (**Install to Workspace**).
 4. Copy **Bot User OAuth Token** (starts with `xoxb-`). That is the value for the Workbench field **Bot user OAuth token**.
 
-## 3) Scopes to support common agent tasks
+Invite the bot to any **private** channel it should list, post in, or invite others to—the bot only sees private channels it has joined.
 
-Slack’s MCP tools are permission-gated. Add the scopes you actually need; the table below follows [Slack’s MCP scope reference](https://docs.slack.dev/ai/slack-mcp-server/developing#add-scopes).
+## 3) Scopes used by built-in Slack tools
 
-| Goal | Scopes to add (per Slack docs) |
-|------|----------------------------------|
-| **Search** messages / channels / DMs / group DMs | `search:read.public`, `search:read.private`, `search:read.mpim`, `search:read.im` |
-| **Search** files | `search:read.files` |
-| **Search** users | `search:read.users` |
-| **Post** messages | `chat:write` |
-| **Read** channel / thread history | `channels:history`, `groups:history`, `im:history`, `mpim:history` |
-| **User profiles** (optional) | `users:read`, `users:read.email` |
-| **Canvases** (optional) | `canvases:read`, `canvases:write` |
+These tools are implemented against the Slack Web API. Add the scopes for each tool you want agents to use; each row links to Slack’s method reference for details.
 
-The sample manifest in Slack’s docs also includes bot scopes such as `assistant:write` when using assistant-style features. Start with **search + `chat:write` + history** scopes that match how your agents use Slack, then tighten.
+| Built-in tool (name suffix) | Slack API method | Bot token scopes |
+|-----------------------------|------------------|------------------|
+| `slack_list_channels_*`, `slack_find_channel_by_name_*` | [`conversations.list`](https://api.slack.com/methods/conversations.list) | `channels:read`, `groups:read` |
+| `slack_post_message_*` | [`chat.postMessage`](https://api.slack.com/methods/chat.postMessage) | `chat:write` |
+| `slack_edit_message_*` | [`chat.update`](https://api.slack.com/methods/chat.update) | `chat:write` |
+| `slack_create_channel_*` | [`conversations.create`](https://api.slack.com/methods/conversations.create) | `channels:manage` (public channels), `groups:write` (private channels) |
+| `slack_invite_to_channel_*` | [`conversations.invite`](https://api.slack.com/methods/conversations.invite) | `channels:write.invites` (public channels), `groups:write.invites` (private channels). If you pass `usergroup_id`, [`usergroups.users.list`](https://api.slack.com/methods/usergroups.users.list) also runs—use `usergroups:read` (below). |
+| `slack_list_user_groups_*` | [`usergroups.list`](https://api.slack.com/methods/usergroups.list) | `usergroups:read` |
+
+### Recommended scope set (all built-in tools)
+
+If you want every built-in Slack tool to work (public and private channels, including invites and user groups), add **all** of these **Bot Token Scopes**:
+
+`chat:write`, `channels:read`, `groups:read`, `channels:manage`, `groups:write`, `channels:write.invites`, `groups:write.invites`, `usergroups:read`
+
+You can omit scopes for features you do not need (for example, skip `usergroups:read` if you never use `slack_list_user_groups_*` or `usergroup_id` on invites).
 
 ## 4) Fill the Workbench tool form
 
 - **Bot user OAuth token**: paste the `xoxb-` token from **OAuth & Permissions**.
 
-After saving, associate this tool with a workbench so jobs can call the Slack MCP tools exposed for your token.
+After saving, associate this tool with a workbench so jobs can use the built-in Slack tools for that connection.
 
 ## Further reading
 
-- [Slack MCP server overview](https://docs.slack.dev/ai/mcp-server/)
-- [Slack API: authentication](https://docs.slack.dev/authentication/)
+- [Slack API: Installing with OAuth](https://api.slack.com/authentication/oauth-v2)
+- [Slack API: Scope reference](https://api.slack.com/scopes)
+- [Slack API: authentication overview](https://docs.slack.dev/authentication/)

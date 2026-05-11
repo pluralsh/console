@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "Invite workspace members to a Slack channel via conversations.invite (POST). Pass user_ids (U…) and/or usergroup_id (S… from slack_list_user_groups); a user group is expanded with usergroups.users.list. Slack allows at most 100 user IDs per call—this tool does not batch; if the combined list exceeds 100, the call fails.",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Slack channel ID (e.g. C… or G… for a private channel the bot can access)."
+    },
+    "user_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Slack member user IDs to invite. Combined with members from usergroup_id (deduplicated)."
+    },
+    "usergroup_id": {
+      "type": "string",
+      "description": "Optional Slack user group ID (S…). Current members are loaded via usergroups.users.list and invited together with user_ids."
+    },
+    "force": {
+      "type": "boolean",
+      "description": "Slack conversations.invite force: invite valid users even if some IDs in the list are invalid."
+    }
+  },
+  "required": ["channel_id"],
+  "additionalProperties": false
+}

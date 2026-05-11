@@ -36,7 +36,7 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
   [WorkbenchToolType.Datadog]:
     'https://docs.datadoghq.com/account_management/api-app-keys/',
   [WorkbenchToolType.Linear]: 'https://linear.app/docs/api-and-webhooks',
-  [WorkbenchToolType.Slack]: 'https://docs.slack.dev/ai/mcp-server/',
+  [WorkbenchToolType.Slack]: 'https://api.slack.com/authentication/oauth-v2',
   [WorkbenchToolType.Atlassian]:
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',

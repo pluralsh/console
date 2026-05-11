@@ -42,6 +42,7 @@ fragment IssueWebhookTiny on IssueWebhook {
 fragment WorkbenchWebhookTiny on WorkbenchWebhook {
   id
   name
+  priority
   webhook {
     id
     type
@@ -399,6 +400,8 @@ fragment WorkbenchCron on WorkbenchCron {
 
 fragment WorkbenchPrompt on WorkbenchPrompt {
   id
+  title
+  category
   prompt
   insertedAt
   updatedAt
@@ -408,6 +411,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
   prompt
+  priority
   userId
   matches {
     regex
@@ -1031,9 +1035,7 @@ mutation CreateWorkbenchPrompt(
   $attributes: WorkbenchPromptAttributes!
 ) {
   createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
-    id
-    prompt
-    insertedAt
+    ...WorkbenchPrompt
   }
 }
 

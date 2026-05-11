@@ -74,7 +74,7 @@ defmodule Console.Schema.WorkbenchEvalResult do
       group_by: [w.id, 2],
       select: %{
         workbench_id: w.id,
-        timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, e.inserted_at),
+        timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, r.inserted_at),
         average: fragment("?::float", avg(r.grade))
       },
       order_by: [asc: 2]

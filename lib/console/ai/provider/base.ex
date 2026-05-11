@@ -77,6 +77,7 @@ defmodule Console.AI.Provider.Base do
   def reqllm_result({:error, error}) when is_binary(error), do: {:error, error}
   def reqllm_result({:error, %ReqLLM.Error.API.Stream{reason: reason}}) when is_binary(reason), do: {:error, reason}
   def reqllm_result({:error, %ReqLLM.Error.API.Stream{reason: reason}}) when is_map(reason), do: {:error, "internal http error: #{reason}"}
+  def reqllm_result({:error, %ReqLLM.Error.API.Request{reason: reason}}), do: {:error, "internal http error: #{inspect(reason)}"}
   def reqllm_result({:error, error}), do: {:error, "unknown ai request error: #{inspect(error)}"}
   def reqllm_result(pass), do: pass
 

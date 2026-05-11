@@ -381,12 +381,14 @@ defmodule Console.Deployments.Workbenches do
   @decorate cacheable(cache: @cache_adapter, key: {:wb_webhooks, webhook_id}, opts: [ttl: @ttl])
   def list_workbench_webhooks(webhook_id) do
     WorkbenchWebhook.for_webhook(webhook_id)
+    |> WorkbenchWebhook.prioritized()
     |> Repo.all()
   end
 
   @decorate cacheable(cache: @cache_adapter, key: {:wb_webhooks_for_issue, issue_webhook_id}, opts: [ttl: @ttl])
   def list_workbench_webhooks_for_issue(issue_webhook_id) do
     WorkbenchWebhook.for_issue_webhook(issue_webhook_id)
+    |> WorkbenchWebhook.prioritized()
     |> Repo.all()
   end
 

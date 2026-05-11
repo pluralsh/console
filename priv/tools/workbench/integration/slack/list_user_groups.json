@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "description": "Calls Slack usergroups.list for the workspace’s user groups (subteams). Each item includes id and handle for mentions. Pagination: pass cursor from response_metadata.next_cursor.",
+  "properties": {
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from response_metadata.next_cursor on the prior response."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Page size (subject to Slack’s API limits)."
+    },
+    "include_disabled": {
+      "type": "boolean",
+      "description": "When true, include disabled user groups in the listing (Slack usergroups.list include_disabled)."
+    }
+  },
+  "additionalProperties": false
+}

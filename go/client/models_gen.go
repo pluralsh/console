@@ -10179,6 +10179,10 @@ type WorkbenchPrMergeRateEntry struct {
 type WorkbenchPrompt struct {
 	// the id of the saved prompt
 	ID string `json:"id"`
+	// display title for the saved prompt
+	Title *string `json:"title,omitempty"`
+	// grouping category for the saved prompt (Default when unset in storage)
+	Category string `json:"category"`
 	// the saved prompt text
 	Prompt *string `json:"prompt,omitempty"`
 	// the workbench this prompt belongs to
@@ -10188,6 +10192,10 @@ type WorkbenchPrompt struct {
 }
 
 type WorkbenchPromptAttributes struct {
+	// display title for the saved prompt
+	Title *string `json:"title,omitempty"`
+	// grouping category for the saved prompt
+	Category *string `json:"category,omitempty"`
 	// the saved prompt text
 	Prompt string `json:"prompt"`
 }
@@ -10719,6 +10727,8 @@ type WorkbenchWebhook struct {
 	Name *string `json:"name,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// higher values are preferred when multiple webhooks match the same payload
+	Priority *int64 `json:"priority,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
 	// user this webhook runs as
@@ -10746,6 +10756,8 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// higher values are preferred when multiple webhooks match the same payload
+	Priority *int64 `json:"priority,omitempty"`
 	// user this webhook runs as; must have read access to the workbench
 	UserID *string `json:"userId,omitempty"`
 	// when true on update, sets userId to the authenticated user

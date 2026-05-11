@@ -238,6 +238,7 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
     id
     name
     prompt
+    priority
     matches {
         regex
         substring

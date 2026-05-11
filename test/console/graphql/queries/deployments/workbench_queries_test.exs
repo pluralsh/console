@@ -239,7 +239,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     test "it can fetch workbench prompts" do
       workbench = insert(:workbench)
       p1 = insert(:workbench_prompt, workbench: workbench, prompt: "first")
-      p2 = insert(:workbench_prompt, workbench: workbench, prompt: "second")
+      p2 = insert(:workbench_prompt, workbench: workbench, prompt: "second", category: "Jobs")
 
       {:ok, %{data: %{"workbench" => found}}} = run_query("""
         query Workbench($id: ID!) {
@@ -250,6 +250,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
                 node {
                   id
                   prompt
+                  category
                 }
               }
             }
@@ -260,8 +261,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == workbench.id
       nodes = from_connection(found["prompts"])
       assert ids_equal(nodes, [p1, p2])
-      assert Enum.any?(nodes, & &1["prompt"] == "first")
-      assert Enum.any?(nodes, & &1["prompt"] == "second")
+      assert Enum.any?(nodes, & &1["prompt"] == "first" and &1["category"] == "Default")
+      assert Enum.any?(nodes, & &1["prompt"] == "second" and &1["category"] == "Jobs")
     end
 
     test "it can fetch workbench skills" do
@@ -1536,6 +1537,46 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert row["workbench"]["id"] == allowed_wb.id
       assert row["average"] == 7.0
       assert row["timestamp"]
+    end
+
+    test "averageWorkbenchEvalResults returns one row per time bucket per workbench" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      wb = insert(:workbench, project: project)
+      eval = insert(:workbench_eval, workbench: wb)
+      older = DateTime.utc_now() |> DateTime.add(-3, :day)
+      newer = DateTime.utc_now() |> DateTime.add(-1, :day)
+
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: insert(:workbench_job, workbench: wb),
+        grade: 4,
+        inserted_at: older,
+        updated_at: older
+      )
+
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: insert(:workbench_job, workbench: wb),
+        grade: 8,
+        inserted_at: newer,
+        updated_at: newer
+      )
+
+      {:ok, %{data: %{"averageWorkbenchEvalResults" => rows}}} = run_query("""
+        query AvgWorkbenchEvalResults($period: EvalResultsPeriod) {
+          averageWorkbenchEvalResults(period: $period) {
+            timestamp
+            average
+            workbench { id }
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: user})
+
+      assert length(rows) == 2
+      assert Enum.all?(rows, &(&1["workbench"]["id"] == wb.id))
+      averages = rows |> Enum.map(& &1["average"]) |> Enum.sort()
+      assert averages == [4.0, 8.0]
     end
 
     test "averageEvalResults returns global averages by period" do
