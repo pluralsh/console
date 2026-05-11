@@ -30,7 +30,6 @@ PLRL_CODEX_MODEL := $(if $(PLRL_CODEX_MODEL),$(PLRL_CODEX_MODEL),"")
 PLRL_CODEX_API_KEY := $(if $(PLRL_CODEX_API_KEY),$(PLRL_CODEX_API_KEY),"")
 GIT_ACCESS_TOKEN := $(if $(GIT_ACCESS_TOKEN),$(GIT_ACCESS_TOKEN),"")
 
-
 VELERO_CHART_VERSION := 5.2.2 # It should be kept in sync with Velero chart version from console/charts/velero
 VELERO_CHART_URL := https://github.com/vmware-tanzu/helm-charts/releases/download/velero-$(VELERO_CHART_VERSION)/velero-$(VELERO_CHART_VERSION).tgz
 
@@ -52,12 +51,14 @@ PRE = --ensure
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: TOOL = controller-gen
+manifests: --tool ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	@$(MAKE) -s codegen-chart-crds
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+generate: TOOL = controller-gen
+generate: --tool ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: genmock
