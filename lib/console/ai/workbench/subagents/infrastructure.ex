@@ -72,7 +72,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       {_, %WorkbenchTool{tool: :cloud} = tool} -> [
         %CloudSchema{tool: tool},
         %CloudQuery{tool: tool},
-        %CloudLambda{tool: tool},
         %CloudTables{tool: tool}
       ]
       _ -> []
