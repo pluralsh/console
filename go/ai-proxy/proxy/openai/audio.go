@@ -8,15 +8,19 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
 )
 
 const (
-	embeddingsEndpoint = "/v1/embeddings"
+	upstreamAudioTranscriptions = "/v1/audio/transcriptions"
+	upstreamAudioTranslations   = "/v1/audio/translations"
 )
 
-func NewOpenAIEmbeddingsProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+// NewOpenAIAudioProxy forwards Whisper-style requests (multipart/form-data) to the
+// OpenAI Audio API. See https://platform.openai.com/docs/api-reference/audio
+func NewOpenAIAudioProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
 	if len(tokenRotator.Tokens) == 0 {
 		return nil, fmt.Errorf("at least one token is required")
 	}
@@ -32,7 +36,12 @@ func NewOpenAIEmbeddingsProxy(host string, tokenRotator *helpers.RoundRobinToken
 
 			r.SetXForwarded()
 
-			targetURL, err := url.Parse(embeddingsEndpoint)
+			targetPath := upstreamAudioTranscriptions
+			if r.In.URL.Path == openai.EndpointAudioTranslations {
+				targetPath = upstreamAudioTranslations
+			}
+
+			targetURL, err := url.Parse(targetPath)
 			if err != nil {
 				klog.ErrorS(err, "failed to parse target url")
 				return
