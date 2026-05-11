@@ -27,6 +27,9 @@ jobs:
       - name: Regenerate datastore controller docs
         working-directory: go/datastore
         run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
+      - name: Regenerate deployment operator docs
+        working-directory: go/deployment-operator
+        run: make crd-docs
       - name: Save date
         id: date
         run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
