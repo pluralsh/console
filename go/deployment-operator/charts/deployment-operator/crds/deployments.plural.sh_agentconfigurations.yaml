@@ -54,12 +54,6 @@ spec:
                   CompatibilityUploadInterval determines how frequently the agent uploads compatibility data.
                   Set to "0s" to disable compatibility uploads.
                 type: string
-              maxAgentRunPods:
-                description: |-
-                  MaxAgentRunPods limits the number of concurrent agent run pods that can be active at any given time.
-                  Must be greater than 0. Set this field to nil (omit) to disable the limit.
-                minimum: 1
-                type: integer
               disableWebsocket:
                 description: |-
                   DisableWebsocket disables the cluster websocket connection to the Console.
@@ -67,6 +61,12 @@ spec:
                   push updates. This is useful in large-scale edge deployments where maintaining
                   persistent websocket connections has an infeasible network cost.
                 type: boolean
+              maxAgentRunPods:
+                description: |-
+                  MaxAgentRunPods limits the number of concurrent agent run pods that can be active at any given time.
+                  Must be greater than 0. Set this field to nil (omit) to disable the limit.
+                minimum: 1
+                type: integer
               maxConcurrentReconciles:
                 description: |-
                   MaxConcurrentReconciles controls the maximum number of concurrent reconcile loops.
