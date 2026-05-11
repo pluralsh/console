@@ -124,7 +124,7 @@ defmodule Console.AI.Workbench.Engine do
       %CanvasTool{} = canvas, {msgs, acts} -> {:cont, {msgs, [canvas | acts]}}
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
-      msg, {msgs, acts} -> {:cont, {msgs, [msg | acts]}}
+      msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
     |> case do
       %Complete{} = complete -> {:halt, complete}

@@ -1,8 +1,8 @@
 defmodule Console.AI.Tools.Workbench.Integration.Slack.ListChannels do
   @moduledoc """
-  Lists channels via Slack `conversations.list` (public and private). Responses are
-  Slack JSON as returned by the Web API. Paginate with `cursor` from
-  `response_metadata.next_cursor`.
+  Lists channels via Slack `conversations.list` (public and private). Archived channels
+  are omitted via the API `exclude_archived` parameter ([Slack docs](https://api.slack.com/methods/conversations.list)).
+  Paginate with `cursor` from `response_metadata.next_cursor`.
   """
   use Console.AI.Tools.Workbench.Base
   alias Console.Schema.{WorkbenchTool}
@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Slack.ListChannels do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "List Slack channels for #{name} via conversations.list (public/private); next page cursor is response_metadata.next_cursor. Response body is Slack’s JSON. Use channel id from the listing with the post-message tool."
+      "List Slack channels for #{name} via conversations.list (public/private). Omits archived channels and private channels the bot cannot access. Next page cursor is response_metadata.next_cursor. Response body is Slack’s JSON. Use channel id from the listing with the post-message tool."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 
@@ -42,7 +42,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Slack.ListChannels do
         limit: limit
       }) do
     params =
-      %{types: @channel_types}
+      %{types: @channel_types, exclude_archived: true}
       |> maybe_put(:limit, limit)
       |> maybe_put_cursor(cursor)
 

@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "description": "Calls Slack conversations.list for public and private channels. Pagination: pass cursor from response_metadata.next_cursor.",
+  "description": "Calls Slack conversations.list for public and private channels with exclude_archived (archived channels omitted by Slack). Pagination: pass cursor from response_metadata.next_cursor.",
   "properties": {
     "cursor": {
       "type": "string",

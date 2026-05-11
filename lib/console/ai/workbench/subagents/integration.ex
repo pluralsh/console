@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http}
-  alias Console.AI.Tools.Workbench.Integration.Slack.{EditMessage, FindChannelByName, ListChannels, PostMessage}
+  alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, ListChannels, PostMessage}
   alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
   alias Console.AI.Workbench.{Environment, MCP}
 
@@ -52,6 +52,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
         [
           %ListChannels{tool: tool},
           %FindChannelByName{tool: tool},
+          %CreateChannel{tool: tool},
           %PostMessage{tool: tool},
           %EditMessage{tool: tool}
         ]

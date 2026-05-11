@@ -63,7 +63,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Slack.FindChannelByName do
   defp normalize_name(nil), do: nil
 
   defp find_channel(token, wanted, cursor, page) when page < @max_pages do
-    params = maybe_put_cursor(%{types: @channel_types, limit: 200}, cursor)
+    params =
+      %{types: @channel_types, exclude_archived: true, limit: 200}
+      |> maybe_put_cursor(cursor)
 
     with {:ok, %{"channels" => [_ | _] = channels} = body} <- Client.get("conversations.list", token, params),
          {:channel, %{} = channel, _body} <- {:channel, Enum.find(channels, &name_match?(&1, wanted)), body} do
