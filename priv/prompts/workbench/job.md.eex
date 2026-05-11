@@ -131,7 +131,7 @@ If you are revising a prior run, take this feedback into account:
 <%= @job.result.criticism %>
 <% end %>
 
-<%= if @job.result && (((is_binary(@job.result.conclusion) && byte_size(@job.result.conclusion) > 0)) || (is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0)) do %>
+<%= if @job.result && ((is_binary(@job.result.conclusion) && byte_size(@job.result.conclusion) > 0) || (is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0)) do %>
 ### Skill Backfill Guidance
 
 You also have a `skill_backfill` tool available.  Usage of this tool has a few rules you must follow:

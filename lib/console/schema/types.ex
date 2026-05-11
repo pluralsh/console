@@ -1,6 +1,6 @@
 defmodule Console.Schema.MapJson do
   use Ecto.Type
-  def type, do: :map
+  def type, do: :string
 
   def cast(""), do: {:ok, %{}}
   def cast(blob) when is_binary(blob) do

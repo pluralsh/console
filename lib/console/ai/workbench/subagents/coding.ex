@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     Skills,
     History,
     Skill,
+    Scratchpad,
     CodingAgent,
     Result,
     Coding.PullRequests
@@ -15,7 +16,12 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(activity, environment)
-    |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20,
+      system_prompt: String.trim(system_prompt(prompt: jprompt)),
+      acc: %{},
+      callback: &callback(activity, &1),
+      continue_msg: cont_msg()
+    )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -57,6 +63,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       %PullRequests{job: job},
       %Skills{skills: Environment.subagent_skills(skills, :coding)},
       %Skill{skills: Environment.subagent_skills(skills, :coding)},
+      Scratchpad,
       %History{job: job, activities: activities},
       Result
     ]

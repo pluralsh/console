@@ -68,6 +68,7 @@ defmodule Console.AI.Workbench.Engine do
     # with {:ok, job} <- SA.Plan.run(job, engine.environment) do
     #   loop(%{engine | activities: list_activities(job)})
     # end
+    Console.AI.Provider.external_errors()
     loop(%{engine | activities: list_activities(job)})
   end
 
@@ -151,6 +152,7 @@ defmodule Console.AI.Workbench.Engine do
   defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
     module = subagent_module(type)
+    Console.AI.Provider.external_errors()
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
@@ -164,6 +166,8 @@ defmodule Console.AI.Workbench.Engine do
 
   defp spawn_activity(%SkillBackfill{prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities}) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
+    Console.AI.Provider.external_errors()
+
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :skill, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
       Console.safely(fn ->
@@ -176,6 +180,7 @@ defmodule Console.AI.Workbench.Engine do
 
   defp spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
+    Console.AI.Provider.external_errors()
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :canvas, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       Canvas.new(activity, existing_canvas(job))
 

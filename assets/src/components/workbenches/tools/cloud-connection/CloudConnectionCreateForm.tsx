@@ -99,18 +99,19 @@ export function CloudConnectionCreateForm() {
       readBindings: readBindings.map(bindingToBindingAttributes),
     }
     switch (provider) {
-      case Provider.Aws:
+      case Provider.Aws: {
+        const cfg: AwsCloudConnectionAttributes = {}
+        const accessKeyId = (aws.accessKeyId ?? '').trim()
+        if (accessKeyId) cfg.accessKeyId = accessKeyId
+        if (aws.secretAccessKey) cfg.secretAccessKey = aws.secretAccessKey
+        if (aws.region?.trim()) cfg.region = aws.region.trim()
+        if (aws.assumeRoleArn?.trim())
+          cfg.assumeRoleArn = aws.assumeRoleArn.trim()
         return {
           ...base,
-          configuration: {
-            aws: {
-              accessKeyId: aws.accessKeyId.trim(),
-              secretAccessKey: aws.secretAccessKey,
-              region: aws.region?.trim() || undefined,
-              assumeRoleArn: aws.assumeRoleArn?.trim() || undefined,
-            },
-          },
+          configuration: { aws: cfg },
         }
+      }
       case Provider.Gcp:
         return {
           ...base,
@@ -195,8 +196,9 @@ export function CloudConnectionCreateForm() {
       direction="column"
       gap="medium"
       padding="large"
-      maxWidth={980}
       minHeight={0}
+      width="100%"
+      css={{ maxWidth: 980, marginInline: 'auto' }}
     >
       {error && <GqlError error={error} />}
 
@@ -297,11 +299,7 @@ export function CloudConnectionCreateForm() {
 
 function providerFieldsValid(
   provider: Provider,
-  {
-    aws,
-    gcp,
-    azure,
-  }: {
+  fields: {
     aws: AwsCloudConnectionAttributes
     gcp: GcpCloudConnectionAttributes
     azure: AzureCloudConnectionAttributes
@@ -309,15 +307,15 @@ function providerFieldsValid(
 ) {
   switch (provider) {
     case Provider.Aws:
-      return !!aws.accessKeyId.trim() && !!aws.secretAccessKey
+      return true
     case Provider.Gcp:
-      return !!gcp.serviceAccountKey && !!gcp.projectId.trim()
+      return !!fields.gcp.serviceAccountKey && !!fields.gcp.projectId.trim()
     case Provider.Azure:
       return (
-        !!azure.subscriptionId.trim() &&
-        !!azure.tenantId.trim() &&
-        !!azure.clientId.trim() &&
-        !!azure.clientSecret
+        !!fields.azure.subscriptionId.trim() &&
+        !!fields.azure.tenantId.trim() &&
+        !!fields.azure.clientId.trim() &&
+        !!fields.azure.clientSecret
       )
   }
 }
@@ -332,20 +330,20 @@ function AwsFields({
   return (
     <>
       <FormField
-        required
         label="Access key ID"
+        hint="Optional when the console uses workload identity (IRSA) or another ambient credential."
       >
         <Input2
-          value={state.accessKeyId}
+          value={state.accessKeyId ?? ''}
           onChange={(e) => setState({ ...state, accessKeyId: e.target.value })}
         />
       </FormField>
       <FormField
-        required
         label="Secret access key"
+        hint="Optional when not using static access keys."
       >
         <InputRevealer
-          value={state.secretAccessKey}
+          value={state.secretAccessKey ?? ''}
           onChange={(e) =>
             setState({ ...state, secretAccessKey: e.target.value })
           }

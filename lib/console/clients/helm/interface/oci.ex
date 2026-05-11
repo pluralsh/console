@@ -5,7 +5,7 @@ defmodule Console.Helm.Interface.OCI do
   defstruct [:client, :repo, :authed, :tags, :fetched_at]
 
   def client(%HelmRepository{} = repo) do
-    %__MODULE__{client: Client.new(repo.url), repo: repo, fetched_at: Timex.now() |> Timex.shift(minutes: -10)}
+    %__MODULE__{client: Client.new(repo.url), tags: %{}, repo: repo, fetched_at: Timex.now() |> Timex.shift(minutes: -10)}
   end
 
   def authenticate(%__MODULE__{authed: true} = client), do: {:ok, client}
@@ -40,13 +40,13 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
     |> Client.download_blob(digest, to)
   end
 
-  defp get_charts(%OCI{client: client, fetched_at: fetched_at, tags: tags} = oci, chart) do
+  defp get_charts(%OCI{client: client, fetched_at: fetched_at, tags: tc} = oci, chart) do
     expired = Timex.now() |> Timex.shift(minutes: -5)
     with true <- Timex.before?(fetched_at, expired),
          {:ok, %{tags: tags}} <- Client.tags(client) do
-      {:ok, %{oci | tags: tags, fetched_at: Timex.now()}, Enum.map(tags, & %Chart{version: &1, name: chart})}
+      {:ok, %{oci | tags: Map.put(tc, chart, tags), fetched_at: Timex.now()}, Enum.map(tags, & %Chart{version: &1, name: chart})}
     else
-      false -> {:ok, oci, Enum.map(tags, & %Chart{version: &1, name: chart})}
+      false -> {:ok, oci, Enum.map(tc[chart] || [], & %Chart{version: &1, name: chart})}
       err -> err
     end
   end

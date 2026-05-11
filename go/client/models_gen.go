@@ -1036,8 +1036,8 @@ type AWSCloudAttributes struct {
 }
 
 type AWSCloudConnectionAttributes struct {
-	AccessKeyID     string    `json:"accessKeyId"`
-	SecretAccessKey string    `json:"secretAccessKey"`
+	AccessKeyID     *string   `json:"accessKeyId,omitempty"`
+	SecretAccessKey *string   `json:"secretAccessKey,omitempty"`
 	Region          *string   `json:"region,omitempty"`
 	Regions         []*string `json:"regions,omitempty"`
 	// optional IAM role ARN for the console to assume when using this connection
@@ -1052,7 +1052,7 @@ type AWSCloudSettings struct {
 // The configuration for a cloud provider
 type AWSConnectionAttributes struct {
 	// the access key id for aws
-	AccessKeyID string `json:"accessKeyId"`
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// the region for aws
 	Region *string `json:"region,omitempty"`
 	// the regions for aws

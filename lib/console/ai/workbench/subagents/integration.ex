@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http}
+  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http, Scratchpad}
   alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListUserGroups, PostMessage}
   alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
   alias Console.AI.Workbench.{Environment, MCP}
@@ -10,7 +10,12 @@ defmodule Console.AI.Workbench.Subagents.Integration do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20,
+      system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
+      acc: %{},
+      callback: &callback(activity, &1),
+      continue_msg: cont_msg()
+    )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -34,6 +39,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :integration)},
       %Skill{skills: Environment.subagent_skills(skills, :integration)},
+      Scratchpad,
       Result
     ])
   end

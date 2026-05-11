@@ -2,7 +2,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
   alias Console.PubSub
   alias Console.Deployments.Workbenches
-  alias Console.Schema.WorkbenchJob
+  alias Console.Schema.{WorkbenchJob}
 
   describe "create_workbench/2" do
     test "project writers can create a workbench" do
@@ -680,6 +680,24 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       assert DateTime.compare(refetch(job).updated_at, job_updated_at) == :eq
+    end
+
+    test "persists result.error when attrs include result error" do
+      job = insert(:workbench_job)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :search, status: :running)
+
+      error_msg = "search subagent: upstream timeout"
+
+      {:ok, updated} =
+        Workbenches.update_job_activity(%{result: %{error: error_msg}}, activity)
+
+      assert updated.id == activity.id
+      assert updated.status == :running
+      assert updated.result.error == error_msg
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+
+      reloaded = refetch(updated)
+      assert reloaded.result.error == error_msg
     end
   end
 

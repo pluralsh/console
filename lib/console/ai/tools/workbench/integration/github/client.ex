@@ -36,8 +36,10 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   def build(%WorkbenchTool{}),
     do: {:error, "GitHub connection is not configured for this workbench tool."}
 
-  defp resolve_tentacat(%GithubConnection{app_id: id} = gh) when is_binary(id),
-    do: GithubJwt.gh_client(gh.url, gh.app_id, gh.installation_id, gh.private_key, [])
+  defp resolve_tentacat(%GithubConnection{app_id: id} = gh) when is_binary(id) do
+    api_endpoint(gh)
+    |> GithubJwt.gh_client(id, gh.installation_id, gh.private_key, [])
+  end
 
   defp resolve_tentacat(%GithubConnection{access_token: token} = gh),
     do: {:ok, Tentacat.Client.new(%{access_token: token}, api_endpoint(gh))}

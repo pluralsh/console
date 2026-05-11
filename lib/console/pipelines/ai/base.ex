@@ -16,7 +16,7 @@ defmodule Console.Pipelines.AI.Base do
     |> case do
       {:ok, insight} -> handle_notify(event, {res, insight})
       err ->
-        Logger.warn("failed to generate insight for #{res.__struct__}{id: #{res.id}}, reason: #{inspect(err)}")
+        Logger.warning("failed to generate insight for #{res.__struct__}{id: #{res.id}}, reason: #{inspect(err)}")
         bump_poll(res)
         :ok
     end

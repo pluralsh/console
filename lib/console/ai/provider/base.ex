@@ -67,19 +67,20 @@ defmodule Console.AI.Provider.Base do
     end)
   end
 
-  def reqllm_result({:ok, %Response{} = resp}) do
+  def reqllm_result(val, simple \\ Console.AI.Provider.simple_errors?())
+  def reqllm_result({:ok, %Response{} = resp}, _) do
     case {Response.text(resp), Response.tool_calls(resp)} do
       {text, [_ | _] = tools} -> {:ok, text, Enum.map(tools, &to_tool/1)}
       {text, _} when is_binary(text) -> {:ok, text}
       {_, _} -> {:error, "no text or tool results in response"}
     end
   end
-  def reqllm_result({:error, error}) when is_binary(error), do: {:error, error}
-  def reqllm_result({:error, %ReqLLM.Error.API.Stream{reason: reason}}) when is_binary(reason), do: {:error, reason}
-  def reqllm_result({:error, %ReqLLM.Error.API.Stream{reason: reason}}) when is_map(reason), do: {:error, "internal http error: #{reason}"}
-  def reqllm_result({:error, %ReqLLM.Error.API.Request{reason: reason}}), do: {:error, "internal http error: #{inspect(reason)}"}
-  def reqllm_result({:error, error}), do: {:error, "unknown ai request error: #{inspect(error)}"}
-  def reqllm_result(pass), do: pass
+  def reqllm_result({:error, error}, true) when is_binary(error), do: {:error, error}
+  def reqllm_result({:error, %ReqLLM.Error.API.Stream{reason: reason}}, true) when is_binary(reason), do: {:error, reason}
+  def reqllm_result({:error, %ReqLLM.Error.API.Stream{reason: reason}}, true) when is_map(reason), do: {:error, "internal http error: #{reason}"}
+  def reqllm_result({:error, %ReqLLM.Error.API.Request{reason: reason}}, true), do: {:error, "internal http error: #{inspect(reason)}"}
+  def reqllm_result({:error, error}, true), do: {:error, "unknown ai request error: #{inspect(error)}"}
+  def reqllm_result(pass, _), do: pass
 
   def noop(_), do: {:ok, "ignore"}
 

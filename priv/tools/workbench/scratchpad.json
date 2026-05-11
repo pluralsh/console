@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "description": "Show or replace the per-subagent scratchpad. The `update` field is optional because the same tool serves two behaviors: omit `update` (or leave it unset) to read the current scratchpad text without changing it; provide `update` as a string to replace the stored scratchpad for this subagent session.",
+    "properties": {
+        "update": {
+            "type": "string",
+            "description": "When set, replaces the entire scratchpad with this string. When omitted, the tool does not write and instead returns whatever is already stored (or a default empty-state message)."
+        }
+    }
+}

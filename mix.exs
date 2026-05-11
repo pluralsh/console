@@ -187,6 +187,8 @@ defmodule Console.MixProject do
       {:caramelize, "~> 1.2"},
       {:req_llm, "~> 1.11"},
       {:sweet_xml, ">= 0.0.0"},
+      {:jaqex, "~> 0.1.3"},
+
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

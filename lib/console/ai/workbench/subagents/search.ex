@@ -1,14 +1,19 @@
 defmodule Console.AI.Workbench.Subagents.Search do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill}
+  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Scratchpad}
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20,
+      system_prompt: String.trim(system_prompt(prompt: jprompt)),
+      acc: %{},
+      callback: &callback(activity, &1),
+      continue_msg: cont_msg()
+    )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -31,6 +36,7 @@ defmodule Console.AI.Workbench.Subagents.Search do
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :search)},
       %Skill{skills: Environment.subagent_skills(skills, :search)},
+      Scratchpad,
       Result
     ])
   end

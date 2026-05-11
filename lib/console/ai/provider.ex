@@ -145,6 +145,15 @@ defmodule Console.AI.Provider do
   def defaults(:vertex), do: Vertex.defaults()
   def defaults(:nexus), do: Nexus.defaults()
 
+  def simple_errors?() do
+    case Process.get({__MODULE__, :simple_errors}) do
+      nil -> true
+      val -> val
+    end
+  end
+
+  def external_errors(), do: Process.put({__MODULE__, :simple_errors}, false)
+
   defp embedding_client(%DeploymentSettings{ai: %AI{embedding_provider: p}} = settings) when not is_nil(p),
     do: client(put_in(settings.ai.provider, p))
   defp embedding_client(settings), do: client(settings)

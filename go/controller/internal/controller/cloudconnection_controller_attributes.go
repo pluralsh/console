@@ -93,8 +93,8 @@ func (r *CloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx c
 		Provider: console.ProviderAWS,
 		Configuration: console.CloudConnectionConfigurationAttributes{
 			AWS: &console.AWSCloudConnectionAttributes{
-				AccessKeyID:     aws.AccessKeyId,
-				SecretAccessKey: string(secretAccessKey),
+				AccessKeyID:     lo.ToPtr(aws.AccessKeyId),
+				SecretAccessKey: lo.ToPtr(string(secretAccessKey)),
 				Region:          aws.Region,
 				Regions:         lo.ToSlicePtr(aws.Regions),
 			},

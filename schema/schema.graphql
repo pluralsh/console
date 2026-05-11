@@ -5371,9 +5371,9 @@ input CloudConnectionConfigurationAttributes {
 }
 
 input AwsCloudConnectionAttributes {
-  accessKeyId: String!
+  accessKeyId: String
 
-  secretAccessKey: String!
+  secretAccessKey: String
 
   region: String
 
@@ -5787,7 +5787,7 @@ type CloudConnectionConfiguration {
 "The configuration for a cloud provider"
 type AwsConnectionAttributes {
   "the access key id for aws"
-  accessKeyId: String!
+  accessKeyId: String
 
   "the region for aws"
   region: String
