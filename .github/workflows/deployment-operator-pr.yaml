@@ -7,6 +7,9 @@ on:
       - opened
       - edited
       - synchronize
+    paths:
+      - .github/workflows/deployment-operator-pr.yaml
+      - go/deployment-operator/**
   pull_request:
     types:
       - opened
@@ -14,6 +17,9 @@ on:
       - synchronize
       - labeled
       - unlabeled
+    paths:
+      - .github/workflows/deployment-operator-pr.yaml
+      - go/deployment-operator/**
 
 permissions:
   contents: 'read'
