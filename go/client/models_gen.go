@@ -10418,6 +10418,8 @@ type WorkbenchToolConfiguration struct {
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// slack connection (no secrets)
 	Slack *WorkbenchToolSlackConnection `json:"slack,omitempty"`
+	// microsoft teams / graph connection (no secrets)
+	Teams *WorkbenchToolTeamsConnection `json:"teams,omitempty"`
 	// atlassian connection (no secrets)
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 	// exa connection (no secrets)
@@ -10453,6 +10455,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// slack connection (integration)
 	Slack *WorkbenchToolSlackConnectionAttributes `json:"slack,omitempty"`
+	// microsoft teams / graph connection (integration)
+	Teams *WorkbenchToolTeamsConnectionAttributes `json:"teams,omitempty"`
 	// atlassian/jira connection (ticketing)
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 	// exa connection (search)
@@ -10696,6 +10700,22 @@ type WorkbenchToolSplunkConnectionAttributes struct {
 	Username *string `json:"username,omitempty"`
 	// basic auth password
 	Password *string `json:"password,omitempty"`
+}
+
+type WorkbenchToolTeamsConnection struct {
+	// microsoft entra application (client) id
+	ClientID *string `json:"clientId,omitempty"`
+	// microsoft entra tenant (directory) id (client secret never exposed)
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolTeamsConnectionAttributes struct {
+	// microsoft entra application (client) id
+	ClientID string `json:"clientId"`
+	// microsoft entra client secret
+	ClientSecret string `json:"clientSecret"`
+	// microsoft entra tenant (directory) id
+	TenantID string `json:"tenantId"`
 }
 
 type WorkbenchToolTempoConnection struct {
@@ -17168,6 +17188,7 @@ const (
 	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
 	WorkbenchToolTypeGithub     WorkbenchToolType = "GITHUB"
 	WorkbenchToolTypeSLACk      WorkbenchToolType = "SLACK"
+	WorkbenchToolTypeTeams      WorkbenchToolType = "TEAMS"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17190,11 +17211,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeExa,
 	WorkbenchToolTypeGithub,
 	WorkbenchToolTypeSLACk,
+	WorkbenchToolTypeTeams,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams:
 		return true
 	}
 	return false

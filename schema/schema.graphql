@@ -2325,6 +2325,7 @@ enum WorkbenchToolType {
   EXA
   GITHUB
   SLACK
+  TEAMS
 }
 
 enum WorkbenchToolCategory {
@@ -2693,6 +2694,9 @@ input WorkbenchToolConfigurationAttributes {
   "slack connection (integration)"
   slack: WorkbenchToolSlackConnectionAttributes
 
+  "microsoft teams \/ graph connection (integration)"
+  teams: WorkbenchToolTeamsConnectionAttributes
+
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
 
@@ -2863,6 +2867,17 @@ input WorkbenchToolLinearConnectionAttributes {
 input WorkbenchToolSlackConnectionAttributes {
   "slack bot user OAuth token (xoxb-...) for MCP"
   botToken: String
+}
+
+input WorkbenchToolTeamsConnectionAttributes {
+  "microsoft entra application (client) id"
+  clientId: String!
+
+  "microsoft entra client secret"
+  clientSecret: String!
+
+  "microsoft entra tenant (directory) id"
+  tenantId: String!
 }
 
 input WorkbenchToolAtlassianConnectionAttributes {
@@ -3757,6 +3772,9 @@ type WorkbenchToolConfiguration {
   "slack connection (no secrets)"
   slack: WorkbenchToolSlackConnection
 
+  "microsoft teams \/ graph connection (no secrets)"
+  teams: WorkbenchToolTeamsConnection
+
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
 
@@ -3873,6 +3891,14 @@ type WorkbenchToolLinearConnection {
 type WorkbenchToolSlackConnection {
   "Slack hosted MCP endpoint (credentials never exposed)"
   url: String!
+}
+
+type WorkbenchToolTeamsConnection {
+  "microsoft entra application (client) id"
+  clientId: String
+
+  "microsoft entra tenant (directory) id (client secret never exposed)"
+  tenantId: String
 }
 
 type WorkbenchToolAtlassianConnection {

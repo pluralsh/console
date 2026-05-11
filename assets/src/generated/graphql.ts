@@ -16097,6 +16097,8 @@ export type WorkbenchToolConfiguration = {
   slack?: Maybe<WorkbenchToolSlackConnection>;
   /** splunk connection (no secrets) */
   splunk?: Maybe<WorkbenchToolSplunkConnection>;
+  /** microsoft teams / graph connection (no secrets) */
+  teams?: Maybe<WorkbenchToolTeamsConnection>;
   /** tempo connection (no secrets) */
   tempo?: Maybe<WorkbenchToolTempoConnection>;
 };
@@ -16132,6 +16134,8 @@ export type WorkbenchToolConfigurationAttributes = {
   slack?: InputMaybe<WorkbenchToolSlackConnectionAttributes>;
   /** splunk connection (logs) */
   splunk?: InputMaybe<WorkbenchToolSplunkConnectionAttributes>;
+  /** microsoft teams / graph connection (integration) */
+  teams?: InputMaybe<WorkbenchToolTeamsConnectionAttributes>;
   /** tempo connection (traces) */
   tempo?: InputMaybe<WorkbenchToolTempoConnectionAttributes>;
 };
@@ -16397,6 +16401,23 @@ export type WorkbenchToolSplunkConnectionAttributes = {
   username?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type WorkbenchToolTeamsConnection = {
+  __typename?: 'WorkbenchToolTeamsConnection';
+  /** microsoft entra application (client) id */
+  clientId?: Maybe<Scalars['String']['output']>;
+  /** microsoft entra tenant (directory) id (client secret never exposed) */
+  tenantId?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolTeamsConnectionAttributes = {
+  /** microsoft entra application (client) id */
+  clientId: Scalars['String']['input'];
+  /** microsoft entra client secret */
+  clientSecret: Scalars['String']['input'];
+  /** microsoft entra tenant (directory) id */
+  tenantId: Scalars['String']['input'];
+};
+
 export type WorkbenchToolTempoConnection = {
   __typename?: 'WorkbenchToolTempoConnection';
   /** optional tenant id */
@@ -16439,6 +16460,7 @@ export enum WorkbenchToolType {
   Sentry = 'SENTRY',
   Slack = 'SLACK',
   Splunk = 'SPLUNK',
+  Teams = 'TEAMS',
   Tempo = 'TEMPO'
 }
 

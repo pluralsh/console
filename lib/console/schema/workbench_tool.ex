@@ -24,7 +24,8 @@ defmodule Console.Schema.WorkbenchTool do
     jaeger: 15,
     exa: 16,
     github: 17,
-    slack: 18
+    slack: 18,
+    teams: 19
 
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
@@ -71,6 +72,12 @@ defmodule Console.Schema.WorkbenchTool do
 
       embeds_one :slack, SlackConnection, on_replace: :update do
         field :bot_token, EncryptedString
+      end
+
+      embeds_one :teams, TeamsConnection, on_replace: :update do
+        field :client_id,     :string
+        field :client_secret, EncryptedString
+        field :tenant_id,     :string
       end
 
       embeds_one :atlassian, AtlassianConnection, on_replace: :update do
@@ -269,6 +276,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:github), do: [:integration]
   defp categories(:linear), do: [:ticketing]
   defp categories(:slack), do: [:integration]
+  defp categories(:teams), do: [:integration]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
@@ -292,6 +300,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:github, with: &github_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:slack, with: &slack_configuration_changeset/2)
+    |> cast_embed(:teams, with: &teams_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
   end
@@ -391,6 +400,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(bot_token)a)
     |> validate_required([:bot_token])
+  end
+
+  defp teams_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(client_id client_secret tenant_id)a)
+    |> validate_required([:client_id, :client_secret, :tenant_id])
   end
 
   defp atlassian_configuration_changeset(model, attrs) do
