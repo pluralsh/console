@@ -3,9 +3,9 @@ package controller
 import (
 	"context"
 
-	"github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/internal/errors"
-	"github.com/pluralsh/deployment-operator/pkg/cache"
+	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/internal/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

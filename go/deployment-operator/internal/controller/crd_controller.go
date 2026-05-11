@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	discoverycache "github.com/pluralsh/deployment-operator/pkg/cache/discovery"
+	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
 )
 
 type SetupWithManager func(mgr ctrl.Manager) error

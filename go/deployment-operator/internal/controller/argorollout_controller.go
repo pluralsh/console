@@ -20,10 +20,10 @@ import (
 	k8sClient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/pluralsh/deployment-operator/internal/utils"
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	v1 "github.com/pluralsh/deployment-operator/pkg/controller/v1"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	v1 "github.com/pluralsh/console/godeployment-operator/pkg/controller/v1"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
 )
 
 const requeueArgoRolloutAfter = time.Second * 5

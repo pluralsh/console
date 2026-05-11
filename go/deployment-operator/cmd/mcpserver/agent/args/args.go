@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pluralsh/deployment-operator/internal/mcpserver/agent/tool"
+	"github.com/pluralsh/console/godeployment-operator/internal/mcpserver/agent/tool"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/internal/controller"
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/internal/controller"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 const (

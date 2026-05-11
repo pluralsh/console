@@ -5,15 +5,15 @@ import (
 	"errors"
 	"os"
 
-	"github.com/pluralsh/deployment-operator/pkg/harness/signals"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/signals"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/cmd/sentinel-harness/args"
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	internalerrors "github.com/pluralsh/deployment-operator/pkg/harness/errors"
-	"github.com/pluralsh/deployment-operator/pkg/log"
-	"github.com/pluralsh/deployment-operator/pkg/sentinel-harness/controller"
-	"github.com/pluralsh/deployment-operator/pkg/sentinel-harness/environment"
+	"github.com/pluralsh/console/godeployment-operator/cmd/sentinel-harness/args"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	internalerrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/pkg/sentinel-harness/controller"
+	"github.com/pluralsh/console/godeployment-operator/pkg/sentinel-harness/environment"
 )
 
 func main() {

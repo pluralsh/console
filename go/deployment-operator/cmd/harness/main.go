@@ -6,16 +6,16 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/deployment-operator/cmd/harness/args"
-	"github.com/pluralsh/deployment-operator/internal/helpers"
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/harness/controller"
-	"github.com/pluralsh/deployment-operator/pkg/harness/environment"
-	internalerrors "github.com/pluralsh/deployment-operator/pkg/harness/errors"
-	"github.com/pluralsh/deployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/deployment-operator/pkg/harness/signals"
-	"github.com/pluralsh/deployment-operator/pkg/harness/sink"
-	"github.com/pluralsh/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/godeployment-operator/cmd/harness/args"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/controller"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/environment"
+	internalerrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/signals"
+	"github.com/pluralsh/console/godeployment-operator/pkg/harness/sink"
+	"github.com/pluralsh/console/godeployment-operator/pkg/log"
 )
 
 func main() {

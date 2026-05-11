@@ -22,7 +22,7 @@ import (
 	constraintstatusv1beta1 "github.com/open-policy-agent/gatekeeper/v3/apis/status/v1beta1"
 	openshift "github.com/openshift/api/config/v1"
 	pollycache "github.com/pluralsh/console/go/polly/cache"
-	"github.com/pluralsh/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -34,18 +34,18 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/pluralsh/deployment-operator/internal/utils"
-	"github.com/pluralsh/deployment-operator/pkg/cache"
-	discoverycache "github.com/pluralsh/deployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/deployment-operator/pkg/client"
-	"github.com/pluralsh/deployment-operator/pkg/ping"
-	"github.com/pluralsh/deployment-operator/pkg/scraper"
-	"github.com/pluralsh/deployment-operator/pkg/streamline"
-	"github.com/pluralsh/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/godeployment-operator/internal/utils"
+	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
+	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/godeployment-operator/pkg/ping"
+	"github.com/pluralsh/console/godeployment-operator/pkg/scraper"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 
-	deploymentsv1alpha1 "github.com/pluralsh/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/deployment-operator/cmd/agent/args"
-	consolectrl "github.com/pluralsh/deployment-operator/pkg/controller"
+	deploymentsv1alpha1 "github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
+	consolectrl "github.com/pluralsh/console/godeployment-operator/pkg/controller"
 )
 
 var (

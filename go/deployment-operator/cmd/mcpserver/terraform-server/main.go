@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	terraformserver "github.com/pluralsh/deployment-operator/internal/mcpserver/terraform-server"
+	terraformserver "github.com/pluralsh/console/godeployment-operator/internal/mcpserver/terraform-server"
 )
 
 func main() {
