@@ -233,31 +233,13 @@ harness: ## build stack run harness
 agent-harness: ## build agent harness
 	go build -o bin/agent-harness cmd/agent-harness/*.go
 
-
 .PHONY: sentinel-harness
 sentinel-harness: ## build sentinel harness
 	go build -o bin/sentinel-harness cmd/sentinel-harness/*.go
 
-.PHONY: docker-build-sentinel-harness-base
-docker-build-sentinel-harness-base: ## build base docker sentinel harness image
-	docker build \
-		--build-arg=VERSION="0.0.0-dev" \
-		-t ghcr.io/pluralsh/sentinel-harness-base:local \
-		-f dockerfiles/sentinel-harness/base.Dockerfile \
-		.
-
-.PHONY: docker-build-sentinel-harness
-docker-build-sentinel-harness: docker-build-sentinel-harness-base ## build docker sentinel harness image
-	docker build \
-		--build-arg=SENTINEL_HARNESS_BASE_IMAGE_TAG="local" \
-		-t ghcr.io/pluralsh/sentinel-harness:local \
-		-f dockerfiles/sentinel-harness/terratest.Dockerfile \
-		.
-
 .PHONY: agent-mcpserver
 agent-mcpserver: ## build agent harness mcp server
 	go build -o bin/agent-mcpserver cmd/mcpserver/agent/main.go
-
 
 .PHONY: terraform-mcpserver
 terraform-mcpserver: ## build terraform mcp server
@@ -360,6 +342,22 @@ docker-build-terraform-mcpserver: ## build mcp server docker image
 		--build-arg=VERSION="0.0.0-dev" \
 		-t ghcr.io/pluralsh/terraform-mcpserver:latest \
 		-f dockerfiles/mcpserver/terraform-server/Dockerfile \
+		.
+
+.PHONY: docker-build-sentinel-harness-base
+docker-build-sentinel-harness-base: ## build base docker sentinel harness image
+	docker build \
+		--build-arg=VERSION="0.0.0-dev" \
+		-t ghcr.io/pluralsh/sentinel-harness-base:local \
+		-f dockerfiles/sentinel-harness/base.Dockerfile \
+		.
+
+.PHONY: docker-build-sentinel-harness
+docker-build-sentinel-harness: docker-build-sentinel-harness-base ## build docker sentinel harness image
+	docker build \
+		--build-arg=SENTINEL_HARNESS_BASE_IMAGE_TAG="local" \
+		-t ghcr.io/pluralsh/sentinel-harness:local \
+		-f dockerfiles/sentinel-harness/terratest.Dockerfile \
 		.
 
 ##@ Tests
