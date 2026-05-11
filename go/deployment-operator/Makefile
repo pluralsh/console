@@ -1,4 +1,8 @@
-ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
+
+include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
+include $(TOOLS_MAKEFILE)
 
 PROJECT_NAME := deployment-operator
 
@@ -38,23 +42,12 @@ $(LOCALBIN):
 ENVTEST_K8S_VERSION := 1.28.3
 CONTROLLER_GEN ?= $(shell which controller-gen)
 MOCKERY ?= $(shell which mockery)
-include tools.mk
 
 ifndef GOPATH
 GOPATH := $(shell go env GOPATH)
 endif
 
 PRE = --ensure
-
-##@ General
-
-.PHONY: help
-help: ## Display this help.
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-
-.PHONY: crd-docs
-crd-docs: tools ##generate docs from the CRDs
-	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=config.yaml
 
 ##@ Development
 
@@ -68,7 +61,8 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: genmock
-genmock: mockery ## generates mocks before running tests
+genmock: TOOL = mockery
+genmock: --tool ## generates mocks before running tests
 	$(MOCKERY)
 
 .PHONY: codegen-chart-crds
@@ -81,6 +75,11 @@ velero-crds: ## download velero CRDs
 	@tar zxvf velero.tgz velero/crds
 	@mv velero/crds/* charts/deployment-operator/crds
 	@rm -r velero.tgz velero
+
+.PHONY: crd-docs
+crd-docs: TOOL = crd-ref-docs
+crd-docs: --tool ##generate docs from the CRDs
+	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=config.yaml
 
 ##@ Run
 
@@ -364,7 +363,8 @@ docker-build-terraform-mcpserver: ## build mcp server docker image
 
 ##@ Tests
 .PHONY: test
-test: tools ## run tests
+test: TOOL = envtest gotestsum
+test: --tool  ## run tests
 	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" \
 	gotestsum --format pkgname -- \
 		$$(go list ./... | grep -v /e2e) \
@@ -377,14 +377,6 @@ test-docker: ## run tests in docker compose
 	status=$$?; \
 	docker compose -f docker-compose.test.yml down --remove-orphans; \
 	exit $$status
-
-.PHONY: lint
-lint: $(PRE) ## run linters
-	golangci-lint run ./...
-
-.PHONY: fix
-fix: $(PRE) ## fix issues found by linters
-	golangci-lint run --fix ./...
 
 ##@ Release
 
@@ -414,52 +406,3 @@ down: ## stop deployment-operator and kind cluster
 .PHONY: logs
 logs: ## show logs from deployment-operator
 	docker compose logs -f agent
-
-##@ Dependencies
-
-.PHONY: tools
-tools: ## install required tools
-tools: --tool
-
-.PHONY: --tool
-%--tool: TOOL = .*
---tool: # INTERNAL: installs tool with name provided via $(TOOL) variable or all tools.
-	@cat tools.go | grep _ | awk -F'"' '$$2 ~ /$(TOOL)/ {print $$2}' | xargs -I {} go install {}
-
-.PHONY: envtest
-envtest: TOOL = setup-envtest
-envtest: --tool ## download and install setup-envtest in the $GOPATH/bin
-
-.PHONY: mockery
-mockery: TOOL = mockery
-mockery: --tool
-
-.PHONY: crd-ref-docs
-crd-ref-docs: TOOL = crd-ref-docs
-crd-ref-docs: --tool
-
-.PHONY: controller-gen
-controller-gen: TOOL = controller-gen
-controller-gen: --tool
-
-.PHONY: discovery
-discovery: TOOL = discovery
-discovery: --tool
-
-.PHONY: gotestsum
-gotestsum: TOOL = gotestsum
-gotestsum: --tool
-
-# go-get-tool will 'go get' any package $2 and install it to $1.
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-define go-get-tool
-@[ -f $(1) ] || { \
-set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
-echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
-rm -rf $$TMP_DIR ;\
-}
-endef
