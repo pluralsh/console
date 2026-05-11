@@ -3,11 +3,10 @@ module github.com/pluralsh/console/godeployment-operator
 go 1.26.2
 
 replace (
+	github.com/containerd/containerd => github.com/containerd/containerd v1.7.29
+	github.com/open-policy-agent/opa => github.com/open-policy-agent/opa v1.4.0
 	github.com/pluralsh/console/go/client => ../client
 	github.com/pluralsh/console/go/polly => ../polly
-
-	github.com/containerd/containerd => github.com/containerd/containerd v1.7.29
-    github.com/open-policy-agent/opa => github.com/open-policy-agent/opa v1.4.0
 )
 
 require (
