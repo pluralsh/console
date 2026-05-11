@@ -40,7 +40,11 @@ defmodule Console.AI.Workbench.Engine do
   require EEx
   require Logger
 
-  defstruct [:job, :user, :environment, activities: [], iterations: 0, max: 200]
+  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200]
+
+  defmodule Acc do
+    defstruct [messages: [], activities: []]
+  end
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job = preload_job(job)
@@ -69,11 +73,14 @@ defmodule Console.AI.Workbench.Engine do
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
     when iter >= max, do: Workbenches.fail_job("Max iterations reached", job)
-  defp loop(%__MODULE__{job: job, environment: environment, activities: activities} = engine) do
-    messages = Enum.map(activities, &Message.to_message/1)
+  defp loop(%__MODULE__{job: job, environment: environment, activities: activities, messages: msgs} = engine) do
+    messages = case msgs do
+      [_ | _] = msgs -> Enum.map(msgs, &Message.to_message/1)
+      _ -> Enum.map(activities, &Message.to_message/1)
+    end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
+    |> MemoryEngine.new(50, system_prompt: &sysprompt(job, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{
@@ -99,7 +106,7 @@ defmodule Console.AI.Workbench.Engine do
           }),
         })
         |> Workbenches.complete_job(job)
-      {:ok, l} when is_list(l) -> spawn_activities(l, engine)
+      {:ok, {msgs, l}} when is_list(l) -> spawn_activities(l, msgs, engine)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
   end
@@ -110,33 +117,32 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(pass), do: pass
 
-  defp reducer(messages, _) do
-    Enum.reduce_while(messages, [], fn
+  defp reducer(messages, %Acc{messages: msgs}) do
+    Enum.reduce_while(messages, {[], []}, fn
       %Complete{} = complete, _ -> {:halt, complete}
-      %Subagent{} = subagent, acc -> {:cont, [subagent | acc]}
-      %CanvasTool{} = canvas, acc -> {:cont, [canvas | acc]}
-      %Notes{} = notes, acc -> {:cont, [notes | acc]}
-      %SkillBackfill{} = backfill, acc -> {:cont, [backfill | acc]}
-      _, acc -> {:cont, acc}
+      %Subagent{} = subagent, {msgs, acts} -> {:cont, {msgs, [subagent | acts]}}
+      %CanvasTool{} = canvas, {msgs, acts} -> {:cont, {msgs, [canvas | acts]}}
+      %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
+      %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
+      msg, {msgs, acts} -> {:cont, {msgs, [msg | acts]}}
     end)
     |> case do
       %Complete{} = complete -> {:halt, complete}
-      [_ | _] = l -> {:halt, l}
-      _ -> {:cont, []}
+      {new, [_ | _] = acts} -> {:halt, {new ++ msgs, acts}}
+      {new, []} -> {:cont, %Acc{messages: new ++ msgs}}
     end
   end
 
-  defp spawn_activities(actions, engine) do
+  defp spawn_activities(actions, msgs, engine) do
     Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.minutes(30))
-    |> Enum.reduce(engine, fn
-      {:ok, {:ok, %WorkbenchJobActivity{} = activity}}, engine ->
-        %{engine | activities: [activity | engine.activities]}
-      {:ok, {:error, error}}, engine ->
+    |> Enum.flat_map(fn
+      {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
+      {:ok, {:error, error}} ->
         Logger.error("Error spawning activity: #{inspect(error)}")
-        engine
-      _, engine -> engine
+        []
+      _ -> []
     end)
-    |> then(& %{&1 | iterations: &1.iterations + 1, job: refresh_job(&1.job)})
+    |> then(& %{engine | activities: &1 ++ engine.activities, messages: &1 ++ msgs, iterations: engine.iterations + 1, job: refresh_job(engine.job)})
     |> loop()
   end
 
