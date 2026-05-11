@@ -1,4 +1,4 @@
-module github.com/pluralsh/deployment-operator
+module github.com/pluralsh/console/godeployment-operator
 
 go 1.26.2
 
