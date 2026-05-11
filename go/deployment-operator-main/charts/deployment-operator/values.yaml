@@ -1,0 +1,196 @@
+# Default values for helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+additionalVolumes: ~
+additionalVolumeMounts: ~
+
+# Allows mounting custom certs to deployment operator.
+# Certificates are mounted to the "/etc/ssl/certs" directory.
+# An array of files can be provided. Every file will be mounted
+# on a specific subpath to ensure that multiple files can be mounted
+# without overriding each other.
+#
+# In order to override default "ca-certificates.crt" simply
+# provide a "file: ca-certificates.crt" when providing custom certs.
+# It will be mounted on a subpath to override only this single file.
+#
+# Example usage:
+#  - name: ca-pemstore
+#    data: xyz
+#    file: my-cert.pem
+certs: []
+
+extraArgs: []
+
+replicaCount: 1
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+args:
+  processingTimeout: 5m
+  enableHelmDependencyUpdate: false
+  disableHelmTemplateDryRunServer: false
+
+image:
+  repository: ghcr.io/pluralsh/deployment-operator
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+consoleUrl: ~
+clusterId: 'test'
+
+secrets:
+  deployToken: REPLACE_ME
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "deployment-operator"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "deployment-operator"
+
+rbac:
+  clusterRole: cluster-admin
+
+podLabels: {}
+podAnnotations: {}
+#  prometheus.io/scrape: "true"
+#  prometheus.io/path: "/metrics"
+#  prometheus.io/port: "8080"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9001
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  requests:
+    memory: "600Mi"
+    cpu: "200m"
+    ephemeral-storage: "1Gi"
+  limits:
+    ephemeral-storage: "10Gi"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global:
+  registry: ~
+
+consoleReaderPolicy:
+- apiGroups: ["apps"]
+  resources: ["deployments", "daemonsets", "statefulsets"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["", "*"]
+  resources: ["*"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["delete"]
+- apiGroups: ["deployments.plural.sh"]
+  resources: ["customhealths", "kubecostextractors", "agentruntimes", "agentruns"]
+  verbs: ["create","delete","get", "list", "patch", "update", "watch"]
+- apiGroups: ["deployments.plural.sh"]
+  resources: ["customhealths/finalizers", "kubecostextractors/finalizers", "agentruntimes/finalizers", "agentruns/finalizers"]
+  verbs: ["update"]
+- apiGroups: ["deployments.plural.sh"]
+  resources: ["customhealths/status", "kubecostextractors/status", "agentruntimes/status", "agentruns/status"]
+  verbs: ["get", "patch", "update", "watch"]
+
+agentk:
+  image:
+    repository: ghcr.io/pluralsh/agentk
+    pullPolicy: IfNotPresent
+    tag: ~
+  config:
+    kasAddress: ""
+    # kasHeaders:
+    #   - "Cookie: gitlab-canary"
+    # secretName: "token"
+    # caCert: "PEM certificate file to use to verify config.kasAddress. Useful if config.kasAddress is self-signed."
+
+    observability:
+      enabled: false
+      # Application-level TLS configuration for the observability service
+      tls:
+        enabled: false
+        # cert: "Public key for the TLS certificate"
+        # key: "Private key for the TLS certificate"
+        secret: {}
+        # create: false # when true, creates a certificate with values cert and key from above
+        # name: "agentk-observability"
+  # Add additional environment settings to the pod. Can be useful in proxy
+  # environments
+  extraEnv: []
+  # Add additional args settings to the pod.
+  extraArgs: []
+  # Show the last 80 lines or 2048 bytes (whichever is smaller) of pod logs in kubectl describe output when container exits with non-zero exit code
+  # Useful for when pod logs are cycled out of a node post-crash before an operator can capture the logs
+  # Valid values are 'File' which is the Kubernetes API default, or 'FallbackToLogsOnError'
+  # See https://kubernetes.io/docs/tasks/debug/debug-application/determine-reason-pod-failure/ for more information
+  terminationMessagePolicy: FallbackToLogsOnError
+  resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  serviceMonitor:
+    # Specifies whether to create a ServiceMonitor resource for collecting Prometheus metrics
+    enabled: false

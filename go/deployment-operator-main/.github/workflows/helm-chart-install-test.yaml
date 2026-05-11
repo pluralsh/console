@@ -1,0 +1,47 @@
+name: Helm Chart Install Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'charts/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'charts/**'
+  workflow_dispatch:
+
+jobs:
+  helm-install-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
+
+      - name: Set up kind cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          cluster_name: kind
+          wait: 300s
+
+      - name: Test deployment-operator chart installation
+        run: |
+          # Install the chart - this should succeed without errors
+          helm install deployment-operator ./charts/deployment-operator \
+            --set secrets.deployToken=test-token \
+            --set fullnameOverride=deployment-operator-test
+          
+          # Verify the chart was installed
+          if ! helm list | grep -q deployment-operator; then
+            echo "Helm chart installation failed"
+            exit 1
+          fi
+          
+          echo "Helm chart installed successfully" 

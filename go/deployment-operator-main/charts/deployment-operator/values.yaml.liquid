@@ -1,0 +1,56 @@
+secrets:
+  deployToken: {{ configuration.deployToken }}
+
+consoleUrl: {{ configuration.url }}
+
+{% if configuration.clusterId %}
+clusterId: {{ configuration.clusterId }}
+{% endif %}
+
+{% if configuration.tag %}
+image:
+  tag: {{ configuration.tag }}
+{% endif %}
+
+{% if configuration.registry %}
+global:
+  registry: {{ configuration.registry }}
+{% endif %}
+
+agentk:
+  config:
+    kasAddress: {{ configuration.kasAddress }}
+{% if configuration.agentkTag %}
+  image:
+    tag: {{ configuration.agentkTag }}
+{% endif %}
+
+{% if configuration.replicas %}
+replicaCount: {{ configuration.replicas }}
+{% endif %}
+
+{% if configuration.processingTimeout %}
+args:
+  processingTimeout: {{ configuration.processingTimeout }}
+{% endif %}
+
+{% if configuration.enableHelmDependencyUpdate %}
+args:
+  enableHelmDependencyUpdate: {{ configuration.enableHelmDependencyUpdate }}
+{% endif %}
+
+{% if configuration.disableHelmTemplateDryRunServer %}
+args:
+  disableHelmTemplateDryRunServer: {{ configuration.disableHelmTemplateDryRunServer }}
+{% endif %}
+
+{% if configuration.memory or configuration.cpu %}
+resources:
+  requests:
+    {% if configuration.memory %}
+    memory: {{ configuration.memory }}
+    {% endif %}
+    {% if configuration.cpu %}
+    cpu: {{ configuration.cpu }}
+    {% endif %}
+{% endif %}

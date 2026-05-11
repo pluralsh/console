@@ -1,0 +1,1 @@
+values["items"] = result["metadata"]["finalizers"]

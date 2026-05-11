@@ -1,0 +1,105 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Provider
+metadata:
+  name: aws
+spec:
+  cloud: aws
+  name: aws
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: guestbook
+spec:
+  url: https://github.com/argoproj/argocd-example-apps.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: guestbook-dev
+  namespace: default
+spec:
+  version: 0.0.1
+  git:
+    folder: guestbook
+    ref: master
+  repositoryRef:
+    kind: GitRepository
+    name: guestbook
+    namespace: default
+  clusterRef:
+    kind: Cluster
+    name: mgmt
+    namespace: infra
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: guestbook-prod
+  namespace: default
+spec:
+  version: 0.0.1
+  git:
+    folder: guestbook
+    ref: master
+  repositoryRef:
+    kind: GitRepository
+    name: guestbook
+    namespace: default
+  clusterRef:
+    kind: Cluster
+    name: mgmt
+    namespace: infra
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Pipeline
+metadata:
+  name: test
+  namespace: default
+spec:
+  stages:
+    - name: dev
+      services:
+        - serviceRef:
+            name: guestbook-dev
+            namespace: default
+    - name: prod
+      services:
+        - serviceRef:
+            name: guestbook-prod
+            namespace: default
+          criteria:
+            serviceRef:
+              name: guestbook-dev
+              namespace: default
+            secrets:
+              - test-secret
+  edges:
+    - from: dev
+      to: prod
+      gates:
+        - name: job-gate
+          type: JOB
+          clusterRef:
+            name: mgmt
+            namespace: infra
+          spec:
+            job:
+              namespace: default
+              labels:
+                test: test
+              annotations:
+                plural.sh/annotation: test
+              serviceAccount: default
+              containers:
+                - image: alpine:3.7
+                  args:
+                    - /bin/sh
+                    - -c
+                    - echo "Hello, World!"
+                    - echo $TEST_ENV_VAR
+                  env:
+                    - name: TEST_ENV_VAR
+                      value: pipeline
+        - name: approval-gate
+          type: APPROVAL

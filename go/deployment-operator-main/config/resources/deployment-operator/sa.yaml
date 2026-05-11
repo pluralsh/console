@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deployment-controller-sa
+  labels:
+    plural.sh/part-of: deployment
+    plural.sh/component: controller
+    plural.sh/version: main
+    plural.sh/name: deployment-controller

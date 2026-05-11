@@ -1,0 +1,53 @@
+services:
+  kind:
+    image: docker:27.4.1
+    container_name: deployment-operator-kind
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kind_kubeconfig:/kube
+      - .:/repo:ro
+    environment:
+      KIND_CLUSTER_NAME: ${KIND_CLUSTER_NAME:-deployment-operator}
+      KUBERNETES_VERSION: ${KUBERNETES_VERSION:-1.32.0}
+    command: >-
+      sh -c "
+      apk add --no-cache curl tar gzip &&
+      curl -sSL https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64 -o /usr/local/bin/kind &&
+      chmod +x /usr/local/bin/kind &&
+      curl -sSL https://dl.k8s.io/release/v$$KUBERNETES_VERSION/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl &&
+      chmod +x /usr/local/bin/kubectl &&
+      kind get clusters | grep -q \"^$$KIND_CLUSTER_NAME$$\" || kind create cluster --name $$KIND_CLUSTER_NAME --image kindest/node:v$$KUBERNETES_VERSION &&
+      kind get kubeconfig --name $$KIND_CLUSTER_NAME > /kube/config &&
+      CLUSTER_NAME=$$(kubectl config view --kubeconfig /kube/config -o jsonpath='{.contexts[0].context.cluster}') &&
+      SERVER=$$(kubectl config view --kubeconfig /kube/config -o jsonpath='{.clusters[0].cluster.server}') &&
+      SERVER=$${SERVER/127.0.0.1/host.docker.internal} &&
+      kubectl config set-cluster $$CLUSTER_NAME --server=$$SERVER --insecure-skip-tls-verify=true --kubeconfig /kube/config &&
+      kubectl config unset clusters.$$CLUSTER_NAME.certificate-authority-data --kubeconfig /kube/config &&
+      kubectl --kubeconfig /kube/config wait --for=condition=Ready nodes --all --timeout=120s &&
+      kubectl apply --server-side --force-conflicts --kubeconfig /kube/config -f /repo/config/crd/bases
+      "
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      KUBECONFIG: /kube/config
+      KUBE_INSECURE_SKIP_TLS_VERIFY: "true"
+      OPERATOR_NAMESPACE: ${OPERATOR_NAMESPACE:-plrl-deploy-operator}
+    command:
+      - "--console-url=${CONSOLE_URL:-https://console.plrl-dev-aws.onplural.sh/ext/gql}"
+      - "--cluster-id=${CLUSTER_ID:?CLUSTER_ID is required}"
+      - "--deploy-token=${DEPLOY_TOKEN:?DEPLOY_TOKEN is required}"
+      - "--poll-interval=${POLL_INTERVAL:-30s}"
+      - "--v=${VERBOSITY:-4}"
+      - "--local=true"
+    volumes:
+      - kind_kubeconfig:/kube:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      kind:
+        condition: service_completed_successfully
+
+volumes:
+  kind_kubeconfig:

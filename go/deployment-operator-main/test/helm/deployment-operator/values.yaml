@@ -1,0 +1,10 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/pluralsh/deployment-operator
+  tag: "latest"
+  pullPolicy: IfNotPresent
+serviceAccount:
+  create: true
+fullnameOverride: "deployment-operator-test"
+secrets:
+  deployToken: "test-token" 

@@ -1,0 +1,213 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "deployment-operator.fullname" . }}
+  labels:
+    {{- include "deployment-operator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "deployment-operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "deployment-operator.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "deployment-operator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{ $tag := .Values.image.tag | default .Chart.AppVersion }}
+          {{ if .Values.global.registry }}
+          image: "{{ .Values.global.registry }}/deployment-operator:{{ $tag }}"
+          {{ else }}
+          image: "{{ .Values.image.repository }}:{{ $tag }}"
+          {{ end }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - secretRef:
+              name: deployment-operator-env
+          args:
+          - -console-url={{ .Values.consoleUrl }}
+          - -cluster-id={{ .Values.clusterId }}
+          - -leader-elect=true
+          - -processing-timeout={{ .Values.args.processingTimeout }}
+          - -enable-helm-dependency-update={{ .Values.args.enableHelmDependencyUpdate }}
+          - -disable-helm-dry-run-server={{ .Values.args.disableHelmTemplateDryRunServer }}
+          {{ if .Values.extraArgs }}
+          {{ toYaml .Values.extraArgs | nindent 10 }}
+          {{ end }}
+          env:
+          - name: IMAGE_TAG
+            value: {{ $tag | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: temp
+              mountPath: /tmp
+            - name: kube-dir
+              mountPath: /.kube
+              readOnly: false
+          {{- range $cert := .Values.certs }}
+            - name: {{ $cert.name }}
+              mountPath: "/etc/ssl/certs/{{ $cert.file }}"
+              subPath: "{{ $cert.file }}"
+          {{- end }}
+          {{ if .Values.additionalVolumeMounts }}
+          {{ toYaml .Values.additionalVolumeMounts | nindent 12 }}
+          {{ end }}
+        - name: {{ .Chart.Name }}-agentk
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{ if .Values.global.registry }}
+          image: {{ .Values.global.registry }}/agentk:{{ .Values.agentk.image.tag | default .Chart.AppVersion }}
+          {{ else }}
+          image: {{ .Values.agentk.image.repository }}:{{ .Values.agentk.image.tag | default .Chart.AppVersion }}
+          {{ end }}
+          imagePullPolicy: {{ .Values.agentk.image.pullPolicy }}
+          terminationMessagePolicy: {{ .Values.agentk.terminationMessagePolicy }}
+          {{ $kasAddress := replace "gql" "kas" (default "" .Values.consoleUrl) | replace "https" "wss" }}
+          args:
+            - --token-file=/etc/agentk/secrets/token
+            - --kas-address={{ $kasAddress }}
+            - --observability-listen-address=:8081
+            {{- if .Values.agentk.config.caCert }}
+            - --ca-cert-file=/etc/agentk/config/ca.crt
+            {{- end }}
+            {{- if .Values.agentk.config.kasHeaders }}
+            {{- range .Values.agentk.config.kasHeaders }}
+            - --kas-header
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- range .Values.agentk.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.agentk.resources | nindent 12 }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SERVICE_ACCOUNT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+          {{- if .Values.agentk.extraEnv }}
+            {{- toYaml .Values.agentk.extraEnv | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: temp
+              mountPath: /tmp
+            - name: service-account-token-volume
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+            {{- if .Values.secrets.deployToken }}
+            - name: token-volume
+              mountPath: /etc/agentk/secrets
+              readOnly: true
+            {{- end }}
+            {{- if .Values.agentk.config.caCert }}
+            - name: config-volume
+              mountPath: /etc/agentk/config
+              readOnly: true
+            {{- end }}
+            {{ if .Values.additionalVolumeMounts }}
+            {{ toYaml .Values.additionalVolumeMounts | nindent 12 }}
+            {{ end }}
+      volumes:
+        - name: temp
+          emptyDir: {}
+        - name: kube-dir
+          emptyDir: {}
+        - name: service-account-token-volume
+          projected:
+            defaultMode: 0444
+            sources:
+              - configMap:
+                  name: kube-root-ca.crt
+              - downwardAPI:
+                  items:
+                    - fieldRef:
+                        apiVersion: v1
+                        fieldPath: metadata.namespace
+                      path: namespace
+              - serviceAccountToken:
+                  expirationSeconds: 3600
+                  path: token
+        {{- if .Values.secrets.deployToken }}
+        - name: token-volume
+          secret:
+            defaultMode: 0444
+            secretName: deployment-operator-env
+            items:
+              - key: DEPLOY_TOKEN
+                path: token
+        {{- end }}
+        {{- if .Values.agentk.config.caCert }}
+        - name: config-volume
+          configMap:
+            defaultMode: 0444
+            name: {{ include "deployment-operator.fullname" . }}
+        {{- end }}
+        {{- range $cert := .Values.certs }}
+        - name: {{ $cert.name }}
+          configMap:
+            name: {{ include "deployment-operator.fullname" $ }}-{{ $cert.name }}
+        {{- end }}
+        {{ if .Values.additionalVolumes }}
+        {{ toYaml .Values.additionalVolumes | nindent 8 }}
+        {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

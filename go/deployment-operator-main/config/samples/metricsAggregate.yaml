@@ -1,0 +1,9 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: MetricsAggregate
+metadata:
+  labels:
+    app.kubernetes.io/name: metrics-aggregate
+    app.kubernetes.io/instance: metricsaggregate-sample
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+  name: global

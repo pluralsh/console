@@ -1,0 +1,48 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: deployment-controller-role
+  namespace: default
+  labels:
+    plural.sh/part-of: deployment
+    plural.sh/component: controller
+    plural.sh/version: main
+    plural.sh/name: deployment-controller
+rules:
+- apiGroups: ["platform.plural.sh"]
+  resources: ["deploymentrequests", "deploymentaccesses", "deploymentrequests/status", "deploymentaccesses/status"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["platform.plural.sh"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "update", "create", "delete", "patch"]
+- apiGroups: ["platform.plural.sh"]
+  resources: ["deploymentclasses","deploymentaccessclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["list", "watch", "create", "update", "patch"]
+- apiGroups: [""]
+  resources: ["configmaps", "serviceaccounts"]
+  verbs: ["list", "get", "watch"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: deployment-controller-role-binding
+  namespace: default
+  labels:
+    plural.sh/part-of: deployment
+    plural.sh/component: controller
+    plural.sh/version: main
+    plural.sh/name: deployment-controller
+subjects:
+  - kind: ServiceAccount
+    name: deployment-controller-sa
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: deployment-controller-role
+  apiGroup: rbac.authorization.k8s.io
+

@@ -1,0 +1,35 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: deployment-controller
+  labels:
+    plural.sh/part-of: deployment
+    plural.sh/component: controller
+    plural.sh/version: main
+    plural.sh/name: deployment-controller
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      plural.sh/part-of: deployment
+      plural.sh/component: controller
+      plural.sh/version: main
+      plural.sh/name: deployment-controller
+  template:
+    metadata:
+      labels:
+        plural.sh/part-of: deployment
+        plural.sh/component: controller
+        plural.sh/version: main
+        plural.sh/name: deployment-controller
+    spec:
+      serviceAccountName: deployment-controller-sa
+      containers:
+        - name: deployment-controller
+          image: ghcr.io/pluralsh/deployment-operator:0.0.1
+          command: ["./deployment-operator"]
+          imagePullPolicy: Always

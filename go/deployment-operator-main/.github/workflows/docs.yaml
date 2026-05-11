@@ -1,0 +1,52 @@
+name: Docs
+on:
+  schedule:
+    - cron: '0 0 * * *'
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+jobs:
+  docs:
+    name: Regenerate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      pull-requests: 'write'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+        cache: false
+    - name: Regenerate docs
+      run: make crd-docs
+    - name: Save date
+      id: date
+      run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+    - name: Create pull request
+      id: cpr
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: "chore: API documentation sync"
+        body: Automated pull request to regenerate API docs for the deployment operator.
+        commit-message: Update docs for deployment operator
+        branch: docs-${{steps.date.outputs.date}}
+        labels: documentation
+        base: main
+#    - name: Auto-approve
+#      if: steps.cpr.outputs.pull-request-operation == 'created'
+#      run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
+#      env:
+#        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Enable pull request auto-merge
+      if: steps.cpr.outputs.pull-request-operation == 'created'
+      uses: peter-evans/enable-pull-request-automerge@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+        merge-method: squash
