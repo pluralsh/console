@@ -76,7 +76,7 @@ velero-crds: ## download velero CRDs
 .PHONY: crd-docs
 crd-docs: TOOL = crd-ref-docs
 crd-docs: --tool ##generate docs from the CRDs
-	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=config.yaml
+	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=$(CRD_REF_DOCS_CONFIG)
 
 ##@ Run
 
@@ -371,20 +371,6 @@ test-docker: ## run tests via docker compose
 	status=$$?; \
 	docker compose -f docker-compose.test.yml down; \
 	exit $$status
-
-##@ Release
-
-release-vsn: ## tags and pushes a new release
-	@read -p "Version: " tag; \
-	git checkout main; \
-	git pull --rebase; \
-	git tag -a $$tag -m "new release"; \
-	git push origin $$tag
-
-delete-tag:  ## deletes a tag from git locally and upstream
-	@read -p "Version: " tag; \
-	git tag -d $$tag; \
-	git push origin :$$tag
 
 ##@ Docker Compose
 

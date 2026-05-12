@@ -81,7 +81,7 @@ codegen-chart-crds: ## copy CRDs to the controller helm chart
 .PHONY: codegen-crd-docs
 codegen-crd-docs: TOOL = crd-ref-docs
 codegen-crd-docs: --tool ## generate docs from the CRDs
-	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=config.yaml
+	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=$(CRD_REF_DOCS_CONFIG)
 
 ##@ Deployment
 
