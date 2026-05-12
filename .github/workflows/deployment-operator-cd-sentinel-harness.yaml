@@ -11,7 +11,7 @@ on:
     - "go/deployment-operator/pkg/sentinel-harness/**"
   push:
     tags:
-    - 'v*.*.*'
+    - 'go/deployment-operator/v*.*.*'
   workflow_dispatch:
     inputs:
       version:
@@ -138,7 +138,7 @@ jobs:
           docker.io/pluralsh/sentinel-harness-base
         tags: |
           type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
-          type=semver,pattern={{version}},priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
           type=sha,priority=800
           type=ref,event=pr,priority=600
     - name: Create manifest list and push
@@ -173,7 +173,7 @@ jobs:
           docker.io/pluralsh/sentinel-harness
         tags: |
           type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
-          type=semver,pattern={{version}},priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
           type=sha,priority=800
           type=ref,event=pr,priority=600
     - name: Set up QEMU

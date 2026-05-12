@@ -3,7 +3,7 @@ name: CD / Deployment Operator FIPS
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'go/deployment-operator/v*.*.*'
 
 permissions:
   contents: read
@@ -35,7 +35,7 @@ jobs:
             ghcr.io/pluralsh/deployment-operator
             docker.io/pluralsh/deployment-operator
           tags: |
-            type=semver,pattern={{version}},suffix=-fips,priority=1000
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-fips,priority=1000
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx

@@ -11,7 +11,7 @@ on:
     - "go/deployment-operator/pkg/harness/**"
   push:
     tags:
-    - 'v*.*.*'
+    - 'go/deployment-operator/v*.*.*'
 
 permissions:
   contents: read
@@ -127,7 +127,7 @@ jobs:
             ghcr.io/pluralsh/stackrun-harness-base
             docker.io/pluralsh/stackrun-harness-base
           tags: |
-            type=semver,pattern={{version}},priority=1000
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
             type=sha,priority=800
             type=ref,event=pr,priority=600
       - name: Create manifest list and push
@@ -194,8 +194,8 @@ jobs:
           ghcr.io/pluralsh/harness
           docker.io/pluralsh/harness
         tags: |
-          type=semver,pattern={{version}},suffix=-terraform-${{ matrix.versions.full }},priority=1000
-          type=semver,pattern={{version}},suffix=-terraform-${{ matrix.versions.minor }},priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-terraform-${{ matrix.versions.full }},priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-terraform-${{ matrix.versions.minor }},priority=1000
           type=sha,suffix=-terraform-${{ matrix.versions.full }},priority=800
           type=sha,suffix=-terraform-${{ matrix.versions.minor }},priority=800
           type=ref,event=pr,suffix=-terraform-${{ matrix.versions.full }},priority=600
@@ -280,8 +280,8 @@ jobs:
           ghcr.io/pluralsh/harness
           docker.io/pluralsh/harness
         tags: |
-          type=semver,pattern={{version}},suffix=-ansible-${{ matrix.versions.ansible }},priority=1000
-          type=semver,pattern={{version}},suffix=-ansible-${{ matrix.versions.minor }},priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-ansible-${{ matrix.versions.ansible }},priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-ansible-${{ matrix.versions.minor }},priority=1000
           type=sha,suffix=-ansible-${{ matrix.versions.ansible }},priority=800
           type=sha,suffix=-ansible-${{ matrix.versions.minor }},priority=800
           type=ref,event=pr,suffix=-ansible-${{ matrix.versions.ansible }},priority=600
@@ -340,7 +340,7 @@ jobs:
           ghcr.io/pluralsh/harness
           docker.io/pluralsh/harness
         tags: |
-          type=semver,pattern={{version}},suffix=-custom,priority=1000
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-custom,priority=1000
           type=sha,suffix=-custom,priority=800
           type=ref,event=pr,suffix=-custom,priority=600
     - name: Set up QEMU
