@@ -24,7 +24,6 @@ permissions:
   contents: read
 
 env:
-  GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/agent-harness-base
 
 jobs:

@@ -17,7 +17,6 @@ permissions:
   contents: read
 
 env:
-  GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/stackrun-harness-base
 
 jobs:

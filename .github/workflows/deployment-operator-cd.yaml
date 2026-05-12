@@ -9,7 +9,6 @@ permissions:
   contents: read
 
 env:
-  GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/deployment-operator
 jobs:
   test:

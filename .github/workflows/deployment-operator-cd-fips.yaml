@@ -8,9 +8,6 @@ on:
 permissions:
   contents: read
 
-env:
-  GOPROXY: "https://proxy.golang.org"
-
 jobs:
   publish-agent-fips:
     name: Build and push agent FIPS container

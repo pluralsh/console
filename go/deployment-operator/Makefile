@@ -6,8 +6,10 @@ include $(TOOLS_MAKEFILE)
 
 PROJECT_NAME := deployment-operator
 
-IMAGE_REGISTRIES := ghcr.io
-IMAGE_REPOSITORY := plural
+# Setting SHELL to bash allows bash commands to be executed by recipes.
+# Options are set to exit when a recipe line exits non-zero or a piped command fails.
+SHELL = /usr/bin/env bash -o pipefail
+.SHELLFLAGS = -ec
 
 # Config variables used for testing
 DEFAULT_PLRL_CONSOLE_URL := "https://console.plrl-dev-aws.onplural.sh"
@@ -30,17 +32,8 @@ GIT_ACCESS_TOKEN := $(if $(GIT_ACCESS_TOKEN),$(GIT_ACCESS_TOKEN),"")
 VELERO_CHART_VERSION := 5.2.2 # It should be kept in sync with Velero chart version from console/charts/velero
 VELERO_CHART_URL := https://github.com/vmware-tanzu/helm-charts/releases/download/velero-$(VELERO_CHART_VERSION)/velero-$(VELERO_CHART_VERSION).tgz
 
-## Location to install dependencies to
-LOCALBIN ?= $(shell pwd)/bin
-$(LOCALBIN):
-	mkdir -p $(LOCALBIN)
-
 ENVTEST_K8S_VERSION := 1.28.3
 CONTROLLER_GEN_PATHS ?= ./api/...;./internal/...;./pkg/...
-
-ifndef GOPATH
-GOPATH := $(shell go env GOPATH)
-endif
 
 PRE = --ensure
 
