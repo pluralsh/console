@@ -371,11 +371,10 @@ test: --tool  ## run tests
 		-race -v -tags="cache"
 
 .PHONY: test-docker
-test-docker: ## run tests in docker compose
-	@set +e; \
-	docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from tests; \
+test-docker: ## run tests via docker compose
+	@docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from deployment-operator-test; \
 	status=$$?; \
-	docker compose -f docker-compose.test.yml down --remove-orphans; \
+	docker compose -f docker-compose.test.yml down; \
 	exit $$status
 
 ##@ Release
