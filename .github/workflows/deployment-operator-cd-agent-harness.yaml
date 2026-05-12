@@ -1,9 +1,15 @@
-name: Publish Agent Harness
+name: CD / Agent Harness
 
 on:
   pull_request:
     branches:
-    - "main"
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-agent-harness.yaml"
+    - "go/deployment-operator/dockerfiles/agent-harness/**"
+    - "go/deployment-operator/cmd/agent-harness/**"
+    - "go/deployment-operator/cmd/mcpserver/**"
+    - "go/deployment-operator/pkg/agentrun-harness/**"
   push:
     tags:
     - 'v*.*.*'
@@ -13,6 +19,9 @@ on:
         description: 'Semantic Version (e.g. 1.2.3)'
         required: true
         type: string
+
+permissions:
+  contents: read
 
 env:
   GOPATH: /home/runner/go/
@@ -60,7 +69,7 @@ jobs:
     runs-on: ${{ matrix.platforms.runner }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Prepare
@@ -91,8 +100,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: "."
-          file: "./dockerfiles/agent-harness/base.Dockerfile"
+          context: "./go/deployment-operator"
+          file: "./go/deployment-operator/dockerfiles/agent-harness/base.Dockerfile"
           tags: ${{ env.REGISTRY_IMAGE }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
@@ -184,7 +193,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
@@ -216,10 +225,10 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: "."
-          file: "./dockerfiles/agent-harness/${{ matrix.agents.name }}.Dockerfile"
+          context: "./go/deployment-operator"
+          file: "./go/deployment-operator/dockerfiles/agent-harness/${{ matrix.agents.name }}.Dockerfile"
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -465,7 +474,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
@@ -497,10 +506,10 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: "."
-          file: "./dockerfiles/agent-harness/${{ matrix.languages.name }}.Dockerfile"
+          context: "./go/deployment-operator"
+          file: "./go/deployment-operator/dockerfiles/agent-harness/${{ matrix.languages.name }}.Dockerfile"
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

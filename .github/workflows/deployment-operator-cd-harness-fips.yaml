@@ -1,11 +1,20 @@
-name: Publish Harness FIPS
+name: CD / Stack Run Harness FIPS
 on:
   pull_request:
     branches:
-    - "main"
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-harness-fips.yaml"
+    - "go/deployment-operator/dockerfiles/harness/**"
+    - "go/deployment-operator/cmd/harness/**"
+    - "go/deployment-operator/pkg/harness/**"
   push:
     tags:
     - 'v*.*.*'
+
+permissions:
+  contents: read
+
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
@@ -32,7 +41,7 @@ jobs:
       version: ${{ steps.meta.outputs.version }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - name: Prepare
@@ -63,8 +72,8 @@ jobs:
       id: build
       uses: docker/build-push-action@v6
       with:
-        context: "."
-        file: "./dockerfiles/harness/base.fips.Dockerfile"
+        context: "./go/deployment-operator"
+        file: "./go/deployment-operator/dockerfiles/harness/base.fips.Dockerfile"
         tags: ${{ env.REGISTRY_IMAGE }}
         labels: ${{ steps.meta.outputs.labels }}
         platforms: ${{ matrix.platforms.platform }}
@@ -160,7 +169,7 @@ jobs:
       packages: write
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - name: Docker meta
@@ -193,10 +202,10 @@ jobs:
         username: mjgpluralsh
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
     - name: Build and push
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
-        context: "."
-        file: "./dockerfiles/harness/ansible.fips.Dockerfile"
+        context: "./go/deployment-operator"
+        file: "./go/deployment-operator/dockerfiles/harness/ansible.fips.Dockerfile"
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}

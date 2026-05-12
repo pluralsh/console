@@ -1,9 +1,12 @@
-name: Publish agent FIPS
+name: CD / Deployment Operator FIPS
 
 on:
   push:
     tags:
       - 'v*.*.*'
+
+permissions:
+  contents: read
 
 env:
   GOPATH: /home/runner/go/
@@ -21,7 +24,7 @@ jobs:
       version: ${{ steps.meta.outputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
@@ -49,10 +52,10 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: "."
-          file: "./dockerfiles/agent/fips.Dockerfile"
+          context: "./go/deployment-operator"
+          file: "./go/deployment-operator/dockerfiles/agent/fips.Dockerfile"
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
