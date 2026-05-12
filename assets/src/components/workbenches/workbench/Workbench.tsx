@@ -122,9 +122,11 @@ export function WorkbenchPageLayout({
 
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
   const resolveSubTabTo = useCallback(
-    (relPath: string) =>
-      relPath === '' ? workbenchBasePath : `${workbenchBasePath}/${relPath}`,
-    [workbenchBasePath]
+    (relPath: string) => {
+      const base = getWorkbenchAbsPath(workbenchId)
+      return relPath === '' ? base : `${base}/${relPath}`
+    },
+    [workbenchId]
   )
 
   const handleMoreMenuSelection = useCallback(
