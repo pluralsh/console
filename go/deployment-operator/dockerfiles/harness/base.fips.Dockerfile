@@ -19,17 +19,22 @@ ARG VERSION
 
 WORKDIR /workspace
 
+# Copy required local modules referenced by go.mod replace directives
+COPY /client /workspace/client
+COPY /polly /workspace/polly
+
+WORKDIR /workspace/deployment-operator
+
 # Retrieve application dependencies.
 # This allows the container build to reuse cached dependencies.
 # Expecting to copy go.mod and if present go.sum.
-COPY go.mod go.mod
-COPY go.sum go.sum
+COPY deployment-operator/go.* ./
 RUN go mod download
 
-COPY cmd/harness ./cmd/harness
-COPY pkg ./pkg
-COPY internal ./internal
-COPY api ./api
+COPY deployment-operator/cmd/harness ./cmd/harness
+COPY deployment-operator/pkg ./pkg
+COPY deployment-operator/internal ./internal
+COPY deployment-operator/api ./api
 
 
 RUN GOOS=linux GOARCH=${TARGETARCH} GO111MODULE=on go build -a \
@@ -48,7 +53,7 @@ USER 65532:65532
 # Set up the environment
 # - copy the harness binary
 # - copy the trivy binary
-COPY --from=builder /workspace/harness /harness
+COPY --from=builder /workspace/deployment-operator/harness /harness
 COPY --from=aquasec/trivy:0.69.3 /usr/local/bin/trivy /usr/local/bin/trivy
 
 WORKDIR /plural

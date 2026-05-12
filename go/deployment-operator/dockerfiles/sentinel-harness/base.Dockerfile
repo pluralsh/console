@@ -6,14 +6,20 @@ ARG VERSION
 
 WORKDIR /workspace
 
+# Copy required local modules referenced by go.mod replace directives
+COPY /client /workspace/client
+COPY /polly /workspace/polly
+
+WORKDIR /workspace/deployment-operator
+
 # Retrieve application dependencies
-COPY go.* ./
+COPY deployment-operator/go.* ./
 RUN go mod download
 
-COPY cmd/sentinel-harness ./cmd/sentinel-harness
-COPY pkg ./pkg
-COPY internal ./internal
-COPY api ./api
+COPY deployment-operator/cmd/sentinel-harness ./cmd/sentinel-harness
+COPY deployment-operator/pkg ./pkg
+COPY deployment-operator/internal ./internal
+COPY deployment-operator/api ./api
 
 # Build agent-harness binary
 RUN CGO_ENABLED=0 \

@@ -60,7 +60,7 @@ manifests: --tool ## Generate WebhookConfiguration, ClusterRole and CustomResour
 .PHONY: generate
 generate: TOOL = controller-gen
 generate: --tool ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="$(CONTROLLER_GEN_PATHS)"
+	$(CONTROLLER_GEN) object:headerFile=$(BOILERPLATE_FILE) paths="$(CONTROLLER_GEN_PATHS)"
 
 .PHONY: genmock
 genmock: TOOL = mockery
@@ -252,32 +252,32 @@ terraform-mcpserver: ## build terraform mcp server
 docker-build-agent-fips: ## build docker fips agent image
 	docker build \
     	  	-t deployment-agent-fips \
-    		-f dockerfiles/agent/fips.Dockerfile \
-    		.
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent/fips.Dockerfile \
+    		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-harness-base
 docker-build-harness-base: ## build base docker harness image
 	docker build \
 			--build-arg=VERSION="0.0.0-dev" \
     	  	-t harness-base \
-    		-f dockerfiles/harness/base.Dockerfile \
-    		.
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/base.Dockerfile \
+    		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-harness-terraform
 docker-build-harness-terraform: docker-build-harness-base ## build terraform docker harness image
 	docker build \
 		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
     	  	-t harness \
-    		-f dockerfiles/harness/terraform.Dockerfile \
-    		.
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/terraform.Dockerfile \
+    		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-harness-ansible
 docker-build-harness-ansible: docker-build-harness-base ## build terraform docker harness image
 	docker build \
 		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
     	  	-t harness \
-    		-f dockerfiles/harness/ansible.Dockerfile \
-    		.
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/ansible.Dockerfile \
+    		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-harness-base-fips
 docker-build-harness-base-fips: ## build fips base docker harness image
@@ -285,8 +285,8 @@ docker-build-harness-base-fips: ## build fips base docker harness image
 			--no-cache \
 			--build-arg=VERSION="0.0.0-dev" \
     	  	-t harness-base-fips \
-    		-f dockerfiles/harness/base.fips.Dockerfile \
-    		.
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/base.fips.Dockerfile \
+    		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-harness-ansible-fips
 docker-build-harness-ansible-fips: docker-build-harness-base-fips ## build fips ansible docker harness image
@@ -294,72 +294,72 @@ docker-build-harness-ansible-fips: docker-build-harness-base-fips ## build fips 
 			--no-cache \
 		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
     	  	-t harness-fips \
-    		-f dockerfiles/harness/ansible.fips.Dockerfile \
-    		.
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/ansible.fips.Dockerfile \
+    		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-base
 docker-build-agent-harness-base: ## build base docker agent harness image
 	docker build \
 		--build-arg=VERSION="0.0.0-dev" \
 		-t ghcr.io/pluralsh/agent-harness-base \
-		-f dockerfiles/agent-harness/base.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/base.Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-gemini
 docker-build-agent-harness-gemini: docker-build-agent-harness-base ## build gemini docker agent harness image
 	docker build \
 		--build-arg=AGENT_HARNESS_BASE_IMAGE_TAG="latest" \
 		-t ghcr.io/pluralsh/agent-harness-gemini \
-		-f dockerfiles/agent-harness/gemini.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/gemini.Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-claude
 docker-build-agent-harness-claude: docker-build-agent-harness-base ## build claude docker agent harness image
 	docker build \
 		--build-arg=AGENT_HARNESS_BASE_IMAGE_TAG="latest" \
 		-t ghcr.io/pluralsh/agent-harness-claude \
-		-f dockerfiles/agent-harness/claude.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/claude.Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-codex
 docker-build-agent-harness-codex: docker-build-agent-harness-base ## build codex docker agent harness image
 	docker build --no-cache \
 		--build-arg=AGENT_HARNESS_BASE_IMAGE_TAG="latest" \
 		-t ghcr.io/pluralsh/agent-harness-codex \
-		-f dockerfiles/agent-harness/codex.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/codex.Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-opencode
 docker-build-agent-harness-opencode: docker-build-agent-harness-base ## build opencode docker agent harness image
 	docker build \
 		--build-arg=AGENT_HARNESS_BASE_IMAGE_TAG="latest" \
 		-t ghcr.io/pluralsh/agent-harness-opencode \
-		-f dockerfiles/agent-harness/opencode.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/opencode.Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-terraform-mcpserver
 docker-build-terraform-mcpserver: ## build mcp server docker image
 	docker build \
 		--build-arg=VERSION="0.0.0-dev" \
 		-t ghcr.io/pluralsh/terraform-mcpserver:latest \
-		-f dockerfiles/mcpserver/terraform-server/Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/mcpserver/terraform-server/Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-sentinel-harness-base
 docker-build-sentinel-harness-base: ## build base docker sentinel harness image
 	docker build \
 		--build-arg=VERSION="0.0.0-dev" \
 		-t ghcr.io/pluralsh/sentinel-harness-base:local \
-		-f dockerfiles/sentinel-harness/base.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/sentinel-harness/base.Dockerfile \
+		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-sentinel-harness
 docker-build-sentinel-harness: docker-build-sentinel-harness-base ## build docker sentinel harness image
 	docker build \
 		--build-arg=SENTINEL_HARNESS_BASE_IMAGE_TAG="local" \
 		-t ghcr.io/pluralsh/sentinel-harness:local \
-		-f dockerfiles/sentinel-harness/terratest.Dockerfile \
-		.
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/sentinel-harness/terratest.Dockerfile \
+		$(WORKSPACES_DIR)
 
 ##@ Tests
 .PHONY: test

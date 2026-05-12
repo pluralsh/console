@@ -72,7 +72,7 @@ jobs:
       id: build
       uses: docker/build-push-action@v6
       with:
-        context: "./go/deployment-operator"
+        context: "./go"
         file: "./go/deployment-operator/dockerfiles/harness/base.fips.Dockerfile"
         tags: ${{ env.REGISTRY_IMAGE }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -204,7 +204,7 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v6
       with:
-        context: "./go/deployment-operator"
+        context: "./go"
         file: "./go/deployment-operator/dockerfiles/harness/ansible.fips.Dockerfile"
         push: true
         tags: ${{ steps.meta.outputs.tags }}

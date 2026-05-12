@@ -17,7 +17,7 @@ ENV CGO_ENABLED=0 \
 RUN mkdir -p /sentinel/.cache && chown -R 65532:65532 /sentinel && chown -R 65532:65532 /plural
 
 # Copy test files
-COPY terratest /sentinel/terratest
+COPY deployment-operator/terratest /sentinel/terratest
 
 # Switch to the nonroot user
 USER 65532:65532

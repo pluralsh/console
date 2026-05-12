@@ -7,18 +7,24 @@ ARG TARGETARCH
 RUN apk add --no-cache curl
 
 WORKDIR /workspace
+
+# Copy required local modules referenced by go.mod replace directives
+COPY /client /workspace/client
+COPY /polly /workspace/polly
+
+WORKDIR /workspace/deployment-operator
+
 # Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
+# Cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer.
+COPY deployment-operator/go.* ./
 RUN go mod download
 
 # Copy the go source
-COPY /cmd/agent cmd/agent
-COPY /pkg pkg/
-COPY /api api/
-COPY /internal internal/
+COPY deployment-operator/cmd/agent cmd/agent
+COPY deployment-operator/pkg pkg/
+COPY deployment-operator/api api/
+COPY deployment-operator/internal internal/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} GO111MODULE=on GOEXPERIMENT=greenteagc go build -a -o deployment-agent cmd/agent/*.go
@@ -38,7 +44,7 @@ RUN apk upgrade --no-cache && \
     chown 65532:65532 /.kube && \
     chmod 700 /.kube
 
-COPY --from=builder /workspace/deployment-agent .
+COPY --from=builder /workspace/deployment-operator/deployment-agent .
 # Copy Helm binary from builder
 COPY --from=builder /usr/local/bin/helm /usr/local/bin/helm
 

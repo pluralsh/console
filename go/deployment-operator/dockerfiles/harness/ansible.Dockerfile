@@ -16,8 +16,8 @@ COPY --from=harness /harness /usr/local/bin/harness
 # Change ownership of the harness binary to UID/GID 65532
 RUN chown -R 65532:65532 /usr/local/bin/harness
 
-COPY ansible/modules/ /usr/share/plural/plugins/modules/
-COPY ansible/action_plugins/ /usr/share/plural/plugins/action/
+COPY deployment-operator/ansible/modules/ /usr/share/plural/plugins/modules/
+COPY deployment-operator/ansible/action_plugins/ /usr/share/plural/plugins/action/
 RUN chown -R 65532:65532 /usr/share/plural/plugins/modules/
 RUN chown -R 65532:65532 /usr/share/plural/plugins/action/
 

@@ -6,14 +6,20 @@ ARG VERSION
 
 WORKDIR /workspace
 
+# Copy required local modules referenced by go.mod replace directives
+COPY /client /workspace/client
+COPY /polly /workspace/polly
+
+WORKDIR /workspace/deployment-operator
+
 # Retrieve application dependencies
-COPY go.* ./
+COPY deployment-operator/go.* ./
 RUN go mod download
 
-COPY cmd/ ./cmd
-COPY pkg ./pkg
-COPY internal ./internal
-COPY api ./api
+COPY deployment-operator/cmd/ ./cmd
+COPY deployment-operator/pkg ./pkg
+COPY deployment-operator/internal ./internal
+COPY deployment-operator/api ./api
 
 # Build agent-harness binary
 RUN CGO_ENABLED=0 \
@@ -72,7 +78,7 @@ RUN groupadd -g 65532 nonroot && \
 
 WORKDIR /plural
 
-COPY dockerfiles/agent-harness/system /plural/system
+COPY deployment-operator/dockerfiles/agent-harness/system /plural/system
 
 RUN mkdir -p /plural/.opencode && \
     mkdir -p /plural/.claude && \
