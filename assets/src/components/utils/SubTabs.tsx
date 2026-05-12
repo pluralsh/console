@@ -12,12 +12,9 @@ export type SubtabDirectory = {
 export function SubTabs({
   directory,
   activeFn,
-  /** When set, tab links use this instead of `path` (for absolute URLs from nested routes). */
-  resolveTo,
 }: {
   directory: SubtabDirectory
   activeFn?: (path: string, route: string) => boolean
-  resolveTo?: (path: string) => string
 }) {
   const route = useParams()['*']
   return (
@@ -32,7 +29,7 @@ export function SubTabs({
                 route?.split('/')?.includes(path.split('/').pop() ?? '')
               }
               key={path}
-              to={resolveTo ? resolveTo(path) : path}
+              to={path}
             >
               <SubTab css={{ minWidth: 'max-content' }}>{label}</SubTab>
             </LinkTabWrap>

@@ -80,13 +80,6 @@ export enum WorkbenchMoreMenuKey {
   Delete = 'delete',
 }
 
-const subTabDirectory = [
-  { label: 'Jobs', path: '' },
-  { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
-  { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
-  { label: 'Evals', path: WORKBENCHES_EVALS_REL_PATH },
-]
-
 export type WorkbenchSidebar =
   | { kind: 'default' }
   | { kind: 'none' }
@@ -121,12 +114,23 @@ export function WorkbenchPageLayout({
   )
 
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
-  const resolveSubTabTo = useCallback(
-    (relPath: string) => {
-      const base = getWorkbenchAbsPath(workbenchId)
-      return relPath === '' ? base : `${base}/${relPath}`
-    },
-    [workbenchId]
+  const subTabDirectory = useMemo(
+    () => [
+      { label: 'Jobs', path: workbenchBasePath },
+      {
+        label: 'Issues',
+        path: `${workbenchBasePath}/${WORKBENCHES_ISSUES_REL_PATH}`,
+      },
+      {
+        label: 'Alerts',
+        path: `${workbenchBasePath}/${WORKBENCHES_ALERTS_REL_PATH}`,
+      },
+      {
+        label: 'Evals',
+        path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,
+      },
+    ],
+    [workbenchBasePath]
   )
 
   const handleMoreMenuSelection = useCallback(
@@ -184,9 +188,11 @@ export function WorkbenchPageLayout({
           >
             <SubTabs
               directory={subTabDirectory}
-              resolveTo={resolveSubTabTo}
               activeFn={(path) =>
-                path === (tab === WORKBENCH_JOBS_REL_PATH ? '' : tab)
+                path ===
+                (tab === '' || tab === WORKBENCH_JOBS_REL_PATH
+                  ? workbenchBasePath
+                  : `${workbenchBasePath}/${tab}`)
               }
             />
             <Flex grow={1} />
