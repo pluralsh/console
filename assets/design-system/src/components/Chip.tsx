@@ -1,4 +1,5 @@
 import {
+  ReactNode,
   type ComponentProps,
   type ComponentPropsWithRef,
   type ReactElement,
@@ -24,6 +25,7 @@ export type ChipProps = ComponentPropsWithRef<typeof Card> & {
   inactive?: boolean | 'keep-fill'
   icon?: ReactElement<any>
   iconColor?: SemanticColorKey
+  endIcon?: ReactNode
   loading?: boolean
   closeButton?: boolean
   closeButtonProps?: ComponentPropsWithRef<'div'>
@@ -177,6 +179,7 @@ function Chip({
   loading = false,
   icon,
   iconColor,
+  endIcon,
   closeButton,
   closeButtonProps,
   clickable,
@@ -220,6 +223,7 @@ function Chip({
         />
       )}
       <div className="children">{children}</div>
+      {endIcon}
       {closeButton && (
         <CloseButtonSC
           disabled={disabled}

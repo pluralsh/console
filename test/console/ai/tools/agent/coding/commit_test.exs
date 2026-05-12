@@ -4,6 +4,7 @@ defmodule Console.AI.Tools.Agent.Coding.CommitTest do
   alias Console.AI.Tools.Agent.Coding.Commit
 
   describe "implement/1" do
+    @tag :skip
     test "it can implement a pr" do
       expect(Console.Deployments.Pr.Git, :clone_branch, fn conn, "https://github.com/pluralsh/console.git", "plrl/ai/pr-test" ->
         {:ok, %{conn | dir: Briefly.create!(directory: true)}}

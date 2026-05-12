@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -32,7 +32,7 @@ jobs:
             type=ref,event=branch
       - name: Docker meta
         id: meta-ubuntu
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -43,11 +43,11 @@ jobs:
             type=ref,event=pr
             type=ref,event=branch
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to GHCR
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -63,7 +63,7 @@ jobs:
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Test Build console image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: "."
           file: "./Dockerfile"
@@ -80,7 +80,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
       # - name: Build and push ubuntu images
-      #   uses: docker/build-push-action@v3
+      #   uses: docker/build-push-action@v6
       #   with:
       #     context: "."
       #     file: "./Dockerfile"
@@ -100,11 +100,12 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
+      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v3
         with:
           version: latest
@@ -123,14 +124,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
-      - name: Restore _build
+          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-deps-v2-
+      - name: Restore NIF cache
+        uses: actions/cache@v3
+        with:
+          path: priv/native
+          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
+          restore-keys: ${{ runner.os }}-nif-v2-
+      - name: Restore _build cache
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
+          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'config/**/*.exs', 'native/**') }}
       - run: mix deps.get
       - run: mix test
       - name: Verify Changed files
@@ -150,11 +156,12 @@ jobs:
     name: Check that Schema is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
+      - uses: dtolnay/rust-toolchain@stable
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -164,14 +171,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
-      - name: Restore _build
+          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-deps-v2-
+      - name: Restore NIF cache
+        uses: actions/cache@v3
+        with:
+          path: priv/native
+          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
+          restore-keys: ${{ runner.os }}-nif-v2-
+      - name: Restore _build cache
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-3-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-3
+          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
       - name: get dependencies
         run: mix deps.get
       - name: update schema

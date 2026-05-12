@@ -14,6 +14,9 @@ defmodule ConsoleWeb.Endpoint do
     websocket: [check_origin: false],
     longpoll: false
 
+  socket "/ext/socket/gql-ws", ConsoleWeb.ExternalGraphqlWSSocket,
+    websocket: [path: "", subprotocols: ["graphql-transport-ws"], check_origin: false]
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

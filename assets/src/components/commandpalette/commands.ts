@@ -18,13 +18,13 @@ import {
   PodContainerIcon,
   PrOpenIcon,
   PrQueueIcon,
-  RobotIcon,
   setThemeColorMode,
   SprayIcon,
   StackIcon,
   ToolsIcon,
   useThemeColorMode,
   WarningShieldIcon,
+  WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { useChatbot } from 'components/ai/AIContext.tsx'
@@ -70,6 +70,7 @@ import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 import { CommandPaletteContext } from './CommandPaletteContext.tsx'
 import { useOpenAccessTokenModal } from 'components/profile/access-tokens/AccessTokenContext.tsx'
+import { WORKBENCHES_ABS_PATH } from 'routes/workbenchesRoutesConsts.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -178,17 +179,6 @@ export function useCommands({
                 },
               ]
             : []),
-          ...(!featureFlags.Agent
-            ? [
-                {
-                  id: 'enable-agent',
-                  label: 'Enable Agent',
-                  icon: RobotIcon,
-                  callback: () => setFeatureFlag('Agent', true),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
         ],
       },
     ],
@@ -269,6 +259,14 @@ export function useCommands({
                 },
               ]
             : []),
+          {
+            id: 'workbenches',
+            label: 'Workbenches',
+            icon: WorkbenchIcon,
+            callback: () => navigate(WORKBENCHES_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift W'],
+          },
           {
             id: 'pull-requests',
             label: "Pull requests (PR's)",

@@ -8,7 +8,6 @@ defmodule Mix.Tasks.Db.Certs do
       https://www.microsoft.com/pkiops/certs/microsoft%20azure%20rsa%20tls%20issuing%20ca%2004%20-%20xsign.crt
       https://www.microsoft.com/pkiops/certs/Microsoft%20RSA%20Root%20Certificate%20Authority%202017.crt
       https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem
-      https://dl.cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem
       https://cacerts.digicert.com/DigiCertGlobalRootCA.crt
     ),
   ]

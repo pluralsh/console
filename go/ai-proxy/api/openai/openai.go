@@ -14,6 +14,7 @@ type Endpoint string
 
 const (
 	EndpointChat            = "/openai/v1/chat/completions"
+	EndpointResponses       = "/openai/v1/responses"
 	EndpointChatCompletions = "/v1/chat/completions"
 	EndpointEmbeddings      = "/openai/v1/embeddings"
 )

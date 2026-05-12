@@ -1,9 +1,9 @@
 import {
   ErrorPolicy,
-  FetchPolicy,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
+  WatchQueryFetchPolicy,
 } from '@apollo/client'
 import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -36,7 +36,7 @@ export type FetchPaginatedDataOptions<
   keyPath: string[]
   pollInterval?: number
   errorPolicy?: ErrorPolicy
-  fetchPolicy?: FetchPolicy
+  fetchPolicy?: WatchQueryFetchPolicy
   skip?: boolean
 }
 

@@ -1,0 +1,68 @@
+{
+    "type": "object",
+    "description": "Adds or updates a logs panel that binds to a configured workbench log tool (CanvasBlock with type logs and ToolGraph content). The UI will run the named tool with the given arguments to fetch log lines or aggregates. Use `summary` to tell the operator what they should see; use `tool_name` that exists on this workbench (same string as the tool's configured name). `layout` is required for grid position and size.",
+    "properties": {
+        "identifier": {
+            "type": "string",
+            "description": "Unique key for this canvas block (e.g. `loki_errors`, `datadog_apache`)."
+        },
+        "layout": {
+            "type": "object",
+            "description": "Required grid placement (CanvasBlock.Layout). All of x, y, w, and h must be set.",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "Column index of the top-left cell (0-based)."
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Row index of the top-left cell (0-based)."
+                },
+                "w": {
+                    "type": "integer",
+                    "description": "Width in grid columns."
+                },
+                "h": {
+                    "type": "integer",
+                    "description": "Height in grid rows."
+                }
+            },
+            "required": ["x", "y", "w", "h"]
+        },
+        "props": {
+            "type": "object",
+            "description": "Log widget configuration (WorkbenchJobResult.ToolGraph): human-readable framing plus the tool invocation.",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Panel title shown above the log viewer (e.g. `Recent 5xx from checkout`)."
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "Optional one- or two-sentence explanation of what this query shows and why it matters for the investigation."
+                },
+                "query": {
+                    "type": "object",
+                    "description": "Which workbench tool to call and with what arguments (WorkbenchJobResult.ToolQuery).",
+                    "properties": {
+                        "tool_name": {
+                            "type": "string",
+                            "description": "Name of the workbench tool to execute.  This is likely reported in prior observability subagent results."
+                        },
+                        "tool_args": {
+                            "type": "string",
+                            "description": "JSON string passed verbatim to that tool's input schema (e.g. query string, time range, filters). Keys and shape must match the tool's documented parameters."
+                        },
+                        "summary": {
+                            "type": "string",
+                            "description": "Optional short note stored with the query metadata (can duplicate or extend `props.summary`)."
+                        }
+                    },
+                    "required": ["tool_name"]
+                }
+            },
+            "required": ["title", "query"]
+        }
+    },
+    "required": ["identifier", "layout", "props"]
+}

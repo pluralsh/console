@@ -1,0 +1,576 @@
+import {
+  Button,
+  Card,
+  Chip,
+  Select,
+  SelectButton,
+  EmptyState,
+  Flex,
+  CodeEditor,
+  FormField,
+  IconFrame,
+  Input2,
+  ListBoxItem,
+  PencilIcon,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTheme } from 'styled-components'
+
+import { StackedText } from 'components/utils/table/StackedText'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { CaptionP } from 'components/utils/typography/Text'
+import {
+  WorkbenchSkillAttributes,
+  WorkbenchSkillSubagent,
+} from 'generated/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
+
+import { createFormUpdater, WorkbenchFormStepProps } from './WorkbenchFormSteps'
+import {
+  useWorkbenchFormCardRightContent,
+  useWorkbenchFormFooterActions,
+} from './WorkbenchCreateOrEdit'
+
+export const CREATE_MODE_NAME = ''
+
+type SkillFormStep = 'metadata' | 'contents'
+const SKILL_FORM_STEPS: { id: SkillFormStep; label: string }[] = [
+  { id: 'metadata', label: 'Add metadata' },
+  { id: 'contents', label: 'Add content' },
+]
+const DUPLICATE_SKILL_NAME_ERROR = 'A skill with this name already exists.'
+const SKILL_SUBAGENTS = Object.values(
+  WorkbenchSkillSubagent
+) as WorkbenchSkillSubagent[]
+const subagentLabel = (subagent: WorkbenchSkillSubagent) =>
+  subagent
+    .toLowerCase()
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+
+const normalizeSkillName = (name: Nullable<string>) =>
+  (name ?? '').trim().toLowerCase()
+
+const validateSkillName = ({
+  draftName,
+  existingSkillNames,
+  editingName,
+}: {
+  draftName: Nullable<string>
+  existingSkillNames: Nullable<string>[]
+  editingName: Nullable<string>
+}): Nullable<string> => {
+  const normalizedDraftName = normalizeSkillName(draftName)
+  if (!normalizedDraftName) return null
+
+  const normalizedEditingName = normalizeSkillName(editingName)
+  const hasDuplicateName = existingSkillNames.some((name) => {
+    const normalizedExistingName = normalizeSkillName(name)
+    return (
+      normalizedExistingName === normalizedDraftName &&
+      normalizedExistingName !== normalizedEditingName
+    )
+  })
+
+  return hasDuplicateName ? DUPLICATE_SKILL_NAME_ERROR : null
+}
+
+export function PluralSkillsSubStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const theme = useTheme()
+  const update = createFormUpdater(setFormState)
+  const skills: WorkbenchSkillAttributes[] = (
+    formState.workbenchSkills ?? []
+  ).filter(isNonNullable)
+  const existingSkillNames = useMemo(
+    () => skills.map((skill) => skill.name),
+    [skills]
+  )
+  const [editingName, setEditingName] = useState<string | null>(null)
+
+  const editingSkill = useMemo(
+    () =>
+      !editingName
+        ? null
+        : (skills.find((s) => s.name === editingName) ?? null),
+    [editingName, skills]
+  )
+
+  const handleCreate = () => setEditingName(CREATE_MODE_NAME)
+
+  const handleEdit = (name: string) => setEditingName(name)
+
+  const handleDelete = (name: string) =>
+    update((d) => {
+      const next: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? [])
+        .filter(isNonNullable)
+        .filter((s) => s.name !== name)
+      d.workbenchSkills =
+        next as WorkbenchFormStepProps['formState']['workbenchSkills']
+    })
+
+  const handleSave = (draft: WorkbenchSkillAttributes): Nullable<string> => {
+    const canSave = !!draft.contents.trim() && !!draft.name.trim()
+    if (!canSave) return 'Skill name and contents are required.'
+
+    const error = validateSkillName({
+      draftName: draft.name,
+      existingSkillNames,
+      editingName,
+    })
+    if (error) return error
+
+    const normalizedDraft: WorkbenchSkillAttributes = {
+      ...draft,
+      name: draft.name.trim(),
+      description: draft.description?.trim(),
+      subagents:
+        (draft.subagents?.filter(isNonNullable) as WorkbenchSkillSubagent[]) ??
+        [],
+    }
+    update((d) => {
+      const list: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? []).filter(
+        isNonNullable
+      )
+      const idx = editingName
+        ? list.findIndex((s) => s.name === editingName)
+        : -1
+      if (idx >= 0) list[idx] = normalizedDraft
+      else list.push(normalizedDraft)
+      d.workbenchSkills =
+        list as WorkbenchFormStepProps['formState']['workbenchSkills']
+    })
+    setEditingName(null)
+    return null
+  }
+
+  const handleCancel = () => setEditingName(null)
+
+  if (editingName !== null) {
+    return (
+      <PluralSkillForm
+        initialSkill={editingSkill}
+        existingSkillNames={existingSkillNames}
+        isNew={editingName === CREATE_MODE_NAME}
+        onSave={handleSave}
+        onCancel={handleCancel}
+      />
+    )
+  }
+
+  return (
+    <FormField
+      label={
+        <Flex
+          align="center"
+          justify="space-between"
+          width="100%"
+        >
+          <span>Skills</span>
+          {skills.length > 0 && (
+            <InlineLink
+              css={{ fontWeight: 400 }}
+              onClick={(e) => {
+                e.preventDefault()
+                handleCreate()
+              }}
+            >
+              Add new skills
+            </InlineLink>
+          )}
+        </Flex>
+      }
+    >
+      {skills.length === 0 ? (
+        <Card css={{ border: 'none' }}>
+          <EmptyState
+            message="No skills"
+            description="Skills teach Workbench agents what to do and how to do it. Add your first skill to get started, or connect a git repository to manage skills alongside your codebase."
+            css={{ margin: '0 auto', width: 580 }}
+          >
+            <Button
+              secondary
+              small
+              onClick={handleCreate}
+            >
+              Create new skill
+            </Button>
+          </EmptyState>
+        </Card>
+      ) : (
+        <Card
+          fillLevel={2}
+          css={{
+            padding: 0,
+            overflow: 'hidden',
+            border: theme.borders['fill-two'],
+            backgroundColor: theme.colors['fill-zero'],
+          }}
+        >
+          {skills.map((skill, idx) => (
+            <PluralSkillRow
+              key={skill.name}
+              skill={skill}
+              isLast={idx === skills.length - 1}
+              onEdit={() => handleEdit(skill.name)}
+              onDelete={() => handleDelete(skill.name)}
+            />
+          ))}
+        </Card>
+      )}
+    </FormField>
+  )
+}
+
+function PluralSkillRow({
+  skill,
+  isLast,
+  onEdit,
+  onDelete,
+}: {
+  skill: WorkbenchSkillAttributes
+  isLast: boolean
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const theme = useTheme()
+  return (
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: theme.spacing.small,
+        padding: theme.spacing.small,
+        borderBottom: isLast ? 'none' : theme.borders['fill-two'],
+      }}
+    >
+      <StackedText
+        truncate
+        first={skill.name}
+        second={skill.description}
+        firstPartialType="body2LooseLineHeight"
+        firstColor="text-light"
+        secondPartialType="caption"
+        secondColor="text-xlight"
+        css={{ minWidth: 0, flex: 1 }}
+      />
+      <Flex
+        align="center"
+        gap="xsmall"
+      >
+        <IconFrame
+          clickable
+          tooltip="Edit skill"
+          icon={<PencilIcon />}
+          onClick={onEdit}
+        />
+        <IconFrame
+          clickable
+          tooltip="Delete skill"
+          icon={<TrashCanIcon color="icon-danger" />}
+          onClick={onDelete}
+        />
+      </Flex>
+    </div>
+  )
+}
+
+function PluralSkillForm({
+  initialSkill,
+  existingSkillNames,
+  isNew,
+  onSave,
+  onCancel,
+}: {
+  initialSkill: Nullable<WorkbenchSkillAttributes>
+  existingSkillNames: Nullable<string>[]
+  isNew: boolean
+  onSave: (skill: WorkbenchSkillAttributes) => Nullable<string>
+  onCancel: () => void
+}) {
+  const [draft, setDraft] = useState<WorkbenchSkillAttributes>(
+    () =>
+      initialSkill ?? {
+        name: '',
+        description: null,
+        contents: '',
+        subagents: [],
+      }
+  )
+  const [saveError, setSaveError] = useState<Nullable<string>>(null)
+  const [currentStep, setCurrentStep] = useState<SkillFormStep>('metadata')
+  const { setFooterActions } = useWorkbenchFormFooterActions()
+  const { setRightContent } = useWorkbenchFormCardRightContent()
+  const validationError = useMemo(
+    () =>
+      validateSkillName({
+        draftName: draft.name,
+        existingSkillNames,
+        editingName: initialSkill?.name,
+      }),
+    [draft.name, existingSkillNames, initialSkill?.name]
+  )
+  const canContinue = !!draft.name.trim() && !validationError
+  const canSave = canContinue && !!draft.contents.trim()
+
+  const onSaveRef = useRef(onSave)
+  const onCancelRef = useRef(onCancel)
+  const draftRef = useRef(draft)
+  useEffect(() => {
+    onSaveRef.current = onSave
+    onCancelRef.current = onCancel
+    draftRef.current = draft
+  }, [draft, onCancel, onSave])
+
+  const selectedSubagents = useMemo(
+    () =>
+      (draft.subagents?.filter(isNonNullable) as
+        | WorkbenchSkillSubagent[]
+        | undefined) ?? [],
+    [draft.subagents]
+  )
+
+  useEffect(() => {
+    setSaveError(null)
+  }, [draft.contents, draft.description, draft.name, draft.subagents])
+
+  useEffect(() => {
+    setFooterActions(
+      <>
+        <Button
+          destructive
+          onClick={() => onCancelRef.current()}
+        >
+          Cancel
+        </Button>
+        {currentStep === 'metadata' ? (
+          <Button
+            onClick={() => setCurrentStep('contents')}
+            disabled={!canContinue}
+          >
+            Next
+          </Button>
+        ) : (
+          <Button
+            onClick={() => {
+              const saveError = onSaveRef.current(draftRef.current)
+              setSaveError(saveError)
+            }}
+            disabled={!canSave}
+          >
+            {isNew ? 'Create new skill' : 'Save skill'}
+          </Button>
+        )}
+      </>
+    )
+
+    return () => setFooterActions(null)
+  }, [canContinue, canSave, currentStep, isNew, setFooterActions])
+
+  useEffect(() => {
+    setRightContent(
+      <PluralSkillFormSteps
+        activeStep={currentStep}
+        canGoToContent={canContinue}
+        onStepSelect={setCurrentStep}
+      />
+    )
+
+    return () => setRightContent(null)
+  }, [canContinue, currentStep, setRightContent])
+
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+    >
+      {currentStep === 'metadata' ? (
+        <>
+          <FormField
+            required
+            error={!!validationError}
+            label="Skill name"
+            hint={validationError}
+          >
+            <Input2
+              placeholder="Skill name"
+              value={draft.name}
+              error={!!validationError}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            />
+          </FormField>
+          <FormField label="Skill description">
+            <Input2
+              placeholder="Short summary of what this skill does"
+              value={draft.description ?? ''}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  description: e.target.value || null,
+                })
+              }
+            />
+          </FormField>
+          <FormField
+            label="Subagents"
+            hint="Choose the subagents this skill applies to.  No selection implies all subagents."
+          >
+            <Flex
+              direction="column"
+              gap="xsmall"
+            >
+              <Select
+                label="Subagents"
+                selectionMode="multiple"
+                selectedKeys={new Set(selectedSubagents)}
+                onSelectionChange={(keys) =>
+                  setDraft({
+                    ...draft,
+                    subagents: Array.from(keys).map(
+                      (key) => key as WorkbenchSkillSubagent
+                    ),
+                  })
+                }
+                triggerButton={
+                  <SelectButton>
+                    <Flex
+                      align="center"
+                      gap="xsmall"
+                    >
+                      <Chip
+                        fillLevel={3}
+                        size="small"
+                      >
+                        {selectedSubagents.length}
+                      </Chip>
+                      <span>Subagents selected</span>
+                    </Flex>
+                  </SelectButton>
+                }
+              >
+                {SKILL_SUBAGENTS.map((subagent) => (
+                  <ListBoxItem
+                    key={subagent}
+                    label={subagentLabel(subagent)}
+                  />
+                ))}
+              </Select>
+              {selectedSubagents.length > 0 && (
+                <Flex
+                  gap="xsmall"
+                  wrap="wrap"
+                >
+                  {selectedSubagents.map((subagent) => (
+                    <Chip
+                      key={subagent}
+                      size="small"
+                      closeButton
+                      clickable
+                      onClick={() =>
+                        setDraft({
+                          ...draft,
+                          subagents: selectedSubagents.filter(
+                            (current) => current !== subagent
+                          ),
+                        })
+                      }
+                    >
+                      {subagentLabel(subagent)}
+                    </Chip>
+                  ))}
+                </Flex>
+              )}
+            </Flex>
+          </FormField>
+        </>
+      ) : (
+        <FormField
+          required
+          label="Skills file"
+          infoTooltip="Markdown contents of the skill file."
+        >
+          <CodeEditor
+            language="markdown"
+            value={draft.contents}
+            onChange={(value) => setDraft({ ...draft, contents: value ?? '' })}
+            height={350}
+            options={{ minimap: { enabled: false } }}
+          />
+        </FormField>
+      )}
+      {!!saveError && <CaptionP $color="text-danger">{saveError}</CaptionP>}
+    </Flex>
+  )
+}
+
+function PluralSkillFormSteps({
+  activeStep,
+  canGoToContent,
+  onStepSelect,
+}: {
+  activeStep: SkillFormStep
+  canGoToContent: boolean
+  onStepSelect: (step: SkillFormStep) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      align="flex-start"
+      css={{ minWidth: 140 }}
+    >
+      {SKILL_FORM_STEPS.map(({ id, label }, idx) => {
+        const isActive = id === activeStep
+        const isClickable = id === 'metadata' || canGoToContent
+
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => isClickable && onStepSelect(id)}
+            css={{
+              ...theme.partials.text.body2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.xsmall,
+              border: 'none',
+              background: 'transparent',
+              color: isActive
+                ? theme.colors['text']
+                : theme.colors['text-xlight'],
+              cursor: isClickable ? 'pointer' : 'not-allowed',
+              opacity: isClickable ? 1 : 0.6,
+              padding: 0,
+            }}
+          >
+            <Flex
+              align="center"
+              justify="center"
+              css={{
+                ...theme.partials.text.overline,
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                backgroundColor: theme.colors['fill-one'],
+                border: theme.borders.default,
+                color: isActive
+                  ? theme.colors['text']
+                  : theme.colors['text-xlight'],
+              }}
+            >
+              {idx + 1}
+            </Flex>
+            <span>{label}</span>
+          </button>
+        )
+      })}
+    </Flex>
+  )
+}

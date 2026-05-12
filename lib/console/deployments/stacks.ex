@@ -4,6 +4,7 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   import Console.AI.Fixer.Base, only: [blacklist: 1]
+  require Logger
   alias Console.PubSub
   alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
@@ -74,6 +75,23 @@ defmodule Console.Deployments.Stacks do
     |> StackRun.ordered(desc: :id)
     |> StackRun.limit(1)
     |> Repo.one()
+  end
+
+  @doc """
+  The most recent failed `StackRun` for a stack (same selection as `Console.AI.Fixer.Stack`).
+  Preloads `errors` and `steps` with `logs` for each step.
+  """
+  @spec last_failed_run(binary) :: StackRun.t() | nil
+  def last_failed_run(stack_id) do
+    StackRun.for_stack(stack_id)
+    |> StackRun.for_status(:failed)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+    |> case do
+      %StackRun{} = run -> Repo.preload(run, [:errors, steps: :logs])
+      nil -> nil
+    end
   end
 
   def preloaded(%Stack{} = stack), do: Repo.preload(stack, @preloads)
@@ -271,7 +289,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, violations: :causes])
+      |> Repo.preload([:state, :infracost_resources, violations: :causes])
       |> StackRun.update_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)
@@ -316,16 +334,18 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("insight", insight: insight, link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state ai_comment_id)a)}, pr_blob("insight", insight: insight, link: url))
+        |> save_comment(run, :ai_comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
         status: status,
         state: %StackState{plan: plan},
         pull_request: %PullRequest{} = pr
-      }, %ScmConnection{} = conn}  when is_binary(plan) and status in ~w(pending_approval successful)a ->
+      }, %ScmConnection{} = conn} when is_binary(plan) and status in ~w(pending_approval successful)a ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("stack_summary", plan: plan, link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("stack_summary", plan: plan, link: url))
+        |> save_comment(run, :comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -333,7 +353,13 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("failed", link: url))
+        {logs, has_logs} = failed_job_logs(run)
+        Dispatcher.review(
+          conn,
+          %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)},
+          pr_blob("failed", link: url, logs: logs, has_logs: has_logs)
+        )
+        |> save_comment(run, :comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -341,10 +367,17 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("succeeded", link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("succeeded", link: url))
+        |> save_comment(run, :comment_id)
       _ -> {:error, "cannot post review for this stack run"}
     end
   end
+
+  defp save_comment({:ok, id}, %StackRun{} = run, field) when is_atom(field) do
+    StackRun.changeset(run, %{scm_state: %{field => id}})
+    |> Repo.update()
+  end
+  defp save_comment(err, _, _), do: err
 
   @doc """
   Updates the commit status for a given stack run
@@ -394,6 +427,19 @@ defmodule Console.Deployments.Stacks do
     |> EEx.eval_file(assigns: assigns)
   end
 
+  @spec failed_job_logs(StackRun.t) :: {binary, boolean}
+  def failed_job_logs(%StackRun{id: id}) do
+    RunStep.for_run(id)
+    |> RunStep.failing()
+    |> RunStep.with_limit(1)
+    |> Repo.one()
+    |> Repo.preload([:logs])
+    |> case do
+      %RunStep{logs: logs} -> {Enum.map(logs, & &1.logs) |> Enum.join(""), true}
+      nil -> {"{no logs found}", false}
+    end
+  end
+
   @doc """
   It terminates a run in a completed state, and if successful, persists output/state information to the stack
   """
@@ -402,7 +448,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, :output, :errors, :stack, violations: :causes])
+      |> Repo.preload([:state, :output, :errors, :stack, :infracost_resources, violations: :causes])
       |> StackRun.complete_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)
@@ -797,9 +843,35 @@ defmodule Console.Deployments.Stacks do
   """
   @spec tarstream(StackRun.t) :: {:ok, File.t} | error
   def tarstream(%StackRun{} = run) do
-    case Repo.preload(run, [:repository]) do
-      %{repository: %GitRepository{} = repo, git: git} -> Discovery.fetch(repo, git)
-      _ -> {:error, "could not resolve repository for run"}
+    run = Repo.preload(run, [:repository])
+    with {:ok, base} <- base_tarball(run) do
+      case policy_tarball(run) do
+        {:ok, policy} -> merge_custom_policies(base, policy)
+        :ignore -> {:ok, base}
+        err -> err
+      end
+    end
+  end
+
+  defp base_tarball(%StackRun{repository: %GitRepository{} = repo, git: git}), do: Discovery.fetch(repo, git)
+  defp base_tarball(_), do: {:error, "could not resolve repository for run"}
+
+  defp policy_tarball(%StackRun{policy_engine: %Stack.PolicyEngine{
+    custom_policies: true,
+    repository_id: id,
+    git: git
+  }}) do
+    case Git.get_repository(id) do
+      %GitRepository{} = repo -> Discovery.fetch(repo, git)
+      _ -> {:error, "could not resolve repository for custom policies"}
+    end
+  end
+  defp policy_tarball(_), do: :ignore
+
+  defp merge_custom_policies(base, policy) do
+    with {:ok, policy_stream} <- Tar.tar_stream(policy) do
+      Map.new(policy_stream, fn {k, v} -> {Path.join([".plural", "policies", k]), v} end)
+      |> then(&Tar.splice(base, &1))
     end
   end
 

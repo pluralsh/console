@@ -1,0 +1,723 @@
+import { DeepPartial } from '@apollo/client/utilities'
+import {
+  Button,
+  Card,
+  CodeEditor,
+  Flex,
+  FormField,
+  Input2,
+  ListBoxItem,
+  AddIcon,
+  MinusIcon,
+  Select,
+} from '@pluralsh/design-system'
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { EditableDiv } from 'components/utils/EditableDiv'
+import { WorkbenchToolHttpMethod, WorkbenchToolType } from 'generated/graphql'
+import { ComponentProps, ComponentType, useState } from 'react'
+import styled from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+import { isValidJson } from 'utils/isValidJson'
+import {
+  INITIAL_TOOL_CONFIG_BY_TYPE,
+  WorkbenchToolFormState,
+} from './WorkbenchToolForm'
+import {
+  ConfigForToolType,
+  CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
+  ConfigurableWorkbenchToolType,
+  isConfigurableWorkbenchToolType,
+} from './workbenchToolsUtils'
+
+type ToolFormFieldProps<T extends ConfigurableWorkbenchToolType> = {
+  config: ConfigForToolType<T>
+  setConfig: (next: ConfigForToolType<T>) => void
+}
+
+export function WorkbenchToolFormFields({
+  type,
+  state,
+  update,
+}: {
+  type: WorkbenchToolType
+  state: WorkbenchToolFormState
+  update: (update: DeepPartial<WorkbenchToolFormState>) => void
+}) {
+  if (!isConfigurableWorkbenchToolType(type)) return null
+
+  function render<T extends ConfigurableWorkbenchToolType>(
+    t: T,
+    Fields: ComponentType<ToolFormFieldProps<T>>
+  ) {
+    const key = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[t]
+    const config =
+      state.configuration?.[key] ?? INITIAL_TOOL_CONFIG_BY_TYPE[type]({})[key]
+    const setConfig = (next: ConfigForToolType<T>) =>
+      update({ configuration: { ...state.configuration, [key]: next } })
+    return (
+      <Fields
+        config={config}
+        setConfig={setConfig}
+      />
+    )
+  }
+
+  switch (type) {
+    case WorkbenchToolType.Datadog:
+      return render(type, DatadogFormFields)
+    case WorkbenchToolType.Elastic:
+      return render(type, ElasticFormFields)
+    case WorkbenchToolType.Http:
+      return render(type, HttpFormFields)
+    case WorkbenchToolType.Loki:
+      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Prometheus:
+      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Tempo:
+      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Jaeger:
+      return render(type, JaegerFormFields)
+    case WorkbenchToolType.Atlassian:
+      return render(type, AtlassianFormFields)
+    case WorkbenchToolType.Linear:
+      return render(type, LinearFormFields)
+    case WorkbenchToolType.Exa:
+      return render(type, ExaFormFields)
+    case WorkbenchToolType.Github:
+      return render(type, GithubFormFields)
+    case WorkbenchToolType.Splunk:
+      return render(type, SplunkFormFields)
+    case WorkbenchToolType.Cloudwatch:
+      return render(type, CloudwatchFormFields)
+    case WorkbenchToolType.Azure:
+      return render(type, AzureFormFields)
+    case WorkbenchToolType.Dynatrace:
+      return render(type, DynatraceFormFields)
+  }
+}
+
+function DatadogFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Datadog>) {
+  return (
+    <>
+      <InputField
+        label="Site"
+        hint="e.g. datadoghq.com"
+        placeholder="datadoghq.com"
+        value={c.site ?? ''}
+        onChange={(e) => set({ ...c, site: e.target.value || undefined })}
+      />
+      <InputField
+        label="API key"
+        required
+        revealer
+        value={c.apiKey ?? ''}
+        onChange={(e) => set({ ...c, apiKey: e.target.value })}
+      />
+      <InputField
+        label="Application key (optional)"
+        revealer
+        value={c.appKey ?? ''}
+        onChange={(e) => set({ ...c, appKey: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
+function ElasticFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Elastic>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="Elasticsearch base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Index"
+        required
+        placeholder="Index name"
+        value={c.index ?? ''}
+        onChange={(e) => set({ ...c, index: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        required
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value })}
+      />
+      <InputField
+        label="Password"
+        required
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value })}
+      />
+    </>
+  )
+}
+
+function HttpFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Http>) {
+  const headers = c.headers?.filter(isNonNullable) ?? []
+
+  function setHeader(index: number, field: 'name' | 'value', value: string) {
+    const next = [...headers]
+    if (!next[index]) next[index] = { name: '', value: '' }
+    next[index] = { ...next[index], [field]: value }
+    set({ ...c, headers: next })
+  }
+
+  function addHeader() {
+    set({ ...c, headers: [...headers, { name: '', value: '' }] })
+  }
+
+  function removeHeader(index: number) {
+    set({ ...c, headers: headers.filter((_, i) => i !== index) })
+  }
+
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="Request URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <FormField
+        label="Method"
+        required
+      >
+        <Select
+          selectedKey={c.method ?? WorkbenchToolHttpMethod.Get}
+          onSelectionChange={(key) =>
+            set({
+              ...c,
+              method:
+                (key as WorkbenchToolHttpMethod) ?? WorkbenchToolHttpMethod.Get,
+            })
+          }
+          selectionMode="single"
+          label="HTTP method"
+        >
+          {Object.values(WorkbenchToolHttpMethod).map((label) => (
+            <ListBoxItem
+              key={label}
+              label={label}
+            />
+          ))}
+        </Select>
+      </FormField>
+      <FormField label="Headers">
+        <Flex
+          direction="column"
+          gap="small"
+        >
+          {headers.map((h, i) => (
+            <Flex
+              key={i}
+              gap="xsmall"
+              align="center"
+            >
+              <Input2
+                placeholder="Name"
+                value={h.name ?? ''}
+                onChange={(e) => setHeader(i, 'name', e.target.value)}
+                css={{ flex: 1 }}
+              />
+              <Input2
+                placeholder="Value"
+                value={h.value ?? ''}
+                onChange={(e) => setHeader(i, 'value', e.target.value)}
+                css={{ flex: 1 }}
+              />
+              <Button
+                tertiary
+                destructive
+                small
+                startIcon={<MinusIcon size={12} />}
+                onClick={() => removeHeader(i)}
+              />
+            </Flex>
+          ))}
+          <Button
+            secondary
+            small
+            startIcon={<AddIcon />}
+            onClick={addHeader}
+          >
+            Add header
+          </Button>
+        </Flex>
+      </FormField>
+      <InputField
+        multiline
+        label="Body"
+        placeholder="Request body (optional)"
+        initialValue={c.body ?? ''}
+        setValue={(value) => set({ ...c, body: value || undefined })}
+        css={{ minHeight: 56 }}
+      />
+      <JsonEditorField
+        label="Input schema (JSON)"
+        hint="JSON schema for the tool input"
+        value={c.inputSchema as Record<string, unknown> | string | undefined}
+        onChange={(jsonStr) => set({ ...c, inputSchema: jsonStr })}
+      />
+    </>
+  )
+}
+
+function UrlUsernamePasswordTokenTenantFormFields<
+  T extends
+    | WorkbenchToolType.Loki
+    | WorkbenchToolType.Prometheus
+    | WorkbenchToolType.Tempo,
+>({ config: c, setConfig: set }: ToolFormFieldProps<T>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="Base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Tenant ID"
+        placeholder="Optional tenant id (e.g. for Mimir)"
+        value={c.tenantId ?? ''}
+        onChange={(e) => set({ ...c, tenantId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token / API key"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
+function AtlassianFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Atlassian>) {
+  return (
+    <>
+      <InputField
+        label="Email"
+        hint="Atlassian account email (required if not using service account)"
+        placeholder="Account email"
+        value={c.email ?? ''}
+        onChange={(e) => set({ ...c, email: e.target.value || undefined })}
+      />
+      <InputField
+        label="API token"
+        hint="Required if not using service account"
+        revealer
+        value={c.apiToken ?? ''}
+        onChange={(e) => set({ ...c, apiToken: e.target.value || undefined })}
+      />
+      <InputField
+        label="Service account (JSON)"
+        hint="Encrypted service account JSON (alternative to API token + email)"
+        revealer
+        value={c.serviceAccount ?? ''}
+        onChange={(e) =>
+          set({ ...c, serviceAccount: e.target.value || undefined })
+        }
+      />
+    </>
+  )
+}
+
+function LinearFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Linear>) {
+  return (
+    <InputField
+      label="Access token"
+      required
+      revealer
+      value={c.accessToken ?? ''}
+      onChange={(e) => set({ ...c, accessToken: e.target.value })}
+    />
+  )
+}
+
+function ExaFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Exa>) {
+  return (
+    <InputField
+      label="API key (optional)"
+      hint="Leave blank to use the server-side Exa API key if configured."
+      revealer
+      value={c.apiKey ?? ''}
+      onChange={(e) => set({ ...c, apiKey: e.target.value || undefined })}
+    />
+  )
+}
+
+const GITHUB_MCP_TOOLSET_OPTIONS = [
+  { key: 'repos', label: 'Repos' },
+  { key: 'issues', label: 'Issues' },
+  { key: 'pull_requests', label: 'Pull requests' },
+  { key: 'actions', label: 'Actions' },
+  { key: 'code_security', label: 'Code security' },
+  { key: 'secret_protection', label: 'Secret protection' },
+  { key: 'copilot', label: 'Copilot (remote only)' },
+  {
+    key: 'github_support_docs_search',
+    label: 'GitHub support docs search (remote only)',
+  },
+  { key: 'all', label: 'All (every toolset)' },
+  {
+    key: 'default',
+    label: 'Default (repos, issues, pull requests)',
+  },
+] as const
+
+function GithubFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Github>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        hint="Defaults to the public GitHub MCP server when omitted."
+        placeholder="https://api.githubcopilot.com/mcp"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access token"
+        required
+        revealer
+        value={c.accessToken ?? ''}
+        onChange={(e) => set({ ...c, accessToken: e.target.value })}
+      />
+      <FormField
+        label="Toolset"
+        hint="Optional. Use a single toolset value; leave blank to use the default GitHub MCP toolsets."
+      >
+        <Select
+          selectedKey={c.toolset ?? null}
+          onSelectionChange={(key) =>
+            set({ ...c, toolset: typeof key === 'string' ? key : undefined })
+          }
+          selectionMode="single"
+          label="GitHub MCP toolset"
+        >
+          {GITHUB_MCP_TOOLSET_OPTIONS.map((option) => (
+            <ListBoxItem
+              key={option.key}
+              label={option.label}
+            />
+          ))}
+        </Select>
+      </FormField>
+    </>
+  )
+}
+
+function SplunkFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Splunk>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="Splunk base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
+function CloudwatchFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Cloudwatch>) {
+  return (
+    <>
+      <InputField
+        label="Region"
+        required
+        placeholder="us-east-1"
+        value={c.region ?? ''}
+        onChange={(e) => set({ ...c, region: e.target.value })}
+      />
+      <InputField
+        label="Role ARN"
+        placeholder="arn:aws:iam::123456789012:role/my-role"
+        value={c.roleArn ?? ''}
+        onChange={(e) => set({ ...c, roleArn: e.target.value || undefined })}
+      />
+      <InputField
+        label="Role session name"
+        placeholder="plural-workbench"
+        value={c.roleSessionName ?? ''}
+        onChange={(e) =>
+          set({ ...c, roleSessionName: e.target.value || undefined })
+        }
+      />
+      <InputField
+        label="External ID"
+        placeholder="Optional assume-role external id"
+        value={c.externalId ?? ''}
+        onChange={(e) => set({ ...c, externalId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access key ID"
+        value={c.accessKeyId ?? ''}
+        onChange={(e) =>
+          set({ ...c, accessKeyId: e.target.value || undefined })
+        }
+      />
+      <InputField
+        label="Secret access key"
+        revealer
+        value={c.secretAccessKey ?? ''}
+        onChange={(e) =>
+          set({ ...c, secretAccessKey: e.target.value || undefined })
+        }
+      />
+      <InputField
+        multiline
+        label="Default log groups"
+        hint="One log group name per line"
+        initialValue={(c.logGroupNames ?? []).filter(isNonNullable).join('\n')}
+        setValue={(value) =>
+          set({
+            ...c,
+            logGroupNames:
+              value
+                ?.split('\n')
+                .map((v) => v.trim())
+                .filter(Boolean) ?? [],
+          })
+        }
+      />
+    </>
+  )
+}
+
+function DynatraceFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Dynatrace>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="https://{tenant}.live.dynatrace.com"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Platform token"
+        required
+        revealer
+        value={c.platformToken ?? ''}
+        onChange={(e) => set({ ...c, platformToken: e.target.value })}
+      />
+    </>
+  )
+}
+
+function AzureFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Azure>) {
+  return (
+    <>
+      <InputField
+        label="Subscription ID"
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.subscriptionId ?? ''}
+        onChange={(e) => set({ ...c, subscriptionId: e.target.value })}
+      />
+      <InputField
+        label="Tenant ID"
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.tenantId ?? ''}
+        onChange={(e) => set({ ...c, tenantId: e.target.value })}
+      />
+      <InputField
+        label="Client ID"
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.clientId ?? ''}
+        onChange={(e) => set({ ...c, clientId: e.target.value })}
+      />
+      <InputField
+        label="Client secret"
+        required
+        revealer
+        value={c.clientSecret ?? ''}
+        onChange={(e) => set({ ...c, clientSecret: e.target.value })}
+      />
+      <InputField
+        label="Azure Managed Prometheus query URL (optional)"
+        hint="When set, metrics tools use PromQL against this endpoint instead of Azure Monitor REST metrics. Use your workspace query URL (for example from Azure Monitor workspace settings)."
+        placeholder="https://…"
+        value={c.prometheusUrl ?? ''}
+        onChange={(e) =>
+          set({ ...c, prometheusUrl: e.target.value || undefined })
+        }
+      />
+    </>
+  )
+}
+
+function JaegerFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Jaeger>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="http://jaeger-query.monitoring.svc:16686"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
+function JsonEditorField({
+  hint,
+  value,
+  onChange,
+  ...props
+}: {
+  value: Nullable<Record<string, unknown> | string>
+  onChange: (jsonStr: string | undefined) => void
+} & ComponentProps<typeof FormField>) {
+  const [rawValue, setRawValue] = useState(() =>
+    typeof value === 'object' ? JSON.stringify(value, null, 2) : (value ?? '')
+  )
+  const [isJsonInvalid, setIsJsonInvalid] = useState(false)
+
+  return (
+    <FormField
+      {...props}
+      hint={isJsonInvalid ? 'Invalid JSON' : hint}
+      error={isJsonInvalid}
+    >
+      <CodeEditor
+        value={rawValue}
+        onChange={(raw) => {
+          setRawValue(raw ?? '')
+          if (isValidJson(raw)) {
+            onChange(raw)
+            setIsJsonInvalid(false)
+          } else setIsJsonInvalid(true)
+        }}
+        language="json"
+        height={160}
+        options={{ lineNumbers: 'off', minimap: { enabled: false } }}
+      />
+    </FormField>
+  )
+}
+
+type InputFieldProps = { label: string; hint?: string; required?: boolean } & (
+  | ({ multiline: true } & ComponentProps<typeof EditableDiv>)
+  | ({ multiline?: false; revealer?: boolean } & ComponentProps<typeof Input2>)
+)
+function InputField({ label, hint, required, ...props }: InputFieldProps) {
+  return (
+    <FormField
+      label={label}
+      hint={hint}
+      required={required}
+    >
+      {props.multiline ? (
+        <EditableDivWrapperSC>
+          <EditableDiv {...props} />
+        </EditableDivWrapperSC>
+      ) : props.revealer ? (
+        <InputRevealer {...props} />
+      ) : (
+        <Input2 {...props} />
+      )}
+    </FormField>
+  )
+}
+
+export const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.medium,
+  background: theme.colors['fill-zero'],
+}))

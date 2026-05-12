@@ -13,7 +13,7 @@
                         "properties": {
                             "name": {
                                 "type": "string",
-                                "description": "The name of the todo"
+                                "description": "The name of the todo.  This should be space separated words and all lowercase."
                             },
                             "description": {
                                 "type": "string",
@@ -27,6 +27,10 @@
                         "required": ["name", "description", "done"]
                     }
                 },
+                "topology": {
+                    "type": "string",
+                    "description": "A mermaid diagram of the topology of the system in question in this investigation. We will validate mermaid syntax and reply with an error if invalid."
+                },
                 "working_theory": {
                     "type": "string",
                     "description": "The current working theory you might want to update.  Pass the old theory if no changes are needed."
@@ -34,14 +38,10 @@
             },
             "required": []
         },
-        "prompt": {
-            "type": "string",
-            "description": "A quick prompt to record why you're updating the notes"
-        },
-        "output": {
+        "summary": {
             "type": "string",
             "description": "A summary of the notes change you made"
         }
     },
-    "required": ["status", "prompt", "output"]
+    "required": ["status", "summary"]
 }

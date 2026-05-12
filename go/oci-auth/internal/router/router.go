@@ -11,6 +11,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
+const ginJSONFieldError = "error"
+
 var (
 	router    *gin.Engine
 	rootGroup *gin.RouterGroup
@@ -37,7 +39,7 @@ func authMiddleware() gin.HandlerFunc {
 		requestHeaderToken := c.GetHeader("Authorization")
 		splitRequestHeaderToken := strings.Split(requestHeaderToken, "Token")
 		if len(splitRequestHeaderToken) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
+			c.JSON(http.StatusUnauthorized, gin.H{ginJSONFieldError: "Invalid authorization header format"})
 			c.Abort()
 			return
 		}
@@ -52,13 +54,13 @@ func authMiddleware() gin.HandlerFunc {
 		token, err := os.ReadFile(args.TokenFile())
 		if err != nil {
 			klog.Error("Could not read token file, got error:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not read token file"})
+			c.JSON(http.StatusInternalServerError, gin.H{ginJSONFieldError: "Could not read token file"})
 			c.Abort()
 			return
 		}
 
 		if requestToken != string(token) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.JSON(http.StatusUnauthorized, gin.H{ginJSONFieldError: "Invalid token"})
 			c.Abort()
 			return
 		}

@@ -14,7 +14,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -30,6 +30,9 @@ jobs:
           helm repo add radar https://radar-base.github.io/radar-helm-charts
           helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
           helm repo add dexidp https://charts.dexidp.io
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add plural https://pluralsh.github.io/module-library
+          helm repo add ory https://k8s.ory.sh/helm/charts
       - name: Run chart-releaser
         id: release
         uses: helm/chart-releaser-action@v1.5.0

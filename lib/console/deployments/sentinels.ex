@@ -44,7 +44,10 @@ defmodule Console.Deployments.Sentinels do
   @spec create_sentinel(map, User.t) :: sentinel_resp
   def create_sentinel(attrs, %User{} = user) do
     %Sentinel{}
-    |> Sentinel.changeset(Settings.add_project_id(attrs, user))
+    |> Sentinel.changeset(
+      Settings.add_project_id(attrs, user)
+      |> Map.put(:last_run_at, Timex.now())
+    )
     |> allow(user, :write)
     |> when_ok(:insert)
   end
@@ -90,6 +93,15 @@ defmodule Console.Deployments.Sentinels do
     end)
     |> add_operation(:run, fn %{fetch: sentinel} -> run_sentinel(sentinel) end)
     |> execute(extract: :run)
+  end
+
+  @doc """
+  Marks a sentinel as having been run
+  """
+  @spec mark_ran(Sentinel.t) :: sentinel_resp
+  def mark_ran(%Sentinel{} = sentinel) do
+    Sentinel.changeset(sentinel, %{last_run_at: DateTime.utc_now()})
+    |> Repo.update()
   end
 
   @doc """
@@ -145,7 +157,9 @@ defmodule Console.Deployments.Sentinels do
           repository_id: test.repository_id,
         }) end)
 
-        {count, _} = Repo.insert_all(SentinelRunJob, attrs)
+        {count, jobs} = Repo.insert_all(SentinelRunJob, attrs, returning: true)
+        Enum.each(jobs, &handle_notify(PubSub.SentinelRunJobCreated, &1))
+
         count
       end)
       |> Enum.sum()

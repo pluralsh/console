@@ -4,7 +4,6 @@ import {
   Button,
   ButtonProps,
   Card,
-  CardProps,
   CloseIcon,
   DiscoverIcon,
   Flex,
@@ -13,7 +12,7 @@ import {
   Markdown,
   SelectButton,
 } from '@pluralsh/design-system'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { AgentRunInfoCard } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { GqlError } from 'components/utils/Alert'
@@ -22,12 +21,9 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunMode,
-  AgentRunStatus,
-  useAgentRunTinyQuery,
   useCreateAgentRunMutation,
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
@@ -208,58 +204,6 @@ function AgentRunForm({
   )
 }
 
-export function AgentRunInfoCard({
-  agentRun: { id, status },
-  showLinkButton = false,
-  ...props
-}: {
-  agentRun: AgentRunFragment
-  showLinkButton?: boolean
-} & CardProps) {
-  const { colors } = useTheme()
-  const isRunning =
-    status === AgentRunStatus.Running || status === AgentRunStatus.Pending
-  const { data } = useAgentRunTinyQuery({
-    variables: { id },
-    skip: !isRunning,
-    fetchPolicy: 'cache-and-network',
-    pollInterval: 5000,
-  })
-  return (
-    <AgentRunStatusBoxSC {...props}>
-      <Flex
-        align="center"
-        gap="small"
-        flex={1}
-      >
-        <DiscoverIcon
-          size={16}
-          color={colors['icon-default']}
-        />
-        <Body2BoldP $shimmer={isRunning}>
-          {status === AgentRunStatus.Successful
-            ? 'Run complete'
-            : 'Started agent run'}
-        </Body2BoldP>
-      </Flex>
-      <RunStatusChip
-        status={data?.agentRun?.status ?? status}
-        fillLevel={2}
-      />
-      {showLinkButton && (
-        <Button
-          small
-          as={Link}
-          to={getAgentRunAbsPath({ agentRunId: id })}
-          endIcon={<ArrowTopRightIcon />}
-        >
-          View details
-        </Button>
-      )}
-    </AgentRunStatusBoxSC>
-  )
-}
-
 export const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
   width: 578,
   padding: theme.spacing.medium,
@@ -275,13 +219,4 @@ export const PromptInputBoxSC = styled(Card)(({ theme }) => ({
   '&:focus-within': {
     border: theme.borders['outline-focused'],
   },
-}))
-
-const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  justifyContent: 'space-between',
-  padding: theme.spacing.medium,
-  width: '100%',
 }))

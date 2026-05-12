@@ -5,6 +5,119 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
+- version: 3.3.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **CRDs must be updated before/with the upgrade** (same command\
+      \ as prior releases):\n  ```bash\n  kubectl apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
+      \n  ```\n- **Gateway API CRDs**: ensure the LBC Gateway-specific CRDs are installed:\n\
+      \  ```bash\n  kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml\n\
+      \  ```\n  Then install upstream Gateway API CRDs depending on usage:\n  - ALB\
+      \ Gateway only:\n    ```bash\n    kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml\n\
+      \    ```\n  - NLB Gateway: release notes call out **experimental-install.yaml**;\
+      \ verify the version you apply (notes mention v1.3.0 for experimental in v3.3.0\
+      \ docs\u2014this is likely a doc inconsistency vs the v1.5.0 standard install).\
+      \ Use the version recommended by your cluster/LBC docs and ensure TLSRoute availability.\n\
+      - **IAM/RBAC**:\n  - If enabling **Certificate Management** (`EnableCertificateManagement`),\
+      \ you must add IAM permissions for **ACM + Route53** (and **Private CA** if\
+      \ used). See docs.\n  - Helm chart RBAC is now automated/synced from kubebuilder;\
+      \ expect possible **ClusterRole/ClusterRoleBinding diffs** during the upgrade\u2014\
+      review before applying in locked-down clusters.\n- **Feature gates / flags**:\n\
+      \  - To use the new cert feature: `--feature-gates=EnableCertificateManagement=true`\
+      \ plus ingress annotation `create-acm-cert: \"true\"`.\n  - Gateway API auto-detection\
+      \ continues; feature flags still exist to disable if needed.\n"
+    chart_updates: [Gateway API auto-detection improvements and **LBC-specific CRD
+        handling in Helm** (behavioral improvements around detecting/handling CRDs).,
+      Helm **ClusterRole RBAC sync** is automated from kubebuilder (RBAC manifest
+        generation change).]
+    features: ['ACM Certificate Management (feature-gated): controller can create/manage
+        ACM certificates from Ingress hostnames, supporting Amazon-issued DNS validation
+        via Route53 and private certs via AWS Private CA.', 'Gateway API: improved
+        auto-detection behavior and Helm handling around LBC-specific Gateway CRDs.']
+    breaking_changes: ['No explicit breaking changes called out for v3.3.0 vs v3.2.x,
+        but enabling `EnableCertificateManagement` without updating IAM will cause
+        reconciliation failures for certificate creation/validation.', "Gateway API\
+        \ CRD install instructions include a potential **version mismatch** for experimental\
+        \ CRDs; applying incompatible CRDs could break NLB Gateway/TLSRoute behavior\u2014\
+        validate CRD versions before upgrading."]
+  chart_version: 3.3.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.3.0']
+- version: 3.2.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n\n- **Webhook\
+      \ TLS secret handling during upgrades (3.1.x context):** v3.1.0 reintroduced\
+      \ the `keepTLSSecret` Helm value and improved upgrade logic to avoid webhook\
+      \ certificate regeneration issues (and maintain cert-manager compatibility).\
+      \ When upgrading beyond 3.1.0, **verify whether you rely on cert-manager-managed\
+      \ webhook certs** and whether you need `keepTLSSecret: true` to preserve an\
+      \ existing secret during `helm upgrade`.\n\n- **Concurrency controls exposed\
+      \ via Helm chart (v3.2.0):** v3.2.0 **backfills/exposes additional max-concurrency\
+      \ flags in the Helm chart**. If you previously set these via extraArgs or couldn\u2019\
+      t tune them, review values for any new knobs and confirm defaults are acceptable\
+      \ for your cluster/API limits.\n\n- **Webhook namespace selectors (v3.2.0):**\
+      \ v3.2.0 adds **namespace selectors for Service and Ingress webhooks** (and\
+      \ updates Helm chart accordingly). If you need to scope/limit webhook enforcement\
+      \ to particular namespaces (or you previously used object selectors), review\
+      \ and set these new selector values.\n\n- **Controller flags deprecation / behavior\
+      \ change (v3.2.0):** `--aws-vpc-tag-key` is **deprecated and ignored**. Ensure\
+      \ your Helm `extraArgs` no longer depends on it. Also, VPC lookup behavior changed:\
+      \ **all** tags in `--aws-vpc-tags` are now used as filters (can be breaking\
+      \ if your VPC only matches a subset)."
+    chart_updates: [Exposes additional controller concurrency/max-concurrency flags
+        through the Helm chart (previously not all were configurable)., Adds Helm
+        values to configure namespace selectors for the Service and Ingress validating/mutating
+        webhooks., "Carries forward improved webhook cert handling introduced in v3.1.0\
+        \ (notably `keepTLSSecret`)\u2014ensure your chart values align with your\
+        \ certificate management approach."]
+    features: ['Gateway API upgraded to v1.5.0, including new resources like ListenerSet
+        and improved Gateway functionality.', Gateway API resources are now auto-detected
+        (feature flags no longer required to enable; flags remain to disable)., Ingress
+        adds a new annotation for Frontend NLB attributes to tune NLB behavior via
+        Ingress.]
+    breaking_changes: ['Gateway API moves from v1.3 to v1.5; for NLB Gateway users,
+        TLSRoute is now served in v1 (not alpha). To avoid downtime, install the experimental
+        TLSRoute CRD during upgrade as recommended.', 'VPC tag lookup now requires
+        *all* tags in `--aws-vpc-tags` to match; previously a partial match might
+        have worked. `--aws-vpc-tag-key` is deprecated/ignored, so update flags/tags
+        accordingly.']
+  chart_version: 3.2.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.0']
+- version: 3.1.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to check\n\n- **`keepTLSSecret`\
+      \ parameter is (re)introduced in v3.1.0 with improved logic.**\n  - v3.0.0 removed\
+      \ the KeepTLS/keepTLSSecret knob in the Helm chart.\n  - v3.1.0 **reintroduces\
+      \ `keepTLSSecret`** to address webhook certificate regeneration issues during\
+      \ Helm upgrades and to maintain **cert-manager compatibility**.\n  - **Action:**\
+      \ If you previously set/relied on `keepTLSSecret` (or were impacted by the v3.0.0\
+      \ removal), review your values and explicitly set the desired behavior for upgrades,\
+      \ especially when `enableCertManager=true`.\n\n- **Webhook certificate handling\
+      \ during Helm upgrades is changed/fixed in v3.1.0.**\n  - **Action:** Expect\
+      \ different behavior around webhook TLS secret/certificate regeneration on upgrade;\
+      \ validate that the webhook comes up with a valid cert and that `aws-load-balancer-tls`\
+      \ is managed as intended in your environment.\n"
+    chart_updates: [Helm chart and controller versions remain aligned in v3.x (introduced
+        in v3.0.0)., v3.1.0 updates Helm chart information/documentation and changes
+        webhook cert upgrade logic (fixes cert regeneration and brings back `keepTLSSecret`).]
+    features: ['Gateway API: Redirect port defaulting now follows spec (defaults to
+        80/443 based on scheme when port is omitted).', 'Gateway API: Improved regex
+        handling for route matching.', 'Gateway API: Gateway status hostname is normalized
+        to lowercase for consistency.', 'AWS Global Accelerator (AGA): Cross-namespace
+        reference support for more flexible multi-namespace setups.']
+    breaking_changes: []
+  chart_version: 3.1.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.1.0']
 - version: 3.0.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

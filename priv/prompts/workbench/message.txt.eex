@@ -1,6 +1,6 @@
 We finished executing an activity for this workbench.  Here are the details:
 
-Activity type: <%= @activity.type %>
+Activity type: <%= if @activity.type == :memo, do: "notes", else: @activity.type %>
 Activity status: <%= @activity.status %>
 Initial prompt:
 
@@ -11,6 +11,83 @@ Initial prompt:
 Conclusion:
 
 ```
-<%= @activity.result && @activity.result.output %>
+<%= @activity.result.output || @activity.result.error %>
 ```
+
+<%= if is_list(@activity.result.logs) and !Enum.empty?(@activity.result.logs) do %>
+There were also some important log lines emitted by the activity, in json format:
+
+```json
+<%= Console.clean(@activity.result.logs) |> Jason.encode!() %>
+```
+<% end %>
+
+<%= if is_map(@activity.result.metrics_query) and map_size(@activity.result.metrics_query) > 0 do %>
+There were also key metrics emitted by the activity, the tool call used to find them in json format:
+
+```json
+<%= Console.clean(@activity.result.metrics_query) |> Jason.encode!() %>
+```
+
+That metrics query can be useful when reporting the final metrics informing your investigation.
+<% end %>
+
+<%= if is_list(@activity.result.metrics_queries) and !Enum.empty?(@activity.result.metrics_queries) do %>
+There were also some important metrics queries emitted by the activity, in json format:
+
+<%= for query <- @activity.result.metrics_queries do %>
+```json
+<%= Console.clean(query) |> Jason.encode!() %>
+```
+<% end %>
+
+These should be specified when delegating to the dashboard agent if you wish to include them in the final dashboard.
+<% end %>
+
+<%= if is_list(@activity.result.logs_queries) and !Enum.empty?(@activity.result.logs_queries) do %>
+There were also some important logs queries emitted by the activity, in json format:
+
+<%= for query <- @activity.result.logs_queries do %>
+```json
+<%= Console.clean(query) |> Jason.encode!() %>
+```
+<% end %>
+
+These should be specified when delegating to the dashboard agent if you wish to include them in the final dashboard.
+<% end %>
+
+<%= if is_map(@activity.result.traces_query) and map_size(@activity.result.traces_query) > 0 do %>
+There were also key traces emitted by the activity, the tool call used to find them in json format:
+
+```json
+<%= Console.clean(@activity.result.traces_query) |> Jason.encode!() %>
+```
+
+That traces query can be useful when reporting the final trace evidence informing your investigation.
+<% end %>
+
+<%= if is_list(@activity.result.traces_queries) and !Enum.empty?(@activity.result.traces_queries) do %>
+There were also some important traces queries emitted by the activity, in json format:
+
+<%= for query <- @activity.result.traces_queries do %>
+```json
+<%= Console.clean(query) |> Jason.encode!() %>
+```
+<% end %>
+
+These should be specified when delegating to the dashboard agent if you wish to include them in the final dashboard.
+<% end %>
+
+<%= if @activity.result.job_update do %>
+The key job attributes you updated were:
+
+```json
+<%= Console.clean(@activity.result.job_update) |> Jason.encode!() %>
+```
+<% end %>
+<% else %><%= if @activity.status == :running do %>
+Subagent is still running, waiting for the result...
+<% end %><%= if @activity.status == :cancelled do %>
+Subagent was cancelled, you might want to restart it.
+<% end %>
 <% end %>

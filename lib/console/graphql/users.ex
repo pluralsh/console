@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Users do
   ecto_enum :severity, Severity
   ecto_enum :notification_status, Status
   ecto_enum :persona_role, Console.Schema.Persona.Role
+  ecto_enum :homepage, Console.Schema.User.Homepage
 
   enum :read_type do
     value :notification
@@ -18,6 +19,7 @@ defmodule Console.GraphQl.Users do
     field :name,                :string
     field :email,               :string
     field :password,            :string
+    field :homepage,            :homepage
     field :roles,               :user_role_attributes
     field :email_settings,      :email_settings_attributes
     field :signing_private_key, :string
@@ -136,6 +138,7 @@ defmodule Console.GraphQl.Users do
     field :id,              non_null(:id)
     field :name,            non_null(:string)
     field :email,           non_null(:string)
+    field :homepage,        :homepage
     field :deleted_at,      :datetime
     field :profile,         :string
     field :plural_id,       :string

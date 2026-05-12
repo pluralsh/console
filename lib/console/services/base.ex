@@ -22,6 +22,9 @@ defmodule Console.Services.Base do
     end)
   end
 
+  def error({:error, _}, msg) when is_binary(msg), do: {:error, msg}
+  def error(pass, _), do: pass
+
   def ok(val), do: {:ok, val}
 
   def bang!({:ok, val}), do: val

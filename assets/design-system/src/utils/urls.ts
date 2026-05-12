@@ -59,15 +59,19 @@ export function isValidRepoUrl(url: string): boolean {
   return false
 }
 
-export function prettifyRepoUrl(repoUrl: string) {
-  const [owner, name] = repoUrl
+export function prettifyRepoUrl(
+  repoUrl: string,
+  showFullPath: boolean = false
+) {
+  const fullPath = repoUrl
     .trim()
     .replace(/^git@[^:]+:/, '')
     .replace(/^ssh:\/\/[^/]+\/?/, '')
     .replace(/^https?:\/\/[^/]+\/?/, '')
     .replace(/^\/+/, '')
     .replace(/\.git$/, '')
-    .split('/')
 
-  return owner && name ? `${owner}/${name}` : repoUrl
+  const [owner, name] = fullPath.split('/')
+
+  return showFullPath ? fullPath : owner && name ? `${owner}/${name}` : repoUrl
 }

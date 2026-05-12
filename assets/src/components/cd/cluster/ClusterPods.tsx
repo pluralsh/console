@@ -170,6 +170,7 @@ export function ClusterPods() {
       <GqlError
         header="Sorry, something went wrong"
         error={error}
+        css={{ height: 'fit-content' }}
       />
     )
 

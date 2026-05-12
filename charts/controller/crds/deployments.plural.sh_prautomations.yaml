@@ -54,6 +54,22 @@ spec:
               addon:
                 description: Addon links this automation to a specific add-on name.
                 type: string
+              ai:
+                description: |-
+                  AI configuration controls whether AI assistance is enabled for this automation
+                  and allows specifying a custom prompt to guide AI-generated updates.
+                properties:
+                  enabled:
+                    description: Enabled controls whether AI assistance is enabled
+                      for this PR automation.
+                    type: boolean
+                  prompt:
+                    description: Prompt is a custom prompt to guide AI-generated updates
+                      for this automation.  Templating is supported.
+                    type: string
+                required:
+                - prompt
+                type: object
               bindings:
                 description: Bindings containing read and write policies of PR automation.
                 properties:
@@ -491,7 +507,7 @@ spec:
               message:
                 description: |-
                   Message defines the commit message template that will be used in the generated PR.
-                  Can include templated variables from user input.
+                  Can include templated variables from user input. If you're using an AI pr automation, the ai can provide this for you.
                 type: string
               name:
                 description: |-
@@ -768,7 +784,7 @@ spec:
               title:
                 description: |-
                   Title defines the template for the pull request title. Can include variables
-                  that will be replaced with user-provided configuration values.
+                  that will be replaced with user-provided configuration values. If you're using an AI pr automation, the ai can provide this for you.
                 type: string
               updates:
                 description: |-

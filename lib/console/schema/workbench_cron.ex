@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchCron do
   use Console.Schema.Base
-  alias Console.Schema.Workbench
+  alias Console.Schema.{Workbench, User}
 
   schema "workbench_crons" do
     field :crontab,     :string
@@ -10,6 +10,7 @@ defmodule Console.Schema.WorkbenchCron do
     field :last_run_at, :utc_datetime_usec
 
     belongs_to :workbench, Workbench
+    belongs_to :user,      User
 
     timestamps()
   end
@@ -26,17 +27,18 @@ defmodule Console.Schema.WorkbenchCron do
     from(c in query, where: c.workbench_id == ^workbench_id)
   end
 
-  def preloaded(query \\ __MODULE__, preloads \\ [:workbench]) do
+  def preloaded(query \\ __MODULE__, preloads \\ [:workbench, :user]) do
     from(c in query, preload: ^preloads)
   end
 
-  @valid ~w(crontab prompt last_run_at workbench_id)a
+  @valid ~w(crontab prompt last_run_at workbench_id user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> add_next_run()
     |> foreign_key_constraint(:workbench_id)
+    |> foreign_key_constraint(:user_id)
     |> validate_required([:crontab, :next_run_at])
   end
 

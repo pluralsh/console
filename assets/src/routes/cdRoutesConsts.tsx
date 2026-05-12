@@ -32,7 +32,6 @@ export const CLUSTER_DETAILS_PATH = 'details' as const
 export const CLUSTER_NETWORK_PATH = 'network' as const
 export const CLUSTER_NODES_PATH = 'nodes' as const
 export const CLUSTER_INSIGHTS_PATH = 'insights' as const
-export const CLUSTER_INSIGHTS_SUMMARY_PATH = 'summary' as const
 export const CLUSTER_INSIGHTS_COMPONENTS_PATH = 'components' as const
 export const CLUSTER_METADATA_PATH = 'metadata' as const
 export const CLUSTER_ADDONS_REL_PATH = 'addons' as const
@@ -70,6 +69,10 @@ export const FLOW_SERVICE_PATH_MATCHER_ABS =
 
 export const SERVICE_COMPONENTS_PATH = 'components'
 export const SERVICE_PRS_PATH = 'prs'
+
+export const SERVICE_OBSERVABILITY_REL_PATH = 'observability' as const
+export const SERVICE_MONITORS_REL_PATH = 'monitors' as const
+export const SERVICE_MONITOR_PARAM_ID = 'monitorId' as const
 
 export const COMPONENT_PARAM_ID = `componentId` as const
 export const CD_SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_SERVICE_PATH_MATCHER_ABS}/${SERVICE_COMPONENTS_PATH}/:${COMPONENT_PARAM_ID}`

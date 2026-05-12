@@ -83,6 +83,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ClusterScalingRecommendation,
     StackPolicyViolation,
     StackViolationCause,
+    StackInfracostResource,
     Alert,
     AlertResolution,
     Flow,
@@ -114,10 +115,15 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     WorkbenchJobResult,
     WorkbenchTool,
     WorkbenchCron,
+    WorkbenchPrompt,
+    WorkbenchSkill,
+    WorkbenchEval,
+    WorkbenchEvalResult,
     WorkbenchWebhook,
     ObservabilityWebhook,
     IssueWebhook,
-    Issue
+    Issue,
+    Monitor
   }
 
   def query(Project, _), do: Project
@@ -189,6 +195,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterScalingRecommendation, _), do: ClusterScalingRecommendation
   def query(StackPolicyViolation, _), do: StackPolicyViolation
   def query(StackViolationCause, _), do: StackViolationCause
+  def query(StackInfracostResource, _), do: StackInfracostResource
   def query(Alert, _), do: Alert
   def query(AlertResolution, _), do: AlertResolution
   def query(Flow, _), do: Flow
@@ -220,10 +227,15 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(WorkbenchJobResult, _), do: WorkbenchJobResult.ordered()
   def query(WorkbenchTool, _), do: WorkbenchTool
   def query(WorkbenchCron, _), do: WorkbenchCron.ordered()
+  def query(WorkbenchPrompt, _), do: WorkbenchPrompt.ordered()
+  def query(WorkbenchSkill, _), do: WorkbenchSkill.ordered()
+  def query(WorkbenchEval, _), do: WorkbenchEval
+  def query(WorkbenchEvalResult, _), do: WorkbenchEvalResult.ordered()
   def query(WorkbenchWebhook, _), do: WorkbenchWebhook
   def query(ObservabilityWebhook, _), do: ObservabilityWebhook.ordered()
   def query(IssueWebhook, _), do: IssueWebhook.ordered()
   def query(Issue, _), do: Issue.ordered()
+  def query(Monitor, _), do: Monitor
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

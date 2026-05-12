@@ -1,5 +1,6 @@
 import { GlobalSettings } from 'components/settings/global/GlobalSettings'
 import { GlobalSettingsAgents } from 'components/settings/global/GlobalSettingsAgents'
+import { GlobalSettingsGeneral } from 'components/settings/global/GlobalSettingsGeneral'
 
 import { GlobalSettingsRepositories } from 'components/settings/global/GlobalSettingsRepositories'
 import { Navigate, Route } from 'react-router-dom'
@@ -100,9 +101,13 @@ const globalSettingsRoutes = (
       element={
         <Navigate
           replace
-          to="permissions"
+          to="general"
         />
       }
+    />
+    <Route
+      path="general"
+      element={<GlobalSettingsGeneral />}
     />
     <Route
       path="permissions"

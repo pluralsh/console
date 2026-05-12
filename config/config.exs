@@ -69,7 +69,38 @@ config :console,
   cloudquery: false,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem")),
   oidc_sync: :upsert,
-  refresh_token_expiry: "7d"
+  refresh_token_expiry: "7d",
+  workbench_default: false,
+  qove_key: nil,
+  cloud_override: "ignore"
+
+config :console, :ai_defaults,
+  openai: %{
+    model: "gpt-5.4-mini",
+    tool_model: "gpt-5.4",
+    embedding_model: "text-embedding-3-large"
+  },
+  azure: %{
+    model: "gpt-5.4-mini",
+    tool_model: "gpt-5.4",
+    embedding_model: "text-embedding-3-large"
+  },
+  vertex: %{
+    model: "claude-haiku-4-5@20251001",
+    tool_model: "claude-sonnet-4-5@20250929",
+    embedding_model: "gemini-embedding-001"
+  },
+  anthropic: %{
+    model: "claude-4-5-haiku-latest",
+    tool_model: "claude-4-5-sonnet-latest"
+  },
+  bedrock: %{
+    model: "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+    tool_model: "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    embedding_model: "cohere.embed-english-v3"
+  },
+  ollama: %{},
+  nexus: %{}
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
@@ -85,8 +116,6 @@ config :console, Console.Guardian,
 config :console, Console.Repo,
   queue_target: 1000,
   migration_timestamps: [type: :utc_datetime_usec]
-
-config :libcluster, :topologies, []
 
 config :tzdata, :autoupdate, :disabled
 
@@ -153,7 +182,10 @@ config :hammer,
 config :tzdata, :autoupdate, :disabled
 
 config :console, Console.Mailer,
-  adapter: Bamboo.SMTPAdapter
+  adapter: Swoosh.Adapters.SMTP
+
+# We only use SMTP, so disable the API client to avoid hackney deprecation warnings.
+config :swoosh, :api_client, false
 
 config :console, Console.PromEx,
   disabled: false,
@@ -184,5 +216,21 @@ config :sentry,
 
 config :kazan, :httpoison_options,
   hackney: [pool: :kazan_pool]
+
+config :req_llm,
+  finch: [
+    name: ReqLLM.Finch,
+    pools: %{
+      :default => [
+        protocols: [:http1],
+        size: 10,
+        count: 100,
+        pool_max_idle_time: :infinity,
+        conn_max_idle_time: :timer.seconds(360)
+      ]
+    }
+  ]
+
+# config :rustler_precompiled, :force_build, tiktoken: true
 
 import_config "#{Mix.env()}.exs"

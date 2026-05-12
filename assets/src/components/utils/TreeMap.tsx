@@ -1,9 +1,13 @@
-import { ResponsiveTreeMapCanvas, ResponsiveTreeMapHtml } from '@nivo/treemap'
+import {
+  ComputedNodeWithoutStyles,
+  ResponsiveTreeMapCanvas,
+  ResponsiveTreeMapHtml,
+} from '@nivo/treemap'
 
 import { ComponentPropsWithoutRef, memo } from 'react'
 import { styled, useTheme } from 'styled-components'
 import { useGraphTheme } from './Graph'
-import { isEmpty } from 'lodash'
+import { isEmpty, truncate } from 'lodash'
 import { EmptyState } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
 import { ChartTooltip } from './ChartTooltip'
@@ -34,10 +38,17 @@ export type TreeMapProps = {
   rounded?: boolean
 } & (TreeMapHtmlProps | TreeMapCanvasProps)
 
+export function truncatedGraphLabel(
+  node: Omit<ComputedNodeWithoutStyles<object>, 'label' | 'parentLabel'>
+) {
+  const size = node.width > node.height ? node.width : node.height
+  return truncate(node.id, { length: size / 8 })
+}
+
 const commonTreeMapProps = {
   identity: 'name',
   value: 'amount',
-  label: (e) => e.id,
+  label: truncatedGraphLabel,
   labelSkipSize: 16,
   nodeOpacity: 0.9,
   tooltip: ({ node }) => (

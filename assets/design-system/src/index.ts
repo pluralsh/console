@@ -14,6 +14,7 @@ export {
   default as Accordion,
   AccordionItem,
   type AccordionProps,
+  type AccordionCaret,
 } from './components/Accordion'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { default as AppIcon } from './components/AppIcon'
@@ -25,6 +26,8 @@ export { default as Callout } from './components/Callout'
 export type { CalloutProps } from './components/Callout'
 export { default as Card } from './components/Card'
 export type { CardProps } from './components/Card'
+export { CardTab, CardTabs } from './components/CardTab'
+export type { CardTabProps, CardTabsProps } from './components/CardTab'
 export { default as CatalogCard } from './components/CatalogCard'
 export { default as Checkbox } from './components/Checkbox'
 export { Checklist } from './components/Checklist'
@@ -78,7 +81,11 @@ export { default as LoadingSpinner } from './components/LoadingSpinner'
 export { default as LoopingLogo } from './components/LoopingLogo'
 export { default as LoopingLogoAlternative } from './components/LoopingLogoAlternative'
 export { default as LoopingLogoOutlineAlternative } from './components/LoopingLogoOutlineAlternative'
-export { default as Markdown, getLastStringChild } from './components/Markdown'
+export {
+  default as Markdown,
+  getLastStringChild,
+  markdownSanitizeSchema,
+} from './components/Markdown'
 export {
   downloadMermaidSvg,
   getMermaidId,

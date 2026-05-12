@@ -174,6 +174,7 @@ function GlobalServiceSelect({
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
+  height: '100%',
   gap: theme.spacing.large,
   maxWidth: theme.breakpoints.desktopLarge + 800,
   padding: theme.spacing.large,

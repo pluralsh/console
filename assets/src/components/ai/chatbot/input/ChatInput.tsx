@@ -5,43 +5,39 @@ import {
   CaretDownIcon,
   Chip,
   Flex,
-  PlusIcon,
-  RobotIcon,
   SemanticColorKey,
-  SendMessageIcon,
   ServersIcon,
   SpinnerAlt,
 } from '@pluralsh/design-system'
+import { useAutofocusRef } from 'components/hooks/useAutofocusRef.tsx'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 import { SemanticPartialType } from 'components/utils/table/StackedText.tsx'
-import {
-  ChatThreadDetailsFragment,
-  useAddChatContextMutation,
-} from 'generated/graphql.ts'
+import { ChatThreadDetailsFragment } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
+  ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   Dispatch,
-  FormEvent,
+  KeyboardEvent,
   ReactNode,
+  RefObject,
   SetStateAction,
   useCallback,
-  useLayoutEffect,
+  useImperativeHandle,
   useRef,
   useState,
 } from 'react'
-import { mergeRefs } from 'react-merge-refs'
-import styled, { useTheme } from 'styled-components'
+import styled, { StyledObject, useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
-import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
+import { EditableSkillChipTooltip } from './autocomplete/EditableSkillChipTooltip.tsx'
+import { MentionMenu } from './autocomplete/MentionMenu.tsx'
+import { useMentionAutocomplete } from './autocomplete/useMentionAutocomplete.ts'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
 
 export function ChatInput({
-  ref,
   currentThread,
   sendMessage,
   serverNames,
@@ -62,12 +58,9 @@ export function ChatInput({
   placeholder?: string
   onValueChange?: Dispatch<string>
   stateless?: boolean
-} & Partial<ComponentPropsWithRef<typeof EditableDiv>>) {
-  const { selectedAgent, mcpPanelOpen, setMcpPanelOpen } = useChatbot()
+} & Partial<Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>>) {
+  const { mcpPanelOpen, setMcpPanelOpen } = useChatbot()
 
-  const { sourceId, source } = useCurrentPageChatContext()
-  const showContextBtn = !!source && !!sourceId
-  const [contextBtnClicked, setContextBtnClicked] = useState(false)
   const [localMessage, setLocalMessage] = useState<string>('')
   const [persistedMessage, setPersistedMessage] =
     usePersistedSessionState<string>('currentAiChatMessage', '')
@@ -75,49 +68,17 @@ export function ChatInput({
   const newMessage = stateless ? localMessage : persistedMessage
   const setNewMessage = stateless ? setLocalMessage : setPersistedMessage
 
-  const [addChatContext, { loading: contextLoading, error: contextError }] =
-    useAddChatContextMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
-      onCompleted: () => setContextBtnClicked(true),
-    })
+  const inputRef = useAutofocusRef<ChatInputSimpleRef>()
 
-  const contentEditableRef = useRef<HTMLDivElement>(null)
-  const formRef = useRef<HTMLFormElement>(null)
-
-  // focus input on initial mount
-  useLayoutEffect(() => {
-    contentEditableRef.current?.focus()
-  }, [])
-
-  const handleSubmit = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault()
-      const content = newMessage.trim()
-      if (content) {
-        sendMessage(content)
-        setNewMessage('')
-        if (contentEditableRef.current)
-          contentEditableRef.current.innerText = ''
-      }
-    },
-    [newMessage, sendMessage, setNewMessage]
-  )
-
-  const handleAddPageContext = useCallback(() => {
-    setContextBtnClicked(true)
-    if (showContextBtn && currentThread)
-      addChatContext({
-        variables: { source, sourceId, threadId: currentThread.id },
-      })
-  }, [addChatContext, currentThread, showContextBtn, source, sourceId])
+  const handleSubmit = () => {
+    const content = newMessage.trim()
+    if (!content) return
+    sendMessage(content)
+    inputRef.current?.resetInput()
+  }
 
   return (
-    <SendMessageFormSC
-      className="plrl-chat-input-form"
-      onSubmit={handleSubmit}
-      ref={formRef}
-    >
+    <ChatInputContainerSC className="plrl-chat-input-form">
       {serverNames && serverNames.length > 0 && (
         <Flex
           justify="space-between"
@@ -140,38 +101,25 @@ export function ChatInput({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC
-        $agent={!!selectedAgent}
-        $bgColor="fill-zero"
-      >
-        {contextError && <GqlError error={contextError} />}
-        <EditableDiv
-          placeholder={placeholder}
-          setValue={(value) => {
-            setNewMessage(value)
-            onValueChange?.(value)
-          }}
-          initialValue={newMessage}
-          onEnter={() => formRef.current?.requestSubmit()}
-          css={{ maxHeight: 130 }}
-          {...props}
-          ref={mergeRefs([contentEditableRef, ref])}
-        />
-        <Flex justifyContent="space-between">
+      <ChatInputSimple
+        bgColor="fill-zero"
+        wrapperStyles={{ minHeight: 'unset' }}
+        css={{ maxHeight: 130 }}
+        {...props}
+        placeholder={placeholder}
+        setValue={(value) => {
+          setNewMessage(value)
+          onValueChange?.(value)
+        }}
+        initialValue={newMessage}
+        onSubmit={handleSubmit}
+        allowSubmit={!!newMessage.trim()}
+        options={
           <Flex
             gap="xxsmall"
             align="flex-end"
             overflow="hidden"
           >
-            {showContextBtn && (
-              <ChatInputIconFrame
-                disabled={contextBtnClicked}
-                loading={contextLoading}
-                icon={<PlusIcon />}
-                onClick={handleAddPageContext}
-                tooltip={`Append prompts and files related to the ${source.toLowerCase()} currently being viewed`}
-              />
-            )}
             {enableExamplePrompts && (
               <ChatInputIconFrame
                 active={showPrompts}
@@ -187,60 +135,91 @@ export function ChatInput({
                 onClick={() => setMcpPanelOpen(!mcpPanelOpen)}
               />
             )}
-            {/* {!selectedAgent && currentThread && (
-              <ChatInputCloudSelect currentThread={currentThread} />
-            )} */}
-            {!selectedAgent && !!currentThread?.session?.id && (
+            {!!currentThread?.session?.id && (
               <ChatInputRuntimeSelect currentThread={currentThread} />
             )}
-            {!selectedAgent && !!currentThread?.session?.id && (
+            {!!currentThread?.session?.id && (
               <ChatInputClusterSelect currentThread={currentThread} />
             )}
           </Flex>
-          <Button
-            disabled={!newMessage.trim()}
-            endIcon={<SendMessageIcon />}
-            onClick={() => formRef.current?.requestSubmit()}
-            secondary={!selectedAgent}
-            small
-            startIcon={selectedAgent ? <RobotIcon /> : undefined}
-          >
-            {selectedAgent ? 'Agent' : 'Chat'}
-          </Button>
-        </Flex>
-      </EditableContentWrapperSC>
-    </SendMessageFormSC>
+        }
+        ref={inputRef}
+      />
+    </ChatInputContainerSC>
   )
 }
 
+export type ChatInputSimpleRef = { resetInput: () => void } & HTMLElement
+
 export function ChatInputSimple({
+  ref,
   onSubmit,
   allowSubmit = true,
   loading = false,
   disabled = false,
   bgColor = 'fill-zero-selected',
   options,
+  wrapperStyles,
+  enableAutoComplete = false,
+  workbenchId,
+  onKeyDown: onKeyDownProp,
+  setValue: setValueProp,
   ...props
 }: {
+  ref?: RefObject<Nullable<ChatInputSimpleRef>>
   onSubmit: () => void
   allowSubmit?: boolean
   loading?: boolean
   bgColor?: SemanticColorKey
   options?: ReactNode
-} & Omit<ComponentPropsWithRef<typeof EditableDiv>, 'onEnter'>) {
+  wrapperStyles?: StyledObject
+  enableAutoComplete?: boolean
+  workbenchId?: Nullable<string>
+} & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
-
+  const divRef = useRef<HTMLDivElement>(null)
   const handleSubmit = () => allowSubmit && onSubmit()
+
+  const autocomplete = useMentionAutocomplete({
+    containerRef: divRef,
+    workbenchId,
+    enabled: enableAutoComplete,
+  })
+
+  useImperativeHandle(ref, () => {
+    const node = divRef.current
+    if (node)
+      return Object.assign(node, {
+        resetInput: () => {
+          node.innerHTML = ''
+          // notify React state so callers don't have to also reset state locally
+          node.dispatchEvent(new InputEvent('input', { bubbles: true }))
+        },
+      })
+  })
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (autocomplete.onKeyDown(e)) return
+      onKeyDownProp?.(e)
+    },
+    [autocomplete, onKeyDownProp]
+  )
 
   return (
     <EditableContentWrapperSC
-      $agent={false}
       $bgColor={bgColor}
-      css={{ position: 'relative', minHeight: 130 }}
+      css={{ position: 'relative', minHeight: 130, ...wrapperStyles }}
     >
       <EditableDiv
+        ref={divRef}
         {...props}
         onEnter={handleSubmit}
+        onKeyDown={onKeyDown}
+        setValue={(value) => {
+          setValueProp(value)
+          autocomplete.onInput()
+        }}
         disabled={loading || disabled}
       />
       <div css={{ width: '100%', paddingRight: spacing.xlarge }}>{options}</div>
@@ -255,6 +234,12 @@ export function ChatInputSimple({
           right: spacing.small,
         }}
       />
+      <MentionMenu
+        autoCompleteState={autocomplete.state}
+        onSelect={autocomplete.commit}
+        onHover={autocomplete.setHighlightedIndex}
+      />
+      <EditableSkillChipTooltip containerRef={divRef} />
     </EditableContentWrapperSC>
   )
 }
@@ -309,7 +294,7 @@ export function ChatOptionPill({
   )
 }
 
-const SendMessageFormSC = styled.form(({ theme }) => ({
+const ChatInputContainerSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
@@ -318,9 +303,8 @@ const SendMessageFormSC = styled.form(({ theme }) => ({
 }))
 
 const EditableContentWrapperSC = styled.div<{
-  $agent: boolean
   $bgColor: SemanticColorKey
-}>(({ theme, $agent: agent, $bgColor }) => ({
+}>(({ theme, $bgColor }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
@@ -333,12 +317,7 @@ const EditableContentWrapperSC = styled.div<{
   '&:has(div:focus)': {
     backgroundColor: theme.colors['fill-zero-selected'],
     transition: 'box-shadow 0.16s ease-in-out, border 0.16s ease-in-out',
-    boxShadow: agent
-      ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
-      : undefined,
-    border: agent
-      ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}`
-      : theme.borders['outline-focused'],
+    border: theme.borders['outline-focused'],
   },
 }))
 

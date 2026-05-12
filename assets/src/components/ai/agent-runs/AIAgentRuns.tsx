@@ -47,6 +47,7 @@ export function AIAgentRuns() {
             <Flex
               align="center"
               height={40}
+              gap="xxsmall"
             >
               <IconFrame
                 size="small"

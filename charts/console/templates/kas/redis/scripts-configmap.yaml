@@ -1,0 +1,70 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-scripts" (include "redis.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  start-master.sh: |
+    #!/bin/bash
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    {{- if and .Values.kas.redis.master.containerSecurityContext.runAsUser (eq (.Values.kas.redis.master.containerSecurityContext.runAsUser | int) 0) }}
+    useradd redis
+    chown -R redis {{ .Values.kas.redis.master.persistence.path }}
+    {{- end }}
+    if [[ -f /opt/bitnami/redis/mounted-etc/master.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/master.conf /opt/bitnami/redis/etc/master.conf
+    fi
+    if [[ -f /opt/bitnami/redis/mounted-etc/redis.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/redis.conf /opt/bitnami/redis/etc/redis.conf
+    fi
+    if [[ -f /opt/bitnami/redis/mounted-etc/users.acl ]];then
+        cp /opt/bitnami/redis/mounted-etc/users.acl /opt/bitnami/redis/etc/users.acl
+    fi
+    {{- if .Values.kas.redis.tls.enabled }}
+    ARGS=("--port" "0")
+    ARGS+=("--tls-port" "${REDIS_TLS_PORT}")
+    ARGS+=("--tls-cert-file" "${REDIS_TLS_CERT_FILE}")
+    ARGS+=("--tls-key-file" "${REDIS_TLS_KEY_FILE}")
+    {{- if not (empty (include "redis.tlsCACert" .)) }}
+    ARGS+=("--tls-ca-cert-file" "${REDIS_TLS_CA_FILE}")
+    {{- end }}
+    ARGS+=("--tls-auth-clients" "${REDIS_TLS_AUTH_CLIENTS}")
+    {{- if .Values.kas.redis.tls.dhParamsFilename }}
+    ARGS+=("--tls-dh-params-file" "${REDIS_TLS_DH_PARAMS_FILE}")
+    {{- end }}
+    {{- else }}
+    ARGS=("--port" "${REDIS_PORT}")
+    {{- end }}
+    {{- if .Values.kas.redis.auth.enabled }}
+    ARGS+=("--requirepass" "${REDIS_PASSWORD}")
+    ARGS+=("--masterauth" "${REDIS_PASSWORD}")
+    {{- else }}
+    ARGS+=("--protected-mode" "no")
+    {{- end }}
+    ARGS+=("--include" "/opt/bitnami/redis/etc/redis.conf")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/master.conf")
+    {{- if .Values.kas.redis.master.extraFlags }}
+    {{- range .Values.kas.redis.master.extraFlags }}
+    ARGS+=({{ . | quote }})
+    {{- end }}
+    {{- end }}
+    {{- if .Values.kas.redis.master.preExecCmds }}
+    {{- range $command := .Values.kas.redis.master.preExecCmds }}
+    {{- $command | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.kas.redis.master.command }}
+    exec {{ .Values.kas.redis.master.command }} "${ARGS[@]}"
+    {{- else }}
+    exec redis-server "${ARGS[@]}"
+    {{- end }}

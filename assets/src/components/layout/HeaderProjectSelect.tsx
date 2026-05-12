@@ -39,7 +39,6 @@ export function HeaderProjectSelect() {
       css={{
         width: 280,
         borderRadius: theme.borderRadiuses.medium,
-        marginLeft: theme.spacing.large,
       }}
       style={{
         border: projectId

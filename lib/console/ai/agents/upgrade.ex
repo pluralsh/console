@@ -37,7 +37,7 @@ defmodule Console.AI.Agents.Upgrade do
     })
 
     tools(step)
-    |> MemoryEngine.new(30, system_prompt: prompt(step, upgrade), acc: %{}, callback: &callback(step, &1))
+    |> MemoryEngine.new(30, system_prompt: String.trim(prompt(step, upgrade)), acc: %{}, callback: &callback(step, &1))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs

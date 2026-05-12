@@ -1,6 +1,15 @@
 import { Flex } from '@pluralsh/design-system'
 import { AlertInsight } from 'components/utils/alerts/AlertInsight'
-import { AlertsTable } from 'components/utils/alerts/AlertsTable'
+import {
+  AlertsTable,
+  ColAlertExpander,
+  ColAlertResolution,
+  ColAlertSeverity,
+  ColAlertState,
+  ColAlertTitle,
+  ColAlertUrl,
+  getColAlertViewJob,
+} from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useFlowAlertsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -17,6 +26,26 @@ export function FlowAlerts() {
     )
 
   const alerts = useMemo(() => mapExistingNodes(data?.flow?.alerts), [data])
+  const columns = useMemo(
+    () => [
+      ColAlertExpander,
+      ColAlertTitle,
+      ColAlertUrl,
+      ColAlertState,
+      ColAlertSeverity,
+      getColAlertViewJob((alert) => {
+        if (!alert.workbenchJob?.id) return null
+
+        return {
+          workbenchId: alert.workbench?.id ?? '',
+          jobId: alert.workbenchJob.id,
+          status: alert.workbenchJob.status,
+        }
+      }),
+      ColAlertResolution,
+    ],
+    []
+  )
 
   return (
     <AlertsTable
@@ -26,6 +55,10 @@ export function FlowAlerts() {
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       setVirtualSlice={setVirtualSlice}
+      hideHeader
+      columns={columns}
+      fillLevel={0}
+      rowBg="stripes"
     />
   )
 }

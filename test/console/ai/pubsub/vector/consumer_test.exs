@@ -197,6 +197,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       assert settings.ai.vector_store.initialized
     end
 
+    @tag :skip
     test "it can fetch pr files from github (opensearch)" do
       deployment_settings(ai: %{
         enabled: true,

@@ -1,0 +1,21 @@
+icon: https://avatars.githubusercontent.com/u/54533161?s=200&v=4
+git_url: https://github.com/wiz-sec/charts
+release_url: https://github.com/wiz-sec/charts/releases/tag/wiz-sensor-{vsn}
+helm_repository_url: https://wiz-sec.github.io/charts
+helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imagePullSecret.password=dummy
+chart_name: wiz-sensor
+versions:
+- version: 1.0.10715
+  kube: ['1.36', '1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.10715
+  images: ['wizio.azurecr.io/sensor:v1']
+- version: 1.0.3999
+  kube: ['1.36', '1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.3999
+  images: ['wizio.azurecr.io/sensor:v1']

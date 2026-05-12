@@ -99,9 +99,9 @@ defmodule Console.Logs.Provider.Opensearch do
     end
   end
 
-  defp build_query(%Query{query: str} = q) do
+  defp build_query(%Query{} = q) do
     %{
-      query: maybe_query(str)
+      query: maybe_query(q)
              |> add_terms(q)
              |> add_range(q)
              |> add_pod(q)
@@ -197,7 +197,7 @@ defmodule Console.Logs.Provider.Opensearch do
 
     put_in(resp, ~w(kubernetes node labels), nil)
     |> put_in(~w(kubernetes labels), nil)
-    |>  Map.take(~w(kubernetes cloud container cluster))
+    |>  Map.take(~w(kubernetes cloud container cluster custom))
     |> Line.flat_map()
     |> Line.facets()
   end
@@ -205,25 +205,27 @@ defmodule Console.Logs.Provider.Opensearch do
   defp add_filter(%{bool: %{filter: fs}} = q, f) when is_list(fs), do: put_in(q[:bool][:filter], [f | fs])
   defp add_filter(q, f), do: put_in(q[:bool][:filter], [f])
 
-  defp maybe_query(q) when is_binary(q) and byte_size(q) > 0 do
+  defp maybe_query(%Query{query: q, operator: op}) when is_binary(q) and byte_size(q) > 0 do
     %{
       bool: %{
         must: [
-          %{nested: %{
-            path: "message",
-            query: %{
-              match: %{message: q}
+          %{
+            nested: %{
+              path: "message",
+              query: %{
+                match: %{message: %{query: q, operator: Query.elastic_operator(op)}}
+              }
             }
-          }}
+          }
         ]
       }
     }
   end
   defp maybe_query(_), do: %{bool: %{}}
 
-  defp maybe_dur(dir, ts, duration) when is_binary(duration) do
+  defp maybe_dur(dir, ts, duration) when is_binary(duration) or is_map(duration) do
     opp = Query.opposite(dir)
-    dur = Timex.Duration.parse!(String.upcase(duration))
+    dur = Console.Logs.Time.safe_duration(duration)
     %{dir => ts, opp => Query.add_duration(opp, ts, dur)}
   end
   defp maybe_dur(dir, ts, _), do: %{dir => ts}
@@ -232,9 +234,9 @@ defmodule Console.Logs.Provider.Opensearch do
   defp sort(_), do: [%{"@timestamp": %{order: "desc"}}]
 
 
-  defp build_aggregation_query(%Query{query: str} = q) do
+  defp build_aggregation_query(%Query{} = q) do
     %{
-      query: maybe_query(str)
+      query: maybe_query(q)
              |> add_terms(q)
              |> add_range(q)
              |> add_namespaces(q)

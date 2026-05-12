@@ -28,6 +28,10 @@ type ServiceKustomize struct {
 	// Used for inflating Helm charts.
 	// +kubebuilder:validation:Optional
 	EnableHelm *bool `json:"enableHelm,omitempty"`
+
+	// Envsubst indicates whether to apply envsubst replacements to the manifests, using the services attached configuration as the variables.
+	// +kubebuilder:validation:Optional
+	Envsubst *bool `json:"envsubst,omitempty"`
 }
 
 func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
@@ -35,7 +39,11 @@ func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
 		return nil
 	}
 
-	return &console.KustomizeAttributes{Path: sk.Path, EnableHelm: sk.EnableHelm}
+	return &console.KustomizeAttributes{
+		Path:       sk.Path,
+		EnableHelm: sk.EnableHelm,
+		Envsubst:   sk.Envsubst,
+	}
 }
 
 type ServiceHelm struct {

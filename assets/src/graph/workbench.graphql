@@ -1,0 +1,1117 @@
+fragment WorkbenchTiny on Workbench {
+  id
+  name
+  description
+  agentRuntime {
+    id
+    name
+    type
+  }
+  tools {
+    ...WorkbenchToolTiny
+  }
+  webhooks(first: 50) {
+    edges {
+      node {
+        ...WorkbenchWebhookTiny
+      }
+    }
+  }
+}
+
+fragment IssueWebhook on IssueWebhook {
+  id
+  name
+  provider
+  url
+  insertedAt
+  updatedAt
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment IssueWebhookTiny on IssueWebhook {
+  id
+  provider
+}
+
+fragment WorkbenchWebhookTiny on WorkbenchWebhook {
+  id
+  name
+  webhook {
+    id
+    type
+  }
+  issueWebhook {
+    ...IssueWebhookTiny
+  }
+}
+
+fragment Workbench on Workbench {
+  ...WorkbenchTiny
+  systemPrompt
+  agentRuntime {
+    id
+    name
+  }
+  repository {
+    id
+  }
+  configuration {
+    infrastructure {
+      services
+      stacks
+      kubernetes
+      podLogs
+      vulnerabilities
+    }
+    observability {
+      logs
+      metrics
+    }
+    coding {
+      mode
+      repositories
+      enableBabysitting
+    }
+  }
+  skills {
+    ref {
+      ref
+      folder
+    }
+    files
+  }
+  workbenchSkills(first: 500) {
+    edges {
+      node {
+        id
+        name
+        description
+        contents
+        subagents
+      }
+    }
+  }
+  tools {
+    ...WorkbenchTool
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  botUser {
+    id
+    name
+    email
+    profile
+  }
+}
+
+fragment WorkbenchToolTiny on WorkbenchTool {
+  id
+  name
+  tool
+  categories
+  cloudConnection {
+    ...CloudConnectionTiny
+  }
+}
+
+fragment WorkbenchTool on WorkbenchTool {
+  ...WorkbenchToolTiny
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  configuration {
+    http {
+      url
+      method
+      headers {
+        name
+        value
+      }
+      body
+      inputSchema
+    }
+    datadog {
+      site
+    }
+    elastic {
+      index
+      url
+      username
+    }
+    loki {
+      url
+      username
+      tenantId
+    }
+    prometheus {
+      url
+      username
+      tenantId
+    }
+    tempo {
+      url
+      username
+      tenantId
+    }
+    jaeger {
+      url
+      username
+    }
+    atlassian {
+      email
+      url
+    }
+    linear {
+      url
+    }
+    splunk {
+      url
+      username
+    }
+    cloudwatch {
+      logGroupNames
+      region
+      roleArn
+      roleSessionName
+    }
+    azure {
+      subscriptionId
+      tenantId
+      clientId
+      prometheusUrl
+    }
+    dynatrace {
+      url
+    }
+    github {
+      url
+      toolset
+    }
+  }
+}
+
+fragment WorkbenchJobThought on WorkbenchJobThought {
+  id
+  content
+  toolName
+  toolArgs
+  activity {
+    id
+  }
+  attributes {
+    logs {
+      ...WorkbenchJobActivityLog
+    }
+    metrics {
+      ...WorkbenchJobActivityMetric
+    }
+    traces {
+      ...WorkbenchJobActivityTrace
+    }
+  }
+}
+
+fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
+  name
+  description
+  done
+}
+
+fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
+  timestamp
+  name
+  value
+  labels
+}
+
+fragment WorkbenchToolQueryData on WorkbenchToolQueryData {
+  toolName
+  toolArgs
+  summary
+}
+
+fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
+  timestamp
+  message
+  labels
+}
+
+fragment WorkbenchJobActivityTrace on WorkbenchJobActivityTrace {
+  traceId
+  spanId
+  parentId
+  name
+  service
+  start
+  end
+  tags
+}
+
+fragment WorkbenchCanvasBlockGraph on WorkbenchCanvasBlockGraph {
+  title
+  data {
+    label
+    value
+  }
+}
+
+fragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {
+  title
+  summary
+  query {
+    ...WorkbenchToolQueryData
+  }
+}
+
+fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
+  identifier
+  type
+  layout {
+    x
+    y
+    w
+    h
+  }
+  content {
+    markdown
+    metrics {
+      ...WorkbenchCanvasToolGraph
+    }
+    logs {
+      ...WorkbenchCanvasToolGraph
+    }
+    traces {
+      ...WorkbenchCanvasToolGraph
+    }
+    pie {
+      ...WorkbenchCanvasBlockGraph
+    }
+    bar {
+      ...WorkbenchCanvasBlockGraph
+    }
+  }
+}
+
+fragment WorkbenchJobResult on WorkbenchJobResult {
+  id
+  workingTheory
+  conclusion
+  topology
+  todos {
+    ...WorkbenchJobResultTodo
+  }
+  canvas {
+    ...WorkbenchCanvasBlock
+  }
+}
+
+fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
+  output
+  error
+  jobUpdate {
+    diff
+    workingTheory
+    conclusion
+  }
+  metricsQuery {
+    ...WorkbenchToolQueryData
+  }
+  logs {
+    ...WorkbenchJobActivityLog
+  }
+  traces {
+    ...WorkbenchJobActivityTrace
+  }
+  tracesQuery {
+    ...WorkbenchToolQueryData
+  }
+  canvas {
+    ...WorkbenchCanvasBlock
+  }
+}
+
+fragment WorkbenchJobActivity on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  insertedAt
+  result {
+    ...WorkbenchJobActivityResult
+  }
+  agentRun {
+    ...AgentRunTiny
+  }
+  agentRuns {
+    ...AgentRunTiny
+  }
+}
+
+fragment WorkbenchJobActivityWithThoughts on WorkbenchJobActivity {
+  ...WorkbenchJobActivity
+  thoughts {
+    ...WorkbenchJobThought
+  }
+}
+
+fragment WorkbenchJobProgress on WorkbenchJobProgress {
+  activityId
+  tool
+  text
+  arguments
+}
+
+fragment WorkbenchTextStream on WorkbenchTextStream {
+  activityId
+  text
+}
+
+fragment WorkbenchCron on WorkbenchCron {
+  id
+  crontab
+  prompt
+  lastRunAt
+  nextRunAt
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchPrompt on WorkbenchPrompt {
+  id
+  prompt
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchWebhook on WorkbenchWebhook {
+  id
+  name
+  prompt
+  matches {
+    regex
+    substring
+    caseInsensitive
+  }
+  insertedAt
+  updatedAt
+  webhook {
+    id
+    name
+    type
+    url
+  }
+  issueWebhook {
+    ...IssueWebhook
+  }
+}
+
+fragment WorkbenchIssue on Issue {
+  id
+  title
+  externalId
+  provider
+  status
+  url
+  insertedAt
+  updatedAt
+  workbench {
+    id
+  }
+  workbenchJob {
+    id
+    status
+  }
+}
+
+fragment WorkbenchJobTiny on WorkbenchJob {
+  id
+  prompt
+  status
+  insertedAt
+  user {
+    id
+    name
+    profile
+  }
+  workbench {
+    id
+    name
+  }
+  alert {
+    id
+    state
+    url
+  }
+  issue {
+    id
+    status
+    url
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  result {
+    id
+    conclusion
+  }
+}
+
+fragment WorkbenchJob on WorkbenchJob {
+  ...WorkbenchJobTiny
+  workbench {
+    id
+    name
+    tools {
+      ...WorkbenchToolTiny
+    }
+  }
+  error
+  alert {
+    ...Alert
+  }
+  issue {
+    id
+    title
+    externalId
+    insertedAt
+    status
+    url
+    provider
+  }
+  result {
+    ...WorkbenchJobResult
+  }
+}
+
+fragment WorkbenchEvalResultRow on WorkbenchEvalResult {
+  id
+  grade
+  feedback {
+    summary
+    prompt
+    result
+    logic
+  }
+  workbenchJob {
+    id
+    prompt
+    insertedAt
+    startedAt
+    completedAt
+  }
+}
+
+query Workbenches($first: Int = 100, $after: String, $q: String) {
+  workbenches(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTiny
+      }
+    }
+  }
+}
+
+query WorkbenchDashboard {
+  workbenchAggregates {
+    pullRequests
+    pullRequestMergeRate
+    evalResults
+  }
+}
+
+query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {
+  workbenchPrMergeRates(period: $period) {
+    timestamp
+    mergeRate
+  }
+}
+
+query WorkbenchesEvalsAvgGraph($period: EvalResultsPeriod = WEEK) {
+  averageWorkbenchEvalResults(period: $period) {
+    average
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {
+  averageWorkbenchEvalResults(period: $period) {
+    timestamp
+    average
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+query WorkbenchesAlerts($first: Int = 100, $after: String) {
+  workbenchAlerts(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Alert
+      }
+    }
+  }
+}
+
+query Workbench($id: ID, $name: String) {
+  workbench(id: $id, name: $name) {
+    ...Workbench
+  }
+}
+
+query WorkbenchEvalSettings($id: ID!) {
+  workbench(id: $id) {
+    id
+    eval {
+      id
+      promptRules
+      conclusionRules
+      progressRules
+    }
+  }
+}
+
+query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    runs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchEvals($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    evalResults(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchEvalResultRow
+        }
+      }
+    }
+  }
+}
+
+query RecentWorkbenchJobs($count: Int) {
+  recentWorkbenchJobs(count: $count) {
+    ...WorkbenchJobTiny
+  }
+}
+
+query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    alerts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...Alert
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchesIssues($first: Int = 100, $after: String) {
+  workbenchIssues(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchIssue
+      }
+    }
+  }
+}
+
+query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    issues(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+
+mutation GetWorkbenchCron($id: ID!) {
+  workbenchCron(id: $id) {
+    ...WorkbenchCron
+  }
+}
+
+query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    crons(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+
+fragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {
+  id
+  name
+  description
+  subagents
+}
+
+query WorkbenchSkills($id: ID!) {
+  workbench(id: $id) {
+    id
+    allSkills {
+      ...UnifiedWorkbenchSkillTiny
+    }
+  }
+}
+
+query WorkbenchPrompts($id: ID!, $first: Int = 500, $after: String) {
+  workbench(id: $id) {
+    id
+    prompts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchPrompt
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    webhooks(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchWebhook
+        }
+      }
+    }
+  }
+}
+
+mutation GetWorkbenchWebhook($id: ID!) {
+  getWorkbenchWebhook(id: $id) {
+    ...WorkbenchWebhook
+  }
+}
+
+query IssueWebhooks($first: Int, $after: String) {
+  issueWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        ...IssueWebhook
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+query WorkbenchTriggersSummary($id: ID!) {
+  workbench(id: $id) {
+    id
+    name
+    description
+    tools {
+      ...WorkbenchToolTiny
+    }
+    crons(first: 30) {
+      edges {
+        node {
+          id
+          crontab
+          prompt
+          nextRunAt
+        }
+      }
+    }
+    webhooks(first: 30) {
+      edges {
+        node {
+          id
+          name
+          webhook {
+            id
+            name
+            type
+            url
+          }
+          issueWebhook {
+            ...IssueWebhook
+          }
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchJob($id: ID!) {
+  workbenchJob(id: $id) {
+    ...WorkbenchJob
+  }
+}
+
+query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    metricsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityMetric
+    }
+  }
+}
+
+query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    logsTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityLog
+    }
+  }
+}
+
+query WorkbenchJobTracesTool($id: ID!, $name: String, $arguments: Json) {
+  workbenchJob(id: $id) {
+    id
+    tracesTool(name: $name, arguments: $arguments) {
+      ...WorkbenchJobActivityTrace
+    }
+  }
+}
+
+query WorkbenchJobActivities($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    status
+    prompt
+    workbench {
+      id
+    }
+    activities(first: 100) {
+      edges {
+        node {
+          ...WorkbenchJobActivity
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchJobWhimseyText($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    whimsey
+  }
+}
+
+query WorkbenchJobActivityWhimseyText($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    id
+    whimsey
+  }
+}
+
+query WorkbenchJobActivity($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    ...WorkbenchJobActivityWithThoughts
+  }
+}
+
+query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
+  workbenchTools(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchToolTiny
+      }
+    }
+  }
+}
+
+query WorkbenchTool($id: ID, $name: String) {
+  workbenchTool(id: $id, name: $name) {
+    ...WorkbenchTool
+  }
+}
+
+mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
+  createWorkbench(attributes: $attributes) {
+    ...Workbench
+  }
+}
+
+mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
+  updateWorkbench(id: $id, attributes: $attributes) {
+    ...Workbench
+  }
+}
+
+mutation CreateWorkbenchEval(
+  $workbenchId: ID!
+  $attributes: WorkbenchEvalAttributes!
+) {
+  createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    promptRules
+    conclusionRules
+    progressRules
+  }
+}
+
+mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
+  updateWorkbenchEval(id: $id, attributes: $attributes) {
+    id
+    promptRules
+    conclusionRules
+    progressRules
+  }
+}
+
+mutation DeleteWorkbenchEval($id: ID!) {
+  deleteWorkbenchEval(id: $id) {
+    id
+  }
+}
+
+mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {
+  workbenchEvalSkill(id: $id, prompt: $prompt) {
+    id
+  }
+}
+
+mutation DeleteWorkbench($id: ID!) {
+  deleteWorkbench(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchTool($attributes: WorkbenchToolAttributes!) {
+  createWorkbenchTool(attributes: $attributes) {
+    ...WorkbenchTool
+  }
+}
+
+mutation UpdateWorkbenchTool($id: ID!, $attributes: WorkbenchToolAttributes!) {
+  updateWorkbenchTool(id: $id, attributes: $attributes) {
+    ...WorkbenchTool
+  }
+}
+
+mutation DeleteWorkbenchTool($id: ID!) {
+  deleteWorkbenchTool(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchJob(
+  $workbenchId: ID!
+  $attributes: WorkbenchJobAttributes!
+) {
+  createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchJob
+  }
+}
+
+mutation CancelWorkbenchJob($jobId: ID!) {
+  cancelWorkbenchJob(jobId: $jobId) {
+    id
+    status
+  }
+}
+
+mutation CreateWorkbenchMessage(
+  $jobId: ID!
+  $attributes: WorkbenchMessageAttributes!
+) {
+  createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
+    ...WorkbenchJobActivity
+  }
+}
+
+mutation CreateWorkbenchPrompt(
+  $workbenchId: ID!
+  $attributes: WorkbenchPromptAttributes!
+) {
+  createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    prompt
+    insertedAt
+  }
+}
+
+mutation UpdateWorkbenchPrompt(
+  $id: ID!
+  $attributes: WorkbenchPromptAttributes!
+) {
+  updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+    ...WorkbenchPrompt
+  }
+}
+
+mutation DeleteWorkbenchPrompt($id: ID!) {
+  deleteWorkbenchPrompt(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchCron(
+  $workbenchId: ID!
+  $attributes: WorkbenchCronAttributes!
+) {
+  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+
+mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+  updateWorkbenchCron(id: $id, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+
+mutation DeleteWorkbenchCron($id: ID!) {
+  deleteWorkbenchCron(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchWebhook(
+  $workbenchId: ID!
+  $attributes: WorkbenchWebhookAttributes!
+) {
+  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+
+mutation UpdateWorkbenchWebhook(
+  $id: ID!
+  $attributes: WorkbenchWebhookAttributes!
+) {
+  updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+
+mutation DeleteWorkbenchWebhook($id: ID!) {
+  deleteWorkbenchWebhook(id: $id) {
+    id
+    name
+  }
+}
+
+mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
+  createIssueWebhook(attributes: $attributes) {
+    ...IssueWebhook
+  }
+}
+
+mutation UpdateIssueWebhook($id: ID!, $attributes: IssueWebhookAttributes!) {
+  updateIssueWebhook(id: $id, attributes: $attributes) {
+    ...IssueWebhook
+  }
+}
+
+subscription WorkbenchJobDelta($id: ID!) {
+  workbenchJobDelta(id: $id) {
+    delta
+    payload {
+      id
+      status
+      error
+      result {
+        ...WorkbenchJobResult
+      }
+    }
+  }
+}
+
+subscription WorkbenchJobActivityDelta($jobId: ID!) {
+  workbenchJobActivityDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobActivity
+    }
+  }
+}
+
+subscription WorkbenchJobThoughtDelta($jobId: ID!) {
+  workbenchJobThoughtDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobThought
+    }
+  }
+}
+
+subscription WorkbenchTextStream($jobId: ID!) {
+  workbenchTextStream(jobId: $jobId) {
+    ...WorkbenchTextStream
+  }
+}
+
+subscription WorkbenchCanvasStream($jobId: ID!, $activityId: ID) {
+  workbenchCanvasStream(jobId: $jobId, activityId: $activityId) {
+    ...WorkbenchCanvasBlock
+  }
+}

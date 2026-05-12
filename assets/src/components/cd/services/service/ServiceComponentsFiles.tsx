@@ -114,6 +114,16 @@ const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
   txt: `${FILE_TYPE_ICON_PATH}/file_type_text.svg`,
 } as const
 
+function decodeBase64(content: string): string {
+  try {
+    const binary = atob(content)
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+    return new TextDecoder('utf-8').decode(bytes)
+  } catch {
+    return content
+  }
+}
+
 function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
   const extension = getExtensionFromFileName(fileName)
   const iconPath = extension
@@ -262,7 +272,7 @@ export function ComponentsFilesView() {
     const files = data?.serviceTarball ?? []
     const contentMap = files.reduce((acc, file) => {
       if (file?.path && file?.content) {
-        acc.set(file.path, file.content)
+        acc.set(file.path, decodeBase64(file.content))
       }
       return acc
     }, new Map<string, string>())
@@ -294,7 +304,10 @@ export function ComponentsFilesView() {
       const firstFile = data?.serviceTarball?.find((f) => f?.path && f?.content)
       if (firstFile?.path && firstFile?.content) {
         const parentId = parentMap.get(firstFile.path)
-        setSelectedFile({ path: firstFile.path, content: firstFile.content })
+        setSelectedFile({
+          path: firstFile.path,
+          content: decodeBase64(firstFile.content),
+        })
         setParentOfSelectedId(parentId)
         hasAutoSelectedRef.current = true
       }
@@ -324,7 +337,10 @@ export function ComponentsFilesView() {
       if (isSelected) {
         const node = nodeMap.get(itemId)
         if (node?.isFile && node.content) {
-          setSelectedFile({ path: node.path, content: node.content })
+          setSelectedFile({
+            path: node.path,
+            content: node.content,
+          })
           setParentOfSelectedId(parentMap.get(itemId))
         }
       }

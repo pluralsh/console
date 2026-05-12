@@ -11,8 +11,6 @@ import { LoginContext } from 'components/contexts'
 import { Permissions, hasRbac } from '../misc'
 
 import { useThrottle } from 'components/hooks/useThrottle'
-import { SimpleToastChip } from 'components/utils/SimpleToastChip'
-import { Body2BoldP } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { ListWrapperSC } from '../users/UsersList'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
@@ -21,7 +19,6 @@ import { groupsCols } from './GroupsColumns'
 export type GroupsListMeta = {
   editable: boolean
   setGroupEdit: (group: Nullable<GroupEditT>) => void
-  setGroupDeletedToast: (show: boolean, groupName: string) => void
 }
 
 export function GroupsList({
@@ -30,11 +27,6 @@ export function GroupsList({
   setGroupEdit: (group: Nullable<GroupEditT>) => void
 }) {
   const { me } = useContext(LoginContext)
-
-  const [showGroupDeletedToast, setShowGroupDeletedToast] = useState<{
-    show: boolean
-    groupName: string
-  }>({ show: false, groupName: '' })
 
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 300)
@@ -48,8 +40,6 @@ export function GroupsList({
 
   const meta: GroupsListMeta = {
     editable: !!me?.roles?.admin || hasRbac(me, Permissions.USERS),
-    setGroupDeletedToast: (show, groupName) =>
-      setShowGroupDeletedToast({ show, groupName }),
     setGroupEdit,
   }
 
@@ -93,14 +83,6 @@ export function GroupsList({
             : { message: `No groups found for ${throttledQ}` }),
         }}
       />
-      <SimpleToastChip
-        show={showGroupDeletedToast.show}
-        delayTimeout={2500}
-        onClose={() => setShowGroupDeletedToast({ show: false, groupName: '' })}
-      >
-        {showGroupDeletedToast.groupName}
-        <Body2BoldP $color="icon-danger">deleted</Body2BoldP>
-      </SimpleToastChip>
     </ListWrapperSC>
   )
 }

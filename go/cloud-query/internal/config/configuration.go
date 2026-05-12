@@ -61,6 +61,14 @@ func (c *Configuration) SHA() (string, error) {
 	return common.HashObject(c)
 }
 
+func (c *Configuration) Cleanup(connectionName string) error {
+	if c.provider == ProviderAWS {
+		return c.aws.Cleanup(connectionName)
+	}
+
+	return nil
+}
+
 func NewAWSConfiguration(options ...Option) Configuration {
 	c := Configuration{
 		provider: ProviderAWS,

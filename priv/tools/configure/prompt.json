@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "prompt": {
+            "type": "string",
+            "description": "The prompt to provide the agent.  This should give all necessary context for the agent to complete the task assigned."
+        }
+    },
+    "required": ["prompt"]
+}

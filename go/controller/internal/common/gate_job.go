@@ -67,6 +67,7 @@ func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 			func(c *v1alpha1.Container) *console.ContainerAttributes {
 				return &console.ContainerAttributes{
 					Image: c.Image,
+					Name:  c.Name,
 					Args:  c.Args,
 					Env: algorithms.Map(c.Env, func(e *v1alpha1.Env) *console.EnvAttributes {
 						return &console.EnvAttributes{Name: e.Name, Value: e.Value}

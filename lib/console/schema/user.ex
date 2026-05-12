@@ -1,5 +1,5 @@
 defmodule Console.Schema.User do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     RoleBinding,
     Group,
@@ -9,6 +9,8 @@ defmodule Console.Schema.User do
     GroupMember,
     Chat
   }
+
+  defenum Homepage, clusters: 0, workbenches: 1
 
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
@@ -30,6 +32,7 @@ defmodule Console.Schema.User do
     field :scopes,           :map, virtual: true
     field :api,              :string, virtual: true
     field :roles_updated,    :boolean, virtual: true, default: false
+    field :homepage,         Homepage
 
     field :last_digest_at,   :utc_datetime_usec
 
@@ -127,7 +130,7 @@ defmodule Console.Schema.User do
     from(u in query, order_by: ^order)
   end
 
-  @valid ~w(name email password deleted_at profile plural_id service_account signing_private_key)a
+  @valid ~w(name email password deleted_at profile plural_id service_account homepage signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -140,9 +143,12 @@ defmodule Console.Schema.User do
     |> unique_constraint(:bot_name)
     |> validate_length(:password, min: 10)
     |> validate_length(:email, max: 255)
+    |> truncate_fields([:profile], 1000)
+    |> truncate_fields([:name], 255)
     |> validate_format(:email, @email_re)
     |> validate_required([:email, :name])
     |> put_new_change(:assume_policy_id, &Ecto.UUID.generate/0)
+    |> put_new_change(:homepage, &homepage/0)
     |> change_markers(roles: :roles_updated)
     |> hash_password()
   end
@@ -166,6 +172,13 @@ defmodule Console.Schema.User do
     case {get_field(changeset, :name), get_field(changeset, :email)} do
       {nil, email} -> put_change(changeset, :name, email)
       _ -> changeset
+    end
+  end
+
+  defp homepage() do
+    case Console.conf(:workbench_default) do
+      true -> :workbenches
+      _ -> :clusters
     end
   end
 end

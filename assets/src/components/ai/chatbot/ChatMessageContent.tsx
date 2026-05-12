@@ -6,8 +6,6 @@ import {
   CheckIcon,
   Chip,
   Code,
-  Divider,
-  DocumentIcon,
   FileIcon,
   Flex,
   IconFrame,
@@ -18,7 +16,7 @@ import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrMo
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRunTinyFragment,
   AgentSessionFragment,
@@ -28,7 +26,6 @@ import {
   PrAutomationFragment,
   PrCallAttributes,
   useConfirmChatMutation,
-  useConfirmChatPlanMutation,
   useDeleteChatMutation,
 } from 'generated/graphql'
 
@@ -38,7 +35,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import styled, { StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
-import { AgentRunInfoCard } from '../agent-runs/AgentRunFixButton.tsx'
+import { AgentRunInfoCard } from '../agent-runs/AgentRunInfoDisplays.tsx'
 import { ChatMessageActions } from './ChatMessage'
 import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
 import { ToolCallContent } from './ToolCallContent'
@@ -117,14 +114,6 @@ export function ChatMessageContent({
           content={content ?? ''}
           attributes={attributes}
           isPending={isPending}
-        />
-      )
-    case ChatType.ImplementationPlan:
-      return (
-        <ImplementationPlanMessageContent
-          content={content}
-          threadId={threadId}
-          session={session}
         />
       )
     case ChatType.PrCall:
@@ -212,90 +201,6 @@ function FileMessageContent({
         </Code>
       </AccordionItem>
     </Accordion>
-  )
-}
-
-function ImplementationPlanMessageContent({
-  content,
-  threadId,
-  session,
-}: ChatMessageContentProps) {
-  const { spacing, colors, borders, partials } = useTheme()
-  const [confirmPlan, { loading, error }] = useConfirmChatPlanMutation({
-    awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreadDetails'],
-  })
-
-  return (
-    <Flex
-      direction="column"
-      gap="small"
-    >
-      <Accordion
-        type="single"
-        css={{
-          background: colors['fill-zero'],
-          border: borders.default,
-        }}
-      >
-        <AccordionItem
-          padding="relaxed"
-          caret="right"
-          trigger={
-            <Flex
-              gap="xsmall"
-              align="center"
-              wordBreak="break-word"
-            >
-              <IconFrame
-                icon={
-                  <DocumentIcon
-                    size={12}
-                    color="icon-light"
-                  />
-                }
-                size="small"
-              />
-              <Body2BoldP $color="text">Implementation Plan</Body2BoldP>
-            </Flex>
-          }
-        >
-          <Markdown text={content} />
-        </AccordionItem>
-        <Divider
-          css={{ margin: `0 ${spacing.medium}px` }}
-          backgroundColor={colors['border']}
-        />
-        {!session?.planConfirmed ? (
-          <Button
-            small
-            css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
-            loading={loading}
-            onClick={() =>
-              confirmPlan({ variables: { threadId: threadId ?? '' } })
-            }
-          >
-            Approve
-          </Button>
-        ) : (
-          <Flex
-            gap="small"
-            css={{ margin: spacing.medium, justifySelf: 'flex-end' }}
-          >
-            <span
-              css={{
-                ...partials.text.buttonSmall,
-                color: colors['text-light'],
-              }}
-            >
-              Approved
-            </span>
-            <CheckIcon />
-          </Flex>
-        )}
-      </Accordion>
-      {error && <GqlError error={error} />}
-    </Flex>
   )
 }
 

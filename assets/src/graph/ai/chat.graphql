@@ -111,13 +111,6 @@ fragment AgentSession on AgentSession {
   id
   type
   done
-  planConfirmed
-  thread {
-    id
-    summary
-    insertedAt
-    lastMessageAt
-  }
   connection {
     id
     name
@@ -133,17 +126,6 @@ fragment AgentSession on AgentSession {
   pullRequest {
     id
     url
-  }
-  stack {
-    id
-    name
-  }
-  service {
-    id
-    name
-    cluster {
-      id
-    }
   }
 }
 
@@ -259,30 +241,13 @@ query ChatThreadMessages(
   }
 }
 
-query AgentSessions(
-  $first: Int = 100
-  $last: Int
-  $after: String
-  $before: String
-) {
-  agentSessions(first: $first, last: $last, after: $after, before: $before) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...AgentSession
-      }
-    }
-  }
-}
-
 query CloudConnections(
   $first: Int = 100
   $last: Int
   $after: String
   $before: String
   $q: String
+  $provider: Provider
 ) {
   cloudConnections(
     first: $first
@@ -290,6 +255,7 @@ query CloudConnections(
     after: $after
     before: $before
     q: $q
+    provider: $provider
   ) {
     pageInfo {
       ...PageInfo
@@ -299,6 +265,12 @@ query CloudConnections(
         ...CloudConnectionTiny
       }
     }
+  }
+}
+
+mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {
+  upsertCloudConnection(attributes: $attributes) {
+    ...CloudConnectionTiny
   }
 }
 

@@ -16,6 +16,7 @@ defmodule Console.Bootstrapper do
       :timer.send_interval(:timer.minutes(30), :migrate)
       send self(), :migrate
       send self(), :kick
+      send self(), :force_flip
     end
 
     write_token_file!()
@@ -38,6 +39,13 @@ defmodule Console.Bootstrapper do
     Console.Repo.all(GitRepository)
     |> Enum.each(&Discovery.start/1)
     {:noreply, state}
+  end
+
+  def handle_info(:force_flip, state) do
+    case Console.Deployments.Init.force_flip() do
+      {:ok, %{}} -> {:noreply, state}
+      _ -> {:noreply, state}
+    end
   end
 
   def handle_info(_, state), do: {:noreply, state}

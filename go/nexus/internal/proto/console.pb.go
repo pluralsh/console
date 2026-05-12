@@ -427,6 +427,7 @@ type BedrockConfig struct {
 	AwsAccessKeyId     *string                `protobuf:"bytes,6,opt,name=awsAccessKeyId,proto3,oneof" json:"awsAccessKeyId,omitempty"`
 	AwsSecretAccessKey *string                `protobuf:"bytes,7,opt,name=awsSecretAccessKey,proto3,oneof" json:"awsSecretAccessKey,omitempty"`
 	ProxyModels        []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
+	Deployments        map[string]string      `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -517,6 +518,13 @@ func (x *BedrockConfig) GetProxyModels() []string {
 	return nil
 }
 
+func (x *BedrockConfig) GetDeployments() map[string]string {
+	if x != nil {
+		return x.Deployments
+	}
+	return nil
+}
+
 type AzureOpenAiConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ApiVersion     *string                `protobuf:"bytes,1,opt,name=apiVersion,proto3,oneof" json:"apiVersion,omitempty"`
@@ -526,6 +534,7 @@ type AzureOpenAiConfig struct {
 	ToolModel      *string                `protobuf:"bytes,6,opt,name=toolModel,proto3,oneof" json:"toolModel,omitempty"`
 	AccessToken    *string                `protobuf:"bytes,7,opt,name=accessToken,proto3,oneof" json:"accessToken,omitempty"`
 	ProxyModels    []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
+	Deployments    map[string]string      `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -605,6 +614,13 @@ func (x *AzureOpenAiConfig) GetAccessToken() string {
 func (x *AzureOpenAiConfig) GetProxyModels() []string {
 	if x != nil {
 		return x.ProxyModels
+	}
+	return nil
+}
+
+func (x *AzureOpenAiConfig) GetDeployments() map[string]string {
+	if x != nil {
+		return x.Deployments
 	}
 	return nil
 }
@@ -757,7 +773,7 @@ const file_console_proto_rawDesc = "" +
 	"_toolModelB\n" +
 	"\n" +
 	"\b_projectB\v\n" +
-	"\t_location\"\xc4\x03\n" +
+	"\t_location\"\xcc\x04\n" +
 	"\rBedrockConfig\x12\x1d\n" +
 	"\amodelId\x18\x01 \x01(\tH\x00R\amodelId\x88\x01\x01\x12%\n" +
 	"\vtoolModelId\x18\x02 \x01(\tH\x01R\vtoolModelId\x88\x01\x01\x12%\n" +
@@ -766,7 +782,11 @@ const file_console_proto_rawDesc = "" +
 	"\x10embeddingModelId\x18\x05 \x01(\tH\x04R\x10embeddingModelId\x88\x01\x01\x12+\n" +
 	"\x0eawsAccessKeyId\x18\x06 \x01(\tH\x05R\x0eawsAccessKeyId\x88\x01\x01\x123\n" +
 	"\x12awsSecretAccessKey\x18\a \x01(\tH\x06R\x12awsSecretAccessKey\x88\x01\x01\x12 \n" +
-	"\vproxyModels\x18\b \x03(\tR\vproxyModelsB\n" +
+	"\vproxyModels\x18\b \x03(\tR\vproxyModels\x12F\n" +
+	"\vdeployments\x18\t \x03(\v2$.plrl.BedrockConfig.DeploymentsEntryR\vdeployments\x1a>\n" +
+	"\x10DeploymentsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
 	"\n" +
 	"\b_modelIdB\x0e\n" +
 	"\f_toolModelIdB\x0e\n" +
@@ -774,7 +794,7 @@ const file_console_proto_rawDesc = "" +
 	"\a_regionB\x13\n" +
 	"\x11_embeddingModelIdB\x11\n" +
 	"\x0f_awsAccessKeyIdB\x15\n" +
-	"\x13_awsSecretAccessKey\"\xe4\x02\n" +
+	"\x13_awsSecretAccessKey\"\xf0\x03\n" +
 	"\x11AzureOpenAiConfig\x12#\n" +
 	"\n" +
 	"apiVersion\x18\x01 \x01(\tH\x00R\n" +
@@ -784,7 +804,11 @@ const file_console_proto_rawDesc = "" +
 	"\x0eembeddingModel\x18\x05 \x01(\tH\x03R\x0eembeddingModel\x88\x01\x01\x12!\n" +
 	"\ttoolModel\x18\x06 \x01(\tH\x04R\ttoolModel\x88\x01\x01\x12%\n" +
 	"\vaccessToken\x18\a \x01(\tH\x05R\vaccessToken\x88\x01\x01\x12 \n" +
-	"\vproxyModels\x18\b \x03(\tR\vproxyModelsB\r\n" +
+	"\vproxyModels\x18\b \x03(\tR\vproxyModels\x12J\n" +
+	"\vdeployments\x18\t \x03(\v2(.plrl.AzureOpenAiConfig.DeploymentsEntryR\vdeployments\x1a>\n" +
+	"\x10DeploymentsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
 	"\v_apiVersionB\b\n" +
 	"\x06_modelB\v\n" +
 	"\t_endpointB\x11\n" +
@@ -812,7 +836,7 @@ func file_console_proto_rawDescGZIP() []byte {
 	return file_console_proto_rawDescData
 }
 
-var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_console_proto_goTypes = []any{
 	(*AiConfigRequest)(nil),             // 0: plrl.AiConfigRequest
 	(*AiConfig)(nil),                    // 1: plrl.AiConfig
@@ -823,22 +847,26 @@ var file_console_proto_goTypes = []any{
 	(*AzureOpenAiConfig)(nil),           // 6: plrl.AzureOpenAiConfig
 	(*ProxyAuthenticationRequest)(nil),  // 7: plrl.ProxyAuthenticationRequest
 	(*ProxyAuthenticationResponse)(nil), // 8: plrl.ProxyAuthenticationResponse
+	nil,                                 // 9: plrl.BedrockConfig.DeploymentsEntry
+	nil,                                 // 10: plrl.AzureOpenAiConfig.DeploymentsEntry
 }
 var file_console_proto_depIdxs = []int32{
-	2, // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
-	3, // 1: plrl.AiConfig.anthropic:type_name -> plrl.AnthropicConfig
-	4, // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
-	5, // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
-	6, // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
-	0, // 5: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	7, // 6: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	1, // 7: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	8, // 8: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	2,  // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
+	3,  // 1: plrl.AiConfig.anthropic:type_name -> plrl.AnthropicConfig
+	4,  // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
+	5,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
+	6,  // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
+	9,  // 5: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
+	10, // 6: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	0,  // 7: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
+	7,  // 8: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
+	1,  // 9: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	8,  // 10: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	9,  // [9:11] is the sub-list for method output_type
+	7,  // [7:9] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_console_proto_init() }
@@ -857,7 +885,7 @@ func file_console_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_console_proto_rawDesc), len(file_console_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

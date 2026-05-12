@@ -24,9 +24,9 @@ import { ComponentProps, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import LoadingIndicator from '../LoadingIndicator'
 import { Edge, EdgeType } from '../reactflow/edges'
 import { ReactFlowGraph } from '../reactflow/ReactFlowGraph'
+import { RectangleSkeleton } from '../SkeletonLoaders'
 import { TimestampSliderButton } from '../TimestampSlider'
 import { MeshWorkloadNode } from './NetworkGraphNodes'
 import { NetworkGraphStatistics } from './NetworkGraphStatistics'
@@ -163,7 +163,10 @@ function NetworkGraphInternal({
       <Card flex={1}>
         {isEmpty(networkData) ? (
           loading ? (
-            <LoadingIndicator />
+            <RectangleSkeleton
+              $height="100%"
+              $width="100%"
+            />
           ) : (
             <EmptyState message="No network data found." />
           )

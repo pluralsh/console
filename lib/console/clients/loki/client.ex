@@ -23,9 +23,7 @@ defmodule Loki.Client do
         {:ok, body
               |> Poison.decode(as: %Response{data: %Data{result: [%Result{}]}})
               |> convert()}
-      error ->
-        IO.inspect(error)
-        {:error, "loki error"}
+      _ -> {:error, "loki error"}
     end
   end
 

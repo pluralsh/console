@@ -147,8 +147,10 @@ export function ServiceDetailsSidecar({
             </div>
           </SidecarItem>
         )}
-        {helm && <SidecarItem heading="Helm Chart">{helm.chart}</SidecarItem>}
-        {helm && (
+        {helm?.chart && (
+          <SidecarItem heading="Helm Chart">{helm.chart}</SidecarItem>
+        )}
+        {helm?.version && (
           <SidecarItem
             heading="Chart Version"
             css={{

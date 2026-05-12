@@ -54,11 +54,11 @@ const tabs = {
   contexts: 'Contexts',
 } as const
 
-export function PipelineTabs() {
+function PipelineTabs() {
   const [searchParams, setSearchParams] = useSearchParams()
   const tabStateRef = useRef<any>(null)
 
-  const view = searchParams.get('view')
+  const view = searchParams.get('view') ?? 'graph'
   const tabKey = view && tabs[view] ? (view as keyof typeof tabs) : 'graph'
 
   return (
@@ -164,7 +164,7 @@ function PipelineSelector({
 function PipelineDetailsBase() {
   const { pipelineId } = useParams()
   const [searchParams] = useSearchParams()
-  const view = searchParams.get('view')
+  const view = searchParams.get('view') ?? 'graph'
 
   const { data, loading, error } = usePipelineQuery({
     variables: { id: pipelineId ?? '' },

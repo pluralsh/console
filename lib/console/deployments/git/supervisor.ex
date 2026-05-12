@@ -1,15 +1,17 @@
 defmodule Console.Deployments.Git.Supervisor do
   use DynamicSupervisor
   alias Console.Deployments.Git.Agent
+  alias Console.Schema.GitRepository
 
   def start_link(init_arg \\ :ok) do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  def start_child(repository) do
+  def start_child(%GitRepository{id: id}), do: start_child(id)
+  def start_child(id) when is_binary(id) do
     child = %{
-      id: repository.id,
-      start: {Agent, :start_link, [repository]},
+      id: id,
+      start: {Agent, :start_link, [id]},
       restart: :temporary
     }
     DynamicSupervisor.start_child(__MODULE__, child)

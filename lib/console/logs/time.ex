@@ -5,4 +5,12 @@ defmodule Console.Logs.Time do
   def new(%{} = args), do: struct(__MODULE__,  args)
   def new(args) when is_list(args), do: struct(__MODULE__,  args)
   def new(_), do: nil
+
+  def safe_duration(%{} = duration), do: duration
+  def safe_duration(duration) when is_binary(duration) do
+    case Console.convert_duration(duration) do
+      {:ok, duration} -> duration
+      {:error, _} -> Timex.Duration.parse!(String.upcase(duration))
+    end
+  end
 end

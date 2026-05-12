@@ -2,26 +2,21 @@ import {
   Avatar,
   Button,
   ButtonProps,
-  CheckRoundedIcon,
   Divider,
   LogoutIcon,
-  MoonIcon,
   PersonIcon,
-  setThemeColorMode,
-  SunIcon,
 } from '@pluralsh/design-system'
 import { BillingSubscriptionChip } from 'components/billing/BillingSubscriptionChip'
 import { useLogin } from 'components/contexts'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
-import { OverlineH1 } from 'components/utils/typography/Text'
 import { useCallback, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 export function ProfileMenu() {
-  const theme = useTheme()
   const { me, logout } = useLogin()
+  const theme = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   useOutsideClick(menuBtnRef, () => setIsMenuOpen(false))
@@ -38,6 +33,7 @@ export function ProfileMenu() {
         tertiary
         onClick={() => setIsMenuOpen((open) => !open)}
         css={{
+          borderRadius: '50%',
           padding: 0,
           transition: 'filter 0.1s ease',
           '&:hover': { filter: 'brightness(1.1)' },
@@ -50,6 +46,16 @@ export function ProfileMenu() {
           name={me?.name}
           src={me?.profile}
           size={32}
+          css={{
+            borderRadius: '50%',
+            ...(me?.profile
+              ? {}
+              : {
+                  backgroundColor: theme.colors['fill-three'],
+                  border: theme.borders.input,
+                  fontSize: 12,
+                }),
+          }}
         />
       </Button>
       <SimplePopupMenu
@@ -70,44 +76,9 @@ export function ProfileMenu() {
           <PersonIcon color="icon-light" />
           <span>My profile</span>
         </Button>
-        <OverlineH1
-          as="h3"
-          $color="text-xlight"
-          css={{
-            padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
-          }}
-        >
-          theme
-        </OverlineH1>
-        <Button
-          tertiary
-          justifyContent="flex-start"
-          startIcon={<MoonIcon />}
-          endIcon={theme.mode === 'dark' ? <CheckRoundedIcon /> : undefined}
-          onClick={() => {
-            setThemeColorMode('dark')
-            setIsMenuOpen(false)
-          }}
-        >
-          Dark
-        </Button>
-        <Button
-          tertiary
-          justifyContent="flex-start"
-          startIcon={<SunIcon />}
-          endIcon={theme.mode === 'light' ? <CheckRoundedIcon /> : undefined}
-          onClick={() => {
-            setThemeColorMode('light')
-            setIsMenuOpen(false)
-          }}
-        >
-          Light
-        </Button>
         <Divider
           backgroundColor="border-fill-two"
-          css={{
-            padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-          }}
+          padding="xsmall"
         />
         <Button
           tertiary

@@ -43,6 +43,7 @@ export function StackPrs() {
       {
         queryHook: useStackPrsQuery,
         keyPath: ['infrastructureStack', 'pullRequests'],
+        fetchPolicy: 'cache-and-network',
       },
       { id: stack.id ?? '' }
     )
@@ -121,7 +122,7 @@ function StackPrsExpandedRow({
       virtualizeRows={false}
       fillLevel={2}
       variables={{ id: stackId, pullRequestId: pr.id }}
-      options={{ pollInterval: 5_000 }}
+      options={{ pollInterval: 5_000, fetchPolicy: 'cache-and-network' }}
       height={400}
       borderRadius={0}
       paddingLeft={24}

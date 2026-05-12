@@ -59,7 +59,16 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, 2, fn _, _, [_], _ -> {:ok,  [%Console.AI.Tool{
+        name: "plural_insight",
+        arguments: %{
+          "summary" => "summary",
+          "root_cause" => "root cause",
+          "key_evidence" => ["key evidence"],
+          "contextual_observations" => ["contextual observations"]
+        }
+      }]} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -98,10 +107,19 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
-        {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: true}}]}
+      expect(Console.AI.OpenAI, :tool_call, 3, fn
+        _, _, [Console.AI.Tools.Insight], _ -> {:ok, [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }]}
+        _, _, _, _ -> {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: true}}]}
       end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       log_document(service, "error what is happening") |> index_doc()
       log_document(service, "another valid log message") |> index_doc()
@@ -154,7 +172,16 @@ defmodule Console.AI.CronTest do
         %Kazan.Request{path: "/apis/elasticsearch.k8s.elastic.com/v1/namespaces/ns/elasticsearches/name"} -> {:ok, es_cluster("ns")}
         _ -> {:ok, %{items: []}}
       end)
-      expect(Console.AI.OpenAI, :completion, 6, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, 3, fn _, _, [_], _ -> {:ok, [%Console.AI.Tool{
+        name: "plural_insight",
+        arguments: %{
+          "summary" => "summary",
+          "root_cause" => "root cause",
+          "key_evidence" => ["key evidence"],
+          "contextual_observations" => ["contextual observations"]
+        }
+      }]} end)
+      expect(Console.AI.OpenAI, :completion, 3, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -189,7 +216,18 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, 2, fn _, _, [_], _ ->
+        {:ok, [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }]}
+      end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -260,15 +298,24 @@ defmodule Console.AI.CronTest do
           ]}
       end)
 
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
-        {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
+      expect(Console.AI.OpenAI, :tool_call, 3, fn
+        _, _, [Console.AI.Tools.Insight], _ -> {:ok, [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }]}
+        _, _, _, _ -> {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
       end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
       %{id: id} = svc = refetch(service) |> Console.Repo.preload([:insight, :components])
-      assert svc.insight.text
+      assert is_binary(svc.insight.text)
 
       [component] = svc.components
       component_insight = Repo.get!(Console.Schema.AiInsight, component.insight_id) |> Repo.preload(:evidence)
@@ -301,7 +348,16 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, 2, fn _, _, [_], _ -> {:ok, [%Console.AI.Tool{
+        name: "plural_insight",
+        arguments: %{
+          "summary" => "summary",
+          "root_cause" => "root cause",
+          "key_evidence" => ["key evidence"],
+          "contextual_observations" => ["contextual observations"]
+        }
+      }]} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       Cron.clusters()
 
@@ -339,10 +395,18 @@ defmodule Console.AI.CronTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Client, :list_certificate_requests, fn _ -> {:ok, %Kube.CertificateRequest.List{items: []}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
-        {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
-      end)
+      expect(Console.AI.OpenAI, :tool_call, 3, fn
+        _, _, [_], _ -> {:ok, [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }}]}
+        _, _, _, _ -> {:ok, [%Console.AI.Tool{name: "logging", arguments: %{required: false}}]}
+       end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
 
       log_document(cluster, "cert-manager", "failed no such host") |> index_doc()
       refresh()
@@ -377,18 +441,26 @@ defmodule Console.AI.CronTest do
       run   = insert(:stack_run, status: :failed, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
       step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
       insert(:run_log, step: step, logs: "blah blah blah")
-      expect(Console.AI.OpenAI, :completion, 4, fn _, _, _ -> {:ok, "openai completion"} end)
-
+      expect(Console.AI.OpenAI, :tool_call, 2, fn _, _, [_], _ -> {:ok, [%Console.AI.Tool{
+        name: "plural_insight",
+        arguments: %{
+          "summary" => "summary",
+          "root_cause" => "root cause",
+          "key_evidence" => ["key evidence"],
+          "contextual_observations" => ["contextual observations"]
+        }
+      }]} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
       Cron.stacks()
 
       %{id: id} = stack = Console.Repo.preload(refetch(stack), [:insight])
 
-      assert stack.insight.text
+      assert is_binary(stack.insight.text)
       assert stack.ai_poll_at
 
       run = Console.Repo.preload(refetch(run), [:insight])
 
-      assert run.insight.text
+      assert is_binary(run.insight.text)
 
       assert_receive {:event, %PubSub.StackInsight{item: {%{id: ^id}, _}}}
     end
@@ -400,7 +472,18 @@ defmodule Console.AI.CronTest do
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
       )
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, [_], _ -> {:ok, [
+        %Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }
+      ]} end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
       svc = insert(:service)
       alert = insert(:alert, state: :firing, service: svc)
 
@@ -438,10 +521,19 @@ defmodule Console.AI.CronTest do
       %{id: flow_id} = flow = insert(:flow)
       svc = insert(:service, flow: flow)
 
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
-      expect(Console.AI.OpenAI, :tool_call, fn _, _, _, _ ->
-        {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
+      expect(Console.AI.OpenAI, :tool_call, 2, fn
+        _, _, [Console.AI.Tools.Insight], _ -> {:ok, [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }]}
+        _, _, _, _ -> {:ok, [%Console.AI.Tool{name: "vector", arguments: %{required: true, query: "some query"}}]}
       end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
       expect(Console.AI.VectorStore, :fetch, fn "some query", [filters: [flow_id: ^flow_id, datatype: {:raw, :pr_file}]] ->
         {:ok, [
           %Console.AI.VectorStore.Response{

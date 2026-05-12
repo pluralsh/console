@@ -110,7 +110,10 @@ defmodule Console do
     end
   end
 
+  @allowed_structs [DateTime, Time, Date, NaiveDateTime]
+
   def mapify(l) when is_list(l), do: Enum.map(l, &mapify/1)
+  def mapify(%type{} = struct) when type in @allowed_structs, do: struct
   def mapify(%{__schema__: _} = schema) do
     Piazza.Ecto.Schema.mapify(schema)
     |> mapify()
@@ -129,6 +132,7 @@ defmodule Console do
     Map.delete(map, :id)
     |> remove_ids()
   end
+  def remove_ids(%type{} = struct) when type in @allowed_structs, do: struct
   def remove_ids(%{} = map), do: Map.new(map, fn {k, v} -> {k, remove_ids(v)} end)
   def remove_ids(l) when is_list(l), do: Enum.map(l, &remove_ids/1)
   def remove_ids(v), do: v
@@ -148,8 +152,8 @@ defmodule Console do
     |> remove_ids()
   end
 
-  def string_map(%{} = map) do
-    Poison.encode!(map)
+  def string_map(value) when is_list(value) or is_map(value) do
+    Poison.encode!(value)
     |> Poison.decode!()
   end
 
@@ -166,6 +170,8 @@ defmodule Console do
       _ -> true
     end
   end
+
+  def identity(v), do: v
 
   def dedupe(attrs, key, val) do
     as_string = Atom.to_string(key)
@@ -233,6 +239,15 @@ defmodule Console do
 
   def demo_project?(), do: conf(:is_demo_project, false)
 
+  def conditional_merge(%{} = base, overlay) do
+    Enum.reduce(overlay, base, fn {k, v}, acc ->
+      case Map.get(acc, k) do
+        nil -> Map.put(acc, k, v)
+        _ -> acc
+      end
+    end)
+  end
+
   def deep_get(map, keys, def \\ nil)
   def deep_get(map, [key], def), do: Map.get(map, key, def)
   def deep_get(map, [key | keys], def) do
@@ -296,6 +311,16 @@ defmodule Console do
     |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
     |> :crypto.hash_final()
     |> Base.encode16(case: :lower)
+  end
+
+  def safely(fun, fallback) when is_function(fun, 0) and is_function(fallback, 1) do
+    try do
+      fun.()
+    catch
+      _, err ->
+        Logger.error(Exception.format(:error, err, __STACKTRACE__))
+        fallback.(err)
+    end
   end
 
   def async_retry(fun, tries \\ 0, res \\ :error)

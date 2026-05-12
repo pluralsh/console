@@ -48,7 +48,7 @@ type agentProxyListenConfig struct {
 func deriveAgentProxyListenConfig(cfg *kascfg.ConfigurationFile) agentProxyListenConfig {
 	// Default values
 	lc := agentProxyListenConfig{
-		network: "tcp",
+		network: defaultAgentListenNetwork,
 		address: proxyDefaultListenAddress,
 	}
 

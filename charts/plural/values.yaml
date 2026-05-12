@@ -1,0 +1,506 @@
+global:
+  registry: dkr.plural.sh/plural
+  tag: ~
+
+replicaCount: 3
+rabbitmqNamespace: rabbitmq
+influxNamespace: influx
+
+extraSecretEnv: {}
+
+rbac:
+  serviceAccountAnnotations: {}
+
+configOverlays: []
+
+secrets:
+  jwt: dummy
+  erlang: dummy
+  jwt_pk: dummy
+  jwt_cert: dummy
+  jwt_iss: dummy
+  jwt_aud: dummy
+  aes_key: dummy
+
+admin:
+  enabled: false
+
+postgres:
+  create: true
+  plural:
+    resources: {}
+    size: 50Gi
+    tolerations:
+    - key: plural.sh/pluralReserved
+      operator: Exists
+      effect: "NoSchedule"
+
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: plural.sh/scalingGroup
+            operator: In
+            values:
+            - plural-small
+  hydra:
+    resources: {}
+    size: 25Gi
+    tolerations:
+    - key: plural.sh/pluralReserved
+      operator: Exists
+      effect: "NoSchedule"
+
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: plural.sh/scalingGroup
+            operator: In
+            values:
+            - plural-small
+  default:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: '2'
+        memory: 1Gi
+
+
+api:
+  port: 4000
+  bucket: plural-assets
+  resources: {}
+
+  topologySpreadConstraints: []
+
+mcp:
+  port: 3000
+
+image:
+  repository: plural
+  # if empty the chart version is used
+  tag: '' ## PLRL-REPLACE[  tag: '%s']
+  pullPolicy: IfNotPresent
+
+rtc:
+  repository: rtc
+  # if empty the chart version is used
+  tag: '' ## PLRL-REPLACE[  tag: '%s']
+  resources: {}
+  replicaCount: 3
+
+  topologySpreadConstraints: []
+
+worker:
+  repository: worker
+  # if empty the chart version is used
+  tag: '' ## PLRL-REPLACE[  tag: '%s']
+  minReplicas: 1
+  maxReplicas: 10
+  resources: {}
+  replicaCount: 3
+
+  dockerScan:
+    pollInterval: 60
+    parallelism: 1
+
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: plural-worker
+        app.kubernetes.io/instance: plural
+
+  nodeSelector: {}
+
+  extraEnv: []
+
+  tolerations:
+  - key: plural.sh/pluralReserved
+    operator: Exists
+    effect: "NoSchedule"
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: plural.sh/scalingGroup
+            operator: In
+            values:
+            - plural-worker-medium
+
+ai:
+  repository: plural-ai
+  tag: ~
+  port: 8000
+  replicaCount: 2
+  resources: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 50
+    cpuUtilization: 80
+
+www:
+  repository: plural-www
+  # if empty the chart version is used
+  tag: '' ## PLRL-REPLACE[  tag: '%s']
+  port: 8080
+  resources: {}
+  replicaCount: 3
+
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: plural-www
+        app.kubernetes.io/instance: plural
+
+cron:
+  repository: cron
+  # if empty the chart version is used
+  tag: '' ## PLRL-REPLACE[  tag: '%s']
+
+imagePullSecrets:
+- name: plural-creds
+
+provider: aws
+region: us-east-1
+
+dbPasswordSecret: plural.plural-plural.credentials.postgresql.acid.zalan.do
+rabbitPasswordSecret: plural-rabbitmq
+
+crons:
+- cronName: plrl-login-prune
+  cronModule: Prune.Passwordless
+  crontab: "10 0 * * *"
+  envVars: []
+- cronName: plrl-prune-queues
+  cronModule: Prune.Queues
+  crontab: "15 */3 * * *"
+  envVars: []
+- cronName: plrl-stale-tests
+  cronModule: Task.StaleTests
+  crontab: "30 0 * * *"
+  envVars: []
+- cronName: plrl-prune-invites
+  cronModule: Prune.Invites
+  crontab: "45 0 * * *"
+  envVars: []
+- cronName: plrl-prune-stacks
+  cronModule: Prune.Stacks
+  crontab: "55 0 * * *"
+  envVars: []
+- cronName: plrl-prune-trials
+  cronModule: Prune.Trials
+  cronTab: "40 0 * * *"
+  envVars: []
+- cronName: plrl-prune-notifs
+  cronModule: Prune.Notifications
+  cronTab: "15 1 * * *"
+  envVars: []
+- cronName: plrl-metering
+  cronModule: Task.Metering
+  cronTab: "30 1 * * *"
+  envVars: []
+- cronName: plrl-digest
+  cronModule: Digest.Pending
+  cronTab: "0 12 * * 1"
+  envVars: []
+- cronName: plrl-prune-cloud-instances
+  cronModule: Prune.Cloud
+  cronTab: "45 1 * * *"
+  envVars: []
+
+hydraSecrets:
+  dsn: memory
+  system: dummy
+  cookie: dummy
+
+autoscaling:
+  enabled: true
+
+hydra:
+  replicaCount: 2
+
+  image:
+    repository: gcr.io/pluralsh/oryd/hydra
+    tag: v2.0.3
+  
+  secret:
+    enabled: false
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: plural.sh/scalingGroup
+            operator: In
+            values:
+            - plural-small
+
+  maester:
+    enabled: false
+  hydra:
+    dev: false
+    automigration:
+      enabled: false
+    config:
+      serve:
+        admin:
+          tls:
+            enabled: false
+        public:
+          tls:
+            enabled: false
+        cookies:
+          same_site_mode: None
+          secure: true
+      ttl:
+        id_token: 12h
+        access_token: 12h
+        refresh_token: 96h
+
+  pdb:
+    enabled: true
+  deployment:
+    autoscaling:
+      enabled: false
+    tolerations:
+    - key: plural.sh/pluralReserved
+      operator: Exists
+      effect: "NoSchedule"
+    topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: hydra
+          app.kubernetes.io/instance: plural
+    
+  ingress:
+    public:
+      enabled: true
+      annotations:
+        kubernetes.io/tls-acme: "true"
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/proxy-connect-timeout: '10'
+        nginx.ingress.kubernetes.io/proxy-read-timeout: '120'
+        nginx.ingress.kubernetes.io/proxy-send-timeout: '120'
+  
+chartmuseum:
+  resources: {}
+  replicaCount: 2
+  rbac:
+    serviceAccountAnnotations: {}
+  repository: dkr.plural.sh/plural/chartmuseum
+  tag: v0.13.2
+  bucket: plural-charts
+  pullPolicy: Always
+
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: chartmuseum
+        app.kubernetes.io/instance: plural
+
+registry:
+  replicaCount: 2
+  podAnnotations: {}
+  podLabels: {}
+  podDisruptionBudget: {}
+  nodeSelector: {}
+  tolerations:
+  - key: plural.sh/pluralReserved
+    operator: Exists
+    effect: "NoSchedule"
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: plural.sh/scalingGroup
+            operator: In
+            values:
+            - plural-small
+
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: plural-registry
+        app.kubernetes.io/instance: plural
+
+  rbac:
+    serviceAccountAnnotations: {}
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
+  persistence:
+    accessMode: ReadWriteOnce
+    enabled: false
+    size: 10Gi
+
+  securityContext:
+    enabled: false
+    runAsUser: 1000
+    fsGroup: 1000
+
+  secrets:
+    haSharedSecret: ""
+
+  image: 
+    repository: gcr.io/pluralsh/registry
+    tag: 2.7.2
+
+  configData:
+    version: 0.1
+    notifications:
+      endpoints:
+      - name: plural
+        url: http://plural-api:4000/dkr/callback
+        timeout: 500ms
+        threshold: 5
+        backoff: 1s
+    log:
+      fields:
+        service: registry
+    storage:
+      cache:
+        blobdescriptor: inmemory
+    prometheus:
+      enabled: true
+    auth:
+      token:
+        realm: plural.piazza.app/dkr
+        service: plural.piazza.app/dkr
+        issuer: plural.piazza.app
+        rootcertbundle: /etc/docker/registry/cert.pem
+    http:
+      addr: :5000
+      headers:
+        X-Content-Type-Options: [nosniff]
+    health:
+      storagedriver:
+        enabled: true
+        interval: 10s
+        threshold: 3
+
+postgresql:
+  image:
+    registry: gcr.io
+    repository: pluralsh/postgres
+    tag: 11.7.0-debian-10-r9
+  metrics:
+    enabled: true
+    image:
+      registry: gcr.io
+      repository: pluralsh/postgres-exporter
+      tag: 0.8.0
+    serviceMonitor:
+      enabled: true
+  postgresqlExtendedConf:
+    max_connections: 100
+  postgresqlUsername: plural
+  postgresqlDatabase: plural
+
+rabbitmqCredentials:
+  namespace: "rabbitmq"
+
+rabbitmq:
+  metrics:
+    enabled: true
+
+influxdb:
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 0.2
+  env:
+  - name: INFLUXDB_DB
+    value: plural
+  setDefaultUser:
+    enabled: true
+    user:
+      username: plural
+      password: null
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+  mcp:
+    type: ClusterIP
+    annotations: {}
+
+ingress:
+  enabled: true
+  dns: app.plural.sh
+  dkr_dns: dkr.plural.sh
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-path: /socket
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+  
+  mcp:
+    enabled: false
+    dns: mcp.plural.sh
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations:
+- key: plural.sh/pluralReserved
+  operator: Exists
+  effect: "NoSchedule"
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: plural.sh/scalingGroup
+          operator: In
+          values:
+          - plural-small
+
+test-base:
+  enabled: false
+  application: plural
+  testName: plural-integration
+  promoteTag: stable

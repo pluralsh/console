@@ -18,8 +18,8 @@ defmodule Console.AI.Tools.Agent.Stack do
   @json_schema Console.priv_file!("tools/agent/stack.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: plrl_tool("stack_search")
-  def description(), do: "Execute a semantic search for a cloud resource within a Plural Stack.  Use this if a user is searching specifically for a plural stack or for how the terraform configuration of their cloud has been set up. You might need to get more data about the resource to make this query precise, as it will need additional information like ids that are present in terraform state."
+  def name(), do: plrl_tool("stack_resource_search")
+  def description(), do: "Execute a semantic search for a cloud resource within a Plural Stack.  Use this if a user is searching specifically for a plural stack or for what the state of any resource in the terraform configuration of their cloud currently shows."
 
   @opts [count: 15, filters: [datatype: {:raw, :stack_state}]]
 

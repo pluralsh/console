@@ -30,9 +30,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: |-
-          WorkbenchTool represents a tool that can be attached to a Workbench (e.g. HTTP tool).
-          Tools are defined once and can be associated with multiple workbenches.
+        description: WorkbenchTool is the Schema for the workbenchtools API.
         properties:
           apiVersion:
             description: |-
@@ -52,45 +50,393 @@ spec:
           metadata:
             type: object
           spec:
-            description: Spec defines the desired state of the WorkbenchTool.
+            description: WorkbenchToolSpec defines the desired state of a WorkbenchTool.
             properties:
               categories:
-                description: Categories for the tool (e.g. METRICS, LOGS, INTEGRATION).
+                description: Categories for the tool.
                 items:
                   type: string
                 type: array
-              configuration:
-                description: Configuration is the tool-specific configuration (e.g.
-                  HTTP).
+              cloudConnectionRef:
+                description: The cloud connection for this tool (e.g. infrastructure
+                  cloud tools).
                 properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: |-
+                      If referring to a piece of an object instead of an entire object, this string
+                      should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within a pod, this would take on a value like:
+                      "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]" (container with
+                      index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                      referencing a part of an object.
+                    type: string
+                  kind:
+                    description: |-
+                      Kind of the referent.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                    type: string
+                  name:
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                    type: string
+                  resourceVersion:
+                    description: |-
+                      Specific resourceVersion to which this reference is made, if any.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  uid:
+                    description: |-
+                      UID of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              configuration:
+                description: Tool configuration (e.g. HTTP).
+                properties:
+                  atlassian:
+                    description: Atlassian/jira connection (ticketing).
+                    properties:
+                      apiTokenSecretRef:
+                        description: Reference to a secret key containing the atlassian
+                          API token (required if not using service_account).
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      email:
+                        description: Atlassian account email (required if not using
+                          service_account).
+                        type: string
+                      serviceAccountSecretRef:
+                        description: Reference to a secret key containing the encrypted
+                          service account JSON (alternative to api_token + email).
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  azure:
+                    description: Azure monitor connection (metrics).
+                    properties:
+                      clientId:
+                        description: Azure client id.
+                        type: string
+                      clientSecretSecretRef:
+                        description: Reference to a secret key containing the azure
+                          client secret.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      subscriptionId:
+                        description: Azure subscription id.
+                        type: string
+                      tenantId:
+                        description: Azure tenant id.
+                        type: string
+                    required:
+                    - clientId
+                    - clientSecretSecretRef
+                    - subscriptionId
+                    - tenantId
+                    type: object
+                  cloudwatch:
+                    description: Cloudwatch connection (metrics, logs).
+                    properties:
+                      accessKeyIdSecretRef:
+                        description: Reference to a secret key containing the optional
+                          static AWS access key id.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      externalId:
+                        description: Optional external id for assume role.
+                        type: string
+                      logGroupNames:
+                        description: Optional default log groups for CloudWatch Logs
+                          Insights.
+                        items:
+                          type: string
+                        type: array
+                      region:
+                        description: AWS region (e.g. us-east-1).
+                        type: string
+                      roleArn:
+                        description: Optional IAM role ARN to assume.
+                        type: string
+                      roleSessionName:
+                        description: Optional role session name for assume role.
+                        type: string
+                      secretAccessKeySecretRef:
+                        description: Reference to a secret key containing the optional
+                          static AWS secret access key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - region
+                    type: object
+                  datadog:
+                    description: Datadog connection (metrics, logs).
+                    properties:
+                      apiKeySecretRef:
+                        description: Reference to a secret key containing the datadog
+                          API key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      appKeySecretRef:
+                        description: Reference to a secret key containing the datadog
+                          application key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      site:
+                        description: Datadog site (e.g. datadoghq.com).
+                        type: string
+                    type: object
+                  dynatrace:
+                    description: Dynatrace connection (metrics, logs, traces).
+                    properties:
+                      platformTokenSecretRef:
+                        description: Reference to a secret key containing the dynatrace
+                          platform token.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Dynatrace base URL.
+                        type: string
+                    required:
+                    - platformTokenSecretRef
+                    - url
+                    type: object
+                  elastic:
+                    description: Elasticsearch connection (logs).
+                    properties:
+                      index:
+                        description: Elasticsearch index.
+                        type: string
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Elasticsearch base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - index
+                    - url
+                    - username
+                    type: object
                   http:
-                    description: HTTP tool configuration.
+                    description: Http tool configuration.
                     properties:
                       body:
-                        description: Body is the optional request body.
+                        description: Request body.
                         type: string
                       headers:
-                        description: Headers are optional request headers.
+                        description: Request headers.
                         items:
                           description: WorkbenchToolHTTPHeader represents a single
                             HTTP header.
                           properties:
                             name:
-                              description: Name is the header name.
                               type: string
                             value:
-                              description: Value is the header value.
                               type: string
                           type: object
                         type: array
                       inputSchema:
-                        description: InputSchema is the JSON schema for the tool input
-                          (arbitrary JSON).
+                        description: JSON schema for the tool input.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       method:
-                        description: Method is the HTTP method (GET, POST, PUT, DELETE,
-                          PATCH).
+                        description: The HTTP method.
                         enum:
                         - GET
                         - POST
@@ -99,7 +445,7 @@ spec:
                         - PATCH
                         type: string
                       url:
-                        description: URL is the request URL.
+                        description: The request URL.
                         format: uri
                         type: string
                     required:
@@ -107,13 +453,405 @@ spec:
                     - method
                     - url
                     type: object
+                  jaeger:
+                    description: Jaeger connection (traces).
+                    properties:
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      tokenSecretRef:
+                        description: Reference to a secret key containing the bearer
+                          token.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Jaeger base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  linear:
+                    description: Linear connection (ticketing).
+                    properties:
+                      accessTokenSecretRef:
+                        description: Reference to a secret key containing the linear
+                          API access token.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  loki:
+                    description: Loki connection (logs).
+                    properties:
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      tenantId:
+                        description: Optional tenant id.
+                        type: string
+                      tokenSecretRef:
+                        description: Reference to a secret key containing the bearer
+                          token or api key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Loki base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  prometheus:
+                    description: Prometheus connection (metrics).
+                    properties:
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      tenantId:
+                        description: Optional tenant id (e.g. for Mimir).
+                        type: string
+                      tokenSecretRef:
+                        description: Reference to a secret key containing the bearer
+                          token or api key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Prometheus base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  splunk:
+                    description: Splunk connection (logs).
+                    properties:
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      tokenSecretRef:
+                        description: Reference to a secret key containing the bearer
+                          token.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Splunk base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  tempo:
+                    description: Tempo connection (traces).
+                    properties:
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      tenantId:
+                        description: Optional tenant id.
+                        type: string
+                      tokenSecretRef:
+                        description: Reference to a secret key containing the bearer
+                          token or api key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Tempo base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - url
+                    type: object
                 type: object
+              mcpServerRef:
+                description: The mcp server for this tool.
+                properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: |-
+                      If referring to a piece of an object instead of an entire object, this string
+                      should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within a pod, this would take on a value like:
+                      "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]" (container with
+                      index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                      referencing a part of an object.
+                    type: string
+                  kind:
+                    description: |-
+                      Kind of the referent.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                    type: string
+                  name:
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                    type: string
+                  resourceVersion:
+                    description: |-
+                      Specific resourceVersion to which this reference is made, if any.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  uid:
+                    description: |-
+                      UID of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
               name:
-                description: Name of the tool. If not set, metadata.name is used.
+                description: The name of the tool (a-z, 0-9, underscores). If not
+                  set, metadata.name is used.
                 pattern: ^[a-z0-9_]+$
                 type: string
               projectRef:
-                description: ProjectRef references the project this tool belongs to.
+                description: The project for this tool.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -156,7 +894,7 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               reconciliation:
-                description: Reconciliation settings for this resource.
+                description: Reconciliation parameters for a specific resource.
                 properties:
                   driftDetection:
                     default: true
@@ -177,15 +915,29 @@ spec:
                     type: string
                 type: object
               tool:
-                description: Tool type (e.g. HTTP).
+                description: The type of tool.
                 enum:
                 - HTTP
+                - ELASTIC
+                - DATADOG
+                - PROMETHEUS
+                - LOKI
+                - TEMPO
+                - SENTRY
+                - MCP
+                - LINEAR
+                - ATLASSIAN
+                - SPLUNK
+                - DYNATRACE
+                - CLOUDWATCH
+                - AZURE
+                - CLOUD
+                - JAEGER
                 type: string
             required:
             - tool
             type: object
           status:
-            description: Status represents the current state of this resource.
             properties:
               conditions:
                 description: Represents the observations of a PrAutomation's current

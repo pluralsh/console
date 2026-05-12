@@ -9,7 +9,6 @@ import {
   MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import Fuse from 'fuse.js'
 import { useCatalogsQuery } from 'generated/graphql'
@@ -98,7 +97,6 @@ export function Catalogs() {
   }, [authorFilters, catalogs, categoryFilters, hasActiveSearch, query])
 
   if (error) return <GqlError error={error} />
-  if (!catalogs && loading) return <LoadingIndicator />
 
   return (
     <WrapperSC>
@@ -144,6 +142,7 @@ export function Catalogs() {
           onBottomReached={() => {
             if (!loading && pageInfo?.hasNextPage) fetchNextPage()
           }}
+          loading={loading}
           emptyState={
             <Card
               css={{

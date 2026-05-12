@@ -20,7 +20,8 @@ defmodule Console.Schema.Stack do
     Service,
     Project,
     StackDefinition,
-    AiInsight
+    AiInsight,
+    StackInfracostResource
   }
 
   defenum Type, terraform: 0, ansible: 1, custom: 2
@@ -55,6 +56,8 @@ defmodule Console.Schema.Stack do
         field :parallelism,   :integer
         field :refresh,       :boolean
         field :approve_empty, :boolean
+        field :tofu,          :boolean, default: false
+        field :tofu_registry, :boolean, default: false
       end
 
       embeds_one :ansible, Ansible, on_replace: :update do
@@ -92,7 +95,7 @@ defmodule Console.Schema.Stack do
 
     def terraform_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(parallelism refresh approve_empty)a)
+      |> cast(attrs, ~w(parallelism refresh approve_empty tofu tofu_registry)a)
     end
 
     def ansible_changeset(model, attrs) do
@@ -111,17 +114,23 @@ defmodule Console.Schema.Stack do
 
   defmodule PolicyEngine do
     use Piazza.Ecto.Schema
+    alias Console.Schema.Service.Git
 
     defenum Type, trivy: 0
 
     embedded_schema do
-      field :type, Type
-      field :max_severity, Console.Schema.Vulnerability.Severity
+      field :type,            Type
+      field :custom_policies, :boolean, default: false
+      field :max_severity,    Console.Schema.Vulnerability.Severity
+      field :repository_id,   :binary_id
+
+      embeds_one :git, Git, on_replace: :update
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(type max_severity)a)
+      |> cast(attrs, ~w(type custom_policies max_severity repository_id)a)
+      |> cast_embed(:git)
       |> validate_required(~w(type)a)
     end
   end
@@ -178,6 +187,7 @@ defmodule Console.Schema.Stack do
     has_many :files,       StackFile, on_replace: :delete
     has_many :output,      StackOutput, on_replace: :delete
     has_many :runs,        StackRun
+    has_many :infracost_resources, StackInfracostResource, foreign_key: :stack_id
     has_many :tags,        Tag, on_replace: :delete
 
     has_many :observable_metrics, ObservableMetric, on_replace: :delete
@@ -207,6 +217,13 @@ defmodule Console.Schema.Stack do
 
   def for_project(query \\ __MODULE__, pid) do
     from(s in query, where: s.project_id == ^pid)
+  end
+
+  def for_project_name(query \\ __MODULE__, name) do
+    from(s in query,
+      join: p in assoc(s, :project),
+      where: p.name == ^name
+    )
   end
 
   def for_user(query \\ __MODULE__, %User{} = user) do
@@ -245,7 +262,7 @@ defmodule Console.Schema.Stack do
     from(s in query, order_by: ^order)
   end
 
-def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
+  def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
 
   def for_status(query \\ __MODULE__, status) do
     from(s in query, where: s.status == ^status)

@@ -124,7 +124,7 @@ type PrAutomationSpec struct {
 	Identifier *string `json:"identifier,omitempty"`
 
 	// Message defines the commit message template that will be used in the generated PR.
-	// Can include templated variables from user input.
+	// Can include templated variables from user input. If you're using an AI pr automation, the ai can provide this for you.
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 
@@ -134,7 +134,7 @@ type PrAutomationSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Title defines the template for the pull request title. Can include variables
-	// that will be replaced with user-provided configuration values.
+	// that will be replaced with user-provided configuration values. If you're using an AI pr automation, the ai can provide this for you.
 	// +kubebuilder:validation:Optional
 	Title *string `json:"title,omitempty"`
 
@@ -214,6 +214,11 @@ type PrAutomationSpec struct {
 	// of the PR, useful for cleanup or migration scenarios.
 	// +kubebuilder:validation:Optional
 	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
+
+	// AI configuration controls whether AI assistance is enabled for this automation
+	// and allows specifying a custom prompt to guide AI-generated updates.
+	// +kubebuilder:validation:Optional
+	AI *PrAutomationAIConfiguration `json:"ai,omitempty"`
 
 	// Lua specification to source lua scripts to preprocess the PR automation.
 	// +kubebuilder:validation:Optional
@@ -676,6 +681,27 @@ func (in *PrAutomationLuaConfiguration) Attributes() *console.PrLuaSpecAttribute
 		Script:   in.Script,
 		Folder:   in.Folder,
 		External: in.External,
+	}
+}
+
+type PrAutomationAIConfiguration struct {
+	// Enabled controls whether AI assistance is enabled for this PR automation.
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Prompt is a custom prompt to guide AI-generated updates for this automation.  Templating is supported.
+	// +kubebuilder:validation:Required
+	Prompt string `json:"prompt,omitempty"`
+}
+
+func (in *PrAutomationAIConfiguration) Attributes() *console.PrAiSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrAiSpecAttributes{
+		Enabled: in.Enabled,
+		Prompt:  in.Prompt,
 	}
 }
 

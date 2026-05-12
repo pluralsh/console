@@ -144,9 +144,9 @@ export const sanitizeScmAttributes = (
   formState: ScmConnectionAttributes
 ): ScmConnectionAttributes => {
   const type = formState.type
-  const { github, azure, token, ...rest } = deepOmitFalsy(formState)
+  const { github, azure, token, name = '', ...rest } = deepOmitFalsy(formState)
   if (type === ScmType.Github)
-    return { ...(github ? { github } : { token }), ...rest }
-  if (type === ScmType.AzureDevops) return { azure, token, ...rest }
-  return { token, ...rest }
+    return { name, type, ...(github ? { github } : { token }), ...rest }
+  if (type === ScmType.AzureDevops) return { name, type, azure, token, ...rest }
+  return { name, type, token, ...rest }
 }

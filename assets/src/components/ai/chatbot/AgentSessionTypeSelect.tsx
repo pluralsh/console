@@ -6,6 +6,7 @@ import {
   ListBoxItem,
   RocketIcon,
   SearchIcon,
+  GearTrainIcon,
   Select,
   Toast,
   Tooltip,
@@ -126,5 +127,10 @@ const options = [
     type: AgentSessionType.Chat,
     description: 'Chat about your existing infra',
     icon: <ChatOutlineIcon />,
+  },
+  {
+    type: AgentSessionType.Configure,
+    description: 'Configure your existing infra',
+    icon: <GearTrainIcon />,
   },
 ]

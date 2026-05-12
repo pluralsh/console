@@ -57,9 +57,9 @@ defmodule Console.AI.MCP.Agent do
     with {sname, name} <- tool_name(name),
          %McpServer{} = server <- Enum.find(servers(thread), & &1.name == sname) do
       name(:client, thread, server)
-      |> Hermes.Client.Base.call_tool(name, args)
+      |> Anubis.Client.call_tool(name, args)
       |> case do
-        {:ok, %Hermes.MCP.Response{result: %{"content" => content}}} ->
+        {:ok, %Anubis.MCP.Response{result: %{"content" => content}}} ->
           {:reply, {:ok, concat_content(content)}, State.touch(state)}
         {:error, error} ->
           {:reply, {:error, "MCP Server #{server.name} has error: #{inspect(error)}"}, State.touch(state)}
@@ -72,8 +72,8 @@ defmodule Console.AI.MCP.Agent do
   def handle_info(:init, %State{thread: thread} = state) do
     Logger.info "starting mcp agent for thread: #{thread.id}"
     state = Enum.reduce(servers(thread), state, fn server, %State{tools: tools} = state ->
-      case Console.Retrier.retry(fn -> Hermes.Client.Base.list_tools(name(:client, thread, server)) end) do
-        {:ok, %Hermes.MCP.Response{result: %{"tools" => found}}} ->
+      case Console.Retrier.retry(fn -> Anubis.Client.list_tools(name(:client, thread, server)) end) do
+        {:ok, %Anubis.MCP.Response{result: %{"tools" => found}}} ->
           new_tools = Map.new(found, & {tool_name(server, &1["name"]), Tool.new(&1)})
           %{state | tools: Map.merge(tools, new_tools)}
         err ->

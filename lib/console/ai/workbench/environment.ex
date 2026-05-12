@@ -1,19 +1,22 @@
 defmodule Console.AI.Workbench.Environment do
-  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool}
-  alias Console.AI.Workbench.Skill
+  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity, User}
+  alias Console.AI.Workbench.{Skill, Skills.Builtins}
 
   @type t :: %__MODULE__{
+    user: User.t,
     job: WorkbenchJob.t,
     tools: %{binary => WorkbenchTool.t},
-    skills: %{binary => Skill.t}
+    skills: %{binary => Skill.t},
+    activities: [WorkbenchJobActivity.t]
   }
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills]
+  defstruct [:job, :tools, :skills, :user, activities: []]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     %__MODULE__{
+      user: job.user,
       job: job,
       tools: to_map(tools),
       skills: to_map(skills)
@@ -21,11 +24,35 @@ defmodule Console.AI.Workbench.Environment do
     |> save()
   end
 
-  def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench}) do
+  def with_builtins(skills) when is_map(skills) do
+    Builtins.builtins()
+    |> Map.new(fn %Skill{name: name} = skill -> {name, skill} end)
+    |> Map.merge(skills)
+  end
+
+  def subagent_skills(%__MODULE__{skills: %{} = skills}, subagent), do: subagent_skills(skills, subagent)
+  def subagent_skills(%{} = skills, subagent) do
+    Enum.filter(skills, fn {_, skill} -> Skill.subagent?(skill, subagent) end)
+    |> Map.new()
+  end
+
+  def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench} = job) do
     tool_agents(tools)
+    |> Enum.concat(type_subagents(job))
     |> Enum.concat(coding_agents(bench))
     |> Enum.concat(infra_agents(bench))
+    |> Enum.filter(&allow_subagent?(job, &1))
   end
+
+  defp allow_subagent?(%WorkbenchJob{type: :skill}, :canvas), do: false
+  defp allow_subagent?(%WorkbenchJob{type: :skill}, :coding), do: false
+  defp allow_subagent?(_, _), do: true
+
+  def categories(%WorkbenchJob{workbench: %Workbench{tools: tools}}) when is_list(tools) do
+    Enum.flat_map(tools, & (&1.categories || []))
+    |> Enum.uniq()
+  end
+  def categories(_), do: []
 
   defp to_map(m) when is_map(m), do: m
   defp to_map(l) when is_list(l), do: Map.new(l, & {&1.name, &1})
@@ -73,17 +100,22 @@ defmodule Console.AI.Workbench.Environment do
   defp coding_agents(%Workbench{agent_runtime_id: id}) when is_binary(id), do: [:coding]
   defp coding_agents(_), do: []
 
-  defp infra_agents(%Workbench{configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k}}}) do
-    case (s || st || k) do
+  defp infra_agents(%Workbench{
+         configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k, pod_logs: pl}}
+       }) do
+    case s || st || k || pl do
       true -> [:infrastructure]
       _ -> []
     end
   end
   defp infra_agents(_), do: []
 
+  defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
+  defp type_subagents(_), do: []
+
   defp tool_agents(tools) do
-    Enum.flat_map(tools, fn
-      {_, %{categories: [_ | _] = categories}} -> categories
+    Enum.flat_map(tools || [], fn
+      %{categories: [_ | _] = categories} -> categories
       _ -> [:integration]
     end)
     |> Enum.map(&category_to_subagent/1)
@@ -97,5 +129,6 @@ defmodule Console.AI.Workbench.Environment do
   defp category_to_subagent(:error_tracking), do: :observability
   defp category_to_subagent(:integration), do: :integration
   defp category_to_subagent(:ticketing), do: :integration
+  defp category_to_subagent(:search), do: :search
   defp category_to_subagent(_), do: :integration
 end

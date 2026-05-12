@@ -5,6 +5,227 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 85.0.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 85.0.1
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    'quay.io/kiwigrid/k8s-sidecar:2.7.1', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 84.5.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumps kube-prometheus-stack chart dependencies with non-major
+        updates (Renovate-driven)., Previous patch (84.4.0) updated the Grafana subchart
+        to v12.3.0; 84.5.0 follows with additional dependency patch/minor bumps.]
+    features: []
+    breaking_changes: []
+  chart_version: 84.5.0
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    'quay.io/kiwigrid/k8s-sidecar:2.7.1', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 84.4.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped the Grafana subchart (Helm release) to **Grafana v12.3.0**.]
+    features: [Grafana dependency updated to v12.3.0 as part of the kube-prometheus-stack
+        chart release.]
+    breaking_changes: []
+  chart_version: 84.4.0
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    'quay.io/kiwigrid/k8s-sidecar:2.7.1', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 84.3.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **New value (84.1.0):** `kubeApiServer.jobNameOverride` was added\
+      \ to allow overriding the Prometheus scrape job name for the kube-apiserver\
+      \ target. If you rely on a specific `job` label for alerts/dashboards, consider\
+      \ setting this explicitly to avoid label mismatches.\n- **84.3.0:** No explicit\
+      \ Helm values changes called out in the provided notes; it is described as \u201C\
+      dependency non-major updates\u201D."
+    chart_updates: ['84.1.0: Added support for `kubeApiServer.jobNameOverride` (chart
+        template change for the kube-apiserver scrape config).', '84.3.0: Bumped kube-prometheus-stack
+        chart dependencies with non-major updates (per Renovate PR #6871).']
+    features: ['Ability to override the kube-apiserver Prometheus job name via `kubeApiServer.jobNameOverride`,
+        which can help align job labels with existing alerting/dashboards or avoid
+        collisions.']
+    breaking_changes: ["No breaking changes were indicated in the provided release\
+        \ notes for 84.1.0 \u2192 84.3.0. However, dependency bumps (even non-major)\
+        \ can still cause minor behavioral changes; validate alerts/dashboards and\
+        \ scrape targets in a staging environment."]
+  chart_version: 84.3.0
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    'quay.io/kiwigrid/k8s-sidecar:2.7.1', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 84.1.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- No required values changes are called out in the provided notes.
+
+      - **Optional**: a new value/field was added for the API server scrape config:
+      `kubeApiServer.jobNameOverride` (name inferred from the PR title). Use it only
+      if you need to control the generated Prometheus job name for kube-apiserver.'
+    chart_updates: [Adds support for overriding the Prometheus scrape job name for
+        kube-apiserver via a new `jobNameOverride` setting.]
+    features: [New option to override the kube-apiserver scrape job name (useful when
+        you need the job label to match existing dashboards/alerts or to avoid collisions).]
+    breaking_changes: []
+  chart_version: 84.1.0
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 84.0.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **Grafana subchart bumped to major v12** (`[kube-prometheus-stack]
+      Update Helm release grafana to v12`). Review any **Grafana-related values**
+      you override (admin credentials, persistence, sidecars/dashboards/datasources,
+      ingress, service, resources, plugins) against the Grafana chart v12 values schema
+      before upgrading.
+
+      '
+    chart_updates: [Updated the bundled Grafana Helm dependency to **Grafana chart
+        v12**.]
+    features: ['Grafana is now deployed via the Grafana Helm chart v12, bringing whatever
+        new defaults/fixes that chart version includes.']
+    breaking_changes: [Potential breaking changes may come from the **Grafana Helm
+        chart major version bump (v12)**; existing `values.yaml` overrides for Grafana
+        may no longer be valid or may change behavior. Validate your Grafana configuration
+        and run a dry-run/templating diff before applying.]
+  chart_version: 84.0.0
+  images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 83.7.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Updated bundled kubernetes-mixin content to digest `afc9733`
+        (Prometheus rules, alerts, recording rules, and Grafana dashboards derived
+        from the mixin).']
+    features: ['Refreshes the upstream kubernetes-mixin bundle, which may add/adjust
+        dashboards and Prometheus rules shipped with the chart.']
+    breaking_changes: []
+  chart_version: 83.7.0
+  images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 83.6.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / config changes
+
+      - **No required values changes identified** between `83.5.0` and `83.6.0` based
+      on the provided release notes.
+
+      - If you enabled/used Alertmanager `sessionPersistence` introduced in `83.5.0`,
+      ensure your values still match your ingress/service setup after upgrading (no
+      new notes for `83.6.0`).'
+    chart_updates: ['Bumped the embedded `kube-prometheus` (prometheus-operator/kube-prometheus)
+        content digest to `ac9a509` (chart content refresh: manifests/dashboards/rules).']
+    features: [Updated the bundled kube-prometheus assets (manifests/rules/dashboards)
+        to the upstream digest `ac9a509`.]
+    breaking_changes: []
+  chart_version: 83.6.0
+  images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.1',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 83.5.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- No required values changes mentioned in the provided release
+      notes.
+
+      - Optional: if you want Alertmanager session stickiness/persistence at the Service/ingress
+      layer, review the new `alertmanager.sessionPersistence` (or similarly named)
+      values introduced by the chart and enable/configure it to match your ingress/load
+      balancer behavior.'
+    chart_updates: ['Added support for Alertmanager session persistence (stickiness)
+        in the chart (PR #6847).']
+    features: ['Alertmanager can now be configured with session persistence, which
+        helps keep client sessions pinned to the same backend when behind a load balancer/ingress.']
+    breaking_changes: []
+  chart_version: 83.5.0
+  images: ['docker.io/grafana/grafana:12.4.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.0',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 83.4.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Prometheus image tag updated: `quay.io/prometheus/prometheus`
+        -> `v3.11.2` (in kube-prometheus-stack chart 83.4.1).', (Context from start
+        version) 82.18.0 updated the `prometheus-node-exporter` subchart to `v4.53.0`.]
+    features: ['Prometheus upgraded to v3.11.2 via image tag bump, which may include
+        upstream Prometheus fixes/improvements.']
+    breaking_changes: []
+  chart_version: 83.4.1
+  images: ['docker.io/grafana/grafana:12.4.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.0',
+    'quay.io/kiwigrid/k8s-sidecar:2.6.0', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
+    'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+- version: 82.18.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Prometheus Operator dependency bumped to v0.89.0 (chart 82.0.0).,
+      prometheus-node-exporter subchart updated to v4.53.0 (chart 82.18.0).]
+    features: ['Upgrades Prometheus Operator to 0.89.0, bringing its upstream fixes
+        and improvements into the stack.', 'Updates node-exporter chart to 4.53.0,
+        which may include new metrics/flags and bugfixes from that chart release.']
+    breaking_changes: [No explicit breaking changes are mentioned in the provided
+        release notes; verify Prometheus Operator 0.89.0 and node-exporter 4.53.0
+        upstream changelogs for any deprecations that could affect existing CRs/flags/values.]
+  chart_version: 82.18.0
+  images: ['docker.io/grafana/grafana:12.4.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.0',
+    'quay.io/kiwigrid/k8s-sidecar:2.5.4', 'quay.io/prometheus-operator/prometheus-operator:v0.89.0',
+    'quay.io/prometheus/alertmanager:v0.31.1', 'quay.io/prometheus/node-exporter:v1.11.0',
+    'quay.io/prometheus/prometheus:v3.11.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 82.0.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']

@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   ecto_enum :ai_provider, DeploymentSettings.AIProvider
   ecto_enum :log_driver, DeploymentSettings.LogDriver
   ecto_enum :vector_store, DeploymentSettings.VectorStore
+  ecto_enum :open_ai_method, DeploymentSettings.OpenAIMethod
   ecto_enum :provider, CloudConnection.Provider
 
   input_object :project_attributes do
@@ -30,11 +31,19 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :ai, :ai_settings_attributes, description: "configuration for LLM provider clients"
     field :cost, :cost_settings_attributes, description: "settings for cost management functionality"
+    field :metrics, :metrics_settings_attributes, description: "settings for OpenTelemetry metrics export"
 
     field :read_bindings,          list_of(:policy_binding_attributes)
     field :write_bindings,         list_of(:policy_binding_attributes)
     field :git_bindings,           list_of(:policy_binding_attributes)
     field :create_bindings,        list_of(:policy_binding_attributes)
+  end
+
+  @desc "Settings for OpenTelemetry metrics export"
+  input_object :metrics_settings_attributes do
+    field :enabled,  :boolean, description: "whether to enable metrics export"
+    field :endpoint, :string, description: "the OpenTelemetry collector endpoint to send metrics to"
+    field :crontab,  :string, description: "cron expression for how often to export metrics (e.g. '*/5 * * * *')"
   end
 
   input_object :http_connection_attributes do
@@ -115,7 +124,16 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :method,          :open_ai_method, description: "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
+    field :token_exchange,  :openai_token_exchange_attributes, description: "OAuth2 client credentials against a token endpoint to obtain access tokens"
+  end
+
+  input_object :openai_token_exchange_attributes do
+    field :enabled,       :boolean
+    field :token_url,     :string, description: "token endpoint URL"
+    field :client_id,     :string
+    field :client_secret, :string
   end
 
   input_object :anthropic_settings_attributes do
@@ -142,12 +160,12 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :access_token,    non_null(:string), description: "the azure openai access token to use"
-    field :deployment,      :string, description: "the azure openai deployment name"
+    field :deployments,     :json, description: "mapping from model id to azure openai deployment name"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :bedrock_ai_attributes do
-    field :model_id,              non_null(:string), description: "the bedrock model id to use"
+    field :model_id,              :string, description: "the bedrock model id to use"
     field :tool_model_id,         :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_token,          :string, description: "the openai bedrock access token to use"
     field :region,                :string, description: "the aws region the model is hosted in"
@@ -209,6 +227,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :secret_access_key, non_null(:string)
     field :region,            :string
     field :regions,           list_of(:string)
+    field :assume_role_arn,   :string, description: "optional IAM role ARN for the console to assume when using this connection"
   end
 
   input_object :gcp_cloud_connection_attributes do
@@ -263,6 +282,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :ai,                    :ai_settings, description: "settings for LLM provider clients"
     field :cost,                  :cost_settings, description: "settings for cost management"
     field :logging,               :logging_settings, description: "settings for connections to log aggregation datastores"
+    field :metrics,               :metrics_settings, description: "settings for OpenTelemetry metrics export"
     field :mgmt_repo,             :string, description: "the root repo you used to run `plural up`"
 
     field :onboarded, :boolean, description: "whether the console has been onboarded and getting started pages need to be shown"
@@ -314,6 +334,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :recommendation_cushion, :integer, description: "the percentage cushion above baseline usage to give when generation recommendations, default 20%"
   end
 
+  @desc "Settings for OpenTelemetry metrics export"
+  object :metrics_settings do
+    field :enabled,  :boolean, description: "whether metrics export is enabled"
+    field :endpoint, :string, description: "the OpenTelemetry collector endpoint"
+    field :crontab,  :string, description: "cron expression for export schedule"
+  end
+
   @desc "Settings for configuring access to common LLM providers"
   object :ai_settings do
     field :enabled,        :boolean
@@ -340,7 +367,16 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string, description: "the openai model version to use"
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :method,          :open_ai_method, description: "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
+    field :token_exchange,  :openai_token_exchange, description: "OAuth2 client credentials configured for token endpoint exchange"
+  end
+
+  @desc "OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
+  object :openai_token_exchange do
+    field :enabled,   :boolean
+    field :token_url, :string, description: "token endpoint URL"
+    field :client_id, :string
   end
 
   @desc "Anthropic connection information"
@@ -364,13 +400,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :api_version,     :string, description: "the api version you want to use"
-    field :deployment,      :string, description: "the azure openai deployment name"
+    field :deployments,     :map, description: "mapping from model id to azure openai deployment name"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
-    field :model_id,        non_null(:string), description: "the bedrock model to use"
+    field :model_id,        :string, description: "the bedrock model to use (omit for Plural defaults)"
     field :tool_model_id,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)"
     field :region,          :string, description: "the aws region the model is hosted in"
@@ -433,16 +469,15 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "The configuration for a cloud provider"
   object :aws_connection_attributes do
-    field :access_key_id,     non_null(:string), description: "the access key id for aws"
-    field :secret_access_key, non_null(:string), description: "the secret access key for aws"
-    field :region,            :string, description: "the region for aws"
-    field :regions,           list_of(:string), description: "the regions for aws"
+    field :access_key_id,   non_null(:string), description: "the access key id for aws"
+    field :region,          :string, description: "the region for aws"
+    field :regions,         list_of(:string), description: "the regions for aws"
+    field :assume_role_arn, :string, description: "IAM role ARN for the console to assume when using this connection"
   end
 
   @desc "The configuration for a cloud provider"
   object :gcp_connection_attributes do
-    field :service_account_key, non_null(:string), description: "the service account key for gcp"
-    field :project_id,          non_null(:string), description: "the project id for gcp"
+    field :project_id, non_null(:string), description: "the project id for gcp"
   end
 
   @desc "The configuration for a cloud provider"
@@ -450,7 +485,6 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :subscription_id, non_null(:string), description: "the subscription id for azure"
     field :tenant_id,       non_null(:string), description: "the tenant id for azure"
     field :client_id,       non_null(:string), description: "the client id for azure"
-    field :client_secret,   non_null(:string), description: "the client secret for azure"
   end
 
   @desc "A federated credential is a way to authenticate users from an external identity provider"
@@ -519,7 +553,8 @@ defmodule Console.GraphQl.Deployments.Settings do
         resource: :settings,
         action: :read,
         api: "cloudConnections"
-      arg :q, :string
+      arg :q,        :string
+      arg :provider, :provider
 
       resolve &Deployments.list_cloud_connections/2
     end

@@ -1,5 +1,8 @@
 import {
+  ArrowTopRightIcon,
+  Button,
   CaretDownIcon,
+  Flex,
   IconFrame,
   ListBoxItem,
   Spinner,
@@ -17,6 +20,8 @@ import { MoreMenu } from '../utils/MoreMenu'
 import StackCustomRun from './customrun/StackCustomRun'
 import StackCustomRunModal from './customrun/StackCustomRunModal'
 import RestoreStackButton from './RestoreStackButton'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+import { Link } from 'react-router-dom'
 
 enum MenuItemKey {
   None = '',
@@ -37,7 +42,10 @@ export default function StackActions({
   const [isOpen, setIsOpen] = useState(false)
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.Resync)
   const [showRestoreToast, setShowRestoreToast] = useState(false)
-  const [mutation, { loading, error }] = useTriggerStackRunMutation()
+  const [mutation, { loading, error }] = useTriggerStackRunMutation({
+    refetchQueries: ['Stacks'],
+    awaitRefetchQueries: true,
+  })
   const theme = useTheme()
 
   // need a ref instead of state because state doesn't update before onOpenChange fires
@@ -67,26 +75,6 @@ export default function StackActions({
 
   return (
     <>
-      {error && (
-        <Toast
-          severity="danger"
-          margin="xlarge"
-          marginVertical="xxxlarge"
-        >
-          Error: {error.message}
-        </Toast>
-      )}
-      {showRestoreToast && (
-        <Toast
-          position={'bottom'}
-          onClose={() => setShowRestoreToast(false)}
-          closeTimeout={5000}
-          margin="large"
-          severity="success"
-        >
-          Stack &quot;{stack?.name}&quot; restored.
-        </Toast>
-      )}
       {deleting ? (
         <>
           <RestoreStackButton
@@ -96,22 +84,25 @@ export default function StackActions({
           <StackCustomRun stackId={stack?.id ?? ''} />
         </>
       ) : (
-        <div
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: theme.borderRadiuses.medium,
-          }}
+        <Flex
+          align="center"
+          borderRadius={theme.borderRadiuses.medium}
         >
           <KickButton
+            key={stack?.id ?? 'id'}
             floating
             css={{
               borderRight: 'none',
               borderTopRightRadius: 0,
               borderBottomRightRadius: 0,
+              transition: 'none',
             }}
             pulledAt={stack?.repository?.pulledAt}
             kickMutationHook={useKickStackMutation}
+            mutationOptions={{
+              refetchQueries: ['Stacks'],
+              awaitRefetchQueries: true,
+            }}
             message="Resync"
             tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
             variables={{ id: stack?.id }}
@@ -148,13 +139,41 @@ export default function StackActions({
               rightContent={loading ? <Spinner /> : null}
             />
           </MoreMenu>
-        </div>
+        </Flex>
+      )}
+      {stack?.parent?.id && (
+        <Button
+          secondary
+          as={Link}
+          to={getServiceDetailsPath({ serviceId: stack.parent.id })}
+          endIcon={<ArrowTopRightIcon />}
+        >
+          Parent
+        </Button>
       )}
       <StackCustomRunModal
         open={menuKey === MenuItemKey.CustomRun}
         onClose={closeMenu}
         stackId={stack?.id ?? ''}
       />
+      <Toast
+        show={!!error}
+        severity="danger"
+        margin="xlarge"
+        marginVertical="xxxlarge"
+      >
+        Error: {error?.message}
+      </Toast>
+      <Toast
+        show={showRestoreToast}
+        position="bottom"
+        onClose={() => setShowRestoreToast(false)}
+        closeTimeout={5000}
+        margin="large"
+        severity="success"
+      >
+        Stack &quot;{stack?.name}&quot; restored.
+      </Toast>
     </>
   )
 }

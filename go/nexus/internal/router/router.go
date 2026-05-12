@@ -1,0 +1,645 @@
+package router
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+
+	"github.com/bytedance/sonic"
+	"github.com/go-chi/chi/v5"
+	bifrostcore "github.com/maximhq/bifrost/core"
+	"github.com/maximhq/bifrost/core/schemas"
+	"go.uber.org/zap"
+)
+
+// Router defines the interface that all provider routers must implement
+// to register their routes with the main HTTP router.
+type Router interface {
+	RegisterRoutes(chi.Router)
+}
+
+// StreamingRequest interface for requests that support streaming
+type StreamingRequest interface {
+	IsStreamingRequested() bool
+}
+
+type TextStreamResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostTextCompletionResponse) (string, interface{}, error)
+
+type ChatStreamResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (string, interface{}, error)
+
+type ResponsesStreamResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostResponsesStreamResponse) (string, interface{}, error)
+
+type StreamErrorConverter func(ctx *schemas.BifrostContext, err *schemas.BifrostError) interface{}
+
+type StreamConfig struct {
+	// TextStreamResponseConverter is the function to convert BifrostTextCompletionResponse to streaming format
+	TextStreamResponseConverter TextStreamResponseConverter
+
+	// ChatStreamResponseConverter is the function to convert BifrostChatResponse to streaming format
+	ChatStreamResponseConverter ChatStreamResponseConverter
+
+	// ResponsesStreamResponseConverter is the function to convert BifrostResponsesResponse to streaming format
+	ResponsesStreamResponseConverter ResponsesStreamResponseConverter
+
+	// ErrorConverter is the function to convert BifrostError to streaming format
+	ErrorConverter StreamErrorConverter
+}
+
+type RequestConverter func(ctx *schemas.BifrostContext, req any) (*schemas.BifrostRequest, error)
+type TextResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostTextCompletionResponse) (interface{}, error)
+type ChatResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (interface{}, error)
+type ResponsesResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostResponsesResponse) (interface{}, error)
+type EmbeddingResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostEmbeddingResponse) (interface{}, error)
+type CountTokensResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostCountTokensResponse) (interface{}, error)
+type ListModelsResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostListModelsResponse) (interface{}, error)
+type ErrorConverter func(ctx *schemas.BifrostContext, err *schemas.BifrostError) interface{}
+
+type PreRequestCallback func(request *http.Request, bifrostCtx *schemas.BifrostContext, req interface{}) error
+
+type RouteConfig struct {
+	// Path is the HTTP endpoint path for the route
+	Path string
+
+	// Method is the HTTP method for the route (e.g., GET, POST)
+	Method string
+
+	// GetRequestTypeInstance is a function to get a new instance of the request type
+	GetRequestTypeInstance func() interface{}
+
+	// RequestConverter converts incoming requests to BifrostRequest
+	RequestConverter RequestConverter
+
+	// RequestParser is a function to parse the raw request body.
+	RequestParser func(req *http.Request, target interface{}) error
+
+	// TextResponseConverter converts BifrostTextCompletionResponse to integration format
+	TextResponseConverter TextResponseConverter
+
+	// ChatResponseConverter converts BifrostChatResponse to integration format
+	ChatResponseConverter ChatResponseConverter
+
+	// ResponsesResponseConverter converts BifrostResponsesResponse to integration format
+	ResponsesResponseConverter ResponsesResponseConverter
+
+	// EmbeddingResponseConverter converts BifrostEmbeddingResponse to integration format
+	EmbeddingResponseConverter EmbeddingResponseConverter
+
+	// ListTokensResponseConverter converts BifrostListModelsResponse to integration format
+	ListModelsResponseConverter ListModelsResponseConverter
+
+	// CountTokensResponseConverter converts BifrostCountTokensResponse to integration format
+	CountTokensResponseConverter CountTokensResponseConverter
+
+	// ErrorConverter converts BifrostError to integration format
+	ErrorConverter ErrorConverter
+
+	// StreamConfig holds the streaming configuration for the route
+	StreamConfig *StreamConfig
+
+	// SendDoneMarker controls whether "data: [DONE]" is written at the end of a stream.
+	// If nil, legacy path-based behavior is used for backward compatibility.
+	SendDoneMarker *bool
+
+	// PreCallback is called after parsing but before Bifrost processing
+	PreCallback PreRequestCallback
+}
+
+// GenericRouter provides common functionality for different AI provider routers.
+type GenericRouter struct {
+	// Logger for the router
+	logger *zap.Logger
+
+	// Bifrost client for handling requests
+	client *bifrostcore.Bifrost
+
+	// List of route configurations
+	routes []RouteConfig
+
+	// resolver is an instance of EmbeddingsResolver used for resolving embedding configurations within the router.
+	resolver *EmbeddingsResolver
+}
+
+func (in *GenericRouter) RegisterRoutes(r chi.Router) {
+	for _, route := range in.routes {
+		if route.GetRequestTypeInstance == nil {
+			in.logger.Warn("route configuration is invalid: GetRequestTypeInstance is nil",
+				zap.String("path", route.Path),
+				zap.String("method", route.Method),
+			)
+			continue
+		}
+
+		if testInstance := route.GetRequestTypeInstance(); testInstance == nil {
+			in.logger.Warn("route configuration is invalid: GetRequestTypeInstance returned nil",
+				zap.String("path", route.Path),
+				zap.String("method", route.Method),
+			)
+			continue
+		}
+
+		if route.ErrorConverter == nil {
+			in.logger.Warn("route configuration is invalid: ErrorConverter is nil",
+				zap.String("path", route.Path),
+				zap.String("method", route.Method),
+			)
+			continue
+		}
+
+		handler := in.createHandler(route)
+		path := route.Path
+		switch route.Method {
+		case http.MethodGet:
+			r.Get(path, handler)
+		case http.MethodPost:
+			r.Post(path, handler)
+		case http.MethodDelete:
+			r.Delete(path, handler)
+		case http.MethodPut:
+			r.Put(path, handler)
+		case http.MethodHead:
+			r.Head(path, handler)
+		default:
+			in.logger.Warn("unsupported HTTP method in route configuration",
+				zap.String("path", route.Path),
+				zap.String("method", route.Method),
+			)
+			continue
+		}
+		in.logger.Info("registered route", zap.String("method", route.Method), zap.String("path", path))
+	}
+}
+
+func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := config.GetRequestTypeInstance()
+		bifrostCtx, cancel := schemas.NewBifrostContextWithCancel(r.Context())
+		if userAgent := r.Header.Get("User-Agent"); userAgent != "" {
+			bifrostCtx.SetValue(schemas.BifrostContextKeyUserAgent, userAgent)
+		}
+
+		if config.RequestParser != nil {
+			if err := config.RequestParser(r, req); err != nil {
+				defer cancel()
+				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Failed to parse request"))
+				return
+			}
+		} else {
+			rawBody, err := io.ReadAll(r.Body)
+			if err != nil {
+				defer cancel()
+				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Failed to read request body"))
+				return
+			}
+
+			if len(rawBody) > 0 {
+				if err = sonic.Unmarshal(rawBody, req); err != nil {
+					defer cancel()
+					in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Invalid JSON"))
+					return
+				}
+			}
+		}
+
+		var bifrostReq *schemas.BifrostRequest
+		var err error
+
+		if config.PreCallback != nil {
+			if err = config.PreCallback(r, bifrostCtx, req); err != nil {
+				defer cancel()
+				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "pre-request callback failed"))
+				return
+			}
+		}
+
+		bifrostReq, err = config.RequestConverter(bifrostCtx, req)
+
+		if err != nil {
+			defer cancel()
+			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "failed to convert request"))
+			return
+		}
+		if bifrostReq == nil {
+			defer cancel()
+			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(nil, "converted request is nil"))
+			return
+		}
+
+		isStreaming := false
+		if streamingReq, ok := req.(StreamingRequest); ok {
+			isStreaming = streamingReq.IsStreamingRequested()
+		}
+		if isStreaming {
+			in.handleStreamingRequest(w, config, bifrostReq, bifrostCtx, cancel)
+		} else {
+			defer cancel()
+			in.handleNonStreamingRequest(w, config, r, bifrostReq, bifrostCtx)
+		}
+	}
+}
+
+func (in *GenericRouter) handleStreamingRequest(w http.ResponseWriter, config RouteConfig, bifrostReq *schemas.BifrostRequest, ctx *schemas.BifrostContext, cancel context.CancelFunc) {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	var stream chan *schemas.BifrostStreamChunk
+	var bifrostErr *schemas.BifrostError
+
+	switch {
+	case bifrostReq.TextCompletionRequest != nil:
+		stream, bifrostErr = in.client.TextCompletionStreamRequest(ctx, bifrostReq.TextCompletionRequest)
+	case bifrostReq.ChatRequest != nil:
+		stream, bifrostErr = in.client.ChatCompletionStreamRequest(ctx, bifrostReq.ChatRequest)
+	case bifrostReq.ResponsesRequest != nil:
+		stream, bifrostErr = in.client.ResponsesStreamRequest(ctx, bifrostReq.ResponsesRequest)
+	default:
+		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "unsupported request type for streaming"))
+		cancel()
+		return
+	}
+
+	if bifrostErr != nil {
+		cancel()
+		in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+		return
+	}
+
+	if config.StreamConfig == nil {
+		cancel()
+		// Drain the stream to avoid goroutine leaks
+		go func() {
+			for range stream {
+			}
+		}()
+
+		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "streaming configuration is missing"))
+		return
+	}
+
+	in.handleStreaming(w, ctx, config, stream, cancel)
+}
+
+func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.BifrostContext, config RouteConfig, stream chan *schemas.BifrostStreamChunk, cancel context.CancelFunc) {
+	defer cancel()
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "streaming not supported"))
+		return
+	}
+
+	for chunk := range stream {
+		if chunk == nil {
+			continue
+		}
+
+		var errorResponse any
+		fallbackError := map[string]any{
+			"error": map[string]any{
+				"type":    "internal_error",
+				"message": "An internal error occurred while processing your request.",
+			},
+		}
+
+		if chunk.BifrostError != nil {
+			switch {
+			case config.StreamConfig != nil && config.StreamConfig.ErrorConverter != nil:
+				errorResponse = config.StreamConfig.ErrorConverter(ctx, chunk.BifrostError)
+			case config.ErrorConverter != nil:
+				errorResponse = config.ErrorConverter(ctx, chunk.BifrostError)
+			default:
+				errorResponse = fallbackError
+			}
+
+			errorJSON, err := in.toStreamingErrorResponse(errorResponse)
+			if err != nil {
+				// Fallback to generic error if conversion fails
+				var errorBytes []byte
+				if errorBytes, err = sonic.Marshal(fallbackError); err != nil {
+					cancel()
+					return
+				}
+
+				errorJSON = string(errorBytes)
+			}
+
+			if _, err := fmt.Fprint(w, errorJSON); err != nil {
+				cancel()
+				return
+			}
+
+			flusher.Flush()
+
+			// Some clients (like OpenAI) expect a [DONE] marker to stop listening,
+			// even if an error occurred during the stream.
+			if in.shouldSendDoneMarker(config) {
+				_, _ = fmt.Fprint(w, "data: [DONE]\n\n")
+				flusher.Flush()
+			}
+
+			return
+		}
+
+		var eventType string
+		var convertedResponse any
+		var err error
+
+		switch {
+		case chunk.BifrostTextCompletionResponse != nil:
+			eventType, convertedResponse, err = config.StreamConfig.TextStreamResponseConverter(ctx, chunk.BifrostTextCompletionResponse)
+		case chunk.BifrostChatResponse != nil:
+			eventType, convertedResponse, err = config.StreamConfig.ChatStreamResponseConverter(ctx, chunk.BifrostChatResponse)
+		case chunk.BifrostResponsesStreamResponse != nil:
+			eventType, convertedResponse, err = config.StreamConfig.ResponsesStreamResponseConverter(ctx, chunk.BifrostResponsesStreamResponse)
+		default:
+			requestType := in.safeGetRequestType(chunk)
+			convertedResponse, err = nil, fmt.Errorf("no response converter found for request type: %s", requestType)
+		}
+
+		if convertedResponse == nil && err == nil {
+			// Skip if there's nothing to send
+			continue
+		}
+
+		if err != nil {
+			in.logger.Error("failed to convert stream response", zap.Error(err))
+			continue
+		}
+
+		if eventType != "" {
+			// OPENAI RESPONSES FORMAT: Use event: and data: lines for OpenAI responses API compatibility
+			if _, err := fmt.Fprintf(w, "event: %s\n", eventType); err != nil {
+				cancel()
+				return
+			}
+		}
+
+		switch sse := convertedResponse.(type) {
+		case string:
+			// CUSTOM SSE FORMAT: The converter returned a complete SSE string
+			// This is used by providers like Anthropic that need custom event types
+			// Example: "event: content_block_delta\ndata: {...}\n\n"
+			if !strings.HasPrefix(sse, "data: ") && !strings.HasPrefix(sse, "event: ") {
+				sse = fmt.Sprintf("data: %s\n\n", sse)
+			}
+			if _, err := fmt.Fprint(w, sse); err != nil {
+				cancel() // Client disconnected (write error), cancel upstream stream
+				return
+			}
+		default:
+			// STANDARD SSE FORMAT: The converter returned an object
+			// This will be JSON marshaled and wrapped as "data: {json}\n\n"
+			// Used by most providers (OpenAI chat/completions, Google, etc.)
+			responseJSON, err := sonic.Marshal(convertedResponse)
+			if err != nil {
+				in.logger.Error("failed to marshal stream response to JSON", zap.Error(err))
+				continue
+			}
+
+			// Send as SSE data
+			if _, err := fmt.Fprintf(w, "data: %s\n\n", responseJSON); err != nil {
+				cancel() // Client disconnected (write error), cancel upstream stream
+				return
+			}
+		}
+
+		flusher.Flush()
+	}
+
+	// Only send the [DONE] marker for plain SSE APIs that expect it.
+	// Do NOT send [DONE] for the following cases:
+	//   - OpenAI "responses" API and Anthropic messages API: they signal completion by simply closing the stream, not sending [DONE].
+	//   - Bedrock: uses AWS Event Stream format rather than SSE with [DONE].
+	// Bifrost handles any additional cleanup internally on normal stream completion.
+	if in.shouldSendDoneMarker(config) {
+		if _, err := fmt.Fprint(w, "data: [DONE]\n\n"); err != nil {
+			in.logger.Error("failed to send done marker", zap.Error(err))
+			cancel()
+			return // End stream on error, Bifrost handles cleanup internally
+		}
+	}
+}
+
+func (in *GenericRouter) shouldSendDoneMarker(config RouteConfig) bool {
+	if config.SendDoneMarker != nil {
+		return *config.SendDoneMarker
+	}
+
+	return !strings.Contains(config.Path, "/responses")
+}
+
+func (in *GenericRouter) toStreamingErrorResponse(errorResponse any) (string, error) {
+	// Check if the error response is already a string (custom SSE format)
+	// This is used by providers like Anthropic that need custom event types
+	// Example: "event: error\ndata: {...}\n\n"
+	if sseErrorString, isCustomSSEFormat := errorResponse.(string); isCustomSSEFormat {
+		return sseErrorString, nil
+	}
+
+	// STANDARD SSE FORMAT: The converter returned an object
+	// This will be JSON marshaled and wrapped as "data: {json}\n\n"
+	// Used by most providers (OpenAI, Google, etc.)
+	errorJSON, err := sonic.Marshal(errorResponse)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("data: %s\n\n", string(errorJSON)), nil
+}
+
+// safeGetRequestType safely obtains the request type from a BifrostStreamChunk.
+// It checks multiple sources in order of preference:
+// 1. Response ExtraFields if any response is available
+// 2. BifrostError ExtraFields if error is available and not nil
+// 3. Falls back to "unknown" if no source is available
+func (in *GenericRouter) safeGetRequestType(chunk *schemas.BifrostStreamChunk) string {
+	if chunk == nil {
+		return "unknown"
+	}
+
+	// Try to get RequestType from response ExtraFields (preferred source)
+	switch {
+	case chunk.BifrostTextCompletionResponse != nil:
+		return string(chunk.BifrostTextCompletionResponse.ExtraFields.RequestType)
+	case chunk.BifrostChatResponse != nil:
+		return string(chunk.BifrostChatResponse.ExtraFields.RequestType)
+	case chunk.BifrostResponsesStreamResponse != nil:
+		return string(chunk.BifrostResponsesStreamResponse.ExtraFields.RequestType)
+	}
+
+	// Try to get RequestType from error ExtraFields (fallback)
+	if chunk.BifrostError != nil && chunk.BifrostError.ExtraFields.RequestType != "" {
+		return string(chunk.BifrostError.ExtraFields.RequestType)
+	}
+
+	// Final fallback
+	return "unknown"
+}
+
+func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config RouteConfig, _ *http.Request, bifrostReq *schemas.BifrostRequest, ctx *schemas.BifrostContext) {
+	var response any
+	var err error
+
+	switch {
+	case bifrostReq.ListModelsRequest != nil:
+		var listModelsResponse *schemas.BifrostListModelsResponse
+		var bifrostErr *schemas.BifrostError
+		listModelsResponse, bifrostErr = in.client.ListAllModels(ctx, bifrostReq.ListModelsRequest)
+
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if listModelsResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Bifrost response is nil"))
+			return
+		}
+
+		response, err = config.ListModelsResponseConverter(ctx, listModelsResponse)
+	case bifrostReq.TextCompletionRequest != nil:
+		bifrostResponse, bifrostErr := in.client.TextCompletionRequest(ctx, bifrostReq.TextCompletionRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "text completion response is nil"))
+			return
+		}
+
+		response, err = config.TextResponseConverter(ctx, bifrostResponse)
+	case bifrostReq.ChatRequest != nil:
+		bifrostResponse, bifrostErr := in.client.ChatCompletionRequest(ctx, bifrostReq.ChatRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "chat response is nil"))
+			return
+		}
+
+		response, err = config.ChatResponseConverter(ctx, bifrostResponse)
+	case bifrostReq.ResponsesRequest != nil:
+		bifrostResponse, bifrostErr := in.client.ResponsesRequest(ctx, bifrostReq.ResponsesRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "responses response is nil"))
+			return
+		}
+
+		response, err = config.ResponsesResponseConverter(ctx, bifrostResponse)
+	case bifrostReq.CountTokensRequest != nil:
+		bifrostResponse, bifrostErr := in.client.CountTokensRequest(ctx, bifrostReq.CountTokensRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "count tokens response is nil"))
+			return
+		}
+
+		response, err = config.CountTokensResponseConverter(ctx, bifrostResponse)
+	case bifrostReq.EmbeddingRequest != nil:
+		bifrostResponse, bifrostErr := in.client.EmbeddingRequest(ctx, bifrostReq.EmbeddingRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "embedding response is nil"))
+			return
+		}
+
+		response, err = config.EmbeddingResponseConverter(ctx, bifrostResponse)
+	default:
+		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "unsupported request type"))
+		return
+	}
+
+	if err != nil {
+		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(err, "failed to convert text completion response"))
+		return
+	}
+
+	in.sendSuccess(w, ctx, config.ErrorConverter, response)
+}
+
+func (in *GenericRouter) sendError(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, errorConverter ErrorConverter, bifrostErr *schemas.BifrostError) {
+	statusCode := http.StatusInternalServerError
+	if bifrostErr != nil && bifrostErr.StatusCode != nil {
+		statusCode = *bifrostErr.StatusCode
+	}
+
+	if bifrostErr == nil {
+		bifrostErr = in.toBifrostError(nil, "internal server error")
+	}
+
+	var responseObj any = map[string]any{
+		"error": map[string]any{
+			"message": "internal server error",
+		},
+	}
+	if errorConverter != nil {
+		responseObj = errorConverter(bifrostCtx, bifrostErr)
+	}
+
+	responsePayload, err := json.Marshal(responseObj)
+	if err != nil {
+		in.logger.Error("failed to marshal error response", zap.Error(err))
+		statusCode = http.StatusInternalServerError
+		responsePayload = []byte(`{"error":{"message":"internal server error"}}`)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if _, err = w.Write(responsePayload); err != nil {
+		in.logger.Error("failed to write error response", zap.Error(err))
+	}
+}
+
+func (in *GenericRouter) sendSuccess(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, errorConverter ErrorConverter, response any) {
+	responsePayload, err := json.Marshal(response)
+	if err != nil {
+		in.sendError(w, bifrostCtx, errorConverter, in.toBifrostError(err, "failed to encode success response"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write(responsePayload); err != nil {
+		in.logger.Error("failed to write success response", zap.Error(err))
+	}
+}
+
+func (in *GenericRouter) toBifrostError(err error, message string) *schemas.BifrostError {
+	if err == nil {
+		return &schemas.BifrostError{
+			IsBifrostError: false,
+			Error: &schemas.ErrorField{
+				Message: message,
+			},
+		}
+	}
+
+	return &schemas.BifrostError{
+		IsBifrostError: false,
+		Error: &schemas.ErrorField{
+			Message: fmt.Errorf("%s: %w", message, err).Error(),
+		},
+	}
+}

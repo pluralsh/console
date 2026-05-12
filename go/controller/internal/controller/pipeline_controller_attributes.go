@@ -167,11 +167,37 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		sourceID = service.Status.ID
 	}
 
+	var connectionID *string
+	if criteria.ConnectionRef != nil {
+		connection, err := utils.GetScmConnection(ctx, r.Client, criteria.ConnectionRef)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if !connection.Status.HasID() {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
+		}
+
+		connectionID = connection.Status.ID
+	}
+
+	var ai *console.AiCriteriaAttributes
+	if criteria.Ai != nil {
+		ai = &console.AiCriteriaAttributes{
+			Enabled: criteria.Ai.Enabled,
+			Prompt:  criteria.Ai.Prompt,
+			Title:   criteria.Ai.Title,
+			Message: criteria.Ai.Message,
+		}
+	}
+
 	return &console.PromotionCriteriaAttributes{
 		SourceID:       sourceID,
 		PrAutomationID: prAutomationID,
 		Secrets:        criteria.Secrets,
 		Repository:     criteria.Repository,
+		ConnectionID:   connectionID,
+		Ai:             ai,
 	}, nil, nil
 }
 

@@ -59,6 +59,8 @@ To make changes to the server codebase, you'll want to install elixir on your ma
 
 ```sh
 asdf install
+brew install rustup-init
+rustup toolchain install stable
 ```
 
 Once elixir is available, all server dependencies are managed via docker-compose, and tests can be run via `mix`, like so:

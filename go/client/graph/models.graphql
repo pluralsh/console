@@ -41,6 +41,9 @@ fragment ServiceContextFragment on ServiceContext {
     id
     name
     configuration
+    project {
+        ...TinyProjectFragment
+    }
 }
 
 fragment ComponentContentFragment on ComponentContent {
@@ -149,6 +152,10 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
         images
         fqdns
     }
+    imports {
+        stack { ...InfrastructureStackTinyFragment }
+        outputs { ...StackOutputFragment }
+    }
 }
 
 fragment ErrorFragment on ServiceError {
@@ -195,10 +202,12 @@ fragment BaseClusterFragment on Cluster {
     handle
     self
     version
+    distro
     pingedAt
     currentVersion
     kasUrl
     metadata
+    tags { ...ClusterTags }
     credential { ...ProviderCredentialFragment }
     provider { ...BaseClusterProviderFragment }
     nodePools { ...NodePoolFragment }

@@ -40,9 +40,11 @@ import { usePodsColumns } from './Pods'
 import { getBreadcrumbs } from './StatefulSets'
 import { WorkloadStatusChip } from './utils'
 import { ResourceList } from '../common/ResourceList.tsx'
+import KubernetesMetrics from '../common/KubernetesMetrics'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
 ] as const
@@ -152,6 +154,21 @@ export function StatefulSetEvents(): ReactElement<any> {
       pathParams={{ statefulset: name, namespace }}
       itemsKey="events"
       disableOnRowClick
+    />
+  )
+}
+
+export function StatefulSetMetrics(): ReactElement<any> {
+  const { name = '', namespace = '', clusterId = '' } = useParams()
+
+  return (
+    <KubernetesMetrics
+      clusterId={clusterId}
+      group="apps"
+      version="v1"
+      kind="StatefulSet"
+      name={name}
+      namespace={namespace}
     />
   )
 }

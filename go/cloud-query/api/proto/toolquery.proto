@@ -43,6 +43,42 @@ message TempoConnection {
   optional string password = 5;
 }
 
+message JaegerConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message SplunkConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message DynatraceConnection {
+  string url = 1;
+   string platformToken = 2;
+}
+
+message CloudwatchConnection {
+  string region = 1;
+  repeated string log_group_names = 2;
+  optional string access_key_id = 3;
+  optional string secret_access_key = 4;
+  optional string role_arn = 5;
+  optional string external_id = 6;
+  optional string role_session_name = 7;
+}
+
+message AzureConnection {
+  string subscription_id = 1;
+  string tenant_id = 2;
+  string client_id = 3;
+  string client_secret = 4;
+}
+
 message ToolConnection {
   oneof connection {
     ElasticConnection elastic = 1;
@@ -50,6 +86,11 @@ message ToolConnection {
     PrometheusConnection prometheus = 3;
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
+    SplunkConnection splunk = 6;
+    DynatraceConnection dynatrace = 7;
+    CloudwatchConnection cloudwatch = 8;
+    AzureConnection azure = 9;
+    JaegerConnection jaeger = 10;
   }
 }
 
@@ -63,6 +104,27 @@ message MetricsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional string step = 4;
+  optional MetricsOptions options = 5;
+}
+
+message MetricsOptions {
+  optional AzureMetricsOptions azure = 1;
+}
+
+message AzureMetricsOptions {
+  string resource_id = 1;
+  string metrics_namespace = 2;
+  optional string aggregation = 3;
+  optional string filter = 4;
+  optional string order_by = 5;
+  optional string roll_up_by = 6;
+  optional string metrics_endpoint = 7;
+  optional string prometheus_url = 8;
+}
+
+message LogsQueryFacet {
+  string name = 1;
+  string value = 2;
 }
 
 message LogsQueryInput {
@@ -70,6 +132,16 @@ message LogsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  repeated LogsQueryFacet facets = 5;
+  optional LogsOptions options = 6;
+}
+
+message LogsOptions {
+  optional AzureLogsOptions azure = 1;
+}
+
+message AzureLogsOptions {
+  string resource_id = 1;
 }
 
 message TracesQueryInput {
@@ -77,6 +149,23 @@ message TracesQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  optional TracesOptions options = 5;
+}
+
+message TracesOptions {
+  optional JaegerTracesOptions jaeger = 1;
+}
+
+message JaegerTraceQueryAttribute {
+  string name = 1;
+  string value = 2;
+}
+
+message JaegerTracesOptions {
+  optional string operation_name = 1;
+  repeated JaegerTraceQueryAttribute attributes = 2;
+  optional string duration_min = 3;
+  optional string duration_max = 4;
 }
 
 message MetricPoint {
@@ -99,6 +188,16 @@ message MetricsSearchInput {
   // Maximum number of results to return. If not set or zero, a
   // provider-specific default will be used.
   optional int64 limit = 3;
+  optional MetricsSearchOptions options = 4;
+}
+
+message MetricsSearchOptions {
+  optional AzureMetricsSearchOptions azure = 1;
+}
+
+message AzureMetricsSearchOptions {
+  string resource_id = 1;
+  optional string prometheus_url = 2;
 }
 
 message MetricsSearchResult {

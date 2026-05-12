@@ -1,8 +1,9 @@
 defmodule Console.Deployments.StacksTest do
   use Console.DataCase, async: true
   use Mimic
+  import Ecto.Query, only: [from: 2]
   alias Console.PubSub
-  alias Console.Schema.{StackRun}
+  alias Console.Schema.{StackRun, StackInfracostResource}
   alias Console.Deployments.{Stacks, Settings, Tar}
   alias Console.Deployments.Git.Discovery
 
@@ -742,7 +743,33 @@ defmodule Console.Deployments.StacksTest do
 
       expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
 
-      {:ok, "id"} = Stacks.post_comment(run)
+      {:ok, updated} = Stacks.post_comment(run)
+
+      assert updated.scm_state.comment_id == "id"
+    end
+
+    test "it includes failed step logs in the github pr comment body" do
+      run = insert(:stack_run,
+        status: :failed,
+        pull_request: build(:pull_request, url: "https://github.com/pluralsh/console/pull/10"),
+        stack: build(:stack, connection: build(:scm_connection))
+      )
+
+      step = insert(:run_step, run: run, status: :failed, index: 1)
+      insert(:run_log, step: step, logs: "first line\n")
+      insert(:run_log, step: step, logs: "second line\n")
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, %{"body" => comment} ->
+        assert String.contains?(comment, "Failed to generate a plan for this PR")
+        assert String.contains?(comment, "<details>")
+        assert String.contains?(comment, "first line\nsecond line\n")
+
+        {:ok, %{"id" => "id"}, :ok}
+      end)
+
+      {:ok, updated} = Stacks.post_comment(run)
+
+      assert updated.scm_state.comment_id == "id"
     end
   end
 
@@ -886,6 +913,42 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
     end
 
+    test "writers can attach infracost resources on update" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack)
+
+      {:ok, updated} =
+        Stacks.update_stack_run(
+          %{
+            status: :successful,
+            job_ref: %{namespace: "ns", name: "job"},
+            infracost_resources: [
+              %{
+                resource_scope: "breakdown",
+                project_name: "default",
+                name: "aws_instance.foo",
+                resource_type: "aws_instance",
+                monthly_cost: "7.3",
+                hourly_cost: "0.01"
+              }
+            ]
+          },
+          run.id,
+          user
+        )
+
+      assert updated.id == run.id
+
+      resources = Repo.all(from r in StackInfracostResource, where: r.stack_run_id == ^run.id)
+      assert length(resources) == 1
+      [res] = resources
+      assert res.resource_scope == "breakdown"
+      assert res.project_name == "default"
+      assert res.name == "aws_instance.foo"
+      assert res.stack_id == stack.id
+    end
+
     test "clusters can update runs" do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
@@ -985,6 +1048,40 @@ defmodule Console.Deployments.StacksTest do
       assert completed.status == :successful
 
       assert_receive {:event, %PubSub.StackRunCompleted{item: ^completed}}
+    end
+
+    test "writers can attach infracost resources on complete" do
+      user  = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run   = insert(:stack_run, stack: stack)
+
+      {:ok, completed} =
+        Stacks.complete_stack_run(
+          %{
+            status: :successful,
+            infracost_resources: [
+              %{
+                resource_scope: "breakdown",
+                project_name: "default",
+                name: "aws_instance.bar",
+                resource_type: "aws_instance",
+                monthly_cost: "12.5"
+              }
+            ]
+          },
+          run.id,
+          user
+        )
+
+      assert completed.id == run.id
+
+      resources = Repo.all(from r in StackInfracostResource, where: r.stack_run_id == ^run.id)
+      assert length(resources) == 1
+      [res] = resources
+      assert res.resource_scope == "breakdown"
+      assert res.project_name  == "default"
+      assert res.name          == "aws_instance.bar"
+      assert res.stack_id      == stack.id
     end
 
     test "random users cannot complete runs" do
@@ -1252,11 +1349,12 @@ defmodule Console.Deployments.StacksTest do
       {:error, _} = Stacks.stack_files(stack.id, insert(:user))
     end
   end
+
 end
 
 defmodule Console.Deployments.StacksSyncTest do
   use Console.DataCase, async: false
-  alias Console.Deployments.Stacks
+  alias Console.Deployments.{Stacks, Tar}
 
   describe "#poll/1" do
     test "it will create runs when it detects changes" do
@@ -1274,6 +1372,35 @@ defmodule Console.Deployments.StacksSyncTest do
       assert run.message
       assert run.stack_id == stack.id
       refute run.git.ref == stack.git.ref
+    end
+  end
+
+  describe "#tarstream/1" do
+    test "it can fetch a tarstream for a standard terraform dir" do
+      repo = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      run = insert(:stack_run, repository: repo, git: %{ref: "master", folder: "charts"})
+
+      {:ok, f} = Stacks.tarstream(run)
+      {:ok, content} = Tar.tar_stream(f)
+
+      refute Enum.empty?(content)
+    end
+
+    test "it can splice custom policies into stack tarstream" do
+      repo = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+
+      run = insert(:stack_run,
+        repository: repo,
+        git: %{ref: "master", folder: "charts"},
+        policy_engine: %{
+          type: :trivy,
+          custom_policies: true,
+          repository_id: repo.id,
+          git: %{ref: "master", folder: "templates"}
+        }
+      )
+
+      {:ok, _} = Stacks.tarstream(run)
     end
   end
 

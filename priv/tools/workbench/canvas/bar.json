@@ -1,0 +1,63 @@
+{
+    "type": "object",
+    "description": "Adds or updates a bar chart on the workbench canvas from static series data (CanvasBlock with type bar and Graph content). Use after you have computed or aggregated categories and numeric values; this does not run a query by itself. Reuse the same `identifier` to refresh a chart in place. `layout` is required for grid position and size.",
+    "properties": {
+        "identifier": {
+            "type": "string",
+            "description": "Unique key for this canvas block (e.g. `error_rate_by_service`)."
+        },
+        "layout": {
+            "type": "object",
+            "description": "Required grid placement (CanvasBlock.Layout). All of x, y, w, and h must be set.",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "Column index of the top-left cell (0-based)."
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Row index of the top-left cell (0-based)."
+                },
+                "w": {
+                    "type": "integer",
+                    "description": "Width in grid columns."
+                },
+                "h": {
+                    "type": "integer",
+                    "description": "Height in grid rows."
+                }
+            },
+            "required": ["x", "y", "w", "h"]
+        },
+        "props": {
+            "type": "object",
+            "description": "Chart configuration (WorkbenchJobResult.CanvasBlock.Graph): a display title plus labeled numeric points.",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Short chart title shown above the bars (e.g. `5xx responses by route`)."
+                },
+                "data": {
+                    "type": "array",
+                    "description": "Series values (WorkbenchJobResult.DataPoint). Each item is one bar; order is preserved left-to-right.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "label": {
+                                "type": "string",
+                                "description": "Category label for the x-axis (e.g. service name, status code bucket)."
+                            },
+                            "value": {
+                                "type": "number",
+                                "description": "Numeric magnitude for the bar height (counts, rates, percentages, etc.)."
+                            }
+                        },
+                        "required": ["label", "value"]
+                    }
+                }
+            },
+            "required": ["title"]
+        }
+    },
+    "required": ["identifier", "layout", "props"]
+}

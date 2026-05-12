@@ -6,12 +6,18 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
-import { ChangeEvent, EventHandler, useMemo, useState } from 'react'
 import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
 import useOnUnMount from 'components/hooks/useOnUnMount'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useGitRepositoryQuery } from 'generated/graphql'
-import { trimStart } from 'lodash'
+import {
+  ChangeEvent,
+  ComponentPropsWithRef,
+  EventHandler,
+  useMemo,
+  useState,
+} from 'react'
 
 export function DeployServiceSettingsGit({
   repos,
@@ -87,19 +93,29 @@ export function DeployServiceSettingsGit({
   )
 }
 
-const cleanRefs = (refs: string[] | null) =>
-  (refs || []).map((ref) => trimStart(trimStart(ref, '/'), 'refs/heads/'))
+export const cleanRefs = (refs: string[] | null): string[] =>
+  new Set(
+    refs
+      ?.map((ref) => ref.replace(/^\/+/, '').replace(/^refs\/heads\//, ''))
+      .filter((ref) => !!ref.trim())
+  )
+    .values()
+    .toArray()
 
 export function ServiceGitRefField({
   refs,
   value,
   setValue,
   required,
+  disabled,
+  loading,
 }: {
   value: string
   setValue: (ref: string) => void
   required?: boolean
   refs?: string[] | null
+  disabled?: boolean
+  loading?: boolean
 }) {
   return (
     <FormField
@@ -107,25 +123,36 @@ export function ServiceGitRefField({
       required={required}
       hint="Branch name, tag name, or commit SHA"
     >
-      {refs && (
-        <Select
-          label="Select a branch or tag"
-          selectedKey={value}
-          onSelectionChange={(ref) => setValue(ref as string)}
-        >
-          {cleanRefs(refs).map((ref) => (
-            <ListBoxItem
-              key={ref}
-              label={ref}
-            />
-          ))}
-        </Select>
-      )}
-      {!refs && (
-        <Input
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
+      {loading ? (
+        <RectangleSkeleton
+          $width="100%"
+          $height={38}
         />
+      ) : (
+        <>
+          {refs && (
+            <Select
+              isDisabled={disabled}
+              label="Select a branch or tag"
+              selectedKey={value}
+              onSelectionChange={(ref) => setValue(ref as string)}
+            >
+              {cleanRefs(refs).map((ref) => (
+                <ListBoxItem
+                  key={ref}
+                  label={ref}
+                />
+              ))}
+            </Select>
+          )}
+          {!refs && (
+            <Input
+              disabled={disabled}
+              value={value}
+              onChange={(e) => setValue(e.currentTarget.value)}
+            />
+          )}
+        </>
       )}
     </FormField>
   )
@@ -135,20 +162,28 @@ export function ServiceGitFolderField({
   value,
   onChange,
   required,
+  placeholder,
+  disabled,
+  ...props
 }: {
   value: string
   onChange: EventHandler<ChangeEvent<HTMLInputElement>>
   required?: boolean
-}) {
+  placeholder?: string
+  disabled?: boolean
+} & ComponentPropsWithRef<typeof FormField>) {
   return (
     <FormField
       required={required}
       label="Git folder"
       hint="Folder within the source tree where manifests are located"
+      {...props}
     >
       <Input
         value={value}
         onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
       />
     </FormField>
   )
@@ -159,12 +194,13 @@ export function RepositorySelector({
   repositories,
   repositoryId,
   setRepositoryId,
+  ...props
 }: {
   isDisabled?: boolean
   repositories: any
   repositoryId: Nullable<string>
   setRepositoryId: (repositoryId: string) => void
-}) {
+} & Partial<ComponentPropsWithRef<typeof ComboBox>>) {
   const [comboBoxInput, setComboBoxInput] = useState('')
   const [selectIsOpen, setSelectIsOpen] = useState(false)
 
@@ -209,6 +245,7 @@ export function RepositorySelector({
         setRepositoryId('')
         setSelectIsOpen(false)
       }}
+      {...props}
     >
       {repoSearchResults.map(({ item: { id, url } }) => (
         <ListBoxItem

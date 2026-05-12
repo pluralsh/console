@@ -4,7 +4,7 @@ defmodule Console.AI.Provider do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Tool}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Nexus, Tool}
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
@@ -40,6 +40,8 @@ defmodule Console.AI.Provider do
   - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """
 
+  @callback defaults() :: map
+
   @callback completion(struct, history, keyword) :: completion_result
 
   @callback tool_call(struct, history, [atom], keyword) :: {:ok, binary | tool_result} | error
@@ -51,6 +53,8 @@ defmodule Console.AI.Provider do
   @callback context_window(struct) :: integer
 
   @callback proxy(struct) :: {:ok, Console.AI.Proxy.t()} | error
+
+  def model_defaults(provider), do: Console.conf(:ai_defaults)[provider] || %{}
 
   @doc """
   Built-in system prompts
@@ -76,10 +80,11 @@ defmodule Console.AI.Provider do
     end
   end
 
-  @decorate cacheable(cache: @local_cache, key: :context_window, ttl: :timer.minutes(30))
-  def context_window() do
+  @decorate cacheable(cache: @local_cache, key: {:context_window, client}, ttl: :timer.minutes(30))
+  def context_window(client \\ :default)
+  def context_window(client) do
     Settings.cached()
-    |> client()
+    |> client(client)
     |> case do
       {:ok, %mod{} = client} -> mod.context_window(client)
       _ -> @default_context_window
@@ -105,7 +110,7 @@ defmodule Console.AI.Provider do
       do: handle_tool_calls(result, tools)
   end
 
-  def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_atom(tool) do
+  def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_struct(tool) or is_atom(tool) do
     name = Tool.name(tool)
     case tool_call(history, [tool], opts) do
       {:ok, [%{^name => %{result: result}} | _]} -> {:ok, result}
@@ -115,6 +120,15 @@ defmodule Console.AI.Provider do
     end
   end
 
+  @doc """
+  Generates embeddings for the given text.
+
+  If Nexus is configured in DeploymentSettings (ai.nexus.url is set), it will be used.
+  Otherwise, falls back to the configured embedding provider.
+
+  Options (only used when Nexus is not configured):
+  - `:client` - Which client to use (`:embedding` by default, uses embedding_provider if set)
+  """
   def embeddings(text, opts \\ []) do
     settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings, opts[:client] || :embedding),
@@ -122,6 +136,14 @@ defmodule Console.AI.Provider do
   end
 
   def summary(text), do: completion([{:user, text}], preface: @summary)
+
+  def defaults(:openai), do: OpenAI.defaults()
+  def defaults(:anthropic), do: Anthropic.defaults()
+  def defaults(:ollama), do: Ollama.defaults()
+  def defaults(:azure), do: Azure.defaults()
+  def defaults(:bedrock), do: Bedrock.defaults()
+  def defaults(:vertex), do: Vertex.defaults()
+  def defaults(:nexus), do: Nexus.defaults()
 
   defp embedding_client(%DeploymentSettings{ai: %AI{embedding_provider: p}} = settings) when not is_nil(p),
     do: client(put_in(settings.ai.provider, p))
@@ -147,6 +169,8 @@ defmodule Console.AI.Provider do
     do: {:ok, Bedrock.new(bedrock)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :vertex, vertex: %{} = vertex}}),
     do: {:ok, Vertex.new(vertex)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :nexus, nexus: %{url: url} = nexus}}) when is_binary(url),
+    do: {:ok, Nexus.new(nexus)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
   defp handle_tool_calls([arg | _] = calls, tools) when is_map(arg) do

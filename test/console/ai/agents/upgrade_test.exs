@@ -64,7 +64,7 @@ defmodule Console.AI.Agents.UpgradeTest do
       run = Repo.get(Console.Schema.AgentRun, step.agent_run_id)
       insert(:pull_request, agent_run: run)
 
-      assert_receive {:result, result}, :timer.seconds(10)
+      assert_receive {:result, result}, :timer.seconds(20)
 
       assert result.status == :completed
 

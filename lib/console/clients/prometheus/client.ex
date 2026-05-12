@@ -23,9 +23,7 @@ defmodule Prometheus.Client do
     |> HTTPoison.post({:form, [{"query", query}]}, @headers ++ auth(client))
     |> case do
       {:ok, %{body: body, status_code: 200}} -> Poison.decode(body, as: Response.spec())
-      error ->
-        IO.inspect(error)
-        {:error, "prometheus error"}
+      _ -> {:error, "prometheus error"}
     end
   end
 
@@ -44,9 +42,7 @@ defmodule Prometheus.Client do
     )
     |> case do
       {:ok, %{body: body, status_code: 200}} -> Poison.decode(body, as: Response.spec())
-      error ->
-        IO.inspect(error)
-        {:error, "prometheus error"}
+      _ -> {:error, "prometheus error"}
     end
   end
 

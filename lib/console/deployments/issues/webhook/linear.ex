@@ -14,8 +14,9 @@ defmodule Console.Deployments.Issues.Webhook.Linear do
   def url(_), do: nil
 
   def status(%{"state" => %{"name" => "In Progress"}}), do: :in_progress
-  def status(%{"state" => %{"name" => "In Review"}}), do: :open
+  def status(%{"state" => %{"name" => "In Review"}}), do: :in_progress
+  def status(%{"state" => %{"name" => "Canceled"}}), do: :cancelled
   def status(%{"state" => %{"name" => "Cancelled"}}), do: :cancelled
-  def status(%{"state" => %{"name" => "Done"}}), do: :completed
+  def status(%{"state" => %{"name" => name}}) when name in ~w(Done done Completed completed), do: :completed
   def status(_), do: :open
 end

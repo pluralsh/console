@@ -6,13 +6,23 @@ ARG OS_VERSION=3.21.3
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION}
 
 ARG OS_VARIANT=alpine
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:${PATH}
+ARG RUST_TOOLCHAIN=stable
 
 WORKDIR /app
 
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk add git build-base; \
+      apk update && apk add git build-base curl ca-certificates \
+        --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+        --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+        rust cargo; \
     else \
-      apt-get update && apt-get install -y git build-essential; \
+      apt-get update && apt-get install -y git build-essential curl ca-certificates; \
+      rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
     fi && \
+  rustc --version && cargo --version && \
   mix local.rebar --force && \
   mix local.hex --force

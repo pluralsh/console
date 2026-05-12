@@ -1,0 +1,63 @@
+{
+    "type": "object",
+    "description": "Adds or updates a pie chart on the workbench canvas from static slice data (CanvasBlock with type pie and Graph content). Ideal for proportions (share of traffic, error budget consumed, etc.). Reuse the same `identifier` to refresh slices in place. `layout` is required for grid position and size.",
+    "properties": {
+        "identifier": {
+            "type": "string",
+            "description": "Unique key for this canvas block (e.g. `errors_by_type`)."
+        },
+        "layout": {
+            "type": "object",
+            "description": "Required grid placement (CanvasBlock.Layout). All of x, y, w, and h must be set.",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "Column index of the top-left cell (0-based)."
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Row index of the top-left cell (0-based)."
+                },
+                "w": {
+                    "type": "integer",
+                    "description": "Width in grid columns."
+                },
+                "h": {
+                    "type": "integer",
+                    "description": "Height in grid rows."
+                }
+            },
+            "required": ["x", "y", "w", "h"]
+        },
+        "props": {
+            "type": "object",
+            "description": "Chart configuration (WorkbenchJobResult.CanvasBlock.Graph): a display title plus labeled numeric slices.",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Short chart title (e.g. `Incident events by source`)."
+                },
+                "data": {
+                    "type": "array",
+                    "description": "Slice values (WorkbenchJobResult.DataPoint). Each item is one wedge; `value` is the slice size (absolute count or amount).",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "label": {
+                                "type": "string",
+                                "description": "Legend label for the slice."
+                            },
+                            "value": {
+                                "type": "number",
+                                "description": "Numeric weight of the slice."
+                            }
+                        },
+                        "required": ["label", "value"]
+                    }
+                }
+            },
+            "required": ["title"]
+        }
+    },
+    "required": ["identifier", "layout", "props"]
+}

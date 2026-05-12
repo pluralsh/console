@@ -32,8 +32,11 @@ spec:
           \   user: \"monitoring\"\n\t    passwordSecretRef:\n\t      name: \"prometheus-creds\"\n\t
           \     key: \"password\"\n\t  ai:\n\t    enabled: true\n\t    provider: OPENAI\n\t
           \   openAI:\n\t      model: \"gpt-4\"\n\t      tokenSecretRef:\n\t        name:
-          \"openai-secret\"\n\t        key: \"token\"\n\t  cost:\n\t    recommendationCushion:
-          20\n\t    recommendationThreshold: 100\n\t```"
+          \"openai-secret\"\n\t        key: \"token\"\n\t      tokenExchange:\n\t
+          \       enabled: true\n\t        tokenUrl: \"https://idp.example.com/oauth/token\"\n\t
+          \       clientId: \"console-ai\"\n\t        clientSecretSecretRef:\n\t          name:
+          \"openai-oauth-client\"\n\t          key: \"clientSecret\"\n\t  cost:\n\t
+          \   recommendationCushion: 20\n\t    recommendationThreshold: 100\n\t```"
         properties:
           apiVersion:
             description: |-
@@ -143,9 +146,12 @@ spec:
                           The azure openai Data plane - inference api version to use,
                           defaults to 2024-10-01-preview or the latest available
                         type: string
-                      deployment:
-                        description: Deployment is the Azure OpenAI deployment name.
-                        type: string
+                      deployments:
+                        additionalProperties:
+                          type: string
+                        description: Deployments is a mapping from model id to azure
+                          OpenAI deployment if those require additional configuration
+                        type: object
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings.
                         type: string
@@ -284,7 +290,6 @@ spec:
                           less frequent and often requires more advanced reasoning
                         type: string
                     required:
-                    - modelId
                     - region
                     type: object
                   embeddingProvider:
@@ -360,6 +365,51 @@ spec:
                         - ELASTIC
                         type: string
                     type: object
+                  nexus:
+                    description: Nexus holds configuration for using the Nexus embeddings
+                      proxy
+                    properties:
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
+                        type: string
+                      model:
+                        description: Model to use for completions
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the access token
+                          for the Nexus proxy
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: ToolModel to use for tool calling
+                        type: string
+                      url:
+                        description: URL is the URL of the Nexus proxy
+                        type: string
+                    required:
+                    - url
+                    type: object
                   ollama:
                     description: |-
                       Ollama holds configuration for a self-hosted Ollama deployment,
@@ -417,6 +467,16 @@ spec:
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings
                         type: string
+                      method:
+                        description: Method to use for openai api calls (defaults
+                          to auto, but can be used to restrict to only responses or
+                          chart completions apis, useful for configuring against common
+                          AI proxies)
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
+                        type: string
                       model:
                         description: Model is the LLM model name to use.
                         type: string
@@ -426,6 +486,47 @@ spec:
                         items:
                           type: string
                         type: array
+                      tokenExchange:
+                        description: TokenExchange configures OAuth2 client credentials
+                          against a token endpoint to obtain access tokens for OpenAI-compatible
+                          APIs.
+                        properties:
+                          clientId:
+                            description: ClientID is the OAuth2 client identifier.
+                            type: string
+                          clientSecretSecretRef:
+                            description: ClientSecretSecretRef is a reference to a
+                              Kubernetes secret key holding the OAuth2 client secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          enabled:
+                            description: Enabled turns token exchange on for obtaining
+                              access tokens via the configured token endpoint.
+                            type: boolean
+                          tokenUrl:
+                            description: TokenURL is the OAuth2 token endpoint URL.
+                            type: string
+                        type: object
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access
@@ -646,7 +747,10 @@ spec:
                       to generate LLM insights
                     properties:
                       embeddingModel:
-                        description: EmbeddingModel to use for generating embeddings
+                        description: |-
+                          EmbeddingModel to use for generating embeddings.
+                          This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.
+                          Default is gemini-embedding-001.
                         type: string
                       endpoint:
                         description: Endpoint is a custom endpoint for self-deployed
@@ -657,8 +761,9 @@ spec:
                           from
                         type: string
                       model:
-                        description: 'Model is the Vertex AI model to use.  Must support
-                          the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview'
+                        description: 'Model is the Vertex AI model to use. This should
+                          be a model listed currently on models.dev, for instance
+                          here: https://models.dev/?search=google-vertex'
                         type: string
                       project:
                         description: Project is the GCP project you'll be using
@@ -696,8 +801,10 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: ToolModel to use for tool calling, which is less
-                          frequent and often requires more advanced reasoning
+                        description: 'ToolModel to use for tool calling, which is
+                          less frequent and often requires more advanced reasoning.
+                          This should be a model listed currently on models.dev, for
+                          instance here: https://models.dev/?search=google-vertex'
                         type: string
                     required:
                     - location
@@ -1020,6 +1127,24 @@ spec:
                   your infrastructure with Plural. Usually this
                   will be your `plural up repo`
                 type: string
+              metrics:
+                description: Metrics settings for OpenTelemetry metrics export
+                properties:
+                  crontab:
+                    description: |-
+                      Crontab is the cron expression for how often to export metrics.
+                      Example: "*/5 * * * *" for every 5 minutes.
+                    type: string
+                  enabled:
+                    default: false
+                    description: Enabled defines whether to enable the metrics export
+                      or not.
+                    type: boolean
+                  endpoint:
+                    description: Endpoint is the OpenTelemetry collector endpoint
+                      to send metrics to.
+                    type: string
+                type: object
               prometheusConnection:
                 description: PrometheusConnection connection details for a prometheus
                   instance to use
@@ -1196,6 +1321,9 @@ spec:
                                 type: object
                               type: array
                             image:
+                              type: string
+                            name:
+                              description: Name of the container.
                               type: string
                             resources:
                               properties:

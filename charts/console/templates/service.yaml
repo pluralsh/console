@@ -22,6 +22,10 @@ spec:
     protocol: TCP
     name: nexus-http
   {{- end }}
+  - port: 50051
+    targetPort: grpc
+    protocol: TCP
+    name: grpc
   selector:
     app.kubernetes.io/name: console
     app.kubernetes.io/instance: {{ .Release.Name }}

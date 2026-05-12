@@ -35,6 +35,7 @@ export function SidebarItem({
         as={asLink ? Link : 'button'}
         {...props}
         $active={!!active}
+        $isExpanded={isExpanded}
       >
         {children}
         {isExpanded && expandedLabel ? expandedLabel : null}
@@ -45,16 +46,17 @@ export function SidebarItem({
 
 const ItemSC = styled.button<{
   $active: boolean
-}>(({ theme, $active }) => ({
+  $isExpanded: boolean
+}>(({ theme, $active, $isExpanded }) => ({
   ...theme.partials.reset.button,
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'flex-start',
+  justifyContent: $isExpanded ? 'flex-start' : 'center',
   gap: theme.spacing.xsmall,
   textDecoration: 'none',
   whiteSpace: 'nowrap',
-  width: '100%',
-  height: 39,
+  width: $isExpanded ? '100%' : 40,
+  height: 40,
   flexGrow: 0,
   padding: theme.spacing.small,
   borderRadius: '3px',

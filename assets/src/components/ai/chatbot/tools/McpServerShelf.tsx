@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
+import { SIDE_PANEL_HEADER_HEIGHT } from '../SidePanelShared'
 import { ToolDetailsModal } from './ToolDetailsModal'
 
 type ServerWithTools = {
@@ -162,7 +162,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   borderBottom: theme.borders.default,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  height: CHATBOT_HEADER_HEIGHT,
+  height: SIDE_PANEL_HEADER_HEIGHT,
 }))
 
 const ContentAccordionSC = styled(Accordion)(({ theme }) => ({

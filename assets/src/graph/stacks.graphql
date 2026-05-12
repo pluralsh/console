@@ -48,6 +48,9 @@ fragment StackTiny on InfrastructureStack {
   insight {
     ...AiInsightSummary
   }
+  parent {
+    id
+  }
 }
 
 fragment Stack on InfrastructureStack {
@@ -137,6 +140,9 @@ fragment StackRun on StackRun {
   insight {
     ...AiInsight
   }
+  infracostResources(limit: 5) {
+    ...StackInfracostResource
+  }
 }
 
 fragment ObservableMetric on ObservableMetric {
@@ -221,6 +227,21 @@ fragment StackRunDetails on StackRun {
     type
     maxSeverity
   }
+  infracostResources(limit: 10) {
+    ...StackInfracostResource
+  }
+}
+
+fragment StackInfracostResource on StackInfracostResource {
+  id
+  resourceScope
+  projectName
+  name
+  resourceType
+  hourlyCost
+  monthlyCost
+  monthlyUsageCost
+  rawResource
 }
 
 fragment CustomStackRun on CustomStackRun {

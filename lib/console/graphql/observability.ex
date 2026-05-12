@@ -30,6 +30,11 @@ defmodule Console.GraphQl.Observability do
     field :bucket_size, :string
   end
 
+  enum :log_query_operator do
+    value :and
+    value :or
+  end
+
   object :dashboard do
     field :id,   non_null(:string), resolve: fn %{metadata: %{name: n}}, _, _ -> {:ok, n} end
     field :spec, non_null(:dashboard_spec)
@@ -136,6 +141,7 @@ defmodule Console.GraphQl.Observability do
       arg :query,      :string
       arg :time,       :log_time_range
       arg :limit,      :integer
+      arg :operator,   :log_query_operator
       arg :facets,     list_of(:log_facet_input)
 
       resolve &Observability.list_logs/2
@@ -159,6 +165,7 @@ defmodule Console.GraphQl.Observability do
       arg :query,       :string
       arg :time,        :log_time_range
       arg :aggregation, :log_aggregation_input
+      arg :operator,    :log_query_operator
       arg :facets,      list_of(:log_facet_input)
 
       resolve &Observability.list_log_aggregations/2

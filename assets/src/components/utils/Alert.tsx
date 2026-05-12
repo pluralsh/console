@@ -18,7 +18,7 @@ export function GqlError({
   action,
   ...props
 }: {
-  header?: string | undefined
+  header?: ReactNode
   error: GqlErrorType
   margin?: SemanticSpacingKey
   action?: ReactNode

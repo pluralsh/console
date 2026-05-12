@@ -90,19 +90,7 @@ replicas = get_env("REPLICAS", "1") |> String.to_integer()
 config :console,
   replicas: replicas
 
-config :libcluster,
-  topologies: [
-    console: [
-      strategy: Cluster.Strategy.Kubernetes,
-      config: [
-        mode: :ip,
-        kubernetes_node_basename: "console",
-        kubernetes_selector: "app=console",
-        kubernetes_namespace: get_env("NAMESPACE"),
-        polling_interval: 10_000
-      ]
-    ]
-  ]
+config :console, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY", "console-headless.#{get_env("NAMESPACE") || "plrl-console"}")
 
 config :console, Console.Guardian,
   issuer: get_env("HOST"),
@@ -206,8 +194,11 @@ config :console,
   cloudquery: get_env("CONSOLE_CLOUDQUERY") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
+  workbench_default: get_env("CONSOLE_WORKBENCH_DEFAULT") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
-  agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES")
+  agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES"),
+  qove_key: get_env("CONSOLE_QOVE_PUBLIC_KEY"),
+  cloud_override: get_env("CONSOLE_CLOUD_OVERRIDE")
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,
@@ -307,4 +298,17 @@ end
 
 if get_env("CONSOLE_ASSETS_PROXY_URL") do
   config :console, :assets_proxy_url, get_env("CONSOLE_ASSETS_PROXY_URL")
+end
+
+if is_set("CONSOLE_AI_DEFAULTS") do
+  {:ok, ai_defaults} = JSON.decode(get_env("CONSOLE_AI_DEFAULTS"))
+  Enum.each(ai_defaults, fn
+    {key, %{} = value} when key in ~w(openai azure vertex anthropic bedrock) ->
+      config :console, :ai_defaults, "#{key}": %{
+        model: value["model"],
+        tool_model: value["tool_model"],
+        embedding_model: value["embedding_model"]
+      }
+    _ -> :ok
+  end)
 end

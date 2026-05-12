@@ -4,6 +4,7 @@ import {
   CloseIcon,
   ComboBox,
   Flex,
+  FlexProps,
   ListBoxFooterPlus,
   ListBoxItem,
   Select,
@@ -16,6 +17,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import {
   LogFacetInput,
   LogLineFragment,
+  LogQueryOperator,
   LogTimeRange,
   useLogLabelsQuery,
 } from 'generated/graphql'
@@ -34,12 +36,14 @@ export type LogsFiltersT = {
   date?: DateParam
   sinceSeconds: SinceSecondsOptions
   queryLength: number
+  queryOperator: LogQueryOperator
 }
 
 export const DEFAULT_LOG_FILTERS: LogsFiltersT = {
   date: undefined,
   sinceSeconds: SinceSecondsOptions.QuarterHour,
   queryLength: 100,
+  queryOperator: LogQueryOperator.Or,
 }
 
 export function LogsDateDropdown({
@@ -169,6 +173,39 @@ export function LogsSinceSecondsSelect({
   )
 }
 
+export function LogsQueryOperatorSelect({
+  operator,
+  setOperator,
+  disabled = false,
+  ...props
+}: {
+  operator: LogQueryOperator
+  setOperator: (operator: LogQueryOperator) => void
+  disabled?: boolean
+} & FlexProps) {
+  return (
+    <Flex {...props}>
+      <FillLevelDiv fillLevel={1}>
+        <Select
+          // size="small"
+          titleContent="Operator"
+          selectedKey={operator}
+          onSelectionChange={(key) => setOperator(key as LogQueryOperator)}
+          isDisabled={disabled}
+        >
+          {Object.values(LogQueryOperator).map((op) => (
+            <ListBoxItem
+              key={op}
+              label={op}
+              selected={op === operator}
+            />
+          ))}
+        </Select>
+      </FillLevelDiv>
+    </Flex>
+  )
+}
+
 export function LogsLabelsPicker({
   logs,
   clusterId,
@@ -177,6 +214,7 @@ export function LogsLabelsPicker({
   time,
   addLabel,
   selectedLabels,
+  ...props
 }: {
   logs: LogLineFragment[]
   clusterId?: string
@@ -185,7 +223,7 @@ export function LogsLabelsPicker({
   time?: LogTimeRange
   addLabel: (key: string, value: string) => void
   selectedLabels: LogFacetInput[]
-}) {
+} & FlexProps) {
   const [field, setField] = useState('')
   const [comboBoxInput, setComboBoxInput] = useState('')
 
@@ -221,7 +259,7 @@ export function LogsLabelsPicker({
   }
 
   return (
-    <Flex>
+    <Flex {...props}>
       <FillLevelDiv fillLevel={1}>
         <Select
           width={240}
@@ -256,32 +294,34 @@ export function LogsLabelsPicker({
           ))}
         </Select>
       </FillLevelDiv>
-      <ComboBox
-        isDisabled={!field}
-        startIcon={null}
-        showArrow={false}
-        allowsEmptyCollection
-        loading={loading}
-        inputValue={comboBoxInput}
-        onInputChange={setComboBoxInput}
-        onSelectionChange={(key) => {
-          if (!field || !key) return
-          addLabel(field, `${key}`)
-          clearSelections()
-        }}
-        inputProps={{
-          placeholder: 'Value',
-          style: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
-        }}
-      >
-        {filteredLabelOptions.map(({ label }) => (
-          <ListBoxItem
-            key={label}
-            label={label}
-            textValue={label}
-          />
-        ))}
-      </ComboBox>
+      <div css={{ flex: 1 }}>
+        <ComboBox
+          isDisabled={!field}
+          startIcon={null}
+          showArrow={false}
+          allowsEmptyCollection
+          loading={loading}
+          inputValue={comboBoxInput}
+          onInputChange={setComboBoxInput}
+          onSelectionChange={(key) => {
+            if (!field || !key) return
+            addLabel(field, `${key}`)
+            clearSelections()
+          }}
+          inputProps={{
+            placeholder: 'Value',
+            style: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
+          }}
+        >
+          {filteredLabelOptions.map(({ label }) => (
+            <ListBoxItem
+              key={label}
+              label={label}
+              textValue={label}
+            />
+          ))}
+        </ComboBox>
+      </div>
     </Flex>
   )
 }

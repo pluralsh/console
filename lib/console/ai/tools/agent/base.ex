@@ -1,7 +1,7 @@
 defmodule Console.AI.Tools.Agent.Base do
   @moduledoc false
   import Ecto.Changeset
-  alias Console.AI.Tool
+  alias Console.AI.{Tool, Stream}
   alias Console.Repo
   alias Console.Schema.{AgentSession, CloudConnection, CloudConnection.Configuration}
   alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials}
@@ -19,6 +19,13 @@ defmodule Console.AI.Tools.Agent.Base do
       alias Cloudquery.CloudQuery.Stub
       alias Console.Schema.{AgentSession, CloudConnection}
     end
+  end
+
+  def in_subagent(fun) when is_function(fun, 0) do
+    Stream.subagent(true)
+    res = fun.()
+    Stream.subagent(false)
+    res
   end
 
   def check_uuid(cs, field) do
@@ -79,7 +86,9 @@ defmodule Console.AI.Tools.Agent.Base do
     %AwsCredentials{
       access_key_id:     aws.access_key_id,
       secret_access_key: aws.secret_access_key,
-      region:            aws.region
+      region:            aws.region,
+      regions:           aws.regions,
+      assume_role_arn:   aws.assume_role_arn
     }
   end
 

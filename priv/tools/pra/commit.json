@@ -1,0 +1,17 @@
+{
+    "type": "object",
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "The title of to use for the pull request"
+        },
+        "message": {
+            "type": "string",
+            "description": "The commit message to use for the pull request's initial commit (and the PR body)"
+        }
+    },
+    "required": [
+        "title",
+        "message"
+    ]
+}

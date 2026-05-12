@@ -301,7 +301,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			ds.Spec.AI = &v1alpha1.AISettings{
 				Enabled:  lo.ToPtr(true),
 				Provider: lo.ToPtr(gqlclient.AiProviderOpenai),
-				OpenAI: &v1alpha1.AIProviderSettings{
+				OpenAI: &v1alpha1.OpenAISettings{
 					TokenSecretRef: corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: "test",
@@ -331,6 +331,103 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			Expect(k8sClient.Get(ctx, typeNamespacedName, ds)).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(ds.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 
+		})
+
+		It("should wait for OpenAI token exchange client secret", func() {
+			tokenSecret := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "openai-token-secret",
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"token": []byte("sk-test"),
+				},
+			}
+			Expect(k8sClient.Create(ctx, tokenSecret)).To(Succeed())
+			DeferCleanup(func() {
+				_ = k8sClient.Delete(ctx, tokenSecret)
+			})
+
+			test := struct {
+				returnResource *gqlclient.DeploymentSettingsFragment
+				expectedStatus v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr(id),
+					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonError.String(),
+							Message: `secrets "openai-oauth-secret" not found`,
+						},
+					},
+				},
+				returnResource: &gqlclient.DeploymentSettingsFragment{
+					ID: id,
+				},
+			}
+
+			Expect(k8sClient.Get(ctx, typeNamespacedName, ds)).NotTo(HaveOccurred())
+			// Earlier tests leave Prometheus/Loki specs that still reference a missing secret; those are
+			// resolved before AI in genDeploymentSettingsAttr and would mask the token-exchange error.
+			ds.Spec.PrometheusConnection = nil
+			ds.Spec.LokiConnection = nil
+			ds.Spec.AI = &v1alpha1.AISettings{
+				Enabled:  lo.ToPtr(true),
+				Provider: lo.ToPtr(gqlclient.AiProviderOpenai),
+				OpenAI: &v1alpha1.OpenAISettings{
+					TokenSecretRef: corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: "openai-token-secret",
+						},
+						Key: "token",
+					},
+					TokenExchange: &v1alpha1.OAuth2TokenExchange{
+						Enabled:  lo.ToPtr(true),
+						TokenURL: lo.ToPtr("https://example.com/oauth/token"),
+						ClientID: lo.ToPtr("client-id"),
+						ClientSecretSecretRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "openai-oauth-secret",
+							},
+							Key: "clientSecret",
+						},
+					},
+				},
+			}
+			Expect(k8sClient.Update(ctx, ds)).NotTo(HaveOccurred())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetDeploymentSettings", mock.Anything).Return(test.returnResource, nil)
+
+			controllerReconciler := &controller.DeploymentSettingsReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).To(Not(BeZero()))
+			Expect(k8sClient.Get(ctx, typeNamespacedName, ds)).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(ds.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 	})
 })

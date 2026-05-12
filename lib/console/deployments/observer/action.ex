@@ -3,6 +3,7 @@ defmodule Console.Deployments.Observer.Action do
   alias Console.Schema.{Observer, PrAutomation, Pipeline, User, AgentRuntime, AgentRun}
   alias Console.Deployments.{Git, Pipelines, Agents}
   alias Console.Services.{Users, Rbac}
+  alias Console.AI.Tool
   alias Console.Deployments.Observer.Attributes
 
   @doc """
@@ -16,9 +17,10 @@ defmodule Console.Deployments.Observer.Action do
     tpl = pr.branch_template || "plrl/auto/#{observer.name}-$value-#{Console.rand_alphanum(6)}"
     branch = String.replace(tpl, "$value", input)
     ctx = replace_map(pr.context, input, attrs)
-    case Git.get_pr_automation(pr.automation_id) do
-      %PrAutomation{} = pra -> Git.create_pull_request(%{}, ctx, pra.id, branch, pr.repository, actor(pr))
-      nil -> {:error, "could not find automation #{pr.automation_id}"}
+    case pr_automation(pr) do
+      {:ok, %PrAutomation{} = pra} -> Git.create_pull_request(%{}, ctx, pra, branch, pr.repository, actor(pr))
+      {:ok, nil} -> {:error, "no pr automation was configured for this action"}
+      {:error, err} -> {:error, err}
     end
   end
 
@@ -33,7 +35,8 @@ defmodule Console.Deployments.Observer.Action do
 
   def act(_, %Observer.ObserverAction{type: :agent, configuration: %{agent: %{prompt: prompt, repository: repository} = agent}}, input, attrs)
     when is_binary(prompt) and is_binary(repository) do
-    with prompt when is_binary(prompt) <- replace_solid(prompt, Map.put(attrs, :value, input)),
+    attrs = Map.put(attrs, :value, input) |> Console.mapify() |> Console.string_map()
+    with prompt when is_binary(prompt) <- replace_solid(prompt, attrs),
          {:ok, %AgentRuntime{id: id}} <- Agents.find_runtime(agent.runtime, agent.cluster_id),
          {:ok, %AgentRun{id: run_id}} <- Agents.create_agent_run(%{prompt: prompt, repository: repository}, id, bot()) do
       {:ok, {:keep, %{agent_run_id: run_id}}}
@@ -44,6 +47,14 @@ defmodule Console.Deployments.Observer.Action do
   end
 
   def act(_, _, _, _), do: {:error, "observer action was misconfigured"}
+
+  defp pr_automation(%Observer.ObserverAction.Configuration.PrAction{ai: %{enabled: true, prompt: prompt}}) when is_binary(prompt) do
+    conn = Tool.scm_connection()
+    {:ok, %PrAutomation{ai: %PrAutomation.AI{enabled: true, prompt: prompt}, connection: conn, write_bindings: [], create_bindings: []}}
+  end
+  defp pr_automation(%Observer.ObserverAction.Configuration.PrAction{automation_id: id})
+    when is_binary(id), do: {:ok, Git.get_pr_automation(id)}
+  defp pr_automation(_), do: {:error, "neither a pr automation or ai was configured for this action"}
 
   defp replace_map(result, value, attrs) do
     attrs_map = Attributes.attrs(attrs)

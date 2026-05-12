@@ -271,3 +271,18 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.Cluster.Mini do
 
   def prompt(%@for{}), do: ""
 end
+
+defimpl Console.AI.Vector.Storable, for: Console.Schema.WorkbenchJob.Mini do
+  alias Console.AI.Utils
+  require EEx
+
+  def id(%@for{id: id}), do: id
+
+  def datatype(_), do: "workbench_job"
+
+  def prompt(%@for{}), do: ""
+
+  def content(%@for{} = mini), do: String.trim(content_template(job: mini))
+
+  EEx.function_from_file(:defp, :content_template, Console.priv_filename(["prompts", "vector", "workbench_job.md.eex"]), [:assigns])
+end

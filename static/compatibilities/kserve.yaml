@@ -4,6 +4,75 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
+- version: 0.17.0
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart changes you must account for\n\n- **Major chart restructuring\
+      \ (breaking):** the previous single `kserve` chart (e.g., `helm-chart-kserve-v0.16.0.tgz`)\
+      \ is split into multiple charts in `v0.17.0`. Expect **new release names, new\
+      \ chart names, and potentially different upgrade ordering**.\n- **Chart rename:**\
+      \ the main chart name changes from **`kserve` \u2192 `kserve-resources`** (`refactor:\
+      \ change kserve chart name to kserve-resources`).\n- **New/explicit charts to\
+      \ install:**\n  - `kserve-crd` (+ `kserve-crd-minimal`)\n  - `kserve-resources`\n\
+      \  - `kserve-runtime-configs` (new)\n  - `kserve-localmodel-crd`, `kserve-localmodel-resources`\
+      \ (new split)\n  - `kserve-llmisvc-crd` (+ minimal), `kserve-llmisvc-resources`\n\
+      - **LLMISVC chart naming/RBAC:** LLMISVC artifacts get **`kserve` prefixes/suffixes**\
+      \ (e.g., chart naming, roles), and ClusterRoleBinding is updated to point to\
+      \ the new ClusterRole. If you had custom RBAC overlays, re-validate them.\n\
+      - **New values knobs introduced (check and set as needed):**\n  - `servingRuntimes.imagePullPolicy`\
+      \ (new helm value for serving runtimes)\n  - Agent container **resources configurable**\
+      \ (new value; exact key not in notes)\n  - LLMISVC scheduler config can be provided\
+      \ via **ConfigMap or inline**; scheduler now expects default ZMQ port **5557**\n\
+      - **Patching/overlays workflow changed:** \"restructure helm charts and the\
+      \ way how to patch\" implies any existing post-render, kustomize overlays, or\
+      \ `helm template | yq` patch steps likely need updates to new paths/resource\
+      \ names.\n\n### Practical upgrade implications\n\n- You likely need to:\n  1.\
+      \ **Install/upgrade CRD charts first** (`kserve-crd`, `kserve-llmisvc-crd`,\
+      \ `kserve-localmodel-crd`) and wait for CRDs to be established.\n  2. Then upgrade/install\
+      \ **resource charts** (`kserve-resources`, `kserve-llmisvc-resources`, `kserve-localmodel-resources`,\
+      \ `kserve-runtime-configs`).\n  3. Adjust your Helm release names, chart references,\
+      \ and any GitOps automation that assumed `kserve` was a single chart.\n\n*(Release\
+      \ notes do not include a full values.yaml diff; you should run `helm show values`\
+      \ for v0.16.0 vs v0.17.0 charts and reconcile.)*"
+    chart_updates: ['Helm packaging now publishes multiple artifacts instead of a
+        single kserve chart; v0.17.0 release assets include CRD-only and resources-only
+        charts for KServe, LLMISVC, and LocalModel, plus a new runtime-configs chart.',
+      Manifests are restructured to a component-based layout (will change rendered
+        resource names/paths used by scripts/patching)., LLMISVC CRD installation
+        paths fixed; LLMISVC RBAC naming updated with `kserve` prefixes and bindings
+        adjusted accordingly., Quick install / dependency install scripts were centralized/refactored;
+        installation scripts updated to include required files and to fix several
+        bugs., 'Controller/webhook architecture change: LocalModelCache webhook separated
+        from KServe controller; LLMInferenceService webhook added with E2E tests (may
+        add/modify webhook deployments/services).', 'Security and dependency refreshes
+        across images and python deps (e.g., starlette pin, cryptography CVE fixes),
+        plus path traversal hardening in HTTP/tar extraction.']
+    features: ['Storage initializer performance improvements: parallel S3/Azure blob
+        downloads and faster parallel S3 file downloads; plus new git download support
+        and ability to download only selected files.', New routing capability for
+        InferenceServices via `pathTemplate` configuration for inference service routing.,
+      'Additional runtimes added, including an OpenVINO model server runtime and a
+        new predictive inference server runtime (with build/publish and E2E coverage).',
+      'LLMISVC enhancements: ability to stop LLMInferenceService, optional storageInitializer,
+        scheduler HA/scaling support, improved CA bundle/cert management, improved
+        Gateway API URL discovery, autoscaling API support, and annotation/label propagation.',
+      'Gateway/API updates: upgrade to Gateway API v1.4.0 and bump Gateway API Inference
+        Extension (GIE) to v1.2.0.', 'Operational knobs: new env var `INFERENCE_SERVICE_NAME`,
+        new `schedulerName` field for ServingRuntimePodSpec, configurable Uvicorn
+        event loop, and configurable agent container resources.']
+    breaking_changes: ['Major Helm chart restructuring in v0.17.0: the old single
+        `kserve` chart is replaced/renamed and split into multiple charts (notably
+        `kserve-resources`, plus separate CRD/resources charts for KServe/LLMISVC/LocalModel).
+        Existing Helm release names, chart references, and patching automation will
+        need changes.', 'vLLM/runtime ecosystem changes: KServe bumps vLLM versions
+        and removes Python 3.9 support for the vLLM runtime line; if you build custom
+        runtime images or depend on Python 3.9, you must update accordingly.', RBAC/name
+        changes for LLMISVC components (prefixed roles/renamed resources) can break
+        custom RoleBinding/ClusterRoleBinding overrides if they referenced old names.]
+  chart_version: v0.17.0
+  images: []
 - version: 0.16.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []

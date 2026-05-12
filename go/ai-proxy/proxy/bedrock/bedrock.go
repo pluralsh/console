@@ -19,6 +19,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	apioai "github.com/pluralsh/console/go/ai-proxy/api/openai"
 )
 
 const (
@@ -51,6 +52,11 @@ func NewBedrockProxy(region string) (api.OpenAIProxy, error) {
 
 func (b *BedrockProxy) Proxy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == apioai.EndpointResponses {
+			http.Error(w, "responses endpoint is only supported for openai provider", http.StatusBadRequest)
+			return
+		}
+
 		var openAIReq openai.ChatCompletionRequest
 		if err := json.NewDecoder(r.Body).Decode(&openAIReq); err != nil {
 			http.Error(w, "failed to parse openai request", http.StatusBadRequest)
@@ -344,7 +350,7 @@ func buildBedrockToolSchema(tool ollamaapi.Tool) map[string]interface{} {
 	}
 
 	propsMap := make(map[string]interface{})
-	for fieldName, fieldDef := range tool.Function.Parameters.Properties {
+	for fieldName, fieldDef := range tool.Function.Parameters.Properties.ToMap() {
 		prop := map[string]interface{}{
 			"type":        fieldDef.Type,
 			"description": fieldDef.Description,

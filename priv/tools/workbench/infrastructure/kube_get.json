@@ -1,0 +1,30 @@
+{
+    "type": "object",
+    "properties": {
+        "cluster": {
+            "type": "string",
+            "description": "The Plural cluster handle identifying which cluster to query"
+        },
+        "group": {
+            "type": "string",
+            "description": "The kubernetes API group (e.g. apps, networking.k8s.io). Use an empty string for the core API group"
+        },
+        "version": {
+            "type": "string",
+            "description": "The kubernetes API version for this resource within the group (e.g. v1)"
+        },
+        "kind": {
+            "type": "string",
+            "description": "The kubernetes resource kind"
+        },
+        "name": {
+            "type": "string",
+            "description": "The kubernetes resource name"
+        },
+        "namespace": {
+            "type": "string",
+            "description": "the kubernetes namespace this resource is in, ignore if this is a cluster scoped resource"
+        }
+    },
+    "required": ["cluster", "version", "kind", "name"]
+}

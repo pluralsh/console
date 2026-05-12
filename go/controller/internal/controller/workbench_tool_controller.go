@@ -114,8 +114,20 @@ func (in *WorkbenchToolReconciler) Reconcile(ctx context.Context, req reconcile.
 		return common.HandleRequeue(res, err, workbenchTool.SetCondition)
 	}
 
+	// Resolve MCPServerRef to get the MCP server ID.
+	mcpServerID, res, err := in.resolveMCPServerRef(ctx, workbenchTool)
+	if res != nil || err != nil {
+		return common.HandleRequeue(res, err, workbenchTool.SetCondition)
+	}
+
+	// Resolve CloudConnectionRef to get the cloud connection ID.
+	cloudConnectionID, res, err := in.resolveCloudConnectionRef(ctx, workbenchTool)
+	if res != nil || err != nil {
+		return common.HandleRequeue(res, err, workbenchTool.SetCondition)
+	}
+
 	// Sync WorkbenchTool CRD with the Console API
-	apiWorkbenchTool, err := in.sync(ctx, workbenchTool, project, changed)
+	apiWorkbenchTool, err := in.sync(ctx, workbenchTool, project, mcpServerID, cloudConnectionID, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
 	}
@@ -213,7 +225,51 @@ func (in *WorkbenchToolReconciler) handleExistingWorkbenchTool(ctx context.Conte
 	return workbenchTool.Spec.Reconciliation.Requeue(), nil
 }
 
-func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, project *v1alpha1.Project, changed bool) (*console.WorkbenchToolFragment, error) {
+func (in *WorkbenchToolReconciler) resolveMCPServerRef(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool) (*string, *ctrl.Result, error) {
+	ref := workbenchTool.Spec.MCPServerRef
+	if ref == nil {
+		return nil, nil, nil
+	}
+
+	mcpServer := &v1alpha1.MCPServer{}
+	ns := lo.Ternary(ref.Namespace == "", workbenchTool.Namespace, ref.Namespace)
+	if err := in.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ns}, mcpServer); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("MCPServer not found: %s", err.Error())
+		}
+		return nil, nil, fmt.Errorf("failed to get MCPServer: %s", err.Error())
+	}
+
+	if !mcpServer.Status.HasID() {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("MCPServer is not ready")
+	}
+
+	return mcpServer.Status.ID, nil, nil
+}
+
+func (in *WorkbenchToolReconciler) resolveCloudConnectionRef(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool) (*string, *ctrl.Result, error) {
+	ref := workbenchTool.Spec.CloudConnectionRef
+	if ref == nil {
+		return nil, nil, nil
+	}
+
+	cloudConnection := &v1alpha1.CloudConnection{}
+	ns := lo.Ternary(ref.Namespace == "", workbenchTool.Namespace, ref.Namespace)
+	if err := in.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ns}, cloudConnection); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("CloudConnection not found: %s", err.Error())
+		}
+		return nil, nil, fmt.Errorf("failed to get CloudConnection: %s", err.Error())
+	}
+
+	if !cloudConnection.Status.HasID() {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("CloudConnection is not ready")
+	}
+
+	return cloudConnection.Status.ID, nil, nil
+}
+
+func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, project *v1alpha1.Project, mcpServerID, cloudConnectionID *string, changed bool) (*console.WorkbenchToolFragment, error) {
 	logger := log.FromContext(ctx)
 
 	existingWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, lo.ToPtr(workbenchTool.ConsoleName()))
@@ -222,13 +278,21 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 			return nil, err
 		}
 
+		attrs, err := workbenchTool.Attributes(ctx, in.Client, project.Status.ID, mcpServerID, cloudConnectionID)
+		if err != nil {
+			return nil, err
+		}
 		logger.Info(fmt.Sprintf("%s workbench tool does not exist, creating it", workbenchTool.ConsoleName()))
-		return in.ConsoleClient.CreateWorkbenchTool(ctx, workbenchTool.Attributes(project.Status.ID))
+		return in.ConsoleClient.CreateWorkbenchTool(ctx, attrs)
 	}
 
 	if changed {
+		attrs, err := workbenchTool.Attributes(ctx, in.Client, project.Status.ID, mcpServerID, cloudConnectionID)
+		if err != nil {
+			return nil, err
+		}
 		logger.Info(fmt.Sprintf("updating workbench tool %s", workbenchTool.ConsoleName()))
-		return in.ConsoleClient.UpdateWorkbenchTool(ctx, existingWorkbenchTool.ID, workbenchTool.Attributes(project.Status.ID))
+		return in.ConsoleClient.UpdateWorkbenchTool(ctx, existingWorkbenchTool.ID, attrs)
 	}
 
 	return existingWorkbenchTool, nil

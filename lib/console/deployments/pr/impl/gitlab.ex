@@ -30,7 +30,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       })
       |> case do
         {:ok, %{"web_url" => url} = mr} ->
-          {:ok, %{title: title, ref: branch, body: body, url: url, owner: owner(mr)}}
+          target = pr.branch || "master"
+          {:ok, %{title: title, ref: branch, body: body, url: url, base: target, owner: owner(mr)}}
         err -> err
       end
     end
@@ -54,6 +55,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     attrs = Map.merge(%{
       status: state(mr),
       ref: mr["source_branch"],
+      base: mr["target_branch"],
       title: mr["title"],
       body: mr["description"]
     }, pr_associations(mr_content(mr)))

@@ -40,5 +40,5 @@ defmodule Console.AI.Evidence.Context do
   def merge(%__MODULE__{} = ctx, _), do: ctx
 
   def history(%__MODULE__{history: history}), do: history
-  def history(%__MODULE__{} = ctx), do: ctx.history
+  def history(%__MODULE__{}), do: []
 end

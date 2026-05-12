@@ -7,6 +7,7 @@ defmodule Console.Pipelines.Sentinel.Pipeline do
     Logger.info "handling sentinel #{sentinel.id}"
     with {:ok, run} <- Sentinels.run_sentinel(sentinel) do
       Logger.info("sentinel #{sentinel.id} run #{run.id} created")
+      {:ok, run}
     else
       err -> Logger.info("sentinel #{sentinel.id} run creation failed: #{inspect(err)}")
     end

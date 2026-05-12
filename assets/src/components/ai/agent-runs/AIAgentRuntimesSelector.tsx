@@ -62,7 +62,7 @@ export function AIAgentRuntimesSelector({
         transparent
         isOpen={isOpen}
         onOpenChange={setIsOpen}
-        width={type === 'standard' ? 240 : 160}
+        width={type === 'standard' ? 240 : 180}
         placement="left"
         label={isLoading ? <RectangleSkeleton /> : placeholder}
         leftContent={

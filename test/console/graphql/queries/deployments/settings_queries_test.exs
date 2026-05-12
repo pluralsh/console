@@ -165,5 +165,22 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       assert from_connection(found)
              |> ids_equal([conn1, conn2])
     end
+
+    test "it can filter cloud connections by provider" do
+      aws = insert(:cloud_connection, provider: :aws)
+      insert(:cloud_connection, provider: :gcp)
+      insert(:cloud_connection, provider: :azure)
+
+      {:ok, %{data: %{"cloudConnections" => found}}} = run_query("""
+        query {
+          cloudConnections(first: 5, provider: AWS) {
+            edges { node { id provider } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal([aws])
+    end
   end
 end

@@ -133,8 +133,14 @@ func (in *WorkbenchReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 		return common.HandleRequeue(res, err, workbench.SetCondition)
 	}
 
+	// Resolve read and write bindings.
+	readBindings, writeBindings, err := in.resolveBindings(workbench)
+	if err != nil {
+		return common.HandleRequeue(nil, err, workbench.SetCondition)
+	}
+
 	// Sync Workbench CRD with the Console API
-	apiWorkbench, err := in.sync(ctx, workbench, project, repositoryID, agentRuntimeID, toolIDs, changed)
+	apiWorkbench, err := in.sync(ctx, workbench, project, repositoryID, agentRuntimeID, toolIDs, readBindings, writeBindings, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbench.SetCondition)
 	}
@@ -233,8 +239,10 @@ func (in *WorkbenchReconciler) handleExistingWorkbench(ctx context.Context, work
 }
 
 func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Workbench, project *v1alpha1.Project,
-	repositoryID *string, agentRuntimeID *string, toolIDs []string, changed bool) (*console.WorkbenchFragment, error) {
+	repositoryID *string, agentRuntimeID *string, toolIDs []string,
+	readBindings, writeBindings []*console.PolicyBindingAttributes, changed bool) (*console.WorkbenchFragment, error) {
 	logger := log.FromContext(ctx)
+	attributes := workbench.Attributes(project.Status.ID, repositoryID, agentRuntimeID, toolIDs, readBindings, writeBindings)
 
 	existingWorkbench, err := in.ConsoleClient.GetWorkbench(ctx, nil, lo.ToPtr(workbench.ConsoleName()))
 	if err != nil {
@@ -243,15 +251,33 @@ func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Wor
 		}
 
 		logger.Info(fmt.Sprintf("%s workbench does not exist, creating it", workbench.ConsoleName()))
-		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID, repositoryID, agentRuntimeID, toolIDs))
+		return in.ConsoleClient.CreateWorkbench(ctx, attributes)
 	}
 
 	if changed {
 		logger.Info(fmt.Sprintf("updating workbench %s", workbench.ConsoleName()))
-		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID, repositoryID, agentRuntimeID, toolIDs))
+		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, attributes)
 	}
 
 	return existingWorkbench, nil
+}
+
+func (in *WorkbenchReconciler) resolveBindings(workbench *v1alpha1.Workbench) (readBindings, writeBindings []*console.PolicyBindingAttributes, err error) {
+	if workbench.Spec.Bindings == nil {
+		return nil, nil, nil
+	}
+
+	readBindings, err = common.BindingsAttributes(workbench.Spec.Bindings.Read)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	writeBindings, err = common.BindingsAttributes(workbench.Spec.Bindings.Write)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return readBindings, writeBindings, nil
 }
 
 func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbench *v1alpha1.Workbench) (*string, *ctrl.Result, error) {

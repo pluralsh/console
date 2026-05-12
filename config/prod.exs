@@ -77,6 +77,7 @@ config :console, Console.Cron.Scheduler,
     {"0 5 * * *",      {Console.Deployments.Cron, :prune_agent_run_repositories, []}},
     {"0 6 * * *",      {Console.Deployments.Cron, :prune_access_tokens, []}},
     {"0 7 * * *",      {Console.Deployments.Cron, :prune_cluster_upgrades, []}},
+    {"0 8 * * *",      {Console.Deployments.Cron, :prune_workbench_jobs, []}},
     {"30 1 * * *",     {Console.Cron.Jobs, :prune_notifications, []}},
     {"45 1 * * *",     {Console.Cron.Jobs, :prune_audits, []}},
     {"0 2 * * *",      {Console.Deployments.Cron, :prune_alerts, []}},
@@ -87,6 +88,9 @@ config :console, Console.Cron.Scheduler,
     {"15 */2 * * *",   {Console.AI.Cron, :vector_expire, []}},
     {"30 */2 * * *",   {Console.AI.Cron, :vector_index, []}},
     {"0 8 * * *",      {Console.AI.Cron, :vectorize_stacks, []}},
+    {"0 9 * * *",      {Console.AI.Cron, :vectorize_workbench_jobs, []}},
+    # {"0 10 * * *",     {Console.AI.Cron, :workbench_job_knowledge_backfill, []}},
+    {"*/15 * * * *",     {Console.AI.Cron, :workbench_job_eval, []}},
     {"45 2 * * *",     {Console.Cost.Cron, :history, []}},
     {"0 3 * * *",      {Console.Cost.Cron, :prune, []}},
     {"15 3 * * *",     {Console.AI.Cron, :trim_sentinel_runs, []}},
@@ -95,8 +99,9 @@ config :console, Console.Cron.Scheduler,
   ]
 
 config :ex_aws,
-  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :pod_identity, :instance_role],
-  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :pod_identity, :instance_role]
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :pod_identity, {:awscli, "profile_name", 30}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :pod_identity, {:awscli, "profile_name", 30}, :instance_role],
+  awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
 
 config :console, :watchers, [Console.Watchers.Upgrade]
 

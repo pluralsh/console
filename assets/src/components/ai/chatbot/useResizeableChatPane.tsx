@@ -1,31 +1,47 @@
 import { useResizeObserver } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
-import { clamp } from 'lodash'
-import { useState } from 'react'
+import { clamp, isNil } from 'lodash'
+import { useCallback, useState } from 'react'
 
 const STORAGE_KEY = 'chatbot-panel-width'
 
-export function useResizablePane(minWidthPx: number, maxWidthVw: number) {
-  const clampNewWidth = (newWidth: number) =>
-    // maxWidthVw could be smaller than minWidthPx on narrow screens
-    clamp(
-      newWidth,
-      minWidthPx,
-      Math.max(minWidthPx, window.innerWidth * (maxWidthVw / 100))
-    )
-
+export function useResizablePane(
+  minWidthPx: number,
+  maxWidthVw: number,
+  initialWidthVw?: number
+) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, width: 0 })
 
   const [calculatedPanelWidth, setCalculatedPanelWidthState] =
     usePersistedState(STORAGE_KEY, minWidthPx, 1000)
-  const setPanelWidth = (newWidth: number) =>
-    setCalculatedPanelWidthState(clampNewWidth(newWidth))
+  const setPanelWidth = useCallback(
+    (newWidth: number) =>
+      setCalculatedPanelWidthState(
+        // maxWidthVw could be smaller than minWidthPx on narrow screens
+        clamp(newWidth, minWidthPx, Math.max(minWidthPx, vwToPx(maxWidthVw)))
+      ),
+    [minWidthPx, maxWidthVw, setCalculatedPanelWidthState]
+  )
 
   // clamps the current width if necessary when window size changes
   useResizeObserver({ current: document.body }, () =>
     setPanelWidth(calculatedPanelWidth)
   )
+
+  // snap to initial when provided, otherwise return to previous width before initial was set
+  const [prevInitialWidthVw, setPrevInitialWidthVw] =
+    useState<Nullable<number>>(null)
+  const [prevWidth, setPrevWidth] = useState<number>(calculatedPanelWidth)
+  if (initialWidthVw !== prevInitialWidthVw) {
+    setPrevInitialWidthVw(initialWidthVw)
+    if (!isNil(initialWidthVw)) {
+      setPrevWidth(calculatedPanelWidth)
+      setPanelWidth(vwToPx(initialWidthVw))
+    } else {
+      setPanelWidth(prevWidth)
+    }
+  }
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault()
@@ -59,3 +75,5 @@ export function useResizablePane(minWidthPx: number, maxWidthVw: number) {
 
   return { calculatedPanelWidth, dragHandleProps, isDragging }
 }
+
+const vwToPx = (vw: number) => window.innerWidth * (vw / 100)

@@ -5,7 +5,6 @@ import {
   formatMemory,
 } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 import { HeatMapFlavor, MetricPointResponseFragment } from 'generated/graphql'
-import { truncate } from 'lodash'
 import { TreeMap } from './TreeMap'
 
 export function UtilizationHeatmap({
@@ -48,19 +47,11 @@ export function UtilizationHeatmap({
     <TreeMap
       loading={loading}
       type="canvas"
-      label={truncatedGraphLabel}
       colors={(d: ComputedNodeWithoutStyles<object>) => getColor(d).hex()}
       valueFormat={(d) => formatValue(d, utilizationType)}
       data={treeMapData}
     />
   )
-}
-
-export function truncatedGraphLabel(
-  node: Omit<ComputedNodeWithoutStyles<object>, 'label' | 'parentLabel'>
-) {
-  const size = node.width > node.height ? node.width : node.height
-  return truncate(node.id, { length: size / 8 })
 }
 
 function formatValue(value: number, type: 'cpu' | 'memory') {

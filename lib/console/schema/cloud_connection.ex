@@ -16,6 +16,7 @@ defmodule Console.Schema.CloudConnection do
         field :region,            :string
         field :regions,           {:array, :string}
         field :access_key_id,     :string
+        field :assume_role_arn,   :string
         field :secret_access_key, EncryptedString
       end
 
@@ -54,6 +55,10 @@ defmodule Console.Schema.CloudConnection do
     from(c in query, where: ilike(c.name, ^"%#{q}%"))
   end
 
+  def for_provider(query \\ __MODULE__, provider) do
+    from(c in query, where: c.provider == ^provider)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(c in query, order_by: ^order)
   end
@@ -78,7 +83,7 @@ defmodule Console.Schema.CloudConnection do
 
   defp aws_changeset(model, attrs) do
     model
-    |> cast(attrs, [:region, :regions, :access_key_id, :secret_access_key])
+    |> cast(attrs, [:region, :regions, :access_key_id, :secret_access_key, :assume_role_arn])
     |> validate_required([:access_key_id, :secret_access_key])
   end
 

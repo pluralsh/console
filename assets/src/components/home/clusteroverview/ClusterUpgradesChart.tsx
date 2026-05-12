@@ -11,10 +11,10 @@ import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 import { ApolloError } from '@apollo/client'
 import { Flex } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
+import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
-import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
-import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
+import { ChartLegendItem, HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { ClusterUpgradesChartEmpty } from './ClusterUpgradesChartEmpty'
 
 export enum UpgradeChartFilter {
@@ -36,12 +36,14 @@ export function ClusterUpgradesChart({
   error,
   selectedFilter,
   onClick,
+  showLegend = false,
 }: {
   data: UpgradeStatisticsQuery | undefined
   loading: boolean
   error?: Nullable<ApolloError>
   selectedFilter: UpgradeChartFilter
   onClick: (filter: UpgradeChartFilter) => void
+  showLegend?: boolean
 }) {
   const chartData = getChartData(data?.upgradeStatistics ?? {})
 
@@ -63,45 +65,69 @@ export function ClusterUpgradesChart({
     )
 
   return (
-    <div
-      css={{
-        height: '100%',
-        width: '100%',
-        '& svg *': { transition: 'fill 0.3s ease-in-out' },
-      }}
+    <Flex
+      height="100%"
+      width="100%"
+      justify="center"
     >
-      <ResponsiveRadialBar
-        colors={(item) =>
-          chroma(item.data.color)
-            .alpha(
-              selectedFilter === UpgradeChartFilter.All ||
-                item.data.x === selectedFilter
-                ? 1
-                : 0.6
+      <div
+        css={{
+          height: '100%',
+          width: '60%',
+          '& svg *': { transition: 'fill 0.3s ease-in-out' },
+        }}
+      >
+        <ResponsiveRadialBar
+          colors={(item) =>
+            chroma(item.data.color)
+              .alpha(
+                selectedFilter === UpgradeChartFilter.All ||
+                  item.data.x === selectedFilter
+                  ? 1
+                  : 0.6
+              )
+              .hex()
+          }
+          endAngle={360}
+          cornerRadius={3}
+          padAngle={1}
+          padding={0.32}
+          innerRadius={0.38}
+          onClick={(bar) =>
+            onClick(
+              bar.data.x === selectedFilter
+                ? UpgradeChartFilter.All
+                : bar.data.x
             )
-            .hex()
-        }
-        endAngle={360}
-        cornerRadius={3}
-        padAngle={1}
-        padding={0.32}
-        innerRadius={0.38}
-        onClick={(bar) =>
-          onClick(
-            bar.data.x === selectedFilter ? UpgradeChartFilter.All : bar.data.x
-          )
-        }
-        tooltip={(props) => (
-          <ChartTooltip
-            color={props.bar.color}
-            value={props.bar.formattedValue}
-            label={props.bar.category}
-          />
-        )}
-        layers={['bars', CenterLabel]}
-        data={chartData}
-      />
-    </div>
+          }
+          tooltip={(props) => (
+            <ChartTooltip
+              color={props.bar.color}
+              value={props.bar.formattedValue}
+              label={props.bar.category}
+            />
+          )}
+          layers={['bars', CenterLabel]}
+          data={chartData}
+        />
+      </div>
+      {showLegend && (
+        <Flex
+          direction="column"
+          gap="small"
+          flexShrink={0}
+          alignSelf="center"
+        >
+          {selectableFilterOptions.map((filter) => (
+            <ChartLegendItem
+              key={filter}
+              color={filterToColor[filter]}
+              label={filter}
+            />
+          ))}
+        </Flex>
+      )}
+    </Flex>
   )
 }
 

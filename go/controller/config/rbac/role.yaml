@@ -64,13 +64,16 @@ rules:
   - projects
   - scmconnections
   - sentinels
+  - sentineltriggers
   - serviceaccounts
   - servicecontexts
   - servicedeployments
   - stackdefinitions
   - upgradeplancallouts
+  - workbenchcrons
   - workbenches
   - workbenchtools
+  - workbenchwebhooks
   verbs:
   - create
   - delete
@@ -119,13 +122,16 @@ rules:
   - projects/finalizers
   - scmconnections/finalizers
   - sentinels/finalizers
+  - sentineltriggers/finalizers
   - serviceaccounts/finalizers
   - servicecontexts/finalizers
   - servicedeployments/finalizers
   - stackdefinitions/finalizers
   - upgradeplancallouts/finalizers
+  - workbenchcrons/finalizers
   - workbenches/finalizers
   - workbenchtools/finalizers
+  - workbenchwebhooks/finalizers
   verbs:
   - update
 - apiGroups:
@@ -168,13 +174,16 @@ rules:
   - projects/status
   - scmconnections/status
   - sentinels/status
+  - sentineltriggers/status
   - serviceaccounts/status
   - servicecontexts/status
   - servicedeployments/status
   - stackdefinitions/status
   - upgradeplancallouts/status
+  - workbenchcrons/status
   - workbenches/status
   - workbenchtools/status
+  - workbenchwebhooks/status
   verbs:
   - get
   - patch

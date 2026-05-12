@@ -183,13 +183,17 @@ defmodule Console.Deployments.Clusters do
   def control_plane(%Cluster{} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
 
   def control_plane(%Cluster{id: id}, %User{} = user, claims \\ %{}) do
-    with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, claims) do
+    with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, Map.merge(claims, user_claims(user))) do
       %Kazan.Server{
         url: kas_proxy_url(),
         auth: %Kazan.Server.TokenAuth{token: "plrl:#{id}:#{token}"},
       }
     end
   end
+
+  defp user_claims(%User{email: email, groups: [_| _] = groups}),
+    do: %{"groups" => Enum.map(groups, & &1.name), "email" => email, "user.email" => email}
+  defp user_claims(%User{email: email}), do: %{"groups" => [], "email" => email, "user.email" => email}
 
   @spec kubeconfig(Cluster.t) :: {:ok, binary} | {:error, term}
   def kubeconfig(%Cluster{name: name} = cluster) do

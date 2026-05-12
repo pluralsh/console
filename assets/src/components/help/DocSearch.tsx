@@ -26,6 +26,7 @@ export function DocSearch({
       indexName="plural"
       apiKey="7a4dbe4b26eb19140c283ff40ff536b5"
       placeholder="Search Plural docs"
+      onAskAiToggle={() => {}}
       navigator={{
         navigate: ({ itemUrl }) => {
           const windowReference = window.open(itemUrl, '_blank', 'noopener')

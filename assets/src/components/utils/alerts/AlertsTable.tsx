@@ -1,33 +1,59 @@
 import { ApolloError } from '@apollo/client'
 import {
+  ArrowTopRightIcon,
   Button,
+  CheckOutlineIcon,
   Chip,
   ChipSeverity,
-  ErrorIcon,
   EyeIcon,
+  FailedFilledIcon,
   Flex,
   IconFrame,
+  SpinnerAlt,
   Table,
+  TableProps,
   Tooltip,
+  UnknownIcon,
 } from '@pluralsh/design-system'
-import { AlertFragment, AlertSeverity, AlertState } from 'generated/graphql'
-
-import { createColumnHelper } from '@tanstack/react-table'
+import { CellContext, createColumnHelper } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
-import { isEmpty, truncate, upperFirst } from 'lodash'
+import {
+  AlertFragment,
+  AlertSeverity,
+  WorkbenchJobStatus,
+} from 'generated/graphql'
+import { isEmpty, upperFirst } from 'lodash'
+import { ReactNode, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { AiInsightSummaryIcon } from '../AiInsights'
 import { GqlError } from '../Alert'
-
 import { StackedText } from '../table/StackedText'
 import { VirtualSlice } from '../table/useFetchPaginatedData'
 import { InlineA } from '../typography/Text'
-import { AlertsTableExpander } from './AlertsTableExpander'
-import { useState } from 'react'
 import { AlertResolutionModal } from './AlertResolutionModal'
+import { AlertsTableExpander } from './AlertsTableExpander'
+import { AlertStateChip } from './AlertStateChip'
+import { TRUNCATE } from '../truncate'
+
+type ViewJobData = {
+  workbenchId: string
+  jobId: string
+  status?: Nullable<WorkbenchJobStatus>
+}
 
 const columnHelper = createColumnHelper<AlertFragment>()
+
+export const alertSeverityToChipSeverity: Record<AlertSeverity, ChipSeverity> =
+  {
+    [AlertSeverity.Critical]: 'critical',
+    [AlertSeverity.High]: 'danger',
+    [AlertSeverity.Medium]: 'warning',
+    [AlertSeverity.Low]: 'success',
+    [AlertSeverity.Undefined]: 'neutral',
+  }
 
 export function AlertsTable({
   alerts,
@@ -36,6 +62,10 @@ export function AlertsTable({
   hasNextPage,
   fetchNextPage,
   setVirtualSlice,
+  hideHeader = false,
+  columns = defaultAlertsColumns,
+  fillLevel = 1,
+  rowBg = 'base',
 }: {
   alerts: AlertFragment[]
   loading: boolean
@@ -43,18 +73,24 @@ export function AlertsTable({
   hasNextPage: boolean
   fetchNextPage: () => void
   setVirtualSlice: (slice: VirtualSlice) => void
+  hideHeader?: boolean
+  columns?: NonNullable<TableProps['columns']>
+  fillLevel?: TableProps['fillLevel']
+  rowBg?: TableProps['rowBg']
 }) {
   const theme = useTheme()
+
   return error ? (
     <GqlError error={error} />
   ) : (
     <Table
+      hideHeader={hideHeader}
       fullHeightWrap
       virtualizeRows
-      fillLevel={1}
-      rowBg="base"
+      fillLevel={fillLevel}
+      rowBg={rowBg}
       data={alerts}
-      columns={cols}
+      columns={columns}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
@@ -72,140 +108,241 @@ export function AlertsTable({
   )
 }
 
-const severityToChipSeverity: Record<AlertSeverity, ChipSeverity> = {
-  [AlertSeverity.Critical]: 'critical',
-  [AlertSeverity.High]: 'danger',
-  [AlertSeverity.Medium]: 'warning',
-  [AlertSeverity.Low]: 'success',
-  [AlertSeverity.Undefined]: 'neutral',
-}
-
-const cols = [
-  ColExpander,
-  columnHelper.accessor((alert) => alert.title, {
-    id: 'title',
-    header: 'Title',
-    meta: { gridTemplate: 'minmax(200px, 1fr)', truncate: true },
-    cell: function Cell({ getValue, row }) {
+function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
+  switch (status) {
+    case WorkbenchJobStatus.Pending:
+    case WorkbenchJobStatus.Running:
+      return <SpinnerAlt size={12} />
+    case WorkbenchJobStatus.Successful:
       return (
-        <StackedText
-          first={getValue()}
-          second={formatDateTime(row.original.updatedAt, 'M/D/YYYY h:mma')}
+        <CheckOutlineIcon
+          size={12}
+          color="icon-success"
         />
       )
-    },
-  }),
-
-  columnHelper.accessor((alert) => alert.state, {
-    id: 'state',
-    header: 'State',
-    cell: function Cell({ getValue }) {
-      const state = getValue()
+    case WorkbenchJobStatus.Failed:
       return (
-        <Chip
-          css={{ width: 'max-content' }}
-          size="small"
-          severity={state === AlertState.Firing ? 'danger' : 'neutral'}
-          inactive={state !== AlertState.Firing}
-        >
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            {state === AlertState.Firing && <ErrorIcon size={12} />}
-            {state === AlertState.Firing ? 'Firing' : 'Non-firing'}
-          </Flex>
-        </Chip>
+        <FailedFilledIcon
+          size={12}
+          color="icon-danger"
+        />
       )
-    },
-  }),
-  columnHelper.accessor((alert) => alert.severity, {
+    default:
+      return (
+        <UnknownIcon
+          size={12}
+          color="icon-xlight"
+        />
+      )
+  }
+}
+
+function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
+  const { url, insight } = getValue() as AlertFragment
+
+  return (
+    <Flex
+      gap="small"
+      align="center"
+      justify="space-between"
+      width="100%"
+    >
+      <Flex
+        align="center"
+        gap="xsmall"
+        width="100%"
+        minWidth={0}
+      >
+        <Tooltip
+          placement="top"
+          label={url}
+        >
+          <InlineA
+            href={url}
+            style={{
+              ...TRUNCATE,
+              minWidth: 0,
+            }}
+          >
+            {url ?? ''}
+          </InlineA>
+        </Tooltip>
+        {!!url && (
+          <ArrowTopRightIcon
+            size={16}
+            color="text"
+          />
+        )}
+      </Flex>
+      <AiInsightSummaryIcon
+        insight={insight}
+        navPath={`insight/${insight?.id}`}
+      />
+    </Flex>
+  )
+}
+
+function ResolutionCell({ getValue }: CellContext<AlertFragment, unknown>) {
+  const { id, resolution } = getValue() as AlertFragment
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsOpen(!isOpen)
+  }
+
+  return (
+    <>
+      {resolution ? (
+        <Flex gap="xsmall">
+          <Button
+            small
+            secondary
+            disabled
+          >
+            Resolved
+          </Button>
+          <IconFrame
+            clickable
+            onClick={handleClick}
+            type="secondary"
+            tooltip="View resolution"
+            icon={<EyeIcon />}
+          />
+        </Flex>
+      ) : (
+        <Button
+          small
+          secondary
+          onClick={handleClick}
+        >
+          Mark as resolved
+        </Button>
+      )}
+      <AlertResolutionModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        initialResolution={resolution}
+        alertId={id}
+      />
+    </>
+  )
+}
+
+function ViewJobCell({
+  getValue,
+  getViewJobData,
+}: {
+  getValue: () => AlertFragment
+  getViewJobData: (alert: AlertFragment) => ViewJobData | null
+}) {
+  const navigate = useNavigate()
+  const alert = getValue()
+  const jobData = getViewJobData(alert)
+
+  if (!jobData) return null
+
+  return (
+    <Chip
+      clickable
+      onClick={() =>
+        navigate(
+          getWorkbenchJobAbsPath({
+            workbenchId: jobData.workbenchId,
+            jobId: jobData.jobId,
+          })
+        )
+      }
+    >
+      <Flex
+        gap="xsmall"
+        align="center"
+      >
+        {jobStatusIcon(jobData.status)}
+        <span>View job</span>
+      </Flex>
+    </Chip>
+  )
+}
+
+export const ColAlertExpander = ColExpander
+
+export const ColAlertTitle = columnHelper.accessor((alert) => alert.title, {
+  id: 'title',
+  header: 'Title',
+  meta: { gridTemplate: 'minmax(200px, 1fr)', truncate: true },
+  cell: function Cell({ getValue, row }) {
+    return (
+      <StackedText
+        first={getValue()}
+        second={formatDateTime(row.original.updatedAt, 'M/D/YYYY h:mma')}
+      />
+    )
+  },
+})
+
+export const ColAlertUrl = columnHelper.accessor((alert) => alert, {
+  id: 'url',
+  header: 'URL',
+  meta: { gridTemplate: 'minmax(280px, 2fr)', truncate: true },
+  cell: UrlCell,
+})
+
+export const ColAlertState = columnHelper.accessor((alert) => alert.state, {
+  id: 'state',
+  header: 'State',
+  cell: function Cell({ getValue }) {
+    return <AlertStateChip state={getValue()} />
+  },
+})
+
+export const ColAlertSeverity = columnHelper.accessor(
+  (alert) => alert.severity,
+  {
     id: 'severity',
     header: 'Severity',
     cell: function Cell({ getValue }) {
       return (
         <Chip
           size="small"
-          severity={severityToChipSeverity[getValue()]}
+          severity={alertSeverityToChipSeverity[getValue()]}
         >
           {upperFirst(getValue().toLowerCase())}
         </Chip>
       )
     },
-  }),
+  }
+)
+
+export const ColAlertResolution = columnHelper.accessor((alert) => alert, {
+  id: 'resolution',
+  header: '',
+  meta: { gridTemplate: 'max-content' },
+  cell: ResolutionCell,
+})
+
+export const getColAlertViewJob = (
+  getViewJobData: (alert: AlertFragment) => ViewJobData | null
+) =>
   columnHelper.accessor((alert) => alert, {
-    id: 'url',
-    header: 'URL',
-    cell: function Cell({ getValue }) {
-      const { url, insight } = getValue()
-      return (
-        <Flex
-          gap="small"
-          align="center"
-          justify="space-between"
-          width="100%"
-        >
-          <Tooltip
-            placement="top"
-            label={url}
-          >
-            <InlineA href={url}>{truncate(url ?? '', { length: 25 })}</InlineA>
-          </Tooltip>
-          <AiInsightSummaryIcon
-            insight={insight}
-            navPath={`insight/${insight?.id}`}
-          />
-        </Flex>
-      )
-    },
-  }),
-  columnHelper.accessor((alert) => alert, {
-    id: 'resolution',
+    id: 'viewJob',
     header: '',
-    meta: { gridTemplate: 'max-content' },
+    meta: { gridTemplate: 'auto' },
     cell: function Cell({ getValue }) {
-      const { id, resolution } = getValue()
-      const [isOpen, setIsOpen] = useState(false)
-      const handleClick = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        setIsOpen(!isOpen)
-      }
       return (
-        <>
-          {resolution ? (
-            <Flex gap="xsmall">
-              <Button
-                small
-                floating
-                disabled
-              >
-                Resolved
-              </Button>
-              <IconFrame
-                clickable
-                onClick={handleClick}
-                type="floating"
-                tooltip="View resolution"
-                icon={<EyeIcon />}
-              />
-            </Flex>
-          ) : (
-            <Button
-              small
-              floating
-              onClick={handleClick}
-            >
-              Mark as resolved
-            </Button>
-          )}
-          <AlertResolutionModal
-            open={isOpen}
-            onClose={() => setIsOpen(false)}
-            initialResolution={resolution}
-            alertId={id}
-          />
-        </>
+        <ViewJobCell
+          getValue={getValue}
+          getViewJobData={getViewJobData}
+        />
       )
     },
-  }),
+  })
+
+const defaultAlertsColumns = [
+  ColAlertExpander,
+  ColAlertTitle,
+  ColAlertState,
+  ColAlertSeverity,
+  ColAlertUrl,
+  ColAlertResolution,
 ]

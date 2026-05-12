@@ -1,0 +1,58 @@
+defmodule Console.AI.Workbench.Toolchain do
+  @moduledoc """
+  Allows on-the-fly querying of tools within a workbench
+  """
+  alias Console.Repo
+  alias Console.Schema.{WorkbenchJob, User}
+  alias Console.AI.Tool
+  alias Console.AI.Workbench.{Environment, Subagents}
+  alias Console.AI.Tools.Workbench.Observability
+
+  @metrics_tools [Observability.Metrics, Observability.Plrl.Metrics]
+  @logs_tools [Observability.Logs, Observability.Plrl.Logs]
+  @traces_tools [Observability.Traces]
+
+  def metrics(%WorkbenchJob{} = job, name, args, %User{} = user) do
+    env = env(job)
+    tools = Subagents.Observability.tools(env, user)
+    with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
+         {:ok, %mod{} = t} when mod in @metrics_tools <- Tool.validate(tool, args) do
+      mod.structured(t)
+    else
+      {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
+      nil -> {:error, "tool not found"}
+      _ -> {:error, "tool not valid for querying on the fly"}
+    end
+  end
+
+  def logs(%WorkbenchJob{} = job, name, args, %User{} = user) do
+    env = env(job)
+    tools = Subagents.Observability.tools(env, user)
+    with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
+         {:ok, %mod{} = t} when mod in @logs_tools <- Tool.validate(tool, args) do
+      mod.structured(t)
+    else
+      {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
+      nil -> {:error, "tool not found"}
+      _ -> {:error, "tool not valid for querying on the fly"}
+    end
+  end
+
+  def traces(%WorkbenchJob{} = job, name, args, %User{} = user) do
+    env = env(job)
+    tools = Subagents.Observability.tools(env, user)
+    with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
+         {:ok, %mod{} = t} when mod in @traces_tools <- Tool.validate(tool, args) do
+      mod.structured(t)
+    else
+      {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
+      nil -> {:error, "tool not found"}
+      _ -> {:error, "tool not valid for querying on the fly"}
+    end
+  end
+
+  defp env(%WorkbenchJob{} = job) do
+    job = Repo.preload(job, [workbench: [tools: :mcp_server]])
+    Environment.new(job, job.workbench.tools, [])
+  end
+end

@@ -17,9 +17,8 @@ defmodule Console.Schema.Base do
     end
   end
 
-  def determine_next_run(cs) do
-    with crontab when is_binary(crontab) <- get_field(cs, :crontab),
-         run when not is_nil(run) <- get_change(cs, :last_run_at),
+  def determine_next_run(cs, field \\ :crontab) do
+    with {crontab, run} when is_binary(crontab) and is_struct(run) <- crontab_changed(cs, field),
          {:ok, cron} <- Crontab.CronExpression.Parser.parse(crontab),
          {:ok, next} <- Crontab.Scheduler.get_next_run_date(cron, Timex.to_naive_datetime(run)) do
       put_change(cs, :next_run_at, next_run(next))
@@ -30,10 +29,25 @@ defmodule Console.Schema.Base do
     end
   end
 
+  defp crontab_changed(cs, field) do
+    case get_change(cs, field) || get_change(cs, :last_run_at) do
+      nil -> :ignore
+      _ -> {get_field(cs, field), get_field(cs, :last_run_at) || Timex.now()}
+    end
+  end
+
+  def validate_crontab(field, crontab) when is_binary(crontab) do
+    case Crontab.CronExpression.Parser.parse(crontab) do
+      {:ok, _} -> []
+      {:error, err} -> [{field, "invalid cron expression: #{inspect(err)}"}]
+    end
+  end
+  def validate_crontab(_, _), do: []
+
   defp next_run(ndt) do
     DateTime.from_naive!(ndt, "Etc/UTC")
     |> Map.put(:microsecond, {0, 6})
-    |> Timex.shift(seconds: Console.jitter(60))
+    |> Timex.shift(seconds: :rand.uniform(60))
   end
 
   def immutable(cs, fields) do
@@ -87,4 +101,14 @@ defmodule Console.Schema.Base do
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)
   def parse_duration(duration), do: Duration.from_iso8601(String.upcase("PT#{duration}"))
+
+  def normalize_period(period) when period in ~w(day week month), do: period
+  def normalize_period(period) when period in ~w(day week month)a, do: Atom.to_string(period)
+
+  def normalize_period(period),
+    do: raise(ArgumentError, "invalid period #{inspect(period)}; expected day, week, or month")
+
+  def lookback_window("day"), do: {14, "day"}
+  def lookback_window("week"), do: {2, "month"}
+  def lookback_window("month"), do: {6, "month"}
 end

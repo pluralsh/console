@@ -5,6 +5,23 @@
             "type": "string",
             "description": "The query to use to gather logs"
         },
+        "facets": {
+            "type": "array",
+            "description": "The facets to use to filter logs",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the facet"
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "The value of the facet"
+                    }
+                }
+            }
+        },
         "limit": {
             "type": "integer",
             "description": "The maximum number of logs to return"
@@ -14,11 +31,11 @@
             "properties": {
                 "start": {
                     "type": "string",
-                    "description": "The start time to use to filter logs"
+                    "description": "The start time to use to filter logs. Provide in ISO8601 format."
                 },
                 "end": {
                     "type": "string",
-                    "description": "The end time to use to filter logs"
+                    "description": "The end time to use to filter logs. Provide in ISO8601 format."
                 }
             }
         }

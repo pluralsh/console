@@ -38,6 +38,16 @@ defmodule Console.Pipelines.PollProducer do
         {:producer, %State{}}
       end
 
+      def kick(%{id: id}) do
+        me = node()
+        case worker_node(id) do
+          ^me -> GenStage.cast(__MODULE__, :kick)
+          node -> GenStage.cast({__MODULE__, node}, :kick)
+        end
+      end
+
+      def handle_cast(:kick, state), do: handle_info(:poll, state)
+
       def handle_info(:poll, %State{demand: demand} = state) do
         events = poll(min(demand, 30))
         Logger.info "poll success for #{__MODULE__}: #{length(events)} events"
@@ -77,7 +87,7 @@ defmodule Console.Pipelines.PollProducer do
     {:noreply, events, %{state | buffer: buffer, demand: demand - length(events)}}
   end
 
-  defp worker_node(id), do: Console.ClusterRing.node(id)
+  def worker_node(id), do: Console.ClusterRing.node(id)
 
   defp local?(%{id: id}), do: worker_node(id) == node()
 end

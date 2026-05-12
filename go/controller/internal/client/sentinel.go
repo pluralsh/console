@@ -5,6 +5,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -77,4 +78,28 @@ func (c *client) UpdateSentinel(ctx context.Context, id string, attr *console.Se
 		return nil, err
 	}
 	return response.UpdateSentinel, nil
+}
+
+func (c *client) GetSentinelRun(ctx context.Context, id string) (*console.SentinelRunFragment, error) {
+	response, err := c.consoleClient.GetSentinelRun(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	if err == nil && (response == nil || response.SentinelRun == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+	return response.SentinelRun, err
+}
+
+func (c *client) RunSentinel(ctx context.Context, id string) (*string, error) {
+	run, err := c.consoleClient.RunSentinel(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return lo.ToPtr(run.RunSentinel.ID), nil
 }

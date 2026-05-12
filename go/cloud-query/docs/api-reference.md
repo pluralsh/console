@@ -296,6 +296,10 @@ ToolQuery support varies by operation:
 | Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
 | Loki | No | Yes | No | Loki HTTP `query_range` API |
 | Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
+| Jaeger | No | No | Yes | Jaeger Query v3 REST API with structured filters |
+| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
+| CloudWatch | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
+| Azure | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs` |
 
 ## Client and Endpoint Details
 
@@ -309,6 +313,16 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Elasticsearch: `elastic/go-elasticsearch` v9 typed client, `Search` (Elasticsearch `/_search`) with a `query_string` query and `@timestamp` range filter. Requires API key.
 - Loki: REST client to `/loki/api/v1/query_range`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
 - Tempo: REST client to `/api/search` and `/api/traces/{traceID}`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
+- Jaeger: REST client to stable Query v3 endpoint `POST /api/v3/traces` with structured trace filters.
+- Dynatrace: REST client to `/platform/storage/query/v1/query:execute` and `/platform/storage/query/v1/query:poll` (Grail DQL), bearer token auth.
+- CloudWatch: AWS SDK for Go v2.
+  - Logs: CloudWatch Logs Insights `StartQuery` + `GetQueryResults`.
+  - Metrics: CloudWatch `GetMetricData` (query expression).
+  - Metrics search: CloudWatch `ListMetrics` with bounded pagination and local filtering.
+- Azure: Azure Monitor Go SDK via Azure AD client credentials.
+  - Metrics: `monitor/query/azmetrics` `QueryResources`.
+  - Metrics search: `resourcemanager/monitor/armmonitor` metric definitions pager.
+  - Logs: `monitor/query/azlogs` `QueryResource`.
 
 ## Service Definition
 
@@ -326,13 +340,15 @@ service ToolQuery {
 ```protobuf
 message ElasticConnection {
   string url = 1;
-  string apiKey = 2;
+  string username = 2;
+  string password = 3;
+  string index = 4;
 }
 
 message DatadogConnection {
   optional string site = 1;
   string apiKey = 2;
-  string appKey = 3;
+  optional string appKey = 3;
 }
 
 message PrometheusConnection {
@@ -340,27 +356,74 @@ message PrometheusConnection {
   optional string token = 2;
   optional string username = 3;
   optional string password = 4;
+  optional string tenant_id = 5;
 }
 
 message LokiConnection {
   string url = 1;
-  string token = 3;
-  optional string tenant_id = 4;
+  optional string token = 2;
+  optional string tenant_id = 3;
+  optional string username = 4;
+  optional string password = 5;
 }
 
 message TempoConnection {
   string url = 1;
-  string token = 2;
+  optional string token = 2;
   optional string tenant_id = 3;
+  optional string username = 4;
+  optional string password = 5;
+}
+
+message SplunkConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message DynatraceConnection {
+  string url = 1;
+  string platformToken = 2;
+}
+
+message CloudwatchConnection {
+  string region = 1;
+  repeated string log_group_names = 2;
+  optional string access_key_id = 3;
+  optional string secret_access_key = 4;
+  optional string role_arn = 5;
+  optional string external_id = 6;
+  optional string role_session_name = 7;
+}
+
+message AzureConnection {
+  string subscription_id = 1;
+  string tenant_id = 2;
+  string client_id = 3;
+  string client_secret = 4;
+}
+
+message JaegerConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
 }
 ```
 
 Implementation notes:
 
-- Datadog requires both `apiKey` and `appKey`. `site` is optional.
-- Elasticsearch validates that `apiKey` is set.
+- Datadog requires `apiKey`. `appKey` and `site` are optional.
+- Elasticsearch requires `url`, `username`, `password`, and `index`.
 - Prometheus requires `url`; bearer token or basic auth are optional.
 - Loki and Tempo pass the token as a bearer token when set, and include `tenant_id` as `X-Scope-OrgID` when provided.
+- Splunk requires `url` plus either bearer token or basic auth username/password.
+- CloudWatch requires `region`. Optional auth fields support static credentials and/or assume-role.
+  - If static credentials are omitted, default AWS credential chain is used (including pod identity).
+  - For logs queries, either `log_group_names` must be configured or the query must include a `SOURCE` command.
+- Azure requires `subscription_id`, `tenant_id`, `client_id`, and `client_secret`.
+  - Metrics and logs operations are resource-scoped and use per-request Azure options for `resource_id`.
 
 ## Common Models
 
@@ -372,6 +435,11 @@ message ToolConnection {
     PrometheusConnection prometheus = 3;
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
+    SplunkConnection splunk = 6;
+    DynatraceConnection dynatrace = 7;
+    CloudwatchConnection cloudwatch = 8;
+    AzureConnection azure = 9;
+    JaegerConnection jaeger = 10;
   }
 }
 
@@ -391,6 +459,21 @@ message MetricsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional string step = 4;
+  optional MetricsOptions options = 5;
+}
+
+message MetricsOptions {
+  optional AzureMetricsOptions azure = 1;
+}
+
+message AzureMetricsOptions {
+  string resource_id = 1;
+  string metrics_namespace = 2;
+  optional string aggregation = 3;
+  optional string filter = 4;
+  optional string order_by = 5;
+  optional string roll_up_by = 6;
+  optional string metrics_endpoint = 7;
 }
 ```
 
@@ -412,6 +495,15 @@ message MetricsSearchInput {
   ToolConnection connection = 1;
   string query = 2;
   optional int64 limit = 3;
+  optional MetricsSearchOptions options = 4;
+}
+
+message MetricsSearchOptions {
+  optional AzureMetricsSearchOptions azure = 1;
+}
+
+message AzureMetricsSearchOptions {
+  string resource_id = 1;
 }
 
 message MetricsSearchResult {
@@ -454,14 +546,9 @@ Output:
       "labels": {
         "metrics_path": "/metrics/cadvisor",
         "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
         "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
+        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
+        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack"
       },
       "timestamp": "2026-02-20T11:00:00.000Z",
       "name": "container_memory_working_set_bytes",
@@ -471,52 +558,13 @@ Output:
       "labels": {
         "metrics_path": "/metrics/cadvisor",
         "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
         "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
+        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
+        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack"
       },
       "timestamp": "2026-02-20T11:10:00.000Z",
       "name": "container_memory_working_set_bytes",
       "value": 224718848
-    },
-    {
-      "labels": {
-        "metrics_path": "/metrics/cadvisor",
-        "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
-        "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
-      },
-      "timestamp": "2026-02-20T11:20:00.000Z",
-      "name": "container_memory_working_set_bytes",
-      "value": 241414144
-    },
-    {
-      "labels": {
-        "metrics_path": "/metrics/cadvisor",
-        "node": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "eks_amazonaws_com_nodegroup_image": "ami-07491243730c925bb",
-        "instance": "ip-10-0-21-32.eu-central-1.compute.internal",
-        "topology_kubernetes_io_region": "eu-central-1",
-        "job": "kubelet",
-        "beta_kubernetes_io_arch": "amd64",
-        "node_kubernetes_io_instance_type": "t3.xlarge",
-        "prometheus": "monitoring/vmetrics-agent-victoria-metrics-k8s-stack",
-        ...
-      },
-      "timestamp": "2026-02-20T11:30:00.000Z",
-      "name": "container_memory_working_set_bytes",
-      "value": 296030208
     }
   ]
 }
@@ -593,6 +641,321 @@ grpcurl -d '{
 }
 ```
 
+### Dynatrace
+
+Dynatrace metrics query uses the Grail (DQL) API.
+The `query` must start with `timeseries`.
+`range` and `step` request fields are not supported for Dynatrace and must be expressed in DQL (`from:`, `to:`, `interval:`).
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "platformToken": "<PLATFORM_TOKEN>"
+    }
+  },
+  "query": "timeseries from:now()-10m, avg(dt.host.cpu.usage), by:{host.name} | limit 1"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    {
+      "labels": {
+        "dt.entity.host": "HOST-12345678"
+      },
+      "timestamp": "2024-03-20T10:00:00Z",
+      "name": "builtin:host.cpu.usage",
+      "value": 15.5
+    }
+  ]
+}
+```
+
+### CloudWatch
+
+CloudWatch metrics query uses `GetMetricData` and expects `query` to be a CloudWatch metric math expression.
+`range` defines the time window and `step` maps to CloudWatch period seconds.
+
+`log_group_names` is only used by CloudWatch logs queries. It is ignored for metrics and metrics search.
+
+#### Example request (default AWS credential chain / pod identity)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1"
+    }
+  },
+  "query": "SEARCH(\"{AWS/EC2,InstanceId} MetricName=\\\"CPUUtilization\\\"\", \"Average\", 300)",
+  "range": {
+    "start": "2026-02-20T10:00:00Z",
+    "end": "2026-02-20T11:00:00Z"
+  },
+  "step": "300s"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+### Azure
+
+Azure metrics query uses Azure Monitor `azmetrics.QueryResources`.
+- `query` is a comma-separated metric names list.
+- `options.azure.resource_id` and `options.azure.metrics_namespace` are required.
+- Optional `options.azure` fields: `aggregation`, `filter`, `order_by`, `roll_up_by`, `metrics_endpoint`.
+- If `options.azure.metrics_endpoint` is omitted, Cloud Query uses `https://global.metrics.monitor.azure.com`.
+
+`range` maps to Azure Monitor `start_time` + `end_time`. For Azure metrics, `step` is required and must be an ISO 8601 duration string (for example `PT5M` or `PT1H`).
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>"
+    }
+  },
+  "query": "apiserver_cpu_usage_percentage",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/my-cluster",
+      "metrics_endpoint": "https://eastus.metrics.monitor.azure.com",
+      "metrics_namespace": "Microsoft.ContainerService/managedClusters"
+    }
+  },
+  "range": {
+    "start": "2026-04-13T00:00:00Z",
+    "end": "2026-04-13T21:00:00Z"
+  },
+  "step": "PT1H"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    {
+      "labels": {
+        "aggregation": "average",
+        "metric_namespace": "Microsoft.Compute/virtualMachines",
+        "resource_uri": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.Compute/virtualMachines/vm-prod-1",
+        "VMName": "vm-prod-1"
+      },
+      "timestamp": "2026-04-10T10:00:00Z",
+      "name": "Percentage CPU",
+      "value": 42.5
+    },
+    {
+      "labels": {
+        "aggregation": "maximum",
+        "metric_namespace": "Microsoft.Compute/virtualMachines",
+        "resource_uri": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.Compute/virtualMachines/vm-prod-1",
+        "VMName": "vm-prod-1"
+      },
+      "timestamp": "2026-04-10T10:00:00Z",
+      "name": "Percentage CPU",
+      "value": 65
+    }
+  ]
+}
+```
+
+#### Example request (assume-role)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1",
+      "role_arn": "arn:aws:iam::123456789012:role/observability-readonly"
+    }
+  },
+  "query": "SEARCH(\"{AWS/EKS,ClusterName} MetricName=\\\"cluster_failed_request_count\\\"\", \"Sum\", 60)",
+  "range": {
+    "start": "2026-02-20T10:00:00Z",
+    "end": "2026-02-20T11:00:00Z"
+  },
+  "step": "60s"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+## Metrics Search
+
+`MetricsSearch` returns metric names only.
+
+### Prometheus
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://vmauth-vm-auth.monitoring:8427/select/0/prometheus",
+      "username": "<USERNAME>",
+      "password": "<PASSWORD>"
+    }
+  },
+  "query": "container_cpu_usage_seconds_total",
+  "limit": 5
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "container_cpu_usage_seconds_total" },
+    { "name": "container_cpu_user_seconds_total" }
+  ]
+}
+```
+
+### Datadog
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "datadog": {
+      "apiKey": "<API_KEY>",
+      "appKey": "<APP_KEY>"
+    }
+  },
+  "query": "system.cpu",
+  "limit": 3
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "system.cpu.idle" },
+    { "name": "system.cpu.iowait" },
+    { "name": "system.cpu.system" }
+  ]
+}
+```
+
+### Dynatrace
+
+Dynatrace metrics search uses a plain search term and Cloud Query composes DQL internally:
+`metrics | filter contains(metric.key, "<query>", caseSensitive: false) [| limit N]`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "platformToken": "<PLATFORM_TOKEN>"
+    }
+  },
+  "query": "builtin:host.cpu.usage",
+  "limit": 3
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "builtin:host.cpu.usage" },
+    { "name": "builtin:host.mem.usage" },
+    { "name": "fallback.metric.name" }
+  ]
+}
+```
+
+### CloudWatch
+
+CloudWatch metrics search is implemented via `ListMetrics`, with conservative API usage:
+- scans at most 6 pages per request,
+- applies `RecentlyActive=PT3H` to reduce API load,
+- stops early as soon as requested `limit` is reached,
+- deduplicates results and returns names as `<namespace>/<metric>`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1"
+    }
+  },
+  "query": "cpu",
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "AWS/EC2/CPUUtilization" },
+    { "name": "AWS/EKS/cluster_failed_request_count" }
+  ]
+}
+```
+
+### Azure
+
+Azure metrics search is resource-scoped and lists metric definitions from Azure Monitor for `options.azure.resource_id`.
+`query` is a plain substring filter applied locally to metric definition names.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>"
+    }
+  },
+  "query": "node",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod"
+    }
+  },
+  "limit": 5
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "node_cpu_usage_percentage" },
+    { "name": "node_memory_working_set" }
+  ]
+}
+```
+
 ## Logs
 
 #### Request
@@ -603,6 +966,16 @@ message LogsQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  repeated LogsQueryFacet facets = 5;
+  optional LogsOptions options = 6;
+}
+
+message LogsOptions {
+  optional AzureLogsOptions azure = 1;
+}
+
+message AzureLogsOptions {
+  string resource_id = 1;
 }
 ```
 
@@ -618,6 +991,38 @@ message LogEntry {
 message LogsQueryOutput {
   repeated LogEntry logs = 1;
 }
+```
+
+### Azure
+
+Azure logs query uses Azure Monitor `azlogs.QueryResource`.
+- `options.azure.resource_id` is required and used as the resource target.
+- `query` must be Azure Log Analytics syntax (KQL).
+- `range` is passed as `timespan`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>"
+    }
+  },
+  "query": "ContainerLog | where LogEntrySource == \"stderr\" | take 50",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/azure-cluster-workspace"
+    }
+  },
+  "range": {
+    "start": "2026-04-10T09:00:00Z",
+    "end": "2026-04-10T11:00:00Z"
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
 ```
 
 ### Loki
@@ -665,6 +1070,50 @@ grpcurl -d '{
     }
   ]
 }
+```
+
+### CloudWatch Logs
+
+CloudWatch logs use Logs Insights (`StartQuery` + `GetQueryResults`).
+You can target log groups in two ways:
+- set `connection.cloudwatch.log_group_names` and keep `query` focused on filtering/projection, or
+- omit `log_group_names` and include `SOURCE` in the query text.
+
+#### Example request (with `log_group_names` in provider config)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1",
+      "log_group_names": ["/aws/eks/prod/app"]
+    }
+  },
+  "query": "fields @timestamp, @message | sort @timestamp desc",
+  "range": {
+    "start": "2026-02-20T00:00:00Z",
+    "end": "2026-02-20T21:00:00Z"
+  },
+  "limit": 20
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
+```
+
+#### Example request (without `log_group_names`, using `SOURCE` in query)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "cloudwatch": {
+      "region": "us-east-1"
+    }
+  },
+  "query": "SOURCE logGroups(namePrefix: [\"/aws/eks/prod/app\"]) | fields @timestamp, @message | filter @message like /error|exception/ | sort @timestamp desc",
+  "range": {
+    "start": "2026-02-20T00:00:00Z",
+    "end": "2026-02-20T21:00:00Z"
+  },
+  "limit": 20
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
 ```
 
 ### Elasticsearch
@@ -779,6 +1228,43 @@ grpcurl -d '{
 }
 ```
 
+### Dynatrace
+
+Dynatrace logs query uses the Grail (DQL) API.
+The `query` must start with `fetch logs`.
+`range` and `limit` request fields are not supported for Dynatrace logs and must be expressed in DQL (`from:`, `to:`, `| limit`).
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "platformToken": "<PLATFORM_TOKEN>"
+    }
+  },
+  "query": "fetch logs | limit 1"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
+```
+
+#### Output
+
+```json
+{
+  "logs": [
+    {
+      "labels": {
+        "dt.process_name": "deployment-operator",
+        "dt.entity.host": "HOST-12345678"
+      },
+      "timestamp": "2024-03-20T10:15:00Z",
+      "message": "Starting deployment sync..."
+    }
+  ]
+}
+```
+
 ## Traces
 
 #### Request
@@ -789,6 +1275,23 @@ message TracesQueryInput {
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  optional TracesOptions options = 5;
+}
+
+message TracesOptions {
+  optional JaegerTracesOptions jaeger = 1;
+}
+
+message JaegerTraceQueryAttribute {
+  string name = 1;
+  string value = 2;
+}
+
+message JaegerTracesOptions {
+  optional string operation_name = 1;
+  repeated JaegerTraceQueryAttribute attributes = 2;
+  optional string duration_min = 3;
+  optional string duration_max = 4;
 }
 ```
 
@@ -865,6 +1368,50 @@ grpcurl -d '{
 }
 ```
 
+### Jaeger
+
+Jaeger traces query uses the stable Query v3 API.
+
+- `query` maps to Jaeger `service_name`.
+- `time_range` maps to `start_time_min`/`start_time_max`.
+- `limit` maps to `num_traces`.
+- `options.jaeger.operation_name` maps to `operation_name`.
+- `options.jaeger.attributes` maps to `attributes`.
+- `options.jaeger.duration_min` maps to `min_duration`.
+- `options.jaeger.duration_max` maps to `max_duration`.
+- Structured filters are passed through `options.jaeger`:
+  - `operation_name`
+  - `duration_min` / `duration_max`
+  - dynamic `attributes[]` (key/value)
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "jaeger": {
+      "url": "http://jaeger-query.monitoring.svc:16686",
+      "token": "<OPTIONAL_TOKEN>"
+    }
+  },
+  "query": "frontend",
+  "range": {
+    "start": "2026-04-10T00:00:00Z",
+    "end": "2026-04-10T01:00:00Z"
+  },
+  "limit": 20,
+  "options": {
+    "jaeger": {
+      "operation_name": "GET /api/products",
+      "duration_min": "10ms",
+      "attributes": [
+        { "name": "http.status_code", "value": "500" }
+      ]
+    }
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Traces
+```
+
 ### Datadog
 
 #### Example request
@@ -930,6 +1477,48 @@ grpcurl -d '{
       "service": "deployment-operator",
       "start": "2026-02-18T12:07:30.533Z",
       "end": "2026-02-18T12:07:30.533Z"
+    }
+  ]
+}
+```
+
+### Dynatrace
+
+Dynatrace traces query uses the Grail (DQL) API and maps span records to `TraceSpan`.
+Expected DQL fields for mapping are: `trace.id`, `span.id`, `span.name`, `start_time`, `end_time`, `duration`.
+The `query` must start with `fetch spans`.
+`range` and `limit` request fields are not supported for Dynatrace traces and must be expressed in DQL (`from:`, `to:`, `| limit`).
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "platformToken": "<PLATFORM_TOKEN>"
+    }
+  },
+  "query": "fetch spans | limit 1"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Traces
+```
+
+#### Output
+
+```json
+{
+  "spans": [
+    {
+      "tags": {
+        "dt.entity.service": "SERVICE-12345",
+        "k8s.namespace.name": "datadog",
+        "http.request.method": "GET"
+      },
+      "trace_id": "b7584e49925d0d6894c154f55c7d360e",
+      "span_id": "cc82a11e223cd2c6",
+      "name": "GET",
+      "start": "2026-04-03T12:57:20.556086Z",
+      "end": "2026-04-03T12:57:20.556304Z"
     }
   ]
 }

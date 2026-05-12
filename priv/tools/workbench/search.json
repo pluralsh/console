@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "regex": {
+            "type": "string",
+            "description": "A regular expression matched against each activity's prompt and result text. Matching is case-insensitive and multiline-aware. This will be a perl-compatible regex."
+        }
+    },
+    "required": ["regex"]
+}

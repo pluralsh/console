@@ -49,10 +49,17 @@ defmodule Console.Deployments.Policies.Rbac do
     ClusterUpgradeStep,
     Workbench,
     WorkbenchJob,
+    WorkbenchJobActivity,
     WorkbenchTool,
     WorkbenchCron,
+    WorkbenchPrompt,
+    WorkbenchSkill,
+    WorkbenchEval,
+    WorkbenchEvalResult,
     WorkbenchWebhook,
-    IssueWebhook
+    IssueWebhook,
+    ObservabilityWebhook,
+    Monitor
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -83,6 +90,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%Project{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%IssueWebhook{} = webhook, %User{} = user, action),
+    do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%ObservabilityWebhook{} = webhook, %User{} = user, action),
     do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, & [&1.project, &1.flow])
@@ -138,10 +147,22 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(tool, user, action, & &1.project)
   def evaluate(%WorkbenchJob{} = job, user, action),
     do: recurse(job, user, action, & &1.workbench)
+  def evaluate(%WorkbenchJobActivity{} = activity, user, action),
+    do: recurse(activity, user, action, & &1.workbench_job)
   def evaluate(%WorkbenchCron{} = cron, user, action),
     do: recurse(cron, user, action, & &1.workbench)
+  def evaluate(%WorkbenchPrompt{} = prompt, user, action),
+    do: recurse(prompt, user, action, & &1.workbench)
+  def evaluate(%WorkbenchSkill{} = skill, user, action),
+    do: recurse(skill, user, action, & &1.workbench)
+  def evaluate(%WorkbenchEval{} = eval, user, action),
+    do: recurse(eval, user, action, & &1.workbench)
+  def evaluate(%WorkbenchEvalResult{} = result, user, action),
+    do: recurse(result, user, action, & &1.workbench_eval)
   def evaluate(%WorkbenchWebhook{} = webhook, user, action),
     do: recurse(webhook, user, action, & &1.workbench)
+  def evaluate(%Monitor{} = monitor, %User{} = user, action),
+    do: recurse(monitor, user, action, & &1.service)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -273,10 +294,30 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(tool, [:read_bindings, :write_bindings, project: @bindings])
   def preload(%WorkbenchJob{} = job),
     do: Repo.preload(job, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchJobActivity{} = activity),
+    do: Repo.preload(activity, [workbench_job: [workbench: [:read_bindings, :write_bindings, project: @bindings]]])
   def preload(%WorkbenchCron{} = cron),
     do: Repo.preload(cron, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchPrompt{} = prompt),
+    do: Repo.preload(prompt, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchSkill{} = skill),
+    do: Repo.preload(skill, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchEval{} = eval),
+    do: Repo.preload(eval, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchEvalResult{} = result),
+    do:
+      Repo.preload(result, [
+        workbench_eval: [workbench: [:read_bindings, :write_bindings, project: @bindings]],
+        workbench_job: [workbench: [:read_bindings, :write_bindings, project: @bindings]]
+      ])
   def preload(%WorkbenchWebhook{} = webhook),
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%ObservabilityWebhook{} = webhook),
+    do: Repo.preload(webhook, [:read_bindings, :write_bindings])
+  def preload(%IssueWebhook{} = webhook),
+    do: Repo.preload(webhook, [:read_bindings, :write_bindings])
+  def preload(%Monitor{} = monitor),
+    do: Repo.preload(monitor, [service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads]])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

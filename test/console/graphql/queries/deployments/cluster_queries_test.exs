@@ -1,7 +1,8 @@
 defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   use Console.DataCase, async: true
-  alias Console.Deployments.Compatibilities
+  alias Console.Deployments.{Compatibilities, Clusters}
   alias Prometheus.{Response, Data, Result}
+  import KubernetesScaffolds
   use Mimic
 
   describe "clusters" do
@@ -394,6 +395,35 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert found["id"] == cluster.id
       refute Enum.empty?(found["clusterMetrics"]["cpu"])
+    end
+
+    test "it can fetch cluster component metrics" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 4, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
+      expect(Clusters, :api_discovery, fn _ -> %{} end)
+      expect(Kazan, :run, fn _, _ -> {:ok, deployment("default", "nginx")} end)
+
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            componentMetrics(group: "apps", version: "v1", kind: "Deployment", name: "nginx", namespace: "default") {
+              cpu { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      refute Enum.empty?(found["componentMetrics"]["cpu"])
     end
 
     test "it can fetch a cluster heat map" do

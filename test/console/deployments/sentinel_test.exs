@@ -155,6 +155,16 @@ defmodule Console.Deployments.SentinelTest do
              |> MapSet.equal?(MapSet.new(clusters, & &1.id))
       assert Enum.all?(jobs, & &1.sentinel_run_id == run.id)
       assert Enum.all?(jobs, & &1.job.namespace == "test")
+
+      job_ids = MapSet.new(jobs, & &1.id)
+
+      received_ids = for _ <- 1..3 do
+        assert_receive {:event, %PubSub.SentinelRunJobCreated{item: %{id: id}}}
+        id
+      end
+
+      assert MapSet.new(received_ids)
+             |> MapSet.equal?(job_ids)
     end
   end
 

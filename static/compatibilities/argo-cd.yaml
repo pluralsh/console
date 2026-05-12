@@ -4,6 +4,60 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
+- version: 3.4.1
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Cluster generator K8s version label format changes to match Helm:
+        ApplicationSets using Cluster Generator with `argocd.argoproj.io/auto-label-cluster-info`
+        must switch from `Major.Minor` to `argocd.argoproj.io/kubernetes-version`
+        in `vMajor.Minor.Patch` format.', 'ApplicationSet improvements: status now
+        includes a Health field, plus new watch/listResourceEvents APIs and multiple
+        UI enhancements for AppSets.', 'Controller features: can pause reconciliation
+        for a specific cluster via an annotation; adds application-level sync option
+        for Prune+Delete.', 'Helm rendering enhancement: supports wildcard/glob patterns
+        for `valueFiles`; also supports custom User-Agent headers when fetching Helm
+        repos.', 'Hydrator enhancements: configurable authorName/Email for hydration
+        commits and multiple correctness fixes; UI adds hydrator support in app create/summary.',
+      'Observability/security: adds OpenTelemetry instrumentation for auth/handlers;
+        disables gRPC DNS TXT lookups by default; adds tighter cert/known-hosts limits
+        during stream parsing.']
+    breaking_changes: ['Cluster version format change impacts ApplicationSet Cluster
+        Generators: update any selectors/templating that rely on Kubernetes version
+        labels to use `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
+        (e.g., `v1.30.2`) instead of `Major.Minor` (e.g., `1.30`).']
+  chart_version: 9.5.13
+  images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
+    'quay.io/argoproj/argocd:v3.4.1']
+- version: 3.3.8
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Server-Side Apply (SSA) becomes a central part of the 3.3 line, including
+        SSA diffs and automatic migration away from the legacy kubectl client-side
+        apply field manager.', 'ApplicationSet improvements include new pprof endpoints,
+        Progressive Sync maturity, status/resource count controls, and multiple reconciliation/finalizer
+        fixes.', 'New/expanded custom actions and health checks (e.g., CloudNativePG
+        actions, PR merge action, more KEDA/Ceph/Crossplane/GatewayAPI-related health
+        logic) improve operational workflows and UI feedback.', Repository integration
+        enhancements such as GitHub App auth without installation ID and optional
+        shallow clones reduce friction and improve performance.]
+    breaking_changes: ['If Argo CD is managing its own installation (app-of-apps/self-managed),
+        the upgrade may fail unless the managing Application uses `ServerSideApply=true`;
+        some environments may also need the temporary workaround `ClientSideApplyMigration=false`
+        to avoid a client-side apply migration error.', 'Behavior changes around apply/diff
+        (SSA, server-side dry-run, apply-out-of-sync-only, replace/force options)
+        can alter sync outcomes; validate sync options and test against critical apps
+        before rolling out broadly.']
+  chart_version: 9.5.10
+  images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
+    'quay.io/argoproj/argocd:v3.3.8']
 - version: 3.3.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -207,7 +261,19 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["v2.14.1 release notes provided don\u2019t enumerate feature changes;\
+        \ they mainly reference the full changelog diff from v2.14.0 to v2.14.1 and\
+        \ standard install/upgrade guidance.", 'v2.13.2 notes list bug fixes in CLI
+        core mode appset generation, multi-source sync ordering, API server secret
+        reads, repo deletion with invalid URLs, Bitbucket Cloud PR author parsing,
+        and a repo-server memory leak fix.']
+    breaking_changes: ["No breaking changes are called out in the provided notes;\
+        \ because you\u2019re crossing a minor version (2.13 \u2192 2.14), you should\
+        \ still review the official Argo CD upgrading docs for any 2.14-specific breaking\
+        \ changes not included here."]
   chart_version: 7.8.0
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
     'quay.io/argoproj/argocd:v2.14.1']

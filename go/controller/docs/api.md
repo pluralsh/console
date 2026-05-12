@@ -46,13 +46,16 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Project](#project)
 - [ScmConnection](#scmconnection)
 - [Sentinel](#sentinel)
+- [SentinelTrigger](#sentineltrigger)
 - [ServiceAccount](#serviceaccount)
 - [ServiceContext](#servicecontext)
 - [ServiceDeployment](#servicedeployment)
 - [StackDefinition](#stackdefinition)
 - [UpgradePlanCallout](#upgradeplancallout)
 - [Workbench](#workbench)
+- [WorkbenchCron](#workbenchcron)
 - [WorkbenchTool](#workbenchtool)
+- [WorkbenchWebhook](#workbenchwebhook)
 
 
 
@@ -96,12 +99,13 @@ _Appears in:_
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
-| `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
+| `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: \{\} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment,<br />more details available at https://github.com/ollama/ollama |  | Optional: \{\} <br /> |
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: \{\} <br /> |
 | `bedrock` _[BedrockSettings](#bedrocksettings)_ | Bedrock holds configuration for using AWS Bedrock to generate LLM insights |  | Optional: \{\} <br /> |
 | `vertex` _[VertexSettings](#vertexsettings)_ | Vertex holds configuration for using GCP VertexAI to generate LLM insights |  | Optional: \{\} <br /> |
+| `nexus` _[NexusSettings](#nexussettings)_ | Nexus holds configuration for using the Nexus embeddings proxy |  | Optional: \{\} <br /> |
 | `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore holds configuration for using a vector store to store embeddings. |  | Optional: \{\} <br /> |
 | `graph` _[GraphStore](#graphstore)_ | Configuration for the cloud graph store, which uses similar datastores to the vector store. |  | Optional: \{\} <br /> |
 
@@ -179,6 +183,26 @@ _Appears in:_
 | `git` _[GitRef](#gitref)_ | Git references the Git repository containing the rules file. |  | Required: \{\} <br /> |
 | `file` _string_ | File is the name of the rules file within the Git repository. |  | Required: \{\} <br /> |
 | `ignoreCancel` _boolean_ | IgnoreCancel indicates if the cancellation of a stack run should be ignored by AI. |  | Optional: \{\} <br /> |
+
+
+#### AiCriteria
+
+
+
+AiCriteria defines the configuration for AI pull request based service promotion.
+This can be a simpler path to construct the GitOps modifications needed to modify your services.
+
+
+
+_Appears in:_
+- [PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Whether AI based service promotion is enabled for this promotion. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | The prompt to use to generate the pull request used in this promotion (liquid templating is supported). |  | Required: \{\} <br /> |
+| `title` _string_ | The title of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a title. |  | Optional: \{\} <br /> |
+| `message` _string_ | The message of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a message. |  | Optional: \{\} <br /> |
 
 
 #### AnalysisRates
@@ -278,7 +302,7 @@ _Appears in:_
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings. |  | Optional: \{\} <br /> |
-| `deployment` _string_ | Deployment is the Azure OpenAI deployment name. |  | Optional: \{\} <br /> |
+| `deployments` _object (keys:string, values:string)_ | Deployments is a mapping from model id to azure OpenAI deployment if those require additional configuration |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
@@ -296,7 +320,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Required: \{\} <br /> |
+| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Optional: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
@@ -350,6 +374,7 @@ _Appears in:_
 - [PipelineSpec](#pipelinespec)
 - [ProjectSpec](#projectspec)
 - [ServiceSpec](#servicespec)
+- [WorkbenchSpec](#workbenchspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1104,6 +1129,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `name` _string_ | Name of the container. |  | Optional: \{\} <br />Type: string <br /> |
 | `image` _string_ |  |  | Required: \{\} <br />Type: string <br /> |
 | `args` _string array_ |  |  | Optional: \{\} <br /> |
 | `env` _[Env](#env) array_ |  |  | Optional: \{\} <br /> |
@@ -1308,6 +1334,13 @@ Example usage:
 	      tokenSecretRef:
 	        name: "openai-secret"
 	        key: "token"
+	      tokenExchange:
+	        enabled: true
+	        tokenUrl: "https://idp.example.com/oauth/token"
+	        clientId: "console-ai"
+	        clientSecretSecretRef:
+	          name: "openai-oauth-client"
+	          key: "clientSecret"
 	  cost:
 	    recommendationCushion: 20
 	    recommendationThreshold: 100
@@ -1366,6 +1399,7 @@ _Appears in:_
 | `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: \{\} <br /> |
 | `logging` _[LoggingSettings](#loggingsettings)_ | Logging settings for connections to log aggregation datastores |  | Optional: \{\} <br /> |
 | `cost` _[CostSettings](#costsettings)_ | Cost settings for managing Plural's cost management features |  | Optional: \{\} <br /> |
+| `metrics` _[MetricsSettings](#metricssettings)_ | Metrics settings for OpenTelemetry metrics export |  | Optional: \{\} <br /> |
 | `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | DeploymentRepositoryRef is a pointer to the deployment GIT repository to use |  | Optional: \{\} <br /> |
 | `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -1528,9 +1562,26 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow. |  | Optional: \{\} <br /> |
 | `repositories` _string array_ | Repositories contains a list of git https urls of the application code repositories used in this flow. |  | Optional: \{\} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow.<br />Can also be managed within the Plural Console UI securely. |  | Optional: \{\} <br /> |
+| `workbenchAssociations` _[FlowWorkbenchAssociation](#flowworkbenchassociation) array_ | WorkbenchAssociations contains a list of workbenches you wish to associate with this flow. |  | Optional: \{\} <br /> |
 | `metadata` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: \{\} <br /> |
 | `agentRuntime` _[AgentRuntimeRef](#agentruntimeref)_ | AgentRuntime references the agent runtime to use for this flow by cluster handle and runtime name.<br />The controller resolves this to an agent runtime ID when syncing to the Console API. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+
+
+#### FlowWorkbenchAssociation
+
+
+
+
+
+
+
+_Appears in:_
+- [FlowSpec](#flowspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef is a required reference to a Workbench resource.<br />This establishes the connection between the flow and the workbench. |  | Required: \{\} <br /> |
 
 
 #### GCPCloudConnection
@@ -1655,6 +1706,7 @@ GitRef represents a reference to a Git repository.
 _Appears in:_
 - [AiApprovalConfiguration](#aiapprovalconfiguration)
 - [InfrastructureStackSpec](#infrastructurestackspec)
+- [PolicyEngine](#policyengine)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
 - [PrAutomationSpec](#prautomationspec)
 - [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
@@ -2284,6 +2336,24 @@ _Appears in:_
 | `namespace` _string_ | Namespace specifies an optional namespace for categorizing or scoping related resources.<br />If empty then the ClusterSync's namespace will be used. |  | Optional: \{\} <br /> |
 
 
+#### MetricsSettings
+
+
+
+MetricsSettings holds configuration for OpenTelemetry metrics export.
+
+
+
+_Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled defines whether to enable the metrics export or not. | false | Optional: \{\} <br /> |
+| `endpoint` _string_ | Endpoint is the OpenTelemetry collector endpoint to send metrics to. |  | Optional: \{\} <br /> |
+| `crontab` _string_ | Crontab is the cron expression for how often to export metrics.<br />Example: "*/5 * * * *" for every 5 minutes. |  | Optional: \{\} <br /> |
+
+
 #### NamespaceCredentials
 
 
@@ -2345,6 +2415,26 @@ _Appears in:_
 | `namespace` _string_ | Namespace is a resource namespace. |  | Required: \{\} <br /> |
 
 
+
+
+#### NexusSettings
+
+
+
+NexusSettings holds configuration for using the Nexus proxy
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL is the URL of the Nexus proxy |  | Required: \{\} <br /> |
+| `model` _string_ | Model to use for completions |  | Optional: \{\} <br /> |
+| `toolModel` _string_ | ToolModel to use for tool calling |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the access token<br />for the Nexus proxy |  | Optional: \{\} <br /> |
 
 
 #### NotificationRouter
@@ -2432,6 +2522,25 @@ _Appears in:_
 | `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration contains the type-specific settings for this notification sink.<br />Only one configuration section should be populated based on the Type field.<br />Each type has different requirements for delivery setup and authentication. |  | Optional: \{\} <br /> |
 | `bindings` _[Binding](#binding) array_ | Bindings define the users and groups who can receive notifications through this sink.<br />This is only applicable for PLURAL type sinks that deliver in-app notifications.<br />For external sinks like Slack or Teams, notifications are sent to the configured webhook. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+
+
+#### OAuth2TokenExchange
+
+
+
+OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
+
+
+
+_Appears in:_
+- [OpenAISettings](#openaisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled turns token exchange on for obtaining access tokens via the configured token endpoint. |  | Optional: \{\} <br /> |
+| `tokenUrl` _string_ | TokenURL is the OAuth2 token endpoint URL. |  | Optional: \{\} <br /> |
+| `clientId` _string_ | ClientID is the OAuth2 client identifier. |  | Optional: \{\} <br /> |
+| `clientSecretSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ClientSecretSecretRef is a reference to a Kubernetes secret key holding the OAuth2 client secret. |  | Optional: \{\} <br /> |
 
 
 #### OIDCProvider
@@ -2806,11 +2915,29 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef references the PR automation template to use for generating pull requests.<br />The automation template defines the repository, branch pattern, and file modifications<br />to apply when creating the pull request. |  | Required: \{\} <br /> |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef references the PR automation template to use for generating pull requests.<br />The automation template defines the repository, branch pattern, and file modifications<br />to apply when creating the pull request. |  | Optional: \{\} <br /> |
+| `ai` _[ObserverPrAiAction](#observerpraiaction)_ | Ai contains configuration for AI assistance in this PR automation. |  | Optional: \{\} <br /> |
 | `repository` _string_ | Repository overrides the repository slug for the referenced PR automation.<br />Use this when you want to target a different repository than the one<br />configured in the PR automation template. |  | Optional: \{\} <br /> |
 | `branchTemplate` _string_ | BranchTemplate provides a template for generating branch names.<br />Use $value to inject the observed value into the branch name.<br />Example: "update-chart-to-$value" becomes "update-chart-to-1.2.3". |  | Optional: \{\} <br /> |
 | `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is a templated context that becomes the input for the PR automation.<br />Use $value to interpolate the observed value into the context data.<br />This context is passed to the PR automation for template rendering and file modifications. |  | Optional: \{\} <br /> |
 | `actor` _string_ | Actor specifies the actor to use for the created branch. Should be a user email in Plural. |  | Optional: \{\} <br /> |
+
+
+#### ObserverPrAiAction
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverPrAction](#observerpraction)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Whether AI assistance is enabled for this automation. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | The prompt to use to guide the AI code change for this PR. |  | Required: \{\} <br /> |
 
 
 #### ObserverSpec
@@ -2879,6 +3006,29 @@ _Appears in:_
 | `model` _string_ | Model is the Ollama model to use when querying the /chat api |  | Required: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AuthorizationSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header<br />to send to your ollama api in case authorization is required (eg for an instance hosted on a public network) |  | Optional: \{\} <br /> |
+
+
+#### OpenAISettings
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
+| `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
+| `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations<br />of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: \{\} <br /> |
+| `tokenExchange` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs. |  | Optional: \{\} <br /> |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies) |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
 #### OpensearchConnection
@@ -3272,6 +3422,8 @@ _Appears in:_
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to a source ServiceDeployment to promote from. |  | Optional: \{\} <br /> |
 | `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to a source PrAutomation to promote from. |  | Optional: \{\} <br /> |
 | `repository` _string_ | The repository slug the PrAutomation will use.<br />E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console. |  | Optional: \{\} <br /> |
+| `ai` _[AiCriteria](#aicriteria)_ | AI configuration for this promotion. |  | Optional: \{\} <br /> |
+| `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SCM connection to use for ai pr based service promotion. |  | Optional: \{\} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: \{\} <br /> |
 
 
@@ -3310,7 +3462,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `type` _[PolicyEngineType](#policyenginetype)_ | Type of the policy engine to use with this stack.<br />At the moment only TRIVY is supported. |  | Enum: [TRIVY] <br />Required: \{\} <br /> |
+| `customPolicies` _boolean_ | CustomPolicies enables loading custom policies from the configured repository. |  | Optional: \{\} <br /> |
 | `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run.<br />One of UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL, NONE. |  | Enum: [UNKNOWN LOW MEDIUM HIGH CRITICAL NONE] <br />Optional: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a GitRepository for policy configuration.<br />Leave unset when policies live in the stack repository, or use git.url instead of this ref. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git is the ref and folder (within the policy repository or stack repository) for policy files.<br />If git.url is set, it resolves the repository in Console (same as the stack-level git field); ref and folder are still used for the API. |  | Optional: \{\} <br /> |
 
 
 #### PrAutomation
@@ -3333,6 +3488,23 @@ for users to configure parameters before generating the PR.
 | `kind` _string_ | `PrAutomation` | | |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[PrAutomationSpec](#prautomationspec)_ | Spec defines the desired state of the PrAutomation, including the operations<br />to perform, target repository, and user interface configuration. |  | Required: \{\} <br /> |
+
+
+#### PrAutomationAIConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled controls whether AI assistance is enabled for this PR automation. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | Prompt is a custom prompt to guide AI-generated updates for this automation.  Templating is supported. |  | Required: \{\} <br /> |
 
 
 #### PrAutomationBindings
@@ -3543,9 +3715,9 @@ _Appears in:_
 | `darkIcon` _string_ | DarkIcon provides a URL to a dark-mode variant of the icon for improved<br />visibility in dark-themed user interfaces. |  | Optional: \{\} <br /> |
 | `documentation` _string_ | Documentation provides detailed explanation of what this automation does,<br />when to use it, and any prerequisites or considerations. |  | Optional: \{\} <br /> |
 | `identifier` _string_ | Identifier specifies the target repository in the format "organization/repository-name"<br />for GitHub, or equivalent formats for other SCM providers. |  | Optional: \{\} <br /> |
-| `message` _string_ | Message defines the commit message template that will be used in the generated PR.<br />Can include templated variables from user input. |  | Optional: \{\} <br /> |
+| `message` _string_ | Message defines the commit message template that will be used in the generated PR.<br />Can include templated variables from user input. If you're using an AI pr automation, the ai can provide this for you. |  | Optional: \{\} <br /> |
 | `name` _string_ | Name specifies the display name for this automation in the Console API.<br />If not provided, defaults to the Kubernetes resource name. |  | Optional: \{\} <br /> |
-| `title` _string_ | Title defines the template for the pull request title. Can include variables<br />that will be replaced with user-provided configuration values. |  | Optional: \{\} <br /> |
+| `title` _string_ | Title defines the template for the pull request title. Can include variables<br />that will be replaced with user-provided configuration values. If you're using an AI pr automation, the ai can provide this for you. |  | Optional: \{\} <br /> |
 | `patch` _boolean_ | Patch determines whether to generate a patch for this PR instead of<br />creating a full pull request. |  | Optional: \{\} <br /> |
 | `branchPrefix` _string_ | BranchPrefix specifies a prefix to use for the branch name, will be appended with a random string for deduplication. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references a specific cluster that this PR operates on. |  | Optional: \{\} <br /> |
@@ -3563,6 +3735,7 @@ _Appears in:_
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates defines specifications for generating new files from templates,<br />allowing the automation to add new configuration files to the repository. |  | Optional: \{\} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
+| `ai` _[PrAutomationAIConfiguration](#prautomationaiconfiguration)_ | AI configuration controls whether AI assistance is enabled for this automation<br />and allows specifying a custom prompt to guide AI-generated updates. |  | Optional: \{\} <br /> |
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -3943,8 +4116,10 @@ _Appears in:_
 - [ServiceSpec](#servicespec)
 - [StackDefinitionSpec](#stackdefinitionspec)
 - [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
+- [WorkbenchCronSpec](#workbenchcronspec)
 - [WorkbenchSpec](#workbenchspec)
 - [WorkbenchToolSpec](#workbenchtoolspec)
+- [WorkbenchWebhookSpec](#workbenchwebhookspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -4332,6 +4507,40 @@ _Appears in:_
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
+#### SentinelTrigger
+
+
+
+SentinelTrigger is the Schema for the sentinel triggers API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `SentinelTrigger` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[SentinelTriggerSpec](#sentineltriggerspec)_ |  |  |  |
+
+
+#### SentinelTriggerSpec
+
+
+
+SentinelTriggerSpec defines the desired state of SentinelTrigger
+
+
+
+_Appears in:_
+- [SentinelTrigger](#sentineltrigger)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef is a reference to the Sentinel resource. |  | Required: \{\} <br /> |
+
+
 #### ServiceAccount
 
 
@@ -4576,6 +4785,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `path` _string_ | The folder your base kustomization file lives within relative to your main git folder path.  It can be a subdirectory. |  |  |
 | `enableHelm` _boolean_ | EnableHelm indicates whether to enable Helm for this Kustomize deployment.<br />Used for inflating Helm charts. |  | Optional: \{\} <br /> |
+| `envsubst` _boolean_ | Envsubst indicates whether to apply envsubst replacements to the manifests, using the services attached configuration as the variables. |  | Optional: \{\} <br /> |
 
 
 #### ServiceSpec
@@ -5016,6 +5226,8 @@ _Appears in:_
 | `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag in Terraform. |  | Optional: \{\} <br /> |
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag in Terraform. |  | Optional: \{\} <br /> |
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
+| `tofu` _boolean_ | Tofu is whether to use OpenTofu instead of Terraform for this stack. |  | Optional: \{\} <br /> |
+| `tofuRegistry` _boolean_ | TofuRegistry is whether to use the OpenTofu registry for provider and module sources. |  | Optional: \{\} <br /> |
 
 
 #### Tools
@@ -5103,9 +5315,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `model` _string_ | Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview |  | Optional: \{\} <br /> |
-| `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
-| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `model` _string_ | Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
+| `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings.<br />This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.<br />Default is gemini-embedding-001. |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
@@ -5165,6 +5377,45 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `coding` _[WorkbenchCodingConfig](#workbenchcodingconfig)_ | Coding configures coding agent capabilities (mode, repositories). |  | Optional: \{\} <br /> |
 | `infrastructure` _[WorkbenchInfrastructureConfig](#workbenchinfrastructureconfig)_ | Infrastructure configures infrastructure capabilities (services, stacks, Kubernetes). |  | Optional: \{\} <br /> |
+| `observability` _[WorkbenchObservabilityConfig](#workbenchobservabilityconfig)_ | Observability configures observability capabilities (logs, metrics). |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchCron
+
+
+
+WorkbenchCron represents a scheduled cron trigger for a Workbench. It runs a prompt
+on the associated workbench at the configured cron schedule.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `WorkbenchCron` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchCronSpec](#workbenchcronspec)_ | Spec defines the desired state of the WorkbenchCron. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchCronSpec
+
+
+
+WorkbenchCronSpec defines the desired state of a WorkbenchCron.
+
+
+
+_Appears in:_
+- [WorkbenchCron](#workbenchcron)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench this cron belongs to. |  | Required: \{\} <br /> |
+| `crontab` _string_ | Crontab is the cron expression defining the schedule (e.g. */5 * * * *). |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
+| `prompt` _string_ | Prompt is the prompt to run when the cron triggers. |  | Optional: \{\} <br />Type: string <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchInfrastructureConfig
@@ -5183,6 +5434,23 @@ _Appears in:_
 | `services` _boolean_ | Services enables the services capability. |  | Optional: \{\} <br /> |
 | `stacks` _boolean_ | Stacks enables the stacks capability. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables the Kubernetes capability. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchObservabilityConfig
+
+
+
+WorkbenchObservabilityConfig configures observability capabilities.
+
+
+
+_Appears in:_
+- [WorkbenchConfiguration](#workbenchconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `logs` _boolean_ | Logs enables the logs capability. |  | Optional: \{\} <br /> |
+| `metrics` _boolean_ | Metrics enables the metrics capability. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchSkills
@@ -5241,6 +5509,7 @@ _Appears in:_
 | `agentRuntime` _string_ | AgentRuntime reference in the "<cluster-handle>/<runtime-name>" format. |  | Optional: \{\} <br />Type: string <br /> |
 | `configuration` _[WorkbenchConfiguration](#workbenchconfiguration)_ | Configuration defines workbench capabilities (coding and infrastructure). |  | Optional: \{\} <br /> |
 | `skills` _[WorkbenchSkills](#workbenchskills)_ | Skills define skills configuration (git ref and/or files) for the workbench. |  | Optional: \{\} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings define read and write access policies for this workbench. |  | Optional: \{\} <br /> |
 | `toolRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | ToolRefs references WorkbenchTool resources to associate with this workbench. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
 
@@ -5249,8 +5518,7 @@ _Appears in:_
 
 
 
-WorkbenchTool represents a tool that can be attached to a Workbench (e.g. HTTP tool).
-Tools are defined once and can be associated with multiple workbenches.
+WorkbenchTool is the Schema for the workbenchtools API.
 
 
 
@@ -5261,30 +5529,14 @@ Tools are defined once and can be associated with multiple workbenches.
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `WorkbenchTool` | | |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `spec` _[WorkbenchToolSpec](#workbenchtoolspec)_ | Spec defines the desired state of the WorkbenchTool. |  | Required: \{\} <br /> |
+| `spec` _[WorkbenchToolSpec](#workbenchtoolspec)_ |  |  | Required: \{\} <br /> |
 
 
-#### WorkbenchToolConfiguration
-
-
-
-WorkbenchToolConfiguration defines tool-specific configuration.
+#### WorkbenchToolAtlassianConfig
 
 
 
-_Appears in:_
-- [WorkbenchToolSpec](#workbenchtoolspec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `http` _[WorkbenchToolHTTPConfig](#workbenchtoolhttpconfig)_ | HTTP tool configuration. |  | Optional: \{\} <br /> |
-
-
-#### WorkbenchToolHTTPConfig
-
-
-
-WorkbenchToolHTTPConfig defines HTTP tool configuration.
+WorkbenchToolAtlassianConfig defines an atlassian/jira connection.
 
 
 
@@ -5293,11 +5545,152 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `url` _string_ | URL is the request URL. |  | Format: uri <br />Required: \{\} <br />Type: string <br /> |
-| `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | Method is the HTTP method (GET, POST, PUT, DELETE, PATCH). |  | Enum: [GET POST PUT DELETE PATCH] <br />Required: \{\} <br /> |
-| `headers` _[WorkbenchToolHTTPHeader](#workbenchtoolhttpheader) array_ | Headers are optional request headers. |  | Optional: \{\} <br /> |
-| `body` _string_ | Body is the optional request body. |  | Optional: \{\} <br />Type: string <br /> |
-| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | InputSchema is the JSON schema for the tool input (arbitrary JSON). |  | Required: \{\} <br /> |
+| `serviceAccountSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the encrypted service account JSON (alternative to api_token + email). |  | Optional: \{\} <br /> |
+| `apiTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the atlassian API token (required if not using service_account). |  | Optional: \{\} <br /> |
+| `email` _string_ | Atlassian account email (required if not using service_account). |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolAzureConfig
+
+
+
+WorkbenchToolAzureConfig defines an azure monitor connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `subscriptionId` _string_ | Azure subscription id. |  | Required: \{\} <br /> |
+| `tenantId` _string_ | Azure tenant id. |  | Required: \{\} <br /> |
+| `clientId` _string_ | Azure client id. |  | Required: \{\} <br /> |
+| `clientSecretSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the azure client secret. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchToolCloudwatchConfig
+
+
+
+WorkbenchToolCloudwatchConfig defines a cloudwatch connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `region` _string_ | AWS region (e.g. us-east-1). |  | Required: \{\} <br /> |
+| `logGroupNames` _string array_ | Optional default log groups for CloudWatch Logs Insights. |  | Optional: \{\} <br /> |
+| `accessKeyIdSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the optional static AWS access key id. |  | Optional: \{\} <br /> |
+| `secretAccessKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the optional static AWS secret access key. |  | Optional: \{\} <br /> |
+| `roleArn` _string_ | Optional IAM role ARN to assume. |  | Optional: \{\} <br /> |
+| `externalId` _string_ | Optional external id for assume role. |  | Optional: \{\} <br /> |
+| `roleSessionName` _string_ | Optional role session name for assume role. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolConfiguration
+
+
+
+WorkbenchToolConfiguration defines tool-specific connection configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolSpec](#workbenchtoolspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `http` _[WorkbenchToolHTTPConfig](#workbenchtoolhttpconfig)_ | Http tool configuration. |  | Optional: \{\} <br /> |
+| `elastic` _[WorkbenchToolElasticConfig](#workbenchtoolelasticconfig)_ | Elasticsearch connection (logs). |  | Optional: \{\} <br /> |
+| `prometheus` _[WorkbenchToolPrometheusConfig](#workbenchtoolprometheusconfig)_ | Prometheus connection (metrics). |  | Optional: \{\} <br /> |
+| `loki` _[WorkbenchToolLokiConfig](#workbenchtoollokiconfig)_ | Loki connection (logs). |  | Optional: \{\} <br /> |
+| `tempo` _[WorkbenchToolTempoConfig](#workbenchtooltempoconfig)_ | Tempo connection (traces). |  | Optional: \{\} <br /> |
+| `jaeger` _[WorkbenchToolJaegerConfig](#workbenchtooljaegerconfig)_ | Jaeger connection (traces). |  | Optional: \{\} <br /> |
+| `splunk` _[WorkbenchToolSplunkConfig](#workbenchtoolsplunkconfig)_ | Splunk connection (logs). |  | Optional: \{\} <br /> |
+| `datadog` _[WorkbenchToolDatadogConfig](#workbenchtooldatadogconfig)_ | Datadog connection (metrics, logs). |  | Optional: \{\} <br /> |
+| `dynatrace` _[WorkbenchToolDynatraceConfig](#workbenchtooldynatraceconfig)_ | Dynatrace connection (metrics, logs, traces). |  | Optional: \{\} <br /> |
+| `cloudwatch` _[WorkbenchToolCloudwatchConfig](#workbenchtoolcloudwatchconfig)_ | Cloudwatch connection (metrics, logs). |  | Optional: \{\} <br /> |
+| `azure` _[WorkbenchToolAzureConfig](#workbenchtoolazureconfig)_ | Azure monitor connection (metrics). |  | Optional: \{\} <br /> |
+| `linear` _[WorkbenchToolLinearConfig](#workbenchtoollinearconfig)_ | Linear connection (ticketing). |  | Optional: \{\} <br /> |
+| `atlassian` _[WorkbenchToolAtlassianConfig](#workbenchtoolatlassianconfig)_ | Atlassian/jira connection (ticketing). |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolDatadogConfig
+
+
+
+WorkbenchToolDatadogConfig defines a datadog connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `site` _string_ | Datadog site (e.g. datadoghq.com). |  | Optional: \{\} <br /> |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the datadog API key. |  | Optional: \{\} <br /> |
+| `appKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the datadog application key. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolDynatraceConfig
+
+
+
+WorkbenchToolDynatraceConfig defines a dynatrace connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Dynatrace base URL. |  | Required: \{\} <br /> |
+| `platformTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the dynatrace platform token. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchToolElasticConfig
+
+
+
+WorkbenchToolElasticConfig defines an elasticsearch connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Elasticsearch base URL. |  | Required: \{\} <br /> |
+| `username` _string_ | Basic auth username. |  | Required: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+| `index` _string_ | Elasticsearch index. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchToolHTTPConfig
+
+
+
+WorkbenchToolHTTPConfig defines the HTTP tool configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | The request URL. |  | Format: uri <br />Required: \{\} <br />Type: string <br /> |
+| `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | The HTTP method. |  | Enum: [GET POST PUT DELETE PATCH] <br />Required: \{\} <br /> |
+| `headers` _[WorkbenchToolHTTPHeader](#workbenchtoolhttpheader) array_ | Request headers. |  | Optional: \{\} <br /> |
+| `body` _string_ | Request body. |  | Optional: \{\} <br />Type: string <br /> |
+| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | JSON schema for the tool input. |  | Required: \{\} <br /> |
 
 
 #### WorkbenchToolHTTPHeader
@@ -5313,8 +5706,83 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ | Name is the header name. |  | Optional: \{\} <br />Type: string <br /> |
-| `value` _string_ | Value is the header value. |  | Optional: \{\} <br />Type: string <br /> |
+| `name` _string_ |  |  | Optional: \{\} <br />Type: string <br /> |
+| `value` _string_ |  |  | Optional: \{\} <br />Type: string <br /> |
+
+
+#### WorkbenchToolJaegerConfig
+
+
+
+WorkbenchToolJaegerConfig defines a jaeger connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Jaeger base URL. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token. |  | Optional: \{\} <br /> |
+| `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolLinearConfig
+
+
+
+WorkbenchToolLinearConfig defines a linear connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `accessTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the linear API access token. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolLokiConfig
+
+
+
+WorkbenchToolLokiConfig defines a loki connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Loki base URL. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token or api key. |  | Optional: \{\} <br /> |
+| `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+| `tenantId` _string_ | Optional tenant id. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolPrometheusConfig
+
+
+
+WorkbenchToolPrometheusConfig defines a prometheus connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Prometheus base URL. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token or api key. |  | Optional: \{\} <br /> |
+| `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+| `tenantId` _string_ | Optional tenant id (e.g. for Mimir). |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchToolSpec
@@ -5330,11 +5798,111 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ | Name of the tool. If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
-| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | Tool type (e.g. HTTP). |  | Enum: [HTTP] <br />Required: \{\} <br /> |
-| `categories` _WorkbenchToolCategory array_ | Categories for the tool (e.g. METRICS, LOGS, INTEGRATION). |  | Optional: \{\} <br /> |
-| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this tool belongs to. |  | Optional: \{\} <br /> |
-| `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Configuration is the tool-specific configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
+| `name` _string_ | The name of the tool (a-z, 0-9, underscores). If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
+| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER] <br />Required: \{\} <br /> |
+| `categories` _WorkbenchToolCategory array_ | Categories for the tool. |  | Optional: \{\} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The project for this tool. |  | Optional: \{\} <br /> |
+| `mcpServerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The mcp server for this tool. |  | Optional: \{\} <br /> |
+| `cloudConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The cloud connection for this tool (e.g. infrastructure cloud tools). |  | Optional: \{\} <br /> |
+| `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Tool configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ |  |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolSplunkConfig
+
+
+
+WorkbenchToolSplunkConfig defines a splunk connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Splunk base URL. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token. |  | Optional: \{\} <br /> |
+| `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolTempoConfig
+
+
+
+WorkbenchToolTempoConfig defines a tempo connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Tempo base URL. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token or api key. |  | Optional: \{\} <br /> |
+| `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+| `tenantId` _string_ | Optional tenant id. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchWebhook
+
+
+
+WorkbenchWebhook represents a webhook trigger for a Workbench. When an incoming
+webhook payload matches the configured criteria, a prompt is run on the workbench.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `WorkbenchWebhook` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchWebhookSpec](#workbenchwebhookspec)_ | Spec defines the desired state of the WorkbenchWebhook. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchWebhookMatchesSpec
+
+
+
+WorkbenchWebhookMatchesSpec defines criteria to match incoming webhook payloads.
+
+
+
+_Appears in:_
+- [WorkbenchWebhookSpec](#workbenchwebhookspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regex` _string_ | Regex is a regex pattern to match in the webhook body. |  | Optional: \{\} <br />Type: string <br /> |
+| `substring` _string_ | Substring is a substring to match in the webhook body. |  | Optional: \{\} <br />Type: string <br /> |
+| `caseInsensitive` _boolean_ | CaseInsensitive enables case-insensitive matching. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchWebhookSpec
+
+
+
+WorkbenchWebhookSpec defines the desired state of a WorkbenchWebhook.
+
+
+
+_Appears in:_
+- [WorkbenchWebhook](#workbenchwebhook)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench this webhook trigger belongs to. |  | Required: \{\} <br /> |
+| `name` _string_ | Name is the unique name for this webhook trigger on the workbench.<br />If not set, metadata.name is used. |  | Optional: \{\} <br />Type: string <br /> |
+| `webhookName` _string_ | WebhookName is the name of an observability webhook in the Console API that receives events.<br />Either WebhookName or IssueWebhookName must be set. |  | Optional: \{\} <br />Type: string <br /> |
+| `issueWebhookName` _string_ | IssueWebhookName is the name of an issue webhook in the Console API that receives events.<br />Either WebhookName or IssueWebhookName must be set. |  | Optional: \{\} <br />Type: string <br /> |
+| `matches` _[WorkbenchWebhookMatchesSpec](#workbenchwebhookmatchesspec)_ | Matches defines criteria to match incoming webhook payloads. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | Prompt is the prompt to run when the webhook matches. |  | Optional: \{\} <br />Type: string <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
 
 

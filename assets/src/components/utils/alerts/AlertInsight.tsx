@@ -1,4 +1,10 @@
-import { Button, EmptyState, Flex, ReturnIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  ButtonProps,
+  EmptyState,
+  Flex,
+  ReturnIcon,
+} from '@pluralsh/design-system'
 import { useAiInsightQuery } from 'generated/graphql'
 import { Link, useParams } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
@@ -9,17 +15,22 @@ import {
   insightMessage,
 } from 'components/ai/chatbot/ChatbotButton'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  PageHeaderContext,
+  POLL_INTERVAL,
+} from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame'
 import { StackedText } from 'components/utils/table/StackedText'
-import { ComponentPropsWithoutRef } from 'react'
+import { ComponentPropsWithoutRef, use, useLayoutEffect, useMemo } from 'react'
 import {
   getClusterDetailsPath,
   getServiceDetailsPath,
+  SERVICE_OBSERVABILITY_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
+import { StretchedFlex } from '../StretchedFlex'
 
 export function AlertInsight({
   type,
@@ -37,27 +48,51 @@ export function AlertInsight({
   const insight = data?.aiInsight
   const alert = insight?.alert
 
-  const backButton = (
-    <Button
-      as={Link}
-      to={
-        type === 'cluster'
-          ? `${getClusterDetailsPath({ clusterId })}/alerts`
-          : type === 'service'
-            ? `${getServiceDetailsPath({ clusterId, serviceId, flowIdOrName })}/alerts`
-            : `${getFlowDetailsPath({ flowIdOrName })}/alerts`
-      }
-      floating
-      startIcon={<ReturnIcon />}
-    >
-      Back to alerts
-    </Button>
+  const backButtonPath = useMemo(
+    () =>
+      type === 'cluster'
+        ? `${getClusterDetailsPath({ clusterId })}/alerts`
+        : type === 'service'
+          ? `${getServiceDetailsPath({ clusterId, serviceId, flowIdOrName })}/${SERVICE_OBSERVABILITY_REL_PATH}/alerts`
+          : `${getFlowDetailsPath({ flowIdOrName })}/alerts`,
+    [clusterId, flowIdOrName, serviceId, type]
   )
 
+  const pageHeaderCtx = type === 'service' ? use(PageHeaderContext) : null
+  useLayoutEffect(() => {
+    if (pageHeaderCtx) {
+      pageHeaderCtx.setHeaderContent(
+        <BackButton
+          small
+          path={backButtonPath}
+        />
+      )
+      return () => pageHeaderCtx.setHeaderContent(null)
+    }
+  }, [pageHeaderCtx, backButtonPath])
+
+  const alertSummary = (
+    <StackedText
+      truncate
+      css={{
+        maxWidth: '50%',
+        marginRight: type === 'service' ? 'auto' : undefined,
+      }}
+      first={alert?.title}
+      firstPartialType="body1Bold"
+      firstColor="text"
+      second={alert?.message}
+      loading={!data && loading}
+    />
+  )
   if (error && !error?.message?.includes('could not find resource'))
     return <GqlError error={error} />
   if (!(data || loading))
-    return <EmptyState message="Insight not found">{backButton}</EmptyState>
+    return (
+      <EmptyState message="Insight not found">
+        <BackButton path={backButtonPath} />
+      </EmptyState>
+    )
 
   return (
     <Flex
@@ -65,47 +100,40 @@ export function AlertInsight({
       gap="large"
       height="100%"
     >
+      {type !== 'service' && (
+        <StretchedFlex>
+          <BackButton path={backButtonPath} />
+          {alertSummary}
+        </StretchedFlex>
+      )}
       <Flex
         gap="small"
-        justify="space-between"
-        alignItems="center"
+        align="center"
+        whiteSpace="nowrap"
       >
-        {backButton}
-        {alert && (
+        {type === 'service' ? (
+          alertSummary
+        ) : (
           <StackedText
-            truncate
-            css={{ maxWidth: '50%' }}
-            first={alert.title}
+            first="Insight"
             firstPartialType="body1Bold"
             firstColor="text"
-            second={alert.message}
+            second={
+              insight?.updatedAt && `Last updated ${fromNow(insight.updatedAt)}`
+            }
+            css={{ flex: 1 }}
           />
         )}
-      </Flex>
-      <Flex
-        align="center"
-        justify="space-between"
-      >
-        <StackedText
-          first="Insight"
-          firstPartialType="body1Bold"
-          firstColor="text"
-          second={
-            insight?.updatedAt && `Last updated ${fromNow(insight.updatedAt)}`
-          }
+        <IconFrameRefreshButton
+          loading={loading}
+          refetch={refetch}
         />
-        <Flex gap="small">
-          <IconFrameRefreshButton
-            loading={loading}
-            refetch={refetch}
-          />
-          <ChatWithAIButton
-            floating
-            insightId={insight?.id}
-            messages={[insightMessage(insight)]}
-          />
-          <AISuggestFix insight={insight} />
-        </Flex>
+        <ChatWithAIButton
+          floating
+          insightId={insight?.id}
+          messages={[insightMessage(insight)]}
+        />
+        <AISuggestFix insight={insight} />
       </Flex>
       <InsightDisplay
         insight={insight}
@@ -123,6 +151,20 @@ export function FullPageAlertInsight(
     <FullPageAlertInsightSC>
       <AlertInsight {...props} />
     </FullPageAlertInsightSC>
+  )
+}
+
+function BackButton({ path, ...props }: { path: string } & ButtonProps) {
+  return (
+    <Button
+      as={Link}
+      to={path}
+      floating
+      startIcon={<ReturnIcon />}
+      {...props}
+    >
+      Back to alerts
+    </Button>
   )
 }
 

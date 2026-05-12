@@ -1,0 +1,31 @@
+A user wants some indication of the progress of a Plural workbench job under the hood.  You're job is to generate a fun but accurate phrase to describe it.
+
+First here's what's happened so far:
+
+Initial prompt:
+
+```
+<%= @job.prompt %>
+```
+
+Current List of activities performed:
+
+<%= for activity <- @job.activities do %>
+Activity type: <%= if activity.type == :memo, do: "notes", else: activity.type %>
+Activity status: <%= activity.status %>
+Initial prompt:
+
+```
+<%= activity.prompt %>
+```
+<%= if activity.result do %>
+Conclusion:
+
+```
+<%= activity.result.output || activity.result.error %>
+```
+<% else %>
+Subagent is still running, waiting for the result...
+<% end %>
+
+<% end %>

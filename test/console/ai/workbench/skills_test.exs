@@ -2,6 +2,25 @@ defmodule Console.AI.Workbench.SkillsTest do
   use ExUnit.Case, async: true
 
   alias Console.AI.Workbench.Skills
+  alias Console.Schema.{Workbench, WorkbenchSkill}
+
+  describe "plural?/2" do
+    test "returns false when db-backed skills list is empty" do
+      wb = struct(Workbench, %{workbench_skills: []})
+      refute Skills.plural?("any-skill-name", wb)
+    end
+
+    test "returns false when job has no loaded workbench" do
+      refute Skills.plural?("any-skill-name", nil)
+    end
+
+    test "returns true when a db skill matches the given name" do
+      ws = struct(WorkbenchSkill, %{name: "my-skill", id: Ecto.UUID.generate()})
+      wb = struct(Workbench, %{workbench_skills: [ws]})
+      assert Skills.plural?("my-skill", wb)
+      refute Skills.plural?("other-skill", wb)
+    end
+  end
 
   describe "parse_skill/2" do
     test "returns ok with parsed name, description, and contents when skill has valid format" do

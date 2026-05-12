@@ -145,6 +145,10 @@ ConfigurationFile represents kas configuration file.
 | url_path_prefix | [string](#string) |  | URL path prefix to remove from the incoming request URL. Should be `/` if no prefix trimming is needed. |
 | allowed_agent_cache_ttl | [google.protobuf.Duration](#google-protobuf-Duration) |  | TTL for successful allowed agent lookups. /api/v4/job/allowed_agents Set to zero to disable. |
 | allowed_agent_cache_error_ttl | [google.protobuf.Duration](#google-protobuf-Duration) |  | TTL for failed allowed agent lookups. /api/v4/job/allowed_agents |
+| jwt_authentication_secret_file | [string](#string) |  | Optional secret used to validate JWT proxy tokens locally. Secret should be base64-encoded and compatible with HS256/HS384/HS512. |
+| audit_log_flush_interval | [google.protobuf.Duration](#google-protobuf-Duration) |  | How often to flush buffered audit events. |
+| audit_log_flush_events | [uint32](#uint32) |  | Maximum number of buffered audit events before triggering an early flush. |
+| audit_log_drain_timeout | [google.protobuf.Duration](#google-protobuf-Duration) |  | How long to wait on shutdown while draining buffered audit events. |
 
 
 

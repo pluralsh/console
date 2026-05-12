@@ -4,6 +4,7 @@ import {
   GearTrainIcon,
   GitHubLogoIcon,
   GlobeIcon,
+  InfoOutlineIcon,
   ListBoxItem,
   ListIcon,
   PeopleIcon,
@@ -30,6 +31,7 @@ import {
 } from 'components/utils/Provider'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { StackedText } from 'components/utils/table/StackedText'
 
 import { ProtectBadge } from '../clusters/ProtectBadge'
 
@@ -53,10 +55,27 @@ const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
 export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   id: 'deployment',
-  header: 'Deployment',
+  header: () => (
+    <Flex
+      align="center"
+      gap="xsmall"
+    >
+      <span>Deployment</span>
+      <Tooltip label="Service name shown on top, service namespace shown on bottom">
+        <InfoOutlineIcon
+          color="icon-xlight"
+          size={12}
+        />
+      </Tooltip>
+    </Flex>
+  ),
   meta: { gridTemplate: '160px' },
-  cell: function Cell({ getValue }) {
-    return <DecoratedServiceDeployment serviceDeployment={getValue()} />
+  cell: function Cell({
+    row: {
+      original: { node },
+    },
+  }) {
+    return <DecoratedServiceDeployment serviceDeployment={node} />
   },
 })
 
@@ -67,17 +86,23 @@ export function DecoratedServiceDeployment({
 }) {
   if (!serviceDeployment) return null
   return (
-    <DecoratedName
-      suffix={
-        <ProtectBadge
-          isProtected={serviceDeployment?.protect}
-          resource="service"
-        />
+    <StackedText
+      first={
+        <DecoratedName
+          suffix={
+            <ProtectBadge
+              isProtected={serviceDeployment?.protect}
+              resource="service"
+            />
+          }
+          deletedAt={serviceDeployment.deletedAt}
+        >
+          {serviceDeployment.name}
+        </DecoratedName>
       }
-      deletedAt={serviceDeployment.deletedAt}
-    >
-      {serviceDeployment.name}
-    </DecoratedName>
+      second={serviceDeployment.namespace}
+      gap="xxxsmall"
+    />
   )
 }
 

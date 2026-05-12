@@ -43,7 +43,7 @@ export function LogsTable({
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
   const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
   const [hasNextPage, setHasNextPage] = useState(true)
-  const { queryLength, sinceSeconds } = filters
+  const { queryLength, sinceSeconds, queryOperator } = filters
   const duration = secondsToDuration(sinceSeconds)
 
   const fetchOlderLogs = useCallback(() => {
@@ -52,6 +52,7 @@ export function LogsTable({
       variables: {
         limit: queryLength || DEFAULT_LOG_QUERY_LENGTH,
         time: { before: logs[logs.length - 1]?.timestamp, duration },
+        operator: queryOperator,
       },
       updateQuery: (prev, { fetchMoreResult }) => {
         // first log will be duplicate of last since range is inclusive
@@ -63,7 +64,15 @@ export function LogsTable({
         return { logAggregation: [...(prev.logAggregation ?? []), ...newLogs] }
       },
     })
-  }, [loading, hasNextPage, fetchMore, queryLength, logs, duration])
+  }, [
+    loading,
+    hasNextPage,
+    fetchMore,
+    queryLength,
+    logs,
+    duration,
+    queryOperator,
+  ])
 
   const lastScrollTop = useRef(0)
   const onScrollCapture = useCallback(
@@ -125,6 +134,7 @@ export function LogsTable({
               clusterId,
               serviceId,
               facets: labels,
+              operator: queryOperator,
             }}
           />
         </Flyover>

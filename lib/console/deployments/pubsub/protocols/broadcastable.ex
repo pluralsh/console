@@ -66,3 +66,10 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.AgentRunC
     {"cluster:#{cid}", "agent.run.event", %{"id" => run.id}}
   end
 end
+
+defimpl Console.Deployments.PubSub.Broadcastable, for: Console.PubSub.SentinelRunJobCreated do
+  alias Console.Schema.SentinelRunJob
+  def message(%@for{item: %SentinelRunJob{cluster_id: cid} = job}) do
+    {"cluster:#{cid}", "sentinel.run.event", %{"id" => job.id}}
+  end
+end

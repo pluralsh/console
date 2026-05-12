@@ -1,8 +1,8 @@
 import os
 import yaml
 import json
-from utils import expand_kube_versions, current_kube_version, write_yaml, read_yaml, fetch_page
-from summarizer import kube_summary
+from utils import expand_kube_versions, current_kube_version, write_yaml, read_yaml, fetch_page, print_warning
+from summarizer import kube_summary, summarization_enabled
 
 def generate_kube_changelog():
     vsns = expand_kube_versions("1.20", current_kube_version())
@@ -10,6 +10,10 @@ def generate_kube_changelog():
 
     current = read_yaml("../../static/kube_changelog.yaml")
     current_versions = set(kube_version["version"] for kube_version in current["kube_changelog"]) if current else set()
+
+    if not summarization_enabled():
+        print_warning("Skipping kube changelog generation: EXA_API_KEY or OPENAI_API_KEY not set")
+        return
 
     with open(os.path.join(os.path.dirname(__file__), "tools/kube_version.json")) as f:
         schema = json.load(f)

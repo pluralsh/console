@@ -2,7 +2,10 @@ import {
   CaretRightIcon,
   Chip,
   IconFrame,
+  IconFrameProps,
   Modal,
+  PrClosedIcon,
+  PrMergedIcon,
   PrOpenIcon,
   SmallPodIcon,
   Table,
@@ -16,12 +19,17 @@ import {
 } from 'components/self-service/pr/queue/PrQueueColumns'
 import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { TRUNCATE } from 'components/utils/truncate'
-import { Body2P } from 'components/utils/typography/Text'
-import { AgentRunTinyFragment } from 'generated/graphql'
-import { capitalize, isEmpty } from 'lodash'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Body2P, SpanSC } from 'components/utils/typography/Text'
+import {
+  AgentRunTinyFragment,
+  PrStatus,
+  PullRequestBasicFragment,
+} from 'generated/graphql'
+import { capitalize, isEmpty, toLower } from 'lodash'
+import { useMemo, useState } from 'react'
+import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
+import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { RunStatusChip } from '../infra-research/details/InfraResearch'
 
@@ -46,44 +54,7 @@ export const agentRunsCols = [
   columnHelper.accessor((run) => run.pullRequests, {
     id: 'pullRequests',
     cell: function Cell({ getValue }) {
-      const [modalOpen, setModalOpen] = useState(false)
-      const prs = getValue()?.filter(isNonNullable) ?? []
-      if (isEmpty(prs)) return null
-      if (prs.length === 1)
-        return (
-          <IconFrame
-            clickable
-            type="secondary"
-            as={Link}
-            to={prs[0].url}
-            target="_blank"
-            rel="noopener noreferrer"
-            tooltip="View pull request"
-            icon={<PrOpenIcon />}
-          />
-        )
-      return (
-        <>
-          <IconFrame
-            clickable
-            type="secondary"
-            tooltip="View pull requests"
-            icon={<PrOpenIcon />}
-            onClick={() => setModalOpen(true)}
-          />
-          <Modal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            header="Pull Requests"
-            size="auto"
-          >
-            <Table
-              data={prs.map((pr) => ({ node: pr }))}
-              columns={basicPrTableCols}
-            />
-          </Modal>
-        </>
-      )
+      return <PRsModalIcon prs={getValue()?.filter(isNonNullable) ?? []} />
     },
   }),
   columnHelper.accessor((run) => run, {
@@ -148,4 +119,70 @@ export const agentRunsCols = [
   }),
 ]
 
-const basicPrTableCols = [ColTitle, ColStatus, ColInsertedAt, ColLinkout]
+export function PRsModalIcon({
+  prs,
+  ...props
+}: {
+  prs: PullRequestBasicFragment[]
+} & Partial<IconFrameProps & LinkProps>) {
+  const theme = useTheme()
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const basicPrTableCols = useMemo(
+    () => [ColTitle, ColStatus, ColInsertedAt, ColLinkout],
+    []
+  )
+
+  if (isEmpty(prs)) return null
+  if (prs.length === 1) {
+    const singlePrStatus = prs[0].status ?? PrStatus.Open
+    const icon =
+      singlePrStatus === PrStatus.Merged ? (
+        <PrMergedIcon color={theme.colors['code-block-purple']} />
+      ) : singlePrStatus === PrStatus.Closed ? (
+        <PrClosedIcon color="icon-danger" />
+      ) : (
+        <PrOpenIcon color="icon-success" />
+      )
+
+    return (
+      <IconFrame
+        clickable
+        type="secondary"
+        as={Link}
+        to={prs[0].url}
+        target="_blank"
+        rel="noopener noreferrer"
+        tooltip={`View ${toLower(singlePrStatus)} pull request`}
+        icon={icon}
+        {...props}
+      />
+    )
+  }
+
+  return (
+    <>
+      <Chip
+        clickable
+        size="small"
+        onClick={() => setModalOpen(true)}
+        tooltip="View pull requests"
+        fillLevel={0}
+      >
+        <SpanSC $color="text-xlight">{prs.length}</SpanSC>{' '}
+        <SpanSC $color="text-light">PRs</SpanSC>
+      </Chip>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        header="Pull Requests"
+        size="auto"
+      >
+        <Table
+          data={prs.map((pr) => ({ node: pr }))}
+          columns={basicPrTableCols}
+        />
+      </Modal>
+    </>
+  )
+}

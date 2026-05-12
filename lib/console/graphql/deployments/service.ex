@@ -201,6 +201,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :kustomize_attributes do
     field :path, non_null(:string), description: "the path to the kustomization file to use"
     field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
+    field :envsubst, :boolean, description: "if the kustomization will need to apply envsubst to the manifests"
   end
 
   @desc "metadata about the deployed contents of a service"
@@ -301,7 +302,22 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.list_alerts/3
     end
 
+    @desc "list all monitors configured for this service"
+    connection field :monitors, node_type: :monitor do
+      arg :q, :string, description: "search monitors by name"
+
+      resolve &Deployments.list_monitors/3
+    end
+
     field :scaling_recommendations, list_of(:cluster_scaling_recommendation), resolve: dataloader(Deployments)
+
+    field :service_metrics, :service_component_metrics do
+      arg :start,        :datetime
+      arg :stop,         :datetime
+      arg :step,         :string
+
+      resolve &Deployments.metrics/3
+    end
 
     field :component_metrics, :service_component_metrics do
       arg :component_id, non_null(:id)
@@ -408,8 +424,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "metadata needed for configuring kustomize"
   object :kustomize do
-    field :path, non_null(:string), description: "the path to the kustomization file to use"
+    field :path,        non_null(:string), description: "the path to the kustomization file to use"
     field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
+    field :envsubst,    :boolean, description: "if the kustomization will need to apply envsubst to the manifests"
   end
 
   @desc "representation of a kubernetes component deployed by a service"
@@ -578,7 +595,9 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "a file in a service's fully realized gitops tarball"
   object :service_file do
     field :path, non_null(:string)
-    field :content, non_null(:string)
+    field :content, non_null(:string) do
+      resolve fn %{content: content}, _, _ -> {:ok, Base.encode64(content)} end
+    end
   end
 
   connection node_type: :service_deployment

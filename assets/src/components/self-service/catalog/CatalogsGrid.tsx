@@ -1,4 +1,5 @@
 import { CatalogCard } from '@pluralsh/design-system'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CatalogFragment } from 'generated/graphql'
 import { CSSProperties, useTheme } from 'styled-components'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
@@ -18,15 +19,24 @@ type CardGridProps = {
 export function CatalogsGrid({
   catalogs,
   emptyState,
+  loading,
   ...props
 }: {
   catalogs: CatalogFragment[]
   emptyState?: ReactNode
+  loading?: boolean
 } & CardGridProps) {
   const theme = useTheme()
   const navigate = useNavigate()
-
-  if (isEmpty(catalogs)) return emptyState
+  if (isEmpty(catalogs))
+    return loading ? (
+      <CardGridSkeleton
+        count={8}
+        {...props}
+      />
+    ) : (
+      emptyState
+    )
 
   return (
     <CardGrid {...props}>
@@ -76,5 +86,25 @@ export function CardGrid({ onBottomReached, styles, children }: CardGridProps) {
     >
       {children}
     </div>
+  )
+}
+
+export function CardGridSkeleton({
+  count,
+  styles,
+}: {
+  count: number
+  styles?: CSSProperties
+}) {
+  return (
+    <CardGrid styles={styles}>
+      {Array.from({ length: count }).map((_, i) => (
+        <RectangleSkeleton
+          key={i}
+          $height={160}
+          $width="100%"
+        />
+      ))}
+    </CardGrid>
   )
 }

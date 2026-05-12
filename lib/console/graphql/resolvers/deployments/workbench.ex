@@ -1,6 +1,8 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
+  alias Console.Repo
   alias Console.Deployments.Workbenches
+  alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.Schema.{
     Alert,
     Issue,
@@ -9,7 +11,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchJobActivity,
     WorkbenchTool,
     WorkbenchCron,
-    WorkbenchWebhook
+    WorkbenchPrompt,
+    WorkbenchSkill,
+    WorkbenchEvalResult,
+    WorkbenchWebhook,
+    PullRequest
   }
 
   def workbench(%{id: id}, ctx) when is_binary(id) do
@@ -37,8 +43,39 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> allow(actor(ctx), :read)
   end
 
+  def workbench_job_activity(%{id: id}, ctx) do
+    Workbenches.get_workbench_job_activity!(id)
+    |> allow(actor(ctx), :read)
+  end
+
+  @default_recent_workbench_jobs 3
+  @max_recent_workbench_jobs 20
+
   def list_workbench_runs(workbench, args, _) do
     WorkbenchJob.for_workbench(workbench.id)
+    |> workbench_job_filters(args)
+    |> WorkbenchJob.ordered()
+    |> paginate(args)
+  end
+
+  def recent_workbench_jobs(args, %{context: %{current_user: user}}) do
+    case Map.get(args, :count, @default_recent_workbench_jobs) do
+      count when count < 1 ->
+        {:error, "count must be at least 1"}
+      count when count > @max_recent_workbench_jobs ->
+        {:error, "count must be at most #{@max_recent_workbench_jobs}"}
+      count ->
+        WorkbenchJob.for_user(user)
+        |> WorkbenchJob.ordered()
+        |> WorkbenchJob.with_limit(count)
+        |> Console.Repo.all()
+        |> ok()
+    end
+  end
+
+  def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do
+    WorkbenchJob.for_flow(flow_id)
+    |> workbench_job_filters(args)
     |> WorkbenchJob.ordered()
     |> paginate(args)
   end
@@ -49,9 +86,27 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def list_workbench_prompts(workbench, args, _) do
+    WorkbenchPrompt.for_workbench(workbench.id)
+    |> WorkbenchPrompt.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_skills(workbench, args, _) do
+    WorkbenchSkill.for_workbench(workbench.id)
+    |> WorkbenchSkill.ordered()
+    |> paginate(args)
+  end
+
   def list_workbench_webhooks(workbench, args, _) do
     WorkbenchWebhook.for_workbench(workbench.id)
     |> WorkbenchWebhook.ordered()
+    |> paginate(args)
+  end
+
+  def list_eval_results(%Workbench{id: id}, args, _) do
+    WorkbenchEvalResult.for_workbench(id)
+    |> WorkbenchEvalResult.ordered()
     |> paginate(args)
   end
 
@@ -73,6 +128,73 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def aggregates(_, _) do
+    prs = PullRequest.for_workbench_jobs()
+          |> PullRequest.aggregates()
+
+    with [pr] <- Console.Repo.all(prs),
+         [eval] <- Console.Repo.all(WorkbenchEvalResult.aggregates()) do
+      {:ok, %{
+        pull_requests: pr.merged,
+        pull_request_merge_rate: pr.merge_rate,
+        eval_results: eval.average_grade,
+      }}
+    else
+      _ -> {:error, "Failed to fetch aggregates"}
+    end
+  end
+
+  def average_workbench_eval_results(args, %{context: %{current_user: user}}) do
+    period = args[:period] || :day
+
+    Workbench.ordered()
+    |> Workbench.for_user(user)
+    |> WorkbenchEvalResult.workbench_grades(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def average_eval_results(args, _ctx) do
+    period = args[:period] || :day
+
+    WorkbenchEvalResult.average_grades(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def workbench_pull_requests(_args, _ctx) do
+    PullRequest.with_workbench()
+    |> Console.Repo.aggregate(:count, :id)
+    |> ok()
+  end
+
+  def workbench_pr_merge_rate(args, _ctx) do
+    period = args[:period] || :day
+
+    PullRequest.merge_rates(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def workbench_pr_merge_rate_by_workbench(args, %{context: %{current_user: user}}) do
+    period = args[:period] || :day
+
+    Workbench.ordered()
+    |> Workbench.for_user(user)
+    |> PullRequest.workbench_merge_rates(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.metrics(job, name, args, user)
+
+  def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.logs(job, name, args, user)
+
+  def traces_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.traces(job, name, args, user)
+
   def workbenches(args, %{context: %{current_user: user}}) do
     Workbench.ordered()
     |> Workbench.for_user(user)
@@ -88,6 +210,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> maybe_search(WorkbenchTool, args)
     |> paginate(args)
   end
+
+  def all_skills(workbench, _args, _ctx) do
+    Repo.preload(workbench, [:workbench_skills, :repository])
+    |> Skills.skills()
+  end
+
+  def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)
+  def whimsey_text(%WorkbenchJobActivity{} = activity, _, _), do: Workbenches.whimsey_text(activity)
 
   def create_workbench(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench(attrs, user)
@@ -119,14 +249,61 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def delete_workbench_cron(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_cron(id, user)
 
+  def workbench_cron(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.fetch_workbench_cron(id, user)
+
+  def create_workbench_prompt(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_prompt(attrs, workbench_id, user)
+
+  def update_workbench_prompt(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_prompt(attrs, id, user)
+
+  def delete_workbench_prompt(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_prompt(id, user)
+
+  def create_workbench_skill(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_skill(attrs, workbench_id, user)
+
+  def update_workbench_skill(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_skill(attrs, id, user)
+
+  def delete_workbench_skill(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_skill(id, user)
+
+  def create_workbench_eval(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_eval(attrs, workbench_id, user)
+
+  def update_workbench_eval(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_eval(attrs, id, user)
+
+  def delete_workbench_eval(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_eval(id, user)
+
+  def workbench_eval_skill(%{id: id,} = args, %{context: %{current_user: user}}),
+    do: Workbenches.workbench_eval_skill(id, args[:prompt], user)
+
   def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)
+
+  def get_workbench_webhook(%{id: id}, %{context: %{current_user: user}}) do
+    Workbenches.get_workbench_webhook!(id)
+    |> allow(user, :read)
+  end
 
   def update_workbench_webhook(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.update_workbench_webhook(attrs, id, user)
 
   def delete_workbench_webhook(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_webhook(id, user)
+
+  def create_workbench_message(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_message(attrs, job_id, user)
+
+  def update_workbench_job(%{job_id: id, attributes: attributes}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_job(attributes, id, user)
+
+  def cancel_workbench_job(%{job_id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.cancel_workbench_job(id, user)
 
   defp workbench_filters(query, args) do
     Enum.reduce(args, query, fn
@@ -138,6 +315,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   defp workbench_tool_filters(query, args) do
     Enum.reduce(args, query, fn
       {:project_id, project_id}, q when is_binary(project_id) -> WorkbenchTool.for_project(q, project_id)
+      _, q -> q
+    end)
+  end
+
+  defp workbench_job_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:alert, true}, q -> WorkbenchJob.with_alert(q)
+      {:issue, true}, q -> WorkbenchJob.with_issue(q)
       _, q -> q
     end)
   end

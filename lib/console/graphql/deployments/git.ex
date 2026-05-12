@@ -155,6 +155,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
     field :vendor,        :pr_vendor_spec_attributes, description: "a specification for vendoring software in this PR"
+    field :ai,            :pr_ai_spec_attributes, description: "configuration for AI assistance in this PR automation"
     field :lua,           :pr_lua_spec_attributes, description: "a specification for sourcing lua scripts to preprocess the PR automation"
     field :git,           :git_ref_attributes, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to created prs"
@@ -301,6 +302,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :folder,   :string, description: "a folder with lua library code and scripts to use"
   end
 
+  @desc "configuration for AI assistance in this PR automation"
+  input_object :pr_ai_spec_attributes do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
+  end
+
   @desc "a specification for vendoring software in this PR"
   input_object :pr_vendor_spec_attributes do
     field :helm, :pr_helm_vendor_spec_attributes, description: "a specification for vendoring a helm chart"
@@ -412,11 +419,17 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for sending a pr in response to an observer"
   input_object :observer_pr_action_attributes do
-    field :automation_id,   non_null(:id)
+    field :automation_id,   :id
     field :repository,      :string
+    field :ai,              :observer_pr_ai_action_attributes
     field :actor,           :string, description: "the actor to use for the created branch, should be a user email in Plural"
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
     field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  input_object :observer_pr_ai_action_attributes do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"
@@ -574,13 +587,14 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,          non_null(:string), description: "the name for this automation"
     field :role,          :pr_role, description: "An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster"
     field :documentation, :string
-    field :title,         non_null(:string)
-    field :message,       non_null(:string)
+    field :title,         :string
+    field :message,       :string
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
     field :proxy,         :http_proxy_configuration, description: "a proxy to use for git requests"
     field :vendor,        :pr_vendor_spec, description: "software vendoring logic to perform in this PR"
+    field :ai,            :pr_ai_spec, description: "configuration for AI assistance in this PR automation"
     field :lua,           :pr_lua_spec, description: "a set of lua scripts to use to preprocess the PR automation"
     field :git,           :git_ref, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to the created prs"
@@ -700,6 +714,11 @@ defmodule Console.GraphQl.Deployments.Git do
     field :script,   :string, description: "file of a flat script to use"
     field :folder,   :string, description: "a folder with lua library code and scripts to use"
     field :external, :boolean, description: "whether the lua script is sourced from an external git repo bound to this automation"
+  end
+
+  object :pr_ai_spec do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   object :pr_vendor_spec do
@@ -874,11 +893,18 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for sending a pr in response to an observer"
   object :observer_pr_action do
-    field :automation_id,   non_null(:id)
+    field :automation_id,   :id
     field :repository,      :string
+    field :ai,              :observer_pr_ai_action, description: "configuration for an AI pr automation (eliminates the need for a full pr automation reference)"
     field :actor,           :string, description: "the actor to use for the created branch, should be a user email in Plural"
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
     field :context,         non_null(:map), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for AI assistance in a PR automation"
+  object :observer_pr_ai_action do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"

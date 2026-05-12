@@ -15,6 +15,7 @@ fragment User on User {
   personas {
     ...Persona
   }
+  homepage
 }
 
 fragment UserTiny on User {

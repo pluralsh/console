@@ -3,7 +3,7 @@
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
 # Builder stage for all binaries
-FROM golang:1.25.7-alpine3.22 AS builder
+FROM golang:1.26.2-alpine3.22 AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -27,10 +27,11 @@ COPY kubernetes-agent/kas/pkg ./kubernetes-agent/kas/pkg
 
 # Copy local dependency required by kas/go.mod replace directive
 COPY polly ./polly
+COPY client ./client
 
 # Create a minimal Go workspace so module sums resolve from go.work.sum.
 WORKDIR /workspace
-RUN go work init ./kubernetes-agent/api ./kubernetes-agent/kas ./polly
+RUN go work init ./kubernetes-agent/api ./kubernetes-agent/kas ./polly ./client
 
 # Set build time if not provided
 RUN if [ -z "$BUILD_TIME" ]; then BUILD_TIME="$(date -u +%Y%m%d.%H%M%S)"; fi

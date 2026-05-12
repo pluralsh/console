@@ -10,7 +10,7 @@ defmodule Console.Schema.AgentSession do
     AgentRuntime
   }
 
-  defenum Type, terraform: 0, kubernetes: 1, provisioning: 2, search: 3, manifests: 4, chat: 5, research: 6
+  defenum Type, terraform: 0, kubernetes: 1, provisioning: 2, search: 3, manifests: 4, chat: 5, research: 6, configure: 7
 
   schema "agent_sessions" do
     field :type,           Type

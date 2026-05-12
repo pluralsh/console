@@ -74,6 +74,8 @@ func (r *InfrastructureStackReconciler) Name() internaltypes.Reconciler {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop.
 func (r *InfrastructureStackReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -127,6 +129,11 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
+	policyEngineRepositoryID, result, err := r.handlePolicyEngineRepositoryRef(ctx, stack)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, stack.SetCondition)
+	}
+
 	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, stack.SetCondition)
@@ -143,11 +150,12 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	}
 
 	attributes := dynamicAttributes{
-		clusterID:         clusterID,
-		repositoryID:      repositoryID,
-		projectID:         project.Status.ID,
-		definitionID:      stackDefinitionID,
-		observableMetrics: metrics,
+		clusterID:                clusterID,
+		repositoryID:             repositoryID,
+		policyEngineRepositoryID: policyEngineRepositoryID,
+		projectID:                project.Status.ID,
+		definitionID:             stackDefinitionID,
+		observableMetrics:        metrics,
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -236,6 +244,8 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
+		Watches(&corev1.ConfigMap{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
+		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
 		For(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
@@ -295,11 +305,12 @@ func (r *InfrastructureStackReconciler) addOrRemoveFinalizer(ctx context.Context
 }
 
 type dynamicAttributes struct {
-	clusterID         string
-	repositoryID      string
-	projectID         *string
-	definitionID      *string
-	observableMetrics []console.ObservableMetricAttributes
+	clusterID                string
+	repositoryID             string
+	policyEngineRepositoryID *string
+	projectID                *string
+	definitionID             *string
+	observableMetrics        []console.ObservableMetricAttributes
 }
 
 func (r *InfrastructureStackReconciler) getStackAttributes(
@@ -326,7 +337,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		Configuration: r.stackConfigurationAttributes(stack.Spec.Configuration),
 		Approval:      stack.Spec.Approval,
 		Files:         make([]*console.StackFileAttributes, 0),
-		PolicyEngine:  stack.Spec.PolicyEngine.Attributes(),
+		PolicyEngine:  stack.Spec.PolicyEngine.Attributes(attributes.policyEngineRepositoryID),
 	}
 
 	if stack.Spec.ScmConnectionRef != nil {
@@ -381,9 +392,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, secret); err != nil {
 				return nil, err
 			}
-			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
-			// 	return nil, err
-			// }
+
+			if err := utils.AddOwnerRefAnnotation(ctx, r.Client, stack, secret); err != nil {
+				return nil, err
+			}
+
 			isSecret = lo.ToPtr(true)
 			rawData, ok := secret.Data[env.SecretKeyRef.Key]
 			if !ok {
@@ -396,12 +409,14 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, configMap); err != nil {
 				return nil, err
 			}
-			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, configMap, r.Scheme); err != nil {
-			// 	return nil, err
-			// }
+
+			if err := utils.AddOwnerRefAnnotation(ctx, r.Client, stack, configMap); err != nil {
+				return nil, err
+			}
+
 			rawData, ok := configMap.Data[env.ConfigMapRef.Key]
 			if !ok {
-				return nil, fmt.Errorf("can not find secret data for the key %s", env.ConfigMapRef.Key)
+				return nil, fmt.Errorf("can not find config map data for the key %s", env.ConfigMapRef.Key)
 			}
 			value = rawData
 		}
@@ -459,8 +474,11 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 
 	if overrides.Terraform != nil {
 		result.Terraform = &console.TerraformConfigurationAttributes{
-			Parallelism: overrides.Terraform.Parallelism,
-			Refresh:     overrides.Terraform.Refresh,
+			Parallelism:  overrides.Terraform.Parallelism,
+			Refresh:      overrides.Terraform.Refresh,
+			ApproveEmpty: overrides.Terraform.ApproveEmpty,
+			Tofu:         overrides.Terraform.Tofu,
+			TofuRegistry: overrides.Terraform.TofuRegistry,
 		}
 	}
 
@@ -484,6 +502,8 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Parallelism:  conf.Terraform.Parallelism,
 			Refresh:      conf.Terraform.Refresh,
 			ApproveEmpty: conf.Terraform.ApproveEmpty,
+			Tofu:         conf.Terraform.Tofu,
+			TofuRegistry: conf.Terraform.TofuRegistry,
 		}
 	}
 
@@ -558,6 +578,43 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	}
 
 	return *repository.Status.ID, nil, nil
+}
+
+// handlePolicyEngineRepositoryRef resolves an optional Git repository for policy configuration.
+// If policyEngine.git.url is set, the ID is resolved via the Plural cache (same as stack git).
+// Otherwise, if policyEngine.repositoryRef is set, the GitRepository CR is waited on.
+func (r *InfrastructureStackReconciler) handlePolicyEngineRepositoryRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
+	pe := stack.Spec.PolicyEngine
+	if pe == nil {
+		return nil, nil, nil
+	}
+
+	if pe.Git != nil && pe.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(pe.Git.Url))
+		if err != nil {
+			return nil, nil, err
+		}
+		return id, nil, nil
+	}
+
+	if pe.RepositoryRef == nil || pe.RepositoryRef.Name == "" {
+		return nil, nil, nil
+	}
+
+	repository := &v1alpha1.GitRepository{}
+	if err := r.Get(ctx, client.ObjectKey{Name: pe.RepositoryRef.Name, Namespace: pe.RepositoryRef.Namespace}, repository); err != nil {
+		return nil, nil, err
+	}
+
+	if !repository.Status.HasID() {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("policy engine git repository is not ready")
+	}
+
+	if repository.Status.Health == v1alpha1.GitHealthFailed {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("policy engine git repository is not healthy")
+	}
+
+	return repository.Status.ID, nil, nil
 }
 
 // handleStackDefinitionRef checks if stack has a stack definition reference configured and waits for it

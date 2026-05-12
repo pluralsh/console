@@ -10,10 +10,20 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivity,
     WorkbenchJobResult,
     WorkbenchCron,
+    WorkbenchPrompt,
+    WorkbenchSkill,
+    WorkbenchEval,
+    WorkbenchEvalResult,
     WorkbenchWebhook,
+    ObservabilityWebhook,
+    IssueWebhook,
+    WorkbenchJobActivityAgentRun,
+    WorkbenchJobThought
   }
   alias Console.Deployments.Settings
   alias Console.PubSub
+
+  require EEx
 
   @type error :: Console.error
   @type workbench_resp :: {:ok, Workbench.t()} | error
@@ -21,6 +31,9 @@ defmodule Console.Deployments.Workbenches do
   @type job_resp :: {:ok, WorkbenchJob.t()} | error
   @type activity_resp :: {:ok, WorkbenchJobActivity.t()} | error
   @type cron_resp :: {:ok, WorkbenchCron.t()} | error
+  @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
+  @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
+  @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -30,6 +43,9 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench(id), do: Repo.get(Workbench, id)
   def get_workbench_job!(id), do: Repo.get!(WorkbenchJob, id)
   def get_workbench_job(id), do: Repo.get(WorkbenchJob, id)
+
+  def get_workbench_job_activity!(id), do: Repo.get!(WorkbenchJobActivity, id)
+  def get_workbench_job_activity(id), do: Repo.get(WorkbenchJobActivity, id)
 
   def get_workbench_by_name(name), do: Repo.get_by(Workbench, name: name)
   def get_workbench_by_name!(name), do: Repo.get_by!(Workbench, name: name)
@@ -42,8 +58,18 @@ defmodule Console.Deployments.Workbenches do
 
   def get_workbench_cron!(id), do: Repo.get!(WorkbenchCron, id)
   def get_workbench_cron(id), do: Repo.get(WorkbenchCron, id)
+  def get_workbench_prompt!(id), do: Repo.get!(WorkbenchPrompt, id)
+  def get_workbench_prompt(id), do: Repo.get(WorkbenchPrompt, id)
+  def get_workbench_skill!(id), do: Repo.get!(WorkbenchSkill, id)
+  def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
+
+  def get_workbench_eval!(id), do: Repo.get!(WorkbenchEval, id)
+  def get_workbench_eval(id), do: Repo.get(WorkbenchEval, id)
+
+  def get_workbench_eval_result!(id), do: Repo.get!(WorkbenchEvalResult, id)
+  def get_workbench_eval_result(id), do: Repo.get(WorkbenchEvalResult, id)
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.
@@ -51,7 +77,7 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec create_workbench(map, User.t()) :: workbench_resp
   def create_workbench(attrs, %User{} = user) do
-    %Workbench{}
+    %Workbench{bot_user_id: user.id}
     |> Workbench.changeset(Settings.add_project_id(attrs, user))
     |> allow(user, :write)
     |> when_ok(:insert)
@@ -64,12 +90,20 @@ defmodule Console.Deployments.Workbenches do
   @spec update_workbench(map, binary, User.t()) :: workbench_resp
   def update_workbench(attrs, id, %User{} = user) do
     get_workbench!(id)
-    |> Repo.preload([:tool_associations, :read_bindings, :write_bindings])
+    |> Repo.preload([:tool_associations, :read_bindings, :write_bindings, :workbench_skills])
     |> allow(user, :write)
-    |> when_ok(&Workbench.changeset(&1, attrs))
+    |> when_ok(&Workbench.changeset(&1, override_bot_user(attrs, user)))
     |> when_ok(:update)
     |> notify(:update, user)
   end
+
+  defp override_bot_user(%{override_bot_user: true} = attrs, %User{id: id}),
+    do: Map.put(attrs, :bot_user_id, id)
+  defp override_bot_user(attrs, _), do: attrs
+
+  defp override_webhook_user(%{override_webhook_user: true} = attrs, %User{id: id}),
+    do: Map.put(attrs, :user_id, id)
+  defp override_webhook_user(attrs, _), do: attrs
 
   @doc """
   Deletes a workbench.
@@ -124,8 +158,8 @@ defmodule Console.Deployments.Workbenches do
   Requires write permission on the workbench.
   """
   @spec create_workbench_cron(map, binary, User.t()) :: cron_resp
-  def create_workbench_cron(attrs, workbench_id, %User{} = user) do
-    %WorkbenchCron{workbench_id: workbench_id}
+  def create_workbench_cron(attrs, workbench_id, %User{id: uid} = user) do
+    %WorkbenchCron{workbench_id: workbench_id, user_id: uid}
     |> WorkbenchCron.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:insert)
@@ -138,8 +172,8 @@ defmodule Console.Deployments.Workbenches do
   @spec update_workbench_cron(map, binary, User.t()) :: cron_resp
   def update_workbench_cron(attrs, id, %User{} = user) do
     get_workbench_cron!(id)
+    |> WorkbenchCron.changeset(attrs)
     |> allow(user, :write)
-    |> when_ok(&WorkbenchCron.changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
   end
@@ -153,6 +187,165 @@ defmodule Console.Deployments.Workbenches do
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
+  end
+
+  @doc """
+  Fetches a workbench cron by id. Requires read permission on the workbench.
+  """
+  @spec fetch_workbench_cron(binary, User.t()) :: cron_resp
+  def fetch_workbench_cron(id, %User{} = user) do
+    get_workbench_cron!(id)
+    |> allow(user, :read)
+  end
+
+  @doc """
+  Creates a saved prompt for a workbench. Requires read access to the workbench.
+  """
+  @spec create_workbench_prompt(map, binary, User.t()) :: prompt_resp
+  def create_workbench_prompt(attrs, workbench_id, %User{} = user) do
+    %WorkbenchPrompt{workbench_id: workbench_id}
+    |> WorkbenchPrompt.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a saved workbench prompt. Requires read access to the workbench.
+  """
+  @spec update_workbench_prompt(map, binary, User.t()) :: prompt_resp
+  def update_workbench_prompt(attrs, id, %User{} = user) do
+    get_workbench_prompt!(id)
+    |> WorkbenchPrompt.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a saved workbench prompt. Requires read access to the workbench.
+  """
+  @spec delete_workbench_prompt(binary, User.t()) :: prompt_resp
+  def delete_workbench_prompt(id, %User{} = user) do
+    get_workbench_prompt!(id)
+    |> allow(user, :read)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates a saved workbench skill. Requires write access to the workbench.
+  """
+  @spec create_workbench_skill(map, binary, User.t()) :: skill_resp
+  def create_workbench_skill(attrs, workbench_id, %User{} = user) do
+    %WorkbenchSkill{workbench_id: workbench_id}
+    |> WorkbenchSkill.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a saved workbench skill. Requires write access to the workbench.
+  """
+  @spec update_workbench_skill(map, binary, User.t()) :: skill_resp
+  def update_workbench_skill(attrs, id, %User{} = user) do
+    get_workbench_skill!(id)
+    |> WorkbenchSkill.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a saved workbench skill. Requires write access to the workbench.
+  """
+  @spec delete_workbench_skill(binary, User.t()) :: skill_resp
+  def delete_workbench_skill(id, %User{} = user) do
+    get_workbench_skill!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates a workbench eval configuration for a workbench. Requires write access to the workbench.
+  At most one eval exists per workbench (enforced by a unique index).
+  """
+  @spec create_workbench_eval(map, binary, User.t()) :: eval_resp
+  def create_workbench_eval(attrs, workbench_id, %User{} = user) do
+    %WorkbenchEval{workbench_id: workbench_id}
+    |> WorkbenchEval.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a workbench eval. Requires write access to the workbench.
+  """
+  @spec update_workbench_eval(map, binary, User.t()) :: eval_resp
+  def update_workbench_eval(attrs, id, %User{} = user) do
+    get_workbench_eval!(id)
+    |> WorkbenchEval.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a workbench eval. Requires write access to the workbench.
+  """
+  @spec delete_workbench_eval(binary, User.t()) :: eval_resp
+  def delete_workbench_eval(id, %User{} = user) do
+    get_workbench_eval!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Fetches a workbench eval by id. Requires read permission on the workbench.
+  """
+  @spec fetch_workbench_eval(binary, User.t()) :: eval_resp
+  def fetch_workbench_eval(id, %User{} = user) do
+    get_workbench_eval!(id)
+    |> allow(user, :read)
+  end
+
+  @doc """
+  Runs an agent on an eval result to update the workbench skills as necessary based on its findings.
+  """
+  @spec workbench_eval_skill(binary | WorkbenchEvalResult.t(), prompt :: binary | nil, User.t()) :: job_resp
+  def workbench_eval_skill(%WorkbenchEvalResult{workbench_job_id: job_id} = eval, prompt, %User{} = user) do
+    eval = Repo.preload(eval, [:workbench_job])
+    create_workbench_job(%{
+      prompt: prompt || "Update the skills as necessary",
+      referenced_job_id: job_id,
+      type: :skill
+    }, eval.workbench_job.workbench_id, user)
+  end
+
+  def workbench_eval_skill(result_id, prompt, %User{} = user) when is_binary(result_id) do
+    get_workbench_eval_result!(result_id)
+    |> workbench_eval_skill(prompt, user)
+  end
+
+  @doc """
+  Infers a skill for a job based on the job's conclusion and prompt.
+  """
+  @spec infer_skill(WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def infer_skill(%WorkbenchJob{} = job, %User{} = user) do
+    create_workbench_job(%{
+      prompt: "No specific guidance provided, update the skills as necessary",
+      referenced_job_id: job.id,
+      type: :skill
+    }, job.workbench_id, Console.Services.Rbac.preload(user))
+  end
+
+  def infer_skill(job_id, user) when is_binary(job_id) do
+    get_workbench_job!(job_id)
+    |> infer_skill(user)
   end
 
   @doc """
@@ -177,11 +370,16 @@ defmodule Console.Deployments.Workbenches do
   Requires write permission on the workbench.
   """
   @spec create_workbench_webhook(map, binary, User.t()) :: webhook_resp
-  def create_workbench_webhook(attrs, workbench_id, %User{} = user) do
-    %WorkbenchWebhook{workbench_id: workbench_id}
-    |> WorkbenchWebhook.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:insert)
+  def create_workbench_webhook(attrs, workbench_id, %User{id: uid} = user) do
+    start_transaction()
+    |> add_operation(:webhook, fn _ ->
+      %WorkbenchWebhook{workbench_id: workbench_id, user_id: uid}
+      |> WorkbenchWebhook.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
+    |> execute(extract: :webhook)
     |> notify(:create, user)
   end
 
@@ -190,11 +388,25 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec update_workbench_webhook(map, binary, User.t()) :: webhook_resp
   def update_workbench_webhook(attrs, id, %User{} = user) do
-    get_workbench_webhook!(id)
-    |> allow(user, :write)
-    |> when_ok(&WorkbenchWebhook.changeset(&1, attrs))
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:webhook, fn _ ->
+      get_workbench_webhook!(id)
+      |> allow(user, :write)
+      |> when_ok(&WorkbenchWebhook.changeset(&1, override_webhook_user(attrs, user)))
+      |> when_ok(:update)
+    end)
+    |> add_operation(:access, fn %{webhook: hook} -> hook_access(hook, user) end)
+    |> execute(extract: :webhook)
     |> notify(:update, user)
+  end
+
+  defp hook_access(%WorkbenchWebhook{} = hook, %User{} = user) do
+    Repo.preload(hook, [:webhook, :issue_webhook])
+    |> case do
+      %WorkbenchWebhook{webhook: %ObservabilityWebhook{} = hook} -> allow(hook, user, :read)
+      %WorkbenchWebhook{issue_webhook: %IssueWebhook{} = hook} -> allow(hook, user, :read)
+      _ -> {:error, "workbench webhook does not have an observability webhook or issue webhook"}
+    end
   end
 
   @doc """
@@ -208,6 +420,27 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:delete, user)
   end
 
+  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words"
+
+  def whimsey_text(%WorkbenchJob{} = job) do
+    job = Repo.preload(job, [:activities])
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: String.trim(whimsey_prompt(job: job)))
+  end
+
+  def whimsey_text(%WorkbenchJobActivity{type: :coding} = activity) do
+    activity = Repo.preload(activity, [:thoughts, agent_runs: :pull_requests])
+    Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: String.trim(whimsey_activity_prompt(activity: activity)))
+  end
+
+  def whimsey_text(%WorkbenchJobActivity{} = activity) do
+    Repo.preload(activity, [:thoughts])
+    |> Map.put(:agent_runs, [])
+    |> then(&Console.AI.Provider.completion([{:user, @whimsey_prompt}], preface: String.trim(whimsey_activity_prompt(activity: &1))))
+  end
+
+  EEx.function_from_file(:defp, :whimsey_activity_prompt, Console.priv_filename(["prompts", "workbench", "whimsey_activity.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :whimsey_prompt, Console.priv_filename(["prompts", "workbench", "whimsey.md.eex"]), [:assigns])
+
   @doc """
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
@@ -218,6 +451,156 @@ defmodule Console.Deployments.Workbenches do
     |> allow(user, :read)
     |> when_ok(:insert)
     |> notify(:create, user)
+  end
+
+  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook) do
+    hook = Repo.preload(hook, [:user])
+    bench = get_workbench!(workbench_id) |> Repo.preload([:bot_user])
+    start_transaction()
+    |> add_operation(:actor, fn _ ->
+      case {hook, bench} do
+        {%WorkbenchWebhook{user: %User{} = user}, _} -> {:ok, Console.Services.Rbac.preload(user)}
+        {_, %Workbench{bot_user: %User{} = bot_user}} -> {:ok, Console.Services.Rbac.preload(bot_user)}
+        _ -> {:error, "workbench webhook does not have a bot user"}
+      end
+    end)
+    |> add_operation(:job, fn %{actor: user} -> create_workbench_job(attrs, workbench_id, user) end)
+    |> execute(extract: :job)
+  end
+
+  @doc """
+  Updates a workbench job. Requires read access to the workbench.
+  """
+  @spec update_workbench_job(map, WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def update_workbench_job(attrs, %WorkbenchJob{} = job, %User{} = user) do
+    Repo.preload(job, :result)
+    |> WorkbenchJob.update_changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+  def update_workbench_job(attrs, id, user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> then(&update_workbench_job(attrs, &1, user))
+  end
+  def update_workbench_job(_, _, _), do: {:error, "you can only update your own jobs"}
+
+  @doc """
+  Cancels a workbench job. Requires write access to the job, or for the user to be the owner of the job.
+  """
+  @spec cancel_workbench_job(binary, User.t()) :: job_resp
+  def cancel_workbench_job(id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      get_workbench_job!(id)
+      |> WorkbenchJob.changeset(%{status: :cancelled})
+      |> allow(user, :edit)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:heartbeat, fn %{job: job} ->
+      Console.AI.Workbench.Router.stop(job)
+      {:ok, job}
+    end)
+    |> execute(extract: :job)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Fails a workbench job. Requires write access to the job, or for the user to be the owner of the job.
+  """
+  @spec fail_job(WorkbenchJob.t()) :: job_resp
+  def fail_job(%WorkbenchJob{} = job) do
+    job
+    |> WorkbenchJob.changeset(%{status: :failed})
+    |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Kicks a job by updating the updated_at timestamp to 20 minutes ago.
+  """
+  @spec kick_job(WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def kick_job(%WorkbenchJob{user_id: id} = job, %User{id: id}) do
+    job
+    |> Ecto.Changeset.change(%{updated_at: Timex.now() |> Timex.shift(minutes: -20)})
+    |> Repo.update()
+    |> notify(:update)
+  end
+  def kick_job(id, user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> kick_job(user)
+  end
+  def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
+
+  @doc """
+  Marks a workbench job as paused, and cancels its activities so they can be restarted later.
+  """
+  @spec pause_job(WorkbenchJob.t()) :: job_resp
+  def pause_job(%WorkbenchJob{} = job) do
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      job
+      |> WorkbenchJob.changeset(%{status: :paused})
+      |> Repo.update()
+    end)
+    |> add_operation(:activities, fn _ ->
+      WorkbenchJobActivity.for_workbench_job(job.id)
+      |> WorkbenchJobActivity.for_status(:running)
+      |> Repo.update_all(set: [status: :cancelled])
+      |> ok()
+    end)
+    |> execute(extract: :job)
+    |> notify(:update)
+  end
+
+  @doc """
+  Heartbeats a job by setting status to running and updating the updated_at timestamp to the current time.
+  """
+  @spec heartbeat(WorkbenchJob.t(), boolean) :: job_resp
+  def heartbeat(%WorkbenchJob{id: id}, boot \\ false) do
+    case {get_workbench_job!(id), boot} do
+      {job, true} -> mark_running(job)
+      {%WorkbenchJob{status: s} = job, _} when s in ~w(successful failed cancelled)a -> {:ok, job}
+      {job, _} -> mark_running(job)
+    end
+  end
+
+  defp mark_running(%WorkbenchJob{} = job) do
+    job
+    |> Ecto.Changeset.change(%{status: :running, updated_at: Timex.now()})
+    |> Repo.update(allow_stale: true)
+  end
+
+  @doc """
+  Creates a new message for a job. Requires read access to the job.
+  """
+  @spec create_message(map, binary, User.t()) :: activity_resp
+  def create_message(attrs, %WorkbenchJob{} = job, %User{} = user) do
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      allow(job, user, :edit)
+      |> error("you can only create messages for your own jobs")
+    end)
+    |> add_operation(:idle, fn _ ->
+      case WorkbenchJob.idle?(job) do
+        true ->
+          WorkbenchJob.changeset(job, %{status: :pending, error: nil})
+          |> Repo.update()
+        false -> {:error, "job is currently active, please wait for it to complete before prompting"}
+      end
+    end)
+    |> add_operation(:activity, fn %{job: job} ->
+      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, status: :successful}
+      |> WorkbenchJobActivity.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> execute(extract: :activity)
+    |> notify(:create, user)
+  end
+
+  def create_message(attrs, id, %User{} = user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> then(&create_message(attrs, &1, user))
   end
 
   @doc """
@@ -240,18 +623,34 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Updates an existing activity for a job, and bookkeeps job status and timestamp.
+  Updates an existing activity for a job.
   """
   @spec update_job_activity(map, WorkbenchJobActivity.t()) :: activity_resp
   def update_job_activity(attrs, %WorkbenchJobActivity{} = activity) do
-    %{workbench_job: job} = Repo.preload(activity, :workbench_job)
+    activity
+    |> WorkbenchJobActivity.changeset(attrs)
+    |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Associates an agent run with a workbench activity: inserts the join row (idempotent) and sets
+  `agent_run_id` and `status: :running` on the activity.
+  """
+  @spec associate_agent_run(WorkbenchJobActivity.t(), binary) :: activity_resp
+  def associate_agent_run(%WorkbenchJobActivity{} = activity, run_id) when is_binary(run_id) do
     start_transaction()
-    |> add_operation(:activity, fn _ ->
-      Ecto.Changeset.change(activity, attrs)
-      |> Repo.update()
+    |> add_operation(:association, fn _ ->
+      %WorkbenchJobActivityAgentRun{}
+      |> WorkbenchJobActivityAgentRun.changeset(%{
+        workbench_job_activity_id: activity.id,
+        agent_run_id: run_id
+      })
+      |> Repo.insert(on_conflict: :nothing, conflict_target: [:workbench_job_activity_id, :agent_run_id])
     end)
-    |> add_operation(:job, fn _ ->
-      Ecto.Changeset.change(job, %{status: :running, updated_at: DateTime.utc_now()})
+    |> add_operation(:activity, fn _ ->
+      activity
+      |> WorkbenchJobActivity.changeset(%{status: :running, agent_run_id: run_id})
       |> Repo.update()
     end)
     |> execute(extract: :activity)
@@ -259,10 +658,38 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Saves a list of canvas blocks to a job activity.
+  """
+  @spec save_canvas([map], binary,  WorkbenchJobActivity.t()) :: {:ok, WorkbenchJobActivity.t(), WorkbenchJob.t()} | {:error, any()}
+  def save_canvas(blocks, output, %WorkbenchJobActivity{} = activity) when is_list(blocks) do
+    %WorkbenchJobActivity{workbench_job: %WorkbenchJob{} = job} =
+      Repo.preload(activity, workbench_job: :result)
+
+    blocks = Console.mapify(blocks)
+
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      update_job_activity(%{status: :successful, result: %{output: output, canvas: blocks}}, activity)
+    end)
+    |> add_operation(:job, fn _ ->
+      job
+      |> WorkbenchJob.changeset(%{result: %{canvas: blocks}})
+      |> Repo.update()
+    end)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, job: job}} ->
+        notify({:ok, job}, :update)
+        {:ok, activity, job}
+      err -> err
+    end
+  end
+
+  @doc """
   Updates the status of a job, and creates a new recording the change made.
   """
   @spec update_job_status(%{status: map, prompt: binary, output: binary}, WorkbenchJob.t()) :: activity_resp
-  def update_job_status(%{status: %{} = status, prompt: prompt, output: output}, %WorkbenchJob{} = job)
+  def update_job_status(%{status: %{} = status, prompt: prompt, output: output} = args, %WorkbenchJob{} = job)
     when is_binary(prompt) and is_binary(output) do
     %{result: result} = Repo.preload(job, :result)
     start_transaction()
@@ -271,34 +698,49 @@ defmodule Console.Deployments.Workbenches do
       |> Repo.update()
     end)
     |> add_operation(:activity, fn _ ->
+      status =
+        TextDiff.format(result.working_theory || "", status[:working_theory] || "", color: true)
+        |> IO.iodata_to_binary()
+        |> then(&Map.put(status, :diff, &1))
       create_job_activity(%{
         status: :successful,
         type: :memo,
         prompt: prompt,
-        result: %{
-          output: output,
-          job_update: %{
-            diff: TextDiff.format(result.working_theory, status[:working_theory], color: true)
-                  |> IO.iodata_to_binary(),
-            working_theory: status[:working_theory]
-          }
-        }
+        result: %{output: output, job_update: status},
+        tool_call: args[:tool_call]
       }, job)
     end)
-    |> execute(extract: :activity)
-    |> notify(:update)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, result: result}} ->
+        notify({:ok, %{job | result: result}}, :update)
+        notify({:ok, activity}, :update)
+      err -> err
+    end
   end
   def update_job_status(_, _), do: {:error, "invalid input struct for job status update"}
 
-  @spec complete_job(binary, WorkbenchJob.t()) :: job_resp
-  def complete_job(conclusion, %WorkbenchJob{} = job) when is_binary(conclusion) do
-    Repo.preload(job, :result)
-    |> WorkbenchJob.changeset(%{
-      status: :successful,
-      completed_at: DateTime.utc_now(),
-      result: %{conclusion: conclusion}
-    })
-    |> Repo.update()
+  @spec complete_job(map, WorkbenchJob.t()) :: job_resp
+  def complete_job(attrs, %WorkbenchJob{} = job) do
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      create_job_activity(%{
+        status: :successful,
+        type: :conclusion,
+        prompt: "completing job...",
+        result: %{output: attrs[:conclusion] || "no conclusion provided"}
+      }, job)
+    end)
+    |> add_operation(:job, fn _ ->
+      Repo.preload(job, :result)
+      |> WorkbenchJob.changeset(%{
+        status: :successful,
+        completed_at: DateTime.utc_now(),
+        result: Console.mapify(attrs)
+      })
+      |> Console.Repo.update()
+    end)
+    |> execute(extract: :job)
     |> notify(:update)
   end
 
@@ -316,6 +758,17 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:update)
   end
 
+  @doc """
+  Updates the knowledge_updated_at timestamp for a job.
+  """
+  @spec knowledge_updated(WorkbenchJob.t()) :: job_resp
+  def knowledge_updated(%WorkbenchJob{} = job) do
+    job
+    |> WorkbenchJob.changeset(%{knowledge_updated_at: DateTime.utc_now()})
+    |> Repo.update()
+    |> notify(:update)
+  end
+
   defp notify({:ok, %Workbench{} = workbench}, :create, user),
     do: handle_notify(PubSub.WorkbenchCreated, workbench, actor: user)
   defp notify({:ok, %Workbench{} = workbench}, :update, user),
@@ -324,6 +777,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchDeleted, workbench, actor: user)
   defp notify({:ok, %WorkbenchJob{} = job}, :create, user),
     do: handle_notify(PubSub.WorkbenchJobCreated, job, actor: user)
+  defp notify({:ok, %WorkbenchJob{} = job}, :update, user),
+    do: handle_notify(PubSub.WorkbenchJobUpdated, job, actor: user)
   defp notify({:ok, %WorkbenchTool{} = tool}, :create, user),
     do: handle_notify(PubSub.WorkbenchToolCreated, tool, actor: user)
   defp notify({:ok, %WorkbenchTool{} = tool}, :update, user),
@@ -336,17 +791,41 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchCronUpdated, cron, actor: user)
   defp notify({:ok, %WorkbenchCron{} = cron}, :delete, user),
     do: handle_notify(PubSub.WorkbenchCronDeleted, cron, actor: user)
+  defp notify({:ok, %WorkbenchPrompt{} = prompt}, :create, user),
+    do: handle_notify(PubSub.WorkbenchPromptCreated, prompt, actor: user)
+  defp notify({:ok, %WorkbenchPrompt{} = prompt}, :update, user),
+    do: handle_notify(PubSub.WorkbenchPromptUpdated, prompt, actor: user)
+  defp notify({:ok, %WorkbenchPrompt{} = prompt}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchPromptDeleted, prompt, actor: user)
+  defp notify({:ok, %WorkbenchSkill{} = skill}, :create, user),
+    do: handle_notify(PubSub.WorkbenchSkillCreated, skill, actor: user)
+  defp notify({:ok, %WorkbenchSkill{} = skill}, :update, user),
+    do: handle_notify(PubSub.WorkbenchSkillUpdated, skill, actor: user)
+  defp notify({:ok, %WorkbenchSkill{} = skill}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchSkillDeleted, skill, actor: user)
+  defp notify({:ok, %WorkbenchEval{} = eval}, :create, user),
+    do: handle_notify(PubSub.WorkbenchEvalCreated, eval, actor: user)
+  defp notify({:ok, %WorkbenchEval{} = eval}, :update, user),
+    do: handle_notify(PubSub.WorkbenchEvalUpdated, eval, actor: user)
+  defp notify({:ok, %WorkbenchEval{} = eval}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchEvalDeleted, eval, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :create, user),
     do: handle_notify(PubSub.WorkbenchWebhookCreated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :update, user),
     do: handle_notify(PubSub.WorkbenchWebhookUpdated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :delete, user),
     do: handle_notify(PubSub.WorkbenchWebhookDeleted, webhook, actor: user)
+  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create, user),
+    do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
   defp notify(pass, _, _), do: pass
 
-  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
+  def notify({:ok, %WorkbenchJobThought{} = thought}, :create),
+    do: handle_notify(PubSub.WorkbenchJobThoughtCreated, thought)
+  def notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity)
-  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
+  def notify({:ok, %WorkbenchJob{} = job}, :update),
+    do: handle_notify(PubSub.WorkbenchJobUpdated, job)
+  def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
     do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
-  defp notify(pass, _), do: pass
+  def notify(pass, _), do: pass
 end

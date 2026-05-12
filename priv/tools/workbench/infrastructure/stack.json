@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "stack_id": {
+            "type": "string",
+            "description": "UUID of the stack (from plrl_stacks)"
+        }
+    },
+    "required": ["stack_id"]
+}

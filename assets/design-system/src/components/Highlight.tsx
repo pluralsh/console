@@ -1,11 +1,11 @@
+import hljs from 'highlight.js/lib/core'
 import {
   type ComponentPropsWithoutRef,
   type RefObject,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react'
-import hljs from 'highlight.js/lib/core'
 import '../hljs'
 
 import styled from 'styled-components'
@@ -162,15 +162,15 @@ function Highlight({
   ref,
   ...props
 }: HighlightProps) {
-  if (typeof children !== 'string') {
+  if (typeof children !== 'string')
     throw new Error('Highlight component expects a string as its children')
-  }
-  const codeRef = useRef(undefined)
+  const codeRef = useRef<HTMLPreElement | null>(null)
 
   const lines = useMemo(() => children.split(/\r?\n/), [children])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (hljs.getLanguage(language) && codeRef.current) {
+      delete codeRef.current.dataset.highlighted
       hljs.highlightElement(codeRef.current)
     }
   }, [language, children])

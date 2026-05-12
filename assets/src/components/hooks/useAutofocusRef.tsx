@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 
-// returns a ref that focuses an input just on is mount
-export function useAutofocusRef() {
-  const ref = useRef<HTMLInputElement>(null)
+// returns a ref that focuses an element on mount
+export function useAutofocusRef<T extends HTMLElement = HTMLElement>() {
+  const ref = useRef<T | null>(null)
   useEffect(() => {
-    if (ref.current) ref.current.focus()
+    ref.current?.focus()
   }, [])
   return ref
 }

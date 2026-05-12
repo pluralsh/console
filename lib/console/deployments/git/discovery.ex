@@ -11,7 +11,7 @@ defmodule Console.Deployments.Git.Discovery do
 
   @type error :: Console.error
 
-  def start(%GitRepository{} = git), do: maybe_rpc(git, fn pid -> {:ok, pid} end)
+  def start(%GitRepository{} = git), do: maybe_rpc(git, :identity)
 
   @spec fetch(Service.t) :: {:ok, SmartFile.t} | error
   def fetch(%Service{git: %Service.Git{}} = svc) do
@@ -69,7 +69,7 @@ defmodule Console.Deployments.Git.Discovery do
   def kick(_), do: {:error, "not a git repository"}
 
 
-  def maybe_rpc(%GitRepository{} = repo, fun) when is_function(fun, 1) do
+  def maybe_rpc(%GitRepository{} = repo, fun) when is_function(fun, 1) or is_atom(fun) do
     me = node()
     try do
       an = agent_node(repo)
@@ -84,8 +84,10 @@ defmodule Console.Deployments.Git.Discovery do
     end
   end
 
-  def start_and_run(%GitRepository{} = repo, fun) when is_function(fun, 1) do
-    case Supervisor.start_child(repo) do
+  def start_and_run(%GitRepository{} = repo, :identity),
+    do: start_and_run(repo, & {:ok, &1})
+  def start_and_run(%GitRepository{id: id}, fun) when is_function(fun, 1) do
+    case Supervisor.start_child(id) do
       {:ok, pid} -> fun.(pid)
       {:error, {:already_started, pid}} -> fun.(pid)
       err -> err

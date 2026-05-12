@@ -1,6 +1,5 @@
 defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Console.Schema.Base
   alias Toolquery.TimeRange
 
   embedded_schema do
@@ -10,9 +9,25 @@ defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
 
   @valid ~w(start end)a
 
+  def default(past \\ 30) do
+    %__MODULE__{
+      start: Timex.now() |> Timex.shift(minutes: -past),
+      end: Timex.now(),
+    }
+  end
+
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> put_new_change(:start, fn -> Timex.now() |> Timex.shift(minutes: -30) end)
+    |> put_new_change(:end, fn -> Timex.now() end)
+  end
+
+  def safe(%__MODULE__{start: s_ts, end: e_ts}, days \\ 7) do
+    case Timex.diff(e_ts, s_ts, :days) < days do
+      true -> :ok
+      _ -> {:error, "The time range is greater than the maximum allowed of #{days} days"}
+    end
   end
 
   def to_proto(%__MODULE__{start: start_ts, end: end_ts}) do
@@ -22,6 +37,10 @@ defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
     }
   end
   def to_proto(_), do: nil
+
+  def to_datetime(%Google.Protobuf.Timestamp{} = timestamp),
+    do: Google.Protobuf.to_datetime(timestamp)
+  def to_datetime(_), do: nil
 
   defp to_proto_timestamp(%DateTime{} = datetime),
     do: Google.Protobuf.from_datetime(datetime)

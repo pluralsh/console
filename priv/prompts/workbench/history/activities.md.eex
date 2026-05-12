@@ -1,0 +1,5 @@
+Here is the full activity list for the workbench job:
+
+<%= for activity <- @job.activities do %>
+<%= Console.AI.Workbench.Eval.activity_prompt(activity: activity) %>
+<% end %>

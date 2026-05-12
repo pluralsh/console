@@ -26,6 +26,19 @@ defmodule Console.AI.File.Editor do
     end
   end
 
+  def sreplace(content, previous, replacement) do
+    {content, lines} = prep(content)
+    {replacement, rlines} = prep(replacement)
+    {previous, plines} = prep(previous)
+
+    with {:error, _} <- perfect_replacement(content, previous, replacement),
+         {:error, _} <- DistanceReplacer.replace(lines, plines, previous, rlines) do
+      {:error, "Could not find a safe replacement within the base content"}
+    else
+      {:ok, new} -> {:ok, new}
+    end
+  end
+
   defp replace_existing(path, content, "", replacement), do: File.write(path, "#{content}\n#{replacement}")
   defp replace_existing(path, content, content, ""), do: File.rm(path) # wipe entire file
   defp replace_existing(path, content, previous, replacement) do

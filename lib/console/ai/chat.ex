@@ -202,7 +202,7 @@ defmodule Console.AI.Chat do
     Chat.for_thread(thread.id)
     |> Repo.all()
     |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one sentence."}])
-    |> fit_context_window(@summary)
+    |> fit_context_window(@summary, :default)
     |> Enum.map(&Chat.message/1)
     |> Enum.filter(& &1)
     |> Provider.completion(preface: @summary)
@@ -412,7 +412,13 @@ defmodule Console.AI.Chat do
   Finds all MCP tools associated with a chat thread
   """
   @spec find_tools(ChatThread.t) :: {:ok, [McpTool.t]} | Console.error
-  def find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread), do: Discovery.tools(thread)
+  def find_tools(%ChatThread{flow: %Flow{servers: [_ | _]}} = thread) do
+    case Discovery.tools(thread) do
+      {:ok, tools} -> {:ok, tools}
+      {:error, _} = err -> err
+      err -> {:error, "internal mcp error: #{inspect(err)}"}
+    end
+  end
   def find_tools(_), do: {:ok, []}
 
   @doc """
@@ -600,9 +606,9 @@ defmodule Console.AI.Chat do
     )
   end
 
-  def fit_context_window(msgs, preface \\ @chat) do
+  def fit_context_window(msgs, preface \\ @chat, client \\ :tool) do
     Enum.reduce(msgs, byte_size(preface), &byte_size(&1.content) + &2)
-    |> trim_messages(msgs, Provider.context_window())
+    |> trim_messages(msgs, Provider.context_window(client))
   end
 
   defp trim_messages(total, msgs, window) when total < window, do: msgs

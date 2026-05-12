@@ -30,6 +30,13 @@ defmodule Console.Deployments.Observability.Metrics do
     pod_mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",pod=~"$name$regex",image!="",container!=""}) by (pod)|
   ])
 
+  @service post_process([
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[5m]))|,
+    mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",image!="",container!=""})|,
+    pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[5m])) by (pod)|,
+    pod_mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",image!="",container!=""}) by (pod)|
+  ])
+
   @heat post_process([
     cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (pod)|,
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""}) by (pod)|
@@ -53,6 +60,7 @@ defmodule Console.Deployments.Observability.Metrics do
   def queries(:cluster), do: @cluster
   def queries(:node), do: @node
   def queries(:component), do: @component
+  def queries(:service), do: @service
   def queries(:noisy), do: @noisy
 
   def queries(:heat, :pod), do: @heat

@@ -32,7 +32,7 @@ export function MainChatbotButton({
       startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >
-      Plural AI
+      Chat
     </MainChatbotButtonSC>
   )
 }

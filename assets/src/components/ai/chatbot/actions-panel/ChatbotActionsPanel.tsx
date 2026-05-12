@@ -7,7 +7,7 @@ import {
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
-import { CHATBOT_HEADER_HEIGHT } from '../Chatbot'
+import { SIDE_PANEL_HEADER_HEIGHT } from '../SidePanelShared'
 
 import {
   ArrowTopRightIcon,
@@ -293,7 +293,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   borderBottom: theme.borders.default,
   padding: `0 ${theme.spacing.medium}px`,
-  minHeight: CHATBOT_HEADER_HEIGHT,
+  minHeight: SIDE_PANEL_HEADER_HEIGHT,
 }))
 
 export const ActionItemSC = styled.div(({ theme }) => ({

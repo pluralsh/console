@@ -40,6 +40,9 @@ const (
 	envVarOwnPrivateApiScheme = "OWN_PRIVATE_API_SCHEME"
 	envVarOwnPrivateApiPort   = "OWN_PRIVATE_API_PORT"
 	envVarOwnPrivateApiHost   = "OWN_PRIVATE_API_HOST"
+
+	privateAPISchemeGRPC  = "grpc"
+	privateAPISchemeGRPCS = "grpcs"
 )
 
 type privateApiServer struct {
@@ -361,7 +364,7 @@ func detectUrlByCIDR(interfaceAddrs func() ([]net.Addr, error),
 
 func detectUrlFromListenAddress(scheme, listenNetwork, listenAddress string) (string, error) {
 	switch listenNetwork {
-	case "tcp", "tcp4", "tcp6": // assume listenAddress is a ip:port or name:port
+	case defaultAgentListenNetwork, "tcp4", "tcp6": // assume listenAddress is a ip:port or name:port
 		listenHost, _, err := net.SplitHostPort(listenAddress)
 		if err != nil {
 			return "", fmt.Errorf("listener address: %w", err)

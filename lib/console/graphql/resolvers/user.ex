@@ -122,7 +122,10 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def oauth_callback(args, _) do
     with {:ok, %Oidcc.Token{id: %Oidcc.Token.Id{claims: claims}}} <- OAuth.retrieve_token(args) do
-      claims
+      Map.new(claims, fn
+        {k, :null} -> {k, nil}
+        {k, v} -> {k, v}
+      end)
       |> Users.bootstrap_user()
       |> with_jwt()
     else

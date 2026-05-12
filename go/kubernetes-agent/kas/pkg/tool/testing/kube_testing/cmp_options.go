@@ -30,7 +30,7 @@ func TransformToUnstructured() cmp.Option {
 func toRuntimeObjectReflect(rv reflect.Value) runtime.Object {
 	var obj interface{}
 	// Make obj a pointer if it's not already. Does a shallow copy.
-	if rv.Kind() != reflect.Ptr && !isRuntimeObjectType(rv.Type()) {
+	if rv.Kind() != reflect.Ptr && !isRuntimeObjectType(rv.Type()) { //nolint:govet // reflect.Kind constants compared intentionally
 		pv := reflect.New(rv.Type())
 		pv.Elem().Set(rv)
 		obj = pv.Interface()
@@ -46,7 +46,7 @@ func toRuntimeObject(obj interface{}) runtime.Object {
 
 // addrType returns a pointer to t if t isn't a pointer or interface.
 func addrType(t reflect.Type) reflect.Type {
-	if k := t.Kind(); k == reflect.Interface || k == reflect.Ptr {
+	if k := t.Kind(); k == reflect.Interface || k == reflect.Ptr { //nolint:govet // reflect.Kind constants compared intentionally
 		return t
 	}
 	return reflect.PointerTo(t)

@@ -3,8 +3,8 @@
     "properties": {
         "prompt": {
             "type": "string",
-            "description": "The prompt to provide the subagent.  This should give all necessary context for the subagent to complete the task assigned."
+            "description": "The prompt to provide the subagent.  This should give all necessary context for the subagent to complete the task assigned and should be in markdown format to convey semantic structure."
         }
     },
-    "required": ["prompt", "agent"]
+    "required": ["prompt"]
 }

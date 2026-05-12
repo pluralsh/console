@@ -8,32 +8,37 @@ defmodule Console.AI.Workbench.Subagents.Plan do
 
   def run(%WorkbenchJob{status: s} = job, _) when s != :pending, do: {:ok, job}
   def run(%WorkbenchJob{prompt: prompt} = job, %Environment{} = environment) do
+    job = Repo.preload(job, [:result])
+
     tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: @system, acc: %{}, callback: &callback(%{id: nil, workbench_job_id: job.id}, &1))
+    |> MemoryEngine.new(20, system_prompt: @system, acc: %{})
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
-      {:error, error} -> %{status: :failed, error: "error planning job: #{inspect(error)}"}
+      {:error, error} -> %{status: :failed, result: %{error: "error planning job: #{inspect(error)}"}}
     end
     |> then(&WorkbenchJob.changeset(job, &1))
-    |> Console.Repo.update()
+    |> Repo.update()
   end
 
   defp reducer(messages, _) do
     case Enum.find(messages, &match?(%Plan{}, &1)) do
       %Plan{todos: todos} -> {:halt, %{
         status: :running,
-        result: %{todos: Enum.map(todos, &Map.take(&1, [:title, :description, :done]))}
+        result: %{todos: Enum.map(todos, &Map.take(&1, [:name, :description, :done]))}
       }}
-      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}) do
     [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
-      %Subagents{subagents: Environment.subagents(job)},
+      %Skills{skills: Environment.subagent_skills(skills, :plan)},
+      %Skill{skills: Environment.subagent_skills(skills, :plan)},
+      %Subagents{
+        subagents: Environment.subagents(job),
+        categories: Environment.categories(job)
+      },
       Plan
     ]
   end

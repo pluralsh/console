@@ -48,7 +48,7 @@ defmodule Console.Jwt.Github do
   defp client(key, jwt, url) when is_binary(url), do: Tentacat.Client.new(%{key => jwt}, url)
   defp client(key, jwt, _), do: Tentacat.Client.new(%{key => jwt})
 
-  defp add_opts(client, [_ | _] = opts), do: %Tentacat.Client{client | request_options: opts}
+  defp add_opts(%Tentacat.Client{} = client, [_ | _] = opts), do: %Tentacat.Client{client | request_options: opts}
   defp add_opts(client, _), do: client
 
   def signer(pem) do

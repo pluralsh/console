@@ -10,7 +10,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Service,
     Project,
     ServiceComponent,
-    Workbench
+    Workbench,
+    Monitor
   }
   alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Services.Observability, as: ObsSvc
@@ -29,8 +30,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def get_observability_webhook(%{id: id}, _) when is_binary(id), do: {:ok, Observability.get_webhook!(id)}
   def get_observability_webhook(%{name: n}, _) when is_binary(n), do: {:ok, Observability.get_webhook_by_name!(n)}
 
-  def list_observability_webhooks(args, _) do
-    ObservabilityWebhook.ordered()
+  def list_observability_webhooks(args, %{context: %{current_user: user}}) do
+    ObservabilityWebhook.for_user(user)
+    |> ObservabilityWebhook.ordered()
     |> paginate(args)
   end
 
@@ -65,15 +67,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     %{group: group, version: version, kind: kind, name: name, namespace: namespace} = args,
     %{context: %{current_user: user}}
   ) do
-    pkind = Console.GraphQl.Resolvers.Kubernetes.get_kind(cluster, group, version, kind)
-    path = Kube.Client.Base.path(group, version, pkind, namespace, name)
-
     Console.Deployments.Clusters.control_plane(cluster, user)
     |> Kube.Utils.save_kubeconfig()
 
+    pkind = Console.GraphQl.Resolvers.Kubernetes.get_kind(cluster, group, version, kind)
+    path  = Kube.Client.Base.path(group, version, pkind, namespace, name)
+
     with {:ok, _} <- Kube.Client.raw(path) do
       {start, stop, step} = prom_args(args)
-      %ServiceComponent{group: group, version: version, kind: kind, name: name, namespace: namespace}
+      %ServiceComponent{
+        group: group,
+        version: version,
+        kind: kind,
+        name: name,
+        namespace: namespace,
+        service: %Service{cluster: cluster}
+      }
       |> Observability.query(start, stop, step)
     end
   end
@@ -95,6 +104,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
         Observability.query(comp, start, stop, step)
       _ -> {:error, "component with id #{comp_id} not found"}
     end
+  end
+
+  def metrics(%Service{} = service, args, _) do
+    {start, stop, step} = prom_args(args)
+    Observability.query(service, start, stop, step)
   end
 
   def cluster_logs(cluster, %{query: query} = args, _) do
@@ -145,4 +159,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Cluster{id: id}), do: Alert.for_cluster(id)
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
+
+  def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
+
+  def list_monitors(%Service{id: id}, args, _) do
+    Monitor.for_service(id)
+    |> maybe_search(Monitor, args)
+    |> Monitor.ordered()
+    |> paginate(args)
+  end
+
+  def create_monitor(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.create_monitor(attrs, user)
+
+  def update_monitor(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.update_monitor(attrs, id, user)
+
+  def delete_monitor(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.delete_monitor(id, user)
 end

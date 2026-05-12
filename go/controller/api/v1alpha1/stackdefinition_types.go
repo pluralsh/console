@@ -83,17 +83,27 @@ func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 	}
 
 	if in.Spec.Configuration != nil {
+		conf := in.Spec.Configuration
 		result.Configuration = &console.StackConfigurationAttributes{
-			Image:   in.Spec.Configuration.Image,
-			Version: in.Spec.Configuration.Version,
-			Tag:     in.Spec.Configuration.Tag,
-			Hooks: algorithms.Map(in.Spec.Configuration.Hooks, func(h *StackHook) *console.StackHookAttributes {
+			Image:   conf.Image,
+			Version: conf.Version,
+			Tag:     conf.Tag,
+			Hooks: algorithms.Map(conf.Hooks, func(h *StackHook) *console.StackHookAttributes {
 				return &console.StackHookAttributes{
 					Cmd:        h.Cmd,
 					Args:       lo.ToSlicePtr(h.Args),
 					AfterStage: h.AfterStage,
 				}
 			}),
+		}
+		if conf.Terraform != nil {
+			result.Configuration.Terraform = &console.TerraformConfigurationAttributes{
+				Parallelism:  conf.Terraform.Parallelism,
+				Refresh:      conf.Terraform.Refresh,
+				ApproveEmpty: conf.Terraform.ApproveEmpty,
+				Tofu:         conf.Terraform.Tofu,
+				TofuRegistry: conf.Terraform.TofuRegistry,
+			}
 		}
 	}
 

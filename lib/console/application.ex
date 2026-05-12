@@ -3,8 +3,6 @@ defmodule Console.Application do
   alias Console.Services.OAuth
 
   def start(_type, _args) do
-    topologies = Application.get_env(:libcluster, :topologies)
-
     :logger.add_handler(:sentry_logger, Sentry.LoggerHandler, %{
       config: %{metadata: [:file, :line]}
     })
@@ -22,6 +20,7 @@ defmodule Console.Application do
       Console.MultilevelCache,
       Console.TestCache,
       Console.LocalCache,
+      {DNSCluster, query: Application.get_env(:console, :dns_cluster_query) || :ignore},
       {Task.Supervisor, name: Console.AI.TaskSupervisor},
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
@@ -32,15 +31,19 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.AI.Agents]},
       :hackney_pool.child_spec(:ai_pool, [max_connections: 100, max_per_host: 100]),
       :hackney_pool.child_spec(:kazan_pool, [max_connections: 100, max_per_host: 100]),
-      {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
       Console.Bootstrapper,
+      ConsoleWeb.Endpoint,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Stacks.Supervisor,
       Console.Deployments.Helm.Server,
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
-      ConsoleWeb.Endpoint,
+      {GRPC.Server.Supervisor,
+        endpoint: Console.GRPC.Endpoint,
+        port: 50051,
+        start_server: Console.conf(:initialize)
+      },
       Console.Plural.Config,
       Console.Features,
       Console.Cron.Scheduler,
@@ -56,15 +59,11 @@ defmodule Console.Application do
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,
       Console.Plural.Pinger,
+      Console.Otel.MetricsExporter,
       Console.AI.GothManager,
       Console.PromEx,
-      Console.AI.Graph.Indexer.Supervisor,
       Console.Chat.Supervisor,
-      {GRPC.Server.Supervisor,
-        endpoint: Console.GRPC.Endpoint,
-        port: 50051,
-        start_server: Console.conf(:initialize)
-      }
+      {GRPC.Client.Supervisor, []}
     ] ++ consumers()
       ++ oidc_providers()
       ++ [Piazza.GracefulShutdown]

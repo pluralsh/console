@@ -4,7 +4,79 @@
         "conclusion": {
             "type": "string",
             "description": "The conclusion to this workbench job you want to record"
+        },
+        "topology": {
+            "type": "string",
+            "description": "A mermaid diagram of the topology of the system in question in this investigation.  Pass the old topology if no changes are needed.  We will validate mermaid syntax and reply with an error if invalid."
+        },
+        "todos": {
+            "type": "array",
+            "description": "The todos to update.  Pass these if there's still a todo to mark as done",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the todo"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the todo"
+                    },
+                    "done": {
+                        "type": "boolean",
+                        "description": "Whether the todo is done"
+                    }
+                },
+                "required": ["name", "description", "done"]
+            }
+        },
+        "metrics_query": {
+            "type": "object",
+            "description": "The metrics tool query to persist on the final result metadata",
+            "properties": {
+                "tool_name": {
+                    "type": "string",
+                    "description": "The metrics tool name from a prior observability subagent result"
+                },
+                "tool_args": {
+                    "type": "string",
+                    "description": "The arguments passed to the metrics tool/function call from `tool_name` (found from a prior observability subagent result).  This should be a JSON string."
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "A two to three sentence summary of what this metrics query means, including what signal it measures and concretely what you can conclude from it."
+                }
+            },
+            "required": ["tool_name", "tool_args"]
+        },
+        "logs": {
+            "type": "array",
+            "description": "Log lines relevant to the conclusion to persist on the final result metadata",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The timestamp of the log"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "The message of the log"
+                    },
+                    "labels": {
+                        "type": "object",
+                        "description": "Labels for the log",
+                        "additionalProperties": true
+                    }
+                },
+                "required": ["timestamp", "message"]
+            }
         }
     },
-    "required": ["conclusion"]
+    "required": [
+        "conclusion",
+        "todos"
+    ]
 }

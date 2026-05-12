@@ -15,7 +15,8 @@ defmodule Console.Schema.StackRun do
     ServiceError,
     PullRequest,
     AiInsight,
-    StackPolicyViolation
+    StackPolicyViolation,
+    StackInfracostResource
   }
 
   defenum ApprovalResult, approved: 0, rejected: 1, indeterminate: 2
@@ -39,6 +40,11 @@ defmodule Console.Schema.StackRun do
     embeds_one :git,           Service.Git, on_replace: :update
     embeds_one :job_spec,      JobSpec, on_replace: :update
     embeds_one :configuration, Stack.Configuration, on_replace: :update
+
+    embeds_one :scm_state, ScmState, on_replace: :update do
+      field :comment_id,    :string
+      field :ai_comment_id, :string
+    end
 
     embeds_one :job_ref, JobRef, on_replace: :update do
       field :name,      :string
@@ -73,6 +79,10 @@ defmodule Console.Schema.StackRun do
     has_many :violations, StackPolicyViolation,
       on_replace: :delete,
       foreign_key: :run_id
+
+    has_many :infracost_resources, StackInfracostResource,
+      foreign_key: :stack_run_id,
+      on_replace: :delete
 
     has_many :errors, ServiceError, on_replace: :delete
 
@@ -141,6 +151,7 @@ defmodule Console.Schema.StackRun do
     |> cast_embed(:configuration)
     |> cast_embed(:policy_engine)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
+    |> cast_embed(:scm_state, with: &scm_state_changeset/2)
     |> cast_assoc(:state)
     |> cast_assoc(:environment)
     |> cast_assoc(:steps)
@@ -161,8 +172,12 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:state)
     |> cast_assoc(:errors)
     |> cast_assoc(:violations)
+    |> cast_assoc(:infracost_resources, with: fn struct, resource_attrs ->
+      StackInfracostResource.changeset(struct, Map.put(resource_attrs, :stack_id, model.stack_id))
+    end)
     |> cast_embed(:approval_result, with: &approval_result_changeset/2)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
+    |> cast_embed(:scm_state, with: &scm_state_changeset/2)
     |> validate_required(~w(status)a)
   end
 
@@ -173,6 +188,9 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:output)
     |> cast_assoc(:errors)
     |> cast_assoc(:violations)
+    |> cast_assoc(:infracost_resources, with: fn struct, resource_attrs ->
+      StackInfracostResource.changeset(struct, Map.put(resource_attrs, :stack_id, model.stack_id))
+    end)
     |> validate_required(~w(status)a)
   end
 
@@ -194,5 +212,10 @@ defmodule Console.Schema.StackRun do
     model
     |> cast(attrs, ~w(reason result)a)
     |> validate_required(~w(reason result)a)
+  end
+
+  defp scm_state_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(comment_id ai_comment_id)a)
   end
 end

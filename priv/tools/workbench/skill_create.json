@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique name for the new skill. Must not collide with an existing skill name on this workbench (use workbench_skills to list names first)."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short summary of what the skill is for and when to use it.  This should be descriptive enough to guide a user to chose this skill when needed"
+    },
+    "contents": {
+      "type": "string",
+      "description": "The full skill body text (instructions, examples, constraints) to codify whatevr knowledge you wish to preserve here"
+    }
+  },
+  "required": ["name", "description", "contents"]
+}

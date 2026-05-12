@@ -8,6 +8,7 @@ on:
       - ".github/workflows/helm-test-ci.yaml"
       - "go/helm-test/**"
       - "charts/console/**"
+      - "charts/console-rapid/**"
 permissions:
   contents: read
 
@@ -25,7 +26,7 @@ jobs:
         working-directory: go/helm-test
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version-file: go/helm-test/go.mod

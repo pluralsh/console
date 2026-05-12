@@ -1,0 +1,557 @@
+import {
+  Button,
+  Card,
+  CheckOutlineIcon,
+  CircleDashIcon,
+  ErrorOutlineIcon,
+  Flex,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
+import { Title2H1 } from 'components/utils/typography/Text'
+import { getWorkbenchesBreadcrumbs } from 'components/workbenches/Workbenches'
+import {
+  PolicyBindingFragment,
+  useCreateWorkbenchMutation,
+  useUpdateWorkbenchMutation,
+  useWorkbenchQuery,
+  WorkbenchAttributes,
+  WorkbenchFragment,
+  WorkbenchSkillAttributes,
+  WorkbenchSkillSubagent,
+} from 'generated/graphql'
+import { cloneDeep } from 'lodash'
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  getWorkbenchAbsPath,
+  WORKBENCH_PARAM_ID,
+  WORKBENCHES_ABS_PATH,
+} from 'routes/workbenchesRoutesConsts'
+import styled, { useTheme } from 'styled-components'
+import { deepOmitFalsy } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
+import { getWorkbenchBreadcrumbs } from '../Workbench'
+import {
+  WORKBENCH_STEP_LABELS,
+  workbenchFormSteps,
+  WorkbenchStepLabel,
+} from './WorkbenchFormSteps'
+
+// Context lets individual form steps register card tabs and override footer actions
+// without the form needing to know which step is active or what UI they need.
+type WorkbenchFormContextValue = {
+  setTabs: (tabs: ReactNode | null) => void
+  setFooterActions: (actions: ReactNode | null) => void
+  setRightContent: (content: ReactNode | null) => void
+}
+const WorkbenchFormContext = createContext<WorkbenchFormContextValue | null>(
+  null
+)
+
+export function useWorkbenchFormCardTabs() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormCardTabs must be used inside a WorkbenchForm'
+    )
+  return { setTabs: ctx.setTabs }
+}
+
+export function useWorkbenchFormFooterActions() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormFooterActions must be used inside a WorkbenchForm'
+    )
+  return { setFooterActions: ctx.setFooterActions }
+}
+
+export function useWorkbenchFormCardRightContent() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormCardRightContent must be used inside a WorkbenchForm'
+    )
+  return { setRightContent: ctx.setRightContent }
+}
+
+// requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
+// use FormBinding[] so BindingInput can show chips (user email / group name).
+export type WorkbenchFormState = Omit<
+  Required<WorkbenchAttributes>,
+  'readBindings' | 'writeBindings' | 'projectId' | 'systemPrompt'
+> & {
+  readBindings: PolicyBindingFragment[]
+  writeBindings: PolicyBindingFragment[]
+  /** Bot user from the server when editing; omitted from mutation input. */
+  botUser: {
+    id: string
+    name: string
+    email: string
+    profile?: string | null
+  } | null
+  workbenchSkills: WorkbenchSkillAttributes[]
+}
+
+export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
+  const id = useParams()[WORKBENCH_PARAM_ID]
+  const { data, loading, error } = useWorkbenchQuery({
+    variables: { id },
+    skip: mode === 'create' || !id,
+    fetchPolicy: 'network-only',
+  })
+  const workbench = data?.workbench
+
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        workbench
+          ? [...getWorkbenchBreadcrumbs(workbench), { label: 'edit' }]
+          : getWorkbenchesBreadcrumbs(mode === 'create' ? 'create' : undefined),
+      [workbench, mode]
+    )
+  )
+
+  if (error)
+    return (
+      <GqlError
+        margin="large"
+        error={error}
+      />
+    )
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+      height="100%"
+      width="100%"
+      overflow="auto"
+      padding="large"
+    >
+      <Flex
+        direction="column"
+        gap="large"
+        width="100%"
+        css={{ maxWidth: 968, marginInline: 'auto' }}
+      >
+        {mode === 'create' ? (
+          <Title2H1>Create a workbench</Title2H1>
+        ) : (
+          <StackedText
+            loading={!data && loading}
+            first={workbench?.name}
+            firstPartialType="subtitle2"
+            firstColor="text"
+            second={workbench?.description}
+            secondPartialType="body2"
+            secondColor="text-xlight"
+            gap="xxsmall"
+          />
+        )}
+        <WorkbenchForm
+          workbenchId={id}
+          key={`${JSON.stringify(data?.workbench)}`} // reset form state if data updates
+          initialFormState={sanitizeInitialForm(
+            workbench ?? { id: '', name: '' }
+          )}
+          mode={mode}
+          loading={!data && loading}
+        />
+      </Flex>
+    </Flex>
+  )
+}
+
+function WorkbenchForm({
+  workbenchId,
+  initialFormState,
+  mode,
+  loading,
+}: {
+  workbenchId: Nullable<string>
+  initialFormState: WorkbenchFormState
+  mode: 'create' | 'edit'
+  loading: boolean
+}) {
+  const theme = useTheme()
+  const navigate = useNavigate()
+  const isCreateMode = mode === 'create'
+  const [formState, setFormState] =
+    useState<WorkbenchFormState>(initialFormState)
+  const [curStep, setCurStepState] =
+    useState<WorkbenchStepLabel>('Workbench setup')
+  const [cardTabs, setCardTabs] = useState<ReactNode | null>(null)
+  const [footerActions, setFooterActions] = useState<ReactNode | null>(null)
+  const [rightContent, setRightContent] = useState<ReactNode | null>(null)
+  const formContextValue = useMemo<WorkbenchFormContextValue>(
+    () => ({ setTabs: setCardTabs, setFooterActions, setRightContent }),
+    []
+  )
+  const [stepStatuses, setStepStatuses] = useState<
+    Record<WorkbenchStepLabel, StepStatus>
+  >(INITIAL_STEP_STATUSES)
+
+  const setCurStep = (newStep: WorkbenchStepLabel) => {
+    setCurStepState(newStep)
+    setStepStatuses((prev) => ({
+      ...prev,
+      [curStep]: validateStep(curStep, formState) ? 'visited' : 'error',
+    }))
+  }
+  const curStepIndex = workbenchFormSteps.findIndex(
+    ({ label }) => label === curStep
+  )
+  const allowSubmit = validateForm(formState)
+  const isLastStep = curStepIndex === workbenchFormSteps.length - 1
+
+  const StepComponent = workbenchFormSteps[curStepIndex]?.component
+
+  const [createWorkbench, { loading: createLoading, error: createError }] =
+    useCreateWorkbenchMutation({
+      onCompleted: () => {
+        navigate(
+          workbenchId ? getWorkbenchAbsPath(workbenchId) : WORKBENCHES_ABS_PATH
+        )
+      },
+      refetchQueries: ['Workbenches'],
+      awaitRefetchQueries: true,
+    })
+
+  const [updateWorkbench, { loading: updateLoading, error: updateError }] =
+    useUpdateWorkbenchMutation({
+      onCompleted: () => {
+        navigate(
+          workbenchId ? getWorkbenchAbsPath(workbenchId) : WORKBENCHES_ABS_PATH
+        )
+      },
+      refetchQueries: ['Workbenches'],
+      awaitRefetchQueries: true,
+    })
+  const mutationLoading = createLoading || updateLoading
+  const mutationError = createError || updateError
+
+  const onSave = () => {
+    const attributes = formStateToAttributes(formState)
+    if (isCreateMode) {
+      createWorkbench({ variables: { attributes } })
+      return
+    }
+    updateWorkbench({
+      variables: { id: workbenchId ?? '', attributes },
+    })
+  }
+
+  return (
+    <WorkbenchFormContext.Provider value={formContextValue}>
+      <WorkbenchSplitLayoutSC>
+        <Flex
+          direction="column"
+          width={200}
+          flexShrink={0}
+          gap="xxxsmall"
+        >
+          {workbenchFormSteps.map(({ label }) => (
+            <SidebarItem
+              key={label}
+              label={label}
+              active={curStep === label}
+              status={isCreateMode ? stepStatuses[label] : null}
+              onClick={() => setCurStep(label)}
+            />
+          ))}
+        </Flex>
+        {loading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="100%"
+          />
+        ) : (
+          StepComponent && (
+            <Flex
+              gap="medium"
+              css={{ minWidth: 0 }}
+            >
+              <FormCardSC tabs={cardTabs}>
+                {mutationError && <GqlError error={mutationError} />}
+                <StepComponent
+                  formState={formState}
+                  setFormState={setFormState}
+                />
+                <StickyActionsFooterSC>
+                  {footerActions ?? (
+                    <>
+                      <Button
+                        destructive
+                        as={Link}
+                        to={
+                          workbenchId
+                            ? getWorkbenchAbsPath(workbenchId)
+                            : WORKBENCHES_ABS_PATH
+                        }
+                      >
+                        Cancel
+                      </Button>
+                      {isLastStep ? (
+                        <Button
+                          disabled={!allowSubmit}
+                          loading={mutationLoading}
+                          onClick={onSave}
+                        >
+                          {isCreateMode
+                            ? 'Create workbench'
+                            : 'Update workbench'}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            if (!!workbenchFormSteps[curStepIndex + 1])
+                              setCurStep(
+                                workbenchFormSteps[curStepIndex + 1].label
+                              )
+                          }}
+                        >
+                          Next
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </StickyActionsFooterSC>
+              </FormCardSC>
+              {rightContent && (
+                <Flex
+                  direction="column"
+                  flexShrink={0}
+                  css={{ marginTop: theme.spacing.xlarge, width: 120 }}
+                >
+                  {rightContent}
+                </Flex>
+              )}
+            </Flex>
+          )
+        )}
+      </WorkbenchSplitLayoutSC>
+    </WorkbenchFormContext.Provider>
+  )
+}
+
+function SidebarItem({
+  label,
+  active,
+  status,
+  onClick,
+}: {
+  label: WorkbenchStepLabel
+  active: boolean
+  status: Nullable<StepStatus>
+  onClick: () => void
+}) {
+  return (
+    <SidebarBtnSC
+      onClick={onClick}
+      $active={active}
+      endIcon={
+        status === null ? null : status === 'visited' ? (
+          <CheckOutlineIcon
+            color="icon-success"
+            size={16}
+          />
+        ) : status === 'error' ? (
+          <ErrorOutlineIcon
+            color="icon-danger"
+            size={16}
+          />
+        ) : (
+          <CircleDashIcon
+            color="icon-light"
+            size={16}
+          />
+        )
+      }
+    >
+      {label}
+    </SidebarBtnSC>
+  )
+}
+
+export const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
+  ({ theme, $active }) => ({
+    ...theme.partials.text.body2,
+    justifyContent: 'space-between',
+    color: theme.colors.text,
+    textDecoration: 'none',
+    padding: theme.spacing.xsmall,
+    background: 'transparent',
+    ...($active && {
+      background: theme.colors['fill-one-selected'],
+      pointerEvents: 'none',
+    }),
+    '&:hover': { background: theme.colors['fill-zero-hover'] },
+  })
+)
+
+export const FormCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  paddingBottom: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  flex: 1,
+  minWidth: 0,
+  maxWidth: 750,
+  width: 750,
+  overflow: 'auto',
+  height: '100%',
+}))
+
+export const WorkbenchSplitLayoutSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+  height: '100%',
+  width: '100%',
+  minWidth: 750,
+  maxWidth: 968,
+  marginInline: 'auto',
+  minHeight: 0,
+}))
+
+export const StickyActionsFooterSC = styled.div(({ theme }) => ({
+  position: 'sticky',
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
+  bottom: 0,
+  marginTop: 'auto',
+  zIndex: theme.zIndexes.tooltip,
+  background: theme.colors['fill-one'],
+  border: `1px solid ${theme.colors['fill-one']}`, // should match bg color
+  padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
+  '&::before': { flex: 1 },
+}))
+
+type StepStatus = 'not-visited' | 'visited' | 'error'
+const INITIAL_STEP_STATUSES = Object.fromEntries(
+  workbenchFormSteps.map(({ label }) => [label, 'not-visited'])
+) as Record<WorkbenchStepLabel, StepStatus>
+
+const validateStep = (
+  step: WorkbenchStepLabel,
+  formState: WorkbenchFormState
+) => {
+  if (step === 'Workbench setup' && !formState.name) return false
+  return true
+}
+
+const validateForm = (formState: WorkbenchFormState) =>
+  WORKBENCH_STEP_LABELS.every((label) =>
+    validateStep(label as WorkbenchStepLabel, formState)
+  )
+
+function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
+  const sanitizedState = cloneDeep(deepOmitFalsy(state))
+  const {
+    name,
+    readBindings: r,
+    writeBindings: w,
+    botUser: _botUser,
+    ...rest
+  } = sanitizedState
+
+  // Keep explicit empty list so "delete all skills" is persisted.
+  rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
+
+  return {
+    name: name ?? '',
+    ...(r && { readBindings: r.map(bindingToBindingAttributes) }),
+    ...(w && { writeBindings: w.map(bindingToBindingAttributes) }),
+    ...rest,
+  }
+}
+
+// maps a WorkbenchFragment to form state
+// if WorkbenchAttributes gains a new field, this will fail to compile until the mapping is added here
+// (and the corresponding field is added to the Workbench GraphQL fragment)
+function sanitizeInitialForm({
+  name,
+  description = '',
+  configuration,
+  agentRuntime,
+  repository,
+  skills,
+  workbenchSkills,
+  tools,
+  readBindings,
+  writeBindings,
+  botUser,
+}: WorkbenchFragment): WorkbenchFormState {
+  const { infrastructure, coding, observability } = configuration ?? {}
+  const { kubernetes, services, stacks, podLogs, vulnerabilities } =
+    infrastructure ?? {}
+  const { logs, metrics } = observability ?? {}
+  const { mode, repositories, enableBabysitting } = coding ?? {}
+  const { files, ref } = skills ?? {}
+
+  // TODO: Load all skills via pagination instead of first 500.
+  const resolvedWorkbenchSkills = (workbenchSkills?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter(isNonNullable)
+    .map((skill) => ({
+      name: skill.name ?? '',
+      description: skill.description ?? null,
+      contents: skill.contents ?? '',
+      subagents:
+        (skill.subagents?.filter(isNonNullable) as WorkbenchSkillSubagent[]) ??
+        [],
+    }))
+
+  return {
+    name,
+    description,
+    agentRuntimeId: agentRuntime?.id ?? null,
+    repositoryId: repository?.id ?? null,
+    botUser: botUser
+      ? {
+          id: botUser.id,
+          name: botUser.name,
+          email: botUser.email,
+          profile: botUser.profile,
+        }
+      : null,
+    overrideBotUser: false,
+    configuration: {
+      infrastructure: {
+        kubernetes,
+        services,
+        stacks,
+        podLogs,
+        vulnerabilities,
+      },
+      observability: { logs, metrics },
+      coding: { mode, repositories, enableBabysitting },
+    },
+    skills: { ref, files },
+    toolAssociations:
+      tools?.flatMap((t) => (t ? [{ toolId: t.id }] : [])) ?? [],
+    readBindings:
+      readBindings?.filter(isNonNullable).flatMap(({ id, user, group }) => [
+        {
+          id,
+          user: user && { id: user.id, name: user.name, email: user.email },
+          group: group && { id: group.id, name: group.name },
+        },
+      ]) ?? [],
+    writeBindings:
+      writeBindings?.filter(isNonNullable).flatMap(({ id, user, group }) => [
+        {
+          id,
+          user: user && { id: user.id, name: user.name, email: user.email },
+          group: group && { id: group.id, name: group.name },
+        },
+      ]) ?? [],
+    workbenchSkills: resolvedWorkbenchSkills,
+  }
+}

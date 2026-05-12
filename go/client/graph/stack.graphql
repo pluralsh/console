@@ -22,9 +22,15 @@ fragment InfrastructureStackStatusFragment on InfrastructureStack {
     status
 }
 
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+    id
+    name
+}
+
 fragment PolicyEngineFragment on PolicyEngine {
     type
     maxSeverity
+    customPolicies
 }
 
 fragment InfrastructureStackFragment on InfrastructureStack {
@@ -316,6 +322,12 @@ query ListInfrastructureStacks($after: String, $first: Int, $before: String, $la
 query GetStackRunMinimal($id: ID!) {
     stackRun(id: $id) {
         ...StackRunMinimalFragment
+    }
+}
+
+query GetStackRunApprovedAt($id: ID!) {
+    stackRun(id: $id) {
+        approvedAt
     }
 }
 

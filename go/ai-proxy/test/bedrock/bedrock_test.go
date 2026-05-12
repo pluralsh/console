@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -192,5 +193,37 @@ func TestBedrockEmbeddingsProxy(t *testing.T) {
 				t.Errorf("\nwant:\n%s\ngot:\n%s", tc.WantData, res)
 			}
 		})
+	}
+}
+
+func TestBedrockResponsesEndpointUnsupported(t *testing.T) {
+	requestBody := map[string]any{
+		"model": "anthropic.claude-v2",
+		"input": "test prompt",
+		"response_format": map[string]any{
+			"type": "json_object",
+		},
+	}
+
+	requestBytes, err := json.Marshal(requestBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, server.URL+"/openai/v1/responses", bytes.NewReader(requestBytes))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := server.Client().Do(req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+	_, _ = io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want status: %d, got: %d", http.StatusBadRequest, resp.StatusCode)
 	}
 }

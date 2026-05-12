@@ -4,6 +4,30 @@ release_url: https://github.com/aws/karpenter-provider-aws/releases/tag/v{vsn}
 helm_repository_url: oci://public.ecr.aws/karpenter/karpenter
 helm_values: settings.clusterName=example
 versions:
+- version: 1.9.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Controller IAM policy was split into multiple policies; review
+        any automation that installs/patches the controller policy and ensure you
+        apply the new policy documents before/with the upgrade., 'Max supported Kubernetes
+        version bumped to 1.35; if you run 1.35, ensure you are on v1.9.0+ and validate
+        AMI/test matrix changes accordingly.', 'Monitoring: ServiceMonitor gained
+        a `sampleLimit` option; if you manage Prometheus Operator manifests, consider
+        whether you need to set/override this value.']
+    features: [Adds ICE filtering for the `MaxFleetCountExceeded` condition to improve
+        capacity selection behavior under fleet limits., Adds support for labeling
+        tenancy in AWS and improves related validation handling., Adds Windows Server
+        2025 (WS2025) support., Makes the controller policy helper script POSIX compliant
+        (quality-of-life for install/upgrade automation).]
+    breaking_changes: [Controller IAM policies were split; upgrades may fail or the
+        controller may be under-permissioned until the new set of policies is applied/reconciled.
+        Treat this as an upgrade prerequisite and verify permissions before rolling
+        out.]
+  chart_version: 1.9.0
+  images: ['public.ecr.aws/karpenter/controller:1.9.0@sha256:30a506c64fbb1d8026cbfd9a1d662be3ab6e33a7999290a104085d78b49a69d7']
 - version: 1.8.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []

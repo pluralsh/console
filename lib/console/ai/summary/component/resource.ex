@@ -57,7 +57,13 @@ defmodule Console.AI.Summary.Component.Resource do
     end
   end
 
-  def hydrate(resource), do: do_hydrate(resource)
+  def hydrate(resource) do
+    case do_hydrate(resource) do
+      {:ok, hydration} -> {:ok, hydration}
+      {:ok, hydration, _} -> {:ok, hydration}
+      error -> error
+    end
+  end
 
   def generate(resource) do
     with {:ok, events} <- events(resource),

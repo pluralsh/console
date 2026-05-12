@@ -24,6 +24,7 @@ defmodule Console.AI.Tools.Agent.Role do
   - provisioning: The assistant will help the user provision new kubernetes or cloud infrastructure or destroy existing resources, use this whenever the user asks to deploy something new or deprovision something already created.
   - manifests: The assistant will help the user write new kubernetes yaml manifests within the context of a cluster.
   - chat: The assistant will handle a generic q&a conversation about the devops related question the user is asking.
+  - configure: The assistant will help the user configure their kubernetes or cloud infrastructure, use this when the user asks to configure something in their kubernetes or cloud estate rather than create or delete infrastructure entirely.
   """
 
   def implement(%__MODULE__{role: role}) do

@@ -126,6 +126,11 @@ func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, 
 		return status.Error(codes.InvalidArgument, "query is required")
 	}
 
+	if connection.GetDynatrace() != nil {
+		// skip time range validation for dynatrace as it is not required
+		return nil
+	}
+
 	return in.validateTimeRange(timeRange)
 }
 

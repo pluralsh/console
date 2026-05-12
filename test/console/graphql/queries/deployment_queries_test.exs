@@ -41,6 +41,39 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert updated["id"] == settings.id
       assert updated["deployerRepository"]["id"] == settings.deployer_repository_id
     end
+
+    test "users can fetch azure deployments map" do
+      admin = insert(:user)
+
+      deployment_settings(ai: %{
+        enabled: true,
+        provider: :azure,
+        azure: %{
+          access_token: "token",
+          endpoint: "https://test.openai.azure.com/openai/deployments",
+          model: "gpt-4.1-mini",
+          deployments: %{"gpt-4.1-mini" => "chat-deployment"}
+        }
+      })
+
+      {:ok, %{data: %{"deploymentSettings" => updated}}} = run_query("""
+        query {
+          deploymentSettings {
+            ai {
+              provider
+              azure {
+                model
+                deployments
+              }
+            }
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert updated["ai"]["provider"] == "AZURE"
+      assert updated["ai"]["azure"]["model"] == "gpt-4.1-mini"
+      assert updated["ai"]["azure"]["deployments"] == %{"gpt-4.1-mini" => "chat-deployment"}
+    end
   end
 end
 

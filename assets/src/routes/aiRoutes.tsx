@@ -10,16 +10,12 @@ import { SentinelRunJobOutput } from 'components/ai/sentinels/sentinel/run/jobs/
 import { SentinelRun } from 'components/ai/sentinels/sentinel/run/SentinelRun.tsx'
 import { Sentinel } from 'components/ai/sentinels/sentinel/Sentinel.tsx'
 import { Sentinels } from 'components/ai/sentinels/Sentinels.tsx'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
-import { use } from 'react'
 import { Navigate, Route } from 'react-router-dom'
-import { AIAgentSessions } from '../components/ai/AIAgentSessions.tsx'
 import {
   AI_ABS_PATH,
   AI_AGENT_RUNS_ABS_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
   AI_AGENT_RUNS_REL_PATH,
-  AI_AGENT_SESSIONS_REL_PATH,
   AI_INFRA_RESEARCH_ABS_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
   AI_INFRA_RESEARCH_REL_PATH,
@@ -44,11 +40,12 @@ export const aiRoutes = [
   >
     <Route
       index
-      element={<AIRouteIndexNav />}
-    />
-    <Route
-      path={AI_AGENT_SESSIONS_REL_PATH}
-      element={<AIAgentSessions />}
+      element={
+        <Navigate
+          replace
+          to={AI_AGENT_RUNS_REL_PATH}
+        />
+      }
     />
     <Route
       path={AI_AGENT_RUNS_REL_PATH}
@@ -118,13 +115,3 @@ export const aiRoutes = [
     </Route>
   </Route>,
 ]
-
-function AIRouteIndexNav() {
-  const agentEnabled = !!use(FeatureFlagContext).featureFlags.Agent
-  return (
-    <Navigate
-      replace
-      to={agentEnabled ? AI_AGENT_RUNS_REL_PATH : AI_INFRA_RESEARCH_REL_PATH}
-    />
-  )
-}

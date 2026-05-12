@@ -33,7 +33,10 @@ defmodule Console.GraphQl.Deployments.IntegrationMutationsTest do
   end
 
   describe "createIssueWebhook" do
-    test "it can create an issue webhook" do
+    test "it can create an issue webhook with policy bindings" do
+      reader = insert(:user)
+      writer = insert(:user)
+
       {:ok, %{data: %{"createIssueWebhook" => webhook}}} = run_query("""
         mutation Create($attrs: IssueWebhookAttributes!) {
           createIssueWebhook(attributes: $attrs) {
@@ -41,37 +44,55 @@ defmodule Console.GraphQl.Deployments.IntegrationMutationsTest do
             provider
             name
             url
+            readBindings { user { id } }
+            writeBindings { user { id } }
           }
         }
       """, %{"attrs" => %{
         "provider" => "LINEAR",
-        "url" => "https://linear.app/hook/example",
         "name" => "my-issue-webhook",
-        "secret" => "webhook-secret"
+        "secret" => "webhook-secret",
+        "readBindings" => [%{"userId" => reader.id}],
+        "writeBindings" => [%{"userId" => writer.id}]
       }}, %{current_user: admin_user()})
 
       assert webhook["name"] == "my-issue-webhook"
       assert webhook["provider"] == "LINEAR"
-      assert webhook["url"] =~ "/v1/webhooks/issues/"
+      assert is_binary(webhook["url"])
+      assert [read_binding] = webhook["readBindings"]
+      assert [write_binding] = webhook["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
     end
   end
 
   describe "updateIssueWebhook" do
     test "it can update an issue webhook" do
       webhook = insert(:issue_webhook, name: "old-name")
+      reader = insert(:user)
+      writer = insert(:user)
 
       {:ok, %{data: %{"updateIssueWebhook" => updated}}} = run_query("""
         mutation Update($id: ID!, $attrs: IssueWebhookAttributes!) {
           updateIssueWebhook(id: $id, attributes: $attrs) {
             id
             name
+            readBindings { user { id } }
+            writeBindings { user { id } }
           }
         }
-      """, %{"id" => webhook.id, "attrs" => %{"name" => "new-name"}}, %{current_user: admin_user()})
+      """, %{"id" => webhook.id, "attrs" => %{
+        "name" => "new-name",
+        "readBindings" => [%{"userId" => reader.id}],
+        "writeBindings" => [%{"userId" => writer.id}]
+      }}, %{current_user: admin_user()})
 
       assert updated["id"] == webhook.id
       assert updated["name"] == "new-name"
-      assert refetch(webhook).name == "new-name"
+      assert [read_binding] = updated["readBindings"]
+      assert [write_binding] = updated["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
     end
   end
 

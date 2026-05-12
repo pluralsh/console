@@ -2,7 +2,7 @@ defmodule Console.AI.Tools.Workbench.Subagent do
   use Console.AI.Tools.Workbench.Base
   import EctoEnum
 
-  defenum Subagent, coding: 0, infrastructure: 1, observability: 2, integration: 3
+  defenum Subagent, coding: 0, infrastructure: 1, observability: 2, integration: 3, skill: 4, history: 5, search: 6
 
   embedded_schema do
     field :subagents, {:array, Subagent}, virtual: true
@@ -24,5 +24,5 @@ defmodule Console.AI.Tools.Workbench.Subagent do
     |> validate_required([:subagent, :prompt])
   end
 
-  def implement(_, result), do: {:ok, result}
+  def implement(result), do: {:ok, result}
 end

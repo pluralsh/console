@@ -232,28 +232,11 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				Configuration: console.ObserverActionConfigurationAttributes{},
 			}
 			if pr := action.Configuration.Pr; pr != nil {
-				prAutomation := &v1alpha1.PrAutomation{}
-				if err = r.Get(ctx, client.ObjectKey{Name: pr.PrAutomationRef.Name, Namespace: pr.PrAutomationRef.Namespace}, prAutomation); err != nil {
-					if errors.IsNotFound(err) {
-						return target, actions, lo.ToPtr(common.Wait()), err
-					}
-
-					return target, actions, nil, err
+				prAction, result, err := r.prActionAttributes(ctx, pr)
+				if result != nil || err != nil {
+					return target, actions, result, err
 				}
-				if !prAutomation.Status.HasID() {
-					return target, actions, lo.ToPtr(common.Wait()), fmt.Errorf("pr automation is not ready")
-				}
-
-				a.Configuration.Pr = &console.ObserverPrActionAttributes{
-					AutomationID:   prAutomation.Status.GetID(),
-					Repository:     pr.Repository,
-					Actor:          pr.Actor,
-					BranchTemplate: pr.BranchTemplate,
-				}
-				a.Configuration.Pr.Context = "{}"
-				if pr.Context.Raw != nil {
-					a.Configuration.Pr.Context = string(pr.Context.Raw)
-				}
+				a.Configuration.Pr = prAction
 			}
 			if p := action.Configuration.Pipeline; p != nil {
 				pipeline := &v1alpha1.Pipeline{}
@@ -296,6 +279,51 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		}
 	}
 	return target, actions, nil, err
+}
+
+func (r *ObserverReconciler) prActionAttributes(ctx context.Context, pr *v1alpha1.ObserverPrAction) (*console.ObserverPrActionAttributes, *ctrl.Result, error) {
+	prAutomation := &v1alpha1.PrAutomation{}
+	var prAutomationID *string
+	if pr.PrAutomationRef != nil {
+		isAi := pr.Ai != nil
+
+		if err := r.Get(ctx, client.ObjectKey{Name: pr.PrAutomationRef.Name, Namespace: pr.PrAutomationRef.Namespace}, prAutomation); err != nil {
+			if errors.IsNotFound(err) && isAi {
+				return nil, lo.ToPtr(common.Wait()), err
+			} else if !isAi {
+				return nil, nil, err
+			}
+		}
+
+		if !prAutomation.Status.HasID() && isAi {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("pr automation is not ready")
+		}
+	}
+
+	if prAutomation.Status.HasID() {
+		prAutomationID = lo.ToPtr(prAutomation.Status.GetID())
+	}
+
+	result := &console.ObserverPrActionAttributes{
+		AutomationID:   prAutomationID,
+		Repository:     pr.Repository,
+		Actor:          pr.Actor,
+		BranchTemplate: pr.BranchTemplate,
+	}
+
+	if pr.Ai != nil {
+		result.Ai = &console.ObserverPrAiActionAttributes{
+			Enabled: pr.Ai.Enabled,
+			Prompt:  pr.Ai.Prompt,
+		}
+	}
+
+	result.Context = "{}"
+	if pr.Context.Raw != nil {
+		result.Context = string(pr.Context.Raw)
+	}
+
+	return result, nil, nil
 }
 
 func (r *ObserverReconciler) addOrRemoveFinalizer(ctx context.Context, observer *v1alpha1.Observer) (*ctrl.Result, error) {

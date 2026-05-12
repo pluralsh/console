@@ -1,0 +1,38 @@
+{
+    "type": "object",
+    "description": "Adds or updates a markdown panel on the workbench canvas. Use this for narrative findings, checklists, tables, or formatted explanations alongside charts and live queries. The `identifier` is stable across calls: reuse it to replace the same block. `layout` is required so the block has a defined position and size on the grid.",
+    "properties": {
+        "identifier": {
+            "type": "string",
+            "description": "Unique key for this canvas block (e.g. `summary`, `root_cause`, `timeline`). Must be unique among canvas blocks in this job."
+        },
+        "markdown": {
+            "type": "string",
+            "description": "GitHub-flavored markdown body shown in the block. Prefer headings, bullet lists, and short sections so the canvas stays scannable."
+        },
+        "layout": {
+            "type": "object",
+            "description": "Required grid placement for this block (CanvasBlock.Layout). All of x, y, w, and h must be set.",
+            "properties": {
+                "x": {
+                    "type": "integer",
+                    "description": "Column index of the top-left cell (0-based)."
+                },
+                "y": {
+                    "type": "integer",
+                    "description": "Row index of the top-left cell (0-based)."
+                },
+                "w": {
+                    "type": "integer",
+                    "description": "Width in grid columns."
+                },
+                "h": {
+                    "type": "integer",
+                    "description": "Height in grid rows."
+                }
+            },
+            "required": ["x", "y", "w", "h"]
+        }
+    },
+    "required": ["identifier", "markdown", "layout"]
+}

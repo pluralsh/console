@@ -47,9 +47,10 @@ defmodule Console.GraphQl.Deployments.Integration do
   @desc "input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
   input_object :issue_webhook_attributes do
     field :provider, :issue_webhook_provider
-    field :url,      :string
     field :name,     :string
     field :secret,   :string
+    field :read_bindings,  list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
   end
 
   @desc "A webhook receiver for an issue provider like Linear"
@@ -57,6 +58,8 @@ defmodule Console.GraphQl.Deployments.Integration do
     field :id,       non_null(:id)
     field :provider, non_null(:issue_webhook_provider)
     field :name,     non_null(:string)
+    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy bindings for this webhook"
+    field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy bindings for this webhook"
 
     field :url, non_null(:string),
       description: "the url for this specific webhook",
@@ -90,8 +93,12 @@ defmodule Console.GraphQl.Deployments.Integration do
     field :body, non_null(:string),
       description: "the detailed description or body content of the issue"
 
-    field :flow,      :flow, resolve: dataloader(Deployments), description: "the flow this issue is associated with"
-    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this issue is associated with"
+    field :payload, :map,
+      description: "raw webhook payload received for this issue"
+
+    field :flow,          :flow, resolve: dataloader(Deployments), description: "the flow this issue is associated with"
+    field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this issue is associated with"
+    field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the workbench job this issue is associated with"
 
     timestamps()
   end

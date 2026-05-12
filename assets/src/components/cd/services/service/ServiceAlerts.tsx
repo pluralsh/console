@@ -7,16 +7,18 @@ import { mapExistingNodes } from 'utils/graphql'
 import { useServiceContext } from './ServiceDetailsContext'
 
 export function ServiceAlerts() {
-  const { service } = useServiceContext()
+  const { service, isLoading: serviceLoading } = useServiceContext()
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
         queryHook: useServiceAlertsQuery,
         keyPath: ['serviceDeployment', 'alerts'],
+        skip: !service?.id,
       },
       { serviceId: service?.id ?? '' }
     )
+  const isLoading = (!data && loading) || serviceLoading
 
   const alerts = useMemo(
     () => mapExistingNodes(data?.serviceDeployment?.alerts),
@@ -26,7 +28,7 @@ export function ServiceAlerts() {
   return (
     <AlertsTable
       alerts={alerts}
-      loading={!data && loading}
+      loading={isLoading}
       error={error}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}

@@ -177,7 +177,8 @@ export const RectangleSkeleton = styled.div<{
     '100%': { backgroundPosition: '-100% 0' },
   },
   width: $width ?? '100%',
-  height: '100%',
+  height:
+    $height in theme.spacing ? theme.spacing[$height] : ($height ?? '100%'),
   position: 'relative',
   '&::after': {
     content: '""',

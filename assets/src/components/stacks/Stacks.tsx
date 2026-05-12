@@ -163,9 +163,12 @@ export function Stacks() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: useStacksQuery, keyPath: ['infrastructureStacks'] },
     {
-      q: debouncedSearchString,
+      queryHook: useStacksQuery,
+      keyPath: ['infrastructureStacks'],
+    },
+    {
+      q: debouncedSearchString || undefined,
       projectId,
       ...(!isEmpty(searchTags)
         ? { tagQuery: { op: tagOp, tags: searchTags } }
@@ -192,7 +195,7 @@ export function Stacks() {
     skip: !stackId,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
-    pollInterval: 3_000,
+    pollInterval: 5_000,
   })
 
   const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
@@ -220,12 +223,11 @@ export function Stacks() {
 
   if (error)
     return (
-      <div css={{ padding: theme.spacing.large }}>
-        <GqlError
-          header="Cannot load stacks"
-          error={error}
-        />
-      </div>
+      <GqlError
+        margin="large"
+        header="Cannot load stacks"
+        error={error}
+      />
     )
 
   if (
@@ -433,7 +435,6 @@ export function Stacks() {
                   />
                   <StackDeleteModal
                     stack={fullStack}
-                    refetch={refetch}
                     open={menuKey === MenuItemKey.Delete}
                     onClose={() => setMenuKey(MenuItemKey.None)}
                   />

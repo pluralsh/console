@@ -9,7 +9,10 @@ defmodule Console.Schema.Alert do
     AiInsight,
     AlertResolution,
     Flow,
-    Workbench
+    Workbench,
+    WorkbenchJob,
+    Monitor,
+    WorkbenchWebhook
   }
 
   defenum Severity, low: 0, medium: 1, high: 2, critical: 3, undefined: 4
@@ -27,9 +30,21 @@ defmodule Console.Schema.Alert do
     field :message,     :string
     field :fingerprint, :string
     field :annotations, :map
+    field :payload,     :map
     field :url,         :string
+    field :webhook,        :map, virtual: true
 
     field :ai_poll_at, :utc_datetime_usec
+
+    embeds_one :timeseries, Timeseries, on_replace: :delete do
+      field :threshold, :float
+
+      embeds_many :metrics, Metric, on_replace: :delete do
+        field :timestamp, :utc_datetime_usec
+        field :value,     :float
+        field :labels,    :map
+      end
+    end
 
     embeds_one :stacktrace, Stacktrace, on_replace: :update do
       field :type,  :string
@@ -52,8 +67,11 @@ defmodule Console.Schema.Alert do
     belongs_to :service,   Service
     belongs_to :flow,      Flow
     belongs_to :workbench, Workbench
+    belongs_to :monitor,   Monitor
+    belongs_to :workbench_webhook, WorkbenchWebhook
 
-    has_one :resolution, AlertResolution
+    has_one :resolution,    AlertResolution
+    has_one :workbench_job, WorkbenchJob
 
     has_many :tags, Tag, on_replace: :delete
 
@@ -137,14 +155,18 @@ defmodule Console.Schema.Alert do
     message
     fingerprint
     annotations
+    payload
     url
     project_id
     flow_id
     cluster_id
     insight_id
     service_id
+    monitor_id
     workbench_id
+    workbench_webhook_id
     ai_poll_at
+    webhook
   )a
 
   def changeset(model, attrs) do
@@ -153,12 +175,13 @@ defmodule Console.Schema.Alert do
     |> cast_assoc(:tags)
     |> cast_assoc(:insight)
     |> cast_embed(:stacktrace, with: &stacktrace_changeset/2)
+    |> cast_embed(:timeseries, with: &timeseries_changeset/2)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:insight_id)
     |> validate_required(~w(type title state severity message fingerprint)a)
-    |> validate_one_present(~w(project_id cluster_id service_id flow_id)a)
+    |> validate_one_present(~w(project_id cluster_id service_id flow_id monitor_id workbench_id)a)
     |> change_markers(state: :state_changed)
   end
 
@@ -171,5 +194,17 @@ defmodule Console.Schema.Alert do
   def frame_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(file line column function context_line vars)a)
+  end
+
+  defp timeseries_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(threshold)a)
+    |> cast_embed(:metrics, with: &timeseries_metrics_changeset/2)
+  end
+
+  defp timeseries_metrics_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(timestamp value labels)a)
+    |> validate_required(~w(timestamp value)a)
   end
 end

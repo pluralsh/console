@@ -14,11 +14,11 @@
             "properties": {
                 "start": {
                     "type": "string",
-                    "description": "The start time to use to filter metrics"
+                    "description": "The start time to use to filter metrics. Provide in ISO8601 format."
                 },
                 "end": {
                     "type": "string",
-                    "description": "The end time to use to filter metrics"
+                    "description": "The end time to use to filter metrics. Provide in ISO8601 format."
                 }
             }
         }

@@ -8,7 +8,7 @@ import {
   SprayIcon,
 } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
-import { useContext, useState } from 'react'
+import { use, useState } from 'react'
 
 import { HeaderIconButton } from 'components/cluster/containers/ContainerShell'
 
@@ -18,7 +18,7 @@ import { normalizedThemes, themeNames } from './themes'
 const fuse = new Fuse(themeNames, { threshold: 0.25 })
 
 function TerminalThemeSelector() {
-  const [, setTerminalTheme] = useContext(TerminalThemeContext)
+  const [, setTerminalTheme] = use(TerminalThemeContext)
   const [search, setSearch] = useState('')
   const [, setOpen] = useState(false)
   const results = fuse.search(search).map((x) => x.item)
@@ -29,7 +29,7 @@ function TerminalThemeSelector() {
       aria-label="theme-selector"
       placement="right"
       width="460px"
-      onSelectionChange={(t) => setTerminalTheme(t)}
+      onSelectionChange={(t) => setTerminalTheme(`${t}`)}
       onOpenChange={(o) => setOpen(o)}
       triggerButton={
         <HeaderIconButton tooltipProps={{ label: 'Change theme' }}>

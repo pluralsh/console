@@ -25,6 +25,8 @@ env:
   GOPATH: /home/runner/go
   GOBIN: /home/runner/go/bin
   GOPROXY: "https://proxy.golang.org"
+  REGISTRY_IMAGE: ghcr.io/pluralsh/ai-proxy
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
   test:
@@ -36,43 +38,108 @@ jobs:
         working-directory: go/ai-proxy
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version-file: go/ai-proxy/go.mod
           cache: true
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make test
-  
-  publish-docker:
-    name: Build and push ai-proxy container
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/ai-proxy
+
+  build-image:
+    name: Build ai-proxy image
     needs: [ test ]
     permissions:
       contents: 'read'
       id-token: 'write'
       packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/ai-proxy
     steps:
-      - uses: actions/checkout@v4.2.2
+      - name: Checkout
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - id: meta
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platforms.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+      - name: Docker meta
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ghcr.io/pluralsh/ai-proxy
-            gcr.io/pluralsh/ai-proxy
-            docker.io/pluralsh/ai-proxy
-          tags: |
-            type=sha
-            type=ref,event=pr
-            type=ref,event=branch
-            type=match,pattern=go/ai-proxy/(v.*),group=1
-      - uses: docker/login-action@v3
+          images: ${{ env.REGISTRY_IMAGE }}
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: "."
+          file: "./go/ai-proxy/Dockerfile"
+          tags: ${{ env.REGISTRY_IMAGE }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.platforms.platform }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-image:
+    name: Publish ai-proxy image
+    needs: [ build-image ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        images:
+          - ghcr.io/pluralsh/ai-proxy
+          - gcr.io/pluralsh/ai-proxy
+          - docker.io/pluralsh/ai-proxy
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -84,23 +151,30 @@ jobs:
           token_format: 'access_token'
           create_credentials_file: true
       - uses: google-github-actions/setup-gcloud@v1.0.1
-      - run: gcloud auth configure-docker -q
-      - uses: docker/login-action@v3
+      - name: Login to GCR
+        run: gcloud auth configure-docker -q
+      - name: Login to Docker
+        uses: docker/login-action@v3
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3.0.0
-      - uses: docker/build-push-action@v5.1.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          context: "."
-          file: "./go/ai-proxy/Dockerfile"
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            GIT_COMMIT=${{ github.sha }}
-            VERSION=${{ steps.meta.outputs.version }}
+          images: ${{ matrix.images }}
+          tags: |
+            type=sha
+            type=ref,event=pr
+            type=ref,event=branch
+            type=match,pattern=go/ai-proxy/(v.*),group=1
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ matrix.images }}:${{ steps.meta.outputs.version }}

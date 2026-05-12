@@ -357,7 +357,6 @@ function CodeContent({
               $verticallyCenter={!multiLine}
             />
             <Highlight
-              key={codeString}
               language={language}
               {...props}
             >
@@ -534,7 +533,7 @@ const Code = styled(CodeUnstyled)((_) => ({
   },
 }))
 
-export function useCopyText(text: string) {
+export function useCopyText(text: string, resetMs: number = 1000) {
   const [copied, setCopied] = useState(false)
   const handleCopy = useCallback(
     () =>
@@ -543,10 +542,10 @@ export function useCopyText(text: string) {
   )
   useEffect(() => {
     if (copied) {
-      const timeout = setTimeout(() => setCopied(false), 1000)
+      const timeout = setTimeout(() => setCopied(false), resetMs)
       return () => clearTimeout(timeout)
     }
-  }, [copied])
+  }, [copied, resetMs])
   return { copied, handleCopy }
 }
 

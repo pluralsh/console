@@ -26,39 +26,41 @@ func getContainerTransformer(container corev1.Container) func(containers []corev
 	}
 }
 
-var _ = Describe("Console Chart", func() {
-	Context("with default values", Ordered, func() {
-		var (
-			containers = []corev1.Container{
-				{
-					Name:  "console",
-					Image: "ghcr.io/pluralsh/console",
-				},
-				{
-					Name:  "auth",
-					Image: "ghcr.io/pluralsh/oci-auth",
-				},
-			}
-			deployment appsv1.Deployment
-			err        error
-			manifests  common.ManifestMap
-		)
+var _ = Describe("Container Image", func() {
+	for _, chartEntry := range console.Charts() {
+		Context(chartEntry.Name+" with default values", Ordered, func() {
+			var (
+				containers = []corev1.Container{
+					{
+						Name:  "console",
+						Image: "ghcr.io/pluralsh/console",
+					},
+					{
+						Name:  "auth",
+						Image: "ghcr.io/pluralsh/oci-auth",
+					},
+				}
+				deployment appsv1.Deployment
+				err        error
+				manifests  common.ManifestMap
+			)
 
-		BeforeAll(func() {
-			manifests, err = console.LoadConsoleChart(nil)
-			Expect(err).NotTo(HaveOccurred())
+			BeforeAll(func() {
+				manifests, err = chartEntry.Load(nil)
+				Expect(err).NotTo(HaveOccurred())
 
-			rawDeployment, exists := manifests[console.DefaultResources().Console.Deployment.String()]
-			Expect(exists).To(BeTrue())
+				rawDeployment, exists := manifests[chartEntry.Resources().Console.Deployment.String()]
+				Expect(exists).To(BeTrue())
 
-			err = runtime.DefaultUnstructuredConverter.FromUnstructured(rawDeployment.UnstructuredContent(), &deployment)
-			Expect(err).NotTo(HaveOccurred())
-		})
-
-		for _, container := range containers {
-			It(fmt.Sprintf("should have %s container with official image", container.Name), func() {
-				Expect(deployment.Spec.Template.Spec.Containers).To(WithTransform(getContainerTransformer(container), Equal(container)))
+				err = runtime.DefaultUnstructuredConverter.FromUnstructured(rawDeployment.UnstructuredContent(), &deployment)
+				Expect(err).NotTo(HaveOccurred())
 			})
-		}
-	})
+
+			for _, container := range containers {
+				It(fmt.Sprintf("should have %s container with official image", container.Name), func() {
+					Expect(deployment.Spec.Template.Spec.Containers).To(WithTransform(getContainerTransformer(container), Equal(container)))
+				})
+			}
+		})
+	}
 })

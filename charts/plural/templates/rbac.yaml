@@ -1,0 +1,65 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: plural-role
+  labels:
+{{ include "plural.labels" . | indent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: plural-shell-role
+  labels:
+{{ include "plural.labels" . | indent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/exec", "pods/status"]
+  verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: plural
+  labels:
+{{ include "plural.labels" . | indent 4 }}
+  annotations:
+  {{ toYaml .Values.rbac.serviceAccountAnnotations | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: plural-role
+  labels:
+{{ include "plural.labels" . | indent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: plural
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: plural-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: plural-shell-role
+  labels:
+{{ include "plural.labels" . | indent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: plural
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: plural-shell-role

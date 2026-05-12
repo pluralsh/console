@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
-	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
 )
 
 type TempoProvider struct {
@@ -24,7 +24,7 @@ func (in *TempoProvider) Traces(ctx context.Context, input *toolquery.TracesQuer
 		return nil, ErrInvalidArgument
 	}
 
-	client := clients.NewTempoClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
+	client := client.NewTempoClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
 	defer client.Close()
 
 	limit := ""

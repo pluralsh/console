@@ -110,6 +110,13 @@ defmodule Console.GraphQl.Deployments.Flow do
       resolve &Deployments.issues_for_flow/3
     end
 
+    connection field :workbench_jobs, node_type: :workbench_job do
+      arg :alert, :boolean, description: "show runs spawned from alerts"
+      arg :issue, :boolean, description: "show runs spawned from issues"
+
+      resolve &Deployments.list_workbench_jobs_for_flow/3
+    end
+
     timestamps()
   end
 

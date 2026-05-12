@@ -535,6 +535,11 @@ spec:
                           EnableHelm indicates whether to enable Helm for this Kustomize deployment.
                           Used for inflating Helm charts.
                         type: boolean
+                      envsubst:
+                        description: Envsubst indicates whether to apply envsubst
+                          replacements to the manifests, using the services attached
+                          configuration as the variables.
+                        type: boolean
                       path:
                         description: The folder your base kustomization file lives
                           within relative to your main git folder path.  It can be

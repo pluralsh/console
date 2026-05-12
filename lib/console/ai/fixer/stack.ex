@@ -81,11 +81,5 @@ defmodule Console.AI.Fixer.Stack do
     """
   end
 
-  defp last_run(%Stack{} = stack) do
-    StackRun.for_stack(stack.id)
-    |> StackRun.for_status(:failed)
-    |> StackRun.ordered(desc: :id)
-    |> StackRun.limit(1)
-    |> Repo.one()
-  end
+  defp last_run(%Stack{} = stack), do: Stacks.last_failed_run(stack.id)
 end

@@ -141,7 +141,12 @@ const IconFrameSC = styled.div<{
     ? {
         cursor: 'pointer',
         '&[disabled]': {
-          cursor: 'default',
+          color: theme.colors['text-disabled'],
+          cursor: 'not-allowed',
+          ...($type !== 'tertiary' && { borderColor: theme.colors['border'] }),
+          ...($type === 'floating' && {
+            background: theme.colors['action-primary-disabled'],
+          }),
         },
         '&:hover:not(:disabled)': {
           backgroundColor: $selected

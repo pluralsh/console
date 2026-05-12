@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	CloudQuery_Query_FullMethodName   = "/cloudquery.CloudQuery/Query"
 	CloudQuery_Schema_FullMethodName  = "/cloudquery.CloudQuery/Schema"
+	CloudQuery_Tables_FullMethodName  = "/cloudquery.CloudQuery/Tables"
 	CloudQuery_Extract_FullMethodName = "/cloudquery.CloudQuery/Extract"
 )
 
@@ -32,6 +33,7 @@ const (
 type CloudQueryClient interface {
 	Query(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryResult, error)
 	Schema(ctx context.Context, in *SchemaInput, opts ...grpc.CallOption) (*SchemaOutput, error)
+	Tables(ctx context.Context, in *TablesInput, opts ...grpc.CallOption) (*TablesOutput, error)
 	Extract(ctx context.Context, in *ExtractInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ExtractOutput], error)
 }
 
@@ -63,6 +65,16 @@ func (c *cloudQueryClient) Schema(ctx context.Context, in *SchemaInput, opts ...
 	return out, nil
 }
 
+func (c *cloudQueryClient) Tables(ctx context.Context, in *TablesInput, opts ...grpc.CallOption) (*TablesOutput, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TablesOutput)
+	err := c.cc.Invoke(ctx, CloudQuery_Tables_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudQueryClient) Extract(ctx context.Context, in *ExtractInput, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ExtractOutput], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &CloudQuery_ServiceDesc.Streams[0], CloudQuery_Extract_FullMethodName, cOpts...)
@@ -88,6 +100,7 @@ type CloudQuery_ExtractClient = grpc.ServerStreamingClient[ExtractOutput]
 type CloudQueryServer interface {
 	Query(context.Context, *QueryInput) (*QueryResult, error)
 	Schema(context.Context, *SchemaInput) (*SchemaOutput, error)
+	Tables(context.Context, *TablesInput) (*TablesOutput, error)
 	Extract(*ExtractInput, grpc.ServerStreamingServer[ExtractOutput]) error
 	mustEmbedUnimplementedCloudQueryServer()
 }
@@ -104,6 +117,9 @@ func (UnimplementedCloudQueryServer) Query(context.Context, *QueryInput) (*Query
 }
 func (UnimplementedCloudQueryServer) Schema(context.Context, *SchemaInput) (*SchemaOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method Schema not implemented")
+}
+func (UnimplementedCloudQueryServer) Tables(context.Context, *TablesInput) (*TablesOutput, error) {
+	return nil, status.Error(codes.Unimplemented, "method Tables not implemented")
 }
 func (UnimplementedCloudQueryServer) Extract(*ExtractInput, grpc.ServerStreamingServer[ExtractOutput]) error {
 	return status.Error(codes.Unimplemented, "method Extract not implemented")
@@ -165,6 +181,24 @@ func _CloudQuery_Schema_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudQuery_Tables_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TablesInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudQueryServer).Tables(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudQuery_Tables_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudQueryServer).Tables(ctx, req.(*TablesInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudQuery_Extract_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ExtractInput)
 	if err := stream.RecvMsg(m); err != nil {
@@ -190,6 +224,10 @@ var CloudQuery_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Schema",
 			Handler:    _CloudQuery_Schema_Handler,
+		},
+		{
+			MethodName: "Tables",
+			Handler:    _CloudQuery_Tables_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

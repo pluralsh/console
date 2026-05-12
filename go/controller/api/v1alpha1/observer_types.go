@@ -195,8 +195,12 @@ type ObserverPrAction struct {
 	// PrAutomationRef references the PR automation template to use for generating pull requests.
 	// The automation template defines the repository, branch pattern, and file modifications
 	// to apply when creating the pull request.
-	// +kubebuilder:validation:Required
-	PrAutomationRef v1.ObjectReference `json:"prAutomationRef"`
+	// +kubebuilder:validation:Optional
+	PrAutomationRef *v1.ObjectReference `json:"prAutomationRef,omitempty"`
+
+	// Ai contains configuration for AI assistance in this PR automation.
+	// +kubebuilder:validation:Optional
+	Ai *ObserverPrAiAction `json:"ai,omitempty"`
 
 	// Repository overrides the repository slug for the referenced PR automation.
 	// Use this when you want to target a different repository than the one
@@ -219,6 +223,16 @@ type ObserverPrAction struct {
 	// Actor specifies the actor to use for the created branch. Should be a user email in Plural.
 	// +kubebuilder:validation:Optional
 	Actor *string `json:"actor,omitempty"`
+}
+
+type ObserverPrAiAction struct {
+	// Whether AI assistance is enabled for this automation.
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// The prompt to use to guide the AI code change for this PR.
+	// +kubebuilder:validation:Required
+	Prompt string `json:"prompt"`
 }
 
 // ObserverPipelineAction defines configuration for triggering pipeline context updates.

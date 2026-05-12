@@ -32,6 +32,10 @@ func (a *App) Run(ctx context.Context) (retErr error) {
 		return err
 	}
 	ApplyDefaultsToKasConfigurationFile(cfg)
+	err = cfg.ValidateAll()
+	if err != nil {
+		return fmt.Errorf("kascfg.Validate: %w", err)
+	}
 	err = cfg.ValidateExtra()
 	if err != nil {
 		return fmt.Errorf("kascfg.ValidateExtra: %w", err)
@@ -68,10 +72,6 @@ func LoadConfigurationFile(configFile string) (*kascfg.ConfigurationFile, error)
 	err = protojson.Unmarshal(configJSON, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("protojson.Unmarshal: %w", err)
-	}
-	err = cfg.ValidateAll()
-	if err != nil {
-		return nil, fmt.Errorf("kascfg.Validate: %w", err)
 	}
 	return cfg, nil
 }

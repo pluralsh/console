@@ -58,8 +58,15 @@ query GetSentinelTiny($id: ID!) {
     }
 }
 
+mutation RunSentinel($id: ID!) {
+    runSentinel(id: $id) {
+        ...SentinelRunFragment
+    }
+}
+
 fragment SentinelRunJobFragment on SentinelRunJob {
     id
+    check
     status
     format
     usesGit
@@ -136,6 +143,8 @@ fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
     distro
     tags
+    rerunFailures
+    rerunFailuresCount
     gotestsum {
         p
         parallel

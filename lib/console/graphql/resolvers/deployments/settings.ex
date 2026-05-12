@@ -31,8 +31,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
     CloudConnection.for_user(user)
     |> CloudConnection.ordered()
     |> maybe_search(CloudConnection, args)
+    |> filter_provider(args)
     |> paginate(args)
   end
+
+  defp filter_provider(query, %{provider: provider}) when not is_nil(provider),
+    do: CloudConnection.for_provider(query, provider)
+  defp filter_provider(query, _), do: query
 
   def create_project(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.create_project(attrs, user)

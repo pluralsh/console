@@ -9,7 +9,11 @@ defmodule Console.Schema.Workbench do
     WorkbenchToolAssociation,
     WorkbenchWebhook,
     WorkbenchCron,
+    WorkbenchPrompt,
+    WorkbenchSkill,
+    WorkbenchEval,
     PolicyBinding,
+    FlowWorkbench,
     User,
     AgentRun,
     Alert
@@ -23,14 +27,22 @@ defmodule Console.Schema.Workbench do
 
     embeds_one :configuration, Configuration, on_replace: :update do
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
-        field :services,   :boolean
-        field :stacks,     :boolean
-        field :kubernetes, :boolean
+        field :services,        :boolean
+        field :stacks,          :boolean
+        field :kubernetes,      :boolean
+        field :pod_logs,        :boolean
+        field :vulnerabilities, :boolean
+      end
+
+      embeds_one :observability, Observability, on_replace: :update do
+        field :logs,    :boolean
+        field :metrics, :boolean
       end
 
       embeds_one :coding, Coding, on_replace: :update do
-        field :mode,         AgentRun.Mode
-        field :repositories, {:array, :string}
+        field :mode,               AgentRun.Mode
+        field :enable_babysitting, :boolean
+        field :repositories,       {:array, :string}
       end
     end
 
@@ -54,14 +66,19 @@ defmodule Console.Schema.Workbench do
     belongs_to :project,   Project
     belongs_to :repository, GitRepository
     belongs_to :agent_runtime, AgentRuntime
+    belongs_to :bot_user, User, foreign_key: :bot_user_id
 
     has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
-    has_many :tools, through: [:tool_associations, :tool]
-    has_many :jobs,     WorkbenchJob,     on_replace: :delete
-    has_many :webhooks, WorkbenchWebhook, on_replace: :delete
-    has_many :crons,    WorkbenchCron,    on_replace: :delete
-    has_many :alerts,   Alert
+    has_many :jobs,              WorkbenchJob,     on_replace: :delete
+    has_many :webhooks,          WorkbenchWebhook, on_replace: :delete
+    has_many :crons,             WorkbenchCron,    on_replace: :delete
+    has_many :prompts,           WorkbenchPrompt,  on_replace: :delete
+    has_many :flows_workbenches, FlowWorkbench,    on_replace: :delete
+    has_many :workbench_skills,  WorkbenchSkill,   on_replace: :delete
+    has_many :alerts,            Alert
+    has_one :eval,               WorkbenchEval
 
+    has_many :tools, through: [:tool_associations, :tool]
     timestamps()
   end
 
@@ -90,18 +107,20 @@ defmodule Console.Schema.Workbench do
       from(w in query,
         join: p in assoc(w, :project),
         left_join: b in PolicyBinding,
-          on: b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
+          on: b.policy_id == w.read_policy_id or b.policy_id == w.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
         where: b.user_id == ^id or b.group_id in ^groups,
         distinct: true
       )
     end)
   end
 
-  @valid ~w(name description system_prompt project_id repository_id agent_runtime_id)a
+  @valid ~w(name description system_prompt project_id repository_id agent_runtime_id bot_user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_assoc(:workbench_skills)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:tool_associations)
@@ -111,6 +130,7 @@ defmodule Console.Schema.Workbench do
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:agent_runtime_id)
+    |> foreign_key_constraint(:bot_user_id)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name])
@@ -135,15 +155,21 @@ defmodule Console.Schema.Workbench do
     |> cast(attrs, [])
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
+    |> cast_embed(:observability, with: &observability_changeset/2)
   end
 
   def infrastructure_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(services stacks kubernetes)a)
+    |> cast(attrs, ~w(services stacks kubernetes pod_logs vulnerabilities)a)
   end
 
   def coding_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(mode repositories)a)
+    |> cast(attrs, ~w(mode repositories enable_babysitting)a)
+  end
+
+  def observability_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(logs metrics)a)
   end
 end

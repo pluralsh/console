@@ -76,8 +76,8 @@ defmodule Console.AI.Research.Graph do
     |> then(fn g ->
       %{
         g | notes: g.notes ++ notes,
-            service_ids: Enum.uniq(g.service_ids ++ graph.service_ids),
-            stack_ids: Enum.uniq(g.stack_ids ++ graph.stack_ids)
+            service_ids: Enum.uniq(g.service_ids ++ (graph.service_ids || [])),
+            stack_ids: Enum.uniq(g.stack_ids ++ (graph.stack_ids || []))
       }
     end)
     |> store()

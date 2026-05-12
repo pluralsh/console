@@ -55,6 +55,55 @@ spec:
                 description: AgentRuntime reference in the "<cluster-handle>/<runtime-name>"
                   format.
                 type: string
+              bindings:
+                description: Bindings define read and write access policies for this
+                  workbench.
+                properties:
+                  read:
+                    description: Read bindings.
+                    items:
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
+                      properties:
+                        UserID:
+                          type: string
+                        groupID:
+                          type: string
+                        groupName:
+                          type: string
+                        id:
+                          description: |-
+                            ID of a binding.
+                            Deprecated.
+                            Do not use.
+                          type: string
+                        userEmail:
+                          type: string
+                      type: object
+                    type: array
+                  write:
+                    description: Write bindings.
+                    items:
+                      description: Binding used to assign permissions to a resource
+                        for a user or a group in the system.
+                      properties:
+                        UserID:
+                          type: string
+                        groupID:
+                          type: string
+                        groupName:
+                          type: string
+                        id:
+                          description: |-
+                            ID of a binding.
+                            Deprecated.
+                            Do not use.
+                          type: string
+                        userEmail:
+                          type: string
+                      type: object
+                    type: array
+                type: object
               configuration:
                 description: Configuration defines workbench capabilities (coding
                   and infrastructure).
@@ -87,6 +136,17 @@ spec:
                         type: boolean
                       stacks:
                         description: Stacks enables the stacks capability.
+                        type: boolean
+                    type: object
+                  observability:
+                    description: Observability configures observability capabilities
+                      (logs, metrics).
+                    properties:
+                      logs:
+                        description: Logs enables the logs capability.
+                        type: boolean
+                      metrics:
+                        description: Metrics enables the metrics capability.
                         type: boolean
                     type: object
                 type: object

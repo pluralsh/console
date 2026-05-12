@@ -1,0 +1,20 @@
+The Plural Monitor <%= @monitor.name %> is firing for <%= @monitor.service.name %> on cluster <%= @monitor.service.cluster.name %>.
+
+The alarm threshold is: <%= @monitor.threshold.value %> <%= @monitor.threshold.aggregate %>.
+
+Here are some of the details of the monitor for reference:
+
+<%= if @monitor.type == :log do %>
+## Log Query
+
+```json
+<%= Jason.encode!(Console.mapify(@monitor.query.log), pretty: true) %>
+```
+
+## Query Results:
+
+```json
+<%= Jason.encode!(Console.mapify(@results), pretty: true) %>
+```
+
+<% end %>

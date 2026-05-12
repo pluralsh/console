@@ -77,6 +77,6 @@ build-docker: ## build docker image via compose
 
 .PHONY: --download-extensions
 --download-extensions: ## INTERNAL: download postgres extensions
-	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.20.0
-	@./hack/postgres.sh -p gcp -d $(DIST_DIR) -v 1.10.0
-	@./hack/postgres.sh -p azure -d $(DIST_DIR) -v 1.4.0
+	@./hack/postgres.sh -p aws -d $(DIST_DIR) -v 1.30.2
+	@./hack/postgres.sh -p gcp -d $(DIST_DIR) -v 1.13.0
+	@./hack/postgres.sh -p azure -d $(DIST_DIR) -v 1.12.0

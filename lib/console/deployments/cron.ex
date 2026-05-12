@@ -23,7 +23,8 @@ defmodule Console.Deployments.Cron do
     ServiceTemplate,
     Revision,
     ClusterInsightComponent,
-    ClusterUpgrade
+    ClusterUpgrade,
+    WorkbenchJob
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -335,6 +336,22 @@ defmodule Console.Deployments.Cron do
     Logger.info "pruning dangling access tokens"
     Console.Schema.AccessToken.expired()
     |> Repo.delete_all(timeout: 300_000)
+  end
+
+  def prune_workbench_jobs() do
+    Logger.info "pruning dangling workbench jobs"
+    WorkbenchJob.expired()
+    |> WorkbenchJob.ordered(desc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 1)
+    |> Stream.chunk_every(20)
+    |> Task.async_stream(fn chunk ->
+      Logger.info "pruning #{length(chunk)} workbench jobs"
+      Enum.map(chunk, & &1.id)
+      |> WorkbenchJob.for_ids()
+      |> Repo.delete_all(timeout: 300_000)
+    end, max_concurrency: 10)
+    |> Stream.run()
   end
 
   def prune_helm_repositories() do

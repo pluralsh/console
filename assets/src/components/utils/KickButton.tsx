@@ -1,3 +1,4 @@
+import { MutationHookOptions } from '@apollo/client'
 import {
   Button,
   GraphQLToast,
@@ -16,6 +17,7 @@ export default function KickButton({
   icon = false,
   tooltipMessage,
   variables,
+  mutationOptions,
   ...props
 }: {
   pulledAt?: string | null
@@ -24,8 +26,12 @@ export default function KickButton({
   icon?: boolean
   tooltipMessage: string
   variables: any
+  mutationOptions?: MutationHookOptions
 } & ComponentPropsWithRef<typeof Button>) {
-  const [mutation, { loading, error }] = kickMutationHook({ variables })
+  const [mutation, { loading, error }] = kickMutationHook({
+    ...mutationOptions,
+    variables,
+  })
   const [lastSync, setLastSync] = useState<Date | undefined>(undefined)
   const { disabled, secondsRemaining } = useSyncCooldown(lastSync, 15 * 1000)
   const onClick = useCallback(() => {

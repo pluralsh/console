@@ -90,7 +90,7 @@ var _ = Describe("Observer Controller", Ordered, func() {
 							Type: gqlclient.ObserverActionTypePr,
 							Configuration: v1alpha1.ObserverConfiguration{
 								Pr: &v1alpha1.ObserverPrAction{
-									PrAutomationRef: corev1.ObjectReference{
+									PrAutomationRef: &corev1.ObjectReference{
 										Name:      prAutomationName,
 										Namespace: namespace,
 									},

@@ -1,0 +1,172 @@
+icon: https://avatars.githubusercontent.com/u/30269780?s=200&v=4
+git_url: https://github.com/argoproj/argo-workflows
+release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
+helm_repository_url: https://argoproj.github.io/argo-helm
+chart_name: argo-workflows
+versions:
+- version: 4.0.5
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.13
+  images: ['quay.io/argoproj/argocli:v4.0.5', 'quay.io/argoproj/workflow-controller:v4.0.5',
+    'registry.k8s.io/kubectl:v1.36.0']
+- version: 4.0.2
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.4
+  images: ['quay.io/argoproj/argocli:v4.0.2', 'quay.io/argoproj/workflow-controller:v4.0.2',
+    'registry.k8s.io/kubectl:v1.35.3']
+- version: 3.7.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.45.21
+  images: ['quay.io/argoproj/argocli:v3.7.0', 'quay.io/argoproj/workflow-controller:v3.7.0']
+- version: 3.6.5
+  kube: ['1.31', '1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["v3.6.3 was explicitly marked as \u201CDo not use\u201D; the main actionable\
+        \ change is to move off 3.6.3 to a later patch (3.6.4+) and proceed to 3.6.5.",
+      'v3.6.5 provides updated controller/server manifests (install.yaml) and updated
+        CLI binaries for all supported platforms (same install process, newer artifacts).']
+    breaking_changes: ["No breaking changes were listed in the provided notes for\
+        \ 3.6.3\u21923.6.5; however 3.6.3 is a known-bad release and should not be\
+        \ deployed."]
+  chart_version: 0.45.12
+  images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
+- version: 3.6.3
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog was provided in the notes you shared\
+        \ (only upstream application GitHub release stubs for v3.6.0 and v3.6.3).\
+        \ Treat this as an app version bump only; verify the chart version mapping\
+        \ and read the chart\u2019s own CHANGELOG/values schema before upgrading.",
+      "Upstream release v3.6.3 is explicitly flagged: \u201CDo not use this version,\
+        \ use v3.6.4 instead.\u201D Plan to skip 3.6.3 and target 3.6.4 (or later\
+        \ 3.6.x) to avoid whatever issue prompted the warning.", 'Install manifests
+        (install.yaml) exist for both versions and are similar in size; no concrete
+        functional deltas are listed in the provided notes. Expect mostly patch-level
+        fixes between 3.6.0 and 3.6.3, but you must consult the detailed changelog/upgrading
+        guide for specifics.']
+    features: [No specific new features were listed in the provided release notes
+        excerpts for v3.6.0 or v3.6.3 (they point to the blog/changelog instead).]
+    breaking_changes: ['No breaking changes were enumerated in the provided excerpts;
+        however, v3.6.3 has a known issue severe enough that upstream recommends not
+        using it (use v3.6.4 instead).']
+  chart_version: 0.45.5
+  images: ['quay.io/argoproj/argocli:v3.6.3', 'quay.io/argoproj/workflow-controller:v3.6.3']
+- version: 3.6.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.45.0
+  images: ['quay.io/argoproj/argocli:v3.6.0', 'quay.io/argoproj/workflow-controller:v3.6.0']
+- version: 3.5.11
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes are listed in the provided release note excerpts;
+        both pages primarily contain installation instructions and links to the full
+        changelog/upgrading guide.]
+    breaking_changes: [No breaking changes are listed in the provided release note
+        excerpts; you must consult the Argo Workflows 3.5 upgrading guide and the
+        project CHANGELOG for any breaking changes between v3.5.6 and v3.5.11.]
+  chart_version: 0.42.5
+  images: ['quay.io/argoproj/argocli:v3.5.11', 'quay.io/argoproj/workflow-controller:v3.5.11']
+- version: 3.5.6
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.41.6
+  images: ['quay.io/argoproj/argocli:v3.5.6', 'quay.io/argoproj/workflow-controller:v3.5.6']
+- version: 3.5.3
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.40.5
+  images: ['quay.io/argoproj/argocli:v3.5.3', 'quay.io/argoproj/workflow-controller:v3.5.3']
+- version: 3.5.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.37.1
+  images: ['quay.io/argoproj/argocli:v3.5.0', 'quay.io/argoproj/workflow-controller:v3.5.0']
+- version: 3.4.10
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.33.1
+  images: ['quay.io/argoproj/argocli:v3.4.10', 'quay.io/argoproj/workflow-controller:v3.4.10']
+- version: 3.4.8
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.31.0
+  images: ['quay.io/argoproj/argocli:v3.4.8', 'quay.io/argoproj/workflow-controller:v3.4.8']
+- version: 3.4.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.20.0
+  images: ['quay.io/argoproj/argocli:v3.4.0', 'quay.io/argoproj/workflow-controller:v3.4.0']
+- version: 3.3.2
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.1
+  images: ['quay.io/argoproj/argocli:v3.3.2', 'quay.io/argoproj/workflow-controller:v3.3.2']
+- version: 3.2.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.2
+  images: ['quay.io/argoproj/argocli:v3.2.0', 'quay.io/argoproj/workflow-controller:v3.2.0']
+- version: 3.1.5
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["v3.1.5 release notes provided don\u2019t list specific new features\
+        \ beyond standard installation/CLI download instructions.", 'v3.0.7 introduced
+        controller probes/health improvements (liveness probe; readiness timeout increased
+        to 30s; metrics/debug listen on :6060) and several UI/controller bug fixes.']
+    breaking_changes: ['v3.0.7: Argo Server enables TLS by default when a key is available;
+        can be disabled with `--secure=false`. Ingress may need backend-protocol annotations
+        set to HTTPS.', 'Known issues noted in v3.0.7: UI may try to list workflows
+        across namespaces; OpenShift may not support coordination API needed for leader
+        election; log archiving reported broken.']
+  chart_version: 0.4.1
+  images: ['quay.io/argoproj/argocli:v3.1.5', 'quay.io/argoproj/workflow-controller:v3.1.5']
+- version: 3.0.7
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.3.0
+  images: ['quay.io/argoproj/argocli:v3.0.7', 'quay.io/argoproj/workflow-controller:v3.0.7']

@@ -37,35 +37,35 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     name = URI.encode(pra.identifier)
     with {:ok, conn} <- connection(pra),
          {:ok, title, body} <- description(pra, ctx),
-         {:ok, id} <- get_repo_id(conn, name) do
-      post(conn, "/git/repositories/#{id}/pullrequests", %{
-        sourceRefName: "refs/heads/#{branch}",
-        targetRefName: "refs/heads/#{pra.branch || "main"}",
-        title: title,
-        description: body,
-      })
-      |> case do
-        {:ok, pr} -> {:ok, %{title: title, ref: branch, body: body, url: web_url(pr), owner: owner(pr)}}
-        err -> err
-      end
+         {:ok, id} <- get_repo_id(conn, name),
+         {:ok, pr} <- post(conn, "/git/repositories/#{id}/pullrequests", %{
+                        sourceRefName: "refs/heads/#{branch}",
+                        targetRefName: "refs/heads/#{pra.branch || "main"}",
+                        title: title,
+                        description: body,
+                      }),
+          {:ok, url} <- web_url(pr) do
+      {:ok, %{title: title, ref: branch, body: body, url: url, base: pra.branch || "main", owner: owner(pr)}}
     end
   end
 
   def webhook(_, _), do: {:error, "not implemented"}
 
   def pr(%{"eventType" => "git.pullrequest" <> _, "resource" => pr}) do
-    url = web_url(pr)
-    attrs = Map.merge(%{
-      status: state(pr),
-      ref: pr["sourceRefName"],
-      title: pr["title"],
-      body: pr["description"],
-      commit_sha: get_in(pr, ["lastMergeCommit", "commitId"])
-    }, pr_associations(pr_content(pr)))
-    |> Map.merge(approval(pr))
-    |> Console.drop_nils()
+    with {:ok, url} <- web_url(pr) do
+      attrs = Map.merge(%{
+        status: state(pr),
+        ref: pr["sourceRefName"],
+        base: ref_to_branch_name(pr["targetRefName"]),
+        title: pr["title"],
+        body: pr["description"],
+        commit_sha: get_in(pr, ["lastMergeCommit", "commitId"])
+      }, pr_associations(pr_content(pr)))
+      |> Map.merge(approval(pr))
+      |> Console.drop_nils()
 
-    {:ok, url, attrs}
+      {:ok, url, attrs}
+    end
   end
   def pr(_), do: :ignore
 
@@ -159,7 +159,11 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     |> handle_response()
   end
 
-  defp web_url(%{"repository" => %{"webUrl" => web_url}, "pullRequestId" => id}), do: "#{web_url}/pullrequest/#{id}"
+  defp web_url(%{"repository" => %{"webUrl" => web_url}, "pullRequestId" => id})
+    when is_binary(web_url) and is_integer(id), do: {:ok, "#{web_url}/pullrequest/#{id}"}
+  defp web_url(%{"_links" => %{"html" => %{"href" => href}}})
+    when is_binary(href), do: {:ok, href}
+  defp web_url(_), do: :ignore
 
   defp url(conn, url) do
     Path.join([
@@ -178,6 +182,10 @@ defmodule Console.Deployments.Pr.Impl.Azure do
 
   defp pr_content(pr), do: "#{pr["sourceRefName"]}\n#{pr["title"]}\n#{pr["description"]}"
 
+  defp ref_to_branch_name("refs/heads/" <> name), do: name
+  defp ref_to_branch_name(name) when is_binary(name), do: name
+  defp ref_to_branch_name(_), do: nil
+
   defp approval(%{"reviewers" => [_ | _] = reviewers}) do
     approver = Enum.max_by(reviewers, & &1["vote"] || 0)
     case Enum.sum_by(reviewers, & &1["vote"] || 0) do
@@ -185,6 +193,7 @@ defmodule Console.Deployments.Pr.Impl.Azure do
       _ -> %{}
     end
   end
+  defp approval(_), do: %{}
 
   defp get_pull_id(url) do
     url = String.downcase(url)

@@ -41,7 +41,12 @@ func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (
 
 			r.SetXForwarded()
 
-			targetURL, err := url.Parse(openai.EndpointChatCompletions)
+			targetPath := openai.EndpointChatCompletions
+			if r.In.URL.Path == openai.EndpointResponses {
+				targetPath = "/v1/responses"
+			}
+
+			targetURL, err := url.Parse(targetPath)
 			if err != nil {
 				klog.ErrorS(err, "failed to parse target url")
 				return

@@ -3,7 +3,13 @@ import { usePrevious } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useState,
+} from 'react'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 import { VirtualSlice } from './table/useFetchPaginatedData'
 
@@ -38,35 +44,24 @@ export function useSlicePolling<
     ? originalRefetch
     : fetchSlice
 
+  const poll = useEffectEvent(() => {
+    refetch()
+  })
+
   useEffect(() => {
-    if (!edges) {
-      return
-    }
+    if (!edges) return
 
     // if interval is 0, prevent polling
     if (interval === 0) return
 
     let intervalId
 
-    if (!loading) {
-      intervalId = setInterval(() => {
-        refetch()
-      }, interval)
-    }
+    if (!loading) intervalId = setInterval(() => poll(), interval)
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-    }
-  }, [edges, interval, loading, refetch])
+    return () => clearInterval(intervalId)
+  }, [edges, interval, loading])
 
-  return useMemo(
-    () => ({
-      refetch,
-    }),
-    [refetch]
-  )
+  return useMemo(() => ({ refetch }), [refetch])
 }
 
 export function useFetchSlice<

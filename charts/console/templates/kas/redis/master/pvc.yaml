@@ -1,0 +1,33 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and (eq .Values.kas.redis.master.kind "Deployment") (.Values.kas.redis.master.persistence.enabled) (not .Values.kas.redis.master.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ printf "redis-data-%s-master" (include "redis.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.kas.redis.master.persistence.labels .Values.kas.redis.commonLabels ) "context" . ) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: master
+  {{- if .Values.kas.redis.master.persistence.annotations }}
+  annotations: {{- toYaml .Values.kas.redis.master.persistence.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .Values.kas.redis.master.persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.kas.redis.master.persistence.size | quote }}
+  {{- if .Values.kas.redis.master.persistence.selector }}
+  selector: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.persistence.selector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.kas.redis.master.persistence.dataSource }}
+  dataSource: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.persistence.dataSource "context" $) | nindent 4 }}
+  {{- end }}
+  {{- include "common.storage.class" (dict "persistence" .Values.kas.redis.master.persistence "global" .Values.kas.redis.global) | nindent 2 }}
+{{- end }}

@@ -6,7 +6,7 @@ defmodule Console.AI.Tools.Workbench.SummarizeComponent do
   alias Console.AI.Summary.Summarizable
 
   embedded_schema do
-    field :prompt, :string
+    field :prompt,       :string
     field :component_id, :string
   end
 
@@ -16,18 +16,19 @@ defmodule Console.AI.Tools.Workbench.SummarizeComponent do
     model
     |> cast(attrs, @valid)
     |> validate_required([:prompt, :component_id])
+    |> check_uuid(:component_id)
   end
 
   @json_schema Console.priv_file!("tools/explain/summarize_component.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
   def name(), do: "summarize_component"
-  def description(), do: "Deep introspects a given service component in kubernetes and answers any questions you might have about it.  Use this as a kubernetes oracle fo this specific resource"
+  def description(), do: "Deep introspects a given service component in kubernetes and answers any questions you might have about it.  Use this as a kubernetes oracle fo this specific resource, if you don't have the ability to use this, fall back to the k8s_get and k8s_list tools available to you"
 
   def implement(%__MODULE__{prompt: prompt, component_id: component_id}) do
     with {:actor, %User{} = user} <- {:actor, Tool.actor()},
          {:comp, %ServiceComponent{} = comp} <- {:comp, Repo.get(ServiceComponent, component_id) |> Repo.preload(service: :cluster)},
-         {:allow, true} <- {:allow, Policies.can?(user, comp.service, :read)},
+         {:allow, {:ok, _}} <- {:allow, Policies.allow(comp.service, user, :read)},
          _ <- Console.AI.Evidence.Base.save_kubeconfig(comp.service.cluster),
          {:summary, {:ok, summary, true}} <- {:summary, Summarizable.summarize(comp, prompt)} do
       {:ok, summary}

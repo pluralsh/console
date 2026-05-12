@@ -10,7 +10,7 @@ defmodule Console.AI.Tools.Workbench.Skill do
 
   def name(_), do: "workbench_skill"
   def json_schema(_), do: @json_schema
-  def description(_), do: "Get a full description of a specific skill by name."
+  def description(_), do: "Get a full description of a specific skill by name.  Use the workbench_skills tool to get a list of skills first."
 
   def changeset(model, attrs) do
     model
@@ -18,9 +18,9 @@ defmodule Console.AI.Tools.Workbench.Skill do
     |> validate_required([:name])
   end
 
-  def implement(_, %__MODULE__{skills: %{} = skills}, %__MODULE__{name: name}) do
+  def implement(%__MODULE__{skills: %{} = skills, name: name}) do
     case Map.get(skills, name) do
-      %{contents: contents} -> {:ok, contents}
+      %Console.AI.Workbench.Skill{contents: contents} -> {:ok, contents}
       _ -> {:error, "Skill #{name} not found"}
     end
   end

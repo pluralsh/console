@@ -70,7 +70,8 @@ export function buildClient(
     delay: { initial: 200, max: 5000 },
     attempts: {
       max: Infinity,
-      retryIf: (error) => !!error && !!fetchToken(),
+      retryIf: (error, operation) =>
+        !!error && !!fetchToken() && !operation.getContext().noRetry,
     },
   })
 

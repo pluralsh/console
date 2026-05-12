@@ -188,6 +188,7 @@ fragment AgentRunFragment on AgentRun {
     id
     prompt
     repository
+    branch
     mode
     language
     languageVersion
@@ -223,4 +224,6 @@ fragment AgentRunFragment on AgentRun {
     pullRequests {
         ...PullRequestFragment
     }
+    babysit
+    babysitInterval
 }

@@ -112,6 +112,7 @@ defmodule Console.PubSub.CatalogDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.SentinelRunJobCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.WorkbenchCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchUpdated, do: use Piazza.PubSub.Event
@@ -127,10 +128,20 @@ defmodule Console.PubSub.WorkbenchToolDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchCronCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchCronUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchCronDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchPromptCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchPromptUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchPromptDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchSkillCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchSkillUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchSkillDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchEvalCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchEvalUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchEvalDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookDeleted, do: use Piazza.PubSub.Event
-
+defmodule Console.PubSub.WorkbenchJobThoughtCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchJobResolved, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.IssueCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.IssueUpdated, do: use Piazza.PubSub.Event

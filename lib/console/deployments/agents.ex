@@ -3,7 +3,7 @@ defmodule Console.Deployments.Agents do
   import Console.Deployments.Policies
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git}
+  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches}
   alias Console.AI.Tool
   alias Console.PubSub
   alias Kazan.Apis.Core.V1, as: CoreV1
@@ -17,7 +17,8 @@ defmodule Console.Deployments.Agents do
     ScmConnection,
     PullRequest,
     AgentMessage,
-    AgentRunRepository
+    AgentRunRepository,
+    WorkbenchJobActivity
   }
   require EEx
 
@@ -135,8 +136,16 @@ defmodule Console.Deployments.Agents do
       |> AgentRun.changeset(Map.put(attrs, :status, :pending))
       |> Repo.insert()
     end)
+    |> add_operation(:activity, fn %{run: run} ->
+      case attrs[:activity] do
+        %WorkbenchJobActivity{} = activity ->
+          Workbenches.associate_agent_run(activity, run.id)
+        _ ->
+          {:ok, run}
+      end
+    end)
     |> add_operation(:repo, fn %{run: %AgentRun{} = run, runtime: runtime} ->
-      case AgentRuntime.allowed_repository?(runtime, repository_url(run)) do
+      case AgentRuntime.allowed_repository?(runtime, run.repository) do
         true -> {:ok, run}
         false -> {:error, "repository is not allowed for this runtime, allowed repositories: #{inspect(runtime.allowed_repositories || [])}"}
       end
@@ -237,7 +246,8 @@ defmodule Console.Deployments.Agents do
   """
   @spec agent_pull_request(map, binary, User.t) :: Git.pr_resp
   def agent_pull_request(%{title: t, body: b, base: ba, head: he} = attrs, run_id, %User{} = user) do
-    run = get_agent_run!(run_id) |> Repo.preload([:runtime])
+    run = get_agent_run!(run_id)
+          |> Repo.preload([:runtime, workbench_job_activity_agent_run: :workbench_job_activity])
     shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
     with {:ok, run} <- allow(run, user, :creds),
          %ScmConnection{} = conn <- Tool.scm_connection(),
@@ -248,6 +258,7 @@ defmodule Console.Deployments.Agents do
       |> PullRequest.changeset(
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
+        |> Map.put(:workbench_job_id, workbench_job_id_for_agent_pr(run))
       )
       |> Repo.insert()
       |> notify(:create)
@@ -329,11 +340,22 @@ defmodule Console.Deployments.Agents do
       do: {:ok, %{token: token, url: Console.graphql_endpoint()}}
   end
 
+  @doc """
+  Fetches the scm connection for an agent runtime
+  """
+  @spec scm_conection(AgentRuntime.t) :: ScmConnection.t
+  def scm_conection(%AgentRuntime{}), do: Tool.scm_connection()
+
   def scm_creds(%AgentRun{} = run, actor) do
     with {:ok, _} <- allow(run, actor, :creds),
-         %ScmConnection{username: username} = conn <- Tool.scm_connection(),
+         %ScmConnection{username: username, type: provider} = conn <- Tool.scm_connection(),
          {:ok, conn} <- backfill_token(conn) do
-      {:ok, %{username: username || "apikey", token: conn.token}}
+      ok(%{
+        type: provider,
+        base_url: conn.base_url,
+        username: username || "apikey",
+        token: conn.token
+      })
     else
       nil -> {:error, "no scm connection found"}
       err -> err
@@ -359,7 +381,7 @@ defmodule Console.Deployments.Agents do
     run = get_agent_run!(run_id) |> Repo.preload([:runtime])
     with %ScmConnection{} = conn <- Tool.scm_connection(),
          {:ok, conn} <- backfill_token(conn) do
-      Dispatcher.review(conn, pr, pr_blob(pr: pr, run: run))
+      Dispatcher.review(conn, pr, String.trim(pr_blob(pr: pr, run: run)))
     end
   end
   def pr_review(_), do: {:error, "no agent run id found"}
@@ -374,6 +396,13 @@ defmodule Console.Deployments.Agents do
       _ -> Console.truncate(prompt, 500)
     end
   end
+
+  defp workbench_job_id_for_agent_pr(%AgentRun{
+    workbench_job_activity_agent_run: %{
+      workbench_job_activity: %{workbench_job_id: id}
+    }
+  }), do: id
+  defp workbench_job_id_for_agent_pr(%AgentRun{}), do: nil
 
   EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
 

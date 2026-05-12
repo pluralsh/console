@@ -8,3 +8,5 @@
 ##-env ERL_FULLSWEEP_AFTER 10
 
 +sbwt none
+
+-kernel inet_dist_listen_min 6000 inet_dist_listen_max 6000

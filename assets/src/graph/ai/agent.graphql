@@ -2,6 +2,7 @@ fragment AgentRunTiny on AgentRun {
   id
   status
   mode
+  babysit
   prompt
   shared
   error
@@ -19,6 +20,8 @@ fragment AgentRunTiny on AgentRun {
     name
     namespace
   }
+  insertedAt
+  updatedAt
 }
 
 fragment AgentRun on AgentRun {

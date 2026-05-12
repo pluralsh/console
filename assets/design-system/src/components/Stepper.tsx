@@ -66,7 +66,7 @@ const StepperSC = styled.div<{ $compact: boolean; $vertical: boolean }>(
     width: $compact ? 'auto' : '100%',
     flexDirection: $vertical ? 'column' : 'row',
     justifyContent: 'space-between',
-    overflow: 'hidden',
+    overflow: $compact ? 'visible' : 'hidden',
   })
 )
 

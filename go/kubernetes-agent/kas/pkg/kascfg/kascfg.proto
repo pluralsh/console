@@ -121,6 +121,15 @@ message KubernetesApiCF {
   // TTL for failed allowed agent lookups.
   // /api/v4/job/allowed_agents
   google.protobuf.Duration allowed_agent_cache_error_ttl = 4 [json_name = "allowed_agent_cache_error_ttl", (validate.rules).duration = {gt: {}}];
+  // Optional secret used to validate JWT proxy tokens locally.
+  // Secret should be base64-encoded and compatible with HS256/HS384/HS512.
+  string jwt_authentication_secret_file = 5 [json_name = "jwt_authentication_secret_file"];
+  // How often to flush buffered audit events.
+  google.protobuf.Duration audit_log_flush_interval = 6 [json_name = "audit_log_flush_interval", (validate.rules).duration = {gt: {}}];
+  // Maximum number of buffered audit events before triggering an early flush.
+  uint32 audit_log_flush_events = 7 [json_name = "audit_log_flush_events", (validate.rules).uint32.gt = 0];
+  // How long to wait on shutdown while draining buffered audit events.
+  google.protobuf.Duration audit_log_drain_timeout = 8 [json_name = "audit_log_drain_timeout", (validate.rules).duration = {gt: {}}];
 }
 
 message AgentCF {

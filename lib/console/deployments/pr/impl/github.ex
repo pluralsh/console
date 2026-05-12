@@ -20,7 +20,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
       |> case do
         {_, %{"html_url" => url} = result, _} ->
           maybe_add_labels(client, owner, repo, result["number"], labels)
-          {:ok, %{title: title, url: url, body: body, ref: branch, owner: owner(result)}}
+          {:ok, %{title: title, url: url, body: body, ref: branch, base: pr.branch || "main", owner: owner(result)}}
         {_, body, _} -> {:error, "failed to create pull request: #{Jason.encode!(body)}"}
       end
     end
@@ -49,6 +49,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["head"]["ref"],
+      base: get_in(pr, ["base", "ref"]),
       title: pr["title"],
       body: pr["body"],
       commit_sha: pr["head"]["sha"]

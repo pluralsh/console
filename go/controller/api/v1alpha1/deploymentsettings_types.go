@@ -94,6 +94,13 @@ type DeploymentSettingsList struct {
 //	      tokenSecretRef:
 //	        name: "openai-secret"
 //	        key: "token"
+//	      tokenExchange:
+//	        enabled: true
+//	        tokenUrl: "https://idp.example.com/oauth/token"
+//	        clientId: "console-ai"
+//	        clientSecretSecretRef:
+//	          name: "openai-oauth-client"
+//	          key: "clientSecret"
 //	  cost:
 //	    recommendationCushion: 20
 //	    recommendationThreshold: 100
@@ -160,6 +167,11 @@ type DeploymentSettingsSpec struct {
 	//
 	// +kubebuilder:validation:Optional
 	Cost *CostSettings `json:"cost,omitempty"`
+
+	// Metrics settings for OpenTelemetry metrics export
+	//
+	// +kubebuilder:validation:Optional
+	Metrics *MetricsSettings `json:"metrics,omitempty"`
 
 	// DeploymentRepositoryRef is a pointer to the deployment GIT repository to use
 	//
@@ -393,6 +405,38 @@ func (cost *CostSettings) Attributes() *console.CostSettingsAttributes {
 	}
 }
 
+// MetricsSettings holds configuration for OpenTelemetry metrics export.
+type MetricsSettings struct {
+	// Enabled defines whether to enable the metrics export or not.
+	//
+	// +kubebuilder:default=false
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Endpoint is the OpenTelemetry collector endpoint to send metrics to.
+	//
+	// +kubebuilder:validation:Optional
+	Endpoint *string `json:"endpoint,omitempty"`
+
+	// Crontab is the cron expression for how often to export metrics.
+	// Example: "*/5 * * * *" for every 5 minutes.
+	//
+	// +kubebuilder:validation:Optional
+	Crontab *string `json:"crontab,omitempty"`
+}
+
+func (m *MetricsSettings) Attributes() *console.MetricsSettingsAttributes {
+	if m == nil {
+		return nil
+	}
+
+	return &console.MetricsSettingsAttributes{
+		Enabled:  m.Enabled,
+		Endpoint: m.Endpoint,
+		Crontab:  m.Crontab,
+	}
+}
+
 // AISettings holds the configuration for LLM provider clients.
 type AISettings struct {
 	// Enabled defines whether to enable the AI integration or not.
@@ -434,7 +478,7 @@ type AISettings struct {
 	// OpenAI holds the OpenAI provider configuration.
 	//
 	// +kubebuilder:validation:Optional
-	OpenAI *AIProviderSettings `json:"openAI,omitempty"`
+	OpenAI *OpenAISettings `json:"openAI,omitempty"`
 
 	// Anthropic holds the Anthropic provider configuration.
 	//
@@ -461,6 +505,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Vertex *VertexSettings `json:"vertex,omitempty"`
+
+	// Nexus holds configuration for using the Nexus embeddings proxy
+	//
+	// +kubebuilder:validation:Optional
+	Nexus *NexusSettings `json:"nexus,omitempty"`
 
 	// VectorStore holds configuration for using a vector store to store embeddings.
 	//
@@ -589,7 +638,15 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			BaseURL:        in.OpenAI.BaseUrl,
 			ToolModel:      in.OpenAI.ToolModel,
 			EmbeddingModel: in.OpenAI.EmbeddingModel,
+			Method:         in.OpenAI.Method,
 			ProxyModels:    lo.ToSlicePtr(in.OpenAI.ProxyModels),
+		}
+		if in.OpenAI.TokenExchange != nil {
+			tokenExchange, err := in.OpenAI.TokenExchange.Attributes(ctx, c, namespace)
+			if err != nil {
+				return nil, err
+			}
+			attr.Openai.TokenExchange = tokenExchange
 		}
 	}
 
@@ -614,6 +671,16 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			return nil, err
 		}
 
+		var deployments *string
+
+		if len(in.Azure.Deployments) > 0 {
+			json, err := json.Marshal(in.Azure.Deployments)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal azure deployments field: %w", err)
+			}
+			deployments = lo.ToPtr(string(json))
+		}
+
 		attr.Azure = &console.AzureOpenaiAttributes{
 			Endpoint:       in.Azure.Endpoint,
 			APIVersion:     in.Azure.ApiVersion,
@@ -621,7 +688,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Azure.ToolModel,
 			EmbeddingModel: in.Azure.EmbeddingModel,
 			AccessToken:    token,
-			Deployment:     in.Azure.Deployment,
+			Deployments:    deployments,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
 		}
 	}
@@ -699,6 +766,21 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Authorization: auth,
 		}
 	}
+
+	// if in.Nexus != nil {
+	// 	token, err := in.Nexus.Token(ctx, c, namespace)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	//
+	// 	attr.Nexus = &console.NexusSettingsAttributes{
+	// 		URL:            in.Nexus.URL,
+	// 		AccessToken:    lo.EmptyableToPtr(token),
+	// 		Model:          in.Nexus.Model,
+	// 		ToolModel:      in.Nexus.ToolModel,
+	// 		EmbeddingModel: in.Nexus.EmbeddingModel,
+	// 	}
+	// }
 
 	return attr, nil
 }
@@ -791,6 +873,93 @@ type AIProviderSettings struct {
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
 }
 
+type OpenAISettings struct {
+	// Model is the LLM model name to use.
+	//
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
+	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
+
+	// EmbeddingModel to use for generating embeddings
+	//
+	// +kubebuilder:validation:Optional
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// ProxyModels are additional models to support within our integrated ai proxy.
+	//
+	// +kubebuilder:validation:Optional
+	ProxyModels []string `json:"proxyModels,omitempty"`
+
+	// BaseUrl is a custom base url to use, for reimplementations
+	// of the same API scheme (for instance Together.ai uses the OpenAI API spec)
+	//
+	// +kubebuilder:validation:Optional
+	BaseUrl *string `json:"baseUrl,omitempty"`
+
+	// TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs.
+	//
+	// +kubebuilder:validation:Optional
+	TokenExchange *OAuth2TokenExchange `json:"tokenExchange,omitempty"`
+
+	// Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies)
+	//
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
+	// TokenSecretRef is a reference to the local secret holding the token to access
+	// the configured AI provider.
+	//
+	// +kubebuilder:validation:Required
+	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
+}
+
+// OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
+type OAuth2TokenExchange struct {
+	// Enabled turns token exchange on for obtaining access tokens via the configured token endpoint.
+	//
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// TokenURL is the OAuth2 token endpoint URL.
+	//
+	// +kubebuilder:validation:Optional
+	TokenURL *string `json:"tokenUrl,omitempty"`
+
+	// ClientID is the OAuth2 client identifier.
+	//
+	// +kubebuilder:validation:Optional
+	ClientID *string `json:"clientId,omitempty"`
+
+	// ClientSecretSecretRef is a reference to a Kubernetes secret key holding the OAuth2 client secret.
+	//
+	// +kubebuilder:validation:Optional
+	ClientSecretSecretRef *corev1.SecretKeySelector `json:"clientSecretSecretRef,omitempty"`
+}
+
+func (in *OAuth2TokenExchange) Attributes(ctx context.Context, c client.Client, namespace string) (*console.OpenaiTokenExchangeAttributes, error) {
+	if in == nil {
+		return nil, nil
+	}
+	attr := &console.OpenaiTokenExchangeAttributes{
+		Enabled:  in.Enabled,
+		TokenURL: in.TokenURL,
+		ClientID: in.ClientID,
+	}
+	if in.ClientSecretSecretRef != nil {
+		clientSecret, err := utils.GetSecretKey(ctx, c, in.ClientSecretSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.ClientSecret = lo.ToPtr(clientSecret)
+	}
+	return attr, nil
+}
+
 // OllamaSettings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
 type OllamaSettings struct {
 	// URL is the url this model is queryable on
@@ -843,10 +1012,10 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
-	// Deployment is the Azure OpenAI deployment name.
+	// Deployments is a mapping from model id to azure OpenAI deployment if those require additional configuration
 	//
 	// +kubebuilder:validation:Optional
-	Deployment *string `json:"deployment,omitempty"`
+	Deployments map[string]string `json:"deployments,omitempty"`
 
 	// ProxyModels are additional models to support within the integrated ai proxy.
 	//
@@ -863,8 +1032,8 @@ type AzureOpenAISettings struct {
 type BedrockSettings struct {
 	// ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported.
 	//
-	// +kubebuilder:validation:Required
-	ModelID string `json:"modelId"`
+	// +kubebuilder:validation:Optional
+	ModelID *string `json:"modelId"`
 
 	// ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning
 	//
@@ -909,17 +1078,19 @@ type BedrockSettings struct {
 }
 
 type VertexSettings struct {
-	// Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview
+	// Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
-	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex
 	//
 	// +kubebuilder:validation:Optional
 	ToolModel *string `json:"toolModel,omitempty"`
 
-	// EmbeddingModel to use for generating embeddings
+	// EmbeddingModel to use for generating embeddings.
+	// This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.
+	// Default is gemini-embedding-001.
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
@@ -950,6 +1121,43 @@ type VertexSettings struct {
 	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef,omitempty"`
 }
 
+// NexusSettings holds configuration for using the Nexus proxy
+type NexusSettings struct {
+	// URL is the URL of the Nexus proxy
+	//
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// Model to use for completions
+	//
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
+	// ToolModel to use for tool calling
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
+
+	// EmbeddingModel to use for generating embeddings
+	//
+	// +kubebuilder:validation:Optional
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// TokenSecretRef is a reference to the local secret holding the access token
+	// for the Nexus proxy
+	//
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+}
+
+func (in *NexusSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
+	if in == nil {
+		return "", nil
+	}
+
+	return utils.GetSecretKey(ctx, c, in.TokenSecretRef, namespace)
+}
+
 func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) {
 	if in == nil {
 		return nil, nil
@@ -978,6 +1186,14 @@ func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) 
 }
 
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
+	if in == nil {
+		return "", fmt.Errorf("configured ai provider settings cannot be nil")
+	}
+
+	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
+}
+
+func (in *OpenAISettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
 	if in == nil {
 		return "", fmt.Errorf("configured ai provider settings cannot be nil")
 	}

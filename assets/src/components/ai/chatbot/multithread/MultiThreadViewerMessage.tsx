@@ -1,11 +1,46 @@
-import { Code, getLastStringChild, Modal } from '@pluralsh/design-system'
-import { CaptionP } from 'components/utils/typography/Text'
+import {
+  Accordion,
+  AccordionItem,
+  Code,
+  Flex,
+  getLastStringChild,
+  markdownSanitizeSchema,
+  Modal,
+} from '@pluralsh/design-system'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
-import { ReactElement, ReactNode, useState } from 'react'
+import { isNil, truncate } from 'lodash'
+import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-import styled from 'styled-components'
+import styled, { CSSProperties, useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
+
+import {
+  CHIP_ATTRIBUTE_SCHEMA,
+  PLRL_CHIP_TAG_NAMES,
+} from '../input/autocomplete/mentionTypes'
+import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
+
+const chipSanitizeSchema = {
+  ...markdownSanitizeSchema,
+  tagNames: [
+    ...(markdownSanitizeSchema.tagNames ?? []),
+    ...PLRL_CHIP_TAG_NAMES,
+  ],
+  attributes: {
+    ...markdownSanitizeSchema.attributes,
+    ...CHIP_ATTRIBUTE_SCHEMA,
+  },
+}
+
+const REHYPE_PLUGINS: ComponentProps<typeof ReactMarkdown>['rehypePlugins'] = [
+  rehypeRaw,
+  [rehypeSanitize, chipSanitizeSchema],
+]
 
 export function MultiThreadViewerMessage({
   message,
@@ -30,33 +65,91 @@ export function SimpleToolCall({
   content,
   attributes,
   isPending,
+  customResultBody,
+  customLabel,
 }: {
-  content: ChatFragment['content']
+  content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
   isPending?: boolean
+  customResultBody?: ReactNode
+  customLabel?: ReactNode
 }) {
+  const { colors } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
-
+  const command = `${attributes?.tool?.arguments?.['command'] ?? ''}`
+  if (!customLabel && toolName.toLowerCase().includes('bash')) {
+    return (
+      <SimpleAccordion
+        label={
+          <CaptionP
+            as="span"
+            $color="text-light"
+          >
+            Bash{' '}
+            <CaptionP
+              as="span"
+              $color="text-xlight"
+            >
+              {truncate(command, { length: 30 })}
+            </CaptionP>
+          </CaptionP>
+        }
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          minWidth={0}
+          width="100%"
+        >
+          <Code
+            language="bash"
+            showHeader={false}
+          >
+            {command}
+          </Code>
+          <Code showHeader={false}>{content ?? ''}</Code>
+        </Flex>
+      </SimpleAccordion>
+    )
+  }
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <CaptionP
-          $shimmer={isPending}
-          $color="text-xlight"
-        >
-          {isPending ? 'CALLING' : 'CALLED'} TOOL {toolName}
-        </CaptionP>
+        {customLabel || (
+          <CaptionP
+            $shimmer={isPending}
+            $color="text-xlight"
+          >
+            {isPending ? 'Calling' : 'Called'} tool{' '}
+            <span css={{ color: colors['text-light'] }}>{toolName}</span>
+          </CaptionP>
+        )}
       </ClickableLabelSC>
       <Modal
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false)
+          setFinishedAnimating(false)
+        }}
+        onAnimationEnd={() => setFinishedAnimating(true)}
         header={`Tool: ${toolName}`}
         size="large"
       >
         <ToolCallContent
           content={content ?? ''}
           attributes={attributes}
+          customResultBody={
+            finishedAnimating ? (
+              customResultBody
+            ) : (
+              <RectangleSkeleton
+                $height={160}
+                $width="100%"
+              />
+            )
+          }
         />
       </Modal>
     </>
@@ -78,6 +171,18 @@ function CodeBlockLabel({
       ? `${language.toUpperCase()} BLOCK`
       : 'CODE BLOCK'
 
+  if (language === 'bash' || language === 'sh')
+    return (
+      <SimpleAccordion label={label}>
+        <Code
+          showHeader={false}
+          language={language}
+        >
+          {content}
+        </Code>
+      </SimpleAccordion>
+    )
+
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
@@ -95,12 +200,14 @@ function CodeBlockLabel({
   )
 }
 
-function SimplifiedMarkdown({ text }: { text: string }) {
+export function SimplifiedMarkdown({ text }: { text: string }) {
   return (
     <SimpleMarkdownSC>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={REHYPE_PLUGINS}
         components={{
+          ...plrlChipComponents,
           // Headers are bold
           h1: ({ children }) => <strong>{children}</strong>,
           h2: ({ children }) => <strong>{children}</strong>,
@@ -136,11 +243,26 @@ function SimplifiedMarkdown({ text }: { text: string }) {
           p: ({ children }) => <ParagraphSC>{children}</ParagraphSC>,
           strong: ({ children }) => <strong>{children}</strong>,
           em: ({ children }) => <span>{children}</span>,
-          a: ({ children }) => <span>{children}</span>,
+          a: ({ children, href }) => (
+            <InlineA
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {children}
+            </InlineA>
+          ),
           ul: ({ children }) => <ListSC>{children}</ListSC>,
           ol: ({ children }) => <ListSC as="ol">{children}</ListSC>,
           li: ({ children }) => <li>{children}</li>,
           hr: () => <HrSC />,
+          table: ({ children }) => (
+            <TableWrapperSC>
+              <TableSC>{children}</TableSC>
+            </TableWrapperSC>
+          ),
+          th: ({ children }) => <ThSC>{children}</ThSC>,
+          td: ({ children }) => <TdSC>{children}</TdSC>,
         }}
       >
         {text}
@@ -149,7 +271,58 @@ function SimplifiedMarkdown({ text }: { text: string }) {
   )
 }
 
-const ClickableLabelSC = styled.button(({ theme }) => ({
+const ARBITRARY_VALUE_NAME = 'value'
+export function SimpleAccordion({
+  label,
+  defaultOpen = false,
+  isOpen,
+  setIsOpen,
+  loading = false,
+  children,
+  accordionStyles,
+  ...props
+}: {
+  label?: ReactNode
+  defaultOpen?: boolean
+  isOpen?: boolean
+  setIsOpen?: (isOpen: boolean) => void
+  loading?: boolean
+  accordionStyles?: CSSProperties
+  children: ReactNode
+} & Partial<ComponentProps<typeof AccordionItem>>) {
+  return (
+    <Accordion
+      type="single"
+      defaultValue={defaultOpen ? ARBITRARY_VALUE_NAME : undefined}
+      value={isOpen ? ARBITRARY_VALUE_NAME : isNil(isOpen) ? undefined : ''}
+      onValueChange={(value) => setIsOpen?.(value === 'value')}
+      css={{
+        background: 'none',
+        border: 'none',
+        width: '100%',
+        ...accordionStyles,
+      }}
+    >
+      <AccordionItem
+        value={ARBITRARY_VALUE_NAME}
+        trigger={
+          loading ? (
+            <RectangleSkeleton />
+          ) : (
+            <CaptionP $color="text-xlight">{label}</CaptionP>
+          )
+        }
+        padding="none"
+        caret="none"
+        {...props}
+      >
+        {children}
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+export const ClickableLabelSC = styled.button(({ theme }) => ({
   background: 'none',
   border: 'none',
   padding: 0,
@@ -179,6 +352,7 @@ const InlineCodeSC = styled.code(({ theme }) => ({
   backgroundColor: theme.colors['fill-two'],
   padding: `0 ${theme.spacing.xxsmall}px`,
   borderRadius: theme.borderRadiuses.medium,
+  wordBreak: 'break-word',
 }))
 
 const ListSC = styled.ul(({ theme }) => ({
@@ -192,4 +366,51 @@ const HrSC = styled.hr(({ theme }) => ({
   border: 0,
   margin: `${theme.spacing.xsmall}px 0`,
   width: '100%',
+}))
+
+const TableWrapperSC = styled.div(({ theme }) => ({
+  paddingTop: theme.spacing.medium,
+  overflowX: 'auto',
+  maxWidth: '100%',
+  minHeight: 'fit-content',
+}))
+
+const TableSC = styled.table(() => ({
+  borderCollapse: 'separate',
+  borderSpacing: 0,
+  minWidth: '100%',
+  width: 'max-content',
+}))
+
+const ThSC = styled.th(({ theme }) => ({
+  padding: theme.spacing.small,
+  height: 40,
+  textAlign: 'left',
+  backgroundColor: theme.colors['fill-one'],
+  border: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  'tr:first-child &': {
+    '&:first-child': { borderTopLeftRadius: theme.borderRadiuses.large },
+    '&:last-child': { borderTopRightRadius: theme.borderRadiuses.large },
+  },
+  '&:not(:last-child)': { borderRight: 'none' },
+  '&:not(:first-child)': { borderLeft: 'none' },
+}))
+
+const TdSC = styled.td(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero-selected'],
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  color: theme.colors['text-light'],
+  height: 40,
+  border: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
+  borderTop: 'none',
+  textAlign: 'left',
+  'tr:last-child &': {
+    borderBottom: theme.borders['fill-two'],
+    '&:first-child': { borderBottomLeftRadius: theme.borderRadiuses.large },
+    '&:last-child': { borderBottomRightRadius: theme.borderRadiuses.large },
+  },
+  '&:not(:last-child)': { borderRight: 'none' },
+  '&:not(:first-child)': { borderLeft: 'none' },
 }))

@@ -1474,7 +1474,7 @@ defmodule Console.Deployments.ServicesSyncTest do
 
       {:ok, f} = Services.tarstream(svc)
       {:ok, content} = Tar.tar_stream(f)
-      content = Map.new(content) |> IO.inspect()
+      content = Map.new(content)
 
       assert content["Chart.yaml"] =~ "bigbang"
       assert content["templates/istiod/values.yaml"]

@@ -46,6 +46,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
             ref: branch,
             body: body,
             url: to_url(conn, project, slug, id),
+            base: base_branch,
             owner: owner(mr)
           }}
         err -> err
@@ -55,20 +56,59 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   def webhook(_, _), do: :ok
 
-  def pr(%{"pullrequest" => %{"links" => %{"html" => %{"href" => url}}} = pr}) do
-    attrs = Map.merge(%{
-      status: state(pr),
-      ref: pr["source"]["branch"]["name"],
-      title: pr["title"],
-      body: pr["summary"]["raw"]
-    }, pr_associations(pr_content(pr)))
-    |> Console.drop_nils()
+  def pr(%{"pullRequest" => %{} = pr}) do
+    with {:ok, url} <- pr_url(pr) do
+      attrs = Map.merge(%{
+        status: state(pr),
+        ref: get_in(pr, ["fromRef", "displayId"]),
+        base: bbdc_pr_base(pr),
+        title: pr["title"],
+        body: pr["description"]
+      }, pr_associations(pr_content(pr)))
+      |> Console.drop_nils()
 
-    {:ok, url, attrs}
+      {:ok, url, attrs}
+    else
+      _ -> :ignore
+    end
+  end
+  def pr(%{"pullrequest" => %{} = pr}) do
+    with {:ok, url} <- pr_url(pr) do
+      attrs = Map.merge(%{
+        status: state(pr),
+        ref: get_in(pr, ["source", "branch", "name"]),
+        base: bbdc_pr_base(pr),
+        title: pr["title"],
+        body: get_in(pr, ["summary", "raw"]) || pr["description"]
+      }, pr_associations(pr_content(pr)))
+      |> Console.drop_nils()
+
+      {:ok, url, attrs}
+    else
+      _ -> :ignore
+    end
   end
   def pr(_), do: :ignore
 
-  defp pr_content(pr), do: "#{pr["fromRef"]["displayId"]}\n#{pr["title"]}\n#{pr["description"]}"
+  defp pr_content(pr), do: "#{pr_ref(pr)}\n#{pr["title"]}\n#{pr_body(pr)}"
+
+  defp pr_ref(%{"fromRef" => %{"displayId" => display_id}}) when is_binary(display_id), do: display_id
+  defp pr_ref(%{"source" => %{"branch" => %{"name" => name}}}) when is_binary(name), do: name
+  defp pr_ref(_), do: ""
+
+  defp pr_body(%{"description" => description}) when is_binary(description), do: description
+  defp pr_body(%{"summary" => %{"raw" => raw}}) when is_binary(raw), do: raw
+  defp pr_body(_), do: ""
+
+  defp pr_url(%{"links" => %{"self" => [%{"href" => url} | _]}}) when is_binary(url), do: {:ok, url}
+  defp pr_url(%{"links" => %{"self" => %{"href" => url}}}) when is_binary(url), do: {:ok, url}
+  defp pr_url(%{"links" => %{"html" => %{"href" => url}}}) when is_binary(url), do: {:ok, url}
+  defp pr_url(_), do: :error
+
+  defp bbdc_pr_base(pr) do
+    get_in(pr, ["toRef", "displayId"]) ||
+      get_in(pr, ["destination", "branch", "name"])
+  end
 
   def review(conn, %PullRequest{url: url} = pr, body) do
     with {:ok, project, slug, number} <- get_pull_id(url),

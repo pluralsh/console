@@ -144,11 +144,11 @@ defmodule Console.AI.Agents.Base do
     {thread, thread.session}
   end
 
-  def publish_absinthe(payload, topic) do
+  def publish_absinthe(payload, topics) do
     Absinthe.Subscription.publish(
       ConsoleWeb.Endpoint,
       payload,
-      topic
+      topics
     )
   end
 

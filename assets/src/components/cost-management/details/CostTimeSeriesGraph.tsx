@@ -39,7 +39,6 @@ export function CostTimeSeriesGraph({
           max: 'auto',
         }}
         yFormat={dollarize}
-        curve="natural"
         axisBottom={{
           format: (value) => formatDateTime(value, 'M/DD'),
           legend: 'date',

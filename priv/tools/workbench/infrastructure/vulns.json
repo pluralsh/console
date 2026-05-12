@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "report_id": {
+            "type": "string",
+            "description": "UUID of the vulnerability report to list findings for (from plrl_vuln_reports)"
+        }
+    },
+    "required": ["report_id"]
+}

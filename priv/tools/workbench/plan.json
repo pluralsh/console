@@ -9,14 +9,14 @@
                 "properties": {
                     "name": {
                         "type": "string",
-                        "description": "The name of the todo"
+                        "description": "The name of the todo.  This should be space separated words and all lowercase."
                     },
                     "description": {
                         "type": "string",
                         "description": "The description of the todo"
                     },
                     "status": {
-                        "type": "enum",
+                        "type": "string",
                         "enum": ["pending", "in_progress", "completed"],
                         "description": "The status of the todo"
                     }

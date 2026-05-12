@@ -92,7 +92,7 @@ defmodule Console.ExternalGraphQl do
   end
 
   def plugins do
-    [Absinthe.Middleware.Dataloader] ++ Absinthe.Plugin.defaults()
+    [Absinthe.Middleware.Dataloader, Console.GraphQl.Introspection] ++ Absinthe.Plugin.defaults()
   end
 
   def middleware(middleware, _field, %{identifier: type}) when type in [:query, :mutation] do
@@ -129,6 +129,9 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_sentinel_mutations
   end
 
+  subscription do
+    import_fields :public_deployment_subscriptions
+  end
 
   defp make_labels(nil), do: []
   defp make_labels(map), do: Enum.map(map, fn {key, value} -> %{name: key, value: value} end)

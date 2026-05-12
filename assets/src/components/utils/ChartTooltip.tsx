@@ -21,6 +21,7 @@ const TooltipContentSC = styled(Card).attrs(() => ({
     alignItems: 'center',
     gap: theme.spacing.xsmall,
     transform: `translate(-50%, calc(-${theme.spacing.small}px - 100%))`,
+    wordBreak: 'break-word',
   },
 }))
 const TooltipSwatchSC = styled.div.attrs(() => ({

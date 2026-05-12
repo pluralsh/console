@@ -198,7 +198,7 @@ defmodule Console.Schema.Cluster do
   defp upgrade_plan_fields(), do: __MODULE__.UpgradePlan.__schema__(:fields) -- [:id]
 
   def search(query \\ __MODULE__, sq) do
-    from(c in query, where: ilike(c.name, ^"#{sq}%") or ilike(c.handle, ^"#{sq}%"))
+    from(c in query, where: ilike(c.name, ^"%#{sq}%") or ilike(c.handle, ^"%#{sq}%"))
   end
 
   def with_insight_components(query \\ __MODULE__) do
@@ -281,6 +281,13 @@ defmodule Console.Schema.Cluster do
 
   def for_project(query \\ __MODULE__, pid) do
     from(c in query, where: c.project_id == ^pid)
+  end
+
+  def for_project_name(query \\ __MODULE__, name) do
+    from(c in query,
+      join: p in assoc(c, :project),
+      where: p.name == ^name
+    )
   end
 
   def for_user(query \\ __MODULE__, %User{} = user) do

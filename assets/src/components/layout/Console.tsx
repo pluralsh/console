@@ -20,19 +20,23 @@ import { SelectedProjectProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
-import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgentSessions'
-import { AIContextProvider, useChatbot } from 'components/ai/AIContext'
-import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
+import { useChatbot } from 'components/ai/AIContext'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
+import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
+import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
+import { QoveScriptLoader } from '../QoveScriptLoader'
+import { SentryInitializer } from '../SentryInitializer'
 import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
 import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
-import { SentryInitializer } from '../SentryInitializer'
-import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
+import {
+  TopLevelSidePanel,
+  TopLevelSidePanelProviders,
+} from './TopLevelSidePanel'
 
 export default function Console() {
   return (
@@ -41,29 +45,33 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <SentryInitializer>
-              <SelectedProjectProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbsProvider>
-                    <TerminalThemeProvider>
-                      <ShareSecretProvider>
-                        <AccessTokenProvider>
-                          <DeploymentSettingsProvider>
-                            <SidebarProvider>
-                              <AIContextProvider>
-                                <FeatureFlagProvider>
-                                  <CommandPaletteProvider>
-                                    <ConsoleContent />
-                                  </CommandPaletteProvider>
-                                </FeatureFlagProvider>
-                              </AIContextProvider>
-                            </SidebarProvider>
-                          </DeploymentSettingsProvider>
-                        </AccessTokenProvider>
-                      </ShareSecretProvider>
-                    </TerminalThemeProvider>
-                  </BreadcrumbsProvider>
-                </BillingSubscriptionProvider>
-              </SelectedProjectProvider>
+              <QoveScriptLoader>
+                <SelectedProjectProvider>
+                  <BillingSubscriptionProvider>
+                    <BreadcrumbsProvider>
+                      <TerminalThemeProvider>
+                        <ShareSecretProvider>
+                          <AccessTokenProvider>
+                            <DeploymentSettingsProvider>
+                              <SidebarProvider>
+                                <TopLevelSidePanelProviders>
+                                  <FeatureFlagProvider>
+                                    <CommandPaletteProvider>
+                                      <SimpleToastProvider>
+                                        <ConsoleContent />
+                                      </SimpleToastProvider>
+                                    </CommandPaletteProvider>
+                                  </FeatureFlagProvider>
+                                </TopLevelSidePanelProviders>
+                              </SidebarProvider>
+                            </DeploymentSettingsProvider>
+                          </AccessTokenProvider>
+                        </ShareSecretProvider>
+                      </TerminalThemeProvider>
+                    </BreadcrumbsProvider>
+                  </BillingSubscriptionProvider>
+                </SelectedProjectProvider>
+              </QoveScriptLoader>
             </SentryInitializer>
           </EnsureLogin>
         </ConsoleNavContextProvider>
@@ -79,7 +87,7 @@ function ConsoleContent() {
 
   // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
   const wrapperRef = useRef<HTMLDivElement>(null)
-  useNativeDomEvent(wrapperRef, CLOSE_CHAT_ACTION_PANEL_EVENT, () => {
+  useNativeDomEvent(wrapperRef, 'pointerdown', () => {
     setActionsPanelOpen(false)
   })
 
@@ -90,6 +98,7 @@ function ConsoleContent() {
       minHeight={0}
       alignItems="stretch"
     >
+      <Sidebar />
       <Flex
         ref={wrapperRef}
         position="relative"
@@ -97,6 +106,7 @@ function ConsoleContent() {
         overflow="hidden"
         flexDirection="column"
         flexGrow={1}
+        minWidth={0}
         zIndex={0} // needed so chatbot flyovers render over main console content
       >
         {isProduction && <ApplicationUpdateToast />}
@@ -109,7 +119,6 @@ function ConsoleContent() {
           flexGrow={1}
           alignItems="stretch"
         >
-          <Sidebar />
           <Flex
             direction="column"
             flexGrow={1}
@@ -124,7 +133,7 @@ function ConsoleContent() {
           </Flex>
         </Flex>
       </Flex>
-      <ChatbotPanel />
+      <TopLevelSidePanel />
     </Flex>
   )
 }

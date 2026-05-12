@@ -1,0 +1,75 @@
+services:
+  mock-console:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PACKAGE: ./cmd/mock-console
+    environment:
+      MOCK_CONSOLE_ADDR: ${MOCK_CONSOLE_ADDR:-:50051}
+      MOCK_PROMETHEUS_HOST: ${MOCK_PROMETHEUS_HOST:-}
+      MOCK_ELASTIC_HOST: ${MOCK_ELASTIC_HOST:-}
+
+  observability-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PACKAGE: ./cmd/proxy
+    depends_on:
+      - mock-console
+    command:
+      - --listen-addr=:8080
+      - --console-grpc-endpoint=mock-console:50051
+      - --config-ttl=5s
+      - --grpc-timeout=5s
+      - --upstream-timeout=10s
+      - --v=4
+    ports:
+      - "8080:8080"
+
+  prom-remote-write:
+    image: prom/prometheus:v2.55.1
+    depends_on:
+      - observability-proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint:
+      - /bin/sh
+      - -ec
+    environment:
+      PROM_REMOTE_WRITE_URL: ${PROM_REMOTE_WRITE_URL:-http://host.docker.internal:8080/ext/v1/ingest/prometheus}
+      PROM_REMOTE_WRITE_USERNAME: ${PROM_REMOTE_WRITE_USERNAME:-}
+      PROM_REMOTE_WRITE_PASSWORD: ${PROM_REMOTE_WRITE_PASSWORD:-}
+      PROM_REMOTE_WRITE_MAX_SAMPLES_PER_SEND: ${PROM_REMOTE_WRITE_MAX_SAMPLES_PER_SEND:-100}
+      PROM_REMOTE_WRITE_BATCH_SEND_DEADLINE: ${PROM_REMOTE_WRITE_BATCH_SEND_DEADLINE:-1s}
+      PROM_REMOTE_WRITE_MIN_SHARDS: ${PROM_REMOTE_WRITE_MIN_SHARDS:-1}
+      PROM_REMOTE_WRITE_MAX_SHARDS: ${PROM_REMOTE_WRITE_MAX_SHARDS:-1}
+      PROM_REMOTE_WRITE_CAPACITY: ${PROM_REMOTE_WRITE_CAPACITY:-200}
+    command:
+      - /scripts/prom-remote-write.sh
+    volumes:
+      - ./scripts/prom-remote-write.sh:/scripts/prom-remote-write.sh:ro
+    ports:
+      - "19090:9090"
+
+  elastic-bulk-write:
+    image: curlimages/curl:8.13.0
+    depends_on:
+      - observability-proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint:
+      - /bin/sh
+      - -ec
+    environment:
+      ELASTIC_PROXY_BULK_URL: ${ELASTIC_PROXY_BULK_URL:-http://host.docker.internal:8080/ext/v1/ingest/elastic/_bulk}
+      ELASTIC_WRITE_USERNAME: ${ELASTIC_WRITE_USERNAME:-}
+      ELASTIC_WRITE_PASSWORD: ${ELASTIC_WRITE_PASSWORD:-}
+      ELASTIC_WRITE_INDEX: ${ELASTIC_WRITE_INDEX:-obs_proxy_smoketest}
+      ELASTIC_WRITE_INTERVAL_SECONDS: ${ELASTIC_WRITE_INTERVAL_SECONDS:-5}
+      ELASTIC_WRITE_BATCH_SIZE: ${ELASTIC_WRITE_BATCH_SIZE:-10}
+    command:
+      - /scripts/elastic-bulk-writer.sh
+    volumes:
+      - ./scripts/elastic-bulk-writer.sh:/scripts/elastic-bulk-writer.sh:ro

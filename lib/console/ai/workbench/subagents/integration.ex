@@ -8,11 +8,11 @@ defmodule Console.AI.Workbench.Subagents.Integration do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20, system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
-      {:error, error} -> %{status: :failed, error: "error running infrastructure subagent: #{inspect(error)}"}
+      {:error, error} -> %{status: :failed, result: %{error: "error running infrastructure subagent: #{inspect(error)}"}}
     end
   end
 
@@ -22,7 +22,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
         status: :successful,
         result: %{output: output}
       }}
-      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 
@@ -30,8 +30,8 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     workbench_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :integration), job))
     |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+      %Skills{skills: Environment.subagent_skills(skills, :integration)},
+      %Skill{skills: Environment.subagent_skills(skills, :integration)},
       Result
     ])
   end

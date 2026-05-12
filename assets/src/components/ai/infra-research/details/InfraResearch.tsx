@@ -27,6 +27,7 @@ import {
   AgentRunStatus,
   InfraResearchFragment,
   InfraResearchStatus,
+  WorkbenchJobStatus,
   useCreateInfraResearchMutation,
   useFixResearchDiagramMutation,
   useInfraResearchQuery,
@@ -338,14 +339,18 @@ function RegenerateButton({
 export function RunStatusChip({
   status,
   runningText = 'Running',
+  showSpinner = true,
   ...props
 }: {
-  status: Nullable<InfraResearchStatus | AgentRunStatus>
+  status: Nullable<InfraResearchStatus | AgentRunStatus | WorkbenchJobStatus>
   runningText?: string
+  showSpinner?: boolean
 } & ChipProps) {
   if (!status) return null
   const isRunning =
-    status === InfraResearchStatus.Running || status === AgentRunStatus.Running
+    status === InfraResearchStatus.Running ||
+    status === AgentRunStatus.Running ||
+    status === WorkbenchJobStatus.Running
   return (
     <Chip
       fillLevel={isRunning ? 2 : 1}
@@ -357,7 +362,7 @@ export function RunStatusChip({
           gap="xsmall"
           align="center"
         >
-          <SpinnerAlt />
+          {showSpinner && <SpinnerAlt />}
           <span>{runningText}</span>
         </Flex>
       ) : (
@@ -367,8 +372,9 @@ export function RunStatusChip({
   )
 }
 
+// these have a lot of overlap so this map is actually exhaustive (typecheck would fail if it wasn't)
 const statusToSeverity: Record<
-  InfraResearchStatus | AgentRunStatus,
+  InfraResearchStatus | AgentRunStatus | WorkbenchJobStatus,
   ChipSeverity
 > = {
   [InfraResearchStatus.Running]: 'neutral',
@@ -377,6 +383,8 @@ const statusToSeverity: Record<
   [InfraResearchStatus.Pending]: 'info',
   [AgentRunStatus.Cancelled]: 'neutral',
   [AgentRunStatus.Successful]: 'success',
+  [AgentRunStatus.Babysitting]: 'neutral',
+  [WorkbenchJobStatus.Paused]: 'neutral',
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

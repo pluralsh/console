@@ -1135,6 +1135,79 @@ func (m *KubernetesApiCF) validate(all bool) error {
 		}
 	}
 
+	// no validation rules for JwtAuthenticationSecretFile
+
+	if d := m.GetAuditLogFlushInterval(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = KubernetesApiCFValidationError{
+				field:  "AuditLogFlushInterval",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := KubernetesApiCFValidationError{
+					field:  "AuditLogFlushInterval",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if m.GetAuditLogFlushEvents() <= 0 {
+		err := KubernetesApiCFValidationError{
+			field:  "AuditLogFlushEvents",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if d := m.GetAuditLogDrainTimeout(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = KubernetesApiCFValidationError{
+				field:  "AuditLogDrainTimeout",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := KubernetesApiCFValidationError{
+					field:  "AuditLogDrainTimeout",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
 	if len(errors) > 0 {
 		return KubernetesApiCFMultiError(errors)
 	}

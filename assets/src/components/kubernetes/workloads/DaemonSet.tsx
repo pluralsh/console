@@ -44,10 +44,12 @@ import { useServicesColumns } from '../network/Services'
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
+import KubernetesMetrics from '../common/KubernetesMetrics.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
   { path: 'services', label: 'Services' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
 ] as const
@@ -171,6 +173,21 @@ export function DaemonSetEvents(): ReactElement<any> {
       pathParams={{ daemonSet: name, namespace }}
       itemsKey="events"
       disableOnRowClick
+    />
+  )
+}
+
+export function DaemonSetMetrics(): ReactElement<any> {
+  const { name = '', namespace = '', clusterId = '' } = useParams()
+
+  return (
+    <KubernetesMetrics
+      clusterId={clusterId}
+      group="apps"
+      version="v1"
+      kind="DaemonSet"
+      name={name}
+      namespace={namespace}
     />
   )
 }

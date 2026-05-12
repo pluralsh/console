@@ -51,6 +51,8 @@ migrator:
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
   config:
+    # homepage is used to configure the default homepage for the console.  Use ``clusters`` to show clusters, ``workbenches`` to show workbenches
+    homepage: clusters
     # refreshTokenExpiry is used to configure the refresh token expiry time.  Use a duration string like ``7d``, ``1h`` etc to set the expiry,.
     refreshTokenExpiry: 7d
     # oidcSync is used to configure whether oidc group claims full sync or not in the db.  Use ``full`` to enable full sync.
@@ -81,7 +83,9 @@ console:
 
     # adminEmails is a list of emails which will be auto-configured as admins in the console.
     adminEmails: []
-  
+
+    qovePublicKey: ~
+
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:
     # enabled is used to configure whether custom oidc authentication should be enabled.
@@ -131,6 +135,8 @@ secrets:
   plural_client_id: ~
   # plural_client_secret is used to set PLURAL_CLIENT_SECRET if not null
   plural_client_secret: ~
+  # exaApiKey is used to set EXA_API_KEY if not null
+  exaApiKey: ~
 
 # image is used to configure the image for the console container as follows: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
@@ -163,11 +169,38 @@ aiProxy:
       configTTL: "60s"
       requestTimeout: "10s"
       connectionRetry:
-        maxAttempts: 5
-        initialBackoff: "1s"
+        maxAttempts: 10
+        initialBackoff: "15s"
         maxBackoff: "30s"
     observability:
       logLevel: info
+
+observabilityProxy:
+  enabled: false
+  replicaCount: 2
+  listenAddr: ":8080"
+  consoleGRPCEndpoint: "console:50051"
+  configTTL: "60s"
+  grpcTimeout: "10s"
+  upstreamTimeout: "30s"
+  meterInterval: "30s"
+  image:
+    repository: observability-proxy
+    tag: ~
+    pullPolicy: IfNotPresent
+    extraArgs: []
+  resources: {}
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ~
 
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []
@@ -272,7 +305,7 @@ externalIngress:
   ingressClass: nginx
   # hostname acts as the flag to determine if console-external ingress controller is created
   hostname: ~
-  
+
   # rewrite is not used in any of the templates
   rewrite:
     annotations:
@@ -387,7 +420,7 @@ gitServer:
   image:
     repository: ghcr.io/pluralsh/git-server
     tag: ~
-  
+
   containerSecurityContext:
     runAsNonRoot: true
   securityContext:
@@ -395,146 +428,6 @@ gitServer:
     runAsGroup: 65543
   resources: ~
   tag: ~
-
-# kas is used to potentially override values in the kas subchart (charts/console/charts/kas-0.3.0.tgz)
-# The values here match the default values in the kas subchart but are here for documentation and ease-of-access in case user wants to override any values
-kas:
-  global:
-    additionalVolumes: ~
-    additionalVolumeMounts: ~
-
-  image:
-    # See: https://github.com/pluralsh/kubernetes-agent/pkgs/container/kubernetes-agent.
-    repository: ghcr.io/pluralsh/kubernetes-agent
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-    pullSecrets: []
-
-  consoleUrl: ""
-
-  nameOverride: ""
-
-  fullnameOverride: ""
-
-  podAnnotations: { }
-  podLabels: { }
-
-  podSecurityContext:
-    runAsUser: 65532
-
-  securityContext:
-    runAsUser: 65532
-    runAsGroup: 65532
-    fsGroup: 65532
-
-  priorityClassName: ""
-
-  extraEnv: []
-
-  extraArgs: []
-
-  nodeSelector: { }
-
-  affinity: { }
-
-  tolerations: []
-
-  initContainers: []
-
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-  service:
-    agentPort: 8150
-    agentProxyPort: 8180
-    apiInternalPort: 8153
-    kubernetesApiPort: 8154
-    privateApiPort: 8155
-    observabilityPort: 8151
-    type: ClusterIP
-
-  serviceAccount:
-    # Specifies whether a service account should be created.
-    create: true
-    # Annotations to add to the service account.
-    annotations: { }
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template.
-    name: ""
-
-  metrics:
-    enabled: false
-    path: /metrics
-    serviceMonitor:
-      enabled: false
-      additionalLabels: { }
-      endpointConfig: { }
-
-  replicCount: 1
-
-  autoscaling:
-    enabled: false
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUAverageValue: 100m
-    # targetCPUUtilizationPercentage: 75
-    # targetMemoryUtilizationPercentage: 75
-
-  secrets:
-    create: true
-    api: ""
-    privateapi: ""
-    redis: ""
-
-  agent:
-    path: /ext/kas
-
-  api:
-    path: /api
-    port: 8000
-
-  ingress:
-    ingressClass: nginx
-    kubernetesApiPath: /k8s-proxy
-    tlsSecretName: kas-tls
-
-    tls:
-      enabled: true
-
-    annotations:
-      kubernetes.io/tls-acme: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-
-  redis:
-    enabled: true
-    architecture: standalone
-    global:
-      security:
-        allowInsecureImages: true
-    image:
-      registry: ghcr.io
-      repository: pluralsh/registry/bitnami/redis
-      tag: 7.4.2-debian-12-r5
-    auth:
-      enabled: true
-      sentinel: false
-    sentinel:
-      enabled: false
-    master:
-      count: 1
-    commonConfiguration: |-
-      # Enable AOF https://redis.io/topics/persistence#append-only-file
-      appendonly yes
-      # Disable RDB persistence, AOF persistence already enabled.
-      save ""
-      # Enable idle client connection timeout (5 minutes)
-      timeout 300
 
 cloudQuery:
   enabled: false
@@ -587,10 +480,23 @@ cloudQuery:
 
   database:
     enabled: true
+
+    # aws config is used to configure the cloud-query to use AWS credentials for querying AWS resources.
+    # It is required by the cloud-query AWS provider to allow usage of the assume role functionality.
+    aws:
+      ### The below options are only used if useLocalCredentials is set to true ###
+      # If set, AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE will be mounted into both cloud-query containers under /shared
+      mountPath: /shared
+      # If set, AWS_CONFIG_FILE env var will be injected into both cloud-query containers
+      configFile: /shared/.aws/config
+      # If set, AWS_SHARED_CREDENTIALS_FILE env var will be injected into both cloud-query containers
+      credentialsFile: /shared/.aws/credentials
+
     image:
       repository: ghcr.io/pluralsh/cloud-query-db
       pullPolicy: IfNotPresent
       tag: ~
+
     # PostgreSQL password configuration
     password:
       # If not provided, a default value of "postgres" will be used
@@ -618,6 +524,12 @@ cloudQuery:
   nodeSelector: { }
   tolerations: []
   affinity: { }
+
+  # networkPolicy configures network policy for cloud-query pods.
+  networkPolicy:
+    # enabled controls creation of the cloud-query NetworkPolicy.
+    # When enabled, only allows ingress from console pods in the same namespace.
+    enabled: false
 
 dex:
   enabled: false
@@ -677,3 +589,492 @@ dex:
     tls:
     - hosts:
       - <your-console-fqdn>
+
+kas:
+  logging:
+    level: info
+  global:
+    additionalVolumes: ~
+    additionalVolumeMounts: ~
+  image:
+    repository: ghcr.io/pluralsh/kubernetes-agent
+    pullPolicy: IfNotPresent
+    tag: "" # Overrides the image tag whose default is the chart appVersion.
+    pullSecrets: [ ]
+  consoleUrl: ""
+  nameOverride: ""
+  fullnameOverride: ""
+  podAnnotations: { }
+  podLabels: { }
+  podSecurityContext:
+    runAsUser: 65532
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+  priorityClassName: ""
+  extraEnv: []
+  extraArgs: []
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  initContainers: []
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    agentPort: 8150
+    agentProxyPort: 8180
+    apiInternalPort: 8153
+    kubernetesApiPort: 8154
+    privateApiPort: 8155
+    observabilityPort: 8151
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    annotations: { }
+    name: ""
+  metrics:
+    enabled: false
+    path: /metrics
+    serviceMonitor:
+      enabled: false
+      additionalLabels: {}
+      endpointConfig: {}
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUAverageValue: 100m
+    # targetCPUUtilizationPercentage: 75
+    # targetMemoryUtilizationPercentage: 75
+
+  # jwtSecretName is used to set the name of the secret that contains the JWT secret, usually the default `console-env` secret
+  jwtSecret:
+    name: console-env
+    key: JWT_SECRET
+
+  secrets:
+    create: true
+    api: ""
+    privateapi: ""
+    redis: ""
+  agent:
+    path: /ext/kas
+  api:
+    path: /api
+    port: 8000
+  ingress:
+    ingressClass: nginx
+    kubernetesApiPath: /k8s-proxy
+    tlsSecretName: kas-tls
+    tls:
+      enabled: true
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+  redis:
+    # Simplified Redis deployment using standalone mode, without sentinel support and other unused features.
+    #
+    # Copyright Broadcom, Inc. All Rights Reserved.
+    # SPDX-License-Identifier: APACHE-2.0
+    global:
+      imageRegistry: ""
+      imagePullSecrets: [ ]
+      defaultStorageClass: ""
+      storageClass: ""
+      security:
+        allowInsecureImages: true
+      redis:
+        password: ""
+      compatibility:
+        openshift:
+          adaptSecurityContext: auto
+      defaultFips: restricted
+    kubeVersion: ""
+    nameOverride: ""
+    fullnameOverride: ""
+    namespaceOverride: ""
+    commonLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: console
+    commonAnnotations: { }
+    configmapChecksumAnnotations: true
+    secretChecksumAnnotations: true
+    secretAnnotations: { }
+    clusterDomain: cluster.local
+    extraDeploy: [ ]
+    useHostnames: true
+    nameResolutionThreshold: 5
+    nameResolutionTimeout: 5
+    diagnosticMode:
+      enabled: false
+      command:
+        - sleep
+      args:
+        - infinity
+    image:
+      registry: ghcr.io
+      repository: pluralsh/registry/bitnami/redis
+      tag: 7.4.2-debian-12-r5
+      digest: ""
+      pullPolicy: IfNotPresent
+      pullSecrets: [ ]
+      debug: false
+    auth:
+      enabled: true
+      password: ""
+      existingSecret: ""
+      existingSecretPasswordKey: ""
+      usePasswordFiles: true
+      usePasswordFileFromSecret: true
+      acl:
+        enabled: false
+        users: [ ]
+        userSecret: ""
+    commonConfiguration: |-
+      # Enable AOF https://redis.io/topics/persistence#append-only-file
+      appendonly yes
+      # Disable RDB persistence, AOF persistence already enabled.
+      save ""
+      # Enable idle client connection timeout (5 minutes)
+      timeout 300
+    existingConfigmap: ""
+    master:
+      count: 1
+      revisionHistoryLimit: 10
+      configuration: ""
+      disableCommands:
+        - FLUSHDB
+        - FLUSHALL
+      command: [ ]
+      args: [ ]
+      enableServiceLinks: true
+      preExecCmds: [ ]
+      extraFlags: [ ]
+      extraEnvVars: [ ]
+      extraEnvVarsCM: ""
+      extraEnvVarsSecret: ""
+      containerPorts:
+        redis: 6379
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: 20
+        periodSeconds: 5
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 5
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 20
+        periodSeconds: 5
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 5
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 20
+        periodSeconds: 5
+        timeoutSeconds: 1
+        successThreshold: 1
+        failureThreshold: 5
+      customStartupProbe: { }
+      customLivenessProbe: { }
+      customReadinessProbe: { }
+      resourcesPreset: "nano"
+      resources: { }
+      fips:
+        openssl: ""
+      podSecurityContext:
+        enabled: true
+        fsGroupChangePolicy: Always
+        sysctls: [ ]
+        supplementalGroups: [ ]
+        fsGroup: 1001
+      containerSecurityContext:
+        enabled: true
+        seLinuxOptions: { }
+        runAsUser: 1001
+        runAsGroup: 1001
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop: [ "ALL" ]
+      kind: StatefulSet
+      schedulerName: ""
+      updateStrategy:
+        type: RollingUpdate
+      minReadySeconds: 0
+      priorityClassName: ""
+      automountServiceAccountToken: false
+      hostAliases: [ ]
+      podLabels: { }
+      podAnnotations: { }
+      shareProcessNamespace: false
+      podAffinityPreset: ""
+      podAntiAffinityPreset: soft
+      nodeAffinityPreset:
+        type: ""
+        key: ""
+        values: [ ]
+      affinity: { }
+      nodeSelector: { }
+      tolerations: [ ]
+      topologySpreadConstraints: [ ]
+      dnsPolicy: ""
+      dnsConfig: { }
+      lifecycleHooks: { }
+      extraVolumes: [ ]
+      extraVolumeMounts: [ ]
+      sidecars: [ ]
+      initContainers: [ ]
+      persistence:
+        enabled: true
+        medium: ""
+        sizeLimit: ""
+        path: /data
+        subPath: ""
+        subPathExpr: ""
+        storageClass: ""
+        accessModes:
+          - ReadWriteOnce
+        size: 8Gi
+        annotations: { }
+        labels: { }
+        selector: { }
+        dataSource: { }
+        existingClaim: ""
+      persistentVolumeClaimRetentionPolicy:
+        enabled: false
+        whenScaled: Retain
+        whenDeleted: Retain
+      service:
+        type: ClusterIP
+        portNames:
+          redis: "tcp-redis"
+        ports:
+          redis: 6379
+        nodePorts:
+          redis: ""
+        externalTrafficPolicy: Cluster
+        extraPorts: [ ]
+        internalTrafficPolicy: Cluster
+        clusterIP: ""
+        loadBalancerIP: ""
+        loadBalancerClass: ""
+        loadBalancerSourceRanges: [ ]
+        externalIPs: [ ]
+        annotations: { }
+        sessionAffinity: None
+        sessionAffinityConfig: { }
+      terminationGracePeriodSeconds: 30
+      serviceAccount:
+        create: true
+        name: ""
+        automountServiceAccountToken: false
+        annotations: { }
+      pdb:
+        create: true
+        minAvailable: ""
+        maxUnavailable: ""
+      extraPodSpec: { }
+      annotations: { }
+    serviceBindings:
+      enabled: false
+    networkPolicy:
+      enabled: true
+      allowExternal: true
+      allowExternalEgress: true
+      extraIngress: [ ]
+      extraEgress: [ ]
+      ingressNSMatchLabels: { }
+      ingressNSPodMatchLabels: { }
+      metrics:
+        allowExternal: true
+        ingressNSMatchLabels: { }
+        ingressNSPodMatchLabels: { }
+    podSecurityPolicy:
+      create: false
+      enabled: false
+    rbac:
+      create: false
+      rules: [ ]
+    serviceAccount:
+      create: true
+      name: ""
+      automountServiceAccountToken: false
+      annotations: { }
+    pdb: { }
+    tls:
+      enabled: false
+      authClients: true
+      autoGenerated: false
+      existingSecret: ""
+      certificatesSecret: ""
+      certFilename: ""
+      certKeyFilename: ""
+      certCAFilename: ""
+      dhParamsFilename: ""
+    metrics:
+      enabled: false
+      image:
+        registry: registry-1.docker.io
+        repository: bitnami/redis-exporter
+        tag: latest
+        digest: ""
+        pullPolicy: IfNotPresent
+        pullSecrets: [ ]
+      containerPorts:
+        http: 9121
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 5
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 5
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 1
+        successThreshold: 1
+        failureThreshold: 3
+      customStartupProbe: { }
+      customLivenessProbe: { }
+      customReadinessProbe: { }
+      command: [ ]
+      redisTargetHost: "localhost"
+      extraArgs: { }
+      extraEnvVars: [ ]
+      containerSecurityContext:
+        enabled: true
+        seLinuxOptions: { }
+        runAsUser: 1001
+        runAsGroup: 1001
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop: [ "ALL" ]
+      extraVolumes: [ ]
+      extraVolumeMounts: [ ]
+      resourcesPreset: "nano"
+      resources: { }
+      fips:
+        openssl: ""
+        golang: restricted
+      podLabels: { }
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+      service:
+        enabled: true
+        type: ClusterIP
+        ports:
+          http: 9121
+        externalTrafficPolicy: Cluster
+        extraPorts: [ ]
+        loadBalancerIP: ""
+        loadBalancerClass: ""
+        loadBalancerSourceRanges: [ ]
+        annotations: { }
+        clusterIP: ""
+      serviceMonitor:
+        port: http-metrics
+        enabled: false
+        namespace: ""
+        tlsConfig: { }
+        interval: 30s
+        scrapeTimeout: ""
+        relabelings: [ ]
+        relabellings: [ ]
+        metricRelabelings: [ ]
+        honorLabels: false
+        additionalLabels: { }
+        podTargetLabels: [ ]
+        sampleLimit: false
+        targetLimit: false
+        additionalEndpoints: [ ]
+      podMonitor:
+        port: metrics
+        enabled: false
+        namespace: ""
+        tlsConfig: { }
+        interval: 30s
+        scrapeTimeout: ""
+        relabelings: [ ]
+        relabellings: [ ]
+        metricRelabelings: [ ]
+        honorLabels: false
+        additionalLabels: { }
+        podTargetLabels: [ ]
+        sampleLimit: false
+        targetLimit: false
+        additionalEndpoints: [ ]
+      prometheusRule:
+        enabled: false
+        namespace: ""
+        additionalLabels: { }
+        rules: [ ]
+    volumePermissions:
+      enabled: false
+      image:
+        registry: registry-1.docker.io
+        repository: bitnami/os-shell
+        tag: latest
+        digest: ""
+        pullPolicy: IfNotPresent
+        pullSecrets: [ ]
+      resourcesPreset: "nano"
+      resources: { }
+      fips:
+        openssl: ""
+      containerSecurityContext:
+        seLinuxOptions: { }
+        runAsUser: 0
+      extraEnvVars: [ ]
+    sysctl:
+      enabled: false
+      image:
+        registry: registry-1.docker.io
+        repository: bitnami/os-shell
+        tag: latest
+        digest: ""
+        pullPolicy: IfNotPresent
+        pullSecrets: [ ]
+      command: [ ]
+      mountHostSys: false
+      resourcesPreset: "nano"
+      resources: { }
+      fips:
+        openssl: ""
+    useExternalDNS:
+      enabled: false
+      suffix: ""
+      annotationKey: external-dns.alpha.kubernetes.io/
+      additionalAnnotations: { }
+
+# networkPolicy configures network policies for console pods.
+networkPolicy:
+  # consoleInternalPorts protects unauthenticated console internal ports.
+  consoleInternalPorts:
+    # enabled controls creation of the console internal ports NetworkPolicy.
+    enabled: false

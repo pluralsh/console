@@ -10,6 +10,8 @@ defmodule Console.MixProject do
         version =
           case System.cmd("git", ~w[describe --dirty=+dirty]) do
             {"go/client/" <> _, 0} -> "0.0.0"
+            {"go/agentk/" <> _, 0} -> "0.0.0"
+            {"go/agent/" <> _, 0} -> "0.0.0"
             {version, 0} ->
               String.trim_leading(String.trim(version), "v")
 
@@ -47,7 +49,7 @@ defmodule Console.MixProject do
       lockfile: "mix.lock",
       elixir: "~> 1.16",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers(),
+      compilers: [:yecc, :leex] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
@@ -80,7 +82,7 @@ defmodule Console.MixProject do
     [
       {:ecto, "~> 3.12.0", override: true},
       {:ex_machina, "~> 2.8", only: :test},
-      {:libcluster, "~> 3.4"},
+      {:dns_cluster, "~> 0.2.0"},
       {:ex_aws, "~> 2.6"},
       {:ex_aws_sts, "~> 2.3.0"},
       {:configparser_ex, "~> 5.0"},
@@ -89,7 +91,8 @@ defmodule Console.MixProject do
       {:slack_elixir, git: "https://github.com/pluralsh/slack_elixir.git", ref: "a6b31a80d249d83eed8e28133d556dee388d97ae"},
       {:absinthe_client, "~> 0.1.0"},
       {:postgrex, ">= 0.0.0"},
-      {:grpc, "~> 0.10"},
+      {:grpc, "~> 0.11"},
+      # {:grpc_server, "~> 0.11"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_pubsub, "~> 2.0"},
@@ -111,12 +114,12 @@ defmodule Console.MixProject do
       {:telemetry_registry, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
-      {:hermes_mcp, "~> 0.14"},
+      {:anubis_mcp, "~> 1.1.1"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", commit: "2a91145d0d567f1aab40d52843d77dfb491c424a", override: true},
       {:flow, "~> 1.2"},
       {:gen_stage, "~> 1.0", override: true},
       {:bourne, "~> 1.1"},
-      {:tiktoken, "~> 0.3"},
+      # {:tiktoken, "~> 0.3"},
       {:phoenix_html, "~> 2.11"},
       {:parallel_task, "~> 0.1.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
@@ -126,11 +129,12 @@ defmodule Console.MixProject do
       {:plug_cowboy, "~> 2.7"},
       {:cowboy, "~> 2.12"},
       {:uniq, "~> 0.4"},
+      {:oauth2, "~> 2.1"},
       {:rustler, "~> 0.32", override: true},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test]},
-      {:absinthe, "~> 1.7.5"},
-      {:absinthe_relay, "~> 1.5.2"},
+      {:absinthe, "~> 1.10"},
+      {:absinthe_relay, "~> 1.6"},
       {:absinthe_plug, "~> 1.5", git: "https://github.com/absinthe-graphql/absinthe_plug.git", commit: "3a984cc341ebb32c79e7ae58b4ebd116d5c62f9e", override: true},
       {:absinthe_phoenix, "~> 2.0"},
       {:dataloader, "~> 2.0"},
@@ -146,9 +150,10 @@ defmodule Console.MixProject do
       {:reverse_proxy_plug, "~> 3.0"},
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "1e4aa9acdf144699ad25be75cc4a9d917c3113a3"},
       {:comeonin, "~> 5.3"},
+      {:path_glob, "~> 0.2.0"},
       {:argon2_elixir, "~> 4.1"},
       {:nimble_parsec, "~> 1.4", override: true},
-      {:guardian, "~> 2.3"},
+      {:guardian, "~> 2.4"},
       {:accessible, "~> 0.3.0"},
       {:httpoison, "~> 1.7", override: true},
       {:nebulex, "~> 2.6"},
@@ -161,16 +166,18 @@ defmodule Console.MixProject do
       {:remote_ip, "~> 1.2.0"},
       {:erlsom, "~> 1.5.1"},
       {:inflex, "~> 2.0.0"},
-      {:websockex, "~> 0.4.3"},
+      {:websockex, "~> 0.5.1", override: true},
       {:briefly, "~> 0.5.0"},
       {:libring, "~> 1.7"},
       {:http_stream, "~> 1.0.0"},
       {:solid, "~> 1.0.0-rc.0"},
-      {:x509, "~> 0.8.5"},
-      {:bamboo_phoenix, "~> 1.0"},
+      {:x509, "~> 0.9.2"},
+      {:swoosh, "~> 1.18"},
+      # phoenix_swoosh is pinned to 0.3.x because newer versions require
+      # phoenix_html ~> 3.0, but the rest of the project still uses ~> 2.11.
+      {:phoenix_swoosh, "~> 0.3.4"},
+      {:gen_smtp, "~> 1.3", override: true},
       {:slipstream, "~> 1.0"},
-      {:bamboo_smtp, "~> 4.2"},
-      {:bamboo, "~> 2.3", override: true},
       {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
       {:tesla, "~> 1.13"},
@@ -178,6 +185,8 @@ defmodule Console.MixProject do
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
+      {:req_llm, "~> 1.11"},
+      {:sweet_xml, ">= 0.0.0"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

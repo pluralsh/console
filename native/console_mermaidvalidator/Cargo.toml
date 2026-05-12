@@ -1,0 +1,12 @@
+[package]
+name = "console_mermaidvalidator"
+version = "0.1.0"
+authors = []
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rustler = "0.37.3"
+selkie = { package = "selkie-rs", version = "0.3", default-features = false }

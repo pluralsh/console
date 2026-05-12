@@ -1,6 +1,10 @@
 import { Children, ReactElement, ReactNode, useMemo } from 'react'
 import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
+import rehypeSanitize, {
+  defaultSchema,
+  type Options as SanitizeOptions,
+} from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
 
@@ -17,6 +21,8 @@ type MarkdownProps = {
   mainBranch?: string
   isStreaming?: boolean
 } & ReactMarkdownOptions
+
+export const markdownSanitizeSchema: SanitizeOptions = { ...defaultSchema }
 
 export function getLastStringChild(children: any, depth = 0): any {
   let lastChild = null
@@ -206,6 +212,7 @@ const MdTableWrapper = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.medium,
   overflowX: 'auto',
   maxWidth: '100%',
+  minHeight: 'fit-content',
 }))
 
 const MdTable = styled.table((_p) => ({
@@ -324,7 +331,7 @@ function Markdown({
     () => (
       <ReactMarkdown
         {...props}
-        rehypePlugins={[rehypeRaw]}
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, markdownSanitizeSchema]]}
         remarkPlugins={[remarkGfm]}
         components={{
           blockquote: (props) => <MdBlockquote {...props} />,

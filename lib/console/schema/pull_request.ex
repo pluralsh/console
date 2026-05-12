@@ -9,8 +9,14 @@ defmodule Console.Schema.PullRequest do
     PrGovernance,
     AgentSession,
     AgentRun,
-    User
+    User,
+    WorkbenchJob,
+    Workbench
   }
+
+  defmodule Aggregate do
+    defstruct [:merged, :merge_rate]
+  end
 
   defenum Status, open: 0, merged: 1, closed: 2
 
@@ -22,6 +28,7 @@ defmodule Console.Schema.PullRequest do
     field :creator,            :string
     field :labels,             {:array, :string}
     field :ref,                :string
+    field :base,               :string
     field :sha,                :string
     field :polled_sha,         :string
     field :commit_sha,         :string
@@ -43,14 +50,15 @@ defmodule Console.Schema.PullRequest do
     field :fresh,              :boolean, virtual: true, default: false
     field :governance_changed, :boolean, virtual: true, default: false
 
-    belongs_to :cluster,    Cluster
-    belongs_to :service,    Service
-    belongs_to :stack,      Stack
-    belongs_to :flow,       Flow
-    belongs_to :governance, PrGovernance
-    belongs_to :session,    AgentSession
-    belongs_to :agent_run,  AgentRun
-    belongs_to :author,    User
+    belongs_to :cluster,        Cluster
+    belongs_to :service,        Service
+    belongs_to :stack,          Stack
+    belongs_to :flow,           Flow
+    belongs_to :governance,     PrGovernance
+    belongs_to :session,        AgentSession
+    belongs_to :agent_run,      AgentRun
+    belongs_to :author,         User
+    belongs_to :workbench_job,  WorkbenchJob
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -58,6 +66,10 @@ defmodule Console.Schema.PullRequest do
       references: :notifications_policy_id
 
     timestamps()
+  end
+
+  def for_status(query \\ __MODULE__, status) do
+    from(pr in query, where: pr.status == ^status)
   end
 
   def pollable(query \\ __MODULE__) do
@@ -113,6 +125,14 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.author_id == ^author_id)
   end
 
+  def with_workbench(query \\ __MODULE__) do
+    from(pr in query, where: not is_nil(pr.workbench_job_id))
+  end
+
+  def for_workbench_job(query \\ __MODULE__, workbench_job_id) do
+    from(pr in query, where: pr.workbench_job_id == ^workbench_job_id)
+  end
+
   def pending_governance(query \\ __MODULE__) do
     from(pr in query, where:
       not is_nil(pr.governance_id) and not pr.approved and pr.status == ^:open and
@@ -130,9 +150,79 @@ defmodule Console.Schema.PullRequest do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
+  def workbench_merge_rates(query \\ Workbench, period) do
+    from(w in query,
+      join: r in subquery(avg_workbench_merge_rates(query, period)),
+      on: w.id == r.workbench_id,
+      select: %{
+        workbench: w,
+        timestamp: r.timestamp,
+        merge_rate: r.merge_rate
+      },
+      order_by: [desc: r.timestamp]
+    )
+  end
+
+  defp avg_workbench_merge_rates(query, period) do
+    period = normalize_period(period)
+    {lookback_value, lookback_unit} = lookback_window(period)
+
+    from(pr in __MODULE__,
+      join: j in assoc(pr, :workbench_job),
+      join: w in subquery(query),
+        on: w.id == j.workbench_id,
+      where: pr.inserted_at >= ago(^lookback_value, ^lookback_unit),
+      group_by: [w.id, 2],
+      select: %{
+        workbench_id: w.id,
+        timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, j.inserted_at),
+        merge_rate:
+          fragment(
+            "?::float",
+            avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status))
+          )
+      },
+      order_by: [desc: 2]
+    )
+  end
+
+  def for_workbench_jobs(query \\ __MODULE__) do
+    from(pr in query, where: not is_nil(pr.workbench_job_id))
+  end
+
+  def aggregates(query \\ __MODULE__) do
+    from(pr in query,
+      select: %Aggregate{
+        merged: sum(fragment("case when ? = 1 then 1 else 0 end", pr.status)),
+        merge_rate: fragment("?::float", avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status)))
+      }
+    )
+  end
+
+  def merge_rates(query \\ __MODULE__, period) do
+    period = normalize_period(period)
+    {lookback_value, lookback_unit} = lookback_window(period)
+
+    from(pr in query,
+      where: not is_nil(pr.workbench_job_id),
+      where: pr.inserted_at >= ago(^lookback_value, ^lookback_unit),
+      group_by: 1,
+      select: %{
+        timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, pr.inserted_at),
+        merge_rate:
+          fragment(
+            "?::float",
+            avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status))
+          )
+      },
+      order_by: [asc: 1]
+    )
+  end
+
   @valid ~w(
     url
     ref
+    base
     sha
     commit_sha
     approver
@@ -157,6 +247,7 @@ defmodule Console.Schema.PullRequest do
     agent_run_id
     merge_cron
     merge_attempt_at
+    workbench_job_id
   )a
 
   def changeset(model, attrs \\ %{}) do

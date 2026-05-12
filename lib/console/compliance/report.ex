@@ -1,5 +1,13 @@
 defmodule Console.Compliance.Report do
-  alias Console.Compliance.Datasource.{Clusters, Services, Vulnerabilities, Users, Flows}
+  alias Console.Compliance.Datasource.{
+    Clusters,
+    Services,
+    Vulnerabilities,
+    Users,
+    Flows,
+    ClusterCosts,
+    ClusterNamespaceCosts
+  }
   alias Console.Deployments.{Policies, Settings, Policy}
   alias Console.Schema.{User, ComplianceReportGenerator}
 
@@ -20,6 +28,8 @@ defmodule Console.Compliance.Report do
       Zstream.entry("vulnerabilities.csv", Vulnerabilities.stream() |> CSV.encode(headers: true)),
       Zstream.entry("users.csv", Users.stream() |> CSV.encode(headers: true)),
       Zstream.entry("flows.csv", Flows.stream() |> CSV.encode(headers: true)),
+      Zstream.entry("cluster_costs.csv", ClusterCosts.stream() |> CSV.encode(headers: true)),
+      Zstream.entry("cluster_namespace_costs.csv", ClusterNamespaceCosts.stream() |> CSV.encode(headers: true))
     ])
   end
 
@@ -30,6 +40,8 @@ defmodule Console.Compliance.Report do
       Zstream.entry("vulnerabilities.json", Vulnerabilities.stream() |> Stream.map(&Jason.encode!/1)),
       Zstream.entry("users.json", Users.stream() |> Stream.map(&Jason.encode!/1)),
       Zstream.entry("flows.json", Flows.stream() |> Stream.map(&Jason.encode!/1)),
+      Zstream.entry("cluster_costs.json", ClusterCosts.stream() |> Stream.map(&Jason.encode!/1)),
+      Zstream.entry("cluster_namespace_costs.json", ClusterNamespaceCosts.stream() |> Stream.map(&Jason.encode!/1))
     ])
   end
 end

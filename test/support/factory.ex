@@ -261,6 +261,16 @@ defmodule Console.Factory do
     }
   end
 
+  def upgrade_insight_factory do
+    %Schema.UpgradeInsight{
+      name: sequence(:upgrade_insight, &"insight-#{&1}"),
+      version: "1.29",
+      status: :passing,
+      description: "Test upgrade insight",
+      cluster: build(:cluster)
+    }
+  end
+
   def api_deprecation_factory do
     %Schema.ApiDeprecation{
       blocking: false,
@@ -643,6 +653,19 @@ defmodule Console.Factory do
     }
   end
 
+  def monitor_factory do
+    %Schema.Monitor{
+      name: sequence(:monitor, & "monitor-#{&1}"),
+      description: "monitor description",
+      severity: :low,
+      type: :log,
+      query: %{log: %{query: "error", bucket_size: "5m"}},
+      threshold: %{aggregate: :max, value: 1},
+      evaluation_cron: "*/5 * * * *",
+      service: build(:service)
+    }
+  end
+
   def terraform_state_factory do
     %Schema.TerraformState{
       stack: build(:stack)
@@ -735,7 +758,9 @@ defmodule Console.Factory do
       type: :grafana,
       name: sequence(:obs_hook, & "obs-wh-#{&1}"),
       external_id: sequence(:obs_id, & "obs-wh-id-#{&1}"),
-      secret: Ecto.UUID.generate()
+      secret: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate()
     }
   end
 
@@ -1147,6 +1172,7 @@ defmodule Console.Factory do
 
   def workbench_job_factory do
     %Schema.WorkbenchJob{
+      type: :job,
       status: :pending,
       prompt: "test prompt",
       workbench: build(:workbench),
@@ -1193,7 +1219,44 @@ defmodule Console.Factory do
       crontab: "*/5 * * * *",
       prompt: "test prompt",
       next_run_at: Timex.now(),
+      workbench: build(:workbench),
+      user: build(:user)
+    }
+  end
+
+  def workbench_prompt_factory do
+    %Schema.WorkbenchPrompt{
+      prompt: "saved prompt text",
       workbench: build(:workbench)
+    }
+  end
+
+  def workbench_skill_factory do
+    %Schema.WorkbenchSkill{
+      name: sequence(:workbench_skill_name, &"workbench-skill-#{&1}"),
+      description: "saved skill description",
+      contents: "saved skill contents",
+      workbench: build(:workbench)
+    }
+  end
+
+  def workbench_eval_factory do
+    %Schema.WorkbenchEval{
+      conclusion_rules: "conclusion rules blob",
+      prompt_rules: "prompt rules blob",
+      progress_rules: "progress rules blob",
+      workbench: build(:workbench)
+    }
+  end
+
+  def workbench_eval_result_factory do
+    eval = build(:workbench_eval)
+
+    %Schema.WorkbenchEvalResult{
+      grade: 7,
+      feedback: %Schema.WorkbenchEvalResult.Feedback{summary: "eval summary"},
+      workbench_eval: eval,
+      workbench_job: build(:workbench_job, workbench: eval.workbench)
     }
   end
 
@@ -1201,7 +1264,7 @@ defmodule Console.Factory do
     %Schema.WorkbenchWebhook{
       name: sequence(:workbench_webhook, & "workbench-webhook-#{&1}"),
       workbench: build(:workbench),
-      webhook: build(:observability_webhook)
+      user: build(:user)
     }
   end
 
@@ -1256,10 +1319,11 @@ defmodule Console.Factory do
   def issue_webhook_factory do
     %Schema.IssueWebhook{
       provider: 0,
-      url: sequence(:issue_webhook_url, & "https://issues.example.com/hook-#{&1}"),
       name: sequence(:issue_webhook, & "issue-wh-#{&1}"),
       secret: "test-secret-#{Ecto.UUID.generate()}",
       external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),
+      read_policy_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate(),
     }
   end
 

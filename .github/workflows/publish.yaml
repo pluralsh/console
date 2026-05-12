@@ -8,11 +8,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
+      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v3
         with:
           version: latest
@@ -26,14 +27,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-2-
-      - name: Restore _build
+          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-deps-v2-
+      - name: Restore NIF cache
+        uses: actions/cache@v3
+        with:
+          path: priv/native
+          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
+          restore-keys: ${{ runner.os }}-nif-v2-
+      - name: Restore _build cache
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-2-
+          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
       # - name: download jwt verification key
       #   run: |
       #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
@@ -58,12 +64,12 @@ jobs:
       packages: "write"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -75,9 +81,9 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: "projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github"
@@ -93,13 +99,13 @@ jobs:
         with:
           email: gh-actions@plural.sh
       - name: Login to plural registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: dkr.plural.sh
           username: gh-actions@plural.sh
           password: ${{ steps.plrl.outputs.token }}
       - name: Login to GHCR
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -115,7 +121,7 @@ jobs:
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: "."
           file: "./Dockerfile"
@@ -145,14 +151,37 @@ jobs:
     permissions:
       contents: write
       discussions: write
+      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Generate release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RELEASE_NOTES_FILE: release-notes.md
+        run: python3 .github/scripts/generate-release-notes.py "${{ github.ref_name }}" --changelog CHANGELOG.md
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          generate_release_notes: true
+          body_path: release-notes.md
           draft: false
+      - name: Create CHANGELOG PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "Add release notes for ${{ github.ref_name }}"
+          branch: changelog/${{ github.ref_name }}
+          title: "Add release notes for ${{ github.ref_name }}"
+          body: |
+            Automated PR adding release notes for ${{ github.ref_name }}.
+
+            - Adds `releases/${{ github.ref_name }}.md` with the full release notes
+            - Adds a link to the new release file at the top of `CHANGELOG.md`
+          labels: release
+          base: master
+
   bump:
     name: Bump Chart Version
     runs-on: ubuntu-latest
@@ -163,7 +192,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
@@ -203,7 +232,7 @@ jobs:
       - name: helm-dependencies
         run: make helm-dependencies
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           title: Release ${{github.ref_name}}
           body: Automated Pull Request to release ${{github.ref_name}}
@@ -221,7 +250,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
@@ -250,7 +279,7 @@ jobs:
       - name: helm-dependencies
         run: make helm-dependencies-rapid
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           title: Release rapid ${{github.ref_name}}
           body: Automated Pull Request to release rapid channel for ${{github.ref_name}}
