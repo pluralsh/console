@@ -10,6 +10,6 @@ defmodule Console.Email.Builder.Secret do
     |> subject("#{user.name} has shared a one-time secret with you")
     |> assign(:share, share)
     |> assign(:user, user)
-    |> render(:secret)
+    |> render_body(:secret)
   end
 end
