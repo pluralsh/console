@@ -15,6 +15,7 @@ import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchPageLayout } from './Workbench'
 
 export function WorkbenchAlerts() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -49,22 +50,24 @@ export function WorkbenchAlerts() {
   )
 
   return (
-    <WrapperSC>
-      <TableContainerSC>
-        <AlertsTable
-          alerts={alerts}
-          loading={!data && loading}
-          error={error}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          setVirtualSlice={setVirtualSlice}
-          hideHeader
-          columns={columns}
-          fillLevel={0}
-          rowBg="stripes"
-        />
-      </TableContainerSC>
-    </WrapperSC>
+    <WorkbenchPageLayout>
+      <WrapperSC>
+        <TableContainerSC>
+          <AlertsTable
+            alerts={alerts}
+            loading={!data && loading}
+            error={error}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            setVirtualSlice={setVirtualSlice}
+            hideHeader
+            columns={columns}
+            fillLevel={0}
+            rowBg="stripes"
+          />
+        </TableContainerSC>
+      </WrapperSC>
+    </WorkbenchPageLayout>
   )
 }
 

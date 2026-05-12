@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchPageLayout } from './Workbench'
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -21,21 +22,25 @@ export function WorkbenchIssues() {
     [data]
   )
 
-  if (error) return <GqlError error={error} />
-
   return (
-    <WrapperSC>
-      <TableContainerSC>
-        <WorkbenchIssuesTable
-          issues={issues}
-          loading={!data && loading}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          setVirtualSlice={setVirtualSlice}
-          fallbackWorkbenchId={workbenchId}
-        />
-      </TableContainerSC>
-    </WrapperSC>
+    <WorkbenchPageLayout>
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <WrapperSC>
+          <TableContainerSC>
+            <WorkbenchIssuesTable
+              issues={issues}
+              loading={!data && loading}
+              hasNextPage={pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              setVirtualSlice={setVirtualSlice}
+              fallbackWorkbenchId={workbenchId}
+            />
+          </TableContainerSC>
+        </WrapperSC>
+      )}
+    </WorkbenchPageLayout>
   )
 }
 
