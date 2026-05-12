@@ -9,7 +9,6 @@ permissions:
   contents: read
 
 env:
-  GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/deployment-operator
 jobs:
@@ -29,7 +28,7 @@ jobs:
           cache: true
       - name: Download dependencies
         run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make test
+      - run: make test
   build-image:
     name: Build image
     needs: [test]

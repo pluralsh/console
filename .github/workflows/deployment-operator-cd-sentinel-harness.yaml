@@ -23,7 +23,6 @@ permissions:
   contents: read
 
 env:
-  GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/sentinel-harness-base
 

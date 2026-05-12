@@ -9,9 +9,6 @@ PROJECT_NAME := deployment-operator
 IMAGE_REGISTRIES := ghcr.io
 IMAGE_REPOSITORY := plural
 
-ENVTEST ?= $(shell which setup-envtest)
-CRDDOCS ?= $(shell which crd-ref-docs)
-
 # Config variables used for testing
 DEFAULT_PLRL_CONSOLE_URL := "https://console.plrl-dev-aws.onplural.sh"
 PLRL_CONSOLE_URL := $(if $(PLRL_CONSOLE_URL),$(PLRL_CONSOLE_URL),$(DEFAULT_PLRL_CONSOLE_URL))
@@ -39,8 +36,6 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
 ENVTEST_K8S_VERSION := 1.28.3
-CONTROLLER_GEN ?= $(shell which controller-gen)
-MOCKERY ?= $(shell which mockery)
 CONTROLLER_GEN_PATHS ?= ./api/...;./internal/...;./pkg/...
 
 ifndef GOPATH
@@ -364,9 +359,9 @@ docker-build-sentinel-harness: docker-build-sentinel-harness-base ## build docke
 ##@ Tests
 .PHONY: test
 test: TOOL = envtest gotestsum
-test: --tool  ## run tests
-	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" \
-	gotestsum --format pkgname -- \
+test: --tool ## run tests
+	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" \
+	$(GOTESTSUM) --format pkgname -- \
 		$$(go list ./... | grep -v /e2e) \
 		-race -v -tags="cache"
 
