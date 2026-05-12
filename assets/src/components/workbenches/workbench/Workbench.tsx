@@ -155,14 +155,6 @@ export function WorkbenchPageLayout({
     [navigate, workbenchId, openToolsEdit, openDelete]
   )
 
-  const subTabsActiveFn = useCallback(
-    (path: string) =>
-      path === tab ||
-      (path === '' &&
-        (tab === '' || tab === undefined || tab === WORKBENCH_JOBS_REL_PATH)),
-    [tab]
-  )
-
   return (
     <Flex
       height="100%"
@@ -191,7 +183,9 @@ export function WorkbenchPageLayout({
             <SubTabs
               directory={subTabDirectory}
               resolveTo={resolveSubTabTo}
-              activeFn={subTabsActiveFn}
+              activeFn={(path) =>
+                path === (tab === WORKBENCH_JOBS_REL_PATH ? '' : tab)
+              }
             />
             <Flex grow={1} />
             <Button
