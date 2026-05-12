@@ -5,9 +5,9 @@ FROM golang:1.26.2 AS libraries
 
 # Configure versions for Steampipe extensions
 # Do not use latest versions here, as they may not be compatible
-ARG AWS_VERSION=1.30.5
-ARG AZURE_VERSION=1.12.1
-ARG GCP_VERSION=1.13.2
+ARG AWS_VERSION=1.30.6
+ARG AZURE_VERSION=1.12.2
+ARG GCP_VERSION=1.13.3
 
 WORKDIR /workspace
 
