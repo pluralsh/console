@@ -239,6 +239,13 @@ query GetServiceDeploymentByHandle($cluster: String!, $name: String!) {
     }
 }
 
+query GetServiceTarball($id: ID!) {
+    serviceTarball(id: $id) {
+        path
+        content
+    }
+}
+
 query ListServiceDeployment($after: String, $before: String, $last: Int, $clusterId: ID){
     serviceDeployments(after: $after, first: 100, before: $before, last: $last, clusterId: $clusterId) {
         edges {
