@@ -7656,6 +7656,17 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 85.0.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 85.0.1
+    images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+      'quay.io/kiwigrid/k8s-sidecar:2.7.1', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 84.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -13495,7 +13506,19 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["v3.1.5 release notes provided don\u2019t list specific new features\
+          \ beyond standard installation/CLI download instructions.", 'v3.0.7 introduced
+          controller probes/health improvements (liveness probe; readiness timeout
+          increased to 30s; metrics/debug listen on :6060) and several UI/controller
+          bug fixes.']
+      breaking_changes: ['v3.0.7: Argo Server enables TLS by default when a key is
+          available; can be disabled with `--secure=false`. Ingress may need backend-protocol
+          annotations set to HTTPS.', 'Known issues noted in v3.0.7: UI may try to
+          list workflows across namespaces; OpenShift may not support coordination
+          API needed for leader election; log archiving reported broken.']
     chart_version: 0.4.1
     images: ['quay.io/argoproj/argocli:v3.1.5', 'quay.io/argoproj/workflow-controller:v3.1.5']
   - version: 3.0.7

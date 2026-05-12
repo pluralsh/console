@@ -149,7 +149,18 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["v3.1.5 release notes provided don\u2019t list specific new features\
+        \ beyond standard installation/CLI download instructions.", 'v3.0.7 introduced
+        controller probes/health improvements (liveness probe; readiness timeout increased
+        to 30s; metrics/debug listen on :6060) and several UI/controller bug fixes.']
+    breaking_changes: ['v3.0.7: Argo Server enables TLS by default when a key is available;
+        can be disabled with `--secure=false`. Ingress may need backend-protocol annotations
+        set to HTTPS.', 'Known issues noted in v3.0.7: UI may try to list workflows
+        across namespaces; OpenShift may not support coordination API needed for leader
+        election; log archiving reported broken.']
   chart_version: 0.4.1
   images: ['quay.io/argoproj/argocli:v3.1.5', 'quay.io/argoproj/workflow-controller:v3.1.5']
 - version: 3.0.7
