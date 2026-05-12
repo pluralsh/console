@@ -87,7 +87,7 @@ download_plugin() {
     return 0
   fi
 
-  local base_url="https://github.com/turbot/steampipe-plugin-${provider}"
+  local base_url="https://github.com/pluralsh/steampipe-plugin-${provider}"
   local temp_dir=$(mktemp -d)
   local download_url
 
