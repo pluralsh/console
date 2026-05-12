@@ -92,14 +92,17 @@ export function WorkbenchEvals() {
   return (
     <WorkbenchPageLayout
       showDescription={false}
-      sidebar={
-        <WorkbenchEvalsSidePanel
-          evalRows={evalRows}
-          loading={loading && !data}
-          selectedEvalResultId={selectedEvalRow?.id}
-          onSelectEvalResultId={setSelectedEvalResultId}
-        />
-      }
+      sidebar={{
+        kind: 'custom',
+        content: (
+          <WorkbenchEvalsSidePanel
+            evalRows={evalRows}
+            loading={loading && !data}
+            selectedEvalResultId={selectedEvalRow?.id}
+            onSelectEvalResultId={setSelectedEvalResultId}
+          />
+        ),
+      }}
       headerActions={
         <Button
           disabled={

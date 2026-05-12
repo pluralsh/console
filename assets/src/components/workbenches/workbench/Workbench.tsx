@@ -87,9 +87,10 @@ const subTabDirectory = [
   { label: 'Evals', path: WORKBENCHES_EVALS_REL_PATH },
 ]
 
-// 'default' renders the standard WorkbenchSidePanel; 'none' hides the sidebar;
-// any other ReactNode renders the provided custom panel in its place.
-export type WorkbenchSidebar = 'default' | 'none' | ReactNode
+export type WorkbenchSidebar =
+  | { kind: 'default' }
+  | { kind: 'none' }
+  | { kind: 'custom'; content: ReactNode }
 
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
@@ -99,7 +100,7 @@ export type WorkbenchPageLayoutProps = {
 }
 
 export function WorkbenchPageLayout({
-  sidebar = 'default',
+  sidebar = { kind: 'default' },
   showDescription = true,
   headerActions,
   children,
@@ -120,33 +121,47 @@ export function WorkbenchPageLayout({
   )
 
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
-  const resolveSubTabTo = (relPath: string) =>
-    relPath === '' ? workbenchBasePath : `${workbenchBasePath}/${relPath}`
+  const resolveSubTabTo = useCallback(
+    (relPath: string) =>
+      relPath === '' ? workbenchBasePath : `${workbenchBasePath}/${relPath}`,
+    [workbenchBasePath]
+  )
 
-  const handleMoreMenuSelection = (selectedKey: Key) => {
-    switch (selectedKey) {
-      case WorkbenchMoreMenuKey.Cron:
-        navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
-        return
-      case WorkbenchMoreMenuKey.Webhook:
-        navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
-        return
-      case WorkbenchMoreMenuKey.Tools:
-        openToolsEdit()
-        return
-      case WorkbenchMoreMenuKey.SavedPrompts:
-        navigate(getWorkbenchSavedPromptsAbsPath(workbenchId))
-        return
-      case WorkbenchMoreMenuKey.EvalSettings:
-        navigate(getWorkbenchEvalSettingsAbsPath(workbenchId))
-        return
-      case WorkbenchMoreMenuKey.Delete:
-        openDelete()
-        return
-      default:
-        return
-    }
-  }
+  const handleMoreMenuSelection = useCallback(
+    (selectedKey: Key) => {
+      switch (selectedKey) {
+        case WorkbenchMoreMenuKey.Cron:
+          navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
+          return
+        case WorkbenchMoreMenuKey.Webhook:
+          navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
+          return
+        case WorkbenchMoreMenuKey.Tools:
+          openToolsEdit()
+          return
+        case WorkbenchMoreMenuKey.SavedPrompts:
+          navigate(getWorkbenchSavedPromptsAbsPath(workbenchId))
+          return
+        case WorkbenchMoreMenuKey.EvalSettings:
+          navigate(getWorkbenchEvalSettingsAbsPath(workbenchId))
+          return
+        case WorkbenchMoreMenuKey.Delete:
+          openDelete()
+          return
+        default:
+          return
+      }
+    },
+    [navigate, workbenchId, openToolsEdit, openDelete]
+  )
+
+  const subTabsActiveFn = useCallback(
+    (path: string) =>
+      path === tab ||
+      (path === '' &&
+        (tab === '' || tab === undefined || tab === WORKBENCH_JOBS_REL_PATH)),
+    [tab]
+  )
 
   return (
     <Flex
@@ -176,13 +191,7 @@ export function WorkbenchPageLayout({
             <SubTabs
               directory={subTabDirectory}
               resolveTo={resolveSubTabTo}
-              activeFn={(path) =>
-                path === tab ||
-                (path === '' &&
-                  (tab === '' ||
-                    tab === undefined ||
-                    tab === WORKBENCH_JOBS_REL_PATH))
-              }
+              activeFn={subTabsActiveFn}
             />
             <Flex grow={1} />
             <Button
@@ -260,15 +269,19 @@ function renderWorkbenchSidebar(
   workbenchId: string,
   onOpenToolsEdit: () => void
 ): ReactNode {
-  if (sidebar === 'none') return null
-  if (sidebar === 'default')
-    return (
-      <WorkbenchSidePanel
-        workbenchId={workbenchId}
-        onOpenToolsEdit={onOpenToolsEdit}
-      />
-    )
-  return sidebar
+  switch (sidebar.kind) {
+    case 'none':
+      return null
+    case 'default':
+      return (
+        <WorkbenchSidePanel
+          workbenchId={workbenchId}
+          onOpenToolsEdit={onOpenToolsEdit}
+        />
+      )
+    case 'custom':
+      return sidebar.content
+  }
 }
 
 export function Workbench() {
