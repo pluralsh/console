@@ -55,6 +55,10 @@ defmodule Console.Schema.ScmConnection do
     from(scm in query, order_by: ^order)
   end
 
+  def for_type(query \\ __MODULE__, type) do
+    from(scm in query, where: scm.type == ^type)
+  end
+
   @valid ~w(name default type base_url api_url username token signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do

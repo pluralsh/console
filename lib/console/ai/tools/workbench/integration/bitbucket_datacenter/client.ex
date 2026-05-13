@@ -1,26 +1,21 @@
 defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   @moduledoc false
 
-  alias Console.Schema.WorkbenchTool
+  alias Console.Schema.{ScmConnection, WorkbenchTool}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketDatacenterConnection}
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
-  def build(%WorkbenchTool{
-        configuration: %Configuration{bitbucket_datacenter: %BitbucketDatacenterConnection{} = bb}
-      }) do
-    with {:ok, token} <- token_value(bb) do
-      api_base = api_base(bb.url)
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}}),
+    do: {:ok, %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
+  def build(%WorkbenchTool{configuration: %Configuration{
+    bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}}
+  }) do
+      api_base = api_base(url)
       {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
-    end
   end
 
   def build(%WorkbenchTool{}),
     do: {:error, "Bitbucket Data Center connection is not configured for this workbench tool."}
-
-  defp token_value(%BitbucketDatacenterConnection{token: t}) when is_binary(t) and t != "",
-    do: {:ok, t}
-
-  defp token_value(_), do: {:error, "Bitbucket Data Center token (PAT) is missing or invalid."}
 
   @doc false
   def api_base(url) when is_binary(url) do

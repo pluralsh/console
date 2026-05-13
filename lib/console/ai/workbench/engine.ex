@@ -272,7 +272,7 @@ defmodule Console.AI.Workbench.Engine do
   defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
   defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))
 
-  @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]]
+  @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
   defp preload_job(%WorkbenchJob{type: :skill} = job), do: Repo.preload(job, @preloads ++ [referenced_job: [:result, activities: :thoughts]])
   defp preload_job(job), do: Repo.preload(job, @preloads)

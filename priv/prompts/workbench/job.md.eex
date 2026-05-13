@@ -66,15 +66,18 @@ and then delegate to the dashboard agent to craft a dashboard to explain the sys
 ## Completion Criteria
 Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.
 
-**In general, if a pull request has been created to fix the issue or accomplish the task, you should almost always consider the work complete**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+A change to infrastructure will usually be done via a Pull Request. Some guidance there:
 
-The exception to that rule would be if no code change is needed at all, or if multiple pull requests are required to accomplish what the user intends.
+* You should assume these are reviewed independently out of the scope of this run.  You don't need to wait for their completion*
+* If you need to divide work into separate PRs, you can create all of them in one go without waiting for merge or completion.  Reviewers will handle merge order with adequate guidance.*
+* Do not spin waiting for PRs to be merged, this will just waste tokens and cause annoyance.*equests are required to accomplish what the user intends.
+* You will not have the ability to update PRs once created.  SCM integration tools are read-only by design, and post PR creation feedback is delegated entirely to coding agents in babysit mode if applied.
+
+For tasks that do not require a code change, usually a successful run is done when all necessary evidence has been aggregated and you've come up with an adequate way of displaying the needed data to support a conclusion.
+
+You should also take heed of any criticism in the notes tool in case that provides decent insight into gaps in analysis or other issues that need to be addressed.
 
 **Never** have a coding agent reevaluate if a prior pr has been merged or anything similar, as it just wastes tokens.
-
-If you're being asked to create/modify infrastructure, do not loop back and confirm that happened beyond pull request creation, as it will simply burn tokens for no purpose since the infra creation is post pr merge.
-
-You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
 
 Once work is done, wrap up all todos, write a final conclusion.
 

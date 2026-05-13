@@ -98,6 +98,9 @@ export function InsightDisplay({
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
   height: '100%',
   width: '100%',
   overflow: 'hidden',
@@ -129,12 +132,16 @@ const LeftSideSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
+  minHeight: 0,
   minWidth: '50%', // overrides flex min width, prevents crowding out the right side
 })
 
 const RightSideSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
   height: '100%',
   borderLeft: theme.borders['fill-three'],
 }))

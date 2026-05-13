@@ -11,6 +11,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// openAIAuthConfigured reports whether Console sent enough OpenAI config for Nexus to obtain a credential
+// (static apiKey or enabled tokenExchange with all required fields).
+func openAIAuthConfigured(cfg *pb.OpenAiConfig) bool {
+	if cfg == nil {
+		return false
+	}
+	tx := cfg.GetTokenExchange()
+	if tx != nil && tx.GetEnabled() &&
+		tx.GetTokenUrl() != "" && tx.GetClientId() != "" && tx.GetClientSecret() != "" {
+		return true
+	}
+	return cfg.GetApiKey() != ""
+}
+
 // GetKeysForProvider returns the API keys for a specific provider
 func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.ModelProvider) ([]schemas.Key, error) {
 	aiConfig, err := in.consoleClient.GetAiConfig(ctx)
@@ -24,7 +38,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 
 	switch provider {
 	case schemas.OpenAI:
-		return in.handleOpenAIKeys(aiConfig.GetOpenai())
+		return in.handleOpenAIKeys(ctx, aiConfig.GetOpenai())
 	case schemas.Anthropic:
 		return in.handleAnthropicKeys(aiConfig.GetAnthropic())
 	case schemas.Vertex:
@@ -38,7 +52,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 	}
 }
 
-func (in *Account) handleOpenAIKeys(config *pb.OpenAiConfig) ([]schemas.Key, error) {
+func (in *Account) handleOpenAIKeys(ctx context.Context, config *pb.OpenAiConfig) ([]schemas.Key, error) {
 	if config == nil {
 		return nil, fmt.Errorf("openai not configured")
 	}
@@ -49,10 +63,15 @@ func (in *Account) handleOpenAIKeys(config *pb.OpenAiConfig) ([]schemas.Key, err
 		zap.String("embedding_model", config.GetEmbeddingModel()),
 	)
 
+	apiKey, err := in.openAIAPIKey(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+
 	return []schemas.Key{
 		{
 			Value: schemas.EnvVar{
-				Val: config.GetApiKey(),
+				Val: apiKey,
 			},
 			Models: in.filterModels(append(
 				[]string{config.GetModel(), config.GetToolModel(), config.GetEmbeddingModel()},
@@ -62,6 +81,25 @@ func (in *Account) handleOpenAIKeys(config *pb.OpenAiConfig) ([]schemas.Key, err
 			Weight:         1.0,
 		},
 	}, nil
+}
+
+// openAIAPIKey returns the bearer credential for OpenAI: either a cached OAuth2 client-credentials
+// token (when tokenExchange is enabled in the Console gRPC schema) or the static apiKey.
+func (in *Account) openAIAPIKey(ctx context.Context, config *pb.OpenAiConfig) (string, error) {
+	tx := config.GetTokenExchange()
+	if tx != nil && tx.GetEnabled() {
+		tokenURL := tx.GetTokenUrl()
+		clientID := tx.GetClientId()
+		clientSecret := tx.GetClientSecret()
+		if tokenURL == "" || clientID == "" || clientSecret == "" {
+			return "", fmt.Errorf("openai tokenExchange enabled but tokenUrl, clientId, and clientSecret must all be set")
+		}
+		return in.tokenCache.AccessToken(ctx, tokenURL, clientID, clientSecret)
+	}
+	if k := config.GetApiKey(); k != "" {
+		return k, nil
+	}
+	return "", fmt.Errorf("openai not configured: set apiKey or enable tokenExchange with tokenUrl, clientId, and clientSecret")
 }
 
 func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Key, error) {

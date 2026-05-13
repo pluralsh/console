@@ -138,6 +138,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project_id,           :id, description: "the project for this tool"
     field :mcp_server_id,        :id, description: "the mcp server for this tool"
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+    field :scm_connection_id,    :id, description: "the SCM connection for this tool (e.g. shared Git provider credentials)"
     field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
     field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
@@ -809,6 +810,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :configuration,    :workbench_tool_configuration, description: "tool configuration"
     field :mcp_server,       :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
     field :cloud_connection, :cloud_connection, resolve: dataloader(Deployments), description: "the cloud connection bound to this tool"
+    field :scm_connection,   :scm_connection, resolve: dataloader(Deployments), description: "the SCM connection bound to this tool"
 
     timestamps()
   end

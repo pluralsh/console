@@ -1,27 +1,22 @@
 defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   @moduledoc false
 
-  alias Console.Schema.WorkbenchTool
+  alias Console.Schema.{WorkbenchTool, ScmConnection}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketConnection}
 
   @default_api_root "https://api.bitbucket.org/2.0"
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
-  def build(%WorkbenchTool{configuration: %Configuration{bitbucket: %BitbucketConnection{} = bb}}) do
-    with {:ok, token} <- token_value(bb) do
-      {:ok, %{base_url: api_root(bb.url), token: token}}
-    end
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{base_url: base, token: token}}),
+    do: {:ok, %{base_url: api_root(base), token: token}}
+  def build(%WorkbenchTool{configuration: %Configuration{bitbucket: %BitbucketConnection{token: token, url: url}}}) do
+    {:ok, %{base_url: api_root(url), token: token}}
   end
-
   def build(%WorkbenchTool{}),
     do: {:error, "Bitbucket Cloud connection is not configured for this workbench tool."}
 
-  defp token_value(%BitbucketConnection{token: t}) when is_binary(t) and t != "", do: {:ok, t}
-  defp token_value(_), do: {:error, "Bitbucket Cloud token (PAT) is missing or invalid."}
-
   @doc false
   def api_root(url) when url in [nil, ""], do: @default_api_root
-
   def api_root(url) when is_binary(url) do
     url
     |> String.trim()

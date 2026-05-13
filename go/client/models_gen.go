@@ -10293,8 +10293,10 @@ type WorkbenchTool struct {
 	McpServer *McpServer `json:"mcpServer,omitempty"`
 	// the cloud connection bound to this tool
 	CloudConnection *CloudConnection `json:"cloudConnection,omitempty"`
-	InsertedAt      *string          `json:"insertedAt,omitempty"`
-	UpdatedAt       *string          `json:"updatedAt,omitempty"`
+	// the SCM connection bound to this tool
+	ScmConnection *ScmConnection `json:"scmConnection,omitempty"`
+	InsertedAt    *string        `json:"insertedAt,omitempty"`
+	UpdatedAt     *string        `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchToolAssociationAttributes struct {
@@ -10331,6 +10333,8 @@ type WorkbenchToolAttributes struct {
 	McpServerID *string `json:"mcpServerId,omitempty"`
 	// the cloud connection for this tool (e.g. infrastructure cloud tools)
 	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
+	// the SCM connection for this tool (e.g. shared Git provider credentials)
+	ScmConnectionID *string `json:"scmConnectionId,omitempty"`
 	// users who can read and execute this tool
 	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	// users who can modify this tool

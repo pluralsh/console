@@ -28,6 +28,7 @@ import {
   StickyActionsFooterSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
+import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
 import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
@@ -35,7 +36,9 @@ import {
   ConfigForToolType,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
+  getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
+  scmTypeForWorkbenchTool,
   TOOL_TYPE_TO_CATEGORIES,
 } from './workbenchToolsUtils'
 import { Link } from 'react-router-dom'
@@ -98,6 +101,7 @@ export type WorkbenchToolFormState = Omit<
     | 'categories'
     | 'configuration'
     | 'cloudConnectionId'
+    | 'scmConnectionId'
     | 'readBindings'
     | 'writeBindings'
   >,
@@ -147,28 +151,36 @@ export function WorkbenchToolForm({
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
     cloudConnectionId: tool?.cloudConnection?.id,
+    scmConnectionId: tool?.scmConnection?.id,
     readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
   const stepIndex = TOOL_FORM_STEPS.findIndex((s) => s.key === currentStep)
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
+  const hasRegisteredScm = Boolean(state.scmConnectionId)
+  const scmType = scmTypeForWorkbenchTool(type)
   const configurationStepComplete =
     !!state.name.trim() &&
     (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId) &&
     (type !== WorkbenchToolType.Github ||
+      hasRegisteredScm ||
       githubWorkbenchAuthIsValid(state.configuration?.github, {
         appId: tool?.configuration?.github?.appId,
         installationId: tool?.configuration?.github?.installationId,
       })) &&
     (type !== WorkbenchToolType.Gitlab ||
+      hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.gitlab?.token)) &&
     (type !== WorkbenchToolType.Bitbucket ||
+      hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.bitbucket?.token)) &&
     (type !== WorkbenchToolType.BitbucketDatacenter ||
+      hasRegisteredScm ||
       bitbucketDatacenterConfigurationIsComplete(
         state.configuration?.bitbucketDatacenter
       )) &&
     (type !== WorkbenchToolType.AzureDevops ||
+      hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.azureDevops?.token)) &&
     (type !== WorkbenchToolType.Teams ||
       teamsConfigurationIsComplete(state.configuration?.teams))
@@ -203,11 +215,21 @@ export function WorkbenchToolForm({
               onChange={(id) => update({ cloudConnectionId: id })}
             />
           ) : (
-            <WorkbenchToolFormFields
-              type={type}
-              state={state}
-              update={update}
-            />
+            <>
+              {scmType ? (
+                <ScmConnectionWorkbenchSelect
+                  scmType={scmType}
+                  toolLabel={getWorkbenchToolLabel(type)}
+                  selectedId={state.scmConnectionId ?? null}
+                  onChange={(id) => update({ scmConnectionId: id })}
+                />
+              ) : null}
+              <WorkbenchToolFormFields
+                type={type}
+                state={state}
+                update={update}
+              />
+            </>
           )}
           {categories.length > 1 && (
             <FormField label="Allowed capabilities (must select at least one)">

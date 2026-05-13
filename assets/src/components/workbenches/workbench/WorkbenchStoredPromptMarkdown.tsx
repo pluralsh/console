@@ -62,6 +62,21 @@ const SidePanelMarkdownWrapSC = styled(MarkdownWrapSC)`
   ${sidePanelClampStyles}
 `
 
+const jobCardClampStyles = ({ theme }) => css`
+  ${theme.partials.text.body2};
+  color: ${theme.colors['text-light']};
+  min-width: 0;
+  overflow: hidden;
+
+  & > div {
+    ${clampedMarkdownInnerStyles({ theme })}
+  }
+`
+
+const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)`
+  ${jobCardClampStyles}
+`
+
 /**
  * Renders a stored workbench prompt (serialized `plrl-*` chip XML) with the same
  * markdown + inline chip treatment as job activity user messages.
@@ -74,13 +89,14 @@ export function WorkbenchStoredPromptMarkdown({
   text: string
   /** When set, trims by visible length without splitting chips (like job previews). */
   truncateVisibleChars?: number
-  /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). */
-  density?: 'default' | 'tableCell' | 'sidePanel'
+  /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). `jobCard`: body2 + `text-light` + same clamp (home recent jobs). */
+  density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard'
 }) {
+  const clampedDensity =
+    density === 'tableCell' || density === 'sidePanel' || density === 'jobCard'
+
   const trimmed =
-    truncateVisibleChars != null &&
-    density !== 'tableCell' &&
-    density !== 'sidePanel'
+    truncateVisibleChars != null && !clampedDensity
       ? truncateKeepingChips(text, truncateVisibleChars)
       : text
 
@@ -89,7 +105,9 @@ export function WorkbenchStoredPromptMarkdown({
       ? TableCellMarkdownWrapSC
       : density === 'sidePanel'
         ? SidePanelMarkdownWrapSC
-        : MarkdownWrapSC
+        : density === 'jobCard'
+          ? JobCardMarkdownWrapSC
+          : MarkdownWrapSC
 
   return (
     <Wrap>

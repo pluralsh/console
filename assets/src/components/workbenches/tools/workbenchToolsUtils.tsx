@@ -23,6 +23,7 @@ import {
 import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
   Provider,
+  ScmType,
   WorkbenchToolCategory,
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolType,
@@ -99,6 +100,23 @@ export const isConfigurableWorkbenchToolType = (
   type: Nullable<string>
 ): type is ConfigurableWorkbenchToolType =>
   !!type && CONFIGURABLE_SET.has(type as WorkbenchToolType)
+
+/** Workbench tool kinds that map to a registered {@link ScmType} connection. */
+export const WORKBENCH_TOOL_TO_SCM_TYPE: Partial<
+  Record<WorkbenchToolType, ScmType>
+> = {
+  [WorkbenchToolType.Github]: ScmType.Github,
+  [WorkbenchToolType.Gitlab]: ScmType.Gitlab,
+  [WorkbenchToolType.Bitbucket]: ScmType.Bitbucket,
+  [WorkbenchToolType.BitbucketDatacenter]: ScmType.BitbucketDatacenter,
+  [WorkbenchToolType.AzureDevops]: ScmType.AzureDevops,
+}
+
+export function scmTypeForWorkbenchTool(
+  type: WorkbenchToolType
+): ScmType | undefined {
+  return WORKBENCH_TOOL_TO_SCM_TYPE[type]
+}
 
 const WORKBENCH_TOOL_LABELS: Record<
   WorkbenchToolType | `${WorkbenchToolType.Cloud}:${Provider}`,

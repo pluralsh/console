@@ -63,14 +63,23 @@ export function ClusterInsights() {
       overflow="hidden"
       marginBottom={theme.spacing.large}
       height="100%"
+      minHeight={0}
     >
       <StretchedFlex align="end">
         {navigationContent}
         {actionContent}
       </StretchedFlex>
-      <Suspense fallback={<LoadingIndicator />}>
-        <Outlet context={ctx} />
-      </Suspense>
+      <Flex
+        direction="column"
+        grow={1}
+        shrink={1}
+        minHeight={0}
+        overflow="auto"
+      >
+        <Suspense fallback={<LoadingIndicator />}>
+          <Outlet context={ctx} />
+        </Suspense>
+      </Flex>
     </Flex>
   )
 }

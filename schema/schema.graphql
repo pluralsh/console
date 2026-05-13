@@ -139,7 +139,18 @@ type RootQueryType {
 
   fluxHelmRepository(name: String!, namespace: String!): FluxHelmRepository
 
-  scmConnections(after: String, first: Int, before: String, last: Int): ScmConnectionConnection
+  scmConnections(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "when set, only connections of this SCM provider type are returned"
+    type: ScmType
+  ): ScmConnectionConnection
 
   scmConnection(id: ID, name: String): ScmConnection
 
@@ -2649,6 +2660,9 @@ input WorkbenchToolAttributes {
   "the cloud connection for this tool (e.g. infrastructure cloud tools)"
   cloudConnectionId: ID
 
+  "the SCM connection for this tool (e.g. shared Git provider credentials)"
+  scmConnectionId: ID
+
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
 
@@ -3775,6 +3789,9 @@ type WorkbenchTool {
 
   "the cloud connection bound to this tool"
   cloudConnection: CloudConnection
+
+  "the SCM connection bound to this tool"
+  scmConnection: ScmConnection
 
   insertedAt: DateTime
 

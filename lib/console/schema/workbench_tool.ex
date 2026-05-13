@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User, McpServer, CloudConnection, WorkbenchOauthClient}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
@@ -210,6 +210,8 @@ defmodule Console.Schema.WorkbenchTool do
     belongs_to :project,          Project
     belongs_to :mcp_server,       McpServer
     belongs_to :cloud_connection, CloudConnection
+    belongs_to :scm_connection,  ScmConnection
+
     has_one    :oauth_client,     WorkbenchOauthClient, foreign_key: :tool, references: :tool
 
     timestamps()
@@ -239,7 +241,7 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
-  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id)a
+  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id scm_connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -252,6 +254,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
+    |> foreign_key_constraint(:scm_connection_id)
     |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)

@@ -500,7 +500,10 @@ end
 defmodule Toolquery.InvokeLambdaInput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.InvokeLambdaInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :connection, 1, type: Cloudquery.Connection
   field :identifier, 2, type: :string
@@ -510,7 +513,10 @@ end
 defmodule Toolquery.InvokeLambdaOutput do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "toolquery.InvokeLambdaOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :result, 1, type: :string
   field :error, 2, type: :string

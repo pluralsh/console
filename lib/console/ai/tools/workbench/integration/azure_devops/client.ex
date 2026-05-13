@@ -1,12 +1,23 @@
 defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
   @moduledoc false
 
-  alias Console.Schema.WorkbenchTool
+  alias Console.Schema.{WorkbenchTool, ScmConnection}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
 
   @default_base "https://dev.azure.com"
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}})
+      when is_binary(url) and url != "",
+      do: {:ok, %{base_url: normalize_base(url), token: token}}
+
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{base_url: url, token: token}})
+      when is_binary(url) and url != "",
+      do: {:ok, %{base_url: normalize_base(url), token: token}}
+
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{token: token}}),
+    do: {:ok, %{base_url: normalize_base(""), token: token}}
+
   def build(%WorkbenchTool{
         configuration: %Configuration{azure_devops: %AzureDevopsConnection{} = ado}
       }) do

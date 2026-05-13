@@ -21,7 +21,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.StackInspect,
     Infrastructure.CloudSchema,
     Infrastructure.CloudQuery,
-    Infrastructure.CloudLambda,
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,

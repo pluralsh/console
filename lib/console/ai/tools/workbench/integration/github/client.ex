@@ -1,8 +1,9 @@
 defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   @moduledoc false
 
+  alias Console.Deployments.Pr.Git, as: PrGit
   alias Console.Jwt.Github, as: GithubJwt
-  alias Console.Schema.WorkbenchTool
+  alias Console.Schema.{ScmConnection, WorkbenchTool}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.GithubConnection}
 
   @doc false
@@ -30,11 +31,25 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   end
 
   @spec build(WorkbenchTool.t()) :: {:ok, Tentacat.Client.t()} | {:error, String.t()}
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{github: gh} = conn})
+      when not is_nil(gh) and is_binary(gh.app_id) and is_binary(gh.installation_id) and
+             not is_nil(gh.private_key) do
+    scm_github_rest_url(conn)
+    |> GithubJwt.gh_client(gh.app_id, gh.installation_id, gh.private_key, PrGit.request_options(conn))
+  end
+  def build(%WorkbenchTool{scm_connection: %ScmConnection{token: token} = conn}),
+    do: {:ok, Tentacat.Client.new(%{access_token: token}, scm_github_rest_url(conn))}
   def build(%WorkbenchTool{configuration: %Configuration{github: %GithubConnection{} = gh}}),
     do: resolve_tentacat(gh)
 
   def build(%WorkbenchTool{}),
     do: {:error, "GitHub connection is not configured for this workbench tool."}
+
+  defp scm_github_rest_url(%ScmConnection{} = conn) do
+    (conn.api_url || conn.base_url || "")
+    |> normalize_mcp_url()
+    |> github_rest_endpoint()
+  end
 
   defp resolve_tentacat(%GithubConnection{app_id: id} = gh) when is_binary(id) do
     api_endpoint(gh)

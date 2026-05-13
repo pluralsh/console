@@ -68,8 +68,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_scm_connections(args, _) do
     ScmConnection.ordered()
+    |> scm_connection_filters(args)
     |> paginate(args)
   end
+
+  defp scm_connection_filters(query, %{type: type}) when not is_nil(type),
+    do: ScmConnection.for_type(query, type)
+
+  defp scm_connection_filters(query, _), do: query
 
   def list_pr_automations(args, _) do
     PrAutomation.ordered()

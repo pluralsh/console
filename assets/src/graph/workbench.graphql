@@ -127,6 +127,11 @@ fragment WorkbenchToolTiny on WorkbenchTool {
 
 fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
+  scmConnection {
+    id
+    name
+    type
+  }
   readBindings {
     ...PolicyBinding
   }
