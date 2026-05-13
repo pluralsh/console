@@ -14,6 +14,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
+import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
 import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
@@ -138,6 +139,7 @@ export function WorkbenchJobEval({ job }: { job: WorkbenchJobFragment }) {
   const evalResult = job.evalResult
   const feedback = evalResult?.feedback
   const grade = evalResult?.grade ?? 0
+  const workbenchId = job.workbench?.id ?? ''
 
   if (!evalResult) return null
 
@@ -149,15 +151,27 @@ export function WorkbenchJobEval({ job }: { job: WorkbenchJobFragment }) {
       <Flex
         align="center"
         gap="medium"
+        justify="space-between"
       >
-        <WorkbenchEvalGradeBadge
-          grade={grade}
-          colorBorder
-          size="medium"
+        <Flex
+          align="center"
+          gap="medium"
+        >
+          <WorkbenchEvalGradeBadge
+            grade={grade}
+            colorBorder
+            size="medium"
+          />
+          <Subtitle2H1 css={{ fontWeight: 400 }}>
+            Overall grade: {grade.toFixed(0)}/10
+          </Subtitle2H1>
+        </Flex>
+        <WorkbenchEvalSkillButton
+          evalResultId={evalResult.id}
+          workbenchId={workbenchId}
+          floating
+          small
         />
-        <Subtitle2H1 css={{ fontWeight: 400 }}>
-          Overall grade: {grade.toFixed(0)}/10
-        </Subtitle2H1>
       </Flex>
       <EvalSection title="Summary">{feedback?.summary}</EvalSection>
       <EvalSection title="Prompt">{feedback?.prompt}</EvalSection>

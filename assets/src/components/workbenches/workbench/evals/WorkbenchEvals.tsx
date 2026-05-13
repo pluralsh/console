@@ -16,19 +16,17 @@ import {
   getWorkbenchEvalResultAbsPath,
   WORKBENCH_EVAL_RESULT_PARAM_ID,
   getWorkbenchEvalSettingsAbsPath,
-  getWorkbenchJobAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
+import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
 import {
   WorkbenchEvalResultRowFragment,
-  useWorkbenchEvalSkillMutation,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { mapExistingNodes } from 'utils/graphql'
 
 type QualityTab = 'prompt' | 'conclusion' | 'logic'
@@ -46,7 +44,6 @@ const qualityTabs: { key: QualityTab; label: string }[] = [
 export function WorkbenchEvals() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { popToast } = useSimpleToast()
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
   const evalResultIdFromPath = useParams()[WORKBENCH_EVAL_RESULT_PARAM_ID]
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
@@ -69,19 +66,6 @@ export function WorkbenchEvals() {
   const selectedEvalRowFromPath =
     evalRows.find((r) => r.id === evalResultIdFromPath) ?? null
   const selectedEvalRow = selectedEvalRowFromPath ?? evalRows[0] ?? null
-
-  const [workbenchEvalSkill, { loading: skillMutationLoading }] =
-    useWorkbenchEvalSkillMutation({
-      onCompleted: ({ workbenchEvalSkill }) => {
-        popToast({
-          content: 'Skills updated successfully',
-          severity: 'success',
-        })
-        const jobId = workbenchEvalSkill?.id
-        if (jobId) navigate(getWorkbenchJobAbsPath({ workbenchId, jobId }))
-      },
-      onError: (e) => popToast({ content: e.message, severity: 'danger' }),
-    })
 
   const feedback = selectedEvalRow?.feedback
   const grade = selectedEvalRow?.grade ?? 0
@@ -138,22 +122,11 @@ export function WorkbenchEvals() {
           >
             Eval settings
           </Button>
-          <Button
-            disabled={
-              !selectedEvalResultIdForSkill ||
-              skillMutationLoading ||
-              (loading && !data)
-            }
-            loading={skillMutationLoading}
-            onClick={() => {
-              if (!selectedEvalResultIdForSkill) return
-              workbenchEvalSkill({
-                variables: { id: selectedEvalResultIdForSkill },
-              })
-            }}
-          >
-            Create skills from eval
-          </Button>
+          <WorkbenchEvalSkillButton
+            disabled={loading && !data}
+            evalResultId={selectedEvalResultIdForSkill}
+            workbenchId={workbenchId}
+          />
         </Flex>
       }
     >
