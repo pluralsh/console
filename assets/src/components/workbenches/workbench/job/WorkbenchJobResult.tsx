@@ -152,6 +152,7 @@ export function WorkbenchJobEval({ job }: { job: WorkbenchJobFragment }) {
       >
         <WorkbenchEvalGradeBadge
           grade={grade}
+          colorBorder
           size="medium"
         />
         <Subtitle2H1 css={{ fontWeight: 400 }}>

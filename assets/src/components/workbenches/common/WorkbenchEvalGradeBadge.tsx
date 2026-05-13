@@ -3,13 +3,6 @@ import { MouseEventHandler } from 'react'
 import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import { useTheme } from 'styled-components'
 
-type WorkbenchEvalGradeBadgeProps = {
-  grade: number
-  size?: 'small' | 'medium'
-  onClick?: MouseEventHandler<HTMLDivElement>
-  tooltip?: string
-}
-
 const SIZE_BY_VARIANT = {
   small: 32,
   medium: 40,
@@ -18,11 +11,19 @@ const SIZE_BY_VARIANT = {
 export function WorkbenchEvalGradeBadge({
   grade,
   size = 'small',
+  colorBorder = false,
   onClick,
   tooltip,
-}: WorkbenchEvalGradeBadgeProps) {
+}: {
+  grade: number
+  size?: 'small' | 'medium'
+  colorBorder?: boolean
+  onClick?: MouseEventHandler<HTMLDivElement>
+  tooltip?: string
+}) {
   const theme = useTheme()
   const pixelSize = SIZE_BY_VARIANT[size]
+  const color = evalGradeToColor(grade)
 
   return (
     <WrapWithIf
@@ -33,9 +34,11 @@ export function WorkbenchEvalGradeBadge({
         css={{
           alignItems: 'center',
           backgroundColor: theme.colors['fill-two'],
-          border: theme.borders['fill-two'],
+          border: colorBorder
+            ? `1px solid ${color}`
+            : theme.borders['fill-two'],
           borderRadius: '50%',
-          color: evalGradeToColor(grade),
+          color,
           cursor: !!onClick ? 'pointer' : 'default',
           display: 'flex',
           flexShrink: 0,
