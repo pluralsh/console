@@ -309,7 +309,7 @@ export function Stacks() {
             }}
           />
         )}
-        {!isEmpty(stacks) && (
+        {(!isEmpty(stacks) || (!data && loading)) && (
           <VirtualList
             data={stacks}
             loading={!data && loading}
