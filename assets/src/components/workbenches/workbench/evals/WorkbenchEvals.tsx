@@ -17,6 +17,7 @@ import {
 } from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import {
+  getWorkbenchEvalSettingsAbsPath,
   getWorkbenchJobAbsPath,
   WORKBENCH_EVALS_SELECTED_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
@@ -120,22 +121,32 @@ export function WorkbenchEvals() {
         ),
       }}
       headerActions={
-        <Button
-          disabled={
-            !selectedEvalResultIdForSkill ||
-            skillMutationLoading ||
-            (loading && !data)
-          }
-          loading={skillMutationLoading}
-          onClick={() => {
-            if (!selectedEvalResultIdForSkill) return
-            workbenchEvalSkill({
-              variables: { id: selectedEvalResultIdForSkill },
-            })
-          }}
-        >
-          Create skills from eval
-        </Button>
+        <Flex gap="small">
+          <Button
+            secondary
+            onClick={() =>
+              navigate(getWorkbenchEvalSettingsAbsPath(workbenchId))
+            }
+          >
+            Eval settings
+          </Button>
+          <Button
+            disabled={
+              !selectedEvalResultIdForSkill ||
+              skillMutationLoading ||
+              (loading && !data)
+            }
+            loading={skillMutationLoading}
+            onClick={() => {
+              if (!selectedEvalResultIdForSkill) return
+              workbenchEvalSkill({
+                variables: { id: selectedEvalResultIdForSkill },
+              })
+            }}
+          >
+            Create skills from eval
+          </Button>
+        </Flex>
       }
     >
       {error ? (
