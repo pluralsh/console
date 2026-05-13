@@ -109,6 +109,7 @@ export function WorkbenchEvals() {
   return (
     <WorkbenchPageLayout
       showDescription={false}
+      showEditWorkbenchButton={false}
       sidebar={{
         kind: 'custom',
         content: (
