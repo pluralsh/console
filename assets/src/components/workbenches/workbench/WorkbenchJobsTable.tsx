@@ -19,6 +19,7 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
+import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import {
   PageInfoFragment,
@@ -27,8 +28,11 @@ import {
 } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  getWorkbenchEvalResultAbsPath,
+  getWorkbenchJobAbsPath,
+} from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -125,9 +129,12 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
   id: 'actions',
   cell: function Cell({ getValue }) {
     const theme = useTheme()
+    const navigate = useNavigate()
     const { spacing } = theme
-    const { alert, issue, pullRequests, result, status, user } = getValue()
+    const { alert, issue, pullRequests, result, evalResult, status, user } =
+      getValue()
     const prs = pullRequests?.filter(isNonNullable) ?? []
+    const workbenchId = getValue().workbench?.id
 
     return (
       <Flex
@@ -171,6 +178,21 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
           />
         )}
         <PRsModalIcon prs={prs} />
+        {workbenchId && evalResult?.id && !!evalResult?.grade && (
+          <WorkbenchEvalGradeBadge
+            grade={evalResult.grade}
+            tooltip="View eval details"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(
+                getWorkbenchEvalResultAbsPath({
+                  workbenchId,
+                  evalResultId: evalResult.id,
+                })
+              )
+            }}
+          />
+        )}
         <Tooltip
           placement="top"
           label={user?.name}

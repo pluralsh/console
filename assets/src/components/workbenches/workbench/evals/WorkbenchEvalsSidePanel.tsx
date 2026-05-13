@@ -4,9 +4,9 @@ import styled, { useTheme } from 'styled-components'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
-  evalGradeToColor,
   EvalGradeCategory,
 } from 'components/workbenches/common/evalGrade'
+import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
@@ -135,9 +135,7 @@ export function WorkbenchEvalsSidePanel({
                 $active={selectedEvalResultId === row.id}
                 onClick={() => onSelectEvalResultId(row.id)}
               >
-                <ScoreBadgeSC $color={evalGradeToColor(row.grade ?? 0)}>
-                  {Math.round(row.grade ?? 0)}
-                </ScoreBadgeSC>
+                <WorkbenchEvalGradeBadge grade={row.grade ?? 0} />
                 <Flex
                   direction="column"
                   gap="xxxsmall"
@@ -235,18 +233,3 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     },
   })
 )
-
-const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
-  ...theme.partials.text.caption,
-  alignItems: 'center',
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
-  borderRadius: '50%',
-  color: $color,
-  display: 'flex',
-  flexShrink: 0,
-  fontWeight: 600,
-  height: 32,
-  justifyContent: 'center',
-  width: 32,
-}))

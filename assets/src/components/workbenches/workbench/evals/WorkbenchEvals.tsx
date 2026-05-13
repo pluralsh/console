@@ -10,12 +10,19 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import {
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import {
+  getWorkbenchJobAbsPath,
+  WORKBENCH_EVALS_SELECTED_QUERY_PARAM,
+} from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
-import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
+import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import {
   WorkbenchEvalResultRowFragment,
   useWorkbenchEvalSkillMutation,
@@ -43,6 +50,7 @@ export function WorkbenchEvals() {
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
+  const [searchParams] = useSearchParams()
   const [selectedEvalResultId, setSelectedEvalResultId] = useState<
     string | null
   >(null)
@@ -63,8 +71,16 @@ export function WorkbenchEvals() {
     )
   }, [data])
 
+  const selectedEvalResultIdFromQuery = searchParams.get(
+    WORKBENCH_EVALS_SELECTED_QUERY_PARAM
+  )
+  const selectedEvalResultIdResolved =
+    selectedEvalResultId ?? selectedEvalResultIdFromQuery
   const selectedEvalRow =
-    evalRows.find((r) => r.id === selectedEvalResultId) ?? evalRows[0] ?? null
+    evalRows.find((r) => r.id === selectedEvalResultIdResolved) ??
+    evalRows.find((r) => r.id === selectedEvalResultIdFromQuery) ??
+    evalRows[0] ??
+    null
 
   const [workbenchEvalSkill, { loading: skillMutationLoading }] =
     useWorkbenchEvalSkillMutation({
@@ -164,9 +180,10 @@ export function WorkbenchEvals() {
                     align="center"
                     gap="medium"
                   >
-                    <ScoreBadgeSC $color={evalGradeToColor(grade)}>
-                      {Math.round(grade)}
-                    </ScoreBadgeSC>
+                    <WorkbenchEvalGradeBadge
+                      grade={grade}
+                      size="medium"
+                    />
                     <Flex direction="column">
                       <span
                         css={{
@@ -332,17 +349,4 @@ const PanelBodySC = styled.div(({ theme }) => ({
   minHeight: 0,
   overflow: 'auto',
   padding: theme.spacing.medium,
-}))
-
-const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
-  alignItems: 'center',
-  backgroundColor: theme.colors['fill-one'],
-  border: `1px solid ${$color}`,
-  borderRadius: '50%',
-  color: $color,
-  display: 'flex',
-  fontWeight: 600,
-  height: 40,
-  justifyContent: 'center',
-  minWidth: 40,
 }))
