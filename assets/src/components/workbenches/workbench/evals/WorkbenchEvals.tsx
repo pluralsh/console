@@ -9,17 +9,14 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
-import { useMemo, useRef, useState } from 'react'
-import {
-  useNavigate,
-  useOutletContext,
-  useSearchParams,
-} from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import {
+  getWorkbenchEvalResultAbsPath,
+  WORKBENCH_EVAL_RESULT_PARAM_ID,
   getWorkbenchEvalSettingsAbsPath,
   getWorkbenchJobAbsPath,
-  WORKBENCH_EVALS_SELECTED_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
@@ -51,10 +48,7 @@ export function WorkbenchEvals() {
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
-  const [searchParams] = useSearchParams()
-  const [selectedEvalResultId, setSelectedEvalResultId] = useState<
-    string | null
-  >(null)
+  const evalResultIdFromPath = useParams()[WORKBENCH_EVAL_RESULT_PARAM_ID]
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
@@ -72,16 +66,9 @@ export function WorkbenchEvals() {
     )
   }, [data])
 
-  const selectedEvalResultIdFromQuery = searchParams.get(
-    WORKBENCH_EVALS_SELECTED_QUERY_PARAM
-  )
-  const selectedEvalResultIdResolved =
-    selectedEvalResultId ?? selectedEvalResultIdFromQuery
-  const selectedEvalRow =
-    evalRows.find((r) => r.id === selectedEvalResultIdResolved) ??
-    evalRows.find((r) => r.id === selectedEvalResultIdFromQuery) ??
-    evalRows[0] ??
-    null
+  const selectedEvalRowFromPath =
+    evalRows.find((r) => r.id === evalResultIdFromPath) ?? null
+  const selectedEvalRow = selectedEvalRowFromPath ?? evalRows[0] ?? null
 
   const [workbenchEvalSkill, { loading: skillMutationLoading }] =
     useWorkbenchEvalSkillMutation({
@@ -106,6 +93,19 @@ export function WorkbenchEvals() {
   const durationSeconds = getDurationSeconds(selectedEvalRow?.workbenchJob)
   const selectedEvalResultIdForSkill = selectedEvalRow?.id
 
+  useEffect(() => {
+    if (!selectedEvalRow?.id || evalResultIdFromPath === selectedEvalRow.id)
+      return
+
+    navigate(
+      getWorkbenchEvalResultAbsPath({
+        workbenchId,
+        evalResultId: selectedEvalRow.id,
+      }),
+      { replace: true }
+    )
+  }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
+
   return (
     <WorkbenchPageLayout
       showDescription={false}
@@ -117,7 +117,14 @@ export function WorkbenchEvals() {
             evalRows={evalRows}
             loading={loading && !data}
             selectedEvalResultId={selectedEvalRow?.id}
-            onSelectEvalResultId={setSelectedEvalResultId}
+            onSelectEvalResultId={(evalResultId) =>
+              navigate(
+                getWorkbenchEvalResultAbsPath({
+                  workbenchId,
+                  evalResultId,
+                })
+              )
+            }
           />
         ),
       }}
