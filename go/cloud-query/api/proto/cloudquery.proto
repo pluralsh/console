@@ -4,7 +4,7 @@ syntax = "proto3";
 package cloudquery;
 
 // Configures where the generated code will be placed.
-option go_package = "internal/proto/cloudquery";
+option go_package = "github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery";
 
 message AwsCredentials {
   optional string access_key_id = 1;

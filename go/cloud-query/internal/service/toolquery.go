@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -12,6 +14,7 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools"
+	lambdatools "github.com/pluralsh/console/go/cloud-query/internal/tools/lambda"
 )
 
 // ToolQueryService implements the toolquery.ToolQueryServer interface.
@@ -117,6 +120,44 @@ func (in *ToolQueryService) Traces(ctx context.Context, input *toolquery.TracesQ
 	return output, nil
 }
 
+func (in *ToolQueryService) InvokeLambda(ctx context.Context, input *toolquery.InvokeLambdaInput) (*toolquery.InvokeLambdaOutput, error) {
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+	if input.GetConnection() == nil {
+		return nil, status.Error(codes.InvalidArgument, "connection is required")
+	}
+	if strings.TrimSpace(input.GetIdentifier()) == "" {
+		return nil, status.Error(codes.InvalidArgument, "identifier is required")
+	}
+
+	payload := strings.TrimSpace(input.GetPayloadJson())
+	if payload == "" {
+		payload = "{}"
+	}
+	if !json.Valid([]byte(payload)) {
+		return nil, status.Error(codes.InvalidArgument, "payload_json must be valid json")
+	}
+
+	provider, err := lambdatools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapLambdaError("invoke_lambda", err)
+	}
+
+	output, err := provider.Invoke(ctx, lambdatools.InvocationInput{
+		Identifier: input.GetIdentifier(),
+		Payload:    []byte(payload),
+	})
+	if err != nil {
+		return nil, in.mapLambdaError("invoke_lambda", err)
+	}
+
+	return &toolquery.InvokeLambdaOutput{
+		Result: output.Result,
+		Error:  output.Error,
+	}, nil
+}
+
 func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, query string, timeRange *toolquery.TimeRange) error {
 	if err := in.validateSearchInput(connection); err != nil {
 		return err
@@ -162,6 +203,17 @@ func (in *ToolQueryService) validateTimeRange(timeRange *toolquery.TimeRange) er
 }
 
 func (in *ToolQueryService) mapError(operation string, err error) error {
+	switch {
+	case errors.Is(err, tools.ErrUnsupportedOperation):
+		return status.Errorf(codes.Unimplemented, "%s not supported for this provider", operation)
+	case errors.Is(err, tools.ErrInvalidArgument):
+		return status.Errorf(codes.InvalidArgument, "%s provider error: %v", operation, err)
+	default:
+		return status.Errorf(codes.Internal, "%s failed: %v", operation, err)
+	}
+}
+
+func (in *ToolQueryService) mapLambdaError(operation string, err error) error {
 	switch {
 	case errors.Is(err, tools.ErrUnsupportedOperation):
 		return status.Errorf(codes.Unimplemented, "%s not supported for this provider", operation)

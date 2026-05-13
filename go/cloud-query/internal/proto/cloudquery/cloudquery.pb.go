@@ -904,7 +904,7 @@ const file_cloudquery_proto_rawDesc = "" +
 	"\x05Query\x12\x16.cloudquery.QueryInput\x1a\x17.cloudquery.QueryResult\"\x00\x12=\n" +
 	"\x06Schema\x12\x17.cloudquery.SchemaInput\x1a\x18.cloudquery.SchemaOutput\"\x00\x12=\n" +
 	"\x06Tables\x12\x17.cloudquery.TablesInput\x1a\x18.cloudquery.TablesOutput\"\x00\x12B\n" +
-	"\aExtract\x12\x18.cloudquery.ExtractInput\x1a\x19.cloudquery.ExtractOutput\"\x000\x01B\x1bZ\x19internal/proto/cloudqueryb\x06proto3"
+	"\aExtract\x12\x18.cloudquery.ExtractInput\x1a\x19.cloudquery.ExtractOutput\"\x000\x01BFZDgithub.com/pluralsh/console/go/cloud-query/internal/proto/cloudqueryb\x06proto3"
 
 var (
 	file_cloudquery_proto_rawDescOnce sync.Once
