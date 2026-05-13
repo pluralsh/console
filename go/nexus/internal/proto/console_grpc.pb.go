@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PluralServer_GetAiConfig_FullMethodName         = "/plrl.PluralServer/GetAiConfig"
-	PluralServer_ProxyAuthentication_FullMethodName = "/plrl.PluralServer/ProxyAuthentication"
+	PluralServer_MeterMetrics_FullMethodName           = "/plrl.PluralServer/MeterMetrics"
+	PluralServer_GetAiConfig_FullMethodName            = "/plrl.PluralServer/GetAiConfig"
+	PluralServer_GetObservabilityConfig_FullMethodName = "/plrl.PluralServer/GetObservabilityConfig"
+	PluralServer_ProxyAuthentication_FullMethodName    = "/plrl.PluralServer/ProxyAuthentication"
 )
 
 // PluralServerClient is the client API for PluralServer service.
@@ -29,7 +31,9 @@ const (
 //
 // The AI configuration service definition.
 type PluralServerClient interface {
+	MeterMetrics(ctx context.Context, in *MeterMetricsRequest, opts ...grpc.CallOption) (*MeterMetricsResponse, error)
 	GetAiConfig(ctx context.Context, in *AiConfigRequest, opts ...grpc.CallOption) (*AiConfig, error)
+	GetObservabilityConfig(ctx context.Context, in *ObservabilityConfigRequest, opts ...grpc.CallOption) (*ObservabilityConfig, error)
 	ProxyAuthentication(ctx context.Context, in *ProxyAuthenticationRequest, opts ...grpc.CallOption) (*ProxyAuthenticationResponse, error)
 }
 
@@ -41,10 +45,30 @@ func NewPluralServerClient(cc grpc.ClientConnInterface) PluralServerClient {
 	return &pluralServerClient{cc}
 }
 
+func (c *pluralServerClient) MeterMetrics(ctx context.Context, in *MeterMetricsRequest, opts ...grpc.CallOption) (*MeterMetricsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MeterMetricsResponse)
+	err := c.cc.Invoke(ctx, PluralServer_MeterMetrics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *pluralServerClient) GetAiConfig(ctx context.Context, in *AiConfigRequest, opts ...grpc.CallOption) (*AiConfig, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AiConfig)
 	err := c.cc.Invoke(ctx, PluralServer_GetAiConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pluralServerClient) GetObservabilityConfig(ctx context.Context, in *ObservabilityConfigRequest, opts ...grpc.CallOption) (*ObservabilityConfig, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ObservabilityConfig)
+	err := c.cc.Invoke(ctx, PluralServer_GetObservabilityConfig_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +91,9 @@ func (c *pluralServerClient) ProxyAuthentication(ctx context.Context, in *ProxyA
 //
 // The AI configuration service definition.
 type PluralServerServer interface {
+	MeterMetrics(context.Context, *MeterMetricsRequest) (*MeterMetricsResponse, error)
 	GetAiConfig(context.Context, *AiConfigRequest) (*AiConfig, error)
+	GetObservabilityConfig(context.Context, *ObservabilityConfigRequest) (*ObservabilityConfig, error)
 	ProxyAuthentication(context.Context, *ProxyAuthenticationRequest) (*ProxyAuthenticationResponse, error)
 	mustEmbedUnimplementedPluralServerServer()
 }
@@ -79,8 +105,14 @@ type PluralServerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPluralServerServer struct{}
 
+func (UnimplementedPluralServerServer) MeterMetrics(context.Context, *MeterMetricsRequest) (*MeterMetricsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MeterMetrics not implemented")
+}
 func (UnimplementedPluralServerServer) GetAiConfig(context.Context, *AiConfigRequest) (*AiConfig, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAiConfig not implemented")
+}
+func (UnimplementedPluralServerServer) GetObservabilityConfig(context.Context, *ObservabilityConfigRequest) (*ObservabilityConfig, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetObservabilityConfig not implemented")
 }
 func (UnimplementedPluralServerServer) ProxyAuthentication(context.Context, *ProxyAuthenticationRequest) (*ProxyAuthenticationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ProxyAuthentication not implemented")
@@ -106,6 +138,24 @@ func RegisterPluralServerServer(s grpc.ServiceRegistrar, srv PluralServerServer)
 	s.RegisterService(&PluralServer_ServiceDesc, srv)
 }
 
+func _PluralServer_MeterMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MeterMetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluralServerServer).MeterMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluralServer_MeterMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluralServerServer).MeterMetrics(ctx, req.(*MeterMetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PluralServer_GetAiConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AiConfigRequest)
 	if err := dec(in); err != nil {
@@ -120,6 +170,24 @@ func _PluralServer_GetAiConfig_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PluralServerServer).GetAiConfig(ctx, req.(*AiConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PluralServer_GetObservabilityConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ObservabilityConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluralServerServer).GetObservabilityConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluralServer_GetObservabilityConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluralServerServer).GetObservabilityConfig(ctx, req.(*ObservabilityConfigRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -150,8 +218,16 @@ var PluralServer_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PluralServerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "MeterMetrics",
+			Handler:    _PluralServer_MeterMetrics_Handler,
+		},
+		{
 			MethodName: "GetAiConfig",
 			Handler:    _PluralServer_GetAiConfig_Handler,
+		},
+		{
+			MethodName: "GetObservabilityConfig",
+			Handler:    _PluralServer_GetObservabilityConfig_Handler,
 		},
 		{
 			MethodName: "ProxyAuthentication",

@@ -25,9 +25,13 @@ defmodule Console.Schema.WorkbenchTool do
     exa: 16,
     github: 17,
     slack: 18,
-    teams: 19
+    teams: 19,
+    gitlab: 20,
+    bitbucket: 21,
+    bitbucket_datacenter: 22,
+    azure_devops: 23
 
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -153,6 +157,26 @@ defmodule Console.Schema.WorkbenchTool do
         field :prometheus_url,  :string
       end
 
+      embeds_one :gitlab, GitlabConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+      end
+
+      embeds_one :bitbucket, BitbucketConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+      end
+
+      embeds_one :bitbucket_datacenter, BitbucketDatacenterConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+      end
+
+      embeds_one :azure_devops, AzureDevopsConnection, on_replace: :update do
+        field :url,   :string
+        field :token, EncryptedString
+      end
+
       embeds_one :exa, ExaConnection, on_replace: :update do
         field :api_key, EncryptedString, virtual: true
       end
@@ -273,13 +297,17 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:tempo), do: [:traces]
   defp categories(:jaeger), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
-  defp categories(:github), do: [:integration]
+  defp categories(:github), do: [:scm]
   defp categories(:linear), do: [:ticketing]
   defp categories(:slack), do: [:integration]
   defp categories(:teams), do: [:integration]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
+  defp categories(:gitlab), do: [:scm]
+  defp categories(:bitbucket), do: [:scm]
+  defp categories(:bitbucket_datacenter), do: [:scm]
+  defp categories(:azure_devops), do: [:scm]
   defp categories(_), do: [:integration]
 
   defp configuration_changeset(model, attrs) do
@@ -303,6 +331,10 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:teams, with: &teams_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
+    |> cast_embed(:gitlab, with: &gitlab_configuration_changeset/2)
+    |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
+    |> cast_embed(:bitbucket_datacenter, with: &bitbucket_datacenter_configuration_changeset/2)
+    |> cast_embed(:azure_devops, with: &azure_devops_configuration_changeset/2)
   end
 
   defp http_configuration_changeset(model, attrs) do
@@ -423,6 +455,30 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url access_token toolset app_id installation_id private_key)a)
     |> maybe_validate_app_auth()
+  end
+
+  defp gitlab_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:token])
+  end
+
+  defp bitbucket_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:token])
+  end
+
+  defp bitbucket_datacenter_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:url, :token])
+  end
+
+  defp azure_devops_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:token])
   end
 
   defp maybe_validate_app_auth(changeset) do

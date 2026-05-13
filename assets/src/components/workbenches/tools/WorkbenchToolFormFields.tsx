@@ -86,10 +86,20 @@ export function WorkbenchToolFormFields({
       return render(type, LinearFormFields)
     case WorkbenchToolType.Slack:
       return render(type, SlackFormFields)
+    case WorkbenchToolType.Teams:
+      return render(type, TeamsFormFields)
     case WorkbenchToolType.Exa:
       return render(type, ExaFormFields)
     case WorkbenchToolType.Github:
       return render(type, GithubFormFields)
+    case WorkbenchToolType.Gitlab:
+      return render(type, GitlabFormFields)
+    case WorkbenchToolType.Bitbucket:
+      return render(type, BitbucketFormFields)
+    case WorkbenchToolType.BitbucketDatacenter:
+      return render(type, BitbucketDatacenterFormFields)
+    case WorkbenchToolType.AzureDevops:
+      return render(type, AzureDevopsFormFields)
     case WorkbenchToolType.Splunk:
       return render(type, SplunkFormFields)
     case WorkbenchToolType.Cloudwatch:
@@ -390,6 +400,40 @@ function SlackFormFields({
   )
 }
 
+function TeamsFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Teams>) {
+  return (
+    <>
+      <InputField
+        label="Tenant (directory) ID"
+        hint="Microsoft Entra ID → Overview → Tenant ID. Used for the OAuth token endpoint."
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.tenantId ?? ''}
+        onChange={(e) => set({ ...c, tenantId: e.target.value })}
+      />
+      <InputField
+        label="Application (client) ID"
+        hint="App registration → Overview → Application (client) ID."
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.clientId ?? ''}
+        onChange={(e) => set({ ...c, clientId: e.target.value })}
+      />
+      <InputField
+        label="Client secret"
+        hint="App registration → Certificates & secrets (client secret value)."
+        required
+        revealer
+        value={c.clientSecret ?? ''}
+        onChange={(e) => set({ ...c, clientSecret: e.target.value })}
+      />
+    </>
+  )
+}
+
 function ExaFormFields({
   config: c,
   setConfig: set,
@@ -435,6 +479,96 @@ function githubNativeToolsetSelectKey(
   }
 
   return 'default'
+}
+
+function GitlabFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Gitlab>) {
+  return (
+    <>
+      <InputField
+        label="API URL"
+        hint="Optional. Defaults to https://gitlab.com. Set the base URL for self-managed GitLab."
+        placeholder="https://gitlab.com"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access token"
+        required
+        revealer
+        hint="Personal, project, or group access token (encrypted at rest)."
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value })}
+      />
+    </>
+  )
+}
+
+function BitbucketFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Bitbucket>) {
+  return (
+    <>
+      <InputField
+        label="API URL"
+        hint="Optional. Override when using a non-default Bitbucket Cloud API endpoint."
+        placeholder="https://api.bitbucket.org/2.0"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="App password or access token"
+        required
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value })}
+      />
+    </>
+  )
+}
+
+function BitbucketDatacenterFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.BitbucketDatacenter>) {
+  return (
+    <>
+      <InputField
+        label="REST API base URL"
+        required
+        hint="Bitbucket Data Center REST API root, e.g. https://bitbucket.example.com/rest/api/1.0"
+        placeholder="https://bitbucket.example.com/rest/api/1.0"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="HTTP access token"
+        required
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value })}
+      />
+    </>
+  )
+}
+
+function AzureDevopsFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.AzureDevops>) {
+  return (
+    <InputField
+      label="Personal access token (PAT)"
+      required
+      revealer
+      hint="Create a PAT with Code (read) / Code (write) or the scopes your workflows need."
+      value={c.token ?? ''}
+      onChange={(e) => set({ ...c, token: e.target.value })}
+    />
+  )
 }
 
 function GithubFormFields({

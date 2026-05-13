@@ -4,9 +4,14 @@
     "expression": {
       "type": "string",
       "description": "Arbitrary arithmetic expression to evaluate, such as '(2 + 3) * 4 ^ 2'.  This can be a complex expression, and you should bias towards compound expressions to save tokens rather than chaining together multiple calls."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Explanation of why you're running this calculation, such as 'I need calculate the total cost of all ec2 instances by type.'."
     }
   },
   "required": [
-    "expression"
+    "expression",
+    "explanation"
   ]
 }

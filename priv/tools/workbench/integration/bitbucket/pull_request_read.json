@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Fetch a Bitbucket Cloud pull request by repository and id. Set include_comments to also GET /pullrequests/{id}/comments (paged). Optional page/pagelen are Bitbucket Cloud pagination params when include_comments is true.",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository selector as workspace/repo_slug (e.g. atlassian/atlaskit)."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request id (numeric id in the Bitbucket Cloud URL / REST API)."
+    },
+    "include_comments": {
+      "type": "boolean",
+      "description": "When true, also fetch comments for this pull request (paged JSON with values, page, pagelen, next).",
+      "default": false
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number for comments when include_comments is true."
+    },
+    "pagelen": {
+      "type": "integer",
+      "description": "Page size for comments when include_comments is true."
+    }
+  },
+  "required": ["repository", "pull_request_id"],
+  "additionalProperties": false
+}

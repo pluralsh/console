@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Fetch a Bitbucket Data Center pull request by global numeric id (from the PR URL). Set include_comments to also GET /pull-requests/{id}/comments (paged). Optional start/limit are Bitbucket start/limit query params when include_comments is true.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Repository selector as PROJECT_KEY/repository_slug (e.g. ACME/my-service)."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request id (numeric id in the Bitbucket URL / REST API, not a branch name)."
+    },
+    "include_comments": {
+      "type": "boolean",
+      "description": "When true, also fetch comments for this pull request (paged JSON with values, start, limit, isLastPage).",
+      "default": false
+    },
+    "start": {
+      "type": "integer",
+      "description": "Paging start offset for comments when include_comments is true (Bitbucket nextPageStart from a prior page)."
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Page size for comments when include_comments is true (Bitbucket default is often 25)."
+    }
+  },
+  "required": ["project", "pull_request_id"],
+  "additionalProperties": false
+}

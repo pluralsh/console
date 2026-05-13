@@ -4,6 +4,11 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http, Scratchpad}
   alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListUserGroups, PostMessage}
   alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
+  alias Console.AI.Tools.Workbench.Integration.Gitlab.Tools, as: GitlabTools
+  alias Console.AI.Tools.Workbench.Integration.Bitbucket.Tools, as: BitbucketTools
+  alias Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Tools, as: BitbucketDatacenterTools
+  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Tools, as: AzureDevopsTools
+  alias Console.AI.Tools.Workbench.Integration.Teams.Tools, as: TeamsTools
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -44,7 +49,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     ])
   end
 
-  @allowed_tools ~w(http slack github)a
+  @allowed_tools ~w(http slack github gitlab bitbucket bitbucket_datacenter teams azure_devops)a
 
   defp workbench_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
@@ -65,6 +70,11 @@ defmodule Console.AI.Workbench.Subagents.Integration do
           %EditMessage{tool: tool}
         ]
       %WorkbenchTool{tool: :github} = tool -> GithubTools.expand(tool)
+      %WorkbenchTool{tool: :gitlab} = tool -> GitlabTools.expand(tool)
+      %WorkbenchTool{tool: :bitbucket} = tool -> BitbucketTools.expand(tool)
+      %WorkbenchTool{tool: :bitbucket_datacenter} = tool -> BitbucketDatacenterTools.expand(tool)
+      %WorkbenchTool{tool: :azure_devops} = tool -> AzureDevopsTools.expand(tool)
+      %WorkbenchTool{tool: :teams} = tool -> TeamsTools.expand(tool)
     end)
   end
 

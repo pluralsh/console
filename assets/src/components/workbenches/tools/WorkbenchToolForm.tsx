@@ -69,6 +69,28 @@ function githubWorkbenchAuthIsValid(
   return false
 }
 
+function teamsConfigurationIsComplete(
+  teams: WorkbenchToolConfigurationAttributes['teams'] | null | undefined
+): boolean {
+  const clientId = (teams?.clientId ?? '').trim()
+  const tenantId = (teams?.tenantId ?? '').trim()
+  const clientSecret = (teams?.clientSecret ?? '').trim()
+  return clientId.length > 0 && tenantId.length > 0 && clientSecret.length > 0
+}
+
+function scmTokenIsSet(token: string | null | undefined): boolean {
+  return (token ?? '').trim().length > 0
+}
+
+function bitbucketDatacenterConfigurationIsComplete(
+  c:
+    | WorkbenchToolConfigurationAttributes['bitbucketDatacenter']
+    | null
+    | undefined
+): boolean {
+  return (c?.url ?? '').trim().length > 0 && scmTokenIsSet(c?.token)
+}
+
 export type WorkbenchToolFormState = Omit<
   Pick<
     WorkbenchToolAttributes,
@@ -137,7 +159,19 @@ export function WorkbenchToolForm({
       githubWorkbenchAuthIsValid(state.configuration?.github, {
         appId: tool?.configuration?.github?.appId,
         installationId: tool?.configuration?.github?.installationId,
-      }))
+      })) &&
+    (type !== WorkbenchToolType.Gitlab ||
+      scmTokenIsSet(state.configuration?.gitlab?.token)) &&
+    (type !== WorkbenchToolType.Bitbucket ||
+      scmTokenIsSet(state.configuration?.bitbucket?.token)) &&
+    (type !== WorkbenchToolType.BitbucketDatacenter ||
+      bitbucketDatacenterConfigurationIsComplete(
+        state.configuration?.bitbucketDatacenter
+      )) &&
+    (type !== WorkbenchToolType.AzureDevops ||
+      scmTokenIsSet(state.configuration?.azureDevops?.token)) &&
+    (type !== WorkbenchToolType.Teams ||
+      teamsConfigurationIsComplete(state.configuration?.teams))
   const allowSave = hasUpdates && configurationStepComplete
   return (
     <FormCardSC>
@@ -394,6 +428,19 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
       },
     }
   },
+  [WorkbenchToolType.Gitlab]: (config) => {
+    const { url } = config?.gitlab ?? {}
+    return { gitlab: { url: url ?? undefined, token: '' } }
+  },
+  [WorkbenchToolType.Bitbucket]: (config) => {
+    const { url } = config?.bitbucket ?? {}
+    return { bitbucket: { url: url ?? undefined, token: '' } }
+  },
+  [WorkbenchToolType.BitbucketDatacenter]: (config) => {
+    const { url } = config?.bitbucketDatacenter ?? {}
+    return { bitbucketDatacenter: { url: url ?? '', token: '' } }
+  },
+  [WorkbenchToolType.AzureDevops]: () => ({ azureDevops: { token: '' } }),
   [WorkbenchToolType.Splunk]: (config) => {
     const { url, username } = config?.splunk ?? {}
     return { splunk: { url: url ?? '', username } }
@@ -432,6 +479,16 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
   [WorkbenchToolType.Slack]: () => ({ slack: { botToken: '' } }),
+  [WorkbenchToolType.Teams]: (config) => {
+    const { clientId, tenantId } = config?.teams ?? {}
+    return {
+      teams: {
+        clientId: clientId ?? '',
+        tenantId: tenantId ?? '',
+        clientSecret: '',
+      },
+    }
+  },
 }
 
 function sanitizeInitialConfiguration(

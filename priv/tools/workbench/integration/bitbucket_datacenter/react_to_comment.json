@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Add an emoji reaction to a comment using the Bitbucket comment-likes REST API: PUT /rest/comment-likes/{version}/projects/.../reactions/{emoticon}. emoticon must be a short name (e.g. thumbsup, heart, smile, laughing), not a Unicode emoji. Pull request reactions are the primary supported case; issue comment reactions depend on server version.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Repository selector as PROJECT_KEY/repository_slug."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "issue"],
+      "description": "Whether the comment belongs to a pull_request or issue thread."
+    },
+    "resource_id": {
+      "type": "integer",
+      "description": "Pull request id or issue id that owns the comment."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment id (from the comment object returned by the read or create comment APIs)."
+    },
+    "emoticon": {
+      "type": "string",
+      "description": "Reaction key accepted by Bitbucket (e.g. thumbsup, heart, smile, laughing)."
+    }
+  },
+  "required": ["project", "resource", "resource_id", "comment_id", "emoticon"],
+  "additionalProperties": false
+}

@@ -10363,6 +10363,42 @@ type WorkbenchToolAzureConnectionAttributes struct {
 	PrometheusURL *string `json:"prometheusUrl,omitempty"`
 }
 
+type WorkbenchToolAzureDevopsConnection struct {
+	// Azure DevOps REST API root in use (PAT never exposed); defaults to https://dev.azure.com when unset.
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolAzureDevopsConnectionAttributes struct {
+	// Optional REST API root (defaults to https://dev.azure.com). Use https://dev.azure.com/{organization} to bake the org into the URL, or an on-premises root such as https://server/tfs/Collection.
+	URL *string `json:"url,omitempty"`
+	// Azure DevOps personal access token (PAT; encrypted at rest)
+	Token *string `json:"token,omitempty"`
+}
+
+type WorkbenchToolBitbucketConnection struct {
+	// Bitbucket Cloud API base URL when set (tokens never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolBitbucketConnectionAttributes struct {
+	// optional Bitbucket Cloud API base URL
+	URL *string `json:"url,omitempty"`
+	// Bitbucket app password or access token (encrypted at rest)
+	Token *string `json:"token,omitempty"`
+}
+
+type WorkbenchToolBitbucketDatacenterConnection struct {
+	// Bitbucket Data Center REST API base URL (tokens never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolBitbucketDatacenterConnectionAttributes struct {
+	// Bitbucket Data Center REST API base URL
+	URL string `json:"url"`
+	// HTTP access token or personal access token (encrypted at rest)
+	Token *string `json:"token,omitempty"`
+}
+
 type WorkbenchToolCloudwatchConnection struct {
 	// aws region
 	Region *string `json:"region,omitempty"`
@@ -10426,6 +10462,14 @@ type WorkbenchToolConfiguration struct {
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 	// github connection (no secrets)
 	Github *WorkbenchToolGithubConnection `json:"github,omitempty"`
+	// gitlab connection (no secrets)
+	Gitlab *WorkbenchToolGitlabConnection `json:"gitlab,omitempty"`
+	// bitbucket cloud connection (no secrets)
+	Bitbucket *WorkbenchToolBitbucketConnection `json:"bitbucket,omitempty"`
+	// bitbucket data center connection (no secrets)
+	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnection `json:"bitbucketDatacenter,omitempty"`
+	// azure devops connection (no secrets)
+	AzureDevops *WorkbenchToolAzureDevopsConnection `json:"azureDevops,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -10463,6 +10507,14 @@ type WorkbenchToolConfigurationAttributes struct {
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 	// github connection (integration)
 	Github *WorkbenchToolGithubConnectionAttributes `json:"github,omitempty"`
+	// gitlab connection (scm)
+	Gitlab *WorkbenchToolGitlabConnectionAttributes `json:"gitlab,omitempty"`
+	// bitbucket cloud connection (scm)
+	Bitbucket *WorkbenchToolBitbucketConnectionAttributes `json:"bitbucket,omitempty"`
+	// bitbucket data center connection (scm)
+	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnectionAttributes `json:"bitbucketDatacenter,omitempty"`
+	// azure devops connection (scm)
+	AzureDevops *WorkbenchToolAzureDevopsConnectionAttributes `json:"azureDevops,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -10555,6 +10607,18 @@ type WorkbenchToolGithubConnectionAttributes struct {
 	InstallationID *string `json:"installationId,omitempty"`
 	// PEM private key for the GitHub App (encrypted at rest); alternative to access_token
 	PrivateKey *string `json:"privateKey,omitempty"`
+}
+
+type WorkbenchToolGitlabConnection struct {
+	// GitLab API base URL in use (tokens never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolGitlabConnectionAttributes struct {
+	// optional GitLab API base URL (defaults to https://gitlab.com when omitted)
+	URL *string `json:"url,omitempty"`
+	// GitLab personal access token or project/group token (encrypted at rest)
+	Token *string `json:"token,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -17049,6 +17113,7 @@ const (
 	WorkbenchToolCategoryErrorTracking  WorkbenchToolCategory = "ERROR_TRACKING"
 	WorkbenchToolCategoryInfrastructure WorkbenchToolCategory = "INFRASTRUCTURE"
 	WorkbenchToolCategorySearch         WorkbenchToolCategory = "SEARCH"
+	WorkbenchToolCategoryScm            WorkbenchToolCategory = "SCM"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -17060,11 +17125,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryErrorTracking,
 	WorkbenchToolCategoryInfrastructure,
 	WorkbenchToolCategorySearch,
+	WorkbenchToolCategoryScm,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm:
 		return true
 	}
 	return false
@@ -17169,26 +17235,30 @@ func (e WorkbenchToolHTTPMethod) MarshalJSON() ([]byte, error) {
 type WorkbenchToolType string
 
 const (
-	WorkbenchToolTypeHTTP       WorkbenchToolType = "HTTP"
-	WorkbenchToolTypeElastic    WorkbenchToolType = "ELASTIC"
-	WorkbenchToolTypeDatadog    WorkbenchToolType = "DATADOG"
-	WorkbenchToolTypePrometheus WorkbenchToolType = "PROMETHEUS"
-	WorkbenchToolTypeLoki       WorkbenchToolType = "LOKI"
-	WorkbenchToolTypeTempo      WorkbenchToolType = "TEMPO"
-	WorkbenchToolTypeSentry     WorkbenchToolType = "SENTRY"
-	WorkbenchToolTypeMcp        WorkbenchToolType = "MCP"
-	WorkbenchToolTypeLinear     WorkbenchToolType = "LINEAR"
-	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
-	WorkbenchToolTypeSplunk     WorkbenchToolType = "SPLUNK"
-	WorkbenchToolTypeDynatrace  WorkbenchToolType = "DYNATRACE"
-	WorkbenchToolTypeCloudwatch WorkbenchToolType = "CLOUDWATCH"
-	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
-	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
-	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
-	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
-	WorkbenchToolTypeGithub     WorkbenchToolType = "GITHUB"
-	WorkbenchToolTypeSLACk      WorkbenchToolType = "SLACK"
-	WorkbenchToolTypeTeams      WorkbenchToolType = "TEAMS"
+	WorkbenchToolTypeHTTP                WorkbenchToolType = "HTTP"
+	WorkbenchToolTypeElastic             WorkbenchToolType = "ELASTIC"
+	WorkbenchToolTypeDatadog             WorkbenchToolType = "DATADOG"
+	WorkbenchToolTypePrometheus          WorkbenchToolType = "PROMETHEUS"
+	WorkbenchToolTypeLoki                WorkbenchToolType = "LOKI"
+	WorkbenchToolTypeTempo               WorkbenchToolType = "TEMPO"
+	WorkbenchToolTypeSentry              WorkbenchToolType = "SENTRY"
+	WorkbenchToolTypeMcp                 WorkbenchToolType = "MCP"
+	WorkbenchToolTypeLinear              WorkbenchToolType = "LINEAR"
+	WorkbenchToolTypeAtlassian           WorkbenchToolType = "ATLASSIAN"
+	WorkbenchToolTypeSplunk              WorkbenchToolType = "SPLUNK"
+	WorkbenchToolTypeDynatrace           WorkbenchToolType = "DYNATRACE"
+	WorkbenchToolTypeCloudwatch          WorkbenchToolType = "CLOUDWATCH"
+	WorkbenchToolTypeAzure               WorkbenchToolType = "AZURE"
+	WorkbenchToolTypeCloud               WorkbenchToolType = "CLOUD"
+	WorkbenchToolTypeJaeger              WorkbenchToolType = "JAEGER"
+	WorkbenchToolTypeExa                 WorkbenchToolType = "EXA"
+	WorkbenchToolTypeGithub              WorkbenchToolType = "GITHUB"
+	WorkbenchToolTypeSLACk               WorkbenchToolType = "SLACK"
+	WorkbenchToolTypeTeams               WorkbenchToolType = "TEAMS"
+	WorkbenchToolTypeGitlab              WorkbenchToolType = "GITLAB"
+	WorkbenchToolTypeBitbucket           WorkbenchToolType = "BITBUCKET"
+	WorkbenchToolTypeBitbucketDatacenter WorkbenchToolType = "BITBUCKET_DATACENTER"
+	WorkbenchToolTypeAzureDevops         WorkbenchToolType = "AZURE_DEVOPS"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17212,11 +17282,15 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeGithub,
 	WorkbenchToolTypeSLACk,
 	WorkbenchToolTypeTeams,
+	WorkbenchToolTypeGitlab,
+	WorkbenchToolTypeBitbucket,
+	WorkbenchToolTypeBitbucketDatacenter,
+	WorkbenchToolTypeAzureDevops,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops:
 		return true
 	}
 	return false

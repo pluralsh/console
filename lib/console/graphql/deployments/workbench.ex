@@ -161,6 +161,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,     :workbench_tool_github_connection_attributes, description: "github connection (integration)"
+    field :gitlab,     :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
+    field :bitbucket,  :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
+    field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes,
+      description: "bitbucket data center connection (scm)"
+    field :azure_devops, :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -273,6 +278,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :installation_id, :string, description: "GitHub App installation ID for this organization or account"
     field :private_key,      :string,
       description: "PEM private key for the GitHub App (encrypted at rest); alternative to access_token"
+  end
+
+  input_object :workbench_tool_gitlab_connection_attributes do
+    field :url,   :string, description: "optional GitLab API base URL (defaults to https://gitlab.com when omitted)"
+    field :token, :string, description: "GitLab personal access token or project/group token (encrypted at rest)"
+  end
+
+  input_object :workbench_tool_bitbucket_connection_attributes do
+    field :url,   :string, description: "optional Bitbucket Cloud API base URL"
+    field :token, :string, description: "Bitbucket app password or access token (encrypted at rest)"
+  end
+
+  input_object :workbench_tool_bitbucket_datacenter_connection_attributes do
+    field :url,   non_null(:string), description: "Bitbucket Data Center REST API base URL"
+    field :token, :string, description: "HTTP access token or personal access token (encrypted at rest)"
+  end
+
+  input_object :workbench_tool_azure_devops_connection_attributes do
+    field :url, :string,
+      description:
+        "Optional REST API root (defaults to https://dev.azure.com). Use https://dev.azure.com/{organization} to bake the org into the URL, or an on-premises root such as https://server/tfs/Collection."
+
+    field :token, :string, description: "Azure DevOps personal access token (PAT; encrypted at rest)"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -803,6 +831,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
+    field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
+    field :bitbucket, :workbench_tool_bitbucket_connection, description: "bitbucket cloud connection (no secrets)"
+    field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection,
+      description: "bitbucket data center connection (no secrets)"
+    field :azure_devops, :workbench_tool_azure_devops_connection, description: "azure devops connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -902,6 +935,23 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :installation_id, :string,
       description: "GitHub App installation ID when using app authentication"
+  end
+
+  object :workbench_tool_gitlab_connection do
+    field :url, :string, description: "GitLab API base URL in use (tokens never exposed)"
+  end
+
+  object :workbench_tool_bitbucket_connection do
+    field :url, :string, description: "Bitbucket Cloud API base URL when set (tokens never exposed)"
+  end
+
+  object :workbench_tool_bitbucket_datacenter_connection do
+    field :url, :string, description: "Bitbucket Data Center REST API base URL (tokens never exposed)"
+  end
+
+  object :workbench_tool_azure_devops_connection do
+    field :url, :string,
+      description: "Azure DevOps REST API root in use (PAT never exposed); defaults to https://dev.azure.com when unset."
   end
 
   object :workbench_tool_http_configuration do

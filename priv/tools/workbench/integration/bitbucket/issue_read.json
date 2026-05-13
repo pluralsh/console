@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Fetch a Bitbucket Cloud repository issue by id. Requires the repository issue tracker. Set include_comments to also GET /issues/{id}/comments (paged). Optional page/pagelen apply when include_comments is true.",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository selector as workspace/repo_slug (e.g. atlassian/atlaskit)."
+    },
+    "issue_id": {
+      "type": "integer",
+      "description": "Issue id from Bitbucket Cloud for this repository issue."
+    },
+    "include_comments": {
+      "type": "boolean",
+      "description": "When true, also fetch comments for this issue (paged JSON with values, page, pagelen, next).",
+      "default": false
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number for comments when include_comments is true."
+    },
+    "pagelen": {
+      "type": "integer",
+      "description": "Page size for comments when include_comments is true."
+    }
+  },
+  "required": ["repository", "issue_id"],
+  "additionalProperties": false
+}

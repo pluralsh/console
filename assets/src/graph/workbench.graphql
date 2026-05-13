@@ -181,6 +181,10 @@ fragment WorkbenchTool on WorkbenchTool {
     slack {
       url
     }
+    teams {
+      clientId
+      tenantId
+    }
     splunk {
       url
       username
@@ -205,6 +209,18 @@ fragment WorkbenchTool on WorkbenchTool {
       toolset
       appId
       installationId
+    }
+    gitlab {
+      url
+    }
+    bitbucket {
+      url
+    }
+    bitbucketDatacenter {
+      url
+    }
+    azureDevops {
+      url
     }
   }
 }

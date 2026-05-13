@@ -2326,6 +2326,10 @@ enum WorkbenchToolType {
   GITHUB
   SLACK
   TEAMS
+  GITLAB
+  BITBUCKET
+  BITBUCKET_DATACENTER
+  AZURE_DEVOPS
 }
 
 enum WorkbenchToolCategory {
@@ -2337,6 +2341,7 @@ enum WorkbenchToolCategory {
   ERROR_TRACKING
   INFRASTRUCTURE
   SEARCH
+  SCM
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2705,6 +2710,18 @@ input WorkbenchToolConfigurationAttributes {
 
   "github connection (integration)"
   github: WorkbenchToolGithubConnectionAttributes
+
+  "gitlab connection (scm)"
+  gitlab: WorkbenchToolGitlabConnectionAttributes
+
+  "bitbucket cloud connection (scm)"
+  bitbucket: WorkbenchToolBitbucketConnectionAttributes
+
+  "bitbucket data center connection (scm)"
+  bitbucketDatacenter: WorkbenchToolBitbucketDatacenterConnectionAttributes
+
+  "azure devops connection (scm)"
+  azureDevops: WorkbenchToolAzureDevopsConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2914,6 +2931,38 @@ input WorkbenchToolGithubConnectionAttributes {
 
   "PEM private key for the GitHub App (encrypted at rest); alternative to access_token"
   privateKey: String
+}
+
+input WorkbenchToolGitlabConnectionAttributes {
+  "optional GitLab API base URL (defaults to https:\/\/gitlab.com when omitted)"
+  url: String
+
+  "GitLab personal access token or project\/group token (encrypted at rest)"
+  token: String
+}
+
+input WorkbenchToolBitbucketConnectionAttributes {
+  "optional Bitbucket Cloud API base URL"
+  url: String
+
+  "Bitbucket app password or access token (encrypted at rest)"
+  token: String
+}
+
+input WorkbenchToolBitbucketDatacenterConnectionAttributes {
+  "Bitbucket Data Center REST API base URL"
+  url: String!
+
+  "HTTP access token or personal access token (encrypted at rest)"
+  token: String
+}
+
+input WorkbenchToolAzureDevopsConnectionAttributes {
+  "Optional REST API root (defaults to https:\/\/dev.azure.com). Use https:\/\/dev.azure.com\/{organization} to bake the org into the URL, or an on-premises root such as https:\/\/server\/tfs\/Collection."
+  url: String
+
+  "Azure DevOps personal access token (PAT; encrypted at rest)"
+  token: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -3783,6 +3832,18 @@ type WorkbenchToolConfiguration {
 
   "github connection (no secrets)"
   github: WorkbenchToolGithubConnection
+
+  "gitlab connection (no secrets)"
+  gitlab: WorkbenchToolGitlabConnection
+
+  "bitbucket cloud connection (no secrets)"
+  bitbucket: WorkbenchToolBitbucketConnection
+
+  "bitbucket data center connection (no secrets)"
+  bitbucketDatacenter: WorkbenchToolBitbucketDatacenterConnection
+
+  "azure devops connection (no secrets)"
+  azureDevops: WorkbenchToolAzureDevopsConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -3926,6 +3987,26 @@ type WorkbenchToolGithubConnection {
 
   "GitHub App installation ID when using app authentication"
   installationId: String
+}
+
+type WorkbenchToolGitlabConnection {
+  "GitLab API base URL in use (tokens never exposed)"
+  url: String
+}
+
+type WorkbenchToolBitbucketConnection {
+  "Bitbucket Cloud API base URL when set (tokens never exposed)"
+  url: String
+}
+
+type WorkbenchToolBitbucketDatacenterConnection {
+  "Bitbucket Data Center REST API base URL (tokens never exposed)"
+  url: String
+}
+
+type WorkbenchToolAzureDevopsConnection {
+  "Azure DevOps REST API root in use (PAT never exposed); defaults to https:\/\/dev.azure.com when unset."
+  url: String
 }
 
 type WorkbenchToolHttpConfiguration {

@@ -7,7 +7,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.TokenExchange do
   alias Console.Cache
   alias OAuth2.{Client, Strategy.ClientCredentials}
 
-  @spec exchange(binary, binary, binary) :: {:ok, binary} | {:error, binary}
+  @spec exchange(binary, binary, binary) :: {:ok, Client.t()} | {:error, binary}
   def exchange(client_id, client_secret, tenant_id) do
     cache_key(tenant_id, client_id, client_secret)
     |> Cache.get()
@@ -15,9 +15,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.TokenExchange do
       %OAuth2.AccessToken{access_token: token} -> {:ok, token}
       _ -> refresh_token(client_id, client_secret, tenant_id)
     end
-    |> when_ok(fn token ->
+    |> when_ok(fn token_or_at ->
       client_base(client_id, client_secret, tenant_id)
-      |> build_client(token)
+      |> build_client(token_or_at)
     end)
   end
 
@@ -47,6 +47,10 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.TokenExchange do
   defp build_client(%Client{} = client, token) when is_binary(token) do
     %Client{client | token: %OAuth2.AccessToken{access_token: token}}
     |> Client.put_header("content-type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")
+  end
+
+  defp build_client(%Client{} = client, %OAuth2.AccessToken{access_token: token}) when is_binary(token) do
+    build_client(client, token)
   end
 
   defp cache_key(tenant_id, client_id, client_secret), do: {:teams_token, tenant_id, client_id, client_secret}

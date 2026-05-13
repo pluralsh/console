@@ -27,6 +27,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
   [WorkbenchToolType.Slack]: extractSlackMetadata,
+  [WorkbenchToolType.Teams]: extractTeamsMetadata,
   [WorkbenchToolType.Mcp]: () => [],
   [WorkbenchToolType.Sentry]: () => [],
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
@@ -36,6 +37,10 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Jaeger]: extractJaegerMetadata,
   [WorkbenchToolType.Exa]: extractExaMetadata,
   [WorkbenchToolType.Github]: extractGithubMetadata,
+  [WorkbenchToolType.Gitlab]: extractGitlabMetadata,
+  [WorkbenchToolType.Bitbucket]: extractBitbucketMetadata,
+  [WorkbenchToolType.BitbucketDatacenter]: extractBitbucketDatacenterMetadata,
+  [WorkbenchToolType.AzureDevops]: extractAzureDevopsMetadata,
   [WorkbenchToolType.Cloud]: () => [],
 }
 
@@ -158,6 +163,16 @@ function extractSlackMetadata(
   return [{ label: 'URL', value: configuration?.slack?.url }]
 }
 
+function extractTeamsMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  const t = configuration?.teams
+  return [
+    { label: 'Tenant ID', value: t?.tenantId },
+    { label: 'Client ID', value: t?.clientId },
+  ]
+}
+
 function extractSplunkMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
@@ -225,6 +240,30 @@ function extractGithubMetadata(
         ]
       : [{ label: 'Auth', value: 'Access token' }]),
   ]
+}
+
+function extractGitlabMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.gitlab?.url }]
+}
+
+function extractBitbucketMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.bitbucket?.url }]
+}
+
+function extractBitbucketDatacenterMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.bitbucketDatacenter?.url }]
+}
+
+function extractAzureDevopsMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.azureDevops?.url }]
 }
 
 function getConfiguredHeadersCount(

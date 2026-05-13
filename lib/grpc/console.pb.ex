@@ -20,6 +20,20 @@ defmodule Plrl.AiConfig do
   field :azure, 6, type: Plrl.AzureOpenAiConfig
 end
 
+defmodule Plrl.OpenAiTokenExchange do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "plrl.OpenAiTokenExchange",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :enabled, 1, proto3_optional: true, type: :bool
+  field :tokenUrl, 2, proto3_optional: true, type: :string
+  field :clientId, 3, proto3_optional: true, type: :string
+  field :clientSecret, 4, proto3_optional: true, type: :string
+end
+
 defmodule Plrl.OpenAiConfig do
   @moduledoc false
 
@@ -34,6 +48,7 @@ defmodule Plrl.OpenAiConfig do
   field :toolModel, 4, proto3_optional: true, type: :string
   field :baseUrl, 5, proto3_optional: true, type: :string
   field :proxyModels, 6, repeated: true, type: :string
+  field :tokenExchange, 7, proto3_optional: true, type: Plrl.OpenAiTokenExchange
 end
 
 defmodule Plrl.AnthropicConfig do
