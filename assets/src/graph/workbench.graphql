@@ -467,6 +467,10 @@ fragment WorkbenchJobTiny on WorkbenchJob {
     id
     conclusion
   }
+  evalResult {
+    id
+    grade
+  }
 }
 
 fragment WorkbenchJob on WorkbenchJob {
