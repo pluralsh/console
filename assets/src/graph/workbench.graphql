@@ -498,6 +498,14 @@ fragment WorkbenchJob on WorkbenchJob {
   result {
     ...WorkbenchJobResult
   }
+  evalResult {
+    feedback {
+      summary
+      prompt
+      result
+      logic
+    }
+  }
 }
 
 fragment WorkbenchEvalResultRow on WorkbenchEvalResult {
