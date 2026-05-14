@@ -67,7 +67,7 @@ func createServerTools(client console.Client) []agent.Option {
 		tool.GetPRStateTool:        tool.NewGetPRState(),
 		tool.GetCILogsTool:         tool.NewGetCILogs(),
 		tool.ReactToCommentTool:    tool.NewReactToComment(),
-		tool.DownloadManifestsTool: tool.NewDownloadManifests(client, args.AgentRunID()),
+		tool.DownloadManifestsTool: tool.NewDownloadManifests(client),
 	}
 
 	for _, excluded := range excludedTools {
