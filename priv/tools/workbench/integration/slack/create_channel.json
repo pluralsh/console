@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Create a Slack channel via conversations.create. Returns Slack’s JSON (`ok`, `channel` on success). Channel names must follow Slack rules: lowercase letters, numbers, hyphens, underscores, max 80 characters ([Slack docs](https://docs.slack.dev/reference/methods/conversations.create)).",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Channel name to create (e.g. incident-2026-05-11). A leading # is stripped; input is normalized to lowercase. Use the `id` from the response with slack_post_message."
+    },
+    "is_private": {
+      "type": "boolean",
+      "description": "If true, create a private channel; if false or omitted, create a public channel."
+    }
+  },
+  "required": ["name"],
+  "additionalProperties": false
+}

@@ -11,23 +11,23 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	consolectrl "github.com/pluralsh/console/godeployment-operator/pkg/controller"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/stacks"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/controller/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/stacks"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/controller/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 
 	ctrclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/namespaces"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/pipelinegates"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/restore"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/sentinel"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/namespaces"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/pipelinegates"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/restore"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/sentinel"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
 )
 
 func initConsoleManagerOrDie() *consolectrl.Manager {

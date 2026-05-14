@@ -22,9 +22,9 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	fluxcd "github.com/fluxcd/helm-controller/api/v2"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
-	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
 	rspb "helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/releaseutil"
 	"helm.sh/helm/v3/pkg/storage/driver"

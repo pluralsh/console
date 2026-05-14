@@ -14,7 +14,6 @@ import usePersistedState from 'components/hooks/usePersistedState'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { TRUNCATE } from 'components/utils/truncate'
 import {
   Body2P,
   CaptionP,
@@ -23,6 +22,7 @@ import {
 } from 'components/utils/typography/Text'
 import { WorkbenchCard } from 'components/workbenches/WorkbenchesList'
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
+import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
   useRecentWorkbenchJobsQuery,
   useWorkbenchesQuery,
@@ -134,7 +134,10 @@ function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
         />
         <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
       </StretchedFlex>
-      <Body2P css={TRUNCATE}>{prompt}</Body2P>
+      <WorkbenchStoredPromptMarkdown
+        text={prompt ?? ''}
+        density="jobCard"
+      />
       <CaptionP
         $color="text-xlight"
         css={{ maxWidth: '80%' }}

@@ -6,14 +6,14 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/agent-harness/args"
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/controller"
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/environment"
-	agentsignals "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/signals"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	internalerrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/signals"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent-harness/args"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	agentsignals "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/signals"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/signals"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 func main() {

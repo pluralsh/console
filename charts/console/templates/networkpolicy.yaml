@@ -1,8 +1,8 @@
-{{- if .Values.networkPolicy.consoleInternalPorts.enabled }}
+{{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: console-internal-ports
+  name: console
   labels:
 {{ include "console.labels" . | indent 4 }}
 spec:

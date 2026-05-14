@@ -116,8 +116,8 @@ fragment ScmConnection on ScmConnection {
   }
 }
 
-query ScmConnections($first: Int = 100, $after: String) {
-  scmConnections(first: $first, after: $after) {
+query ScmConnections($first: Int = 100, $after: String, $type: ScmType) {
+  scmConnections(first: $first, after: $after, type: $type) {
     pageInfo {
       ...PageInfo
     }

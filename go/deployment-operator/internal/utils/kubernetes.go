@@ -20,9 +20,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/flowcontrol"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/flowcontrol"
 
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 )
 
 func TryAddControllerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, controlled ctrlruntimeclient.Object, scheme *runtime.Scheme) error {

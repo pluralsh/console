@@ -1,16 +1,16 @@
 package applier
 
 import (
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/metrics"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/go/deployment-operator/internal/metrics"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
 
 const (

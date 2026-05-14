@@ -1,7 +1,7 @@
 package agent
 
 import (
-	"github.com/pluralsh/console/godeployment-operator/internal/mcpserver/agent/tool"
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 )
 
 // Option is a function that configures an MCP server instance

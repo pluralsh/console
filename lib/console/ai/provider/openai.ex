@@ -100,8 +100,10 @@ defmodule Console.AI.OpenAI do
       do: {:ok, Enum.filter([base_url: base_url, api_key: key], fn {_, v} -> not is_nil(v) end)}
   end
 
-  defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}),
-    do: TokenExchange.exchange(token.token_url, token.client_id, token.client_secret)
+  defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
+    with {:ok, %OAuth2.AccessToken{access_token: token}} <- TokenExchange.exchange(token.token_url, token.client_id, token.client_secret),
+      do: {:ok, token}
+  end
   defp api_key(%__MODULE__{access_key: key}) when is_binary(key), do: {:ok, key}
   defp api_key(_), do: {:ok, "ignore"}
 

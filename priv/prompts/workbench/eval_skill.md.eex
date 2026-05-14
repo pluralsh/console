@@ -41,6 +41,12 @@ The user has also added some custom guidance for you to inform decision making, 
 
 <%= @prompt %>
 
+<%= if @job.result && is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
+## Criticism recorded on the job result
+
+<%= @job.result.criticism %>
+
+<% end %>
 <%= if Map.get(@job.eval_result, :grade, nil) do %>
 And the evaluation result was:
 

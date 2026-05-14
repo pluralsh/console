@@ -89,6 +89,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJobResult do
     properties: timestamps(%{
       id: string(description: "Unique identifier for the result"),
       working_theory: string(description: "The working theory for this result"),
+      criticism: string(description: "Markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"),
       conclusion: string(description: "The conclusion for this result"),
       todos: array_of(Console.OpenAPI.AI.WorkbenchJobResultTodo, description: "Todos for this result"),
       metadata: Console.OpenAPI.AI.WorkbenchJobResultMetadata,

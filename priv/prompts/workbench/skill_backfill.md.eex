@@ -35,7 +35,12 @@ And the ultimate conclusion was:
 
 <%= @job.result.conclusion %>
 
+<%= if is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
+Recorded criticism or limitations on that conclusion:
 
+<%= @job.result.criticism %>
+
+<% end %>
 Some ancillary information about the conclusion as well:
 
 <%= if is_binary(@job.result.topology) && byte_size(@job.result.topology) > 0 do %>

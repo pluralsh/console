@@ -11,7 +11,6 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
-import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -33,6 +32,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import { CronScheduleDeleteModal } from './CronScheduleDeleteModal'
 import { isEmpty } from 'lodash'
+import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { cronToExplanation } from './utils'
 
 export function CronSchedules() {
@@ -198,13 +198,19 @@ function getColumns({
       meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
       cell: ({ getValue }) => {
         const cron = getValue()
+        const rawPrompt = (cron.prompt ?? '').trim()
         return (
           <StackedText
-            truncate
+            truncate={!rawPrompt}
             first={
-              prettifyPrompt(cron.prompt ?? '') ||
-              cron.crontab ||
-              'Cron schedule'
+              rawPrompt ? (
+                <WorkbenchStoredPromptMarkdown
+                  text={rawPrompt}
+                  density="tableCell"
+                />
+              ) : (
+                (cron.crontab ?? 'Cron schedule')
+              )
             }
             second={cronToExplanation(cron)}
           />

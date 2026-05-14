@@ -49,3 +49,14 @@ func NewOpenAIEmbeddingsProxy(p api.Provider, host, region string, tokenRotator 
 	}
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
+
+// NewOpenAIAudioProxy returns a reverse proxy for OpenAI Audio (Whisper) endpoints.
+// Only api.ProviderOpenAI is supported; other providers return an error.
+func NewOpenAIAudioProxy(p api.Provider, host, _ string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+	switch p {
+	case api.ProviderOpenAI:
+		return openai.NewOpenAIAudioProxy(host, tokenRotator)
+	default:
+		return nil, fmt.Errorf("audio endpoints are only supported for provider %s", api.ProviderOpenAI)
+	}
+}

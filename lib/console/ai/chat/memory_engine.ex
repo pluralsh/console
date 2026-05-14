@@ -7,7 +7,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   alias Console.AI.{Provider, Tool}
   require Logger
 
-  defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: [], tool_fmt: &Console.identity/1]
+  defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, continue_msg: "looks like we aren't done, let's continue", messages: [], acc: [], tool_fmt: &Console.identity/1]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
     struct(__MODULE__, Keyword.merge(opts, [tools: tools, max_iterations: max_iterations]))
@@ -50,6 +50,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     preface = build_preface(preface, Map.put(engine, :iteration, iter))
 
     messages
+    |> append_continue(engine)
     |> Enum.map(&msg(&1, :tool))
     |> fit_context_window(preface)
     |> Provider.completion(preface: preface, plural: engine.tools, client: :tool)
@@ -69,8 +70,12 @@ defmodule Console.AI.Chat.MemoryEngine do
         Logger.error "llm provider HTTP 500, retrying: #{inspect(err)}"
         :timer.sleep(10)
         loop(engine, iter + 1)
-      {:error, %ReqLLM.Error.API.Request{status: status,response_body: body}} ->
+      {:error, %ReqLLM.Error.API.Request{status: status, reason: body}} when status >= 400 and status < 500 ->
         {:error, "llm provider HTTP #{status} : #{Console.truncate(body, 200)}"}
+      {:error, %ReqLLM.Error.API.Request{reason: reason}} ->
+        Logger.warning "llm provider socket closed, retrying: #{inspect(reason)}"
+        :timer.sleep(10)
+        loop(engine, iter + 1)
       err -> err
     end
     |> then(fn
@@ -85,10 +90,18 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> fun.(acc)
     |> case do
       {:halt, res} -> {:ok, res}
-      {:message, msg} ->loop(%{engine | acc: acc, messages: messages ++ [msg]}, iter + 1)
+      {:message, msg} -> loop(%{engine | acc: acc, messages: messages ++ [msg]}, iter + 1)
       {:cont, acc} -> loop(%{engine | acc: acc, messages: messages ++ msgs}, iter + 1)
     end
   end
+
+  defp append_continue([_ | _] = msgs, %__MODULE__{continue_msg: cont}) do
+    case List.last(msgs) do
+      {:assistant, _} -> msgs ++ [{:user, cont}]
+      _ -> msgs
+    end
+  end
+  defp append_continue(msgs, _), do: msgs
 
   defp build_preface(str, _) when is_binary(str), do: str
   defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)
@@ -103,11 +116,11 @@ defmodule Console.AI.Chat.MemoryEngine do
         {:cont, [callback(engine, tool_msg(content, id, name, args, engine.tool_fmt)) | acc]}
       else
         :error ->
-          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args, engine.tool_fmt)) | acc]}
+          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args, engine.tool_fmt)) | acc]}
         {:error, %Ecto.Changeset{} = cs} ->
           {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args, engine.tool_fmt)) | acc]}
         err ->
-          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args, engine.tool_fmt)) | acc]}
+          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args, engine.tool_fmt)) | acc]}
       end
     end)
     |> then(fn

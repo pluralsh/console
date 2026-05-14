@@ -111,7 +111,8 @@ export const EvidenceWrapperSC = styled.div<{
   display: 'flex',
   flexDirection: 'column',
   gap: $table ? 0 : theme.spacing.medium,
-  height: '100%',
+  flex: 1,
+  minHeight: 0,
   overflow: 'auto',
   ...(theme.mode === 'light' && { backgroundColor: theme.colors['fill-zero'] }),
 }))

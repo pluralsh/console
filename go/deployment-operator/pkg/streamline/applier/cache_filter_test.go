@@ -9,9 +9,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

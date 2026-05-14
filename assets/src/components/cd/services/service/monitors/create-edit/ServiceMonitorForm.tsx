@@ -58,6 +58,7 @@ export function ServiceMonitorForm({
 
   const { data: logAggData } = useLogAggregationQuery({
     variables: { serviceId: state.serviceId, limit: 100 },
+    fetchPolicy: 'cache-and-network',
   })
   const logs = useMemo(
     () => logAggData?.logAggregation?.filter(isNonNullable) ?? [],

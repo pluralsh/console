@@ -1,14 +1,26 @@
 defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http}
+  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http, Scratchpad}
+  alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListUserGroups, PostMessage}
+  alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
+  alias Console.AI.Tools.Workbench.Integration.Gitlab.Tools, as: GitlabTools
+  alias Console.AI.Tools.Workbench.Integration.Bitbucket.Tools, as: BitbucketTools
+  alias Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Tools, as: BitbucketDatacenterTools
+  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Tools, as: AzureDevopsTools
+  alias Console.AI.Tools.Workbench.Integration.Teams.Tools, as: TeamsTools
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20,
+      system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
+      acc: %{},
+      callback: &callback(activity, &1),
+      continue_msg: cont_msg()
+    )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -32,11 +44,12 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :integration)},
       %Skill{skills: Environment.subagent_skills(skills, :integration)},
+      Scratchpad,
       Result
     ])
   end
 
-  @allowed_tools ~w(http)a
+  @allowed_tools ~w(http slack github gitlab bitbucket bitbucket_datacenter teams azure_devops)a
 
   defp workbench_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
@@ -44,11 +57,25 @@ defmodule Console.AI.Workbench.Subagents.Integration do
       %WorkbenchTool{tool: t} when t in @allowed_tools -> true
       _ -> false
     end)
-    |> Enum.map(fn
-      %WorkbenchTool{tool: :http} = tool -> %Http{tool: tool}
-      _ -> nil
+    |> Enum.flat_map(fn
+      %WorkbenchTool{tool: :http} = tool -> [%Http{tool: tool}]
+      %WorkbenchTool{tool: :slack} = tool ->
+        [
+          %ListChannels{tool: tool},
+          %ListUserGroups{tool: tool},
+          %FindChannelByName{tool: tool},
+          %InviteToChannel{tool: tool},
+          %CreateChannel{tool: tool},
+          %PostMessage{tool: tool},
+          %EditMessage{tool: tool}
+        ]
+      %WorkbenchTool{tool: :github} = tool -> GithubTools.expand(tool)
+      %WorkbenchTool{tool: :gitlab} = tool -> GitlabTools.expand(tool)
+      %WorkbenchTool{tool: :bitbucket} = tool -> BitbucketTools.expand(tool)
+      %WorkbenchTool{tool: :bitbucket_datacenter} = tool -> BitbucketDatacenterTools.expand(tool)
+      %WorkbenchTool{tool: :azure_devops} = tool -> AzureDevopsTools.expand(tool)
+      %WorkbenchTool{tool: :teams} = tool -> TeamsTools.expand(tool)
     end)
-    |> Enum.filter(& &1)
   end
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "integration.md.eex"]), [:assigns])

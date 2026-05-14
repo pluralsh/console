@@ -20,6 +20,10 @@
         "namespace": {
             "type": "string",
             "description": "the kubernetes namespace this resource is in, ignore if this is a cluster scoped resource"
+        },
+        "jq": {
+            "type": "string",
+            "description": "An optional jq expression to filter the result.  Use this if you know the output shape and want to reduce long result sizes, eg just showing pod names"
         }
     },
     "required": ["cluster", "version", "kind"]

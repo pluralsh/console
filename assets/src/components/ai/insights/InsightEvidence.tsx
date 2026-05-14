@@ -97,14 +97,16 @@ export function InsightEvidence({
         )}
       </TabList>
       {evidenceType && (
-        <EvidencePanel
-          evidence={
-            {
-              type: evidenceType,
-              data: aggregatedEvidence[evidenceType],
-            } as EvidenceEntryItem
-          }
-        />
+        <EvidenceBodySC>
+          <EvidencePanel
+            evidence={
+              {
+                type: evidenceType,
+                data: aggregatedEvidence[evidenceType],
+              } as EvidenceEntryItem
+            }
+          />
+        </EvidenceBodySC>
       )}
     </WrapperSC>
   )
@@ -152,8 +154,17 @@ function EvidencePanel({
 const WrapperSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
   overflow: 'hidden',
-  height: '100%',
+})
+
+const EvidenceBodySC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
 })
 
 export const aggregateInsightEvidence = (

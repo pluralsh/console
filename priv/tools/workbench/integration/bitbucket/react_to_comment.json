@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Attempt to react to a Bitbucket Cloud pull request or issue comment. Bitbucket Cloud currently has no documented REST endpoint for comment emoji/like reactions, so this tool returns an unsupported error rather than calling an invented API.",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository selector as workspace/repo_slug."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "issue"],
+      "description": "Whether the comment belongs to a pull_request or issue thread."
+    },
+    "resource_id": {
+      "type": "integer",
+      "description": "Pull request id or issue id that owns the comment."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment id from the comment object returned by the read or create comment APIs."
+    },
+    "reaction": {
+      "type": "string",
+      "description": "Requested reaction key, e.g. thumbs_up, heart, smile. Bitbucket Cloud does not document support for applying it."
+    }
+  },
+  "required": ["repository", "resource", "resource_id", "comment_id", "reaction"],
+  "additionalProperties": false
+}

@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 type GroupVersionUpdateFunc func(schema.GroupVersion)

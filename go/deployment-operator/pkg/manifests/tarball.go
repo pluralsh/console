@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/errors"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/errors"
 )
 
 const pluralDigestHeader = "x-plrl-digest"

@@ -23,6 +23,16 @@ This is the final conclusion drawn by the workbench job.
 <%= @job.result.conclusion %>
 ```
 
+<%= if is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
+## Criticism
+
+Critique or caveats recorded on the completed job result.
+
+```
+<%= @job.result.criticism %>
+```
+<% end %>
+
 <%= if is_binary(@job.result.topology) && byte_size(@job.result.topology) > 0 do %>
 ## Topology
 

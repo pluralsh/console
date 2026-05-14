@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "description": "Add a reaction on a comment. Pull requests support only the like action (Git pull request comment likes API). Work items support reaction types: like, dislike, heart, hooray, smile, confused (WIT comments reactions preview).",
+  "properties": {
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "work_item"],
+      "description": "Whether the comment is on a pull request thread or a work item."
+    },
+    "organization": {
+      "type": "string",
+      "description": "Azure DevOps organization name when required by the configured API URL."
+    },
+    "project": {
+      "type": "string",
+      "description": "Team project name or GUID."
+    },
+    "repository": {
+      "type": "string",
+      "description": "Repository name or ID (required for pull_request)."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request id (required for pull_request)."
+    },
+    "thread_id": {
+      "type": "integer",
+      "description": "Comment thread id from threads list (required for pull_request)."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment id within the thread (PR) or work item comment id from comments list."
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "Work item id (required for work_item)."
+    },
+    "reaction": {
+      "type": "string",
+      "description": "For pull_request use 'like'. For work_item use like, dislike, heart, hooray, smile, or confused.",
+      "enum": ["like", "dislike", "heart", "hooray", "smile", "confused"]
+    }
+  },
+  "required": ["resource", "project", "comment_id", "reaction"],
+  "additionalProperties": false
+}

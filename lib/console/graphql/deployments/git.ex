@@ -1097,6 +1097,8 @@ defmodule Console.GraphQl.Deployments.Git do
         resource: :repos,
         action: :read
 
+      arg :type, :scm_type, description: "when set, only connections of this SCM provider type are returned"
+
       resolve &Deployments.list_scm_connections/2
     end
 

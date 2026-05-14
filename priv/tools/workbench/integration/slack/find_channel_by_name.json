@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "description": "Find a channel by Slack channel name (the immutable `name` field, typically lowercase—without a leading #). Calls conversations.list and paginates until a match or search limit.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Channel name to match (e.g. incident-response). Comparisons ignore case and strip a leading #."
+    }
+  },
+  "required": ["name"],
+  "additionalProperties": false
+}

@@ -1,8 +1,9 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User, McpServer, CloudConnection, WorkbenchOauthClient}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
+  import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
 
   defenum Tool,
     http: 0,
@@ -22,9 +23,15 @@ defmodule Console.Schema.WorkbenchTool do
     cloud: 14,
     jaeger: 15,
     exa: 16,
-    github: 17
+    github: 17,
+    slack: 18,
+    teams: 19,
+    gitlab: 20,
+    bitbucket: 21,
+    bitbucket_datacenter: 22,
+    azure_devops: 23
 
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -55,13 +62,26 @@ defmodule Console.Schema.WorkbenchTool do
       end
 
       embeds_one :github, GithubConnection, on_replace: :update do
-        field :url,          :string
-        field :access_token, EncryptedString
-        field :toolset,      :string
+        field :url,              :string
+        field :access_token,     EncryptedString
+        field :toolset,          :string
+        field :app_id,           :string
+        field :installation_id, :string
+        field :private_key,      EncryptedString
       end
 
       embeds_one :linear, LinearConnection, on_replace: :update do
         field :access_token, EncryptedString
+      end
+
+      embeds_one :slack, SlackConnection, on_replace: :update do
+        field :bot_token, EncryptedString
+      end
+
+      embeds_one :teams, TeamsConnection, on_replace: :update do
+        field :client_id,     :string
+        field :client_secret, EncryptedString
+        field :tenant_id,     :string
       end
 
       embeds_one :atlassian, AtlassianConnection, on_replace: :update do
@@ -137,6 +157,26 @@ defmodule Console.Schema.WorkbenchTool do
         field :prometheus_url,  :string
       end
 
+      embeds_one :gitlab, GitlabConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+      end
+
+      embeds_one :bitbucket, BitbucketConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+      end
+
+      embeds_one :bitbucket_datacenter, BitbucketDatacenterConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+      end
+
+      embeds_one :azure_devops, AzureDevopsConnection, on_replace: :update do
+        field :url,   :string
+        field :token, EncryptedString
+      end
+
       embeds_one :exa, ExaConnection, on_replace: :update do
         field :api_key, EncryptedString, virtual: true
       end
@@ -170,6 +210,8 @@ defmodule Console.Schema.WorkbenchTool do
     belongs_to :project,          Project
     belongs_to :mcp_server,       McpServer
     belongs_to :cloud_connection, CloudConnection
+    belongs_to :scm_connection,  ScmConnection
+
     has_one    :oauth_client,     WorkbenchOauthClient, foreign_key: :tool, references: :tool
 
     timestamps()
@@ -199,7 +241,7 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
-  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id)a
+  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id scm_connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -212,6 +254,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
+    |> foreign_key_constraint(:scm_connection_id)
     |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
@@ -257,11 +300,17 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:tempo), do: [:traces]
   defp categories(:jaeger), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
-  defp categories(:github), do: [:integration]
+  defp categories(:github), do: [:scm]
   defp categories(:linear), do: [:ticketing]
+  defp categories(:slack), do: [:integration]
+  defp categories(:teams), do: [:integration]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
+  defp categories(:gitlab), do: [:scm]
+  defp categories(:bitbucket), do: [:scm]
+  defp categories(:bitbucket_datacenter), do: [:scm]
+  defp categories(:azure_devops), do: [:scm]
   defp categories(_), do: [:integration]
 
   defp configuration_changeset(model, attrs) do
@@ -281,8 +330,14 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
     |> cast_embed(:github, with: &github_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
+    |> cast_embed(:slack, with: &slack_configuration_changeset/2)
+    |> cast_embed(:teams, with: &teams_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
+    |> cast_embed(:gitlab, with: &gitlab_configuration_changeset/2)
+    |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
+    |> cast_embed(:bitbucket_datacenter, with: &bitbucket_datacenter_configuration_changeset/2)
+    |> cast_embed(:azure_devops, with: &azure_devops_configuration_changeset/2)
   end
 
   defp http_configuration_changeset(model, attrs) do
@@ -376,6 +431,18 @@ defmodule Console.Schema.WorkbenchTool do
     |> validate_required([:access_token])
   end
 
+  defp slack_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(bot_token)a)
+    |> validate_required([:bot_token])
+  end
+
+  defp teams_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(client_id client_secret tenant_id)a)
+    |> validate_required([:client_id, :client_secret, :tenant_id])
+  end
+
   defp atlassian_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(service_account api_token email)a)
@@ -389,8 +456,42 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp github_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url access_token toolset)a)
-    |> validate_required([:access_token])
+    |> cast(attrs, ~w(url access_token toolset app_id installation_id private_key)a)
+    |> maybe_validate_app_auth()
+  end
+
+  defp gitlab_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:token])
+  end
+
+  defp bitbucket_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:token])
+  end
+
+  defp bitbucket_datacenter_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:url, :token])
+  end
+
+  defp azure_devops_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token)a)
+    |> validate_required([:token])
+  end
+
+  defp maybe_validate_app_auth(changeset) do
+    case get_field(changeset, :app_id) do
+      app_id when is_binary(app_id) ->
+        validate_required(changeset, [:installation_id, :private_key])
+        |> validate_private_key(:private_key)
+
+      _ -> validate_required(changeset, [:access_token])
+    end
   end
 
   defp header_changeset(model, attrs) do

@@ -8,6 +8,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
     SkillUpdate,
     SkillCreate,
     SkillIgnore,
+    Scratchpad,
     Coding.PullRequests
   }
 
@@ -20,7 +21,12 @@ defmodule Console.AI.Workbench.Subagents.Skill do
     target_job = target_job(%{job | activities: environment.activities})
 
     tools(target_job, environment)
-    |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(job: target_job)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20,
+      system_prompt: String.trim(system_prompt(job: target_job)),
+      continue_msg: cont_msg(),
+      acc: %{},
+      callback: &callback(activity, &1)
+    )
     |> MemoryEngine.reduce([{:user, String.trim(eval_job_prompt(job: target_job))}, @skill_prompt], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -55,6 +61,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
     [
       %Skills{skills: skills},
       %Skill{skills: skills},
+      Scratchpad,
       %SkillUpdate{skills: skills, job: target_job},
       %SkillCreate{job: target_job},
       %PullRequests{job: target_job},

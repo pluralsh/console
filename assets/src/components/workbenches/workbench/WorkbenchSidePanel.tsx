@@ -175,7 +175,7 @@ export function WorkbenchSidePanel({
           </HeaderSC>
           {hasCrons ? (
             <Flex
-              gap="medium"
+              gap="xxsmall"
               flexWrap="nowrap"
               width="100%"
               direction="column"
@@ -207,23 +207,25 @@ export function WorkbenchSidePanel({
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
+  alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-one'],
   borderRight: theme.borders['fill-one'],
   display: 'flex',
   flexDirection: 'column',
-  flexGrow: 1,
+  flexShrink: 0,
+  maxWidth: 250,
   minHeight: 0,
   minWidth: 250,
-  maxWidth: 250,
   overflowX: 'hidden',
   overflowY: 'auto',
+  WebkitOverflowScrolling: 'touch',
+  width: 250,
 }))
 
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  minHeight: '100%',
   padding: theme.spacing.medium,
 }))
 

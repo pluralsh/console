@@ -7,7 +7,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 func (in *FetchTodos) Install(server *server.MCPServer) {

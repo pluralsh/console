@@ -42,6 +42,13 @@ fragment AiSettings on AiSettings {
     location
     endpoint
   }
+  bedrock {
+    modelId
+    toolModelId
+    embeddingModel
+    accessKeyId
+    region
+  }
   enabled
   toolsEnabled
   provider

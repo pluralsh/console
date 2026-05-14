@@ -17,6 +17,13 @@ message AiConfig {
   AzureOpenAiConfig azure = 6;
 }
 
+message OpenAiTokenExchange {
+  optional bool enabled = 1;
+  optional string tokenUrl = 2;
+  optional string clientId = 3;
+  optional string clientSecret = 4;
+}
+
 message OpenAiConfig {
   optional string apiKey = 1;
   optional string model = 2;
@@ -24,6 +31,7 @@ message OpenAiConfig {
   optional string toolModel = 4;
   optional string baseUrl = 5;
   repeated string proxyModels = 6;
+  optional OpenAiTokenExchange tokenExchange = 7;
 }
 
 message AnthropicConfig {

@@ -21,7 +21,7 @@ func NewOpenAIEmbeddingsProxy(host string, tokenRotator *helpers.RoundRobinToken
 		return nil, fmt.Errorf("at least one token is required")
 	}
 
-	parsedURL, err := url.Parse(host)
+	parsedURL, err := helpers.ParseProviderBaseURL(host)
 	if err != nil {
 		return nil, err
 	}

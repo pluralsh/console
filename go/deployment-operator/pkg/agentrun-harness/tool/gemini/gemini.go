@@ -11,11 +11,11 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/gemini/events"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini/events"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 // Gemini implements v1.Tool interface.

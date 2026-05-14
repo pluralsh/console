@@ -6,7 +6,7 @@ import (
 
 	tfjson "github.com/hashicorp/terraform-json"
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/terraform/api"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/terraform/api"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 )

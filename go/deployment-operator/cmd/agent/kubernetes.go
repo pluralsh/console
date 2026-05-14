@@ -30,13 +30,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
-	"github.com/pluralsh/console/godeployment-operator/internal/controller"
-	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	consoleclient "github.com/pluralsh/console/godeployment-operator/pkg/client"
-	consolectrl "github.com/pluralsh/console/godeployment-operator/pkg/controller"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	consoleclient "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
 )
 
 func emptyDiskHealthCheck(_ *http.Request) error {

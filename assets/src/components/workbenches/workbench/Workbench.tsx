@@ -31,6 +31,7 @@ import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
+  useLocation,
   useMatch,
   useNavigate,
   useOutletContext,
@@ -304,6 +305,7 @@ function renderWorkbenchSidebar(
 
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
+  const { pathname } = useLocation()
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -334,7 +336,10 @@ export function Workbench() {
     })
 
   useSetBreadcrumbs(
-    useMemo(() => getWorkbenchBreadcrumbs(workbench), [workbench])
+    useMemo(() => {
+      void pathname
+      return getWorkbenchBreadcrumbs(workbench)
+    }, [pathname, workbench])
   )
 
   const outletContext = useMemo<WorkbenchOutletContext>(

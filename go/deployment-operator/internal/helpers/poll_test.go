@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 )
 
 func TestBackgroundPollUntilContextCancel_DynamicInterval(t *testing.T) {

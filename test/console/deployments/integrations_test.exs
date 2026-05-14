@@ -17,6 +17,25 @@ defmodule Console.Deployments.IntegrationsTest do
       assert connection.configuration.slack.bot_token == "token"
       assert connection.configuration.slack.bot_id == "id"
     end
+
+    test "it can upsert read and write policy bindings" do
+      reader = insert(:user)
+      writer = insert(:user)
+
+      {:ok, connection} = Integrations.upsert_chat_connection(%{
+        name: "bindings-chat",
+        type: :slack,
+        configuration: %{slack: %{app_token: "token", bot_token: "token", bot_id: "id"}},
+        read_bindings: [%{user_id: reader.id}],
+        write_bindings: [%{user_id: writer.id}]
+      }, admin_user())
+
+      connection = Console.Repo.preload(connection, [:read_bindings, :write_bindings])
+      assert [%{user_id: rid}] = connection.read_bindings
+      assert [%{user_id: wid}] = connection.write_bindings
+      assert rid == reader.id
+      assert wid == writer.id
+    end
   end
 
   describe "#delete_chat_connection/2" do

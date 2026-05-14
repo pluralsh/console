@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 const (

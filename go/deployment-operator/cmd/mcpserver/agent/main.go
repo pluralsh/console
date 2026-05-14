@@ -6,11 +6,11 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/mcpserver/agent/args"
-	"github.com/pluralsh/console/godeployment-operator/internal/mcpserver/agent"
-	"github.com/pluralsh/console/godeployment-operator/internal/mcpserver/agent/tool"
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent"
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const (

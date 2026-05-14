@@ -26,6 +26,8 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
+  [WorkbenchToolType.Slack]: extractSlackMetadata,
+  [WorkbenchToolType.Teams]: extractTeamsMetadata,
   [WorkbenchToolType.Mcp]: () => [],
   [WorkbenchToolType.Sentry]: () => [],
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
@@ -35,6 +37,10 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Jaeger]: extractJaegerMetadata,
   [WorkbenchToolType.Exa]: extractExaMetadata,
   [WorkbenchToolType.Github]: extractGithubMetadata,
+  [WorkbenchToolType.Gitlab]: extractGitlabMetadata,
+  [WorkbenchToolType.Bitbucket]: extractBitbucketMetadata,
+  [WorkbenchToolType.BitbucketDatacenter]: extractBitbucketDatacenterMetadata,
+  [WorkbenchToolType.AzureDevops]: extractAzureDevopsMetadata,
   [WorkbenchToolType.Cloud]: () => [],
 }
 
@@ -151,6 +157,22 @@ function extractLinearMetadata(
   return [{ label: 'URL', value: configuration?.linear?.url }]
 }
 
+function extractSlackMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.slack?.url }]
+}
+
+function extractTeamsMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  const t = configuration?.teams
+  return [
+    { label: 'Tenant ID', value: t?.tenantId },
+    { label: 'Client ID', value: t?.clientId },
+  ]
+}
+
 function extractSplunkMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
@@ -207,10 +229,41 @@ function extractExaMetadata(
 function extractGithubMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
+  const gh = configuration?.github
   return [
-    { label: 'URL', value: configuration?.github?.url },
-    { label: 'Toolset', value: configuration?.github?.toolset },
+    { label: 'URL', value: gh?.url },
+    { label: 'Toolset', value: gh?.toolset },
+    ...(gh?.appId
+      ? [
+          { label: 'GitHub App ID', value: gh.appId },
+          { label: 'Installation ID', value: gh.installationId },
+        ]
+      : [{ label: 'Auth', value: 'Access token' }]),
   ]
+}
+
+function extractGitlabMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.gitlab?.url }]
+}
+
+function extractBitbucketMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.bitbucket?.url }]
+}
+
+function extractBitbucketDatacenterMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.bitbucketDatacenter?.url }]
+}
+
+function extractAzureDevopsMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.azureDevops?.url }]
 }
 
 function getConfiguredHeadersCount(

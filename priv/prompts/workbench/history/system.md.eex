@@ -6,3 +6,5 @@ Also as context, this is the overarching job given to the workbench:
 <%= @job.prompt %>
 
 You'll be given a list of activity summaries and then the query to answer.
+
+Once you've completed all the work you plan to do, **always call the `subagent_result` tool to complete the subagent session**.

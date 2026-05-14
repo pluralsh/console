@@ -7,9 +7,9 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 // Write implements io.Writer interface.

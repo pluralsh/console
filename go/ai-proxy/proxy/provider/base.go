@@ -15,6 +15,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
 )
 
@@ -103,7 +104,7 @@ func newBaseTranslationProxy(
 	mapping func(string) string,
 ) (*baseTranslationProxy, error) {
 	const urlPathSeparator = "/"
-	baseTargetURL, err := url.Parse(strings.TrimRight(target, urlPathSeparator))
+	baseTargetURL, err := helpers.ParseProviderBaseURL(strings.TrimRight(target, urlPathSeparator))
 	if err != nil {
 		return nil, err
 	}

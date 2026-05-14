@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 )

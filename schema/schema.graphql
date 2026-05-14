@@ -139,7 +139,18 @@ type RootQueryType {
 
   fluxHelmRepository(name: String!, namespace: String!): FluxHelmRepository
 
-  scmConnections(after: String, first: Int, before: String, last: Int): ScmConnectionConnection
+  scmConnections(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "when set, only connections of this SCM provider type are returned"
+    type: ScmType
+  ): ScmConnectionConnection
 
   scmConnection(id: ID, name: String): ScmConnection
 
@@ -496,6 +507,8 @@ type RootQueryType {
   workbench(id: ID, name: String): Workbench
 
   workbenchTool(id: ID, name: String): WorkbenchTool
+
+  workbenchChatbot(id: ID!): WorkbenchChatbot
 
   workbenches(
     after: String
@@ -1318,6 +1331,17 @@ type RootMutationType {
 
   deleteWorkbenchWebhook(id: ID!): WorkbenchWebhook
 
+  createWorkbenchChatbot(
+    "the workbench to bind a chatbot for"
+    workbenchId: ID!
+
+    attributes: WorkbenchChatbotAttributes!
+  ): WorkbenchChatbot
+
+  updateWorkbenchChatbot(id: ID!, attributes: WorkbenchChatbotAttributes!): WorkbenchChatbot
+
+  deleteWorkbenchChatbot(id: ID!): WorkbenchChatbot
+
   "Creates a new workbench job. Requires read access to the workbench."
   createWorkbenchJob(
     "the workbench to create a job for"
@@ -1614,6 +1638,12 @@ input ChatProviderConnectionAttributes {
   type: ChatProviderConnectionType!
 
   configuration: ChatProviderConnectionConfigurationAttributes!
+
+  "users who can read this chat connection"
+  readBindings: [PolicyBindingAttributes]
+
+  "users who can modify this chat connection"
+  writeBindings: [PolicyBindingAttributes]
 }
 
 input ChatProviderConnectionConfigurationAttributes {
@@ -1638,6 +1668,12 @@ type ChatProviderConnection {
 
   "the configuration for this chat connection"
   configuration: ChatProviderConnectionConfiguration!
+
+  "read policy bindings for this chat connection"
+  readBindings: [PolicyBinding]
+
+  "write policy bindings for this chat connection"
+  writeBindings: [PolicyBinding]
 
   insertedAt: DateTime
 
@@ -2299,6 +2335,12 @@ enum WorkbenchToolType {
   JAEGER
   EXA
   GITHUB
+  SLACK
+  TEAMS
+  GITLAB
+  BITBUCKET
+  BITBUCKET_DATACENTER
+  AZURE_DEVOPS
 }
 
 enum WorkbenchToolCategory {
@@ -2310,6 +2352,7 @@ enum WorkbenchToolCategory {
   ERROR_TRACKING
   INFRASTRUCTURE
   SEARCH
+  SCM
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2503,9 +2546,18 @@ input WorkbenchCronAttributes {
 
   "the prompt to run when the cron triggers"
   prompt: String
+
+  "user this cron runs as; must have read access to the workbench"
+  userId: ID
 }
 
 input WorkbenchPromptAttributes {
+  "display title for the saved prompt"
+  title: String
+
+  "grouping category for the saved prompt"
+  category: String
+
   "the saved prompt text"
   prompt: String!
 }
@@ -2562,8 +2614,31 @@ input WorkbenchWebhookAttributes {
   "optional prompt text applied when this webhook matches"
   prompt: String
 
+  "higher values are preferred when multiple webhooks match the same payload"
+  priority: Int
+
+  "user this webhook runs as; must have read access to the workbench"
+  userId: ID
+
   "when true on update, sets userId to the authenticated user"
   overrideWebhookUser: Boolean
+}
+
+input WorkbenchChatbotAttributes {
+  "chat provider connection id (required for create)"
+  chatConnectionId: ID
+
+  "external channel identifier (globally unique)"
+  channel: String
+
+  "optional prompt text applied when this chatbot runs"
+  prompt: String
+
+  "user this chatbot runs as; must have read access to the workbench"
+  userId: ID
+
+  "when true on update, sets userId to the authenticated user"
+  overrideChatbotUser: Boolean
 }
 
 input WorkbenchToolAttributes {
@@ -2584,6 +2659,9 @@ input WorkbenchToolAttributes {
 
   "the cloud connection for this tool (e.g. infrastructure cloud tools)"
   cloudConnectionId: ID
+
+  "the SCM connection for this tool (e.g. shared Git provider credentials)"
+  scmConnectionId: ID
 
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
@@ -2632,6 +2710,12 @@ input WorkbenchToolConfigurationAttributes {
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
+  "slack connection (integration)"
+  slack: WorkbenchToolSlackConnectionAttributes
+
+  "microsoft teams \/ graph connection (integration)"
+  teams: WorkbenchToolTeamsConnectionAttributes
+
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
 
@@ -2640,6 +2724,18 @@ input WorkbenchToolConfigurationAttributes {
 
   "github connection (integration)"
   github: WorkbenchToolGithubConnectionAttributes
+
+  "gitlab connection (scm)"
+  gitlab: WorkbenchToolGitlabConnectionAttributes
+
+  "bitbucket cloud connection (scm)"
+  bitbucket: WorkbenchToolBitbucketConnectionAttributes
+
+  "bitbucket data center connection (scm)"
+  bitbucketDatacenter: WorkbenchToolBitbucketDatacenterConnectionAttributes
+
+  "azure devops connection (scm)"
+  azureDevops: WorkbenchToolAzureDevopsConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2799,6 +2895,22 @@ input WorkbenchToolLinearConnectionAttributes {
   accessToken: String
 }
 
+input WorkbenchToolSlackConnectionAttributes {
+  "slack bot user OAuth token (xoxb-...) for MCP"
+  botToken: String
+}
+
+input WorkbenchToolTeamsConnectionAttributes {
+  "microsoft entra application (client) id"
+  clientId: String!
+
+  "microsoft entra client secret"
+  clientSecret: String!
+
+  "microsoft entra tenant (directory) id"
+  tenantId: String!
+}
+
 input WorkbenchToolAtlassianConnectionAttributes {
   "encrypted service account JSON (alternative to api_token + email)"
   serviceAccount: String
@@ -2816,14 +2928,55 @@ input WorkbenchToolExaConnectionAttributes {
 }
 
 input WorkbenchToolGithubConnectionAttributes {
-  "github MCP URL (defaults to public github MCP server)"
+  "optional GitHub REST API base URL (defaults to https:\/\/api.github.com\/; set for GitHub Enterprise Server)"
   url: String
 
-  "github token for MCP authentication"
+  "optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)"
   accessToken: String
 
-  "optional github MCP toolset query parameter"
+  "optional native tool subset: issues, pull_requests, repos, default\/all, or omit for all tools"
   toolset: String
+
+  "GitHub App ID (use with installation_id and private_key instead of access_token)"
+  appId: String
+
+  "GitHub App installation ID for this organization or account"
+  installationId: String
+
+  "PEM private key for the GitHub App (encrypted at rest); alternative to access_token"
+  privateKey: String
+}
+
+input WorkbenchToolGitlabConnectionAttributes {
+  "optional GitLab API base URL (defaults to https:\/\/gitlab.com when omitted)"
+  url: String
+
+  "GitLab personal access token or project\/group token (encrypted at rest)"
+  token: String
+}
+
+input WorkbenchToolBitbucketConnectionAttributes {
+  "optional Bitbucket Cloud API base URL"
+  url: String
+
+  "Bitbucket app password or access token (encrypted at rest)"
+  token: String
+}
+
+input WorkbenchToolBitbucketDatacenterConnectionAttributes {
+  "Bitbucket Data Center REST API base URL"
+  url: String!
+
+  "HTTP access token or personal access token (encrypted at rest)"
+  token: String
+}
+
+input WorkbenchToolAzureDevopsConnectionAttributes {
+  "Optional REST API root (defaults to https:\/\/dev.azure.com). Use https:\/\/dev.azure.com\/{organization} to bake the org into the URL, or an on-premises root such as https:\/\/server\/tfs\/Collection."
+  url: String
+
+  "Azure DevOps personal access token (PAT; encrypted at rest)"
+  token: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -2922,11 +3075,37 @@ type Workbench {
 
   webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
 
+  chatbots(after: String, first: Int, before: String, last: Int): WorkbenchChatbotConnection
+
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   issues(after: String, first: Int, before: String, last: Int): IssueConnection
 
+  "users that have read or write access to this workbench"
+  users: [User]
+
   allSkills: [UnifiedWorkbenchSkill]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ChatbotMessage {
+  "the id of this chatbot message record"
+  id: String!
+
+  "serialized message payload associated with this job (internal format)"
+  message: String
+
+  "external channel identifier (e.g. Slack channel id)"
+  channel: String
+
+  "the chat connection this message was routed through"
+  chatConnection: ChatProviderConnection
+
+  "the workbench job this message is associated with"
+  workbenchJob: WorkbenchJob
 
   insertedAt: DateTime
 
@@ -2951,6 +3130,9 @@ type WorkbenchJob {
 
   "error message when the job failed"
   error: String
+
+  "chatbot integration metadata for this job, when present"
+  chatbotMessage: ChatbotMessage
 
   "the workbench this run belongs to"
   workbench: Workbench
@@ -3122,6 +3304,7 @@ type WorkbenchJobActivityResult {
 type WorkbenchJobActivityJobUpdate {
   diff: String
   workingTheory: String
+  criticism: String
   conclusion: String
   topology: String
   todos: [WorkbenchJobResultTodo]
@@ -3157,6 +3340,9 @@ type WorkbenchJobResult {
 
   "the working theory for this result"
   workingTheory: String
+
+  "a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"
+  criticism: String
 
   "the conclusion for this result"
   conclusion: String
@@ -3328,6 +3514,9 @@ type WorkbenchCron {
   "when the cron last ran"
   lastRunAt: DateTime
 
+  "user this cron runs as"
+  userId: ID
+
   "the workbench this cron belongs to"
   workbench: Workbench
 
@@ -3339,6 +3528,12 @@ type WorkbenchCron {
 type WorkbenchPrompt {
   "the id of the saved prompt"
   id: String!
+
+  "display title for the saved prompt"
+  title: String
+
+  "grouping category for the saved prompt (Default when unset in storage)"
+  category: String!
 
   "the saved prompt text"
   prompt: String
@@ -3511,8 +3706,14 @@ type WorkbenchWebhook {
   "optional prompt text applied when this webhook matches"
   prompt: String
 
+  "higher values are preferred when multiple webhooks match the same payload"
+  priority: Int
+
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches
+
+  "user this webhook runs as"
+  userId: ID
 
   "the workbench this webhook belongs to"
   workbench: Workbench
@@ -3524,6 +3725,33 @@ type WorkbenchWebhook {
   issueWebhook: IssueWebhook
 
   "the user who created this webhook"
+  user: User
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchChatbot {
+  "the id of this chatbot binding"
+  id: String!
+
+  "external channel identifier (globally unique)"
+  channel: String!
+
+  "optional prompt text applied when this chatbot runs"
+  prompt: String
+
+  "user this chatbot runs as"
+  userId: ID
+
+  "the workbench this chatbot is bound to"
+  workbench: Workbench
+
+  "the chat provider connection"
+  chatConnection: ChatProviderConnection
+
+  "the user who created this binding"
   user: User
 
   insertedAt: DateTime
@@ -3561,6 +3789,9 @@ type WorkbenchTool {
 
   "the cloud connection bound to this tool"
   cloudConnection: CloudConnection
+
+  "the SCM connection bound to this tool"
+  scmConnection: ScmConnection
 
   insertedAt: DateTime
 
@@ -3604,6 +3835,12 @@ type WorkbenchToolConfiguration {
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
+  "slack connection (no secrets)"
+  slack: WorkbenchToolSlackConnection
+
+  "microsoft teams \/ graph connection (no secrets)"
+  teams: WorkbenchToolTeamsConnection
+
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
 
@@ -3612,6 +3849,18 @@ type WorkbenchToolConfiguration {
 
   "github connection (no secrets)"
   github: WorkbenchToolGithubConnection
+
+  "gitlab connection (no secrets)"
+  gitlab: WorkbenchToolGitlabConnection
+
+  "bitbucket cloud connection (no secrets)"
+  bitbucket: WorkbenchToolBitbucketConnection
+
+  "bitbucket data center connection (no secrets)"
+  bitbucketDatacenter: WorkbenchToolBitbucketDatacenterConnection
+
+  "azure devops connection (no secrets)"
+  azureDevops: WorkbenchToolAzureDevopsConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -3717,6 +3966,19 @@ type WorkbenchToolLinearConnection {
   url: String!
 }
 
+type WorkbenchToolSlackConnection {
+  "Slack hosted MCP endpoint (credentials never exposed)"
+  url: String!
+}
+
+type WorkbenchToolTeamsConnection {
+  "microsoft entra application (client) id"
+  clientId: String
+
+  "microsoft entra tenant (directory) id (client secret never exposed)"
+  tenantId: String
+}
+
 type WorkbenchToolAtlassianConnection {
   "static MCP URL for Atlassian\/Jira (credentials never exposed)"
   url: String!
@@ -3731,11 +3993,37 @@ type WorkbenchToolExaConnection {
 }
 
 type WorkbenchToolGithubConnection {
-  "github MCP URL (credentials never exposed)"
+  "GitHub REST API base URL in use (defaults to https:\/\/api.github.com\/)"
   url: String!
 
-  "configured github MCP toolset"
+  "configured native GitHub tool subset"
   toolset: String
+
+  "GitHub App ID when using app authentication (secrets such as private keys are never exposed)"
+  appId: String
+
+  "GitHub App installation ID when using app authentication"
+  installationId: String
+}
+
+type WorkbenchToolGitlabConnection {
+  "GitLab API base URL in use (tokens never exposed)"
+  url: String
+}
+
+type WorkbenchToolBitbucketConnection {
+  "Bitbucket Cloud API base URL when set (tokens never exposed)"
+  url: String
+}
+
+type WorkbenchToolBitbucketDatacenterConnection {
+  "Bitbucket Data Center REST API base URL (tokens never exposed)"
+  url: String
+}
+
+type WorkbenchToolAzureDevopsConnection {
+  "Azure DevOps REST API root in use (PAT never exposed); defaults to https:\/\/dev.azure.com when unset."
+  url: String
 }
 
 type WorkbenchToolHttpConfiguration {
@@ -3761,7 +4049,7 @@ type WorkbenchToolHttpHeader {
 }
 
 type WorkbenchJobProgress {
-  activityId: ID!
+  activityId: ID
   text: String
   tool: String
   arguments: Map
@@ -3815,6 +4103,11 @@ type WorkbenchEvalResultConnection {
 type WorkbenchWebhookConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchWebhookEdge]
+}
+
+type WorkbenchChatbotConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchChatbotEdge]
 }
 
 type WorkbenchJobDelta {
@@ -5202,9 +5495,9 @@ input CloudConnectionConfigurationAttributes {
 }
 
 input AwsCloudConnectionAttributes {
-  accessKeyId: String!
+  accessKeyId: String
 
-  secretAccessKey: String!
+  secretAccessKey: String
 
   region: String
 
@@ -5618,7 +5911,7 @@ type CloudConnectionConfiguration {
 "The configuration for a cloud provider"
 type AwsConnectionAttributes {
   "the access key id for aws"
-  accessKeyId: String!
+  accessKeyId: String
 
   "the region for aws"
   region: String
@@ -15540,6 +15833,11 @@ type SentinelRunEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type WorkbenchChatbotEdge {
+  node: WorkbenchChatbot
   cursor: String
 }
 

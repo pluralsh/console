@@ -14,8 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/test/common"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/test/common"
 )
 
 var _ = Describe("IngressReplica Controller", Ordered, func() {

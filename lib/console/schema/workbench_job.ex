@@ -10,7 +10,8 @@ defmodule Console.Schema.WorkbenchJob do
     User,
     Alert,
     Issue,
-    PullRequest
+    PullRequest,
+    ChatbotMessage
   }
   alias Console.Deployments.Policies.Rbac
 
@@ -34,6 +35,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     has_one  :result,        WorkbenchJobResult, on_replace: :update
     has_one  :eval_result,   WorkbenchEvalResult, on_replace: :update
+    has_one  :chatbot_message, ChatbotMessage, on_replace: :update
     has_many :activities,    WorkbenchJobActivity, on_replace: :delete
     has_many :pull_requests, PullRequest, on_replace: :delete
 
@@ -139,6 +141,7 @@ defmodule Console.Schema.WorkbenchJob do
     model
     |> cast(attrs, @valid)
     |> cast_assoc(:result)
+    |> cast_assoc(:chatbot_message)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
@@ -151,6 +154,7 @@ defmodule Console.Schema.WorkbenchJob do
     model
     |> cast(attrs, [])
     |> cast_assoc(:result)
+    |> cast_assoc(:chatbot_message)
   end
 end
 

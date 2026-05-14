@@ -3,8 +3,8 @@ package controller
 import (
 	"time"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/websocket"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
 
 type ControllerManagerOption func(*Manager) error

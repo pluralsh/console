@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	consoleclient "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	consoleclient "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 const (

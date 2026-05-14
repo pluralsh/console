@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "Add a new comment on a GitHub issue.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner (user or organization)."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "issue_number": {
+      "type": "integer",
+      "description": "Issue number."
+    },
+    "body": {
+      "type": "string",
+      "description": "Comment body in Markdown."
+    }
+  },
+  "required": ["owner", "repo", "issue_number", "body"],
+  "additionalProperties": false
+}

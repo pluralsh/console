@@ -162,6 +162,8 @@ export function ChatInputSimple({
   wrapperStyles,
   enableAutoComplete = false,
   workbenchId,
+  submitOnEnter = true,
+  showSubmitButton = true,
   onKeyDown: onKeyDownProp,
   setValue: setValueProp,
   ...props
@@ -170,11 +172,14 @@ export function ChatInputSimple({
   onSubmit: () => void
   allowSubmit?: boolean
   loading?: boolean
+  disabled?: boolean
   bgColor?: SemanticColorKey
   options?: ReactNode
   wrapperStyles?: StyledObject
   enableAutoComplete?: boolean
   workbenchId?: Nullable<string>
+  submitOnEnter?: boolean
+  showSubmitButton?: boolean
 } & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
   const divRef = useRef<HTMLDivElement>(null)
@@ -214,7 +219,7 @@ export function ChatInputSimple({
       <EditableDiv
         ref={divRef}
         {...props}
-        onEnter={handleSubmit}
+        onEnter={submitOnEnter ? handleSubmit : undefined}
         onKeyDown={onKeyDown}
         setValue={(value) => {
           setValueProp(value)
@@ -222,18 +227,27 @@ export function ChatInputSimple({
         }}
         disabled={loading || disabled}
       />
-      <div css={{ width: '100%', paddingRight: spacing.xlarge }}>{options}</div>
-      <ChatSubmitButton
-        loading={loading}
-        loadingIndicator={<SpinnerAlt color="icon-xlight" />}
-        disabled={!allowSubmit || loading || disabled}
-        onClick={handleSubmit}
+      <div
         css={{
-          position: 'absolute',
-          bottom: spacing.small,
-          right: spacing.small,
+          width: '100%',
+          ...(showSubmitButton ? { paddingRight: spacing.xlarge } : {}),
         }}
-      />
+      >
+        {options}
+      </div>
+      {showSubmitButton && (
+        <ChatSubmitButton
+          loading={loading}
+          loadingIndicator={<SpinnerAlt color="icon-xlight" />}
+          disabled={!allowSubmit || loading || disabled}
+          onClick={handleSubmit}
+          css={{
+            position: 'absolute',
+            bottom: spacing.small,
+            right: spacing.small,
+          }}
+        />
+      )}
       <MentionMenu
         autoCompleteState={autocomplete.state}
         onSelect={autocomplete.commit}

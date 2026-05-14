@@ -9,6 +9,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
       field :working_theory, :string
       field :topology, :string
+      field :criticism, :string
     end
     field :summary, :string
   end
@@ -28,7 +29,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
   defp status_changeset(model, attrs) do
     model
-    |> cast(attrs, [:working_theory, :topology])
+    |> cast(attrs, [:working_theory, :topology, :criticism])
     |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
     |> validate_change(:topology, fn :topology, topology ->
       case MermaidValidator.validate(topology) do

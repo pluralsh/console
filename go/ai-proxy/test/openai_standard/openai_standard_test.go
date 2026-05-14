@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,6 +15,7 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
+	apioai "github.com/pluralsh/console/go/ai-proxy/api/openai"
 	"github.com/pluralsh/console/go/ai-proxy/test/helpers"
 )
 
@@ -235,5 +238,97 @@ func TestOpenAIResponsesProxy(t *testing.T) {
 
 	if !bytes.Equal(wantDataBytes, resBody) {
 		t.Errorf("\nwant:\n%s\ngot:\n%s", wantDataBytes, resBody)
+	}
+}
+
+func TestOpenAIAudioTranscriptionsProxy(t *testing.T) {
+	wantBody := []byte(`{"text":"hello world"}`)
+	if err := helpers.MockResponse("/v1/audio/transcriptions", wantBody, nil, http.StatusOK)(handlers); err != nil {
+		t.Fatal(err)
+	}
+
+	var buf bytes.Buffer
+	mw := multipart.NewWriter(&buf)
+	fw, err := mw.CreateFormFile("file", "clip.webm")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := fw.Write([]byte("fake-audio")); err != nil {
+		t.Fatal(err)
+	}
+	if err := mw.WriteField("model", "whisper-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, server.URL+apioai.EndpointAudioTranscriptions, &buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+	got, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, wantBody) {
+		t.Fatalf("body: want %q got %q", wantBody, got)
+	}
+}
+
+func TestOpenAIAudioTranslationsProxy(t *testing.T) {
+	wantBody := []byte(`{"text":"hola"}`)
+	if err := helpers.MockResponse("/v1/audio/translations", wantBody, nil, http.StatusOK)(handlers); err != nil {
+		t.Fatal(err)
+	}
+
+	var buf bytes.Buffer
+	mw := multipart.NewWriter(&buf)
+	fw, err := mw.CreateFormFile("file", "clip.webm")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := fw.Write([]byte("fake-audio")); err != nil {
+		t.Fatal(err)
+	}
+	if err := mw.WriteField("model", "whisper-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, server.URL+apioai.EndpointAudioTranslations, &buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+	got, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, wantBody) {
+		t.Fatalf("body: want %q got %q", wantBody, got)
 	}
 }

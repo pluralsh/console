@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	bifrostcore "github.com/maximhq/bifrost/core"
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/console"
 	"github.com/pluralsh/console/go/nexus/internal/log"
+	"github.com/pluralsh/console/go/nexus/internal/tokenexchange"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +26,10 @@ type Handler struct {
 // NewHandler creates a new Bifrost handler using the Bifrost Core SDK
 func NewHandler(consoleClient console.Client) (*Handler, error) {
 	logger := log.Logger().With(zap.String("component", "bifrost-handler"))
-	account := NewAccount(consoleClient)
+	// Dedicated client for OAuth token exchange so hung identity servers do not tie up the default transport.
+	tokenHTTP := &http.Client{Timeout: 90 * time.Second}
+	tokenCache := tokenexchange.NewCacheWithHTTPClient(tokenHTTP)
+	account := NewAccount(consoleClient, tokenCache)
 	bifrostClient, err := bifrostcore.Init(context.Background(), schemas.BifrostConfig{
 		Account:            account,
 		InitialPoolSize:    1000,

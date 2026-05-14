@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "description": "List issues in a repository with optional filters and pagination.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "state": {
+      "type": "string",
+      "description": "Filter by state: open, closed, or all (GitHub default if omitted)."
+    },
+    "since": {
+      "type": "string",
+      "description": "Only issues updated at or after this time (ISO 8601 timestamp)."
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Label names to filter by (comma-separated in API; here as an array of names)."
+    },
+    "direction": {
+      "type": "string",
+      "description": "Sort direction: asc or desc."
+    },
+    "sort": {
+      "type": "string",
+      "description": "Sort field: e.g. created, updated, comments."
+    },
+    "after": {
+      "type": "string",
+      "description": "Cursor for cursor-based pagination if used by the client."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Number of results per page (max 100 per GitHub API)."
+    }
+  },
+  "required": ["owner", "repo"],
+  "additionalProperties": false
+}
