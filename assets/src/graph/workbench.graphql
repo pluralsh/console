@@ -467,6 +467,10 @@ fragment WorkbenchJobTiny on WorkbenchJob {
     id
     conclusion
   }
+  evalResult {
+    id
+    grade
+  }
 }
 
 fragment WorkbenchJob on WorkbenchJob {
@@ -493,6 +497,14 @@ fragment WorkbenchJob on WorkbenchJob {
   }
   result {
     ...WorkbenchJobResult
+  }
+  evalResult {
+    feedback {
+      summary
+      prompt
+      result
+      logic
+    }
   }
 }
 
@@ -935,7 +947,7 @@ mutation DeleteWorkbenchEval($id: ID!) {
 
 mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {
   workbenchEvalSkill(id: $id, prompt: $prompt) {
-    id
+    ...WorkbenchJob
   }
 }
 

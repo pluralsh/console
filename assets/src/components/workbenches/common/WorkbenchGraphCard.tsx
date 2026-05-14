@@ -10,12 +10,14 @@ export function WorkbenchGraphCard({
   children,
   hint,
   loading,
+  minContentHeight = 200,
 }: {
   title: string
   rightContent?: ReactNode
   children: ReactNode
   hint?: string
   loading?: boolean
+  minContentHeight?: number
 }) {
   const theme = useTheme()
 
@@ -40,7 +42,7 @@ export function WorkbenchGraphCard({
         <Body1P>{title}</Body1P>
         {rightContent}
       </div>
-      <div css={{ minHeight: 200, flex: 1 }}>
+      <div css={{ minHeight: minContentHeight, flex: 1 }}>
         {loading ? (
           <RectangleSkeleton
             $height="100%"

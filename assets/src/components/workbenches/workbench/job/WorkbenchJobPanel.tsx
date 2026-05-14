@@ -1,6 +1,7 @@
 import {
   CloseIcon,
   DashboardIcon,
+  GaugeIcon,
   GraphIcon,
   IconFrame,
   PaperCheckIcon,
@@ -36,12 +37,13 @@ import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import {
   WorkbenchJobPrs,
+  WorkbenchJobEval,
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab = 'Result' | 'Dashboard' | 'Topology' | 'PRs'
+type JobPanelTab = 'Result' | 'Dashboard' | 'Topology' | 'PRs' | 'Eval'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -122,6 +124,9 @@ export function WorkbenchJobPanelContent() {
               prs={job?.pullRequests?.filter(isNonNullable) ?? []}
             />
           )}
+          {selectedTab === 'Eval' && job?.evalResult && (
+            <WorkbenchJobEval job={job} />
+          )}
         </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
@@ -189,6 +194,10 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
     !isEmpty(job?.pullRequests) && {
       label: 'PRs',
       icon: <PrOpenIcon size={12} />,
+    },
+    job?.evalResult && {
+      label: 'Eval',
+      icon: <GaugeIcon size={12} />,
     },
   ].filter((tab): tab is { label: JobPanelTab; icon: ReactElement } =>
     Boolean(tab)

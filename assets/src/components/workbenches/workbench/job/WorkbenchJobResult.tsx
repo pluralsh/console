@@ -12,7 +12,9 @@ import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Body2BoldP } from 'components/utils/typography/Text'
+import { Body2BoldP, Subtitle2H1 } from 'components/utils/typography/Text'
+import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
+import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
 import {
   PullRequestBasicFragment,
   WorkbenchJobFragment,
@@ -130,6 +132,77 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
         </WrapperCardSC>
       ))}
     </>
+  )
+}
+
+export function WorkbenchJobEval({ job }: { job: WorkbenchJobFragment }) {
+  const evalResult = job.evalResult
+  const feedback = evalResult?.feedback
+  const grade = evalResult?.grade ?? 0
+  const workbenchId = job.workbench?.id ?? ''
+
+  if (!evalResult) return null
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      <Flex
+        align="center"
+        gap="medium"
+        justify="space-between"
+      >
+        <Flex
+          align="center"
+          gap="medium"
+        >
+          <WorkbenchEvalGradeBadge
+            grade={grade}
+            colorBorder
+            size="medium"
+          />
+          <Subtitle2H1 css={{ fontWeight: 400 }}>
+            Overall grade: {grade.toFixed(0)}/10
+          </Subtitle2H1>
+        </Flex>
+        <WorkbenchEvalSkillButton
+          evalResultId={evalResult.id}
+          workbenchId={workbenchId}
+          floating
+          small
+        />
+      </Flex>
+      <EvalSection title="Summary">{feedback?.summary}</EvalSection>
+      <EvalSection title="Prompt">{feedback?.prompt}</EvalSection>
+      <EvalSection title="Conclusion">{feedback?.result}</EvalSection>
+      <EvalSection title="Logic and thoughts">{feedback?.logic}</EvalSection>
+    </Flex>
+  )
+}
+
+function EvalSection({
+  title,
+  children,
+}: {
+  title: string
+  children?: Nullable<string>
+}) {
+  if (!children) return null
+
+  return (
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <Subtitle2H1
+        $color="text-light"
+        css={{ fontWeight: 400 }}
+      >
+        {title}
+      </Subtitle2H1>
+      <Markdown text={children} />
+    </Flex>
   )
 }
 

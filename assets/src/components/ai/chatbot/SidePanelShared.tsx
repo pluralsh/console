@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import styled from 'styled-components'
 
 const HANDLE_THICKNESS = 20
-export const SIDE_PANEL_HEADER_HEIGHT = 57
+export const SIDE_PANEL_HEADER_HEIGHT = 55
 
 export function SidePanelContent({ children }: { children: ReactNode }) {
   return (
@@ -31,7 +31,7 @@ export const PanelHeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   minHeight: SIDE_PANEL_HEADER_HEIGHT,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   borderBottom: theme.borders.default,
   flexShrink: 0,
 }))

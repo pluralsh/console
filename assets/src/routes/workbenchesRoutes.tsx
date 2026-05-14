@@ -24,6 +24,7 @@ import { WorkbenchEvals } from 'components/workbenches/workbench/evals/Workbench
 import { Route } from 'react-router-dom'
 import {
   WORKBENCH_EVAL_SETTINGS_REL_PATH,
+  WORKBENCH_EVAL_RESULT_PARAM_ID,
   WORKBENCH_JOBS_PARAM_JOB,
   WORKBENCH_JOBS_REL_PATH,
   WORKBENCH_PARAM_ID,
@@ -112,6 +113,10 @@ export const workbenchesRoutes = [
     />
     <Route
       path={WORKBENCHES_EVALS_REL_PATH}
+      element={<WorkbenchEvals />}
+    />
+    <Route
+      path={`${WORKBENCHES_EVALS_REL_PATH}/:${WORKBENCH_EVAL_RESULT_PARAM_ID}`}
       element={<WorkbenchEvals />}
     />
     <Route
