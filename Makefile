@@ -147,6 +147,14 @@ release-agentk-vsn: # tags and pushes a new release for agentk
 	git tag -a go/agentk/$$tag -m "agentk release $$tag"; \
 	git push origin go/agentk/$$tag
 
+release-agent-vsn: # tags and pushes a new release for deployment-operator
+	@read -p "Version: " tag; \
+	clean_tag=$${tag#v}; \
+	git checkout master; \
+	git pull --rebase; \
+	git tag -a go/deployment-operator/v$$clean_tag -m "deployment-operator release v$$clean_tag"; \
+	git push origin go/deployment-operator/v$$clean_tag
+
 openapi-schema:
 	MIX_ENV=test mix openapi.dump Console.OpenAPI --pretty -o schema/openapi.json
 
