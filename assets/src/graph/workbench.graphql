@@ -947,7 +947,7 @@ mutation DeleteWorkbenchEval($id: ID!) {
 
 mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {
   workbenchEvalSkill(id: $id, prompt: $prompt) {
-    id
+    ...WorkbenchJob
   }
 }
 

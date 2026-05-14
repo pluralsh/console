@@ -11,7 +11,10 @@ import { animated, useTransition } from '@react-spring/web'
 import { ChatInputSimple } from 'components/ai/chatbot/input/ChatInput'
 import { GqlError } from 'components/utils/Alert'
 import { Body1P } from 'components/utils/typography/Text'
-import { useWorkbenchEvalSkillMutation } from 'generated/graphql'
+import {
+  useWorkbenchEvalSkillMutation,
+  WorkbenchJobFragment,
+} from 'generated/graphql'
 import { ComponentProps, useCallback, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
@@ -35,20 +38,21 @@ export function WorkbenchEvalSkillButton({
   const lastEvalResultIdRef = useRef<Nullable<string>>(evalResultId ?? null)
   const [open, setOpen] = useState(false)
   const [additionalInformation, setAdditionalInformation] = useState('')
-  const [createdJobId, setCreatedJobId] = useState<Nullable<string>>(null)
+  const [createdJob, setCreatedJob] =
+    useState<Nullable<WorkbenchJobFragment>>(null)
   const [mutationError, setMutationError] = useState<Nullable<Error>>(null)
 
   const [workbenchEvalSkill, { loading }] = useWorkbenchEvalSkillMutation({
     onCompleted: ({ workbenchEvalSkill }) => {
       setMutationError(null)
-      setCreatedJobId(workbenchEvalSkill?.id ?? null)
+      setCreatedJob(workbenchEvalSkill ?? null)
     },
     onError: (e) => setMutationError(e),
   })
 
   const resetState = useCallback(() => {
     setOpen(false)
-    setCreatedJobId(null)
+    setCreatedJob(null)
     setMutationError(null)
     setAdditionalInformation('')
   }, [])
@@ -56,7 +60,7 @@ export function WorkbenchEvalSkillButton({
   const toggle = useCallback(() => {
     if (!open && lastEvalResultIdRef.current !== (evalResultId ?? null)) {
       lastEvalResultIdRef.current = evalResultId ?? null
-      setCreatedJobId(null)
+      setCreatedJob(null)
       setAdditionalInformation('')
     }
 
@@ -89,7 +93,7 @@ export function WorkbenchEvalSkillButton({
         <AnimatedWrapperSC style={styles}>
           <WorkbenchEvalSkillPanel
             additionalInformation={additionalInformation}
-            createdJobId={createdJobId}
+            createdJob={createdJob}
             mutationError={mutationError}
             loading={loading}
             onAdditionalInformationChange={setAdditionalInformation}
@@ -114,7 +118,7 @@ export function WorkbenchEvalSkillButton({
 
 function WorkbenchEvalSkillPanel({
   additionalInformation,
-  createdJobId,
+  createdJob,
   mutationError,
   loading,
   onAdditionalInformationChange,
@@ -123,7 +127,7 @@ function WorkbenchEvalSkillPanel({
   workbenchId,
 }: {
   additionalInformation: string
-  createdJobId: Nullable<string>
+  createdJob: Nullable<WorkbenchJobFragment>
   mutationError: Nullable<Error>
   loading: boolean
   onAdditionalInformationChange: (value: string) => void
@@ -165,9 +169,10 @@ function WorkbenchEvalSkillPanel({
       </Flex>
       <PanelContentSC>
         {mutationError && <GqlError error={mutationError} />}
-        {createdJobId ? (
+        {createdJob ? (
           <WorkbenchStartedJobPanel
-            jobId={createdJobId}
+            initialJob={createdJob}
+            jobId={createdJob.id}
             workbenchId={workbenchId}
           />
         ) : (

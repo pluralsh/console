@@ -6,7 +6,6 @@ import {
   WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
@@ -26,7 +25,7 @@ export function WorkbenchStartedJobPanel({
   jobId,
   workbenchId,
 }: {
-  initialJob?: Nullable<WorkbenchJobFragment>
+  initialJob: WorkbenchJobFragment
   jobId: string
   workbenchId: string
 }) {
@@ -44,7 +43,7 @@ export function WorkbenchStartedJobPanel({
   })
 
   const job = data?.workbenchJob ?? initialJob
-  const cancellable = job ? isJobRunning(job.status) : false
+  const cancellable = isJobRunning(job.status)
 
   useEffect(() => {
     if (cancellable) startPolling(POLL_INTERVAL)
@@ -67,42 +66,35 @@ export function WorkbenchStartedJobPanel({
     >
       {queryError && <GqlError error={queryError} />}
       {cancelError && <GqlError error={cancelError} />}
-      {job ? (
-        <StartedJobCardSC>
-          <IconFrame
-            type="secondary"
-            icon={<WorkbenchIcon color="icon-light" />}
-          />
-          <Flex
-            direction="column"
-            gap="xxsmall"
-            flex={1}
-            minWidth={0}
-          >
-            <Body2BoldP $color="text">Started workbench job</Body2BoldP>
-            <Body2P
-              $color="text-light"
-              css={{
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {job.prompt}
-            </Body2P>
-          </Flex>
-          <RunStatusChip
-            status={job.status}
-            showSpinner
-          />
-        </StartedJobCardSC>
-      ) : (
-        <RectangleSkeleton
-          $height={112}
-          $width="100%"
+      <StartedJobCardSC>
+        <IconFrame
+          type="secondary"
+          icon={<WorkbenchIcon color="icon-light" />}
         />
-      )}
+        <Flex
+          direction="column"
+          gap="xxsmall"
+          flex={1}
+          minWidth={0}
+        >
+          <Body2BoldP $color="text">Started workbench job</Body2BoldP>
+          <Body2P
+            $color="text-light"
+            css={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {job.prompt}
+          </Body2P>
+        </Flex>
+        <RunStatusChip
+          status={job.status}
+          showSpinner
+        />
+      </StartedJobCardSC>
       <Flex justify={cancellable ? 'space-between' : 'flex-end'}>
         {cancellable && (
           <Button
