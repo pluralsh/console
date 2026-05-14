@@ -5277,6 +5277,9 @@ input AiSettingsAttributes {
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
+  "whether to enable log analysis in AI insights (turn off to save on log query costs)"
+  logAnalysis: Boolean
+
   openai: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
@@ -5685,6 +5688,9 @@ type AiSettings {
 
   "ai provider to use with tool calls"
   toolProvider: AiProvider
+
+  "whether to enable log analysis in AI insights (turn off to save on log query costs)"
+  logAnalysis: Boolean
 
   openai: OpenaiSettings
 

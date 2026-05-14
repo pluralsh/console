@@ -126,7 +126,6 @@ export const userColumn = columnHelper.accessor(({ user }) => user, {
           <AppIcon
             name={user.name}
             size="xxsmall"
-            css={{ marginLeft: 5, borderRadius: '50%' }}
           />
         </Tooltip>
       </Flex>
@@ -154,7 +153,7 @@ export const workbenchColumn = columnHelper.accessor(
 
 export const sourceColumn = columnHelper.accessor((job) => job, {
   id: 'source',
-  meta: { gridTemplate: 'minmax(80px, max-content)', center: true },
+  meta: { gridTemplate: 'minmax(80px, max-content)', right: true },
   cell: ({ getValue }) => {
     const { issue, alert } = getValue()
     if (!issue && !alert) return null

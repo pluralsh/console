@@ -9,7 +9,7 @@ defmodule Console.Logs.Provider.Elastic do
   @type t :: %__MODULE__{}
   @headers [{"Content-Type", "application/json"}]
 
-  @opts [recv_timeout: 10_000]
+  @opts [recv_timeout: :timer.seconds(30)]
 
   defstruct [:connection, :client]
 

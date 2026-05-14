@@ -200,6 +200,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :provider,           AIProvider, default: :openai
       field :tool_provider,      AIProvider
       field :embedding_provider, AIProvider
+      field :log_analysis,       :boolean, default: false
 
       embeds_one :analysis_rates, AnalysisRates, on_replace: :update do
         field :fast, :integer

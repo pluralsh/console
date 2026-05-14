@@ -72,6 +72,7 @@ A change to infrastructure will usually be done via a Pull Request. Some guidanc
 * If you need to divide work into separate PRs, you can create all of them in one go without waiting for merge or completion.  Reviewers will handle merge order with adequate guidance.*
 * Do not spin waiting for PRs to be merged, this will just waste tokens and cause annoyance.*equests are required to accomplish what the user intends.
 * You will not have the ability to update PRs once created.  SCM integration tools are read-only by design, and post PR creation feedback is delegated entirely to coding agents in babysit mode if applied.
+* Do not spin up additional coding agents to inspect existing PRs (this is wasteful and users can reprompt if needed), trust the result from prior coding agents, and likewise always instruct the coding agents to use informative PR bodies so that it is workable for future use.
 
 For tasks that do not require a code change, usually a successful run is done when all necessary evidence has been aggregated and you've come up with an adequate way of displaying the needed data to support a conclusion.
 

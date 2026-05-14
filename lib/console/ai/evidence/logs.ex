@@ -25,7 +25,7 @@ defmodule Console.AI.Evidence.Logs do
   def with_logging(history, parent, opts \\ []) do
     force = Keyword.get(opts, :force, false)
     args  = Keyword.take(opts, ~w(lines query namespaces)a)
-    with %DeploymentSettings{logging: %{enabled: true}} <- Settings.cached(),
+    with %DeploymentSettings{logging: %{enabled: true}, ai: %{log_analysis: true}} <- Settings.cached(),
          true <- use_logs?(history, force),
          {:ok, query} <- query(parent, args),
          {:ok, [_ | _] = logs} <- LogEngine.query(query) do

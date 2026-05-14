@@ -21,7 +21,7 @@ import {
 } from 'routes/cdRoutesConsts'
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
 import styled from 'styled-components'
-import { ChipAttrsByKind, MentionKind } from './mentionTypes'
+import { chipDisplayText, ChipAttrsByKind, MentionKind } from './mentionTypes'
 
 // span-only so chips can safely render inside markdown <p> (as opposed to our DS chip)
 type ChipBodyProps = {
@@ -55,7 +55,13 @@ type RenderedChipProps<K extends MentionKind> = Omit<
 
 function PlrlClusterChip(props: RenderedChipProps<MentionKind.Cluster>) {
   const id = props['item-id']
-  const name = props['item-name'] || id
+  const label =
+    chipDisplayText(MentionKind.Cluster, {
+      'item-name': props['item-name'],
+      handle: props.handle,
+    }) ||
+    props['item-name'] ||
+    id
   const icon = (
     <ClusterProviderIcon
       cluster={{
@@ -70,7 +76,7 @@ function PlrlClusterChip(props: RenderedChipProps<MentionKind.Cluster>) {
       condition={!!id}
       wrapper={<ChipLinkSC to={getClusterDetailsPath({ clusterId: id })} />}
     >
-      <ChipBody icon={icon}>{name}</ChipBody>
+      <ChipBody icon={icon}>{label}</ChipBody>
     </WrapWithIf>
   )
 }
@@ -78,7 +84,14 @@ function PlrlClusterChip(props: RenderedChipProps<MentionKind.Cluster>) {
 function PlrlServiceChip(props: RenderedChipProps<MentionKind.Service>) {
   const id = props['item-id']
   const clusterId = props['cluster-id']
-  const name = props['item-name'] || id
+  const label =
+    chipDisplayText(MentionKind.Service, {
+      'item-name': props['item-name'],
+      'cluster-handle': props['cluster-handle'],
+      'cluster-name': props['cluster-name'],
+    }) ||
+    props['item-name'] ||
+    id
   const icon = <GitPullIcon size={12} />
   return (
     <WrapWithIf
@@ -87,7 +100,7 @@ function PlrlServiceChip(props: RenderedChipProps<MentionKind.Service>) {
         <ChipLinkSC to={getServiceDetailsPath({ serviceId: id, clusterId })} />
       }
     >
-      <ChipBody icon={icon}>{name}</ChipBody>
+      <ChipBody icon={icon}>{label}</ChipBody>
     </WrapWithIf>
   )
 }

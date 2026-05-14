@@ -9,6 +9,7 @@ declare module '@tanstack/table-core' {
     truncate?: boolean
     gridTemplate?: string
     center?: boolean
+    right?: boolean
     highlight?: boolean
     tooltip?: ReactNode
     tooltipProps?: Omit<TooltipProps, 'label' | 'children'>

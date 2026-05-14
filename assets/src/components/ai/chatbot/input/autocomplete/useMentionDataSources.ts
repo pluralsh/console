@@ -101,6 +101,7 @@ export function useMentionDataSources({
           namespace: n.namespace ?? undefined,
           'cluster-id': n.cluster?.id ?? undefined,
           'cluster-name': n.cluster?.name ?? undefined,
+          'cluster-handle': n.cluster?.handle ?? undefined,
         })),
     [serviceData]
   )

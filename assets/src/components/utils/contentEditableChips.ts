@@ -6,7 +6,10 @@
  * is serialized to canonical `<plrl-*>` XML.
  */
 
-import { MentionKind } from 'components/ai/chatbot/input/autocomplete/mentionTypes'
+import {
+  chipDisplayText,
+  MentionKind,
+} from 'components/ai/chatbot/input/autocomplete/mentionTypes'
 import escape from 'lodash/escape'
 import unescape from 'lodash/unescape'
 
@@ -131,10 +134,10 @@ export function buildChipFromAttrs(
     if (v == null || v === '') continue
     span.setAttribute(`${CHIP_ATTR_PREFIX}${k}`, v)
   }
-  const name = attrs['item-name'] ?? ''
+  const label = chipDisplayText(tag, attrs)
   // wrap text in an inner span for highlight styling
   const inner = document.createElement('span')
-  inner.textContent = tag === MentionKind.Skill ? `/${name}` : name
+  inner.textContent = tag === MentionKind.Skill ? `/${label}` : label
   span.appendChild(inner)
   return span
 }
@@ -160,7 +163,7 @@ export function prettifyPrompt(text: string): string {
     .map((n) =>
       n.type === 'chip'
         ? (n.tag === MentionKind.Skill ? '/' : '@') +
-          (n.attrs['item-name'] ?? '')
+          chipDisplayText(n.tag, n.attrs)
         : n.text
     )
     .join('')
@@ -180,7 +183,7 @@ export function truncateKeepingChips(text: string, length: number): string {
   for (const node of walkPlrlText(text)) {
     const [content, visibleLen] =
       node.type === 'chip'
-        ? [node.raw, 1 + (node.attrs['item-name'] ?? '').length]
+        ? [node.raw, 1 + chipDisplayText(node.tag, node.attrs).length]
         : [node.text, node.text.length]
     if (visibleLen > remaining) {
       if (node.type === 'text' && remaining > 0)

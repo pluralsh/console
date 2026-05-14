@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   use Console.AI.Tools.Agent.Base
+  import Piazza.Ecto.Schema, only: [validate_one_present: 2]
   alias Console.Repo
   alias Console.Deployments.{Clusters, Policies}
   alias Console.Schema.{User, Cluster}
@@ -7,16 +8,18 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   require EEx
 
   embedded_schema do
-    field :user, :map, virtual: true
-    field :handle, :string
+    field :user,       :map, virtual: true
+    field :handle,     :string
+    field :cluster_id, :string
   end
 
-  @valid ~w(handle)a
+  @valid ~w(handle cluster_id)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid)
+    |> check_uuid(:cluster_id)
+    |> validate_one_present(@valid)
   end
 
   @json_schema Console.priv_file!("tools/workbench/infrastructure/cluster.json") |> Jason.decode!()
@@ -25,18 +28,26 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   def name(_), do: "plrl_cluster"
   def description(_), do: "Get the details of a cluster from the Plural API.  This will also include deep information about the cluster's upgradeability, plural metadata, and version/distro details"
 
-  def implement(%__MODULE__{user: %User{} = user, handle: handle}) do
-    Clusters.get_cluster_by_handle(handle)
+  def implement(%__MODULE__{user: %User{} = user, handle: handle, cluster_id: cluster_id} = model) do
+    fetch_cluster(model)
     |> Repo.preload([:tags, :project])
     |> Policies.allow(user, :read)
     |> case do
+      {:ok, nil} ->
+        {:error, "could not find cluster with handle #{handle} or cluster_id #{cluster_id}"}
+
       {:ok, cluster} ->
         {:ok, String.trim(cluster_prompt(cluster: cluster, upgrade_plan: simplified_upgrade_plan(cluster)))}
 
-      nil -> {:error, "could not find cluster with handle #{handle}"}
+      nil ->
+        {:error, "could not find cluster with handle #{handle} or cluster_id #{cluster_id}"}
+
       error -> error
     end
   end
+
+  defp fetch_cluster(%{cluster_id: id}) when is_binary(id), do: Clusters.get_cluster(id)
+  defp fetch_cluster(%{handle: handle}) when is_binary(handle), do: Clusters.get_cluster_by_handle(handle)
 
   def simplified_upgrade_plan(%Cluster{} = cluster) do
     plan = Clusters.upgrade_plan(cluster)
@@ -46,6 +57,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
       failed_insights: plan.failed_insights,
     }
   end
+  def simplified_upgrade_plan(_), do: nil
 
   defp simplify_addon(%{current: curr, fix: fix} = addon) do
     %{

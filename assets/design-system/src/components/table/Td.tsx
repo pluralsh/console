@@ -18,6 +18,7 @@ export const Td = styled.td<{
   $highlight?: boolean
   $truncateColumn: boolean
   $center?: boolean
+  $right?: boolean
   $rowsHaveLinks?: boolean
 }>(
   ({
@@ -30,13 +31,14 @@ export const Td = styled.td<{
     $highlight: highlight,
     $truncateColumn: truncateColumn = false,
     $center: center,
+    $right: right,
     $rowsHaveLinks: rowsHaveLinks,
   }) => ({
     ...theme.partials.text.body2LooseLineHeight,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: center ? 'center' : 'flex-start',
+    alignItems: right ? 'flex-end' : center ? 'center' : 'flex-start',
     height: 'auto',
     minHeight: padCells ? 52 : 0,
 

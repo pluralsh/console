@@ -918,6 +918,8 @@ export type AiSettings = {
   azure?: Maybe<AzureOpenaiSettings>;
   bedrock?: Maybe<BedrockAiSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** whether to enable log analysis in AI insights (turn off to save on log query costs) */
+  logAnalysis?: Maybe<Scalars['Boolean']['output']>;
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
@@ -936,6 +938,8 @@ export type AiSettingsAttributes = {
   embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   graph?: InputMaybe<GraphStoreAttributes>;
+  /** whether to enable log analysis in AI insights (turn off to save on log query costs) */
+  logAnalysis?: InputMaybe<Scalars['Boolean']['input']>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;

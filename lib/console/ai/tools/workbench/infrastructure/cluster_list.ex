@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "plrl_clusters"
-  def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle for full details."
+  def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle or cluster_id for full details."
 
   def implement(%__MODULE__{user: %User{} = user, q: q, project: project, distro: distro, tags: tags}) do
     Cluster.ordered()

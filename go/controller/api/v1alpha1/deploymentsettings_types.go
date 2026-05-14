@@ -475,6 +475,11 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingProvider *console.AiProvider `json:"embeddingProvider,omitempty"`
 
+	// LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs)
+	//
+	// +kubebuilder:validation:Optional
+	LogAnalysis *bool `json:"logAnalysis,omitempty"`
+
 	// OpenAI holds the OpenAI provider configuration.
 	//
 	// +kubebuilder:validation:Optional
@@ -598,6 +603,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		EmbeddingProvider: in.EmbeddingProvider,
 		VectorStore:       vectorStoreAttributes,
 		Graph:             graphStoreAttributes,
+		LogAnalysis:       in.LogAnalysis,
 	}
 
 	if in.Tools != nil && in.Tools.CreatePr != nil {
