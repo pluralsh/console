@@ -13,8 +13,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/environment"
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 // Per-service trees land at "<base>/<manifestsSubdir>/<handle>-<service>/".
