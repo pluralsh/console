@@ -20,7 +20,7 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/samber/lo"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"k8s.io/apimachinery/pkg/runtime"

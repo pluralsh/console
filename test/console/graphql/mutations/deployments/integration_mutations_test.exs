@@ -16,6 +16,71 @@ defmodule Console.GraphQl.Deployments.IntegrationMutationsTest do
       assert connection["name"] == "test"
       assert connection["type"] == "SLACK"
     end
+
+    test "it can upsert a chat provider connection with policy bindings" do
+      reader = insert(:user)
+      writer = insert(:user)
+
+      {:ok, %{data: %{"upsertChatProviderConnection" => connection}}} = run_query("""
+        mutation Upsert($attrs: ChatProviderConnectionAttributes!) {
+          upsertChatProviderConnection(attributes: $attrs) {
+            id
+            name
+            readBindings { user { id } }
+            writeBindings { user { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "policy-test-connection",
+        "type" => "SLACK",
+        "configuration" => %{"slack" => %{"app_token" => "token", "bot_token" => "token", "bot_id" => "id"}},
+        "readBindings" => [%{"userId" => reader.id}],
+        "writeBindings" => [%{"userId" => writer.id}]
+      }}, %{current_user: admin_user()})
+
+      assert connection["name"] == "policy-test-connection"
+      assert [read_binding] = connection["readBindings"]
+      assert [write_binding] = connection["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
+    end
+
+    test "it can update policy bindings on upsert" do
+      reader = insert(:user)
+      other_reader = insert(:user)
+
+      {:ok, _} = run_query("""
+        mutation Upsert($attrs: ChatProviderConnectionAttributes!) {
+          upsertChatProviderConnection(attributes: $attrs) {
+            id
+            readBindings { user { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "upsert-bindings-twice",
+        "type" => "SLACK",
+        "configuration" => %{"slack" => %{"app_token" => "token", "bot_token" => "token", "bot_id" => "id"}},
+        "readBindings" => [%{"userId" => reader.id}],
+        "writeBindings" => [%{"userId" => reader.id}]
+      }}, %{current_user: admin_user()})
+
+      {:ok, %{data: %{"upsertChatProviderConnection" => updated}}} = run_query("""
+        mutation Upsert($attrs: ChatProviderConnectionAttributes!) {
+          upsertChatProviderConnection(attributes: $attrs) {
+            readBindings { user { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "upsert-bindings-twice",
+        "type" => "SLACK",
+        "configuration" => %{"slack" => %{"app_token" => "token", "bot_token" => "token", "bot_id" => "id"}},
+        "readBindings" => [%{"userId" => other_reader.id}],
+        "writeBindings" => [%{"userId" => other_reader.id}]
+      }}, %{current_user: admin_user()})
+
+      assert [read_binding] = updated["readBindings"]
+      assert read_binding["user"]["id"] == other_reader.id
+    end
   end
 
   describe "deleteChatProviderConnection" do

@@ -1,6 +1,7 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { type ComponentProps, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
@@ -11,7 +12,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
-import { groupBy } from 'lodash'
+import { groupBy, truncate } from 'lodash'
 
 type EvalRow = WorkbenchEvalResultRowFragment & {
   workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
@@ -148,7 +149,9 @@ export function WorkbenchEvalsSidePanel({
                       color: theme.colors['text-light'],
                     }}
                   >
-                    {row.workbenchJob.prompt}
+                    {truncate(prettifyPrompt(row.workbenchJob.prompt ?? ''), {
+                      length: 150,
+                    })}
                   </span>
                   <span
                     css={{

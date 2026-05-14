@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "List tags for a repository.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page."
+    }
+  },
+  "required": ["owner", "repo"],
+  "additionalProperties": false
+}

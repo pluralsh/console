@@ -8,9 +8,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/godeployment-operator/internal/helm"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helm"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func (in *VirtualClusterController) deployVCluster(ctx context.Context, vCluster *v1alpha1.VirtualCluster) error {

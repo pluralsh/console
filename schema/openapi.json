@@ -3313,6 +3313,10 @@
             "description": "The conclusion for this result",
             "type": "string"
           },
+          "criticism": {
+            "description": "Markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation",
+            "type": "string"
+          },
           "id": {
             "description": "Unique identifier for the result",
             "type": "string"

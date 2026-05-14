@@ -50,7 +50,7 @@ export function WorkbenchJobCreateInput({
   workbenchLoading,
   disabled = false,
   onCreated,
-  placeholder = 'What would you like to investigate?',
+  placeholder = 'Send a job to your workbench.  Use / for skills and @ to mention clusters, services or stacks',
   wrapperStyles,
 }: {
   workbenchId: Nullable<string>

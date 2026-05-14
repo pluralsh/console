@@ -39,6 +39,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
       embeds_one :job_update, JobUpdate, on_replace: :update do
         field :diff,            :string
         field :working_theory,  :string
+        field :criticism,       :string
         field :conclusion,      :string
         field :topology,        :string
 
@@ -148,7 +149,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
   defp job_update_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(diff working_theory conclusion topology)a)
+    |> cast(attrs, ~w(diff working_theory criticism conclusion topology)a)
     |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
   end
 

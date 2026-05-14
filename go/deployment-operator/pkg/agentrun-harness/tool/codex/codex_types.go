@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	console "github.com/pluralsh/console/go/client"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
 
 const (

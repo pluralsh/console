@@ -1,7 +1,7 @@
 package terraform
 
 import (
-	toolv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
+	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 )
 
 // Terraform implements tool.Tool interface.

@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "description": "Search pull requests via the GitHub search API (is:pr is applied automatically).",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Search query string."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Optional. With repo, restricts to repo:owner/name."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Optional. With owner, restricts to that repository."
+    },
+    "sort": {
+      "type": "string",
+      "description": "Sort field for search results."
+    },
+    "order": {
+      "type": "string",
+      "description": "asc or desc."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page."
+    }
+  },
+  "required": ["query"],
+  "additionalProperties": false
+}

@@ -14,11 +14,11 @@ import (
 	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 	ctrclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 var (

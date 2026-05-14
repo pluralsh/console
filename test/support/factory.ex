@@ -1268,6 +1268,15 @@ defmodule Console.Factory do
     }
   end
 
+  def workbench_chatbot_factory do
+    %Schema.WorkbenchChatbot{
+      channel: sequence(:workbench_chatbot_channel, &"chat-channel-#{&1}"),
+      workbench: build(:workbench),
+      chat_connection: build(:chat_connection),
+      user: build(:user)
+    }
+  end
+
   def deprecated_custom_resource_factory do
     %Schema.DeprecatedCustomResource{
       cluster: build(:cluster),
@@ -1301,7 +1310,18 @@ defmodule Console.Factory do
     %Schema.ChatConnection{
       name: sequence(:chat_connection, & "chat-connection-#{&1}"),
       type: :slack,
+      read_policy_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate(),
       configuration: %{slack: %{app_token: "token", bot_token: "token", bot_id: "id"}}
+    }
+  end
+
+  def chatbot_message_factory do
+    %Schema.ChatbotMessage{
+      message: "chatbot message body",
+      channel: "C-test-channel",
+      chat_connection: build(:chat_connection),
+      workbench_job: build(:workbench_job)
     }
   end
 

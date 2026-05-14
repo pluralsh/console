@@ -17,6 +17,23 @@ defmodule Console.GraphQl.Deployments.IntegrationQueriesTest do
       assert from_connection(found)
              |> ids_equal(connections)
     end
+
+    test "it lists only chat provider connections accessible to the current user" do
+      user = insert(:user)
+      allowed = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+      _denied = insert(:chat_connection)
+
+      {:ok, %{data: %{"chatProviderConnections" => found}}} = run_query("""
+        query {
+          chatProviderConnections(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([allowed])
+    end
   end
 
   describe "chatProviderConnection" do
@@ -29,6 +46,33 @@ defmodule Console.GraphQl.Deployments.IntegrationQueriesTest do
       """, %{"id" => connection.id}, %{current_user: admin_user()})
 
       assert found["id"] == connection.id
+    end
+
+    test "it returns policy bindings on a chat provider connection" do
+      reader = insert(:user)
+      writer = insert(:user)
+
+      connection =
+        insert(:chat_connection,
+          read_bindings: [%{user_id: reader.id}],
+          write_bindings: [%{user_id: writer.id}]
+        )
+
+      {:ok, %{data: %{"chatProviderConnection" => found}}} = run_query("""
+        query Connection($id: ID!) {
+          chatProviderConnection(id: $id) {
+            id
+            readBindings { user { id } }
+            writeBindings { user { id } }
+          }
+        }
+      """, %{"id" => connection.id}, %{current_user: admin_user()})
+
+      assert found["id"] == connection.id
+      assert [read_binding] = found["readBindings"]
+      assert [write_binding] = found["writeBindings"]
+      assert read_binding["user"]["id"] == reader.id
+      assert write_binding["user"]["id"] == writer.id
     end
 
     test "it can fetch a chat provider connection by name" do

@@ -6,7 +6,7 @@ import (
 	"text/template"
 
 	console "github.com/pluralsh/console/go/client"
-	agentrunv1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/agentrun/v1"
+	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 )
 
 //go:embed templates/opencode.json.gotmpl

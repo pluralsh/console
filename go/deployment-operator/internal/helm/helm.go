@@ -14,8 +14,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
-	"github.com/pluralsh/console/godeployment-operator/pkg/manifests/template"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
 )
 
 type Helm struct {

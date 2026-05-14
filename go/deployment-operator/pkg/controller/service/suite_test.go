@@ -37,7 +37,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

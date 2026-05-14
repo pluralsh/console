@@ -84,10 +84,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_cron_attributes do
     field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
+    field :user_id, :id, description: "user this cron runs as; must have read access to the workbench"
   end
 
   input_object :workbench_prompt_attributes do
-    field :prompt, non_null(:string), description: "the saved prompt text"
+    field :title,    :string, description: "display title for the saved prompt"
+    field :category, :string, description: "grouping category for the saved prompt"
+    field :prompt,   non_null(:string), description: "the saved prompt text"
   end
 
   input_object :workbench_skill_attributes do
@@ -115,7 +118,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
     field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :priority,               :integer, description: "higher values are preferred when multiple webhooks match the same payload"
+    field :user_id,                :id, description: "user this webhook runs as; must have read access to the workbench"
     field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
+  end
+
+  input_object :workbench_chatbot_attributes do
+    field :chat_connection_id,      :id, description: "chat provider connection id (required for create)"
+    field :channel,                 :string, description: "external channel identifier (globally unique)"
+    field :prompt,                  :string, description: "optional prompt text applied when this chatbot runs"
+    field :user_id,                 :id, description: "user this chatbot runs as; must have read access to the workbench"
+    field :override_chatbot_user,   :boolean, description: "when true on update, sets userId to the authenticated user"
   end
 
   input_object :workbench_tool_attributes do
@@ -125,6 +138,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :project_id,           :id, description: "the project for this tool"
     field :mcp_server_id,        :id, description: "the mcp server for this tool"
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
+    field :scm_connection_id,    :id, description: "the SCM connection for this tool (e.g. shared Git provider credentials)"
     field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
     field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
@@ -143,9 +157,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
     field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
+    field :slack,      :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
+    field :teams,      :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,     :workbench_tool_github_connection_attributes, description: "github connection (integration)"
+    field :gitlab,     :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
+    field :bitbucket,  :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
+    field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes,
+      description: "bitbucket data center connection (scm)"
+    field :azure_devops, :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -226,6 +247,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :access_token, :string, description: "linear API access token"
   end
 
+  input_object :workbench_tool_slack_connection_attributes do
+    field :bot_token, :string, description: "slack bot user OAuth token (xoxb-...) for MCP"
+  end
+
+  input_object :workbench_tool_teams_connection_attributes do
+    field :client_id,     non_null(:string), description: "microsoft entra application (client) id"
+    field :client_secret, non_null(:string), description: "microsoft entra client secret"
+    field :tenant_id,     non_null(:string), description: "microsoft entra tenant (directory) id"
+  end
+
   input_object :workbench_tool_atlassian_connection_attributes do
     field :service_account, :string, description: "encrypted service account JSON (alternative to api_token + email)"
     field :api_token,       :string, description: "atlassian API token (required if not using service_account)"
@@ -237,9 +268,40 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_github_connection_attributes do
-    field :url,          :string, description: "github MCP URL (defaults to public github MCP server)"
-    field :access_token, :string, description: "github token for MCP authentication"
-    field :toolset,      :string, description: "optional github MCP toolset query parameter"
+    field :url,          :string,
+      description: "optional GitHub REST API base URL (defaults to https://api.github.com/; set for GitHub Enterprise Server)"
+    field :access_token, :string,
+      description: "optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)"
+    field :toolset,      :string,
+      description: "optional native tool subset: issues, pull_requests, repos, default/all, or omit for all tools"
+    field :app_id,           :string,
+      description: "GitHub App ID (use with installation_id and private_key instead of access_token)"
+    field :installation_id, :string, description: "GitHub App installation ID for this organization or account"
+    field :private_key,      :string,
+      description: "PEM private key for the GitHub App (encrypted at rest); alternative to access_token"
+  end
+
+  input_object :workbench_tool_gitlab_connection_attributes do
+    field :url,   :string, description: "optional GitLab API base URL (defaults to https://gitlab.com when omitted)"
+    field :token, :string, description: "GitLab personal access token or project/group token (encrypted at rest)"
+  end
+
+  input_object :workbench_tool_bitbucket_connection_attributes do
+    field :url,   :string, description: "optional Bitbucket Cloud API base URL"
+    field :token, :string, description: "Bitbucket app password or access token (encrypted at rest)"
+  end
+
+  input_object :workbench_tool_bitbucket_datacenter_connection_attributes do
+    field :url,   non_null(:string), description: "Bitbucket Data Center REST API base URL"
+    field :token, :string, description: "HTTP access token or personal access token (encrypted at rest)"
+  end
+
+  input_object :workbench_tool_azure_devops_connection_attributes do
+    field :url, :string,
+      description:
+        "Optional REST API root (defaults to https://dev.azure.com). Use https://dev.azure.com/{organization} to bake the org into the URL, or an on-premises root such as https://server/tfs/Collection."
+
+    field :token, :string, description: "Azure DevOps personal access token (PAT; encrypted at rest)"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -307,6 +369,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_webhooks/3
     end
 
+    connection field :chatbots, node_type: :workbench_chatbot do
+      resolve &Deployments.list_workbench_chatbots/3
+    end
+
     connection field :alerts, node_type: :alert do
       resolve &Deployments.list_alerts/3
     end
@@ -315,7 +381,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_issues/3
     end
 
+    @desc "users that have read or write access to this workbench"
+    field :users, list_of(:user), resolve: &Deployments.accessible_users/3
+
     field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
+
+    timestamps()
+  end
+
+  object :chatbot_message do
+    field :id, non_null(:string), description: "the id of this chatbot message record"
+
+    field :message, :string,
+      description: "serialized message payload associated with this job (internal format)"
+
+    field :channel, :string, description: "external channel identifier (e.g. Slack channel id)"
+
+    field :chat_connection, :chat_provider_connection,
+      resolve: dataloader(Deployments),
+      description: "the chat connection this message was routed through"
+
+    field :workbench_job, :workbench_job,
+      resolve: dataloader(Deployments),
+      description: "the workbench job this message is associated with"
 
     timestamps()
   end
@@ -327,6 +415,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+
+    field :chatbot_message, :chatbot_message,
+      resolve: dataloader(Deployments),
+      description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
@@ -421,6 +513,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_activity_job_update do
     field :diff,            :string
     field :working_theory,  :string
+    field :criticism,       :string
     field :conclusion,      :string
     field :topology,        :string
     field :todos,           list_of(:workbench_job_result_todo)
@@ -453,6 +546,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_result do
     field :id,              non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
+    field :criticism,       :string, description: "a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"
     field :conclusion,      :string, description: "the conclusion for this result"
     field :topology,        :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
     field :todos,           list_of(:workbench_job_result_todo), description: "todos for this result"
@@ -560,6 +654,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,      :string, description: "prompt to run when the cron triggers"
     field :next_run_at, :datetime, description: "when the cron will next run"
     field :last_run_at, :datetime, description: "when the cron last ran"
+    field :user_id,     :id, description: "user this cron runs as"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this cron belongs to"
 
@@ -567,7 +662,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_prompt do
-    field :id,     non_null(:string), description: "the id of the saved prompt"
+    field :id,    non_null(:string), description: "the id of the saved prompt"
+    field :title, :string, description: "display title for the saved prompt"
+
+    field :category, non_null(:string),
+      description: "grouping category for the saved prompt (Default when unset in storage)" do
+      resolve fn prompt, _, _ ->
+        {:ok, prompt.category || "Default"}
+      end
+    end
+
     field :prompt, :string, description: "the saved prompt text"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this prompt belongs to"
@@ -667,15 +771,30 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_webhook do
-    field :id,     non_null(:string), description: "the id of the webhook"
-    field :name,   :string, description: "name of this webhook trigger"
-    field :prompt, :string, description: "optional prompt text applied when this webhook matches"
-    field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+    field :id,       non_null(:string), description: "the id of the webhook"
+    field :name,     :string, description: "name of this webhook trigger"
+    field :prompt,   :string, description: "optional prompt text applied when this webhook matches"
+    field :priority, :integer, description: "higher values are preferred when multiple webhooks match the same payload"
+    field :matches,  :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+    field :user_id,  :id, description: "user this webhook runs as"
 
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
     field :webhook,       :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
     field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
     field :user,          :user, resolve: dataloader(User), description: "the user who created this webhook"
+
+    timestamps()
+  end
+
+  object :workbench_chatbot do
+    field :id,      non_null(:string), description: "the id of this chatbot binding"
+    field :channel, non_null(:string), description: "external channel identifier (globally unique)"
+    field :prompt,  :string, description: "optional prompt text applied when this chatbot runs"
+    field :user_id, :id, description: "user this chatbot runs as"
+
+    field :workbench,       :workbench, resolve: dataloader(Deployments), description: "the workbench this chatbot is bound to"
+    field :chat_connection, :chat_provider_connection, resolve: dataloader(Deployments), description: "the chat provider connection"
+    field :user,            :user, resolve: dataloader(User), description: "the user who created this binding"
 
     timestamps()
   end
@@ -691,6 +810,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :configuration,    :workbench_tool_configuration, description: "tool configuration"
     field :mcp_server,       :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
     field :cloud_connection, :cloud_connection, resolve: dataloader(Deployments), description: "the cloud connection bound to this tool"
+    field :scm_connection,   :scm_connection, resolve: dataloader(Deployments), description: "the SCM connection bound to this tool"
 
     timestamps()
   end
@@ -708,9 +828,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
     field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
+    field :slack,     :workbench_tool_slack_connection, description: "slack connection (no secrets)"
+    field :teams,     :workbench_tool_teams_connection, description: "microsoft teams / graph connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
+    field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
+    field :bitbucket, :workbench_tool_bitbucket_connection, description: "bitbucket cloud connection (no secrets)"
+    field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection,
+      description: "bitbucket data center connection (no secrets)"
+    field :azure_devops, :workbench_tool_azure_devops_connection, description: "azure devops connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -774,6 +901,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "static MCP URL for Linear"
   end
 
+  object :workbench_tool_slack_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.slack.com/mcp"} end,
+      description: "Slack hosted MCP endpoint (credentials never exposed)"
+  end
+
+  object :workbench_tool_teams_connection do
+    field :client_id, :string, description: "microsoft entra application (client) id"
+    field :tenant_id, :string, description: "microsoft entra tenant (directory) id (client secret never exposed)"
+  end
+
   object :workbench_tool_atlassian_connection do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.atlassian.com/v1/mcp"} end,
       description: "static MCP URL for Atlassian/Jira (credentials never exposed)"
@@ -786,11 +923,37 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_github_connection do
-    field :url, non_null(:string), description: "github MCP URL (credentials never exposed)", resolve: fn
-      %{url: url}, _ when is_binary(url) -> {:ok, url}
-      _, _ -> {:ok, "https://api.githubcopilot.com"}
-    end
-    field :toolset, :string, description: "configured github MCP toolset"
+    field :url, non_null(:string),
+      description: "GitHub REST API base URL in use (defaults to https://api.github.com/)",
+      resolve: fn
+        %{url: url}, _ when is_binary(url) -> {:ok, url}
+        _, _ -> {:ok, "https://api.github.com/"}
+      end
+
+    field :toolset, :string, description: "configured native GitHub tool subset"
+
+    field :app_id, :string,
+      description: "GitHub App ID when using app authentication (secrets such as private keys are never exposed)"
+
+    field :installation_id, :string,
+      description: "GitHub App installation ID when using app authentication"
+  end
+
+  object :workbench_tool_gitlab_connection do
+    field :url, :string, description: "GitLab API base URL in use (tokens never exposed)"
+  end
+
+  object :workbench_tool_bitbucket_connection do
+    field :url, :string, description: "Bitbucket Cloud API base URL when set (tokens never exposed)"
+  end
+
+  object :workbench_tool_bitbucket_datacenter_connection do
+    field :url, :string, description: "Bitbucket Data Center REST API base URL (tokens never exposed)"
+  end
+
+  object :workbench_tool_azure_devops_connection do
+    field :url, :string,
+      description: "Azure DevOps REST API root in use (PAT never exposed); defaults to https://dev.azure.com when unset."
   end
 
   object :workbench_tool_http_configuration do
@@ -807,7 +970,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_progress do
-    field :activity_id, non_null(:id)
+    field :activity_id, :id
     field :text,        :string
     field :tool,        :string
     field :arguments,   :map
@@ -828,6 +991,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_skill
   connection node_type: :workbench_eval_result
   connection node_type: :workbench_webhook
+  connection node_type: :workbench_chatbot
 
   delta :workbench_job
   delta :workbench_job_activity
@@ -854,6 +1018,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :name, :string
 
       resolve &Deployments.workbench_tool/2
+    end
+
+    field :workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_chatbot/2
     end
 
     connection field :workbenches, node_type: :workbench do
@@ -1250,6 +1424,38 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_webhook/2
+    end
+
+    field :create_workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to bind a chatbot for"
+      arg :attributes, non_null(:workbench_chatbot_attributes)
+
+      resolve &Deployments.create_workbench_chatbot/2
+    end
+
+    field :update_workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_chatbot_attributes)
+
+      resolve &Deployments.update_workbench_chatbot/2
+    end
+
+    field :delete_workbench_chatbot, :workbench_chatbot do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_chatbot/2
     end
 
     @desc "Creates a new workbench job. Requires read access to the workbench."

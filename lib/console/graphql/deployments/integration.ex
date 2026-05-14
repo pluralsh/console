@@ -9,9 +9,11 @@ defmodule Console.GraphQl.Deployments.Integration do
 
   @desc "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
   input_object :chat_provider_connection_attributes do
-    field :name, non_null(:string), description: "the name of this chat connection"
-    field :type, non_null(:chat_provider_connection_type), description: "the type of this chat connection"
-    field :configuration, non_null(:chat_provider_connection_configuration_attributes)
+    field :name,           non_null(:string), description: "the name of this chat connection"
+    field :type,           non_null(:chat_provider_connection_type), description: "the type of this chat connection"
+    field :configuration,  non_null(:chat_provider_connection_configuration_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes), description: "users who can read this chat connection"
+    field :write_bindings, list_of(:policy_binding_attributes), description: "users who can modify this chat connection"
   end
 
   input_object :chat_provider_connection_configuration_attributes do
@@ -26,10 +28,12 @@ defmodule Console.GraphQl.Deployments.Integration do
 
   @desc "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
   object :chat_provider_connection do
-    field :id, non_null(:id)
-    field :name, non_null(:string), description: "the name of this chat connection"
-    field :type, non_null(:chat_provider_connection_type), description: "the type of this chat connection"
-    field :configuration, non_null(:chat_provider_connection_configuration), description: "the configuration for this chat connection"
+    field :id,             non_null(:id)
+    field :name,           non_null(:string), description: "the name of this chat connection"
+    field :type,           non_null(:chat_provider_connection_type), description: "the type of this chat connection"
+    field :configuration,  non_null(:chat_provider_connection_configuration), description: "the configuration for this chat connection"
+    field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy bindings for this chat connection"
+    field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy bindings for this chat connection"
 
     timestamps()
   end
@@ -46,19 +50,19 @@ defmodule Console.GraphQl.Deployments.Integration do
 
   @desc "input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
   input_object :issue_webhook_attributes do
-    field :provider, :issue_webhook_provider
-    field :name,     :string
-    field :secret,   :string
+    field :provider,       :issue_webhook_provider
+    field :name,           :string
+    field :secret,         :string
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 
   @desc "A webhook receiver for an issue provider like Linear"
   object :issue_webhook do
-    field :id,       non_null(:id)
-    field :provider, non_null(:issue_webhook_provider)
-    field :name,     non_null(:string)
-    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy bindings for this webhook"
+    field :id,             non_null(:id)
+    field :provider,       non_null(:issue_webhook_provider)
+    field :name,           non_null(:string)
+    field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy bindings for this webhook"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy bindings for this webhook"
 
     field :url, non_null(:string),

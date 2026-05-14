@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.WorkbenchJob
   alias Console.AI.Workbench.Environment
-  alias Console.AI.Tools.Workbench.{Skills, Skill, Plan, Subagents}
+  alias Console.AI.Tools.Workbench.{Skills, Skill, Plan, Subagents, Scratchpad}
 
   @system Console.priv_file!("prompts/workbench/plan.md")
 
@@ -35,6 +35,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
     [
       %Skills{skills: Environment.subagent_skills(skills, :plan)},
       %Skill{skills: Environment.subagent_skills(skills, :plan)},
+      Scratchpad,
       %Subagents{
         subagents: Environment.subagents(job),
         categories: Environment.categories(job)

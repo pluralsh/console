@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "Updates an existing Teams channel message body (Graph PATCH .../messages/{message-id}).",
+  "properties": {
+    "team_id": {
+      "type": "string",
+      "description": "Team (group) id."
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Channel id."
+    },
+    "message_id": {
+      "type": "string",
+      "description": "Message id from list or post response."
+    },
+    "text": {
+      "type": "string",
+      "description": "New plain-text body."
+    }
+  },
+  "required": ["team_id", "channel_id", "message_id", "text"],
+  "additionalProperties": false
+}

@@ -24,6 +24,8 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> Map.new()
   end
 
+  def cont_msg(), do: "looks like we aren't done, let's continue and if you're done just call subagent_result to wrap up"
+
   def stream_callbacks(%WorkbenchJob{id: id}) do
     Stream.stream_callbacks(
       on_result: &publish_absinthe(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
@@ -57,7 +59,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
     Enum.reverse(messages)
     |> Enum.find(&match?({:assistant, content} when is_binary(content), &1))
     |> case do
-      {:assistant, content} when is_binary(content) -> mapper.(content)
+      {:assistant, content} when is_binary(content) and byte_size(content) > 0 -> mapper.(content)
       _ -> mapper.("no reason given for failure")
     end
   end

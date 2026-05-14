@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -18,8 +18,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/controller/v1"
-	internallog "github.com/pluralsh/console/godeployment-operator/pkg/log"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/controller/v1"
+	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 type Controller struct {

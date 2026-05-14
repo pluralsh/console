@@ -6,7 +6,7 @@ import (
 	pollycache "github.com/pluralsh/console/go/polly/cache"
 	"github.com/samber/lo"
 
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 const defaultWipeCacheInterval = 30 * time.Minute

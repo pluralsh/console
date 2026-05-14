@@ -28,6 +28,7 @@ import {
   StickyActionsFooterSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
+import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
 import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
@@ -35,10 +36,63 @@ import {
   ConfigForToolType,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
+  getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
+  scmTypeForWorkbenchTool,
   TOOL_TYPE_TO_CATEGORIES,
 } from './workbenchToolsUtils'
 import { Link } from 'react-router-dom'
+
+function githubWorkbenchAuthIsValid(
+  gh: WorkbenchToolConfigurationAttributes['github'] | null | undefined,
+  persistedApp: { appId?: Nullable<string>; installationId?: Nullable<string> }
+): boolean {
+  if (!gh) return false
+  const pat = (gh.accessToken ?? '').trim()
+  if (pat.length > 0) return true
+
+  const appId = (gh.appId ?? '').trim()
+  const installationId = (gh.installationId ?? '').trim()
+  const privateKey = (gh.privateKey ?? '').trim()
+  if (appId && installationId && privateKey) return true
+
+  const persistedAppId = (persistedApp.appId ?? '').trim()
+  const persistedInstallationId = (persistedApp.installationId ?? '').trim()
+  if (
+    appId &&
+    installationId &&
+    persistedAppId &&
+    persistedInstallationId &&
+    appId === persistedAppId &&
+    installationId === persistedInstallationId
+  ) {
+    return true
+  }
+
+  return false
+}
+
+function teamsConfigurationIsComplete(
+  teams: WorkbenchToolConfigurationAttributes['teams'] | null | undefined
+): boolean {
+  const clientId = (teams?.clientId ?? '').trim()
+  const tenantId = (teams?.tenantId ?? '').trim()
+  const clientSecret = (teams?.clientSecret ?? '').trim()
+  return clientId.length > 0 && tenantId.length > 0 && clientSecret.length > 0
+}
+
+function scmTokenIsSet(token: string | null | undefined): boolean {
+  return (token ?? '').trim().length > 0
+}
+
+function bitbucketDatacenterConfigurationIsComplete(
+  c:
+    | WorkbenchToolConfigurationAttributes['bitbucketDatacenter']
+    | null
+    | undefined
+): boolean {
+  return (c?.url ?? '').trim().length > 0 && scmTokenIsSet(c?.token)
+}
 
 export type WorkbenchToolFormState = Omit<
   Pick<
@@ -47,6 +101,7 @@ export type WorkbenchToolFormState = Omit<
     | 'categories'
     | 'configuration'
     | 'cloudConnectionId'
+    | 'scmConnectionId'
     | 'readBindings'
     | 'writeBindings'
   >,
@@ -96,15 +151,40 @@ export function WorkbenchToolForm({
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
     cloudConnectionId: tool?.cloudConnection?.id,
+    scmConnectionId: tool?.scmConnection?.id,
     readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
   const stepIndex = TOOL_FORM_STEPS.findIndex((s) => s.key === currentStep)
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
-  const allowSave =
-    hasUpdates &&
+  const hasRegisteredScm = Boolean(state.scmConnectionId)
+  const scmType = scmTypeForWorkbenchTool(type)
+  const configurationStepComplete =
     !!state.name.trim() &&
-    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId)
+    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId) &&
+    (type !== WorkbenchToolType.Github ||
+      hasRegisteredScm ||
+      githubWorkbenchAuthIsValid(state.configuration?.github, {
+        appId: tool?.configuration?.github?.appId,
+        installationId: tool?.configuration?.github?.installationId,
+      })) &&
+    (type !== WorkbenchToolType.Gitlab ||
+      hasRegisteredScm ||
+      scmTokenIsSet(state.configuration?.gitlab?.token)) &&
+    (type !== WorkbenchToolType.Bitbucket ||
+      hasRegisteredScm ||
+      scmTokenIsSet(state.configuration?.bitbucket?.token)) &&
+    (type !== WorkbenchToolType.BitbucketDatacenter ||
+      hasRegisteredScm ||
+      bitbucketDatacenterConfigurationIsComplete(
+        state.configuration?.bitbucketDatacenter
+      )) &&
+    (type !== WorkbenchToolType.AzureDevops ||
+      hasRegisteredScm ||
+      scmTokenIsSet(state.configuration?.azureDevops?.token)) &&
+    (type !== WorkbenchToolType.Teams ||
+      teamsConfigurationIsComplete(state.configuration?.teams))
+  const allowSave = hasUpdates && configurationStepComplete
   return (
     <FormCardSC>
       <Flex css={{ paddingTop: 2 }}>
@@ -135,11 +215,21 @@ export function WorkbenchToolForm({
               onChange={(id) => update({ cloudConnectionId: id })}
             />
           ) : (
-            <WorkbenchToolFormFields
-              type={type}
-              state={state}
-              update={update}
-            />
+            <>
+              {scmType ? (
+                <ScmConnectionWorkbenchSelect
+                  scmType={scmType}
+                  toolLabel={getWorkbenchToolLabel(type)}
+                  selectedId={state.scmConnectionId ?? null}
+                  onChange={(id) => update({ scmConnectionId: id })}
+                />
+              ) : null}
+              <WorkbenchToolFormFields
+                type={type}
+                state={state}
+                update={update}
+              />
+            </>
           )}
           {categories.length > 1 && (
             <FormField label="Allowed capabilities (must select at least one)">
@@ -206,7 +296,11 @@ export function WorkbenchToolForm({
             {hasUpdates ? 'Cancel' : 'Back'}
           </Button>
           <Button
-            disabled={currentStep === 'configuration' ? false : !allowSave}
+            disabled={
+              currentStep === 'configuration'
+                ? !configurationStepComplete
+                : !allowSave
+            }
             loading={currentStep === 'access-policy' && mutationLoading}
             onClick={() => {
               if (currentStep === 'configuration') {
@@ -344,15 +438,31 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),
   [WorkbenchToolType.Github]: (config) => {
-    const { url, toolset } = config?.github ?? {}
+    const { url, toolset, appId, installationId } = config?.github ?? {}
     return {
       github: {
         url: url ?? '',
         accessToken: '',
         toolset: toolset ?? undefined,
+        appId: appId ?? undefined,
+        installationId: installationId ?? undefined,
+        privateKey: undefined,
       },
     }
   },
+  [WorkbenchToolType.Gitlab]: (config) => {
+    const { url } = config?.gitlab ?? {}
+    return { gitlab: { url: url ?? undefined, token: '' } }
+  },
+  [WorkbenchToolType.Bitbucket]: (config) => {
+    const { url } = config?.bitbucket ?? {}
+    return { bitbucket: { url: url ?? undefined, token: '' } }
+  },
+  [WorkbenchToolType.BitbucketDatacenter]: (config) => {
+    const { url } = config?.bitbucketDatacenter ?? {}
+    return { bitbucketDatacenter: { url: url ?? '', token: '' } }
+  },
+  [WorkbenchToolType.AzureDevops]: () => ({ azureDevops: { token: '' } }),
   [WorkbenchToolType.Splunk]: (config) => {
     const { url, username } = config?.splunk ?? {}
     return { splunk: { url: url ?? '', username } }
@@ -390,6 +500,17 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { dynatrace: { url: url ?? '', platformToken: '' } }
   },
   [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
+  [WorkbenchToolType.Slack]: () => ({ slack: { botToken: '' } }),
+  [WorkbenchToolType.Teams]: (config) => {
+    const { clientId, tenantId } = config?.teams ?? {}
+    return {
+      teams: {
+        clientId: clientId ?? '',
+        tenantId: tenantId ?? '',
+        clientSecret: '',
+      },
+    }
+  },
 }
 
 function sanitizeInitialConfiguration(

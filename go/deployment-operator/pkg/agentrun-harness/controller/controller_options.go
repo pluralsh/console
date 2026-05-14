@@ -1,7 +1,7 @@
 package controller
 
 import (
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 func WithAgentRun(id string) Option {

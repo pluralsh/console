@@ -14,7 +14,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 )
 
 type TestReconciler struct{}

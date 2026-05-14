@@ -17,6 +17,9 @@ const (
 	EndpointResponses       = "/openai/v1/responses"
 	EndpointChatCompletions = "/v1/chat/completions"
 	EndpointEmbeddings      = "/openai/v1/embeddings"
+	// Whisper / speech-to-text (OpenAI provider only; proxied to upstream /v1/audio/*).
+	EndpointAudioTranscriptions = "/openai/v1/audio/transcriptions"
+	EndpointAudioTranslations   = "/openai/v1/audio/translations"
 )
 
 type ChatCompletionRequest struct {

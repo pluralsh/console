@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Get the latest published release for a repository.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    }
+  },
+  "required": ["owner", "repo"],
+  "additionalProperties": false
+}

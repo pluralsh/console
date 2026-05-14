@@ -6,7 +6,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/pluralsh/console/go/client"
 
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 type ID string

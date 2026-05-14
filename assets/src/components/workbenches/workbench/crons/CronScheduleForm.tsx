@@ -4,7 +4,6 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input,
   Input2,
   ReturnIcon,
   useSetBreadcrumbs,
@@ -31,6 +30,9 @@ import {
   WORKBENCHES_CRON_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
+import { useLogin } from 'components/contexts'
+import { WorkbenchPromptRichInput } from '../WorkbenchPromptRichInput'
+import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import {
   FormCardSC,
@@ -49,16 +51,19 @@ const CRON_SHORTCUTS_URL =
 type CronScheduleFormState = {
   prompt: string
   crontab: string
+  userId: string
 }
 
 export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const navigate = useNavigate()
   const theme = useTheme()
+  const { me } = useLogin()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const cronId = useParams()[WORKBENCHES_CRON_PARAM_ID]
-  const [formState, setFormState] = useState<CronScheduleFormState>(
+  const [formState, setFormState] = useState<CronScheduleFormState>(() =>
     getInitialFormState()
   )
+  const [promptSyncKey, bumpPromptSyncKey] = useState(0)
   const { popToast } = useSimpleToast()
 
   const {
@@ -81,6 +86,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
       if (!loadedCron) return
       setFormState(getInitialFormState(loadedCron))
+      bumpPromptSyncKey((k) => k + 1)
     },
   })
 
@@ -89,6 +95,16 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   }, [cronId, fetchCron, mode])
 
   const cron = mode === 'edit' ? (cronData?.workbenchCron ?? null) : null
+
+  const effectiveUserId = useMemo(
+    () => formState.userId || (mode === 'create' ? (me?.id ?? '') : ''),
+    [formState.userId, mode, me?.id]
+  )
+
+  const normalizedFormState = useMemo(
+    () => ({ ...formState, userId: effectiveUserId }),
+    [formState, effectiveUserId]
+  )
 
   const preview = useMemo(
     () => buildCronPreview(formState.crontab),
@@ -100,9 +116,16 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const isCronValid = !!crontab && validateCronExpression(crontab)
   const hasCronError = !!crontab && !isCronValid
 
+  const baselineState = getInitialFormState(
+    cron ?? undefined,
+    mode === 'create' ? me?.id : undefined
+  )
   const canSave =
-    !!prompt && isCronValid && !isEqual(formState, getInitialFormState(cron))
-  const attributes = { crontab, prompt }
+    !!prompt &&
+    !!effectiveUserId &&
+    isCronValid &&
+    !isEqual(normalizedFormState, baselineState)
+  const attributes = { crontab, prompt, userId: effectiveUserId }
 
   const handleCompleted = () => {
     navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
@@ -213,19 +236,26 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                 infoTooltip="The instruction your Workbench agent will follow each time this job runs."
                 label="Prompt"
               >
-                <Input
-                  multiline
-                  minRows={3}
-                  maxRows={6}
-                  value={formState.prompt}
-                  onChange={(e) => {
-                    const nextPrompt = e.target.value
-
-                    setFormState((prev) => ({ ...prev, prompt: nextPrompt }))
-                  }}
-                  placeholder="Provide any task for your workbench to handle.  Well-crafted tasks are concise and specific."
+                <WorkbenchPromptRichInput
+                  syncKey={`cron-prompt-${promptSyncKey}`}
+                  workbenchId={workbenchId}
+                  prompt={formState.prompt}
+                  disabled={isSaving}
+                  onPromptChange={(next) =>
+                    setFormState((prev) => ({ ...prev, prompt: next }))
+                  }
+                  placeholder="Provide any task for your workbench to handle. Well-crafted tasks are concise and specific. Type @ for clusters, services, and stacks, or / for skills."
                 />
               </FormField>
+              <WorkbenchAccessibleUserSelect
+                key={workbenchId}
+                workbenchId={workbenchId}
+                selectedUserId={effectiveUserId}
+                onSelectionChange={(userId) =>
+                  setFormState((prev) => ({ ...prev, userId }))
+                }
+                disabled={isSaving}
+              />
               <Flex
                 align="flex-start"
                 gap="small"
@@ -357,10 +387,12 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function getInitialFormState(
-  cron?: Nullable<WorkbenchCronFragment>
+  cron?: Nullable<WorkbenchCronFragment>,
+  defaultUserIdForCreate?: Nullable<string>
 ): CronScheduleFormState {
   return {
     prompt: cron?.prompt ?? '',
     crontab: cron?.crontab ?? '',
+    userId: cron?.userId ?? defaultUserIdForCreate ?? '',
   }
 }

@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "description": "Add an emoji reaction to an issue comment, pull request review comment, or repository commit comment (same owner/repo/comment_id; comment_type selects the GitHub reactions endpoint).",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment id for the chosen comment_type (issue comment id, pull review comment id, or commit comment id)."
+    },
+    "content": {
+      "type": "string",
+      "enum": [
+        "+1",
+        "-1",
+        "laugh",
+        "confused",
+        "heart",
+        "hooray",
+        "rocket",
+        "eyes"
+      ],
+      "description": "Reaction type per GitHub Reactions API."
+    },
+    "comment_type": {
+      "type": "string",
+      "enum": ["issue_comment", "pull_request_review", "commit"],
+      "description": "issue_comment: comment on an issue or PR conversation thread; pull_request_review: inline review comment on a diff; commit: comment on a commit. Each uses a distinct comment id namespace. Defaults to pull_request_review."
+    }
+  },
+  "required": ["owner", "repo", "comment_id", "content"],
+  "additionalProperties": false
+}

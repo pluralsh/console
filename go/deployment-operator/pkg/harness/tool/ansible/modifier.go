@@ -6,10 +6,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 )
 
 func (in *PassthroughModifier) WriteCloser() []io.WriteCloser {

@@ -3,8 +3,8 @@ package lua
 import (
 	"fmt"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/polly/luautils"
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
 	lua "github.com/yuin/gopher-lua"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

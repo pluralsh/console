@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 )
 
 const (

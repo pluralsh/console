@@ -22,7 +22,8 @@ defmodule Console.Deployments.Git do
     HelmRepository,
     Observer,
     Catalog,
-    PrGovernance
+    PrGovernance,
+    WorkbenchTool
   }
 
   require Logger
@@ -274,12 +275,25 @@ defmodule Console.Deployments.Git do
   def register_github_app(name, installation_id, %User{} = user) do
     case {Console.conf(:github_app_id), Console.conf(:github_app_pem)} do
       {app_id, pem} when is_binary(app_id) and is_binary(pem) ->
-        upsert_scm_connection(%{
-          type: :github,
-          name: name,
-          token: nil,
-          github: %{app_id: app_id, installation_id: installation_id, private_key: pem}
-        }, user)
+        start_transaction()
+        |> add_operation(:conn, fn _ ->
+          upsert_scm_connection(%{
+            type: :github,
+            name: name,
+            token: nil,
+            github: %{app_id: app_id, installation_id: installation_id, private_key: pem}
+          }, user)
+        end)
+        |> add_operation(:tool, fn _ ->
+          %WorkbenchTool{}
+          |> WorkbenchTool.changeset(%{
+            name: name,
+            tool: :github,
+            configuration: %{github: %{app_id: app_id, installation_id: installation_id, private_key: pem}}
+          })
+          |> Repo.insert()
+        end)
+        |> execute(extract: :conn)
       _ -> {:error, "you need to configure the github app id and pem in your environment before using this api"}
     end
   end

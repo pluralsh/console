@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "Create a new note (comment) on a GitLab merge request or issue (POST notes API).",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project ID or URL-encoded path."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["merge_request", "issue"],
+      "description": "Whether the note is on a merge_request or issue."
+    },
+    "iid": {
+      "type": "integer",
+      "description": "Merge request IID or issue IID (from the URL)."
+    },
+    "body": {
+      "type": "string",
+      "description": "Note body (GitLab Flavored Markdown supported)."
+    }
+  },
+  "required": ["project", "resource", "iid", "body"],
+  "additionalProperties": false
+}

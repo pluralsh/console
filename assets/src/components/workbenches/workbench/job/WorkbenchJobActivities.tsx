@@ -1,8 +1,6 @@
 import { Accordion, Flex } from '@pluralsh/design-system'
 import {
   useWorkbenchJobActivitiesQuery,
-  WorkbenchJobActivityFragment,
-  WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
@@ -15,9 +13,17 @@ import { VirtualList } from 'components/utils/VirtualList'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { useWorkbenchJobStreams } from './useWorkbenchJobStreams'
-import { isJobRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
+import {
+  isJobRunning,
+  WorkbenchJobActivity,
+  WorkbenchJobJobLevelThinking,
+} from './WorkbenchJobActivity'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
+import {
+  defaultClosedIds,
+  isActivityTerminal,
+} from './workbenchJobActivityCollapse'
 
 export const ACTIVITY_GAP = 'medium' as const
 
@@ -41,7 +47,10 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     [activities, closedIds]
   )
 
-  const textStreamMap = useWorkbenchJobStreams(jobId, setClosedIds)
+  const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(
+    jobId,
+    setClosedIds
+  )
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent
@@ -96,13 +105,20 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
             }
             bottomContent={
               <>
+                {jobLevelThinking.length > 0 && (
+                  <WorkbenchJobJobLevelThinking
+                    items={jobLevelThinking}
+                    jobRunning={isJobRunning(job?.status)}
+                  />
+                )}
                 {textStreamMap['none'] && (
                   <SimplifiedMarkdown text={textStreamMap['none']} />
                 )}
                 {isJobRunning(job?.status) &&
                   activities.every(({ status }) =>
                     isActivityTerminal(status)
-                  ) && (
+                  ) &&
+                  jobLevelThinking.length === 0 && (
                     <AILoadingText
                       jobId={jobId}
                       marginTop={spacing.small}
@@ -147,31 +163,3 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   minHeight: 0,
   overflow: 'hidden',
 }))
-
-const lastActivityId = (
-  activities: WorkbenchJobActivityFragment[]
-): string | null => {
-  const last = activities.findLast(
-    (a) => a.type !== WorkbenchJobActivityType.Memo
-  )
-  if (last) return last.id
-  return null
-}
-
-const defaultClosedIds = (
-  activities: WorkbenchJobActivityFragment[]
-): Set<string> => {
-  const lastId = lastActivityId(activities)
-
-  return new Set(
-    activities
-      .filter((a) => a.id !== lastId && isActivityTerminal(a.status))
-      .map((a) => a.id)
-  )
-}
-
-export const isActivityTerminal = (
-  status: Nullable<WorkbenchJobActivityStatus>
-) =>
-  status === WorkbenchJobActivityStatus.Successful ||
-  status === WorkbenchJobActivityStatus.Failed

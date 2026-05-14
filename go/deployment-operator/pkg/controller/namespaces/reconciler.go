@@ -18,11 +18,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	clienterrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/websocket"
+	clienterrors "github.com/pluralsh/console/go/deployment-operator/internal/errors"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
 
 const (

@@ -87,13 +87,6 @@ export type WorkbenchFormState = Omit<
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
-  /** Bot user from the server when editing; omitted from mutation input. */
-  botUser: {
-    id: string
-    name: string
-    email: string
-    profile?: string | null
-  } | null
   workbenchSkills: WorkbenchSkillAttributes[]
 }
 
@@ -453,13 +446,7 @@ const validateForm = (formState: WorkbenchFormState) =>
 
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
   const sanitizedState = cloneDeep(deepOmitFalsy(state))
-  const {
-    name,
-    readBindings: r,
-    writeBindings: w,
-    botUser: _botUser,
-    ...rest
-  } = sanitizedState
+  const { name, readBindings: r, writeBindings: w, ...rest } = sanitizedState
 
   // Keep explicit empty list so "delete all skills" is persisted.
   rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
@@ -486,7 +473,6 @@ function sanitizeInitialForm({
   tools,
   readBindings,
   writeBindings,
-  botUser,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
   const { kubernetes, services, stacks, podLogs, vulnerabilities } =
@@ -513,14 +499,6 @@ function sanitizeInitialForm({
     description,
     agentRuntimeId: agentRuntime?.id ?? null,
     repositoryId: repository?.id ?? null,
-    botUser: botUser
-      ? {
-          id: botUser.id,
-          name: botUser.name,
-          email: botUser.email,
-          profile: botUser.profile,
-        }
-      : null,
     overrideBotUser: false,
     configuration: {
       infrastructure: {

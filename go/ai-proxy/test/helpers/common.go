@@ -51,6 +51,16 @@ func SetupServer() (*httptest.Server, error) {
 		router.HandleFunc(openai.EndpointChat, op.Proxy())
 		router.HandleFunc(openai.EndpointResponses, op.Proxy())
 		router.HandleFunc(openai.EndpointEmbeddings, ep.Proxy())
+
+		if args.Provider() == api.ProviderOpenAI {
+			aud, err := proxy.NewOpenAIAudioProxy(args.Provider(), args.ProviderHost(), args.ProviderAwsRegion(), tokenRotator)
+			if err != nil {
+				klog.ErrorS(err, "Could not create OpenAI audio proxy")
+				os.Exit(1)
+			}
+			router.HandleFunc(openai.EndpointAudioTranscriptions, aud.Proxy())
+			router.HandleFunc(openai.EndpointAudioTranslations, aud.Proxy())
+		}
 	}
 
 	return httptest.NewServer(router), nil

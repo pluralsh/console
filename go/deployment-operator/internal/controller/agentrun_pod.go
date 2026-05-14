@@ -10,9 +10,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 )
 
 const (

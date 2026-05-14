@@ -11,12 +11,12 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
-	securityv1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
-	tfapi "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/terraform/api"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+	securityv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/security/v1"
+	tfapi "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/terraform/api"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 // State implements [v1.Tool] interface.

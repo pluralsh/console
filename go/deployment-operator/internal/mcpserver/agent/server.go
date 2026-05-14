@@ -4,9 +4,9 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/mcpserver/agent/tool"
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 // Server wraps the mcp server with Plural credentials

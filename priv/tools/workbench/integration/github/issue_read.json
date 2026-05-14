@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "description": "Read issue metadata, comments, labels only, or sub-issues depending on method.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "issue_number": {
+      "type": "integer",
+      "description": "Issue number."
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "get",
+        "get_comments",
+        "get_labels",
+        "get_sub_issues"
+      ],
+      "description": "get: full issue; get_comments: issue comments; get_labels: label list; get_sub_issues: sub-issues (GitHub API)."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number for paginated methods (e.g. get_comments, get_sub_issues)."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page for paginated methods."
+    },
+    "after": {
+      "type": "string",
+      "description": "Cursor for get_sub_issues pagination (GitHub API)."
+    }
+  },
+  "required": ["owner", "repo", "issue_number", "method"],
+  "additionalProperties": false
+}

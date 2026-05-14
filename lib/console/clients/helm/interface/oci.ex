@@ -2,10 +2,10 @@ defmodule Console.Helm.Interface.OCI do
   alias Console.OCI.{Client, Auth}
   alias Console.Schema.{HelmRepository}
 
-  defstruct [:client, :repo, :authed]
+  defstruct [:client, :repo, :authed, :tags, :fetched_at]
 
   def client(%HelmRepository{} = repo) do
-    %__MODULE__{client: Client.new(repo.url), repo: repo}
+    %__MODULE__{client: Client.new(repo.url), tags: %{}, repo: repo, fetched_at: Timex.now() |> Timex.shift(minutes: -10)}
   end
 
   def authenticate(%__MODULE__{authed: true} = client), do: {:ok, client}
@@ -22,12 +22,12 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
 
   def index(_), do: {:ok, %Index{}}
 
-  def chart(oci, %Index{}, chart, vsn) do
+  def chart(%OCI{client: original} = oci, %Index{}, chart, vsn) do
     with {:auth, {:ok, %{client: client} = oci}} <- {:auth, OCI.authenticate(oci)},
-         client = Client.append_repo(client, chart),
-         {:charts, {:ok, %Chart{} = chart}} <- {:charts, get_chart(client, chart, vsn)},
-         {:pull, {:ok, digest}} <- {:pull, get_digest(client, chart.version)} do
-      {:ok, oci, {chart.name, digest}, digest}
+         chart_client = Client.append_repo(client, chart),
+         {:charts, {:ok, oci, %Chart{} = chart}} <- {:charts, get_chart(%{oci | client: chart_client}, chart, vsn)},
+         {:pull, {:ok, digest}} <- {:pull, get_digest(chart_client, chart.version)} do
+      {:ok, %{oci | client: original}, {chart.name, digest}, digest}
     else
       {:auth, {:error, err}} -> {:error, {:auth, "failed to authenticate to oci: #{inspect(err)}"}}
       {:charts, {:error, err}} -> {:error, {:auth, "error fetching chart #{chart}: #{err}"}}
@@ -40,10 +40,13 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
     |> Client.download_blob(digest, to)
   end
 
-  defp get_charts(client, chart) do
-    case Client.tags(client) do
-      {:ok, %{tags: tags}} ->
-        {:ok, Enum.map(tags, & %Chart{version: &1, name: chart})}
+  defp get_charts(%OCI{client: client, fetched_at: fetched_at, tags: tc} = oci, chart) do
+    expired = Timex.now() |> Timex.shift(minutes: -5)
+    with true <- Timex.before?(fetched_at, expired),
+         {:ok, %{tags: tags}} <- Client.tags(client) do
+      {:ok, %{oci | tags: Map.put(tc, chart, tags), fetched_at: Timex.now()}, Enum.map(tags, & %Chart{version: &1, name: chart})}
+    else
+      false -> {:ok, oci, Enum.map(tc[chart] || [], & %Chart{version: &1, name: chart})}
       err -> err
     end
   end
@@ -60,11 +63,11 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
 
   defp get_chart(client, chart, vsn) do
     with true <- has_wildcard?(vsn),
-         {:charts, {:ok, charts}} <- {:charts, get_charts(client, chart)},
+         {:charts, {:ok, client, charts}} <- {:charts, get_charts(client, chart)},
          {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)} do
-      {:ok, chart}
+      {:ok, client, chart}
     else
-      false -> {:ok, %Chart{name: chart, version: vsn}}
+      false -> {:ok, client, %Chart{name: chart, version: vsn}}
       {:charts, _} -> {:error, "could not find chart #{chart}"}
       {:version, _} -> {:error, "could not find version #{vsn}"}
     end

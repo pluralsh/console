@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Get a git tag reference (refs/tags/...) for a repository.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "tag": {
+      "type": "string",
+      "description": "Tag name (without refs/tags/ prefix)."
+    }
+  },
+  "required": ["owner", "repo", "tag"],
+  "additionalProperties": false
+}

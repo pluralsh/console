@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/api"
 	"github.com/pluralsh/console/go/polly/algorithms"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/api"
 	"github.com/samber/lo"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
 
 func createComponentAttributes(uid string, parentUID *string, option ...CreateComponentAttributesOption) client.ComponentChildAttributes {

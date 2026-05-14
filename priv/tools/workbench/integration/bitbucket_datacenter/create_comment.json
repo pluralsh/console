@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Post a comment on a Bitbucket Data Center pull request or repository issue (REST POST .../comments). Optional parent_comment_id creates a reply thread.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Repository selector as PROJECT_KEY/repository_slug."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "issue"],
+      "description": "Whether the comment is on a pull_request or issue."
+    },
+    "resource_id": {
+      "type": "integer",
+      "description": "Pull request id or issue id (same numeric id used in REST paths for that resource)."
+    },
+    "body": {
+      "type": "string",
+      "description": "Comment text (Bitbucket wiki/markup as configured on the server)."
+    },
+    "parent_comment_id": {
+      "type": "integer",
+      "description": "Optional parent comment id to post a reply (pull requests and issues when supported)."
+    }
+  },
+  "required": ["project", "resource", "resource_id", "body"],
+  "additionalProperties": false
+}

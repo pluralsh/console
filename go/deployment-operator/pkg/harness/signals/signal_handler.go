@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	internalerrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
+	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 )
 
 var (

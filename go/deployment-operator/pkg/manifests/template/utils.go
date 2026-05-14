@@ -5,7 +5,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 )
 
 func isTemplated(svc *console.ServiceDeploymentForAgent) bool {

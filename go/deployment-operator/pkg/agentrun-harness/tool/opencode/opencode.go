@@ -9,13 +9,13 @@ import (
 	"path/filepath"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 func (in *Opencode) Run(ctx context.Context, options ...exec.Option) {

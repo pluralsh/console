@@ -12,5 +12,5 @@ defmodule Console.AI.Worker do
     |> Task.Supervisor.async(Memoizer, :generate, [struct])
   end
 
-  def await(task, timeout \\ 300_000), do: Task.await(task, timeout)
+  def await(task, timeout \\ 1_200_000), do: Task.await(task, timeout)
 end

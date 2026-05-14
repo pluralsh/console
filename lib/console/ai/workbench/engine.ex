@@ -10,6 +10,7 @@ defmodule Console.AI.Workbench.Engine do
   3. A complete tool is used to mark the conclusion of the job.
   """
   import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
+  import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -39,7 +40,11 @@ defmodule Console.AI.Workbench.Engine do
   require EEx
   require Logger
 
-  defstruct [:job, :user, :environment, activities: [], iterations: 0, max: 200]
+  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200]
+
+  defmodule Acc do
+    defstruct [messages: [], activities: []]
+  end
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job = preload_job(job)
@@ -63,16 +68,20 @@ defmodule Console.AI.Workbench.Engine do
     # with {:ok, job} <- SA.Plan.run(job, engine.environment) do
     #   loop(%{engine | activities: list_activities(job)})
     # end
+    Console.AI.Provider.external_errors()
     loop(%{engine | activities: list_activities(job)})
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
     when iter >= max, do: Workbenches.fail_job("Max iterations reached", job)
-  defp loop(%__MODULE__{job: job, environment: environment, activities: activities} = engine) do
-    messages = Enum.map(activities, &Message.to_message/1)
+  defp loop(%__MODULE__{job: job, environment: environment, activities: activities, messages: msgs} = engine) do
+    messages = case msgs do
+      [_ | _] = msgs -> Enum.map(msgs, &Message.to_message/1)
+      _ -> Enum.map(activities, &Message.to_message/1)
+    end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(20, system_prompt: &sysprompt(job, &1), acc: %{}, tool_fmt: &tool_fmt/1)
+    |> MemoryEngine.new(50, system_prompt: &sysprompt(job, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{
@@ -82,12 +91,14 @@ defmodule Console.AI.Workbench.Engine do
         logs: logs,
         traces: traces,
         todos: todos,
-        topology: topology
+        topology: topology,
+        criticism: criticism
       }} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
           topology: topology,
+          criticism: criticism,
           metadata: drop_empty(%{
             metrics_query: metrics_query,
             traces_query: traces_query,
@@ -96,7 +107,7 @@ defmodule Console.AI.Workbench.Engine do
           }),
         })
         |> Workbenches.complete_job(job)
-      {:ok, l} when is_list(l) -> spawn_activities(l, engine)
+      {:ok, {msgs, l}} when is_list(l) -> spawn_activities(l, msgs, engine)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
   end
@@ -107,33 +118,32 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(pass), do: pass
 
-  defp reducer(messages, _) do
-    Enum.reduce_while(messages, [], fn
+  defp reducer(messages, %Acc{messages: msgs}) do
+    Enum.reduce_while(messages, {[], []}, fn
       %Complete{} = complete, _ -> {:halt, complete}
-      %Subagent{} = subagent, acc -> {:cont, [subagent | acc]}
-      %CanvasTool{} = canvas, acc -> {:cont, [canvas | acc]}
-      %Notes{} = notes, acc -> {:cont, [notes | acc]}
-      %SkillBackfill{} = backfill, acc -> {:cont, [backfill | acc]}
-      _, acc -> {:cont, acc}
+      %Subagent{} = subagent, {msgs, acts} -> {:cont, {msgs, [subagent | acts]}}
+      %CanvasTool{} = canvas, {msgs, acts} -> {:cont, {msgs, [canvas | acts]}}
+      %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
+      %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
+      msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
     |> case do
       %Complete{} = complete -> {:halt, complete}
-      [_ | _] = l -> {:halt, l}
-      _ -> {:cont, []}
+      {new, [_ | _] = acts} -> {:halt, {new ++ msgs, acts}}
+      {new, []} -> {:cont, %Acc{messages: new ++ msgs}}
     end
   end
 
-  defp spawn_activities(actions, engine) do
+  defp spawn_activities(actions, msgs, engine) do
     Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.minutes(30))
-    |> Enum.reduce(engine, fn
-      {:ok, {:ok, %WorkbenchJobActivity{} = activity}}, engine ->
-        %{engine | activities: [activity | engine.activities]}
-      {:ok, {:error, error}}, engine ->
+    |> Enum.flat_map(fn
+      {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
+      {:ok, {:error, error}} ->
         Logger.error("Error spawning activity: #{inspect(error)}")
-        engine
-      _, engine -> engine
+        []
+      _ -> []
     end)
-    |> then(& %{&1 | iterations: &1.iterations + 1, job: refresh_job(&1.job)})
+    |> then(& %{engine | activities: &1 ++ engine.activities, messages: &1 ++ msgs, iterations: engine.iterations + 1, job: refresh_job(engine.job)})
     |> loop()
   end
 
@@ -142,6 +152,7 @@ defmodule Console.AI.Workbench.Engine do
   defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
     module = subagent_module(type)
+    Console.AI.Provider.external_errors()
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
@@ -155,6 +166,8 @@ defmodule Console.AI.Workbench.Engine do
 
   defp spawn_activity(%SkillBackfill{prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities}) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
+    Console.AI.Provider.external_errors()
+
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :skill, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
       Console.safely(fn ->
@@ -167,6 +180,7 @@ defmodule Console.AI.Workbench.Engine do
 
   defp spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
+    Console.AI.Provider.external_errors()
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :canvas, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       Canvas.new(activity, existing_canvas(job))
 
@@ -258,13 +272,23 @@ defmodule Console.AI.Workbench.Engine do
   defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
   defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))
 
-  @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection]]]]
+  @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
-  defp preload_job(%WorkbenchJob{type: :skill} = job), do: Repo.preload(job, @preloads ++ [referenced_job: [:result, activities: :thoughts]])
+  defp preload_job(%WorkbenchJob{type: :skill} = job),
+    do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])
   defp preload_job(job), do: Repo.preload(job, @preloads)
 
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
   defp maybe_add_memory(subagents, _), do: subagents
+
+  def callback(%WorkbenchJob{id: id}, {:tool, content, %{name: name, arguments: args}}) when is_binary(content) do
+    publish_absinthe(%{
+      tool: name,
+      arguments: args,
+      text: content
+    }, workbench_job_progress: "workbench_jobs:#{id}:progress")
+  end
+  def callback(_, _), do: :ok
 
   EEx.function_from_file(:defp, :skill_system_prompt, Console.priv_filename(["prompts", "workbench", "eval_skill.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns])

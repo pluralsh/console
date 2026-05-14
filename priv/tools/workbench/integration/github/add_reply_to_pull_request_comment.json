@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "description": "Reply to an existing pull request review (inline) comment thread.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "pull_number": {
+      "type": "integer",
+      "description": "Pull request number (for context; API uses comment id)."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "ID of the pull request review comment to reply to."
+    },
+    "body": {
+      "type": "string",
+      "description": "Reply body in Markdown."
+    }
+  },
+  "required": ["owner", "repo", "pull_number", "comment_id", "body"],
+  "additionalProperties": false
+}

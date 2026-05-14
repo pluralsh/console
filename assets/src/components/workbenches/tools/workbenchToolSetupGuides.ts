@@ -11,9 +11,15 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Jaeger]: '/setup-guides/tools/jaeger.md',
   [WorkbenchToolType.Datadog]: '/setup-guides/tools/datadog.md',
   [WorkbenchToolType.Linear]: '/setup-guides/tools/linear.md',
+  [WorkbenchToolType.Slack]: '/setup-guides/tools/slack.md',
   [WorkbenchToolType.Atlassian]: '/setup-guides/tools/atlassian.md',
   [WorkbenchToolType.Exa]: '/setup-guides/tools/exa.md',
   [WorkbenchToolType.Github]: '/setup-guides/tools/github.md',
+  [WorkbenchToolType.Gitlab]: '/setup-guides/tools/gitlab.md',
+  [WorkbenchToolType.Bitbucket]: '/setup-guides/tools/bitbucket.md',
+  [WorkbenchToolType.BitbucketDatacenter]:
+    '/setup-guides/tools/bitbucket_datacenter.md',
+  [WorkbenchToolType.AzureDevops]: '/setup-guides/tools/azure_devops.md',
   [WorkbenchToolType.Splunk]: '/setup-guides/tools/splunk.md',
   [WorkbenchToolType.Dynatrace]: '/setup-guides/tools/dynatrace.md',
   [WorkbenchToolType.Cloudwatch]: '/setup-guides/tools/cloudwatch.md',
@@ -35,11 +41,20 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
   [WorkbenchToolType.Datadog]:
     'https://docs.datadoghq.com/account_management/api-app-keys/',
   [WorkbenchToolType.Linear]: 'https://linear.app/docs/api-and-webhooks',
+  [WorkbenchToolType.Slack]: 'https://api.slack.com/authentication/oauth-v2',
   [WorkbenchToolType.Atlassian]:
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',
   [WorkbenchToolType.Github]:
-    'https://docs.github.com/en/copilot/how-tos/context/use-mcp/configure-toolsets',
+    'https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens',
+  [WorkbenchToolType.Gitlab]:
+    'https://docs.gitlab.com/user/profile/personal_access_tokens/',
+  [WorkbenchToolType.Bitbucket]:
+    'https://support.atlassian.com/bitbucket-cloud/docs/api-tokens/',
+  [WorkbenchToolType.BitbucketDatacenter]:
+    'https://confluence.atlassian.com/bitbucketserver/http-access-tokens-939515499.html',
+  [WorkbenchToolType.AzureDevops]:
+    'https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate',
   [WorkbenchToolType.Splunk]:
     'https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/latest/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities',
   [WorkbenchToolType.Dynatrace]:

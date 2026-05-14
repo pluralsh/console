@@ -84,7 +84,6 @@ defmodule Console.Schema.CloudConnection do
   defp aws_changeset(model, attrs) do
     model
     |> cast(attrs, [:region, :regions, :access_key_id, :secret_access_key, :assume_role_arn])
-    |> validate_required([:access_key_id, :secret_access_key])
   end
 
   defp gcp_changeset(model, attrs) do

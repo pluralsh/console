@@ -1,5 +1,7 @@
 import { DeepPartial } from '@apollo/client/utilities'
 import {
+  Accordion,
+  AccordionItem,
   Button,
   Card,
   CodeEditor,
@@ -11,11 +13,12 @@ import {
   MinusIcon,
   Select,
 } from '@pluralsh/design-system'
+import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { WorkbenchToolHttpMethod, WorkbenchToolType } from 'generated/graphql'
 import { ComponentProps, ComponentType, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isValidJson } from 'utils/isValidJson'
 import {
@@ -81,10 +84,22 @@ export function WorkbenchToolFormFields({
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
+    case WorkbenchToolType.Slack:
+      return render(type, SlackFormFields)
+    case WorkbenchToolType.Teams:
+      return render(type, TeamsFormFields)
     case WorkbenchToolType.Exa:
       return render(type, ExaFormFields)
     case WorkbenchToolType.Github:
       return render(type, GithubFormFields)
+    case WorkbenchToolType.Gitlab:
+      return render(type, GitlabFormFields)
+    case WorkbenchToolType.Bitbucket:
+      return render(type, BitbucketFormFields)
+    case WorkbenchToolType.BitbucketDatacenter:
+      return render(type, BitbucketDatacenterFormFields)
+    case WorkbenchToolType.AzureDevops:
+      return render(type, AzureDevopsFormFields)
     case WorkbenchToolType.Splunk:
       return render(type, SplunkFormFields)
     case WorkbenchToolType.Cloudwatch:
@@ -369,6 +384,56 @@ function LinearFormFields({
   )
 }
 
+function SlackFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Slack>) {
+  return (
+    <InputField
+      label="Bot user OAuth token"
+      hint="Starts with xoxb-. Create a Slack app, add bot scopes, install to your workspace, then copy the Bot User OAuth Token from OAuth & Permissions."
+      required
+      revealer
+      value={c.botToken ?? ''}
+      onChange={(e) => set({ ...c, botToken: e.target.value })}
+    />
+  )
+}
+
+function TeamsFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Teams>) {
+  return (
+    <>
+      <InputField
+        label="Tenant (directory) ID"
+        hint="Microsoft Entra ID → Overview → Tenant ID. Used for the OAuth token endpoint."
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.tenantId ?? ''}
+        onChange={(e) => set({ ...c, tenantId: e.target.value })}
+      />
+      <InputField
+        label="Application (client) ID"
+        hint="App registration → Overview → Application (client) ID."
+        required
+        placeholder="00000000-0000-0000-0000-000000000000"
+        value={c.clientId ?? ''}
+        onChange={(e) => set({ ...c, clientId: e.target.value })}
+      />
+      <InputField
+        label="Client secret"
+        hint="App registration → Certificates & secrets (client secret value)."
+        required
+        revealer
+        value={c.clientSecret ?? ''}
+        onChange={(e) => set({ ...c, clientSecret: e.target.value })}
+      />
+    </>
+  )
+}
+
 function ExaFormFields({
   config: c,
   setConfig: set,
@@ -384,35 +449,48 @@ function ExaFormFields({
   )
 }
 
-const GITHUB_MCP_TOOLSET_OPTIONS = [
-  { key: 'repos', label: 'Repos' },
-  { key: 'issues', label: 'Issues' },
-  { key: 'pull_requests', label: 'Pull requests' },
-  { key: 'actions', label: 'Actions' },
-  { key: 'code_security', label: 'Code security' },
-  { key: 'secret_protection', label: 'Secret protection' },
-  { key: 'copilot', label: 'Copilot (remote only)' },
-  {
-    key: 'github_support_docs_search',
-    label: 'GitHub support docs search (remote only)',
-  },
-  { key: 'all', label: 'All (every toolset)' },
+const GITHUB_NATIVE_TOOLSET_OPTIONS = [
   {
     key: 'default',
-    label: 'Default (repos, issues, pull requests)',
+    label: 'All (issues, pull requests, repos)',
   },
+  { key: 'issues', label: 'Issues only' },
+  { key: 'pull_requests', label: 'Pull requests only' },
+  { key: 'repos', label: 'Repos only' },
 ] as const
 
-function GithubFormFields({
+function githubNativeToolsetSelectKey(
+  toolset: string | null | undefined
+): (typeof GITHUB_NATIVE_TOOLSET_OPTIONS)[number]['key'] {
+  if (
+    !toolset ||
+    toolset === '' ||
+    toolset === 'default' ||
+    toolset === 'all'
+  ) {
+    return 'default'
+  }
+  if (
+    toolset === 'issues' ||
+    toolset === 'pull_requests' ||
+    toolset === 'repos'
+  ) {
+    return toolset
+  }
+
+  return 'default'
+}
+
+function GitlabFormFields({
   config: c,
   setConfig: set,
-}: ToolFormFieldProps<WorkbenchToolType.Github>) {
+}: ToolFormFieldProps<WorkbenchToolType.Gitlab>) {
   return (
     <>
       <InputField
-        label="URL"
-        hint="Defaults to the public GitHub MCP server when omitted."
-        placeholder="https://api.githubcopilot.com/mcp"
+        label="API URL"
+        hint="Optional. Defaults to https://gitlab.com. Set the base URL for self-managed GitLab."
+        placeholder="https://gitlab.com"
         value={c.url ?? ''}
         onChange={(e) => set({ ...c, url: e.target.value || undefined })}
       />
@@ -420,22 +498,118 @@ function GithubFormFields({
         label="Access token"
         required
         revealer
+        hint="Personal, project, or group access token (encrypted at rest)."
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value })}
+      />
+    </>
+  )
+}
+
+function BitbucketFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Bitbucket>) {
+  return (
+    <>
+      <InputField
+        label="API URL"
+        hint="Optional. Override when using a non-default Bitbucket Cloud API endpoint."
+        placeholder="https://api.bitbucket.org/2.0"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="App password or access token"
+        required
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value })}
+      />
+    </>
+  )
+}
+
+function BitbucketDatacenterFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.BitbucketDatacenter>) {
+  return (
+    <>
+      <InputField
+        label="REST API base URL"
+        required
+        hint="Bitbucket Data Center REST API root, e.g. https://bitbucket.example.com/rest/api/1.0"
+        placeholder="https://bitbucket.example.com/rest/api/1.0"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="HTTP access token"
+        required
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value })}
+      />
+    </>
+  )
+}
+
+function AzureDevopsFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.AzureDevops>) {
+  return (
+    <InputField
+      label="Personal access token (PAT)"
+      required
+      revealer
+      hint="Create a PAT with Code (read) / Code (write) or the scopes your workflows need."
+      value={c.token ?? ''}
+      onChange={(e) => set({ ...c, token: e.target.value })}
+    />
+  )
+}
+
+function GithubFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Github>) {
+  const { colors } = useTheme()
+
+  return (
+    <>
+      <InputField
+        label="API URL"
+        hint="Optional. Defaults to https://api.github.com/. Set your GitHub Enterprise Server API root if needed."
+        placeholder="https://api.github.com/"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access token"
+        hint="Optional if you configure GitHub App credentials below. Leave blank when editing if the token is unchanged."
+        revealer
         value={c.accessToken ?? ''}
         onChange={(e) => set({ ...c, accessToken: e.target.value })}
       />
       <FormField
         label="Toolset"
-        hint="Optional. Use a single toolset value; leave blank to use the default GitHub MCP toolsets."
+        hint="Optional. Restrict which GitHub tool groups are registered; omit or choose All to enable every supported tool."
       >
         <Select
-          selectedKey={c.toolset ?? null}
-          onSelectionChange={(key) =>
-            set({ ...c, toolset: typeof key === 'string' ? key : undefined })
-          }
+          selectedKey={githubNativeToolsetSelectKey(c.toolset)}
+          onSelectionChange={(key) => {
+            if (typeof key !== 'string') return
+            set({
+              ...c,
+              toolset: key === 'default' ? undefined : key,
+            })
+          }}
           selectionMode="single"
-          label="GitHub MCP toolset"
+          label="GitHub toolset"
         >
-          {GITHUB_MCP_TOOLSET_OPTIONS.map((option) => (
+          {GITHUB_NATIVE_TOOLSET_OPTIONS.map((option) => (
             <ListBoxItem
               key={option.key}
               label={option.label}
@@ -443,6 +617,58 @@ function GithubFormFields({
           ))}
         </Select>
       </FormField>
+      <Accordion type="single">
+        <AccordionItem trigger="GitHub App authentication">
+          <Flex
+            direction="column"
+            gap="medium"
+          >
+            <p
+              css={{
+                margin: 0,
+                fontSize: 14,
+                color: colors['text-xlight'],
+              }}
+            >
+              Alternative to a personal access token. Provide App ID,
+              Installation ID, and the app&apos;s PEM private key. When editing,
+              leave the key blank to keep the stored key unless you are rotating
+              it.
+            </p>
+            <Flex
+              gap="medium"
+              width="100%"
+              css={{ '& > *': { flex: 1 } }}
+            >
+              <InputField
+                label="App ID"
+                placeholder="123456"
+                value={c.appId ?? ''}
+                onChange={(e) =>
+                  set({ ...c, appId: e.target.value || undefined })
+                }
+              />
+              <InputField
+                label="Installation ID"
+                placeholder="12345678"
+                value={c.installationId ?? ''}
+                onChange={(e) =>
+                  set({ ...c, installationId: e.target.value || undefined })
+                }
+              />
+            </Flex>
+            <SshKeyUpload
+              fillLevel={2}
+              required={false}
+              label="App private key (PEM)"
+              privateKey={c.privateKey}
+              setPrivateKey={(key) =>
+                set({ ...c, privateKey: key ?? undefined })
+              }
+            />
+          </Flex>
+        </AccordionItem>
+      </Accordion>
     </>
   )
 }

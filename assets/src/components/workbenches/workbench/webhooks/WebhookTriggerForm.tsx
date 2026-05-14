@@ -5,7 +5,6 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input,
   Input2,
   ListBoxFooter,
   ListBoxItem,
@@ -49,7 +48,10 @@ import {
   WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM,
   WORKBENCHES_WEBHOOK_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
+import { useLogin } from 'components/contexts'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
+import { WorkbenchPromptRichInput } from '../WorkbenchPromptRichInput'
+import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import {
   FormCardSC,
   StickyActionsFooterSC,
@@ -70,6 +72,8 @@ export type WebhookTriggerFormState = {
   substring: string
   caseInsensitive: boolean
   prompt: string
+  userId: string
+  priority: number
 }
 
 function parseWebhookKey(key: string): {
@@ -87,6 +91,7 @@ type RouteState = {
 
 export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   const theme = useTheme()
+  const { me } = useLogin()
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -118,17 +123,34 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   const webhook = fetchWorkbenchWebhookState.data?.getWorkbenchWebhook
   const editing = !!webhook
 
-  // Source form state is based on the location state (if coming back from create webhook page) or the fetched webhook (if editing),
-  // with the selected webhook key from the query param taking precedence if present.
+  const promptInputSyncKeySuffix =
+    mode === 'edit' && webhookId
+      ? `${webhookId}-${
+          fetchWorkbenchWebhookState.data?.getWorkbenchWebhook?.id === webhookId
+            ? 'ready'
+            : 'loading'
+        }`
+      : 'create'
+
+  // Source form state: defaults from the loaded webhook (or empty create state), then any
+  // in-progress draft from router state merged on top so older drafts without new fields
+  // still pick up defaults instead of replacing the whole shape.
   const sourceFormState = useMemo(() => {
-    const base = routeState?.draftState ?? getInitialFormState(webhook)
+    const defaults = getInitialFormState(
+      webhook,
+      mode === 'create' ? me?.id : undefined
+    )
+    const base = routeState?.draftState
+      ? { ...defaults, ...routeState.draftState }
+      : defaults
 
     return {
       ...base,
       ...(webhookKeyParam ? { selectedWebhookKey: webhookKeyParam } : {}),
       prompt: base.prompt ?? '',
+      userId: base.userId ?? webhook?.userId ?? me?.id ?? '',
     }
-  }, [routeState?.draftState, webhookKeyParam, webhook])
+  }, [routeState?.draftState, webhookKeyParam, webhook, me?.id, mode])
 
   // Local form draft state that can be modified as the user interacts with the form.
   const [formDraft, setFormDraft] =
@@ -224,13 +246,21 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
           }
       : undefined,
     prompt: promptTrimmed || null,
+    userId: formState.userId,
+    priority: formState.priority,
   }
+
+  const initialFormState = getInitialFormState(
+    webhook,
+    mode === 'create' ? me?.id : undefined
+  )
 
   const canSave =
     !!label &&
     !!selectedWebhookKeyValue &&
     !!activeMatchValue &&
-    !isEqual(attributes, getAttributesFromState(getInitialFormState(webhook)))
+    !!formState.userId &&
+    !isEqual(attributes, getAttributesFromState(initialFormState))
 
   const handleCompleted = () => {
     popToast({
@@ -474,7 +504,38 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                     ]}
                   </Select>
                 </FormField>
+                <WorkbenchAccessibleUserSelect
+                  key={workbenchId}
+                  workbenchId={workbenchId}
+                  selectedUserId={formState.userId}
+                  onSelectionChange={(userId) =>
+                    setFormState((prev) => ({ ...prev, userId }))
+                  }
+                  disabled={isSaving}
+                />
               </Flex>
+              <FormField
+                label="Priority"
+                hint="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
+              >
+                <Input2
+                  value={String(formState.priority)}
+                  inputProps={{
+                    type: 'number',
+                    min: 0,
+                    step: 1,
+                  }}
+                  onChange={(e) => {
+                    const raw = e.target.value
+                    const parsed = parseInt(raw, 10)
+                    setFormState((prev) => ({
+                      ...prev,
+                      priority: raw === '' || Number.isNaN(parsed) ? 0 : parsed,
+                    }))
+                  }}
+                  placeholder="0"
+                />
+              </FormField>
               <TabList
                 stateRef={tabStateRef}
                 stateProps={{
@@ -550,18 +611,15 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                 infoTooltip="Optional text appended to the agent prompt when an incoming event matches this webhook."
                 label="Custom instructions"
               >
-                <Input
-                  multiline
-                  minRows={3}
-                  maxRows={6}
-                  value={formState.prompt}
-                  onChange={(e) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      prompt: e.target.value,
-                    }))
+                <WorkbenchPromptRichInput
+                  syncKey={`webhook-prompt-${location.key}-${promptInputSyncKeySuffix}`}
+                  workbenchId={workbenchId}
+                  prompt={formState.prompt}
+                  disabled={isSaving}
+                  onPromptChange={(next) =>
+                    setFormState((prev) => ({ ...prev, prompt: next }))
                   }
-                  placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only."
+                  placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only. Type @ for clusters, services, and stacks, or / for skills."
                 />
               </FormField>
               <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
@@ -592,7 +650,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function getInitialFormState(
-  webhook?: Nullable<WorkbenchWebhookFragment>
+  webhook?: Nullable<WorkbenchWebhookFragment>,
+  defaultUserIdForCreate?: Nullable<string>
 ): WebhookTriggerFormState {
   const matchType: MatchType = webhook?.matches?.regex ? 'regex' : 'substring'
 
@@ -609,6 +668,8 @@ function getInitialFormState(
     substring: webhook?.matches?.substring ?? '',
     caseInsensitive: webhook?.matches?.caseInsensitive ?? false,
     prompt: webhook?.prompt ?? '',
+    userId: webhook?.userId ?? defaultUserIdForCreate ?? '',
+    priority: webhook?.priority ?? 0,
   }
 }
 
@@ -631,5 +692,7 @@ function getAttributesFromState(formState: WebhookTriggerFormState) {
           }
       : undefined,
     prompt: promptTrimmed || null,
+    userId: formState.userId,
+    priority: formState.priority,
   }
 }
