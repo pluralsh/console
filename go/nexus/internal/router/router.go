@@ -257,14 +257,14 @@ func (in *GenericRouter) handleStreamingRequest(w http.ResponseWriter, config Ro
 	case bifrostReq.ResponsesRequest != nil:
 		stream, bifrostErr = in.client.ResponsesStreamRequest(ctx, bifrostReq.ResponsesRequest)
 	default:
-		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "unsupported request type for streaming"))
+		in.sendStreamingInitError(w, ctx, config, in.toBifrostError(nil, "unsupported request type for streaming"))
 		cancel()
 		return
 	}
 
 	if bifrostErr != nil {
 		cancel()
-		in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+		in.sendStreamingInitError(w, ctx, config, bifrostErr)
 		return
 	}
 
@@ -276,11 +276,65 @@ func (in *GenericRouter) handleStreamingRequest(w http.ResponseWriter, config Ro
 			}
 		}()
 
-		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "streaming configuration is missing"))
+		in.sendStreamingInitError(w, ctx, config, in.toBifrostError(nil, "streaming configuration is missing"))
 		return
 	}
 
 	in.handleStreaming(w, ctx, config, stream, cancel)
+}
+
+func (in *GenericRouter) sendStreamingInitError(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, config RouteConfig, bifrostErr *schemas.BifrostError) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		in.sendError(w, bifrostCtx, config.ErrorConverter, bifrostErr)
+		return
+	}
+
+	if bifrostErr == nil {
+		bifrostErr = in.toBifrostError(nil, "internal server error")
+	}
+
+	var errorResponse any
+	fallbackError := map[string]any{
+		"error": map[string]any{
+			"type":    "internal_error",
+			"message": "An internal error occurred while processing your request.",
+		},
+	}
+
+	switch {
+	case config.StreamConfig != nil && config.StreamConfig.ErrorConverter != nil:
+		errorResponse = config.StreamConfig.ErrorConverter(bifrostCtx, bifrostErr)
+	case config.ErrorConverter != nil:
+		errorResponse = config.ErrorConverter(bifrostCtx, bifrostErr)
+	default:
+		errorResponse = fallbackError
+	}
+
+	errorJSON, err := in.toStreamingErrorResponse(errorResponse)
+	if err != nil {
+		var errorBytes []byte
+		if errorBytes, err = sonic.Marshal(fallbackError); err != nil {
+			in.logger.Error("failed to marshal streaming fallback error response", zap.Error(err))
+			return
+		}
+
+		errorJSON = fmt.Sprintf("data: %s\n\n", string(errorBytes))
+	}
+
+	if _, err = fmt.Fprint(w, errorJSON); err != nil {
+		in.logger.Error("failed to write streaming init error response", zap.Error(err))
+		return
+	}
+	flusher.Flush()
+
+	if in.shouldSendDoneMarker(config) {
+		if _, err = fmt.Fprint(w, "data: [DONE]\n\n"); err != nil {
+			in.logger.Error("failed to send done marker after streaming init error", zap.Error(err))
+			return
+		}
+		flusher.Flush()
+	}
 }
 
 func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.BifrostContext, config RouteConfig, stream chan *schemas.BifrostStreamChunk, cancel context.CancelFunc) {
