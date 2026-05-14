@@ -33,6 +33,7 @@ export function WorkbenchesEvalsAvgGraph() {
   return (
     <WorkbenchGraphCard
       title="Average by workbench"
+      minContentHeight={0}
       rightContent={
         <ButtonGroup
           size="small"
@@ -50,7 +51,11 @@ export function WorkbenchesEvalsAvgGraph() {
         <Flex
           direction="column"
           gap="xsmall"
-          css={{ paddingRight: theme.spacing.xxsmall }}
+          css={{
+            paddingRight: theme.spacing.xxsmall,
+            maxHeight: 200,
+            overflowY: 'auto',
+          }}
         >
           {workbenchAverages.map(({ id, name, score }) => {
             const color = evalGradeToColor(score)
@@ -102,7 +107,6 @@ export function WorkbenchesEvalsAvgGraph() {
           css={{
             ...theme.partials.text.body2,
             color: theme.colors['text-xlight'],
-            minHeight: 200,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
