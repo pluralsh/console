@@ -309,22 +309,24 @@ export function Stacks() {
             }}
           />
         )}
-        <VirtualList
-          data={stacks}
-          loading={!data && loading}
-          skeletonProps={{ gap: 'xsmall', height: 80 }}
-          onVirtualSliceChange={setVirtualSlice}
-          hasNextPage={pageInfo?.hasNextPage}
-          isLoadingNextPage={loading}
-          loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
-          renderer={({ rowData, index }) => (
-            <StackEntry
-              stack={rowData}
-              active={rowData.id === stackId}
-              first={index === 0}
-            />
-          )}
-        />
+        {(!isEmpty(stacks) || (!data && loading)) && (
+          <VirtualList
+            data={stacks}
+            loading={!data && loading}
+            skeletonProps={{ gap: 'xsmall', height: 80 }}
+            onVirtualSliceChange={setVirtualSlice}
+            hasNextPage={pageInfo?.hasNextPage}
+            isLoadingNextPage={loading}
+            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
+            renderer={({ rowData, index }) => (
+              <StackEntry
+                stack={rowData}
+                active={rowData.id === stackId}
+                first={index === 0}
+              />
+            )}
+          />
+        )}
         {isEmpty(stacks) &&
           !(isEmpty(debouncedSearchString) && isEmpty(searchTags)) && (
             <EmptyState message="No stacks match your query.">
