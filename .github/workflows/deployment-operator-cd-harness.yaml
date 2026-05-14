@@ -93,6 +93,10 @@ jobs:
 
   publish-base-image:
     name: Publish base image
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
     needs: [build-base-image]
     runs-on: ubuntu-latest
     outputs:
