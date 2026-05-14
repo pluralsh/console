@@ -1,4 +1,4 @@
-import { ApolloCache, useApolloClient } from '@apollo/client'
+import { ApolloCache, ApolloClient, useApolloClient } from '@apollo/client'
 import {
   Delta,
   useWorkbenchCanvasStreamSubscription,
@@ -19,12 +19,16 @@ import {
 } from 'generated/graphql'
 import { Dispatch, SetStateAction, useRef, useState } from 'react'
 import {
+  appendConnectionToEnd,
+  mapExistingNodes,
   updateCache,
   updateFragment,
-  appendConnectionToEnd,
 } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { isActivityTerminal } from './WorkbenchJobActivities'
+import {
+  defaultClosedIds,
+  isActivityTerminal,
+} from './workbenchJobActivityCollapse'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { produce } from 'immer'
 
@@ -109,9 +113,13 @@ export function useWorkbenchJobStreams(
         payload?.id &&
         (isActivityTerminal(payload?.status) || !!payload.result?.output)
       )
-        setClosedIds(
-          (prev) => new Set(prev ? prev.add(payload.id) : new Set([payload.id]))
-        )
+        setClosedIds((prev) => {
+          const next = new Set(
+            prev ?? readDefaultClosedIdsFromCache(client, jobId ?? '')
+          )
+          next.add(payload.id)
+          return next
+        })
 
       appendActivityToCache(
         client.cache,
@@ -132,6 +140,22 @@ export function useWorkbenchJobStreams(
   })
 
   return { textStreamMap, jobLevelThinking }
+}
+
+function readDefaultClosedIdsFromCache(
+  client: ApolloClient<object>,
+  jobId: string
+): Set<string> {
+  if (!jobId) return new Set()
+  try {
+    const data = client.readQuery<WorkbenchJobActivitiesQuery>({
+      query: WorkbenchJobActivitiesDocument,
+      variables: { id: jobId },
+    })
+    return defaultClosedIds(mapExistingNodes(data?.workbenchJob?.activities))
+  } catch {
+    return new Set()
+  }
 }
 
 export const appendActivityToCache = (

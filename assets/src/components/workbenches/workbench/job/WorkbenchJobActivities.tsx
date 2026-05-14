@@ -1,8 +1,6 @@
 import { Accordion, Flex } from '@pluralsh/design-system'
 import {
   useWorkbenchJobActivitiesQuery,
-  WorkbenchJobActivityFragment,
-  WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
@@ -22,6 +20,10 @@ import {
 } from './WorkbenchJobActivity'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
+import {
+  defaultClosedIds,
+  isActivityTerminal,
+} from './workbenchJobActivityCollapse'
 
 export const ACTIVITY_GAP = 'medium' as const
 
@@ -161,31 +163,3 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   minHeight: 0,
   overflow: 'hidden',
 }))
-
-const lastActivityId = (
-  activities: WorkbenchJobActivityFragment[]
-): string | null => {
-  const last = activities.findLast(
-    (a) => a.type !== WorkbenchJobActivityType.Memo
-  )
-  if (last) return last.id
-  return null
-}
-
-const defaultClosedIds = (
-  activities: WorkbenchJobActivityFragment[]
-): Set<string> => {
-  const lastId = lastActivityId(activities)
-
-  return new Set(
-    activities
-      .filter((a) => a.id !== lastId && isActivityTerminal(a.status))
-      .map((a) => a.id)
-  )
-}
-
-export const isActivityTerminal = (
-  status: Nullable<WorkbenchJobActivityStatus>
-) =>
-  status === WorkbenchJobActivityStatus.Successful ||
-  status === WorkbenchJobActivityStatus.Failed
