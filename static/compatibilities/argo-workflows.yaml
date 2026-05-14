@@ -9,9 +9,9 @@ versions:
   requirements: []
   incompatibilities: []
   summary: null
-  chart_version: 1.0.13
+  chart_version: 1.0.14
   images: ['quay.io/argoproj/argocli:v4.0.5', 'quay.io/argoproj/workflow-controller:v4.0.5',
-    'registry.k8s.io/kubectl:v1.36.0']
+    'registry.k8s.io/kubectl:v1.36.1']
 - version: 4.0.2
   kube: ['1.33', '1.32', '1.31']
   requirements: []

@@ -4,35 +4,41 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
-- version: 1.19.3
-  kube: ['1.35', '1.34', '1.33']
+- version: 1.19.4
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '- **New Helm values:** `configDriftDetection` was added (with docs)
-      to help detect/flag configuration drift.
+    helm_changes: '- **If you set `--k8s-service-proxy-name` / Helm equivalent**:
+      Cilium now filters `EndpointSlice` watches by the `service.kubernetes.io/service-proxy-name`
+      label (same behavior as Services). If you have **hand-managed `EndpointSlices`**,
+      you must **apply the matching label** to those slices or Cilium may ignore them.
 
-      - **Init container compatibility:** chart now uses **bash instead of sh** in
-      init containers (notably for **Ubuntu 24.04** compatibility).
+      - **Helm chart behavior change (operator health port)**: The chart no longer
+      sets the operator health port as a `hostPort` when `hostNetwork` is disabled.
+      If you previously relied on `hostPort` exposure for health checks without `hostNetwork`,
+      adjust your monitoring/probing accordingly.
 
-      - No other explicit Helm values changes were called out in the provided notes;
-      expect a patch-level upgrade otherwise (review your rendered manifests for any
-      incidental template changes).'
-    chart_updates: ['Helm chart/docs: added `configDriftDetection` values and documentation.',
-      'Helm chart: init containers now invoke `bash` instead of `sh` (Ubuntu 24.04
-        compatibility).', Installation metadata updated (image digests updated for
-        patch releases; ensure your chart points to v1.19.3 images).]
-    features: [Config drift detection support via new `configDriftDetection` Helm
-        values (operational feature)., 'BIG TCP for tunnels now probes kernel support
-        rather than relying solely on a config toggle, making enablement safer/automatic
-        when supported.', 'BGP CLI enhancement: `bgp/routes` adds a `--with-attrs`
-        option (operational visibility).']
-    breaking_changes: ['No explicit breaking changes were listed for v1.19.3 in the
-        provided notes; this looks like a patch release focused on fixes. The major
-        behavioral/breaking items remain those introduced in v1.19.0 (e.g., BGP v1
-        API removal, policy selector defaulting to local cluster, deprecated policy
-        fields).']
-  chart_version: 1.19.3
+      - **Helm chart enhancement**: You can now **override external images** used
+      by the charts (useful for private registries / air-gapped installs).'
+    chart_updates: ['Cilium Agent and service reflectors now filter `EndpointSlice`
+        watches by the `service.kubernetes.io/service-proxy-name` label when `--k8s-service-proxy-name`
+        is configured, aligning `EndpointSlice` and `Service` filtering behavior.',
+      Chart now avoids setting the operator health port as `hostPort` unless `hostNetwork`
+        is enabled., Chart allows overriding external images referenced by the Helm
+        charts (helps with mirroring images).]
+    features: [EndpointSlice watch filtering now matches Service filtering when `k8s-service-proxy-name`
+        is used; this reduces unnecessary watch traffic but requires correct labeling
+        on manually managed EndpointSlices., iptables masquerading with `enable-masquerade-to-route-source`
+        now sorts routes by mask length to respect longest-prefix match (more correct
+        source selection)., SPIRE client settings for ztunnel can now be configured
+        (better flexibility for service-mesh-style deployments).]
+    breaking_changes: ['Behavioral change when `k8s-service-proxy-name` is set: EndpointSlices
+        missing `service.kubernetes.io/service-proxy-name` may be ignored, which can
+        break Services backed by manually created EndpointSlices.', 'If you depended
+        on the operator health port being exposed via `hostPort` while `hostNetwork`
+        was disabled, that exposure no longer happens by default in this chart version.']
+  chart_version: 1.19.4
   images: []
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33']
@@ -77,6 +83,34 @@ versions:
         are correctly enrolled/compatible before turning it on.]
   chart_version: 1.19.0
   images: []
+- version: 1.18.10
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **Helm charts now support overriding \u201Cexternal\u201D image\
+      \ references** (e.g., certgen / ancillary images) via values. If your org pins\
+      \ images to an internal registry, review and possibly set the new overrides\
+      \ so all non-core images are pulled from your allowed registry.\n- **OCI chart\
+      \ distribution is supported/expected** (introduced in 1.18.6). Ensure your tooling\
+      \ pulls the chart from an OCI registry if that\u2019s your chosen distribution\
+      \ method.\n- No explicit value renames/removals are mentioned in the provided\
+      \ notes; treat this as a patch upgrade and focus on image/tag/digest updates\
+      \ and any new optional knobs around external images."
+    chart_updates: ['Helm chart enhancement: allow overriding of external images in
+        charts (useful for air-gapped / private-registry environments).', 'Operational/documentation
+        update: added documentation and warnings on DNS interception (review if you
+        use DNS proxy/interception features).', Various dependency and base-image
+        updates; image digests updated for the patch release (ensure your deployment
+        uses the intended v1.18.10 images/digests).]
+    features: ['Helm chart can now override external/ancillary images, improving compatibility
+        with private registries and image allowlists.', Additional documentation/warnings
+        around DNS interception to reduce misconfiguration risk.]
+    breaking_changes: []
+  chart_version: 1.18.10
+  images: ['quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3',
+    'quay.io/cilium/cilium:v1.18.10@sha256:dd573bc2f7213dbd978e564a363ecaad060e9578ed557b92b53e42eeeb0f2294',
+    'quay.io/cilium/operator-generic:v1.18.10@sha256:ab08d58fd12e98d9a9601d4b52beee839ff2537fba73d262aabad222454a16b3']
 - version: 1.18.6
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -188,6 +222,45 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.34.4-1753677767-266d5a01d1d55bd1d60148f991b98dac0390d363@sha256:231b5bd9682dfc648ae97f33dcdc5225c5a526194dda08124f5eded833bf02bf',
     'quay.io/cilium/cilium:v1.18.0@sha256:dfea023972d06ec183cfa3c9e7809716f85daaff042e573ef366e9ec6a0c0ab2',
     'quay.io/cilium/operator-generic:v1.18.0@sha256:398378b4507b6e9db22be2f4455d8f8e509b189470061b0f813f0fabaf944f51']
+- version: 1.17.16
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **Behavior change in Local Redirect Policy (LRP) addressMatcher**:\
+      \ `CiliumLocalRedirectPolicy` addressMatcher will **no longer override an existing\
+      \ Service frontend** by default (prevents cross-namespace traffic hijacking\
+      \ and service-map corruption on delete). If you relied on the old behavior,\
+      \ set:\n  - `--enable-lrp-address-matcher-override=true` (agent flag) to restore\
+      \ legacy behavior.\n\n- **Helm chart: external image overrides**: The chart\
+      \ now supports **overriding external images** (useful for private registries\
+      \ / air-gapped setups). If you currently pin/override images, review chart values\
+      \ for new/expanded image override options (introduced via `helm: allow overriding\
+      \ of external images in charts`)."
+    chart_updates: [Security hardening/behavior fix around LRP addressMatcher to avoid
+        overriding Service frontends by default (opt-in legacy override flag available).,
+      'IPsec robustness: prevent panic in `parseSPI` on malformed input.', 'Cluster-pool
+        IPAM: register additional metrics for CiliumNode synchronization with Kubernetes.',
+      'Static pod identity: fix endpoint identity resolution when CNI pod UID differs
+        from Kubernetes mirror pod UID.', 'Dependency updates: OpenTelemetry to 1.41.0;
+        x/net to v0.53; various base image and action dependency bumps; envoy image
+        updates.', 'CI/build plumbing: registry configurability, workflow runner tweaks,
+        cert-manager pull via OCI for clustermesh CI.', 'Release artifact refresh:
+        updated image digests across Cilium components (agent, operator variants,
+        hubble-relay, clustermesh-apiserver, etc.).']
+    features: ["Helm chart can publish/use OCI registries (not new to 1.17.16 but\
+        \ relevant since you\u2019re coming from 1.17.12 which introduced it).", 'Helm
+        chart now allows overriding of external images, improving support for private
+        registries and controlled supply chains.', New/expanded cluster-pool IPAM
+        metrics around CiliumNode sync help with observability of IPAM state propagation.]
+    breaking_changes: [Local Redirect Policy (LRP) addressMatcher no longer overrides
+        an existing Service frontend by default. Environments that depended on that
+        override behavior must explicitly enable it via `--enable-lrp-address-matcher-override=true`
+        (otherwise traffic steering may change).]
+  chart_version: 1.17.16
+  images: ['quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3',
+    'quay.io/cilium/cilium:v1.17.16@sha256:4efb37b791561bc5a2c6d746bdd6f52a9c393623d2426e8c0877cc389610477c',
+    'quay.io/cilium/operator-generic:v1.17.16@sha256:42955931dd62c9c2ea906d78eed0b651b22e70d59cd4877381f57bb98e4a09ae']
 - version: 1.17.12
   kube: ['1.35', '1.34', '1.33']
   requirements: []
