@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/deployment-operator
 
-go 1.26.2
+go 1.26.3
 
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.7.29

@@ -4,7 +4,7 @@
 # 2. run "soft serve" to start the server (done inside the shellscript)
 # 3. import the repos (also done inside the shellscript)
 # This is all done in builder image since we want our actual soft-serve image to not require github interaction for imports
-FROM golang:1.26.2-alpine AS builder
+FROM golang:1.26.3-alpine AS builder
 
 EXPOSE 23231
 EXPOSE 23232
