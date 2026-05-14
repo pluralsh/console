@@ -236,13 +236,6 @@ terraform-mcpserver: ## build terraform mcp server
 
 ##@ Docker
 
-.PHONY: docker-build-agent-fips
-docker-build-agent-fips: ## build docker fips agent image
-	docker build \
-    	  	-t deployment-agent-fips \
-    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent/fips.Dockerfile \
-    		$(WORKSPACES_DIR)
-
 .PHONY: docker-build-harness-base
 docker-build-harness-base: ## build base docker harness image
 	docker build \
@@ -265,24 +258,6 @@ docker-build-harness-ansible: docker-build-harness-base ## build terraform docke
 		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
     	  	-t harness \
     		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/ansible.Dockerfile \
-    		$(WORKSPACES_DIR)
-
-.PHONY: docker-build-harness-base-fips
-docker-build-harness-base-fips: ## build fips base docker harness image
-	docker build \
-			--no-cache \
-			--build-arg=VERSION="0.0.0-dev" \
-    	  	-t harness-base-fips \
-    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/base.fips.Dockerfile \
-    		$(WORKSPACES_DIR)
-
-.PHONY: docker-build-harness-ansible-fips
-docker-build-harness-ansible-fips: docker-build-harness-base-fips ## build fips ansible docker harness image
-	docker build \
-			--no-cache \
-		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
-    	  	-t harness-fips \
-    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/ansible.fips.Dockerfile \
     		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-base
