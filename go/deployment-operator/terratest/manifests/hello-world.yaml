@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-world
+  labels:
+    app: hello-world
+spec:
+  containers:
+    - name: hello
+      image: busybox:1.36
+      command: ["sh", "-c", "echo 'hello-world started'; sleep 3600"]
+      resources:
+        requests:
+          cpu: 50m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+  restartPolicy: Always

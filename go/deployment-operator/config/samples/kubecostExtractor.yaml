@@ -1,0 +1,19 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: KubecostExtractor
+metadata:
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+  name: default
+spec:
+  interval: "10h"
+  recommendationThreshold: "0.00002"
+  kubecostServiceRef:
+    name: kubecost-cost-analyzer
+    namespace: kubecost
+  recommendationsSettings:
+    excludeNamespaces:
+      - default
+      - kubecost
+    requireAnnotations:
+      kubectl.kubernetes.io/default-container: grafana

@@ -1,0 +1,46 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRuntime
+metadata:
+  name: test-codex
+  namespace: codex
+spec:
+  type: "CODEX"
+  targetNamespace: "codex"
+  config:
+    codex:
+      apiKeySecretRef:
+        name: codex-api-key
+        key: apiKey
+  template:
+    spec:
+      containers:
+        - name: default
+          image: ghcr.io/pluralsh/agent-harness:0.6.17-claude-2.1.72
+          args:
+            - --v=3
+  dind: true
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gemini
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRuntime
+metadata:
+  name: gemini
+spec:
+  type: "GEMINI"
+  targetNamespace: "gemini"
+  config:
+    gemini:
+      apiKeySecretRef:
+        name: gemini
+        key: apiKey
+  template:
+    spec:
+      containers:
+        - name: default
+          args:
+            - --v=3
+  dind: true

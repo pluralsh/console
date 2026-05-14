@@ -1,0 +1,11 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRun
+metadata:
+  name: test
+spec:
+  runtimeRef:
+    name: test
+  prompt: "hello"
+  repository: "https://github.com/pluralsh/cli-e2e-tests.git"
+  mode: "ANALYZE"
+

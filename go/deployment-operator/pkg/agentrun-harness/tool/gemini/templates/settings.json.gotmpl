@@ -1,0 +1,85 @@
+{
+  "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/refs/heads/main/schemas/settings.schema.json",
+  "base": {
+    "modelConfig": {
+      "generateContentConfig": {
+        "temperature": 0.1
+      }
+    }
+  },
+  "context": {
+    "fileName": "AGENTS.md"
+  },
+  "coreTools": {{ if eq .AgentRunMode "WRITE" }}[
+    "ReadFileTool",
+    "ReadManyFilesTool",
+    "WriteFileTool",
+    "EditTool",
+    "GlobTool",
+    "LSTool",
+    "GrepTool",
+    "ShellTool",
+    "WebSearchTool",
+    "WebFetchTool",
+    "MemoryTool"
+  ]{{ else }}[
+    "ReadFileTool",
+    "ReadManyFilesTool",
+    "GlobTool",
+    "LSTool",
+    "GrepTool",
+    "ShellTool(ls, cd, pwd, git status, git diff, head, tail, cat, grep, find)",
+    "WebSearchTool",
+    "MemoryTool"
+  ]{{ end }},
+  "excludeTools": [
+    "ShellTool(rm -rf)"
+  ],
+  "includeDirectories": [
+    "/plural/contexts",
+    "{{ .RepositoryDir }}"
+  ],
+  "model": {
+    "name": "{{ .Model }}"
+  },
+  "mcpServers": {
+    "plural": {
+      "command": "mcpserver",
+      "description": "Plural MCP Server",
+      "env": {
+        "PLRL_CONSOLE_TOKEN": "{{ .ConsoleToken }}",
+        "PLRL_CONSOLE_URL": "{{ .ConsoleURL }}",
+        "PLRL_AGENT_RUN_ID": "{{ .AgentRunID }}",
+        "GIT_ACCESS_TOKEN": "{{ .GitAccessToken }}",
+        {{ if eq .AgentRunMode "WRITE" }}
+        "PLRL_EXCLUDE_TOOLS": "updateAgentRunAnalysis"
+        {{ else }}
+        "PLRL_EXCLUDE_TOOLS": "createBranch,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos"
+        {{ end }}
+      },
+      "trust": true{{ if eq .AgentRunMode "WRITE" }},
+      "excludeTools": ["updateAgentRunAnalysis"]
+{{ else }},
+      "includeTools": ["updateAgentRunAnalysis"]
+{{ end }}
+    }{{ range .ExaMcpConfigs }},
+    "{{ .Name }}": {
+      "url": "{{ .Url }}"{{ if .ApiKey }},
+      "headers": {
+        "x-api-key": "{{ .ApiKey }}"
+      }{{ end }},
+      "trust": true
+    }{{ end }}
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  },
+  "telemetry": {
+    "enabled": false
+  },
+  "tools": {
+    "shell": {
+      "inactivityTimeout": {{ .InactivityTimeout }}
+    }
+  }
+}

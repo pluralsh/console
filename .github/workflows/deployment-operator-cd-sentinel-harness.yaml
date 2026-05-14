@@ -1,0 +1,206 @@
+name: CD / Sentinel Harness
+
+on:
+  pull_request:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-sentinel-harness.yaml"
+    - "go/deployment-operator/dockerfiles/sentinel-harness/**"
+    - "go/deployment-operator/cmd/sentinel-harness/**"
+    - "go/deployment-operator/pkg/sentinel-harness/**"
+  push:
+    tags:
+    - 'go/deployment-operator/v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic Version (e.g. 1.2.3)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_IMAGE: pluralsh/sentinel-harness-base
+
+jobs:
+  build-base-image:
+    name: Build base image
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+        - platform: linux/amd64
+          runner: ubuntu-24.04
+        - platform: linux/arm64
+          runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Prepare
+      run: |
+        platform=${{ matrix.platforms.platform }}
+        echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY_IMAGE }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Login to Docker
+      uses: docker/login-action@v3
+      with:
+        username: mjgpluralsh
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: Build and push by digest
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        context: "./go"
+        file: "./go/deployment-operator/dockerfiles/sentinel-harness/base.Dockerfile"
+        tags: ${{ env.REGISTRY_IMAGE }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: ${{ matrix.platforms.platform }}
+        outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          VERSION=${{ steps.meta.outputs.version }}
+    - name: Export digest
+      run: |
+        mkdir -p ${{ runner.temp }}/digests
+        digest="${{ steps.build.outputs.digest }}"
+        touch "${{ runner.temp }}/digests/${digest#sha256:}"
+    - name: Upload digest
+      uses: actions/upload-artifact@v4
+      with:
+        name: digests-${{ env.PLATFORM_PAIR }}
+        path: ${{ runner.temp }}/digests/*
+        if-no-files-found: error
+        retention-days: 1
+
+  publish-base-image:
+    name: Publish base image
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    needs: [build-base-image]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+    - name: Download digests
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ runner.temp }}/digests
+        pattern: digests-*
+        merge-multiple: true
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: mjgpluralsh
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/pluralsh/sentinel-harness-base
+          docker.io/pluralsh/sentinel-harness-base
+        tags: |
+          type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+          type=sha,priority=800
+          type=ref,event=pr,priority=600
+    - name: Create manifest list and push
+      working-directory: ${{ runner.temp }}/digests
+      run: |
+        docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+  publish-sentinel-harness:
+    name: Build and push sentinel harness container
+    runs-on: ubuntu-latest
+    needs: [publish-base-image]
+    env:
+      NODE_VERSION: 24.8.0
+    permissions:
+      contents: write
+      discussions: write
+      pull-requests: write
+      packages: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          ghcr.io/pluralsh/sentinel-harness
+          docker.io/pluralsh/sentinel-harness
+        tags: |
+          type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+          type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+          type=sha,priority=800
+          type=ref,event=pr,priority=600
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Login to Docker
+      uses: docker/login-action@v3
+      with:
+        username: mjgpluralsh
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: "./go"
+        file: "./go/deployment-operator/dockerfiles/sentinel-harness/terratest.Dockerfile"
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64,linux/arm64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          GO_VERSION=1.26.2
+          SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base
+          SENTINEL_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}

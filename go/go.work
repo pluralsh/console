@@ -7,6 +7,7 @@ use (
 	./controller // github.com/pluralsh/console/go/controller
 	./datastore // github.com/pluralsh/console/go/datastore
 	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service
+	./deployment-operator // github.com/pluralsh/console/go/deployment-operator
 	./helm-test // github.com/pluralsh/console/go/helm-test
 	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
 	./kubernetes-agent/api // github.com/pluralsh/console/go/kubernetes-agent/api

@@ -1,0 +1,15 @@
+commonLabels:
+  managed-by: plural
+  environment: production
+
+commonAnnotations:
+  plural.sh/managed: "true"
+  plural.sh/cluster: {{ cluster.name }}
+
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/replicas
+        value: 2

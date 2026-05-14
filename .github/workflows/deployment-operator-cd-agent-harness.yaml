@@ -1,0 +1,520 @@
+name: CD / Agent Harness
+
+on:
+  pull_request:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-agent-harness.yaml"
+    - "go/deployment-operator/dockerfiles/agent-harness/**"
+    - "go/deployment-operator/cmd/agent-harness/**"
+    - "go/deployment-operator/cmd/mcpserver/**"
+    - "go/deployment-operator/pkg/agentrun-harness/**"
+  push:
+    tags:
+    - 'go/deployment-operator/v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic Version (e.g. 1.2.3)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_IMAGE: pluralsh/agent-harness-base
+
+jobs:
+  output-versions:
+    name: Output versions
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: 24
+      CLAUDE_VERSION: 2.1.72
+      GEMINI_VERSION: 0.36.0
+      OPENCODE_VERSION: 1.2.24
+      CODEX_VERSION: 0.104.0
+    outputs:
+      node: ${{ env.NODE_VERSION }}
+      claude: ${{ env.CLAUDE_VERSION }}
+      gemini: ${{ env.GEMINI_VERSION }}
+      opencode: ${{ env.OPENCODE_VERSION }}
+      codex: ${{ env.CODEX_VERSION }}
+    steps:
+      - run: |
+          echo "NODE_VERSION=$NODE_VERSION"
+          echo "CLAUDE_VERSION=$CLAUDE_VERSION"
+          echo "GEMINI_VERSION=$GEMINI_VERSION"
+          echo "OPENCODE_VERSION=$OPENCODE_VERSION"
+          echo "CODEX_VERSION=$CODEX_VERSION"
+
+  build-base-image:
+    name: Build base image
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platforms.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/dockerfiles/agent-harness/base.Dockerfile"
+          tags: ${{ env.REGISTRY_IMAGE }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.platforms.platform }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-base-image:
+    name: Publish base image
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    needs: [build-base-image]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pluralsh/agent-harness-base
+            docker.io/pluralsh/agent-harness-base
+          tags: |
+            type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+            type=sha,priority=800
+            type=ref,event=pr,priority=600
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+  publish-agent-harness:
+    name: Build and push agent harness containers
+    runs-on: ubuntu-latest
+    needs: [ output-versions, publish-base-image ]
+    strategy:
+      matrix:
+        agents:
+          - name: claude
+            version: 2.1.72
+          - name: gemini
+            version: 0.36.0
+          - name: opencode
+            version: 1.2.24
+          - name: codex
+            version: 0.104.0
+    permissions:
+      contents: write
+      discussions: write
+      pull-requests: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/pluralsh/agent-harness
+            docker.io/pluralsh/agent-harness
+          tags: |
+            type=raw,value=${{ inputs.version }},suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }},enable=${{ inputs.version != '' }},priority=1100
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }},priority=1000
+            type=sha,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }},priority=800
+            type=ref,event=pr,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }},priority=600
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/dockerfiles/agent-harness/${{ matrix.agents.name }}.Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ needs.output-versions.outputs.node }}
+            AGENT_VERSION=${{ matrix.agents.version }}
+            AGENT_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/agent-harness-base
+            AGENT_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}
+
+  publish-agent-harness-with-programming-languages-support:
+    name: Build and push agent harness containers with programming language support
+    runs-on: ubuntu-latest
+    needs: [ output-versions, publish-base-image, publish-agent-harness ]
+    strategy:
+      matrix:
+        agents:
+          - name: claude
+            version: ${{ needs.output-versions.outputs.claude }}
+          - name: gemini
+            version: ${{ needs.output-versions.outputs.gemini }}
+          - name: opencode
+            version: ${{ needs.output-versions.outputs.opencode }}
+          - name: codex
+            version: ${{ needs.output-versions.outputs.codex }}
+        languages:
+          - name: golang
+            version: 1.24
+          - name: java
+            version: 25
+          - name: node
+            version: ${{ needs.output-versions.outputs.node }}
+          - name: python
+            version: 3.14
+        include:
+            # GitHub action matrices do not support nested arrays, so we add older language versions manually.
+            # Golang 1.23
+            - languages:
+                name: golang
+                version: 1.23
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: golang
+                version: 1.23
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: golang
+                version: 1.23
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: golang
+                version: 1.23
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Golang 1.22
+            - languages:
+                name: golang
+                version: 1.22
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: golang
+                version: 1.22
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: golang
+                version: 1.22
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: golang
+                version: 1.22
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Java 24
+            - languages:
+                name: java
+                version: 24
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: java
+                version: 24
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: java
+                version: 24
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: java
+                version: 24
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Java 23
+            - languages:
+                name: java
+                version: 23
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: java
+                version: 23
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: java
+                version: 23
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: java
+                version: 23
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Node 23
+            - languages:
+                name: node
+                version: 23
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: node
+                version: 23
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: node
+                version: 23
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: node
+                version: 23
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Node 22
+            - languages:
+                name: node
+                version: 22
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: node
+                version: 22
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: node
+                version: 22
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: node
+                version: 22
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Python 3.13
+            - languages:
+                name: python
+                version: 3.13
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: python
+                version: 3.13
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: python
+                version: 3.13
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: python
+                version: 3.13
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+            # Python 3.12
+            - languages:
+                name: python
+                version: 3.12
+              agents:
+                name: claude
+                version: ${{ needs.output-versions.outputs.claude }}
+            - languages:
+                name: python
+                version: 3.12
+              agents:
+                name: gemini
+                version: ${{ needs.output-versions.outputs.gemini }}
+            - languages:
+                name: python
+                version: 3.12
+              agents:
+                name: opencode
+                version: ${{ needs.output-versions.outputs.opencode }}
+            - languages:
+                name: python
+                version: 3.12
+              agents:
+                name: codex
+                version: ${{ needs.output-versions.outputs.codex }}
+    permissions:
+      contents: write
+      discussions: write
+      pull-requests: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/pluralsh/agent-harness
+            docker.io/pluralsh/agent-harness
+          tags: |
+            type=raw,value=${{ inputs.version }},suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }}-${{ matrix.languages.name }}-${{ matrix.languages.version }},enable=${{ inputs.version != '' }},priority=1100
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }}-${{ matrix.languages.name }}-${{ matrix.languages.version }},priority=1000
+            type=sha,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }}-${{ matrix.languages.name }}-${{ matrix.languages.version }},priority=800
+            type=ref,event=pr,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }}-${{ matrix.languages.name }}-${{ matrix.languages.version }},priority=600
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/dockerfiles/agent-harness/${{ matrix.languages.name }}.Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ matrix.languages.version }}
+            AGENT_HARNESS_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}-${{ matrix.agents.name }}-${{ matrix.agents.version }}
+            AGENT_HARNESS_IMAGE_REPO=ghcr.io/pluralsh/agent-harness

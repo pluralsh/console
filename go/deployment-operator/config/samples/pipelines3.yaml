@@ -1,0 +1,38 @@
+name: pipeline-demo3
+stages:
+- name: dev
+  services:
+  - name: mgmt/cd-demo5
+- name: prod
+  services:
+  - name: mgmt/cd-demo6
+    criteria:
+      source: mgmt/cd-demo5
+      secrets:
+      - tag
+edges:
+- from: dev
+  to: prod
+  gates:
+  - name: example-gate3
+    type: job
+    cluster: mgmt
+    clusterId: 15909239-6fac-472d-934f-6c793933cd79
+    spec:
+      job:
+        namespace: default
+        raw:
+          template:
+            spec:
+              serviceAccountName: default
+              containers:
+              - name: example-gate3
+                image: alpine:3.7
+                args:
+                - /bin/sh
+                - -c
+                - echo "Hello, cruel World!"; exit 1
+                env:
+                - name: ENV_VAR_1
+                  value: value1
+              restartPolicy: Never
