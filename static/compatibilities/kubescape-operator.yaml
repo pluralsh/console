@@ -506,7 +506,11 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: []
+    breaking_changes: []
   chart_version: 1.16.5
   images: []
 - version: 1.16.0
