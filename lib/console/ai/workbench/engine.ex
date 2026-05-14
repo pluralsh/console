@@ -274,7 +274,8 @@ defmodule Console.AI.Workbench.Engine do
 
   @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
-  defp preload_job(%WorkbenchJob{type: :skill} = job), do: Repo.preload(job, @preloads ++ [referenced_job: [:result, activities: :thoughts]])
+  defp preload_job(%WorkbenchJob{type: :skill} = job),
+    do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])
   defp preload_job(job), do: Repo.preload(job, @preloads)
 
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
