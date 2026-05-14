@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/godeployment-operator/internal/errors"
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/samber/lo"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"

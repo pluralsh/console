@@ -1,8 +1,8 @@
 package environment
 
 import (
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 )
 
 // WithWorkingDir allows changing the default working directory of the Environment.

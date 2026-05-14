@@ -18,9 +18,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/test/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/test/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
 )
 
 var _ = Describe("StackRunJob Controller", Ordered, func() {

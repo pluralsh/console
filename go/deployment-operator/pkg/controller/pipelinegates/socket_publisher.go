@@ -3,7 +3,7 @@ package pipelinegates
 import (
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 )
 
 type socketPublisher struct {

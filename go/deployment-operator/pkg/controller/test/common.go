@@ -1,6 +1,6 @@
 package test
 
-import "github.com/pluralsh/console/godeployment-operator/pkg/websocket"
+import "github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 
 const name = "fake"
 

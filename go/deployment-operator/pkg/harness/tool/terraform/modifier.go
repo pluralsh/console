@@ -6,8 +6,8 @@ import (
 
 	"github.com/samber/lo"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 )
 
 // Args implements [v1.ArgsModifier] type.

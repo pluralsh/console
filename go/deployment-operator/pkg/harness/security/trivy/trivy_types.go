@@ -7,7 +7,7 @@ import (
 	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/security/v1"
 )
 
 // Scanner is a scanner implementation for trivy.

@@ -8,9 +8,9 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 // Plan implements [v1.Tool] interface.

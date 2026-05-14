@@ -35,7 +35,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	cache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
+	cache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

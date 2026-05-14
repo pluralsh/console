@@ -9,11 +9,11 @@ import (
 	"k8s.io/kubectl/pkg/cmd/util"
 	ctrclient "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 	"github.com/pluralsh/console/go/polly/containers"
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
 )
 
 type Pinger struct {

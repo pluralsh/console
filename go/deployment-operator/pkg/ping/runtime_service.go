@@ -19,12 +19,12 @@ import (
 	runtimecache "sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	"github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
-	controllerv1 "github.com/pluralsh/console/godeployment-operator/pkg/controller/v1"
-	internallog "github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	controllerv1 "github.com/pluralsh/console/go/deployment-operator/pkg/controller/v1"
+	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const runtimeServicePingerName = "runtime service pinger"

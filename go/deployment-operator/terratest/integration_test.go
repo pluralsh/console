@@ -15,9 +15,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/console/godeployment-operator/dockerfiles/sentinel-harness/terratest/dns"
-	"github.com/pluralsh/console/godeployment-operator/dockerfiles/sentinel-harness/terratest/helpers"
-	"github.com/pluralsh/console/godeployment-operator/dockerfiles/sentinel-harness/terratest/types"
+	"github.com/pluralsh/console/go/deployment-operator/dockerfiles/sentinel-harness/terratest/dns"
+	"github.com/pluralsh/console/go/deployment-operator/dockerfiles/sentinel-harness/terratest/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/dockerfiles/sentinel-harness/terratest/types"
 )
 
 const filePathEnvVar = "TEST_CASES_FILE_PATH"

@@ -4,8 +4,8 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/security/trivy"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/security/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/security/trivy"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/security/v1"
 )
 
 // NewScanner creates a new [Scanner] instance based on the provided config.

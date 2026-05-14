@@ -10,8 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 
-	clienterrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	clienterrors "github.com/pluralsh/console/go/deployment-operator/internal/errors"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 func MarkStackRun(client console.Client, id string, status gqlclient.StackStatus) error {

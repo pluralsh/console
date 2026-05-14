@@ -7,14 +7,14 @@ import (
 	"os"
 
 	gqlclient "github.com/pluralsh/console/go/client"
-	internalerrors "github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
+	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/agentrun"
-	"github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/environment"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const bootstrapScriptPath = "/bootstrap/bootstrap.sh"

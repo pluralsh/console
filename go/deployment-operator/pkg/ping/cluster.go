@@ -9,15 +9,15 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/helpers"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/pluralsh/console/go/polly/containers"
 	"github.com/samber/lo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	internallog "github.com/pluralsh/console/godeployment-operator/pkg/log"
+	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 func RunClusterPingerInBackgroundOrDie(ctx context.Context, pinger *Pinger, duration time.Duration) {

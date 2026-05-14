@@ -3,7 +3,7 @@ package service_test
 import (
 	"context"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pluralsh/console/go/polly/algorithms"
 
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/harness/stackrun/v1"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 )
 
 func WithDir(workingDirectory string) Option {

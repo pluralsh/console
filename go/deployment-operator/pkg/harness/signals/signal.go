@@ -5,13 +5,13 @@ import (
 	"time"
 
 	gqlclient "github.com/pluralsh/console/go/client"
-	clienterrors "github.com/pluralsh/console/godeployment-operator/internal/errors"
+	clienterrors "github.com/pluralsh/console/go/deployment-operator/internal/errors"
 	"k8s.io/klog/v2"
 
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/environment"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/errors"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 type consoleSignal struct {

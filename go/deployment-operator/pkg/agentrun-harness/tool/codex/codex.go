@@ -9,13 +9,13 @@ import (
 	"strings"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
 
 const (

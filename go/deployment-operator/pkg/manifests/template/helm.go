@@ -37,9 +37,9 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/console/godeployment-operator/cmd/agent/args"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	loglevel "github.com/pluralsh/console/godeployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	loglevel "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 var repoFileMutex sync.Mutex

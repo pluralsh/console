@@ -8,7 +8,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/scm"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
 
 // ReactToComment is an MCP tool that adds an emoji reaction to a PR comment.

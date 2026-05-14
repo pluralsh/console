@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/websocket"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"

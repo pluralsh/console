@@ -12,9 +12,9 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
-	v1 "github.com/pluralsh/console/godeployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/godeployment-operator/pkg/harness/exec"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 func New(config v1.Config) v1.Tool {

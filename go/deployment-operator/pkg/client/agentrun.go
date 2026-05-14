@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	internalerror "github.com/pluralsh/console/godeployment-operator/internal/errors"
+	internalerror "github.com/pluralsh/console/go/deployment-operator/internal/errors"
 )
 
 func (c *client) IsAgentRunExists(ctx context.Context, id string) (bool, error) {

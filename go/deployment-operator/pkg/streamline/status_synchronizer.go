@@ -8,10 +8,10 @@ import (
 	"golang.org/x/time/rate"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/godeployment-operator/internal/utils"
-	"github.com/pluralsh/console/godeployment-operator/pkg/cache"
-	"github.com/pluralsh/console/godeployment-operator/pkg/client"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 // NewStatusSynchronizer creates a new StatusSynchronizer with rate limiting set to 10 calls per second.

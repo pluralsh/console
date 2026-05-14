@@ -17,13 +17,13 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
 
-	smcommon "github.com/pluralsh/console/godeployment-operator/pkg/streamline/common"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
 
-	"github.com/pluralsh/console/godeployment-operator/internal/metrics"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/godeployment-operator/pkg/common"
-	"github.com/pluralsh/console/godeployment-operator/pkg/log"
-	"github.com/pluralsh/console/godeployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/go/deployment-operator/internal/metrics"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
 
 type Option func(*Supervisor)

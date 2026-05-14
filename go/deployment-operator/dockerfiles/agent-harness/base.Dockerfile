@@ -27,7 +27,7 @@ RUN CGO_ENABLED=0 \
     GOARCH=${TARGETARCH} \
     go build \
     -trimpath \
-    -ldflags="-s -w -X github.com/pluralsh/deployment-operator/pkg/agentrun-harness/environment.Version=${VERSION}" \
+    -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment.Version=${VERSION}" \
     -o /agent-harness \
     cmd/agent-harness/main.go
 
@@ -37,7 +37,7 @@ RUN CGO_ENABLED=0 \
     GOARCH=${TARGETARCH} \
     go build \
     -trimpath \
-    -ldflags="-s -w -X github.com/pluralsh/deployment-operator/cmd/mcpserver/agent.Version=${VERSION}" \
+    -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent.Version=${VERSION}" \
     -o /mcpserver \
     cmd/mcpserver/agent/main.go
 

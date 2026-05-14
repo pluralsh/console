@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/pluralsh/console/godeployment-operator/pkg/lua"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/lua"
 )
 
 func init() {

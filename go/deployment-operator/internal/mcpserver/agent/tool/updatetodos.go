@@ -10,7 +10,7 @@ import (
 	"github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 
-	console "github.com/pluralsh/console/godeployment-operator/pkg/client"
+	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 func (in *UpdateTodos) Install(server *server.MCPServer) {

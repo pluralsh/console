@@ -11,10 +11,10 @@ import (
 	"k8s.io/apimachinery/pkg/version"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/console/godeployment-operator/api/v1alpha1"
-	discoverycache "github.com/pluralsh/console/godeployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/godeployment-operator/pkg/scraper"
-	"github.com/pluralsh/console/godeployment-operator/pkg/test/mocks"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scraper"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
 )
 
 var _ = Describe("MetricsAggregate Controller", Ordered, func() {
