@@ -70,7 +70,7 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 	})
 
-	t.Run("ANALYZE mode sets includeTools to only updateAgentRunAnalysis for plural MCP server", func(t *testing.T) {
+	t.Run("ANALYZE mode sets includeTools for plural MCP server", func(t *testing.T) {
 		input := *baseInput
 		input.AgentRunMode = console.AgentRunModeAnalyze
 
@@ -107,8 +107,18 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 				tools = append(tools, s)
 			}
 		}
-		if len(tools) != 1 || tools[0] != "updateAgentRunAnalysis" {
-			t.Errorf("includeTools must be exactly [\"updateAgentRunAnalysis\"] in ANALYZE mode, got: %v", tools)
+		want := map[string]struct{}{
+			"updateAgentRunAnalysis":   {},
+			"downloadServiceManifests": {},
+		}
+		for _, name := range tools {
+			delete(want, name)
+		}
+		if len(tools) != 2 {
+			t.Errorf("includeTools must contain exactly 2 tools in ANALYZE mode, got: %v", tools)
+		}
+		if len(want) != 0 {
+			t.Errorf("includeTools missing expected entries in ANALYZE mode, missing: %v", want)
 		}
 	})
 

@@ -24,7 +24,7 @@ var (
 	argConsoleUrl   = pflag.String("console-url", helpers.GetEnv(controller.EnvConsoleURL, ""), "URL to the Console, i.e. https://console.onplural.sh")
 	argConsoleToken = pflag.String("console-token", helpers.GetEnv(EnvConsoleToken, ""), "Deploy token to the Console API")
 	argAgentRunID   = pflag.String("agent-run-id", helpers.GetEnv(controller.EnvAgentRunID, ""), "ID of the Agent Run being executed")
-	argExcludeTools = pflag.String("exclude-tools", helpers.GetEnv(EnvExcludeTools, ""), "Comma-separated list of tools to exclude from the default set. Available tools: createBranch, agentPullRequest, fetchAgentRunTodos, updateAgentRunAnalysis, updateAgentRunTodos")
+	argExcludeTools = pflag.String("exclude-tools", helpers.GetEnv(EnvExcludeTools, ""), "Comma-separated list of tools to exclude from the default set. Available tools: createBranch, agentPullRequest, fetchAgentRunTodos, updateAgentRunAnalysis, updateAgentRunTodos, downloadServiceManifests")
 )
 
 func init() {

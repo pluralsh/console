@@ -202,6 +202,7 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"mcp__plural__updateAgentRunTodos",
 		"mcp__plural__getPRState",
 		"mcp__plural__getCILogs",
+		"mcp__plural__downloadServiceManifests",
 		"mcp__plural__reactToComment")
 
 	for _, cfg := range in.Config.Run.Runtime.ExaMcpConfigs {
@@ -265,7 +266,8 @@ func (in *Claude) Configure(consoleURL, consoleToken, _ string) error {
 			"Bash(grep:*)",
 			"Bash(find:*)",
 			"WebFetch",
-			"mcp__plural__updateAgentRunAnalysis").
+			"mcp__plural__updateAgentRunAnalysis",
+			"mcp__plural__downloadServiceManifests").
 			DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
 	} else {
 		settings.AllowTools(
@@ -278,7 +280,8 @@ func (in *Claude) Configure(consoleURL, consoleToken, _ string) error {
 			"mcp__plural__agentPullRequest",
 			"mcp__plural__createBranch",
 			"mcp__plural__fetchAgentRunTodos",
-			"mcp__plural__updateAgentRunTodos")
+			"mcp__plural__updateAgentRunTodos",
+			"mcp__plural__downloadServiceManifests")
 	}
 
 	for _, cfg := range in.Config.Run.Runtime.ExaMcpConfigs {

@@ -35,6 +35,8 @@ func ToID(id string) (ID, error) {
 		return CreateCommitTool, nil
 	case string(ReactToCommentTool):
 		return ReactToCommentTool, nil
+	case string(DownloadManifestsTool):
+		return DownloadManifestsTool, nil
 	}
 
 	return "", fmt.Errorf("invalid tool ID: %s", id)
@@ -50,6 +52,7 @@ const (
 	GetPRStateTool        ID = "getPRState"
 	GetCILogsTool         ID = "getCILogs"
 	ReactToCommentTool    ID = "reactToComment"
+	DownloadManifestsTool ID = "downloadServiceManifests"
 )
 
 // Tool is an MCP tool that can be installed on the MCP server
@@ -104,5 +107,12 @@ type CreateBranch struct {
 
 // FetchTodos is an MCP tool that gets the todos for a given agent run
 type FetchTodos struct {
+	ConsoleTool
+}
+
+// DownloadManifests is an MCP tool that fetches the rendered Kubernetes
+// manifests for a Plural service via the service files GraphQL API and
+// writes them to a local subdirectory so the agent can inspect them.
+type DownloadManifests struct {
 	ConsoleTool
 }

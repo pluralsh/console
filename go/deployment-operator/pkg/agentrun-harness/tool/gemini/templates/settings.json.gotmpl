@@ -60,7 +60,7 @@
       "trust": true{{ if eq .AgentRunMode "WRITE" }},
       "excludeTools": ["updateAgentRunAnalysis"]
 {{ else }},
-      "includeTools": ["updateAgentRunAnalysis"]
+      "includeTools": ["updateAgentRunAnalysis", "downloadServiceManifests"]
 {{ end }}
     }{{ range .ExaMcpConfigs }},
     "{{ .Name }}": {

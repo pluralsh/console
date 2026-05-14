@@ -1535,6 +1535,65 @@ func (_c *ClientMock_GetService_Call) RunAndReturn(run func(string) (*goclient.S
 	return _c
 }
 
+// GetServiceDeploymentByHandle provides a mock function with given fields: cluster, name
+func (_m *ClientMock) GetServiceDeploymentByHandle(cluster string, name string) (*goclient.ServiceDeploymentExtended, error) {
+	ret := _m.Called(cluster, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceDeploymentByHandle")
+	}
+
+	var r0 *goclient.ServiceDeploymentExtended
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*goclient.ServiceDeploymentExtended, error)); ok {
+		return rf(cluster, name)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *goclient.ServiceDeploymentExtended); ok {
+		r0 = rf(cluster, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*goclient.ServiceDeploymentExtended)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(cluster, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientMock_GetServiceDeploymentByHandle_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceDeploymentByHandle'
+type ClientMock_GetServiceDeploymentByHandle_Call struct {
+	*mock.Call
+}
+
+// GetServiceDeploymentByHandle is a helper method to define mock.On call
+//   - cluster string
+//   - name string
+func (_e *ClientMock_Expecter) GetServiceDeploymentByHandle(cluster interface{}, name interface{}) *ClientMock_GetServiceDeploymentByHandle_Call {
+	return &ClientMock_GetServiceDeploymentByHandle_Call{Call: _e.mock.On("GetServiceDeploymentByHandle", cluster, name)}
+}
+
+func (_c *ClientMock_GetServiceDeploymentByHandle_Call) Run(run func(cluster string, name string)) *ClientMock_GetServiceDeploymentByHandle_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ClientMock_GetServiceDeploymentByHandle_Call) Return(_a0 *goclient.ServiceDeploymentExtended, _a1 error) *ClientMock_GetServiceDeploymentByHandle_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ClientMock_GetServiceDeploymentByHandle_Call) RunAndReturn(run func(string, string) (*goclient.ServiceDeploymentExtended, error)) *ClientMock_GetServiceDeploymentByHandle_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetServiceDeploymentComponents provides a mock function with given fields: id
 func (_m *ClientMock) GetServiceDeploymentComponents(id string) (*goclient.GetServiceDeploymentComponents_ServiceDeployment, error) {
 	ret := _m.Called(id)
@@ -1589,6 +1648,64 @@ func (_c *ClientMock_GetServiceDeploymentComponents_Call) Return(_a0 *goclient.G
 }
 
 func (_c *ClientMock_GetServiceDeploymentComponents_Call) RunAndReturn(run func(string) (*goclient.GetServiceDeploymentComponents_ServiceDeployment, error)) *ClientMock_GetServiceDeploymentComponents_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetServiceTarball provides a mock function with given fields: id
+func (_m *ClientMock) GetServiceTarball(id string) ([]*goclient.GetServiceTarball_ServiceTarball, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceTarball")
+	}
+
+	var r0 []*goclient.GetServiceTarball_ServiceTarball
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]*goclient.GetServiceTarball_ServiceTarball, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) []*goclient.GetServiceTarball_ServiceTarball); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*goclient.GetServiceTarball_ServiceTarball)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientMock_GetServiceTarball_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceTarball'
+type ClientMock_GetServiceTarball_Call struct {
+	*mock.Call
+}
+
+// GetServiceTarball is a helper method to define mock.On call
+//   - id string
+func (_e *ClientMock_Expecter) GetServiceTarball(id interface{}) *ClientMock_GetServiceTarball_Call {
+	return &ClientMock_GetServiceTarball_Call{Call: _e.mock.On("GetServiceTarball", id)}
+}
+
+func (_c *ClientMock_GetServiceTarball_Call) Run(run func(id string)) *ClientMock_GetServiceTarball_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ClientMock_GetServiceTarball_Call) Return(_a0 []*goclient.GetServiceTarball_ServiceTarball, _a1 error) *ClientMock_GetServiceTarball_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ClientMock_GetServiceTarball_Call) RunAndReturn(run func(string) ([]*goclient.GetServiceTarball_ServiceTarball, error)) *ClientMock_GetServiceTarball_Call {
 	_c.Call.Return(run)
 	return _c
 }
