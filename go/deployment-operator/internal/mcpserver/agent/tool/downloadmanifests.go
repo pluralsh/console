@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	securejoin "github.com/cyphar/filepath-securejoin"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
@@ -24,7 +25,10 @@ const manifestsSubdir = "manifests"
 // sync with `sharedContextVolumePath` in internal/controller/agentrun_pod.go.
 const agentHarnessSharedDir = "/plural/shared"
 
-var safeNamePattern = regexp.MustCompile(`[^a-zA-Z0-9._-]+`)
+// safeNamePattern intentionally excludes `.` so that handles like `..` collapse
+// to `-` and ultimately fall back to the sanitizeSegment sentinel rather than
+// producing surprising directory names like `..-myservice`.
+var safeNamePattern = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
 
 func (in *DownloadManifests) Install(s *server.MCPServer) {
 	s.AddTool(
@@ -79,12 +83,21 @@ func (in *DownloadManifests) handler(_ context.Context, request mcp.CallToolRequ
 			continue
 		}
 
-		path, err := safeJoin(targetDir, file.Path)
+		if file.Path == "" {
+			return mcp.NewToolResultError(fmt.Sprintf("refusing to write empty file path from service %q", serviceName)), nil
+		}
+		// SecureJoin lexically and symlink-safely anchors file.Path under
+		// targetDir; an attempt to escape via "..", absolute paths, or
+		// symlinks resolves back inside targetDir.
+		path, err := securejoin.SecureJoin(targetDir, file.Path)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("refusing to write %q from service %q: %v", file.Path, serviceName, err)), nil
 		}
 
-		content, err := base64.StdEncoding.DecodeString(file.Content)
+		// Strip any trailing `=` padding and decode with RawStdEncoding so we
+		// accept both padded standard base64 and the unpadded variant that
+		// some Console releases may emit.
+		content, err := base64.RawStdEncoding.DecodeString(strings.TrimRight(file.Content, "="))
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("failed to decode content for %q: %v", file.Path, err)), nil
 		}
@@ -156,27 +169,6 @@ func resolveManifestsBaseDir() string {
 		return filepath.Dir(cfg.Dir)
 	}
 	return agentHarnessSharedDir
-}
-
-// safeJoin joins name onto base, rejecting absolute paths and any `..`
-// traversal that would escape base.
-func safeJoin(base, name string) (string, error) {
-	if name == "" {
-		return "", fmt.Errorf("empty file path")
-	}
-	if filepath.IsAbs(name) {
-		return "", fmt.Errorf("absolute file path is not allowed")
-	}
-
-	joined := filepath.Join(base, name)
-	rel, err := filepath.Rel(base, joined)
-	if err != nil {
-		return "", fmt.Errorf("invalid file path %q: %w", name, err)
-	}
-	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", fmt.Errorf("file path %q escapes target directory", name)
-	}
-	return joined, nil
 }
 
 // sanitizeSegment normalises an untrusted value into a safe directory segment.
