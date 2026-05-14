@@ -190,7 +190,7 @@ func sanitizeSegment(s string) string {
 	return s
 }
 
-func NewDownloadManifests(client console.Client, agentRunID string) Tool {
+func NewDownloadManifests(client console.Client) Tool {
 	return &DownloadManifests{
 		ConsoleTool: ConsoleTool{
 			id: DownloadManifestsTool,
@@ -201,8 +201,7 @@ func NewDownloadManifests(client console.Client, agentRunID string) Tool {
 				"'" + manifestsSubdir + "/' next to the cloned repository. Use this to inspect " +
 				"Plural's gitops layout - including external Helm charts - instead of guessing via " +
 				"web searches. After it returns, inspect the listed directory with Read/Glob/Grep.",
-			client:     client,
-			agentRunID: agentRunID,
+			client: client,
 		},
 	}
 }
