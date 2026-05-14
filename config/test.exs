@@ -496,12 +496,10 @@ users:
 """
 
 config :console, Console.Mailer,
-  adapter: Bamboo.TestAdapter
+  adapter: Swoosh.Adapters.Test
 
 config :console, Console.Deployments.Metrics.Provider.NewRelic,
   plug: {Req.Test, Console.Deployments.Metrics.Provider.NewRelic}
-
-config :bamboo, :refute_timeout, 10
 
 config :elasticsearch,
   host: System.get_env("ELASTICSEARCH_HOST", "http://localhost:9200"),

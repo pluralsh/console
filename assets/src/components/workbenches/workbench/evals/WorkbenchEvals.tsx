@@ -9,9 +9,9 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
-import { WorkbenchOutletContext } from '../Workbench'
+import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
@@ -42,8 +42,7 @@ export function WorkbenchEvals() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
-  const { workbenchId, setSideContent, setShowDescription, setHeaderActions } =
-    useOutletContext<WorkbenchOutletContext>()
+  const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
   const [selectedEvalResultId, setSelectedEvalResultId] = useState<
     string | null
   >(null)
@@ -80,56 +79,6 @@ export function WorkbenchEvals() {
       onError: (e) => popToast({ content: e.message, severity: 'danger' }),
     })
 
-  useEffect(() => {
-    const evalResultId = selectedEvalRow?.id
-
-    setHeaderActions(
-      <Button
-        disabled={!evalResultId || skillMutationLoading || (loading && !data)}
-        loading={skillMutationLoading}
-        onClick={() => {
-          if (!evalResultId) return
-          workbenchEvalSkill({ variables: { id: evalResultId } })
-        }}
-      >
-        Create skills from eval
-      </Button>
-    )
-
-    return () => setHeaderActions(null)
-  }, [
-    data,
-    loading,
-    selectedEvalRow?.id,
-    setHeaderActions,
-    skillMutationLoading,
-    workbenchEvalSkill,
-  ])
-
-  useEffect(() => {
-    setSideContent(
-      <WorkbenchEvalsSidePanel
-        evalRows={evalRows}
-        loading={loading && !data}
-        selectedEvalResultId={selectedEvalRow?.id}
-        onSelectEvalResultId={setSelectedEvalResultId}
-      />
-    )
-    setShowDescription(false)
-
-    return () => {
-      setSideContent(null)
-      setShowDescription(true)
-    }
-  }, [
-    data,
-    evalRows,
-    loading,
-    selectedEvalRow?.id,
-    setShowDescription,
-    setSideContent,
-  ])
-
   const feedback = selectedEvalRow?.feedback
   const grade = selectedEvalRow?.grade ?? 0
   const feedbackByTab: Record<QualityTab, string> = {
@@ -138,148 +87,180 @@ export function WorkbenchEvals() {
     logic: feedback?.logic ?? 'No logic available',
   }
   const durationSeconds = getDurationSeconds(selectedEvalRow?.workbenchJob)
-
-  if (error) return <GqlError error={error} />
+  const selectedEvalResultIdForSkill = selectedEvalRow?.id
 
   return (
-    <Flex
-      direction="column"
-      flex={1}
-      gap="medium"
-      minHeight={0}
-      overflow="hidden"
-      css={{ borderTop: theme.borders['fill-one'] }}
-    >
-      {!selectedEvalRow ? (
-        <Flex
-          align="center"
-          flex={1}
-          justify="center"
-          minHeight={0}
+    <WorkbenchPageLayout
+      showDescription={false}
+      sidebar={{
+        kind: 'custom',
+        content: (
+          <WorkbenchEvalsSidePanel
+            evalRows={evalRows}
+            loading={loading && !data}
+            selectedEvalResultId={selectedEvalRow?.id}
+            onSelectEvalResultId={setSelectedEvalResultId}
+          />
+        ),
+      }}
+      headerActions={
+        <Button
+          disabled={
+            !selectedEvalResultIdForSkill ||
+            skillMutationLoading ||
+            (loading && !data)
+          }
+          loading={skillMutationLoading}
+          onClick={() => {
+            if (!selectedEvalResultIdForSkill) return
+            workbenchEvalSkill({
+              variables: { id: selectedEvalResultIdForSkill },
+            })
+          }}
         >
-          <EmptyState message="No evals available yet." />
-        </Flex>
+          Create skills from eval
+        </Button>
+      }
+    >
+      {error ? (
+        <GqlError error={error} />
       ) : (
-        <ColumnsSC $qualityCollapsed={qualityBreakdownCollapsed}>
-          <PanelSC $trimRightBorder={qualityBreakdownCollapsed}>
-            <PanelHeaderSC>
-              <Flex
-                align="center"
-                justify="space-between"
-                gap="small"
-                width="100%"
-              >
-                <span css={{ flexShrink: 0 }}>Summary</span>
-                {qualityBreakdownCollapsed && (
-                  <IconFrame
-                    clickable
-                    type="tertiary"
-                    size="small"
-                    textValue="Expand quality breakdown"
-                    icon={<HamburgerMenuCollapseIcon />}
-                    tooltip="Expand quality breakdown"
-                    onClick={() => setQualityBreakdownCollapsed(false)}
-                  />
-                )}
-              </Flex>
-            </PanelHeaderSC>
-            <PanelBodySC>
-              <Flex
-                align="center"
-                gap="medium"
-              >
-                <ScoreBadgeSC $color={evalGradeToColor(grade)}>
-                  {Math.round(grade)}
-                </ScoreBadgeSC>
-                <Flex direction="column">
-                  <span
-                    css={{ ...theme.partials.text.subtitle2, fontWeight: 400 }}
+        <EvalsContentSC>
+          {!selectedEvalRow ? (
+            <Flex
+              align="center"
+              flex={1}
+              justify="center"
+              minHeight={0}
+            >
+              <EmptyState message="No evals available yet." />
+            </Flex>
+          ) : (
+            <ColumnsSC $qualityCollapsed={qualityBreakdownCollapsed}>
+              <PanelSC $trimRightBorder={qualityBreakdownCollapsed}>
+                <PanelHeaderSC>
+                  <Flex
+                    align="center"
+                    justify="space-between"
+                    gap="small"
+                    width="100%"
                   >
-                    Overall grade: {grade.toFixed(0)}/10
-                  </span>
-                  <span
+                    <span css={{ flexShrink: 0 }}>Summary</span>
+                    {qualityBreakdownCollapsed && (
+                      <IconFrame
+                        clickable
+                        type="tertiary"
+                        size="small"
+                        textValue="Expand quality breakdown"
+                        icon={<HamburgerMenuCollapseIcon />}
+                        tooltip="Expand quality breakdown"
+                        onClick={() => setQualityBreakdownCollapsed(false)}
+                      />
+                    )}
+                  </Flex>
+                </PanelHeaderSC>
+                <PanelBodySC>
+                  <Flex
+                    align="center"
+                    gap="medium"
+                  >
+                    <ScoreBadgeSC $color={evalGradeToColor(grade)}>
+                      {Math.round(grade)}
+                    </ScoreBadgeSC>
+                    <Flex direction="column">
+                      <span
+                        css={{
+                          ...theme.partials.text.subtitle2,
+                          fontWeight: 400,
+                        }}
+                      >
+                        Overall grade: {grade.toFixed(0)}/10
+                      </span>
+                      <span
+                        css={{
+                          ...theme.partials.text.body2,
+                          color: theme.colors['text-light'],
+                        }}
+                      >
+                        {durationSeconds && `${durationSeconds} seconds`}
+                      </span>
+                    </Flex>
+                  </Flex>
+                  <Flex
+                    direction="column"
+                    css={{ marginTop: theme.spacing.medium }}
+                  >
+                    <Subtitle1H1>Summary</Subtitle1H1>
+                    <Markdown text={feedback?.summary ?? ''} />
+                  </Flex>
+                </PanelBodySC>
+              </PanelSC>
+
+              {!qualityBreakdownCollapsed && (
+                <PanelSC $trimRightBorder>
+                  <PanelHeaderSC>
+                    <Flex
+                      alignItems="center"
+                      justify="space-between"
+                      gap="small"
+                      width="100%"
+                    >
+                      <span css={{ flexShrink: 0 }}>Quality breakdown</span>
+                      <IconFrame
+                        clickable
+                        type="tertiary"
+                        size="small"
+                        textValue="Collapse quality breakdown"
+                        icon={<HamburgerMenuCollapsedIcon />}
+                        tooltip="Collapse quality breakdown"
+                        onClick={() => setQualityBreakdownCollapsed(true)}
+                      />
+                    </Flex>
+                  </PanelHeaderSC>
+                  <Flex
                     css={{
-                      ...theme.partials.text.body2,
-                      color: theme.colors['text-light'],
+                      backgroundColor: theme.colors['fill-one'],
+                      width: '100%',
                     }}
                   >
-                    {durationSeconds && `${durationSeconds} seconds`}
-                  </span>
-                </Flex>
-              </Flex>
-              <Flex
-                direction="column"
-                css={{ marginTop: theme.spacing.medium }}
-              >
-                <Subtitle1H1>Summary</Subtitle1H1>
-                <Markdown text={feedback?.summary ?? ''} />
-              </Flex>
-            </PanelBodySC>
-          </PanelSC>
-
-          {!qualityBreakdownCollapsed && (
-            <PanelSC $trimRightBorder>
-              <PanelHeaderSC>
-                <Flex
-                  alignItems="center"
-                  justify="space-between"
-                  gap="small"
-                  width="100%"
-                >
-                  <span css={{ flexShrink: 0 }}>Quality breakdown</span>
-                  <IconFrame
-                    clickable
-                    type="tertiary"
-                    size="small"
-                    textValue="Collapse quality breakdown"
-                    icon={<HamburgerMenuCollapsedIcon />}
-                    tooltip="Collapse quality breakdown"
-                    onClick={() => setQualityBreakdownCollapsed(true)}
-                  />
-                </Flex>
-              </PanelHeaderSC>
-              <Flex
-                css={{
-                  backgroundColor: theme.colors['fill-one'],
-                  width: '100%',
-                }}
-              >
-                <TabList
-                  stateRef={qualityTabsStateRef}
-                  stateProps={{
-                    orientation: 'horizontal',
-                    selectedKey: qualityTab,
-                    onSelectionChange: (key) =>
-                      setQualityTab(key as QualityTab),
-                  }}
-                  flexShrink={0}
-                >
-                  {qualityTabs.map((tab) => (
-                    <Tab
-                      key={tab.key}
-                      textValue={tab.label}
+                    <TabList
+                      stateRef={qualityTabsStateRef}
+                      stateProps={{
+                        orientation: 'horizontal',
+                        selectedKey: qualityTab,
+                        onSelectionChange: (key) =>
+                          setQualityTab(key as QualityTab),
+                      }}
+                      flexShrink={0}
                     >
-                      {tab.label}
-                    </Tab>
-                  ))}
-                </TabList>
-                <Flex
-                  flex={1}
-                  minWidth={0}
-                  css={{
-                    alignSelf: 'stretch',
-                    borderBottom: theme.borders.default,
-                  }}
-                />
-              </Flex>
-              <PanelBodySC>
-                <Markdown text={feedbackByTab[qualityTab]} />
-              </PanelBodySC>
-            </PanelSC>
+                      {qualityTabs.map((tab) => (
+                        <Tab
+                          key={tab.key}
+                          textValue={tab.label}
+                        >
+                          {tab.label}
+                        </Tab>
+                      ))}
+                    </TabList>
+                    <Flex
+                      flex={1}
+                      minWidth={0}
+                      css={{
+                        alignSelf: 'stretch',
+                        borderBottom: theme.borders.default,
+                      }}
+                    />
+                  </Flex>
+                  <PanelBodySC>
+                    <Markdown text={feedbackByTab[qualityTab]} />
+                  </PanelBodySC>
+                </PanelSC>
+              )}
+            </ColumnsSC>
           )}
-        </ColumnsSC>
+        </EvalsContentSC>
       )}
-    </Flex>
+    </WorkbenchPageLayout>
   )
 }
 
@@ -295,6 +276,16 @@ function getDurationSeconds(job: EvalRow['workbenchJob'] | null | undefined) {
     0
   )
 }
+
+const EvalsContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  minHeight: 0,
+  overflow: 'hidden',
+  borderTop: theme.borders['fill-one'],
+}))
 
 const ColumnsSC = styled.div<{ $qualityCollapsed: boolean }>(
   ({ $qualityCollapsed }) => ({

@@ -6,11 +6,11 @@ import { useWorkbenchIssuesQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchPageLayout } from './Workbench'
 
 export function WorkbenchIssues() {
-  const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -22,22 +22,37 @@ export function WorkbenchIssues() {
     [data]
   )
 
-  if (error) return <GqlError error={error} />
-
   return (
-    <Flex
-      css={{
-        padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-      }}
-    >
-      <WorkbenchIssuesTable
-        issues={issues}
-        loading={!data && loading}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        setVirtualSlice={setVirtualSlice}
-        fallbackWorkbenchId={workbenchId}
-      />
-    </Flex>
+    <WorkbenchPageLayout>
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <WrapperSC>
+          <TableContainerSC>
+            <WorkbenchIssuesTable
+              issues={issues}
+              loading={!data && loading}
+              hasNextPage={pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              setVirtualSlice={setVirtualSlice}
+              fallbackWorkbenchId={workbenchId}
+            />
+          </TableContainerSC>
+        </WrapperSC>
+      )}
+    </WorkbenchPageLayout>
   )
 }
+
+const WrapperSC = styled(Flex)(({ theme }) => ({
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 160,
+  overflow: 'hidden',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+}))
+
+const TableContainerSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+})

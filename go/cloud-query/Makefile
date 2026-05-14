@@ -45,7 +45,9 @@ proto: --tool install-protoc ## generate gRPC client and server code
         --plugin=protoc-gen-go=$(BINARIES_DIR)/protoc-gen-go \
         --plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
 		--go_out=. \
+		--go_opt=module=github.com/pluralsh/console/go/cloud-query \
 		--go-grpc_out=. \
+		--go-grpc_opt=module=github.com/pluralsh/console/go/cloud-query \
         --proto_path=api/proto \
         api/proto/*.proto
 

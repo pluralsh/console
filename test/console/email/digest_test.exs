@@ -1,9 +1,11 @@
 defmodule Console.Email.DigestTest do
   use Console.DataCase, async: false
-  use Bamboo.Test, shared: true
+  import Swoosh.TestAssertions
 
   alias Console.Email.Digest
   alias Console.Email.Builder
+
+  setup :set_swoosh_global
 
   describe "#normal/0" do
     test "it can deliver some digest emails" do
@@ -24,9 +26,9 @@ defmodule Console.Email.DigestTest do
 
       Digest.normal()
 
-      assert_delivered_email Builder.Digest.email(user1, 3)
-      assert_delivered_email Builder.Digest.email(user2, 2)
-      refute_delivered_email Builder.Digest.email(user3, 2)
+      assert_email_sent Builder.Digest.email(user1, 3)
+      assert_email_sent Builder.Digest.email(user2, 2)
+      assert_email_not_sent Builder.Digest.email(user3, 2)
     end
   end
 end

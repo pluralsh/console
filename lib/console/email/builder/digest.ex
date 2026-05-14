@@ -6,6 +6,6 @@ defmodule Console.Email.Builder.Digest do
     |> to(user)
     |> subject("You have #{count} new activities in Plural!")
     |> assign(:count, count)
-    |> render(:digest)
+    |> render_body(:digest)
   end
 end

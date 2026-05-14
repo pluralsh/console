@@ -7,7 +7,7 @@ defmodule Console.Deployments.PubSub.Email do
 
 
   def handle_event(event) do
-    with %Bamboo.Email{} = email <- Emailable.email(event) do
+    with %Swoosh.Email{} = email <- Emailable.email(event) do
       Console.Mailer.maybe_deliver(email)
     end
   end

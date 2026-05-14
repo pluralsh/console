@@ -319,13 +319,6 @@ versions:
   summary: null
   chart_version: 0.22.1
   images: ['timberio/vector:0.30.0-distroless-libc']
-- version: 0.29.1
-  kube: ['1.27', '1.26', '1.25']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 0.21.1
-  images: ['timberio/vector:0.29.1-distroless-libc']
 - version: 0.29.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []

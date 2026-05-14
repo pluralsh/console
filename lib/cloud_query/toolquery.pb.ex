@@ -497,6 +497,25 @@ defmodule Toolquery.TracesQueryOutput do
   field :spans, 1, repeated: true, type: Toolquery.TraceSpan
 end
 
+defmodule Toolquery.InvokeLambdaInput do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :connection, 1, type: Cloudquery.Connection
+  field :identifier, 2, type: :string
+  field :payload_json, 3, type: :string, json_name: "payloadJson"
+end
+
+defmodule Toolquery.InvokeLambdaOutput do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :result, 1, type: :string
+  field :error, 2, type: :string
+end
+
 defmodule Toolquery.ToolQuery.Service do
   @moduledoc false
 
@@ -509,6 +528,8 @@ defmodule Toolquery.ToolQuery.Service do
   rpc :Logs, Toolquery.LogsQueryInput, Toolquery.LogsQueryOutput
 
   rpc :Traces, Toolquery.TracesQueryInput, Toolquery.TracesQueryOutput
+
+  rpc :InvokeLambda, Toolquery.InvokeLambdaInput, Toolquery.InvokeLambdaOutput
 end
 
 defmodule Toolquery.ToolQuery.Stub do

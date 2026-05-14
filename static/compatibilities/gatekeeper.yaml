@@ -672,7 +672,7 @@ versions:
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0', 'openpolicyagent/gatekeeper:v3.13.0']
   eolAt: '2024-02-05'
 - version: 3.12.0
-  kube: ['1.27', '1.26', '1.25']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:
@@ -708,35 +708,6 @@ versions:
   chart_version: 3.12.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.12.0', 'openpolicyagent/gatekeeper:v3.12.0']
   eolAt: '2023-11-01'
-- version: 3.11.1
-  kube: ['1.27', '1.26', '1.25']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: "### Helm chart / values changes\n- No explicit **values.yaml**\
-      \ changes are called out in the provided notes for `v3.11.1`.\n- For `v3.11.0`,\
-      \ two Helm-related fixes may affect installs/upgrades:\n  - Post-install/post-upgrade\
-      \ jobs are allowed again (fix for Helm hook/job behavior).\n  - Chart avoids\
-      \ mixing `pod-security.kubernetes.io/*` labels with `ignore` labels (may change\
-      \ rendered namespace labels if you set either).\n\n### Upgrade implications\n\
-      - If you rely on Helm hooks/jobs (CRD install jobs, certgen jobs, etc.), `v3.11.0`\
-      \ includes a fix that may change whether those run as expected during upgrade.\n\
-      - If you set Pod Security Admission (PSA) labels on the Gatekeeper namespace\
-      \ via values, verify the resulting labels after upgrade to ensure you\u2019\
-      re not depending on the previously mixed/invalid combination.\n"
-    chart_updates: ['Helm: allow installation of post-install and post-upgrade jobs
-        (fixes hook/job install behavior).', 'Helm: avoid mixing Pod Security `ignore`
-        labels with PSA podSecurity labels (label rendering/validation fix).', 'Chart
-        metadata: adds an icon to Chart.yaml (cosmetic).']
-    features: [External Data is promoted to beta; external data providers now require
-        TLS/mTLS., 'Gator CLI is promoted to beta and now supports tracing, AdmissionReview
-        input, and specifying an OCI image.', Audit logs can include resource labels
-        to improve log context and filtering.]
-    breaking_changes: [External Data providers must be accessed over TLS/mTLS starting
-        in v3.11.0; plaintext providers will stop working until updated.]
-  chart_version: 3.11.1
-  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.1', 'openpolicyagent/gatekeeper:v3.11.1']
-  eolAt: '2023-08-08'
 - version: 3.11.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
