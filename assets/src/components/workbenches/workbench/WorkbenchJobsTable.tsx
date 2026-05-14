@@ -178,7 +178,7 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
           />
         )}
         <PRsModalIcon prs={prs} />
-        {workbenchId && evalResult?.id && !!evalResult?.grade && (
+        {workbenchId && evalResult?.id && evalResult.grade != null && (
           <WorkbenchEvalGradeBadge
             grade={evalResult.grade}
             tooltip="View eval details"
