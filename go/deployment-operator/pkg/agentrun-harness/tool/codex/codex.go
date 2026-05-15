@@ -231,10 +231,7 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser})
 	}
 
-	var lastOutputLine string
 	err := in.executable.RunStream(ctx, func(line []byte) {
-		lineText := strings.TrimSpace(string(line))
-		lastOutputLine = lineText
 		event := &StreamEvent{}
 		if err := json.Unmarshal(line, event); err != nil {
 			klog.V(log.LogLevelExtended).InfoS("failed to unmarshal codex stream event", "line", string(line))
@@ -252,9 +249,8 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 		}
 	})
 	if err != nil {
-		errToReport := fmt.Errorf("codex execution failed: %w (last_output=%q)", err, lastOutputLine)
-		klog.ErrorS(errToReport, "codex execution failed")
-		in.Config.ErrorChan <- errToReport
+		klog.ErrorS(err, "codex execution failed")
+		in.Config.ErrorChan <- err
 		return false
 	}
 
@@ -306,10 +302,7 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser})
 	}
 
-	var lastOutputLine string
 	err := in.executable.RunStream(ctx, func(line []byte) {
-		lineText := strings.TrimSpace(string(line))
-		lastOutputLine = lineText
 		event := &StreamEvent{}
 		if err := json.Unmarshal(line, event); err != nil {
 			klog.V(log.LogLevelExtended).InfoS("failed to unmarshal codex stream event", "line", string(line))
@@ -327,9 +320,8 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 		}
 	})
 	if err != nil {
-		errToReport := fmt.Errorf("codex execution failed: %w (last_output=%q)", err, lastOutputLine)
-		klog.ErrorS(errToReport, "codex execution failed")
-		in.Config.ErrorChan <- errToReport
+		klog.ErrorS(err, "codex execution failed")
+		in.Config.ErrorChan <- err
 		return
 	}
 	klog.V(log.LogLevelExtended).InfoS("codex execution finished")
