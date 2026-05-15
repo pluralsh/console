@@ -10,10 +10,16 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import {
   getWorkbenchEvalResultAbsPath,
+  getWorkbenchJobAbsPath,
   WORKBENCH_EVAL_RESULT_PARAM_ID,
   getWorkbenchEvalSettingsAbsPath,
 } from 'routes/workbenchesRoutesConsts'
@@ -77,7 +83,6 @@ export function WorkbenchEvals() {
     conclusion: feedback?.result ?? 'No conclusion available',
     logic: feedback?.logic ?? 'No logic available',
   }
-  const durationSeconds = getDurationSeconds(selectedEvalRow?.workbenchJob)
   const selectedEvalResultIdForSkill = selectedEvalRow?.id
   const promptText = (selectedEvalRow?.workbenchJob?.prompt ?? '').trim()
   const canExpandPrompt = promptHasOverflow || promptExpanded
@@ -210,14 +215,20 @@ export function WorkbenchEvals() {
                       >
                         Overall grade: {grade.toFixed(0)}/10
                       </span>
-                      <span
-                        css={{
-                          ...theme.partials.text.body2,
-                          color: theme.colors['text-light'],
-                        }}
-                      >
-                        {durationSeconds && `${durationSeconds} seconds`}
-                      </span>
+                      {selectedEvalRow?.workbenchJob?.id && (
+                        <Link
+                          to={getWorkbenchJobAbsPath({
+                            workbenchId,
+                            jobId: selectedEvalRow.workbenchJob.id,
+                          })}
+                          css={{
+                            ...theme.partials.text.inlineLink,
+                            textDecoration: 'none',
+                          }}
+                        >
+                          View job
+                        </Link>
+                      )}
                     </Flex>
                   </Flex>
                   <Flex
@@ -340,19 +351,6 @@ export function WorkbenchEvals() {
         </EvalsContentSC>
       )}
     </WorkbenchPageLayout>
-  )
-}
-
-function getDurationSeconds(job: EvalRow['workbenchJob'] | null | undefined) {
-  if (!job?.startedAt || !job.completedAt) return null
-
-  return Math.max(
-    Math.round(
-      (new Date(job.completedAt).getTime() -
-        new Date(job.startedAt).getTime()) /
-        1000
-    ),
-    0
   )
 }
 
