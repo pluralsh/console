@@ -147,6 +147,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.60.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.60.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.5',
+      'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.5', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.60.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260512-1f34ef0df3-master']
   - version: 1.59.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -6261,7 +6272,14 @@ addons:
       '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Docs/helm: release v0.10.6 helm chart docs update (no functional
+          change indicated).']
+      features: ["Adds YAML-based encoding option for \u201Cget secrets as map\u201D\
+          \ functionality.", Fixes Azure Key Vault provider URL suffix to resolve
+          OpenID discovery issues (improves Azure auth reliability).]
+      breaking_changes: []
     chart_version: 0.10.7
     images: ['oci.external-secrets.io/external-secrets/external-secrets:v0.10.7']
   - version: 0.9.20
@@ -7766,21 +7784,22 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 85.0.2
+  - version: 85.0.3
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ['Bumped kube-prometheus-stack chart dependencies with non-major
-          (patch/minor) updates (PR #6910).', 'Fixed chart values/template to avoid
-          a duplicate Thanos image key (PR #6901).', 'CI-only: updated .codespellrc
-          to ignore the word ''notin'' (no runtime impact) (PR #6903).']
+      chart_updates: ['CI/developer tooling: updated dependency `helm/helm` to v4.2.0
+          (CI only, no runtime impact).', 'Chart maintenance: pulled in non-major
+          dependency updates for kube-prometheus-stack (exact subchart/component version
+          bumps not listed in provided notes).', 'Bugfix: avoid duplicate Thanos image
+          key (prevents conflicting image settings in rendered manifests).']
       features: []
       breaking_changes: []
-    chart_version: 85.0.2
-    images: ['docker.io/grafana/grafana:13.0.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
+    chart_version: 85.0.3
+    images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
       'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
       'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
