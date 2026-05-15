@@ -1,10 +1,4 @@
-import {
-  ArrowTopRightIcon,
-  Button,
-  Flex,
-  IconFrame,
-  WorkbenchIcon,
-} from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
