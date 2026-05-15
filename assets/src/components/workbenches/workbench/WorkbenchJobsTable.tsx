@@ -152,43 +152,37 @@ export const workbenchColumn = columnHelper.accessor(
   }
 )
 
-export const alertColumn = columnHelper.accessor((job) => job.alert, {
-  id: 'alert',
-  meta: { center: true },
-  cell: ({ getValue }) => {
-    const alert = getValue()
-    if (!alert) return null
-
-    return (
-      <AlertStateChip
-        state={alert.state}
-        {...(alert.url && {
-          ...chipAsLinkProps,
-          href: alert.url,
-          tooltip: 'View alert',
-        })}
-      />
-    )
-  },
-})
-
-export const issueColumn = columnHelper.accessor((job) => job.issue, {
-  id: 'issue',
+export const sourceColumn = columnHelper.accessor((job) => job, {
+  id: 'source',
   meta: { gridTemplate: 'minmax(80px, max-content)', center: true },
   cell: ({ getValue }) => {
-    const issue = getValue()
-    if (!issue) return null
+    const { issue, alert } = getValue()
+    if (!issue && !alert) return null
 
     return (
-      <IssueStatusChip
-        status={issue.status}
-        fillLevel={1}
-        {...(issue.url && {
-          ...chipAsLinkProps,
-          href: issue.url,
-          tooltip: 'View issue',
-        })}
-      />
+      <Flex gap="xsmall">
+        {issue && (
+          <IssueStatusChip
+            status={issue.status}
+            fillLevel={1}
+            {...(issue.url && {
+              ...chipAsLinkProps,
+              href: issue.url,
+              tooltip: 'View issue',
+            })}
+          />
+        )}
+        {alert && (
+          <AlertStateChip
+            state={alert.state}
+            {...(alert.url && {
+              ...chipAsLinkProps,
+              href: alert.url,
+              tooltip: 'View alert',
+            })}
+          />
+        )}
+      </Flex>
     )
   },
 })
@@ -229,7 +223,7 @@ export const prsColumn = columnHelper.accessor((job) => job.pullRequests, {
 
 export const evalResultColumn = columnHelper.accessor((job) => job, {
   id: 'eval',
-  meta: { gridTemplate: 'minmax(40px, max-content)', center: true },
+  meta: { gridTemplate: '24px', center: true },
   cell: function Cell({ getValue }) {
     const navigate = useNavigate()
     const { evalResult, workbench } = getValue()
@@ -240,6 +234,7 @@ export const evalResultColumn = columnHelper.accessor((job) => job, {
     return (
       <WorkbenchEvalGradeBadge
         grade={evalResult.grade}
+        size="xsmall"
         tooltip="View eval details"
         onClick={(e) => {
           e.stopPropagation()
@@ -273,11 +268,10 @@ export const rowNavColumn = columnHelper.display({
 })
 
 export const actionColumns: ColumnDef<WorkbenchJobTinyFragment, any>[] = [
-  alertColumn,
-  issueColumn,
-  conclusionColumn,
+  sourceColumn,
   prsColumn,
   evalResultColumn,
+  conclusionColumn,
   statusColumn,
   rowNavColumn,
 ]
