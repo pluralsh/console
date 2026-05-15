@@ -100,7 +100,10 @@ export function WorkbenchEvals() {
     )
   }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
 
-  useEffect(() => setPromptExpanded(false), [selectedEvalRow?.id])
+  useEffect(() => {
+    setPromptExpanded(false)
+    setPromptHasOverflow(false)
+  }, [selectedEvalRow?.id])
 
   useEffect(() => {
     if (promptExpanded) return
