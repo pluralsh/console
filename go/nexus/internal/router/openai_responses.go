@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/maximhq/bifrost/core/providers/openai"
@@ -18,7 +19,7 @@ func (in *OpenAIRouter) newResponsesRoute() RouteConfig {
 		ErrorConverter:             in.errorConverter,
 		StreamConfig: &StreamConfig{
 			ResponsesStreamResponseConverter: in.responsesStreamResponseConverter,
-			ErrorConverter:                   in.errorConverter,
+			ErrorConverter:                   in.responsesStreamErrorConverter,
 		},
 	}
 }
@@ -67,4 +68,27 @@ func (in *OpenAIRouter) responsesStreamResponseConverter(_ *schemas.BifrostConte
 	}
 
 	return string(resp.Type), resp, nil
+}
+
+func (in *OpenAIRouter) responsesStreamErrorConverter(_ *schemas.BifrostContext, err *schemas.BifrostError) interface{} {
+	message := "internal server error"
+	var code *string
+	var param *string
+
+	if err != nil && err.Error != nil {
+		if err.Error.Message != "" {
+			message = err.Error.Message
+		}
+		code = err.Error.Code
+		if err.Error.Param != nil {
+			param = new(fmt.Sprint(err.Error.Param))
+		}
+	}
+
+	return map[string]interface{}{
+		"type":    string(schemas.ResponsesStreamResponseTypeError),
+		"message": message,
+		"code":    code,
+		"param":   param,
+	}
 }
