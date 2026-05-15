@@ -26,6 +26,36 @@ func (c *client) GetService(id string) (*console.ServiceDeploymentForAgent, erro
 	return resp.ServiceDeployment, nil
 }
 
+func (c *client) GetServiceDeploymentByHandle(cluster, name string) (*console.ServiceDeploymentExtended, error) {
+	resp, err := c.consoleClient.GetServiceDeploymentByHandle(c.ctx, cluster, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp == nil || resp.ServiceDeployment == nil {
+		return nil, errors.New("service deployment not found")
+	}
+
+	return resp.ServiceDeployment, nil
+}
+
+// GetServiceTarball returns the rendered files that make up a service's
+// gitops tarball via the user-authenticated `serviceTarball` GraphQL field.
+// File content is returned base64-encoded by the Console; callers are
+// responsible for decoding it before writing to disk.
+func (c *client) GetServiceTarball(id string) ([]*console.GetServiceTarball_ServiceTarball, error) {
+	resp, err := c.consoleClient.GetServiceTarball(c.ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp == nil {
+		return nil, errors.New("empty response fetching service tarball")
+	}
+
+	return resp.ServiceTarball, nil
+}
+
 func (c *client) GetServiceDeploymentComponents(id string) (*console.GetServiceDeploymentComponents_ServiceDeployment, error) {
 	resp, err := c.consoleClient.GetServiceDeploymentComponents(c.ctx, id)
 	if err != nil {
