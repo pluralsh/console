@@ -83,7 +83,7 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns ?? [promptColumn, actionsColumn]}
+      columns={columns ?? [userColumn, promptColumn, actionsColumn]}
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -106,6 +106,33 @@ export function WorkbenchJobsTableContent({
 }
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
+
+export const userColumn = columnHelper.accessor(({ user }) => user, {
+  id: 'user',
+  meta: { gridTemplate: '60px' },
+  cell: ({ getValue }) => {
+    const user = getValue()
+    if (!user) return null
+
+    return (
+      <Flex
+        grow={1}
+        align="center"
+      >
+        <Tooltip
+          placement="top"
+          label={user.name}
+        >
+          <AppIcon
+            name={user.name}
+            size="xxsmall"
+            css={{ marginLeft: 5, borderRadius: '50%' }}
+          />
+        </Tooltip>
+      </Flex>
+    )
+  },
+})
 
 export const promptColumn = columnHelper.accessor(
   ({ prompt }) => truncate(prettifyPrompt(prompt ?? ''), { length: 150 }),
@@ -131,7 +158,7 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
     const theme = useTheme()
     const navigate = useNavigate()
     const { spacing } = theme
-    const { alert, issue, pullRequests, result, evalResult, status, user } =
+    const { alert, issue, pullRequests, result, evalResult, status } =
       getValue()
     const prs = pullRequests?.filter(isNonNullable) ?? []
     const workbenchId = getValue().workbench?.id
@@ -193,15 +220,6 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             }}
           />
         )}
-        <Tooltip
-          placement="top"
-          label={user?.name}
-        >
-          <AppIcon
-            name={user?.name}
-            size="xxsmall"
-          />
-        </Tooltip>
         <RunStatusIcon
           fullColor
           status={status}

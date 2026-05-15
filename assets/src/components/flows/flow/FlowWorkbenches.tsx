@@ -5,6 +5,7 @@ import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   actionsColumn,
   promptColumn,
+  userColumn,
   workbenchColumn,
   WorkbenchJobsTableContent,
 } from 'components/workbenches/workbench/WorkbenchJobsTable'
@@ -85,7 +86,7 @@ export function FlowWorkbenches() {
             pageInfo={jobsPageInfo}
             fetchNextPage={fetchNextJobsPage}
             setVirtualSlice={setJobsVirtualSlice}
-            columns={[promptColumn, workbenchColumn, actionsColumn]}
+            columns={[userColumn, promptColumn, workbenchColumn, actionsColumn]}
           />
         </TableContainerSC>
       </WrapperSC>
