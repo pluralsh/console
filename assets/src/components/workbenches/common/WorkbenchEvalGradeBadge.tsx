@@ -4,8 +4,15 @@ import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import { useTheme } from 'styled-components'
 
 const SIZE_BY_VARIANT = {
+  xsmall: 24,
   small: 32,
   medium: 40,
+} as const
+
+const TEXT_BY_VARIANT = {
+  xsmall: 'caption',
+  small: 'body2Bold',
+  medium: 'subtitle2',
 } as const
 
 export function WorkbenchEvalGradeBadge({
@@ -16,13 +23,14 @@ export function WorkbenchEvalGradeBadge({
   tooltip,
 }: {
   grade: number
-  size?: 'small' | 'medium'
+  size?: 'xsmall' | 'small' | 'medium'
   colorBorder?: boolean
   onClick?: MouseEventHandler<HTMLDivElement>
   tooltip?: string
 }) {
   const theme = useTheme()
   const pixelSize = SIZE_BY_VARIANT[size]
+  const textStyle = theme.partials.text[TEXT_BY_VARIANT[size]]
   const color = evalGradeToColor(grade)
 
   return (
@@ -32,6 +40,7 @@ export function WorkbenchEvalGradeBadge({
     >
       <div
         css={{
+          ...textStyle,
           alignItems: 'center',
           backgroundColor: theme.colors['fill-two'],
           border: colorBorder
@@ -42,7 +51,7 @@ export function WorkbenchEvalGradeBadge({
           cursor: !!onClick ? 'pointer' : 'default',
           display: 'flex',
           flexShrink: 0,
-          fontWeight: 600,
+          fontWeight: 500,
           height: pixelSize,
           justifyContent: 'center',
           width: pixelSize,

@@ -1,10 +1,4 @@
-import {
-  ArrowTopRightIcon,
-  Button,
-  Flex,
-  IconFrame,
-  WorkbenchIcon,
-} from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -67,10 +61,6 @@ export function WorkbenchStartedJobPanel({
       {queryError && <GqlError error={queryError} />}
       {cancelError && <GqlError error={cancelError} />}
       <StartedJobCardSC>
-        <IconFrame
-          type="secondary"
-          icon={<WorkbenchIcon color="icon-light" />}
-        />
         <Flex
           direction="column"
           gap="xxsmall"
@@ -120,7 +110,7 @@ export function WorkbenchStartedJobPanel({
 const StartedJobCardSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   background: theme.colors['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
+  borderRadius: theme.borderRadiuses.large,
   display: 'flex',
   gap: theme.spacing.medium,
   padding: theme.spacing.medium,

@@ -4,6 +4,7 @@ import {
   EmptyState,
   EventScheduleIcon,
   Flex,
+  GearTrainIcon,
   ListBoxItem,
   ReturnIcon,
   ToolsIcon,
@@ -222,7 +223,7 @@ export function WorkbenchPageLayout({
               {!showEditWorkbenchButton && (
                 <ListBoxItem
                   key={WorkbenchMoreMenuKey.Edit}
-                  leftContent={<TuningIcon />}
+                  leftContent={<GearTrainIcon />}
                   label="Edit workbench"
                 />
               )}

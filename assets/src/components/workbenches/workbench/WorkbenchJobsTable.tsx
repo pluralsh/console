@@ -83,7 +83,7 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns ?? [promptColumn, actionsColumn]}
+      columns={columns ?? [userColumn, promptColumn, ...actionColumns]}
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -107,6 +107,33 @@ export function WorkbenchJobsTableContent({
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
 
+export const userColumn = columnHelper.accessor(({ user }) => user, {
+  id: 'user',
+  meta: { gridTemplate: '60px' },
+  cell: ({ getValue }) => {
+    const user = getValue()
+    if (!user) return null
+
+    return (
+      <Flex
+        grow={1}
+        align="center"
+      >
+        <Tooltip
+          placement="top"
+          label={user.name}
+        >
+          <AppIcon
+            name={user.name}
+            size="xxsmall"
+            css={{ marginLeft: 5, borderRadius: '50%' }}
+          />
+        </Tooltip>
+      </Flex>
+    )
+  },
+})
+
 export const promptColumn = columnHelper.accessor(
   ({ prompt }) => truncate(prettifyPrompt(prompt ?? ''), { length: 150 }),
   { id: 'prompt', meta: { gridTemplate: '1fr' } }
@@ -125,34 +152,15 @@ export const workbenchColumn = columnHelper.accessor(
   }
 )
 
-export const actionsColumn = columnHelper.accessor((job) => job, {
-  id: 'actions',
-  cell: function Cell({ getValue }) {
-    const theme = useTheme()
-    const navigate = useNavigate()
-    const { spacing } = theme
-    const { alert, issue, pullRequests, result, evalResult, status, user } =
-      getValue()
-    const prs = pullRequests?.filter(isNonNullable) ?? []
-    const workbenchId = getValue().workbench?.id
+export const sourceColumn = columnHelper.accessor((job) => job, {
+  id: 'source',
+  meta: { gridTemplate: 'minmax(80px, max-content)', center: true },
+  cell: ({ getValue }) => {
+    const { issue, alert } = getValue()
+    if (!issue && !alert) return null
 
     return (
-      <Flex
-        gap="medium"
-        align="center"
-        justify="flex-end"
-        width="100%"
-      >
-        {alert && (
-          <AlertStateChip
-            state={alert.state}
-            {...(alert.url && {
-              ...chipAsLinkProps,
-              href: alert.url,
-              tooltip: 'View alert',
-            })}
-          />
-        )}
+      <Flex gap="xsmall">
         {issue && (
           <IssueStatusChip
             status={issue.status}
@@ -164,53 +172,109 @@ export const actionsColumn = columnHelper.accessor((job) => job, {
             })}
           />
         )}
-        {result?.conclusion && (
-          <ActivityModalIcon
-            icon={PaperCheckIcon}
-            tooltip="View conclusion"
-            modalHeader="Conclusion"
-            modalContent={
-              <Card css={{ padding: spacing.large, overflow: 'auto' }}>
-                <Markdown text={result?.conclusion} />
-              </Card>
-            }
-            size={16}
+        {alert && (
+          <AlertStateChip
+            state={alert.state}
+            {...(alert.url && {
+              ...chipAsLinkProps,
+              href: alert.url,
+              tooltip: 'View alert',
+            })}
           />
         )}
-        <PRsModalIcon prs={prs} />
-        {workbenchId && evalResult?.id && evalResult.grade != null && (
-          <WorkbenchEvalGradeBadge
-            grade={evalResult.grade}
-            tooltip="View eval details"
-            onClick={(e) => {
-              e.stopPropagation()
-              navigate(
-                getWorkbenchEvalResultAbsPath({
-                  workbenchId,
-                  evalResultId: evalResult.id,
-                })
-              )
-            }}
-          />
-        )}
-        <Tooltip
-          placement="top"
-          label={user?.name}
-        >
-          <AppIcon
-            name={user?.name}
-            size="xxsmall"
-          />
-        </Tooltip>
-        <RunStatusIcon
-          fullColor
-          status={status}
-        />
-        <CaretRightIcon color="icon-xlight" />
       </Flex>
     )
   },
 })
+
+export const conclusionColumn = columnHelper.accessor((job) => job.result, {
+  id: 'conclusion',
+  meta: { gridTemplate: 'minmax(40px, max-content)', center: true },
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+    const result = getValue()
+
+    if (!result?.conclusion) return null
+
+    return (
+      <ActivityModalIcon
+        icon={PaperCheckIcon}
+        tooltip="View conclusion"
+        modalHeader="Conclusion"
+        modalContent={
+          <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
+            <Markdown text={result.conclusion} />
+          </Card>
+        }
+        size={16}
+      />
+    )
+  },
+})
+
+export const prsColumn = columnHelper.accessor((job) => job.pullRequests, {
+  id: 'prs',
+  meta: { gridTemplate: 'minmax(40px, max-content)', center: true },
+  cell: ({ getValue }) => {
+    const prs = getValue()?.filter(isNonNullable) ?? []
+    return <PRsModalIcon prs={prs} />
+  },
+})
+
+export const evalResultColumn = columnHelper.accessor((job) => job, {
+  id: 'eval',
+  meta: { gridTemplate: '24px', center: true },
+  cell: function Cell({ getValue }) {
+    const navigate = useNavigate()
+    const { evalResult, workbench } = getValue()
+    const workbenchId = workbench?.id
+
+    if (!workbenchId || !evalResult?.id || evalResult.grade == null) return null
+
+    return (
+      <WorkbenchEvalGradeBadge
+        grade={evalResult.grade}
+        size="xsmall"
+        tooltip="View eval details"
+        onClick={(e) => {
+          e.stopPropagation()
+          navigate(
+            getWorkbenchEvalResultAbsPath({
+              workbenchId,
+              evalResultId: evalResult.id,
+            })
+          )
+        }}
+      />
+    )
+  },
+})
+
+export const statusColumn = columnHelper.accessor((job) => job.status, {
+  id: 'status',
+  meta: { gridTemplate: 'minmax(36px, max-content)', center: true },
+  cell: ({ getValue }) => (
+    <RunStatusIcon
+      fullColor
+      status={getValue()}
+    />
+  ),
+})
+
+export const rowNavColumn = columnHelper.display({
+  id: 'row-nav',
+  meta: { gridTemplate: '40px' },
+  cell: () => <CaretRightIcon color="icon-xlight" />,
+})
+
+export const actionColumns: ColumnDef<WorkbenchJobTinyFragment, any>[] = [
+  sourceColumn,
+  prsColumn,
+  evalResultColumn,
+  conclusionColumn,
+  statusColumn,
+  rowNavColumn,
+]
 
 const chipAsLinkProps = {
   clickable: true,

@@ -10,10 +10,16 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import {
   getWorkbenchEvalResultAbsPath,
+  getWorkbenchJobAbsPath,
   WORKBENCH_EVAL_RESULT_PARAM_ID,
   getWorkbenchEvalSettingsAbsPath,
 } from 'routes/workbenchesRoutesConsts'
@@ -49,7 +55,10 @@ export function WorkbenchEvals() {
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
+  const [promptExpanded, setPromptExpanded] = useState(false)
+  const [promptHasOverflow, setPromptHasOverflow] = useState(false)
   const qualityTabsStateRef = useRef<any>(undefined)
+  const promptTextRef = useRef<HTMLSpanElement>(null)
 
   const { data, loading, error } = useWorkbenchEvalsQuery({
     variables: { id: workbenchId, first: 100 },
@@ -74,8 +83,9 @@ export function WorkbenchEvals() {
     conclusion: feedback?.result ?? 'No conclusion available',
     logic: feedback?.logic ?? 'No logic available',
   }
-  const durationSeconds = getDurationSeconds(selectedEvalRow?.workbenchJob)
   const selectedEvalResultIdForSkill = selectedEvalRow?.id
+  const promptText = (selectedEvalRow?.workbenchJob?.prompt ?? '').trim()
+  const canExpandPrompt = promptHasOverflow || promptExpanded
 
   useEffect(() => {
     if (!selectedEvalRow?.id || evalResultIdFromPath === selectedEvalRow.id)
@@ -89,6 +99,29 @@ export function WorkbenchEvals() {
       { replace: true }
     )
   }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
+
+  useEffect(() => {
+    setPromptExpanded(false)
+    setPromptHasOverflow(false)
+  }, [selectedEvalRow?.id])
+
+  useEffect(() => {
+    if (promptExpanded) return
+
+    const measureOverflow = () => {
+      const el = promptTextRef.current
+      if (!el) return
+      setPromptHasOverflow(el.scrollHeight > el.clientHeight + 1)
+    }
+
+    const rafId = requestAnimationFrame(measureOverflow)
+    window.addEventListener('resize', measureOverflow)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('resize', measureOverflow)
+    }
+  }, [promptText, promptExpanded, qualityBreakdownCollapsed])
 
   return (
     <WorkbenchPageLayout
@@ -185,21 +218,72 @@ export function WorkbenchEvals() {
                       >
                         Overall grade: {grade.toFixed(0)}/10
                       </span>
-                      <span
-                        css={{
-                          ...theme.partials.text.body2,
-                          color: theme.colors['text-light'],
-                        }}
-                      >
-                        {durationSeconds && `${durationSeconds} seconds`}
-                      </span>
+                      {selectedEvalRow?.workbenchJob?.id && (
+                        <Link
+                          to={getWorkbenchJobAbsPath({
+                            workbenchId,
+                            jobId: selectedEvalRow.workbenchJob.id,
+                          })}
+                          css={{
+                            ...theme.partials.text.inlineLink,
+                            textDecoration: 'none',
+                          }}
+                        >
+                          View job
+                        </Link>
+                      )}
                     </Flex>
                   </Flex>
                   <Flex
                     direction="column"
-                    css={{ marginTop: theme.spacing.medium }}
+                    css={{ marginTop: theme.spacing.large }}
                   >
-                    <Subtitle1H1>Summary</Subtitle1H1>
+                    <Flex
+                      direction="column"
+                      align="flex-start"
+                      gap="xxsmall"
+                      minWidth={0}
+                      width="100%"
+                      marginBottom="small"
+                    >
+                      <span
+                        ref={promptTextRef}
+                        css={{
+                          ...theme.partials.text.caption,
+                          color: theme.colors['text-xlight'],
+                          display: 'block',
+                          maxWidth: '100%',
+                          overflowWrap: 'anywhere',
+                          wordBreak: 'break-word',
+                          ...(promptExpanded
+                            ? {}
+                            : {
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }),
+                        }}
+                      >
+                        {promptText || 'No prompt available'}
+                      </span>
+                      {canExpandPrompt && (
+                        <span
+                          onClick={() => setPromptExpanded((v) => !v)}
+                          css={{
+                            ...theme.partials.text.caption,
+                            color: theme.colors['text-input-disabled'],
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                          }}
+                        >
+                          {promptExpanded ? 'Read less' : 'Read more'}
+                        </span>
+                      )}
+                    </Flex>
+                    <Subtitle1H1 css={{ marginTop: theme.spacing.large }}>
+                      Summary
+                    </Subtitle1H1>
                     <Markdown text={feedback?.summary ?? ''} />
                   </Flex>
                 </PanelBodySC>
@@ -270,19 +354,6 @@ export function WorkbenchEvals() {
         </EvalsContentSC>
       )}
     </WorkbenchPageLayout>
-  )
-}
-
-function getDurationSeconds(job: EvalRow['workbenchJob'] | null | undefined) {
-  if (!job?.startedAt || !job.completedAt) return null
-
-  return Math.max(
-    Math.round(
-      (new Date(job.completedAt).getTime() -
-        new Date(job.startedAt).getTime()) /
-        1000
-    ),
-    0
   )
 }
 
