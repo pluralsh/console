@@ -483,8 +483,8 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 			return result
 		}
 
-		result[EnvOpenCodeProvider] = config.OpenCode.Provider
-		result[EnvOpenCodeEndpoint] = config.OpenCode.Endpoint
+		result[EnvOpenCodeProvider] = lo.FromPtr(config.OpenCode.Provider)
+		result[EnvOpenCodeEndpoint] = lo.FromPtr(config.OpenCode.Endpoint)
 		result[EnvOpenCodeModel] = lo.FromPtr(config.OpenCode.Model)
 		result[EnvOpenCodeToken] = config.OpenCode.Token
 		if config.OpenCode.Timeout != nil {

@@ -34,7 +34,7 @@ jobs:
       NODE_VERSION: 24
       CLAUDE_VERSION: 2.1.72
       GEMINI_VERSION: 0.36.0
-      OPENCODE_VERSION: 1.2.24
+      OPENCODE_VERSION: 1.14.50
       CODEX_VERSION: 0.104.0
     outputs:
       node: ${{ env.NODE_VERSION }}
@@ -181,7 +181,7 @@ jobs:
           - name: gemini
             version: 0.36.0
           - name: opencode
-            version: 1.2.24
+            version: 1.14.50
           - name: codex
             version: 0.104.0
     permissions:

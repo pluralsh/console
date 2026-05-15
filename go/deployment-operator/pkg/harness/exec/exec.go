@@ -278,6 +278,11 @@ func (in *executable) RunStream(ctx context.Context, cb func([]byte)) error {
 		for scanner.Scan() {
 			line := append([]byte(nil), scanner.Bytes()...)
 
+			// Log debug line in background not to block stream readers
+			go func() {
+				klog.V(log.LogLevelDebug).InfoS("stream line", "reader", name, "line", string(line))
+			}()
+
 			// Queue callback (non-blocking best-effort).
 			if cbCh != nil {
 				select {
