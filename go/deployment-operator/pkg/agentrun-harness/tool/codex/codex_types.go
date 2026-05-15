@@ -73,6 +73,9 @@ type StreamItem struct {
 	// Text is populated for "reasoning" and "agent_message" items.
 	Text string `json:"text,omitempty"`
 
+	// Message is populated for Type "error" items.
+	Message string `json:"message,omitempty"`
+
 	// Command and output fields are populated for "command_execution" items.
 	Command          string `json:"command,omitempty"`
 	AggregatedOutput string `json:"aggregated_output,omitempty"`

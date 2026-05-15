@@ -368,6 +368,17 @@ func mapCodexStreamEventToAgentMessage(event *StreamEvent, threadID string) *con
 // mapStreamItem maps a completed StreamItem to an AgentMessageAttributes.
 func mapStreamItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
 	switch item.Type {
+	case "error":
+		msg := lo.Ternary(len(item.Message) == 0, item.Text, item.Message)
+		if len(msg) == 0 {
+			return nil
+		}
+
+		klog.V(log.LogLevelDebug).InfoS("codex item error", "message", msg, "thread_id", threadID)
+		return &console.AgentMessageAttributes{
+			Role:    console.AiRoleAssistant,
+			Message: msg,
+		}
 	case "reasoning":
 		if item.Text == "" {
 			return nil
