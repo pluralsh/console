@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.14
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.68.0
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.78.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.88.5
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.10
 	github.com/elastic/go-elasticsearch/v9 v9.3.1
 	github.com/gofrs/uuid v4.4.0+incompatible

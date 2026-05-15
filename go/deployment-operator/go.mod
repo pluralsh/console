@@ -216,7 +216,7 @@ require (
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-getter v1.8.0 // indirect
+	github.com/hashicorp/go-getter v1.8.6 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/hashicorp/hcl v1.0.1-vault-7 // indirect
