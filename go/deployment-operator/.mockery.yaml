@@ -1,0 +1,18 @@
+filename: "{{.InterfaceName}}_mock.go"
+dir: "pkg/test/mocks"
+mockname: "{{.InterfaceName}}Mock"
+outpkg: "mocks"
+packages:
+  github.com/pluralsh/deployment-operator/pkg/client:
+    interfaces:
+      Client:
+  k8s.io/client-go/discovery:
+    interfaces:
+      DiscoveryInterface:
+  k8s.io/metrics/pkg/client/clientset/versioned:
+    interfaces:
+      Interface:
+  k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1:
+    interfaces:
+      MetricsV1beta1Interface:
+      NodeMetricsInterface:

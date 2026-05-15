@@ -6,6 +6,11 @@ defmodule Console.AI.Provider.TokenExchange do
   alias Console.Cache
   alias OAuth2.{Client, Strategy.ClientCredentials}
 
+  @serializers %{
+    "application/json" => Jason,
+    "application/x-www-form-urlencoded" => Console.AI.Provider.TokenExchange.FormURLEncoded
+  }
+
   @spec exchange(binary, binary, binary) :: {:ok, binary} | {:error, binary}
   def exchange(url, client_id, client_secret) do
     cache_key(url, client_id, client_secret)
@@ -22,9 +27,9 @@ defmodule Console.AI.Provider.TokenExchange do
         strategy: ClientCredentials,
         client_id: client_id,
         client_secret: client_secret,
-        site: url,
+        site: site,
         token_url: token_url,
-        site: site
+        serializers: @serializers
       )
       |> Client.get_token()
       |> case do

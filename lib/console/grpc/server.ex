@@ -3,7 +3,7 @@ defmodule Console.GRPC.Server do
   alias Console.AI.Provider
   alias Console.Deployments.{Settings, Agents}
   alias Console.Schema.{DeploymentSettings, User, Cluster}
-  alias Console.Schema.DeploymentSettings.AI
+  alias Console.Schema.DeploymentSettings.{AI, OauthToken}
 
   def meter_metrics(%Plrl.MeterMetricsRequest{bytes: bytes}, _) do
     Console.Prom.Meter.incr(max(bytes, 0))
@@ -76,9 +76,22 @@ defmodule Console.GRPC.Server do
       embeddingModel: openai.embedding_model || defaults[:embedding_model],
       toolModel: openai.tool_model || defaults[:tool_model],
       baseUrl: openai.base_url,
-      proxyModels: proxy_models(openai)
+      proxyModels: proxy_models(openai),
+      tokenExchange: to_pb(openai.token_exchange)
     }
   end
+
+  defp to_pb(%OauthToken{enabled: true, token_url: url, client_id: cid, client_secret: secret})
+       when is_binary(url) and is_binary(cid) and is_binary(secret) do
+    %Plrl.OpenAiTokenExchange{
+      enabled: true,
+      tokenUrl: url,
+      clientId: cid,
+      clientSecret: secret
+    }
+  end
+
+  defp to_pb(%OauthToken{}), do: nil
 
   defp to_pb(%AI.Anthropic{} = anthropic) do
     defaults = Provider.defaults(:anthropic)

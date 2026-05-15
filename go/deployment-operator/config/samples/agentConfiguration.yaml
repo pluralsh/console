@@ -1,0 +1,16 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentConfiguration
+metadata:
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+  name: default
+spec:
+  clusterPingInterval: "10s"
+  stackPollInterval: "20s"
+  pipelineGateInterval: "0s"
+  vulnerabilityReportUploadInterval: "10m"
+  maxConcurrentReconciles: 5
+  maxSentinelRunJobs: 2
+  disableWebsocket: false
+

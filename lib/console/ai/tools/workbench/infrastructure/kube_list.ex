@@ -12,9 +12,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeList do
     field :version,    :string
     field :kind,       :string
     field :namespace,  :string
+    field :jq,         :string
   end
 
-  @valid ~w(cluster group version kind namespace)a
+  @valid ~w(cluster group version kind namespace jq)a
 
   def changeset(model, attrs) do
     model
@@ -39,11 +40,18 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeList do
          {:kind, kind} when kind not in @kind_blacklist <- {:kind, get_kind(cluster, g, v, k)},
          path <- Kube.Client.Base.path(g, v, kind, comp.namespace),
          {:ok, res} <- kube_request(cluster, user, path) do
-      Jason.encode(res)
+      maybe_jq(res, comp)
     else
       {:kind, _} -> {:ok, "I cannot list secrets for you"}
       {:cluster, _} -> {:ok, "No cluster found matching handle=#{handle}"}
       err -> {:error, "Error fetching resource: #{inspect(err)}"}
     end
   end
+
+  defp maybe_jq(result, %__MODULE__{jq: jq}) when is_binary(jq) do
+    with {:ok, json} <- Jason.encode(result),
+         {:ok, filtered} <- Jaqex.filter(json, jq),
+      do: Jason.encode(filtered)
+  end
+  defp maybe_jq(result, _), do: Jason.encode(result)
 end

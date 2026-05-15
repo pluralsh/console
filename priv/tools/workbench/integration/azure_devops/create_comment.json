@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "description": "Post a comment on a pull request (creates a new general discussion thread) or on a work item (discussion comment).",
+  "properties": {
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "work_item"],
+      "description": "Whether to comment on a pull request thread or a work item."
+    },
+    "organization": {
+      "type": "string",
+      "description": "Azure DevOps organization name when required by the configured API URL (see pull_request_read)."
+    },
+    "project": {
+      "type": "string",
+      "description": "Team project name or GUID."
+    },
+    "repository": {
+      "type": "string",
+      "description": "Repository name or ID (required for pull_request)."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request id (required for pull_request)."
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "Work item id (required for work_item)."
+    },
+    "body": {
+      "type": "string",
+      "description": "Comment text (Markdown supported by Azure DevOps where applicable)."
+    }
+  },
+  "required": ["resource", "project", "body"],
+  "additionalProperties": false
+}

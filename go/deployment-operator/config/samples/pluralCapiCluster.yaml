@@ -1,0 +1,14 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: PluralCAPICluster
+metadata:
+  name: capi-quickstart
+  namespace: default
+spec:
+  cluster:
+    handle: capi-quickstart
+  consoleTokenSecretRef:
+    name: capi-quickstart-console-token
+    key: token
+  capiClusterRef:
+    name: capi-quickstart
+    namespace: default

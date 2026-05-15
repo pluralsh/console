@@ -22,7 +22,7 @@ lint: --tool ## run linters
 		$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) $$packages
 
 .PHONY: fix
-lint: TOOL = golangci-lint
+fix: TOOL = golangci-lint
 fix: --tool ## fix issues found by linters
 	@packages=$$($(MAKE) --no-print-directory lint-packages); \
 		$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) --fix $$packages

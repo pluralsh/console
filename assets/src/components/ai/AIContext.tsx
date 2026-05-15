@@ -225,7 +225,9 @@ function ExplainWithAIContextProvider({ children }: { children: ReactNode }) {
 export function useChatbotContext() {
   const context = use(ChatbotContext)
   if (!context)
-    throw new Error('useChatbot must be used within a ChatbotProvider')
+    throw new Error(
+      'useChatbot must be used within AIContextProvider (see TopLevelSidePanelProviders in Console layout)'
+    )
 
   return context
 }

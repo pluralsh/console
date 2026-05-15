@@ -61,4 +61,6 @@ const cssProps = {
 const WrapperSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   overflow: 'auto',
+  flex: 1,
+  minHeight: 0,
 }))

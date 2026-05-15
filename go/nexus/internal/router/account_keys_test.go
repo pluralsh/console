@@ -1,0 +1,119 @@
+package router
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
+	"testing"
+
+	"github.com/maximhq/bifrost/core/schemas"
+	pb "github.com/pluralsh/console/go/nexus/internal/proto"
+	"github.com/pluralsh/console/go/nexus/internal/tokenexchange"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+)
+
+type mockConsoleClient struct {
+	cfg *pb.AiConfig
+}
+
+func (m *mockConsoleClient) GetAiConfig(_ context.Context) (*pb.AiConfig, error) {
+	return m.cfg, nil
+}
+
+func (m *mockConsoleClient) ProxyAuthentication(_ context.Context, _ string) (bool, error) {
+	return true, nil
+}
+
+func (m *mockConsoleClient) IsConnected() bool { return true }
+
+func (m *mockConsoleClient) Close() error { return nil }
+
+func TestOpenAIAuthConfigured(t *testing.T) {
+	require.False(t, openAIAuthConfigured(nil))
+
+	require.False(t, openAIAuthConfigured(&pb.OpenAiConfig{}))
+
+	require.True(t, openAIAuthConfigured(&pb.OpenAiConfig{ApiKey: lo.ToPtr("sk-")}))
+
+	tx := &pb.OpenAiTokenExchange{
+		Enabled:      lo.ToPtr(true),
+		TokenUrl:     lo.ToPtr("https://id.example/oauth/token"),
+		ClientId:     lo.ToPtr("cid"),
+		ClientSecret: lo.ToPtr("sec"),
+	}
+	require.True(t, openAIAuthConfigured(&pb.OpenAiConfig{TokenExchange: tx}))
+
+	incomplete := &pb.OpenAiTokenExchange{Enabled: lo.ToPtr(true), ClientId: lo.ToPtr("x")}
+	require.False(t, openAIAuthConfigured(&pb.OpenAiConfig{TokenExchange: incomplete}))
+}
+
+func TestHandleOpenAIKeys_tokenExchangeUsesCache(t *testing.T) {
+	var tokenCalls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenCalls.Add(1)
+		_ = r.ParseForm()
+		if r.FormValue("grant_type") != "client_credentials" {
+			http.Error(w, "bad grant", http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"access_token":"oauth-at","expires_in":3600}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	tokenURL := srv.URL + "/oauth/token"
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Openai: &pb.OpenAiConfig{
+			Model: lo.ToPtr("gpt-4"),
+			TokenExchange: &pb.OpenAiTokenExchange{
+				Enabled:      lo.ToPtr(true),
+				TokenUrl:     lo.ToPtr(tokenURL),
+				ClientId:     lo.ToPtr("id"),
+				ClientSecret: lo.ToPtr("secret"),
+			},
+		},
+	}
+
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCacheWithHTTPClient(srv.Client()),
+		logger:        zap.NewNop(),
+	}
+	ctx := context.Background()
+
+	keys1, err := acct.GetKeysForProvider(ctx, schemas.OpenAI)
+	require.NoError(t, err)
+	require.Len(t, keys1, 1)
+	require.Equal(t, "oauth-at", keys1[0].Value.Val)
+	c1 := tokenCalls.Load()
+	require.GreaterOrEqual(t, c1, int32(1))
+
+	keys2, err := acct.GetKeysForProvider(ctx, schemas.OpenAI)
+	require.NoError(t, err)
+	require.Equal(t, "oauth-at", keys2[0].Value.Val)
+	require.Equal(t, c1, tokenCalls.Load(), "second GetKeysForProvider should use cached OAuth token")
+}
+
+func TestHandleOpenAIKeys_tokenExchangeEnabledIncomplete(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Openai: &pb.OpenAiConfig{
+			Model: lo.ToPtr("gpt-4"),
+			TokenExchange: &pb.OpenAiTokenExchange{
+				Enabled:  lo.ToPtr(true),
+				ClientId: lo.ToPtr("only-id"),
+			},
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+	_, err := acct.GetKeysForProvider(context.Background(), schemas.OpenAI)
+	require.Error(t, err)
+}

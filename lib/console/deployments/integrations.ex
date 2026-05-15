@@ -38,8 +38,11 @@ defmodule Console.Deployments.Integrations do
   @spec upsert_chat_connection(map, User.t) :: chat_connection_resp
   def upsert_chat_connection(%{name: name} = attrs, %User{} = user) do
     case Repo.get_by(ChatConnection, name: name) do
-      %ChatConnection{} = conn -> conn
-      nil -> %ChatConnection{name: name}
+      %ChatConnection{} = conn ->
+        Repo.preload(conn, [:read_bindings, :write_bindings])
+
+      nil ->
+        %ChatConnection{name: name}
     end
     |> ChatConnection.changeset(attrs)
     |> allow(user, :write)

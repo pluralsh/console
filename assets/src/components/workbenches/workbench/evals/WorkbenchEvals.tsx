@@ -9,21 +9,24 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
-import { useMemo, useRef, useState } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import {
+  getWorkbenchEvalResultAbsPath,
+  WORKBENCH_EVAL_RESULT_PARAM_ID,
+  getWorkbenchEvalSettingsAbsPath,
+} from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
-import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
+import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
+import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
 import {
   WorkbenchEvalResultRowFragment,
-  useWorkbenchEvalSkillMutation,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { mapExistingNodes } from 'utils/graphql'
 
 type QualityTab = 'prompt' | 'conclusion' | 'logic'
@@ -41,11 +44,8 @@ const qualityTabs: { key: QualityTab; label: string }[] = [
 export function WorkbenchEvals() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { popToast } = useSimpleToast()
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
-  const [selectedEvalResultId, setSelectedEvalResultId] = useState<
-    string | null
-  >(null)
+  const evalResultIdFromPath = useParams()[WORKBENCH_EVAL_RESULT_PARAM_ID]
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
@@ -63,21 +63,9 @@ export function WorkbenchEvals() {
     )
   }, [data])
 
-  const selectedEvalRow =
-    evalRows.find((r) => r.id === selectedEvalResultId) ?? evalRows[0] ?? null
-
-  const [workbenchEvalSkill, { loading: skillMutationLoading }] =
-    useWorkbenchEvalSkillMutation({
-      onCompleted: ({ workbenchEvalSkill }) => {
-        popToast({
-          content: 'Skills updated successfully',
-          severity: 'success',
-        })
-        const jobId = workbenchEvalSkill?.id
-        if (jobId) navigate(getWorkbenchJobAbsPath({ workbenchId, jobId }))
-      },
-      onError: (e) => popToast({ content: e.message, severity: 'danger' }),
-    })
+  const selectedEvalRowFromPath =
+    evalRows.find((r) => r.id === evalResultIdFromPath) ?? null
+  const selectedEvalRow = selectedEvalRowFromPath ?? evalRows[0] ?? null
 
   const feedback = selectedEvalRow?.feedback
   const grade = selectedEvalRow?.grade ?? 0
@@ -89,9 +77,23 @@ export function WorkbenchEvals() {
   const durationSeconds = getDurationSeconds(selectedEvalRow?.workbenchJob)
   const selectedEvalResultIdForSkill = selectedEvalRow?.id
 
+  useEffect(() => {
+    if (!selectedEvalRow?.id || evalResultIdFromPath === selectedEvalRow.id)
+      return
+
+    navigate(
+      getWorkbenchEvalResultAbsPath({
+        workbenchId,
+        evalResultId: selectedEvalRow.id,
+      }),
+      { replace: true }
+    )
+  }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
+
   return (
     <WorkbenchPageLayout
       showDescription={false}
+      showEditWorkbenchButton={false}
       sidebar={{
         kind: 'custom',
         content: (
@@ -99,27 +101,33 @@ export function WorkbenchEvals() {
             evalRows={evalRows}
             loading={loading && !data}
             selectedEvalResultId={selectedEvalRow?.id}
-            onSelectEvalResultId={setSelectedEvalResultId}
+            onSelectEvalResultId={(evalResultId) =>
+              navigate(
+                getWorkbenchEvalResultAbsPath({
+                  workbenchId,
+                  evalResultId,
+                })
+              )
+            }
           />
         ),
       }}
       headerActions={
-        <Button
-          disabled={
-            !selectedEvalResultIdForSkill ||
-            skillMutationLoading ||
-            (loading && !data)
-          }
-          loading={skillMutationLoading}
-          onClick={() => {
-            if (!selectedEvalResultIdForSkill) return
-            workbenchEvalSkill({
-              variables: { id: selectedEvalResultIdForSkill },
-            })
-          }}
-        >
-          Create skills from eval
-        </Button>
+        <Flex gap="small">
+          <Button
+            secondary
+            onClick={() =>
+              navigate(getWorkbenchEvalSettingsAbsPath(workbenchId))
+            }
+          >
+            Eval settings
+          </Button>
+          <WorkbenchEvalSkillButton
+            disabled={loading && !data}
+            evalResultId={selectedEvalResultIdForSkill}
+            workbenchId={workbenchId}
+          />
+        </Flex>
       }
     >
       {error ? (
@@ -164,9 +172,10 @@ export function WorkbenchEvals() {
                     align="center"
                     gap="medium"
                   >
-                    <ScoreBadgeSC $color={evalGradeToColor(grade)}>
-                      {Math.round(grade)}
-                    </ScoreBadgeSC>
+                    <WorkbenchEvalGradeBadge
+                      grade={grade}
+                      size="medium"
+                    />
                     <Flex direction="column">
                       <span
                         css={{
@@ -332,17 +341,4 @@ const PanelBodySC = styled.div(({ theme }) => ({
   minHeight: 0,
   overflow: 'auto',
   padding: theme.spacing.medium,
-}))
-
-const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
-  alignItems: 'center',
-  backgroundColor: theme.colors['fill-one'],
-  border: `1px solid ${$color}`,
-  borderRadius: '50%',
-  color: $color,
-  display: 'flex',
-  fontWeight: 600,
-  height: 40,
-  justifyContent: 'center',
-  minWidth: 40,
 }))

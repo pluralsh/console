@@ -36,7 +36,7 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
       operator: operator as InputMaybe<LogQueryOperator> | undefined,
       facets,
     },
-    fetchPolicy: 'network-only', // caching kinda breaks on these because there's no ids to index on
+    fetchPolicy: 'cache-and-network',
   })
 
   const buckets = useMemo(

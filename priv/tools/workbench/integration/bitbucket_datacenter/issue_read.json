@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Fetch a Bitbucket Data Center repository issue by numeric id. Requires the repository issue tracker. Set include_comments to also GET /issues/{id}/comments (paged). Optional start/limit apply when include_comments is true.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Repository selector as PROJECT_KEY/repository_slug (e.g. ACME/my-service)."
+    },
+    "issue_id": {
+      "type": "integer",
+      "description": "Issue id (numeric id from Bitbucket for this repository issue)."
+    },
+    "include_comments": {
+      "type": "boolean",
+      "description": "When true, also fetch comments for this issue (paged JSON with values, start, limit, isLastPage).",
+      "default": false
+    },
+    "start": {
+      "type": "integer",
+      "description": "Paging start offset for comments when include_comments is true."
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Page size for comments when include_comments is true."
+    }
+  },
+  "required": ["project", "issue_id"],
+  "additionalProperties": false
+}

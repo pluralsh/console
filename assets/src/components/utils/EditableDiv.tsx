@@ -28,6 +28,7 @@ export function EditableDiv({
   onKeyDown: onKeyDownProp,
   placeholder,
   disabled,
+  deserializePlrlInitialValue = false,
   ...props
 }: {
   initialValue?: string
@@ -35,20 +36,34 @@ export function EditableDiv({
   onEnter?: () => void
   placeholder?: string
   disabled?: boolean
+  /**
+   * When true, mount once parses stored `<plrl-*>` chip XML via `insertPlrlText` (workbench cron/webhook
+   * prompts). Default `innerText` keeps prior behavior elsewhere (e.g. chat plain-text seeds).
+   */
+  deserializePlrlInitialValue?: boolean
 } & ComponentPropsWithRef<'div'>) {
   const internalRef = useRef<HTMLDivElement>(null)
-  const isFirstRender = useRef(true)
 
   useEffect(() => {
-    // sets the initial value of the div on first render
     const domNode = internalRef.current
-    if (isFirstRender.current && domNode) {
-      if (initialValue && initialValue !== '\n')
-        domNode.innerText = initialValue
-      else domNode.innerHTML = ''
-    }
-    isFirstRender.current = false
-  }, [initialValue])
+    if (!domNode) return
+
+    if (initialValue && initialValue !== '\n') {
+      if (deserializePlrlInitialValue) {
+        domNode.innerHTML = ''
+        const range = document.createRange()
+        range.selectNodeContents(domNode)
+        range.collapse(true)
+        insertPlrlText(range, initialValue)
+
+        const content = serializeEditableDiv(domNode)
+        setValue(content === '\n' ? '' : content)
+      } else domNode.innerText = initialValue
+    } else domNode.innerHTML = ''
+
+    // One-time hydrate per editor mount — parents that load async prompts bump `syncKey` on ChatInputSimple.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initialValue/`setValue` are mount snapshots only
+  }, [])
 
   const onInput = useCallback(
     (e: FormEvent<HTMLDivElement>) => {

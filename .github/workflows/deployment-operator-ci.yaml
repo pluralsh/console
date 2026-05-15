@@ -1,0 +1,184 @@
+name: CI / Deployment Operator
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/deployment-operator-ci.yaml"
+      - "go/deployment-operator/**"
+      - "go/polly/**"
+      - "go/client/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/deployment-operator-ci.yaml"
+      - "go/deployment-operator/**"
+      - "go/polly/**"
+      - "go/client/**"
+permissions:
+  contents: read
+env:
+  REGISTRY_IMAGE: pluralsh/deployment-operator
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/deployment-operator
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/deployment-operator/go.mod
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - run: make agent
+  test:
+    name: Unit test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/deployment-operator
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/deployment-operator/go.mod
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - run: make test
+  check-docs:
+    name: Verify CRD docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/deployment-operator/go.mod
+          cache: true
+      - name: Check docs
+        working-directory: go/deployment-operator
+        run: make crd-docs
+      - name: Verify CRD docs
+        working-directory: go/deployment-operator
+        run: |
+          git diff --exit-code -- docs/api.md || {
+            echo "::error::docs were not generated. Please run 'make crd-docs' and commit the changes."
+            exit 1
+          }
+  build-image:
+    name: Build image
+    needs: [ build, test ]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platforms.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/Dockerfile"
+          tags: ${{ env.REGISTRY_IMAGE }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.platforms.platform }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+  publish-image:
+    name: Publish image
+    needs: [ build-image ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      packages: 'write'
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pluralsh/deployment-operator
+            docker.io/pluralsh/deployment-operator
+          tags: |
+            type=sha
+            type=ref,event=pr
+            type=ref,event=branch
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)

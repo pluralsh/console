@@ -57,9 +57,12 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchEval,
     WorkbenchEvalResult,
     WorkbenchWebhook,
+    WorkbenchChatbot,
     IssueWebhook,
     ObservabilityWebhook,
-    Monitor
+    Monitor,
+    ChatConnection,
+    ChatbotMessage
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -91,6 +94,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%IssueWebhook{} = webhook, %User{} = user, action),
     do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%ChatConnection{} = conn, %User{} = user, action),
+    do: recurse(conn, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%ObservabilityWebhook{} = webhook, %User{} = user, action),
     do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
@@ -147,6 +152,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(tool, user, action, & &1.project)
   def evaluate(%WorkbenchJob{} = job, user, action),
     do: recurse(job, user, action, & &1.workbench)
+  def evaluate(%ChatbotMessage{} = msg, user, action),
+    do: recurse(msg, user, action, & &1.workbench_job)
   def evaluate(%WorkbenchJobActivity{} = activity, user, action),
     do: recurse(activity, user, action, & &1.workbench_job)
   def evaluate(%WorkbenchCron{} = cron, user, action),
@@ -161,6 +168,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(result, user, action, & &1.workbench_eval)
   def evaluate(%WorkbenchWebhook{} = webhook, user, action),
     do: recurse(webhook, user, action, & &1.workbench)
+  def evaluate(%WorkbenchChatbot{} = chatbot, user, action),
+    do: recurse(chatbot, user, action, & &1.workbench)
   def evaluate(%Monitor{} = monitor, %User{} = user, action),
     do: recurse(monitor, user, action, & &1.service)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
@@ -312,10 +321,20 @@ defmodule Console.Deployments.Policies.Rbac do
       ])
   def preload(%WorkbenchWebhook{} = webhook),
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchChatbot{} = chatbot),
+    do: Repo.preload(chatbot, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%ObservabilityWebhook{} = webhook),
     do: Repo.preload(webhook, [:read_bindings, :write_bindings])
   def preload(%IssueWebhook{} = webhook),
     do: Repo.preload(webhook, [:read_bindings, :write_bindings])
+  def preload(%ChatConnection{} = conn),
+    do: Repo.preload(conn, [:read_bindings, :write_bindings])
+  def preload(%ChatbotMessage{} = msg),
+    do:
+      Repo.preload(msg, [
+        workbench_job: [workbench: [:read_bindings, :write_bindings, project: @bindings]],
+        chat_connection: [:read_bindings, :write_bindings]
+      ])
   def preload(%Monitor{} = monitor),
     do: Repo.preload(monitor, [service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads]])
   def preload(pass), do: pass

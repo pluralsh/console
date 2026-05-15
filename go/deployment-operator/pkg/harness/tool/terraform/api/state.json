@@ -1,0 +1,56 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.11.4",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "plural_cluster.deprecated",
+          "mode": "managed",
+          "type": "plural_cluster",
+          "name": "deprecated",
+          "provider_name": "registry.terraform.io/pluralsh/plural",
+          "schema_version": 0,
+          "values": {
+            "bindings": null,
+            "detach": true,
+            "handle": "byok",
+            "helm_repo_url": "https://pluralsh.github.io/deployment-operator",
+            "helm_values": null,
+            "id": "5472923f-5c91-4db7-b5f3-8d0a11a350f5",
+            "inserted_at": "2025-05-22T13:32:11.137449Z",
+            "kubeconfig": {
+              "client_certificate": null,
+              "client_key": null,
+              "cluster_ca_certificate": null,
+              "config_context": null,
+              "config_context_auth_info": null,
+              "config_context_cluster": null,
+              "config_path": "/Users/marcin/.kube/config",
+              "exec": null,
+              "host": null,
+              "insecure": null,
+              "password": null,
+              "proxy_url": null,
+              "tls_server_name": null,
+              "token": null,
+              "username": null
+            },
+            "metadata": "{}",
+            "name": "byok",
+            "project_id": null,
+            "protect": false,
+            "tags": null
+          },
+          "sensitive_values": {
+            "kubeconfig": {
+              "client_key": true,
+              "password": true,
+              "token": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

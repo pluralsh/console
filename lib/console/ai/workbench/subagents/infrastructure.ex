@@ -6,6 +6,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Result,
     Skills,
     Skill,
+    Scratchpad,
     History,
     Calculator,
     Infrastructure.KubeGet,
@@ -20,7 +21,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.StackInspect,
     Infrastructure.CloudSchema,
     Infrastructure.CloudQuery,
-    Infrastructure.CloudLambda,
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
@@ -36,6 +36,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> MemoryEngine.new(50,
       system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
       acc: %{},
+      continue_msg: cont_msg(),
       callback: &callback(activity, &1)
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
@@ -66,6 +67,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat([
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
+      Scratchpad,
       Calculator,
       %History{job: job, activities: activities},
       Result

@@ -1,0 +1,76 @@
+name: "PR"
+
+on:
+  workflow_dispatch:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+    paths:
+      - .github/workflows/deployment-operator-pr.yaml
+      - go/deployment-operator/**
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - labeled
+      - unlabeled
+    paths:
+      - .github/workflows/deployment-operator-pr.yaml
+      - go/deployment-operator/**
+
+permissions:
+  contents: 'read'
+
+jobs:
+  title:
+    name: Title check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check pull request title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  body:
+    name: Body check
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.*.labels.*.name, 'dependencies') && !contains(github.event.*.labels.*.name, 'release')}}
+    steps:
+      - name: Check pull request body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Safely write PR body to file using environment variable
+          printf '%s\n' "$PR_BODY" > /tmp/pr_body.txt
+
+          # Check if body contains the placeholder URL that should be replaced
+          if grep -Fq "https://console.your-env.onplural.sh" /tmp/pr_body.txt; then
+            echo "❌ Error: PR body contains placeholder URL 'https://console.your-env.onplural.sh'"
+            echo "Replace it with link to a test environment where you have deployed and tested the agent"
+            rm -f /tmp/pr_body.txt
+            exit 1
+          fi
+
+          # Check if body contains a valid link to a test environment
+          if grep -E "https://console\.[^.]+\.onplural\.sh" /tmp/pr_body.txt > /dev/null; then
+            echo "✅ Valid link to a test environment found in PR body"
+          else
+            echo "❌ Error: PR body must contain a valid link to a test environment matching pattern 'https://console.*.onplural.sh'"
+            echo "Example: https://console.my-env.onplural.sh"
+            rm -f /tmp/pr_body.txt
+            exit 1
+          fi
+
+          # Check for unchecked checklist items
+          unchecked_count=$(grep -c "\[ \]" /tmp/pr_body.txt || true)
+          if [ "$unchecked_count" -gt 0 ]; then
+            echo "❌ Error: Found $unchecked_count unchecked checklist item(s)"
+            echo "Please complete all action points and mark all checks as completed"
+            rm -f /tmp/pr_body.txt
+            exit 1
+          fi
+
+          echo "✅ All checklist items are marked as completed"
+          rm -f /tmp/pr_body.txt

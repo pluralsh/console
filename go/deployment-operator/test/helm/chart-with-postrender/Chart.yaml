@@ -1,0 +1,6 @@
+apiVersion: v2
+name: chart-with-postrender
+description: Test chart with kustomize postrenderer
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

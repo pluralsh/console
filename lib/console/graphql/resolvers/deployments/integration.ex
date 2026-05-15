@@ -9,8 +9,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Integration do
     |> paginate(args)
   end
 
-  def chat_connections(args, _) do
-    ChatConnection.ordered()
+  def chat_connections(args, %{context: %{current_user: user}}) do
+    ChatConnection.for_user(user)
+    |> ChatConnection.ordered()
     |> maybe_search(ChatConnection, args)
     |> chat_filters(args)
     |> paginate(args)

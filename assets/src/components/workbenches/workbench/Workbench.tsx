@@ -31,6 +31,7 @@ import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
+  useLocation,
   useMatch,
   useNavigate,
   useOutletContext,
@@ -72,6 +73,7 @@ export type WorkbenchOutletContext = {
 }
 
 export enum WorkbenchMoreMenuKey {
+  Edit = 'edit',
   Cron = 'cron',
   Webhook = 'webhook',
   Tools = 'tools',
@@ -88,6 +90,7 @@ export type WorkbenchSidebar =
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
   showDescription?: boolean
+  showEditWorkbenchButton?: boolean
   headerActions?: ReactNode
   children?: ReactNode
 }
@@ -95,6 +98,7 @@ export type WorkbenchPageLayoutProps = {
 export function WorkbenchPageLayout({
   sidebar = { kind: 'default' },
   showDescription = true,
+  showEditWorkbenchButton = true,
   headerActions,
   children,
 }: WorkbenchPageLayoutProps) {
@@ -136,6 +140,9 @@ export function WorkbenchPageLayout({
   const handleMoreMenuSelection = useCallback(
     (selectedKey: Key) => {
       switch (selectedKey) {
+        case WorkbenchMoreMenuKey.Edit:
+          navigate(`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`)
+          return
         case WorkbenchMoreMenuKey.Cron:
           navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
           return
@@ -158,7 +165,7 @@ export function WorkbenchPageLayout({
           return
       }
     },
-    [navigate, workbenchId, openToolsEdit, openDelete]
+    [navigate, workbenchBasePath, workbenchId, openToolsEdit, openDelete]
   )
 
   return (
@@ -196,19 +203,29 @@ export function WorkbenchPageLayout({
               }
             />
             <Flex grow={1} />
-            <Button
-              secondary
-              as={Link}
-              to={`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`}
-            >
-              Edit workbench
-            </Button>
+            {showEditWorkbenchButton && (
+              <Button
+                secondary
+                as={Link}
+                to={`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`}
+              >
+                Edit workbench
+              </Button>
+            )}
             {headerActions}
             <MoreMenu
               disabled={!workbench}
+              maxHeight="min(80vh, 520px)"
               triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
               onSelectionChange={handleMoreMenuSelection}
             >
+              {!showEditWorkbenchButton && (
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.Edit}
+                  leftContent={<TuningIcon />}
+                  label="Edit workbench"
+                />
+              )}
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Tools}
                 leftContent={<ToolsIcon />}
@@ -288,6 +305,7 @@ function renderWorkbenchSidebar(
 
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
+  const { pathname } = useLocation()
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -318,7 +336,10 @@ export function Workbench() {
     })
 
   useSetBreadcrumbs(
-    useMemo(() => getWorkbenchBreadcrumbs(workbench), [workbench])
+    useMemo(() => {
+      void pathname
+      return getWorkbenchBreadcrumbs(workbench)
+    }, [pathname, workbench])
   )
 
   const outletContext = useMemo<WorkbenchOutletContext>(

@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchSkill,
     WorkbenchEvalResult,
     WorkbenchWebhook,
+    WorkbenchChatbot,
     PullRequest
   }
 
@@ -38,6 +39,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
   def workbench_tool(_, _), do: {:error, "Must specify either id or name"}
 
+  def workbench_chatbot(%{id: id}, ctx) when is_binary(id) do
+    Workbenches.get_workbench_chatbot!(id)
+    |> allow(actor(ctx), :read)
+  end
+
   def workbench_job(%{id: id}, ctx) do
     Workbenches.get_workbench_job!(id)
     |> allow(actor(ctx), :read)
@@ -56,6 +62,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> workbench_job_filters(args)
     |> WorkbenchJob.ordered()
     |> paginate(args)
+  end
+
+  def accessible_users(workbench, _args, _) do
+    {:ok, Workbenches.accessible_users(workbench)}
   end
 
   def recent_workbench_jobs(args, %{context: %{current_user: user}}) do
@@ -101,6 +111,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_webhooks(workbench, args, _) do
     WorkbenchWebhook.for_workbench(workbench.id)
     |> WorkbenchWebhook.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_chatbots(workbench, args, _) do
+    WorkbenchChatbot.for_workbench(workbench.id)
+    |> WorkbenchChatbot.ordered()
     |> paginate(args)
   end
 
@@ -295,6 +311,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_webhook(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_webhook(id, user)
+
+  def create_workbench_chatbot(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_chatbot(attrs, workbench_id, user)
+
+  def update_workbench_chatbot(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_chatbot(attrs, id, user)
+
+  def delete_workbench_chatbot(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_chatbot(id, user)
 
   def create_workbench_message(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_message(attrs, job_id, user)

@@ -6,6 +6,7 @@ defmodule Console.AI.Tools.Workbench.Calculator do
   alias Console.AI.Workbench.Calculator
 
   embedded_schema do
+    field :explanation, :string
     field :expression, :string
   end
 
@@ -20,8 +21,8 @@ defmodule Console.AI.Tools.Workbench.Calculator do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:expression])
-    |> validate_required([:expression])
+    |> cast(attrs, [:expression, :explanation])
+    |> validate_required([:expression, :explanation])
   end
 
   def implement(%__MODULE__{expression: expression}) do

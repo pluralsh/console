@@ -130,5 +130,6 @@ defmodule Console.AI.Workbench.Environment do
   defp category_to_subagent(:integration), do: :integration
   defp category_to_subagent(:ticketing), do: :integration
   defp category_to_subagent(:search), do: :search
+  defp category_to_subagent(:scm), do: :integration
   defp category_to_subagent(_), do: :integration
 end

@@ -140,6 +140,9 @@ defmodule Console.PubSub.WorkbenchEvalDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchChatbotCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchChatbotUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchChatbotDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobThoughtCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobResolved, do: use Piazza.PubSub.Event
 

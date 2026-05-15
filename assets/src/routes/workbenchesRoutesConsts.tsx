@@ -19,6 +19,7 @@ export const WORKBENCHES_TOOLS_REL_PATH = 'tools'
 export const WORKBENCHES_TOOLS_ADD_REL_PATH = 'integrations'
 export const WORKBENCHES_TOOLS_YOUR_REL_PATH = 'configured-tools'
 export const WORKBENCHES_EVALS_REL_PATH = 'evals'
+export const WORKBENCH_EVAL_RESULT_PARAM_ID = 'evalResultId'
 export const WORKBENCHES_ALERTS_REL_PATH = 'alerts'
 export const WORKBENCHES_ISSUES_REL_PATH = 'issues'
 export const WORKBENCHES_TOOLS_ABS_PATH = `${WORKBENCHES_ABS_PATH}/${WORKBENCHES_TOOLS_ADD_REL_PATH}`
@@ -102,6 +103,20 @@ export const getWorkbenchWebhookTriggerEditAbsPath = ({
 export const getWorkbenchEvalSettingsAbsPath = (
   workbenchId: Nullable<string>
 ) => `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCH_EVAL_SETTINGS_REL_PATH}`
+
+export const getWorkbenchEvalsAbsPath = (workbenchId: Nullable<string>) =>
+  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_EVALS_REL_PATH}`
+
+export const getWorkbenchEvalResultAbsPath = ({
+  workbenchId,
+  evalResultId,
+}: {
+  workbenchId: Nullable<string>
+  evalResultId: Nullable<string>
+}) =>
+  evalResultId
+    ? `${getWorkbenchEvalsAbsPath(workbenchId)}/${encodeURIComponent(evalResultId)}`
+    : getWorkbenchEvalsAbsPath(workbenchId)
 
 export const getWorkbenchJobAbsPath = ({
   workbenchId,

@@ -3,8 +3,9 @@ defmodule Console.Schema.WorkbenchWebhook do
   alias Console.Schema.{ObservabilityWebhook, Workbench, IssueWebhook, User}
 
   schema "workbench_webhooks" do
-    field :name,    :string
-    field :prompt,  :string
+    field :name,     :string
+    field :prompt,   :string
+    field :priority, :integer, default: 0
 
     embeds_one :matches, Matches, on_replace: :update do
       field :regex,            :string
@@ -48,7 +49,11 @@ defmodule Console.Schema.WorkbenchWebhook do
     from(w in query, where: w.issue_webhook_id == ^issue_webhook_id)
   end
 
-  @valid ~w(name webhook_id issue_webhook_id workbench_id prompt user_id)a
+  def prioritized(query \\ __MODULE__) do
+    from(w in query, order_by: [desc: :priority])
+  end
+
+  @valid ~w(name webhook_id issue_webhook_id workbench_id prompt user_id priority)a
 
   def changeset(model, attrs \\ %{}) do
     model

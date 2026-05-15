@@ -1,6 +1,5 @@
 import {
   ArrowTopRightIcon,
-  Avatar,
   Button,
   Card,
   CardTab,
@@ -48,10 +47,8 @@ import {
   ServiceGitFolderField,
   ServiceGitRefField,
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
-import { useLogin } from 'components/contexts'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { InlineLink } from 'components/utils/typography/InlineLink'
 import { CaptionP, InlineA, OverlineH3 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -599,46 +596,14 @@ export function WorkbenchCodingAgentStep({
   )
 }
 
-type AccessPolicySubTab = 'policy' | 'webhook-actor'
-
 export function WorkbenchAccessPolicyStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
-  const { setTabs } = useWorkbenchFormCardTabs()
-  const [subTab, setSubTab] = useState<AccessPolicySubTab>('policy')
-
-  // Register this step's tabs on the form's Card. Cleanup clears them
-  // when navigating away so other steps don't inherit stale tabs.
-  useEffect(() => {
-    setTabs(
-      <CardTabs>
-        <CardTab
-          active={subTab === 'policy'}
-          onClick={() => setSubTab('policy')}
-        >
-          Access policy
-        </CardTab>
-        <CardTab
-          active={subTab === 'webhook-actor'}
-          onClick={() => setSubTab('webhook-actor')}
-        >
-          Webhook actor
-        </CardTab>
-      </CardTabs>
-    )
-    return () => setTabs(null)
-  }, [subTab, setTabs])
-
   if (!formState) return null
 
-  return subTab === 'policy' ? (
+  return (
     <AccessPolicySubStep
-      formState={formState}
-      setFormState={setFormState}
-    />
-  ) : (
-    <WebhookActorSubStep
       formState={formState}
       setFormState={setFormState}
     />
@@ -695,116 +660,6 @@ function AccessPolicySubStep({
           }}
         />
       </Flex>
-    </Flex>
-  )
-}
-
-function WebhookActorSubStep({
-  formState,
-  setFormState,
-}: WorkbenchFormStepProps) {
-  const theme = useTheme()
-  const { me } = useLogin()
-  const update = createFormUpdater(setFormState)
-
-  const resolvedActor = useMemo(() => {
-    if (formState.overrideBotUser && me) {
-      return {
-        id: me.id,
-        name: me.name ?? '',
-        email: me.email ?? '',
-        profile: me.profile,
-      }
-    }
-    if (formState.botUser) return formState.botUser
-    return null
-  }, [formState.botUser, formState.overrideBotUser, me])
-
-  const showSetMeLink =
-    me &&
-    !!me.roles?.admin &&
-    !formState.overrideBotUser &&
-    (!resolvedActor || resolvedActor.id !== me.id)
-  const showResetLink =
-    me && !!me.roles?.admin && formState.overrideBotUser && !!formState.botUser
-
-  return (
-    <Flex
-      direction="column"
-      gap="xsmall"
-    >
-      <FormField
-        label={
-          <Flex
-            align="center"
-            justify="space-between"
-            width="100%"
-            gap="medium"
-          >
-            <span>Current webhook actor*</span>
-            {showSetMeLink ? (
-              <InlineLink
-                css={{ fontWeight: 400, whiteSpace: 'nowrap' }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  update((d) => {
-                    d.overrideBotUser = true
-                  })
-                }}
-              >
-                Set me as webhook actor
-              </InlineLink>
-            ) : showResetLink ? (
-              <InlineLink
-                css={{ fontWeight: 400, whiteSpace: 'nowrap' }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  update((d) => {
-                    d.overrideBotUser = false
-                  })
-                }}
-              >
-                Reset to original actor
-              </InlineLink>
-            ) : null}
-          </Flex>
-        }
-      >
-        {resolvedActor ? (
-          <Card
-            fillLevel={1}
-            css={{
-              border: theme.borders['fill-one'],
-              borderRadius: theme.borderRadiuses.medium,
-              padding: theme.spacing.medium,
-            }}
-          >
-            <StackedText
-              first={resolvedActor.name}
-              second={resolvedActor.email}
-              firstPartialType="body2"
-              firstColor="text"
-              secondPartialType="caption"
-              secondColor="text-xlight"
-              icon={
-                <Avatar
-                  name={resolvedActor.name}
-                  src={resolvedActor.profile ?? undefined}
-                  css={{ borderRadius: '50%' }}
-                  size={48}
-                />
-              }
-              iconGap="small"
-              css={{ minWidth: 0 }}
-            />
-          </Card>
-        ) : null}
-      </FormField>
-      <CaptionP $color="text-light">
-        For security, webhooks and crons run as a single user. This is set to
-        the workbench creator by default. Admins can take over this role at any
-        time.
-      </CaptionP>
     </Flex>
   )
 }

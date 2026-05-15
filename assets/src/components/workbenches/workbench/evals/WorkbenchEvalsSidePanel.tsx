@@ -1,17 +1,18 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { type ComponentProps, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
-  evalGradeToColor,
   EvalGradeCategory,
 } from 'components/workbenches/common/evalGrade'
+import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
-import { groupBy } from 'lodash'
+import { groupBy, truncate } from 'lodash'
 
 type EvalRow = WorkbenchEvalResultRowFragment & {
   workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
@@ -135,9 +136,7 @@ export function WorkbenchEvalsSidePanel({
                 $active={selectedEvalResultId === row.id}
                 onClick={() => onSelectEvalResultId(row.id)}
               >
-                <ScoreBadgeSC $color={evalGradeToColor(row.grade ?? 0)}>
-                  {Math.round(row.grade ?? 0)}
-                </ScoreBadgeSC>
+                <WorkbenchEvalGradeBadge grade={row.grade ?? 0} />
                 <Flex
                   direction="column"
                   gap="xxxsmall"
@@ -150,7 +149,9 @@ export function WorkbenchEvalsSidePanel({
                       color: theme.colors['text-light'],
                     }}
                   >
-                    {row.workbenchJob.prompt}
+                    {truncate(prettifyPrompt(row.workbenchJob.prompt ?? ''), {
+                      length: 150,
+                    })}
                   </span>
                   <span
                     css={{
@@ -235,18 +236,3 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     },
   })
 )
-
-const ScoreBadgeSC = styled.div<{ $color: string }>(({ theme, $color }) => ({
-  ...theme.partials.text.caption,
-  alignItems: 'center',
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
-  borderRadius: '50%',
-  color: $color,
-  display: 'flex',
-  flexShrink: 0,
-  fontWeight: 600,
-  height: 32,
-  justifyContent: 'center',
-  width: 32,
-}))

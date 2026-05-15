@@ -16,6 +16,8 @@ defmodule Console.AI.Workbench.FileCache do
     fetch_cached(table, stack.id, fn -> Stacks.stack_files(stack.id, user) end)
   end
 
+  def fetch(_, _, _), do: {:error, "no service or stack provided to file cache, likely does not exist"}
+
   defp fetch_cached(table, id, fun) when is_function(fun, 0) do
     case :ets.lookup(table, id) do
       [{^id, files}] -> {:ok, files}

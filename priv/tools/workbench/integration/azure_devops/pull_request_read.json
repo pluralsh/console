@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Fetch an Azure DevOps pull request (Git REST 7.1). Set include_threads to also return PR comment threads. When the workbench URL is bare https://dev.azure.com, pass organization; if the URL is https://dev.azure.com/{organization}, organization may be omitted.",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Azure DevOps organization name (required when API root has no organization path segment)."
+    },
+    "project": {
+      "type": "string",
+      "description": "Team project name or GUID."
+    },
+    "repository": {
+      "type": "string",
+      "description": "Git repository name or ID (GUID) within the project."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request id (numeric id from the PR URL or API, not the merge commit)."
+    },
+    "include_threads": {
+      "type": "boolean",
+      "description": "When true, also fetch pull request comment threads (includes thread id and per-thread comment ids).",
+      "default": false
+    }
+  },
+  "required": ["project", "repository", "pull_request_id"],
+  "additionalProperties": false
+}

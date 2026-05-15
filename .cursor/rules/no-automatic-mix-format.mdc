@@ -1,0 +1,10 @@
+---
+description: Prevent agents from running mix format automatically
+alwaysApply: true
+---
+
+# Elixir Formatting
+
+Do not run `mix format` automatically.
+
+Only run `mix format` when the user explicitly requests formatting. For Elixir changes, preserve existing local formatting and keep diffs focused by hand-editing the relevant lines.

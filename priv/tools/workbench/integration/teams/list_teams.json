@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "description": "Lists Microsoft Teams (team-enabled Microsoft 365 groups) via Microsoft Graph. The JSON body includes @odata.nextLink when more pages exist—pass that exact string back as odata_next_link on the next call. Optional $top via top on the first request only.",
+  "properties": {
+    "odata_next_link": {
+      "type": "string",
+      "description": "Pagination: copy the full @odata.nextLink value from the previous response body (verbatim). When set, top is ignored; Graph encodes the continuation in the URL."
+    },
+    "top": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999,
+      "description": "First-page page size ($top). Ignored when odata_next_link is provided."
+    }
+  },
+  "additionalProperties": false
+}

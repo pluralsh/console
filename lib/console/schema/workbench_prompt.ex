@@ -3,7 +3,9 @@ defmodule Console.Schema.WorkbenchPrompt do
   alias Console.Schema.Workbench
 
   schema "workbench_prompts" do
-    field :prompt, :binary
+    field :title,    :string
+    field :category, :string
+    field :prompt,   :binary
 
     belongs_to :workbench, Workbench
 
@@ -18,7 +20,7 @@ defmodule Console.Schema.WorkbenchPrompt do
     from(p in query, where: p.workbench_id == ^workbench_id)
   end
 
-  @valid ~w(prompt workbench_id)a
+  @valid ~w(title category prompt workbench_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

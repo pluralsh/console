@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "description": "Create a PR review, submit events for an existing review, or delete a review. submit and delete require review_id.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "pull_number": {
+      "type": "integer",
+      "description": "Pull request number."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["create", "submit", "delete"],
+      "description": "create: new review; submit: POST review event (needs review_id); delete: delete pending review (needs review_id)."
+    },
+    "commit_id": {
+      "type": "string",
+      "description": "SHA for create; required by GitHub when adding inline comments."
+    },
+    "body": {
+      "type": "string",
+      "description": "Review summary body for create/submit."
+    },
+    "event": {
+      "type": "string",
+      "description": "For create: COMMENT, APPROVE, REQUEST_CHANGES, or PENDING. For submit: desired completion event per GitHub API."
+    },
+    "comments": {
+      "type": "array",
+      "description": "Inline comments for create (path, position or line, body).",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "review_id": {
+      "type": "integer",
+      "description": "Review database id; required for submit and delete."
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "Reserved; GraphQL thread resolution is not implemented in this tool."
+    }
+  },
+  "required": ["owner", "repo", "pull_number", "method"],
+  "additionalProperties": false
+}

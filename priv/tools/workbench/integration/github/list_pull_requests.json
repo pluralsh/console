@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "description": "List pull requests for a repository.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "state": {
+      "type": "string",
+      "description": "open, closed, or all."
+    },
+    "head": {
+      "type": "string",
+      "description": "Filter by head user:branch or branch name."
+    },
+    "base": {
+      "type": "string",
+      "description": "Filter by base branch name."
+    },
+    "sort": {
+      "type": "string",
+      "description": "created, updated, popularity, or long-running."
+    },
+    "direction": {
+      "type": "string",
+      "description": "asc or desc."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number (legacy pagination)."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page."
+    }
+  },
+  "required": ["owner", "repo"],
+  "additionalProperties": false
+}

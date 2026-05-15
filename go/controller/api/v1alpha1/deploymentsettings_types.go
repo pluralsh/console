@@ -894,8 +894,7 @@ type OpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	ProxyModels []string `json:"proxyModels,omitempty"`
 
-	// BaseUrl is a custom base url to use, for reimplementations
-	// of the same API scheme (for instance Together.ai uses the OpenAI API spec)
+	// BaseUrl is a custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec).  Should be similar to https://api.openai.com/v1
 	//
 	// +kubebuilder:validation:Optional
 	BaseUrl *string `json:"baseUrl,omitempty"`

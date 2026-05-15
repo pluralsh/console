@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "Fetch an Azure DevOps work item (issue, bug, task, etc.). Set include_comments to also return discussion comments. When the workbench URL is bare https://dev.azure.com, pass organization; if the URL includes the org, organization may be omitted.",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Azure DevOps organization name (required when API root has no organization path segment)."
+    },
+    "project": {
+      "type": "string",
+      "description": "Team project name or GUID."
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "Work item id (numeric)."
+    },
+    "include_comments": {
+      "type": "boolean",
+      "description": "When true, also fetch work item comments (REST preview).",
+      "default": false
+    }
+  },
+  "required": ["project", "work_item_id"],
+  "additionalProperties": false
+}

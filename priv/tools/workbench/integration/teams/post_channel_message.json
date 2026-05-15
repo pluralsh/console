@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Posts a plain-text message to a Teams channel (Graph POST .../messages).",
+  "properties": {
+    "team_id": {
+      "type": "string",
+      "description": "Team (group) id."
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Channel id."
+    },
+    "text": {
+      "type": "string",
+      "description": "Message body (plain text)."
+    }
+  },
+  "required": ["team_id", "channel_id", "text"],
+  "additionalProperties": false
+}

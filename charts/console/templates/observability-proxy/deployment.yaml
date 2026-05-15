@@ -57,7 +57,7 @@ spec:
         securityContext:
         {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
         {{- end }}
-        image: "{{ .Values.global.registry }}/{{ .Values.observabilityProxy.image.repository }}:{{ .Values.observabilityProxy.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.observabilityProxy.image.registry | default .Values.global.registry }}/{{ .Values.observabilityProxy.image.repository }}:{{ .Values.observabilityProxy.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.observabilityProxy.image.pullPolicy }}
         args:
         - --listen-addr={{ .Values.observabilityProxy.listenAddr }}

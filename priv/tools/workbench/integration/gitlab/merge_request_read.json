@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Fetch a merge request (IID) from GitLab REST v4. Set include_notes to also return discussion notes (comments); optional page/per_page apply only when include_notes is true.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project ID or URL-encoded path (e.g. numeric id, or group/subgroup/repo for gitlab.com)."
+    },
+    "merge_request_iid": {
+      "type": "integer",
+      "description": "Merge request IID (per-project number from the MR URL)."
+    },
+    "include_notes": {
+      "type": "boolean",
+      "description": "When true, also fetch notes (comments) for this merge request.",
+      "default": false
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page of notes when include_notes is true (GitLab pagination)."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Notes per page when include_notes is true (GitLab pagination)."
+    }
+  },
+  "required": ["project", "merge_request_iid"],
+  "additionalProperties": false
+}

@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stateful-service
+  labels:
+    app: stateful
+spec:
+  clusterIP: None
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: stateful
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stateful-demo
+  labels:
+    app: stateful
+spec:
+  serviceName: stateful-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stateful
+  template:
+    metadata:
+      labels:
+        app: stateful
+    spec:
+      containers:
+        - name: writer
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "hello" >> /data/hello.txt;
+              echo "StatefulSet started";
+              sleep 3600
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

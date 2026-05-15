@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "description": "Read pull request data: metadata, diff, combined status, files, review comments, reviews, issue comments, or check runs.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "pull_number": {
+      "type": "integer",
+      "description": "Pull request number."
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "get",
+        "get_diff",
+        "get_status",
+        "get_files",
+        "get_review_comments",
+        "get_reviews",
+        "get_comments",
+        "get_check_runs"
+      ],
+      "description": "get: PR JSON; get_diff: raw diff; get_status: combined status for head commit; get_files: changed files; get_review_comments: inline review comments; get_reviews: submitted reviews; get_comments: issue-style comments on the PR; get_check_runs: check runs for head commit."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Pagination for list-style methods."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Page size for list-style methods."
+    },
+    "after": {
+      "type": "string",
+      "description": "Cursor for get_review_comments when supported."
+    }
+  },
+  "required": ["owner", "repo", "pull_number", "method"],
+  "additionalProperties": false
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/console"
 	"github.com/pluralsh/console/go/nexus/internal/log"
+	"github.com/pluralsh/console/go/nexus/internal/tokenexchange"
 	"go.uber.org/zap"
 )
 
@@ -25,13 +26,20 @@ type EmbeddingsModelGetter interface {
 // Account implements the Bifrost account interface using Console configuration
 type Account struct {
 	consoleClient console.Client
+	tokenCache    *tokenexchange.Cache
 	logger        *zap.Logger
 }
 
-// NewAccount creates a new account store that bridges Console and Bifrost
-func NewAccount(consoleClient console.Client) NexusAccount {
+// NewAccount creates a new account store that bridges Console and Bifrost.
+// tokenCache performs OAuth2 client-credentials exchanges for OpenAI (see tokenexchange package);
+// if nil, a process-wide cache backed by http.DefaultClient is used.
+func NewAccount(consoleClient console.Client, tokenCache *tokenexchange.Cache) NexusAccount {
+	if tokenCache == nil {
+		tokenCache = tokenexchange.NewCache()
+	}
 	return &Account{
 		consoleClient: consoleClient,
+		tokenCache:    tokenCache,
 		logger:        log.Logger().With(zap.String("component", "account")),
 	}
 }
@@ -81,8 +89,8 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 
 	var providers []schemas.ModelProvider
 
-	// Check each provider and add if configured
-	if cfg := aiConfig.GetOpenai(); cfg != nil {
+	// Check each provider and add if configured (OpenAI may authenticate via static apiKey or OAuth token exchange).
+	if openAIAuthConfigured(aiConfig.GetOpenai()) {
 		providers = append(providers, schemas.OpenAI)
 	}
 

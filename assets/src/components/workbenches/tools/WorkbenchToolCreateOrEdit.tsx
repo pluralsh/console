@@ -38,6 +38,7 @@ import {
   getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
   isProvider,
+  scmTypeForWorkbenchTool,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
 import {
@@ -262,6 +263,7 @@ function formStateToAttributes(
     categories,
     configuration,
     cloudConnectionId,
+    scmConnectionId,
     readBindings,
     writeBindings,
   } = state
@@ -273,17 +275,25 @@ function formStateToAttributes(
     writeBindings: writeBindings.map(bindingToBindingAttributes),
   }
 
-  if (type === WorkbenchToolType.Cloud)
-    return { ...base, cloudConnectionId: cloudConnectionId ?? null }
+  const scmType = scmTypeForWorkbenchTool(type)
+  const scmPatch = scmType ? { scmConnectionId: scmConnectionId ?? null } : {}
 
-  if (!isConfigurableWorkbenchToolType(type) || !configuration) return base
+  if (type === WorkbenchToolType.Cloud)
+    return {
+      ...base,
+      cloudConnectionId: cloudConnectionId ?? null,
+      ...scmPatch,
+    }
+
+  if (!isConfigurableWorkbenchToolType(type) || !configuration)
+    return { ...base, ...scmPatch }
 
   const configKey = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
   const sanitized = deepOmitBlank(configuration[configKey])
 
-  if (isEmpty(sanitized)) return base
+  if (isEmpty(sanitized)) return { ...base, ...scmPatch }
 
-  return { ...base, configuration: { [configKey]: sanitized } }
+  return { ...base, ...scmPatch, configuration: { [configKey]: sanitized } }
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

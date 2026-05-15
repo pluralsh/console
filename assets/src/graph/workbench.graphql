@@ -42,6 +42,7 @@ fragment IssueWebhookTiny on IssueWebhook {
 fragment WorkbenchWebhookTiny on WorkbenchWebhook {
   id
   name
+  priority
   webhook {
     id
     type
@@ -126,6 +127,11 @@ fragment WorkbenchToolTiny on WorkbenchTool {
 
 fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
+  scmConnection {
+    id
+    name
+    type
+  }
   readBindings {
     ...PolicyBinding
   }
@@ -177,6 +183,13 @@ fragment WorkbenchTool on WorkbenchTool {
     linear {
       url
     }
+    slack {
+      url
+    }
+    teams {
+      clientId
+      tenantId
+    }
     splunk {
       url
       username
@@ -199,6 +212,20 @@ fragment WorkbenchTool on WorkbenchTool {
     github {
       url
       toolset
+      appId
+      installationId
+    }
+    gitlab {
+      url
+    }
+    bitbucket {
+      url
+    }
+    bitbucketDatacenter {
+      url
+    }
+    azureDevops {
+      url
     }
   }
 }
@@ -308,6 +335,7 @@ fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
+  criticism
   conclusion
   topology
   todos {
@@ -324,6 +352,7 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   jobUpdate {
     diff
     workingTheory
+    criticism
     conclusion
   }
   metricsQuery {
@@ -383,6 +412,7 @@ fragment WorkbenchCron on WorkbenchCron {
   id
   crontab
   prompt
+  userId
   lastRunAt
   nextRunAt
   insertedAt
@@ -391,6 +421,8 @@ fragment WorkbenchCron on WorkbenchCron {
 
 fragment WorkbenchPrompt on WorkbenchPrompt {
   id
+  title
+  category
   prompt
   insertedAt
   updatedAt
@@ -400,6 +432,8 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
   prompt
+  priority
+  userId
   matches {
     regex
     substring
@@ -467,6 +501,10 @@ fragment WorkbenchJobTiny on WorkbenchJob {
     id
     conclusion
   }
+  evalResult {
+    id
+    grade
+  }
 }
 
 fragment WorkbenchJob on WorkbenchJob {
@@ -493,6 +531,14 @@ fragment WorkbenchJob on WorkbenchJob {
   }
   result {
     ...WorkbenchJobResult
+  }
+  evalResult {
+    feedback {
+      summary
+      prompt
+      result
+      logic
+    }
   }
 }
 
@@ -579,6 +625,22 @@ query WorkbenchesAlerts($first: Int = 100, $after: String) {
 query Workbench($id: ID, $name: String) {
   workbench(id: $id, name: $name) {
     ...Workbench
+  }
+}
+
+fragment WorkbenchAccessibleUser on User {
+  id
+  name
+  email
+  profile
+}
+
+query WorkbenchAccessibleUsers($id: ID!) {
+  workbench(id: $id) {
+    id
+    users {
+      ...WorkbenchAccessibleUser
+    }
   }
 }
 
@@ -789,6 +851,7 @@ query WorkbenchTriggersSummary($id: ID!) {
         node {
           id
           name
+          prompt
           webhook {
             id
             name
@@ -935,7 +998,7 @@ mutation DeleteWorkbenchEval($id: ID!) {
 
 mutation WorkbenchEvalSkill($id: ID!, $prompt: String) {
   workbenchEvalSkill(id: $id, prompt: $prompt) {
-    id
+    ...WorkbenchJob
   }
 }
 
@@ -993,9 +1056,7 @@ mutation CreateWorkbenchPrompt(
   $attributes: WorkbenchPromptAttributes!
 ) {
   createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
-    id
-    prompt
-    insertedAt
+    ...WorkbenchPrompt
   }
 }
 
@@ -1101,6 +1162,12 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
     payload {
       ...WorkbenchJobThought
     }
+  }
+}
+
+subscription WorkbenchJobProgress($jobId: ID!) {
+  workbenchJobProgress(jobId: $jobId) {
+    ...WorkbenchJobProgress
   }
 }
 

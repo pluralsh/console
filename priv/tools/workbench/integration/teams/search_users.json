@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "description": "Searches directory users (Graph GET /users). First page: pass query (substring match). Later pages: pass odata_next_link copied from @odata.nextLink in the previous response (query is then ignored).",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Substring for the first page only (displayName, mail, userPrincipalName). Not used when odata_next_link is set."
+    },
+    "odata_next_link": {
+      "type": "string",
+      "description": "Pagination: exact @odata.nextLink string from the prior teams_search_users response."
+    },
+    "top": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "First-page $top (default 25). Ignored when odata_next_link is set."
+    }
+  },
+  "additionalProperties": false
+}

@@ -21,9 +21,13 @@ Basic guardrails for using these subagents:
 * To bisect issues in git, you should delegate to the coding agent to do so, it can run in read-only mode if that's necessary.  It's rare to find those issues in the infrastructure agent's available data.
 * Always list subagents before selecting to run any subset of them, as it will let you know their current capabilities and how to best use them.
 
+**You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
+
 The overarching task is as follows:
 
 <%= @prompt %>
+
+And wherever needed (for instance when posting job progress in Slack or other integrations), this is the url of the workbench run: <%= Console.url("/workbenches/#{@job.workbench_id}/jobs/#{@job.id}") %>
 
 Leverage any of those tools to accomplish this task.
 
@@ -46,6 +50,8 @@ As work is being done, you can use the `working_theory` field to record the curr
 Also, there's a topology field, which accepts a mermaid formatted diagram.  Use this to express the current state of the system in question, including all main components at issue.  It will make it much easier for users to
 understand the correctness of any theory by visualizing what is at play.  You can modify this as work is being done, and also at completion to ensure your final conclusions are reflected in the diagram.
 
+The `criticism` field (optional) is for limitations, risks, or things a follow-up review should know about your conclusion—use it when the answer is directionally right but incomplete or uncertain.
+
 Topology is useful when:
 
 1. There's a high level distributed system architecture to express
@@ -60,15 +66,18 @@ and then delegate to the dashboard agent to craft a dashboard to explain the sys
 ## Completion Criteria
 Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.
 
-**In general, if a pull request has been created to fix the issue or accomplish the task, you should almost always consider the work complete**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+A change to infrastructure will usually be done via a Pull Request. Some guidance there:
 
-The exception to that rule would be if no code change is needed at all, or if multiple pull requests are required to accomplish what the user intends.
+* You should assume these are reviewed independently out of the scope of this run.  You don't need to wait for their completion*
+* If you need to divide work into separate PRs, you can create all of them in one go without waiting for merge or completion.  Reviewers will handle merge order with adequate guidance.*
+* Do not spin waiting for PRs to be merged, this will just waste tokens and cause annoyance.*equests are required to accomplish what the user intends.
+* You will not have the ability to update PRs once created.  SCM integration tools are read-only by design, and post PR creation feedback is delegated entirely to coding agents in babysit mode if applied.
+
+For tasks that do not require a code change, usually a successful run is done when all necessary evidence has been aggregated and you've come up with an adequate way of displaying the needed data to support a conclusion.
+
+You should also take heed of any criticism in the notes tool in case that provides decent insight into gaps in analysis or other issues that need to be addressed.
 
 **Never** have a coding agent reevaluate if a prior pr has been merged or anything similar, as it just wastes tokens.
-
-If you're being asked to create/modify infrastructure, do not loop back and confirm that happened beyond pull request creation, as it will simply burn tokens for no purpose since the infra creation is post pr merge.
-
-You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
 
 Once work is done, wrap up all todos, write a final conclusion.
 
@@ -111,9 +120,21 @@ For any tool you delegate to, you should have them give as close to exact raw da
 
 That said, you *should* avoid repeatedly calling the notes tool unless you're meaningfully updating your working theory, plan, or conclusion.  This will spam users and is unnneeded.
 
+In general, you should be focused on always making progress, don't repeatedly call tools that get no where important.
+
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  You can mark notes and trigger a subagent in parallel as well.
 
-<%= if @job.result && @job.result.conclusion && byte_size(@job.result.conclusion) > 0 do %>
+Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
+
+<%= if @job.result && is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
+### Prior criticism on the saved result
+
+If you are revising a prior run, take this feedback into account:
+
+<%= @job.result.criticism %>
+<% end %>
+
+<%= if @job.result && ((is_binary(@job.result.conclusion) && byte_size(@job.result.conclusion) > 0) || (is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0)) do %>
 ### Skill Backfill Guidance
 
 You also have a `skill_backfill` tool available.  Usage of this tool has a few rules you must follow:

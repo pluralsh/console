@@ -1036,8 +1036,8 @@ type AWSCloudAttributes struct {
 }
 
 type AWSCloudConnectionAttributes struct {
-	AccessKeyID     string    `json:"accessKeyId"`
-	SecretAccessKey string    `json:"secretAccessKey"`
+	AccessKeyID     *string   `json:"accessKeyId,omitempty"`
+	SecretAccessKey *string   `json:"secretAccessKey,omitempty"`
 	Region          *string   `json:"region,omitempty"`
 	Regions         []*string `json:"regions,omitempty"`
 	// optional IAM role ARN for the console to assume when using this connection
@@ -1052,7 +1052,7 @@ type AWSCloudSettings struct {
 // The configuration for a cloud provider
 type AWSConnectionAttributes struct {
 	// the access key id for aws
-	AccessKeyID string `json:"accessKeyId"`
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// the region for aws
 	Region *string `json:"region,omitempty"`
 	// the regions for aws
@@ -1464,8 +1464,12 @@ type ChatProviderConnection struct {
 	Type ChatProviderConnectionType `json:"type"`
 	// the configuration for this chat connection
 	Configuration ChatProviderConnectionConfiguration `json:"configuration"`
-	InsertedAt    *string                             `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                             `json:"updatedAt,omitempty"`
+	// read policy bindings for this chat connection
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy bindings for this chat connection
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
+	InsertedAt    *string          `json:"insertedAt,omitempty"`
+	UpdatedAt     *string          `json:"updatedAt,omitempty"`
 }
 
 // A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams
@@ -1475,6 +1479,10 @@ type ChatProviderConnectionAttributes struct {
 	// the type of this chat connection
 	Type          ChatProviderConnectionType                    `json:"type"`
 	Configuration ChatProviderConnectionConfigurationAttributes `json:"configuration"`
+	// users who can read this chat connection
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// users who can modify this chat connection
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ChatProviderConnectionConfiguration struct {
@@ -1572,6 +1580,21 @@ type ChatTypeAttributes struct {
 	File   *ChatFile         `json:"file,omitempty"`
 	Tool   *ChatTool         `json:"tool,omitempty"`
 	PrCall *PrCallAttributes `json:"prCall,omitempty"`
+}
+
+type ChatbotMessage struct {
+	// the id of this chatbot message record
+	ID string `json:"id"`
+	// serialized message payload associated with this job (internal format)
+	Message *string `json:"message,omitempty"`
+	// external channel identifier (e.g. Slack channel id)
+	Channel *string `json:"channel,omitempty"`
+	// the chat connection this message was routed through
+	ChatConnection *ChatProviderConnection `json:"chatConnection,omitempty"`
+	// the workbench job this message is associated with
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
 }
 
 type CloudAddon struct {
@@ -9560,11 +9583,14 @@ type Workbench struct {
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
 	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
+	Chatbots    *WorkbenchChatbotConnection    `json:"chatbots,omitempty"`
 	Alerts      *AlertConnection               `json:"alerts,omitempty"`
 	Issues      *IssueConnection               `json:"issues,omitempty"`
-	AllSkills   []*UnifiedWorkbenchSkill       `json:"allSkills,omitempty"`
-	InsertedAt  *string                        `json:"insertedAt,omitempty"`
-	UpdatedAt   *string                        `json:"updatedAt,omitempty"`
+	// users that have read or write access to this workbench
+	Users      []*User                  `json:"users,omitempty"`
+	AllSkills  []*UnifiedWorkbenchSkill `json:"allSkills,omitempty"`
+	InsertedAt *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                  `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAggregates struct {
@@ -9644,6 +9670,48 @@ type WorkbenchCanvasToolGraph struct {
 	Query   *WorkbenchToolQueryData `json:"query,omitempty"`
 }
 
+type WorkbenchChatbot struct {
+	// the id of this chatbot binding
+	ID string `json:"id"`
+	// external channel identifier (globally unique)
+	Channel string `json:"channel"`
+	// optional prompt text applied when this chatbot runs
+	Prompt *string `json:"prompt,omitempty"`
+	// user this chatbot runs as
+	UserID *string `json:"userId,omitempty"`
+	// the workbench this chatbot is bound to
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// the chat provider connection
+	ChatConnection *ChatProviderConnection `json:"chatConnection,omitempty"`
+	// the user who created this binding
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchChatbotAttributes struct {
+	// chat provider connection id (required for create)
+	ChatConnectionID *string `json:"chatConnectionId,omitempty"`
+	// external channel identifier (globally unique)
+	Channel *string `json:"channel,omitempty"`
+	// optional prompt text applied when this chatbot runs
+	Prompt *string `json:"prompt,omitempty"`
+	// user this chatbot runs as; must have read access to the workbench
+	UserID *string `json:"userId,omitempty"`
+	// when true on update, sets userId to the authenticated user
+	OverrideChatbotUser *bool `json:"overrideChatbotUser,omitempty"`
+}
+
+type WorkbenchChatbotConnection struct {
+	PageInfo PageInfo                `json:"pageInfo"`
+	Edges    []*WorkbenchChatbotEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchChatbotEdge struct {
+	Node   *WorkbenchChatbot `json:"node,omitempty"`
+	Cursor *string           `json:"cursor,omitempty"`
+}
+
 type WorkbenchCoding struct {
 	// the mode of the coding agent
 	Mode *AgentRunMode `json:"mode,omitempty"`
@@ -9696,6 +9764,8 @@ type WorkbenchCron struct {
 	NextRunAt *string `json:"nextRunAt,omitempty"`
 	// when the cron last ran
 	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// user this cron runs as
+	UserID *string `json:"userId,omitempty"`
 	// the workbench this cron belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -9707,6 +9777,8 @@ type WorkbenchCronAttributes struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// the prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// user this cron runs as; must have read access to the workbench
+	UserID *string `json:"userId,omitempty"`
 }
 
 type WorkbenchCronConnection struct {
@@ -9834,6 +9906,8 @@ type WorkbenchJob struct {
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// error message when the job failed
 	Error *string `json:"error,omitempty"`
+	// chatbot integration metadata for this job, when present
+	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
 	// the user who created this run
@@ -9901,6 +9975,7 @@ type WorkbenchJobActivityEdge struct {
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
+	Criticism     *string                   `json:"criticism,omitempty"`
 	Conclusion    *string                   `json:"conclusion,omitempty"`
 	Topology      *string                   `json:"topology,omitempty"`
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
@@ -9980,7 +10055,7 @@ type WorkbenchJobEdge struct {
 }
 
 type WorkbenchJobProgress struct {
-	ActivityID string         `json:"activityId"`
+	ActivityID *string        `json:"activityId,omitempty"`
 	Text       *string        `json:"text,omitempty"`
 	Tool       *string        `json:"tool,omitempty"`
 	Arguments  map[string]any `json:"arguments,omitempty"`
@@ -9991,6 +10066,8 @@ type WorkbenchJobResult struct {
 	ID string `json:"id"`
 	// the working theory for this result
 	WorkingTheory *string `json:"workingTheory,omitempty"`
+	// a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation
+	Criticism *string `json:"criticism,omitempty"`
 	// the conclusion for this result
 	Conclusion *string `json:"conclusion,omitempty"`
 	// a mermaid diagram of the topology of the system in question in this investigation
@@ -10102,6 +10179,10 @@ type WorkbenchPrMergeRateEntry struct {
 type WorkbenchPrompt struct {
 	// the id of the saved prompt
 	ID string `json:"id"`
+	// display title for the saved prompt
+	Title *string `json:"title,omitempty"`
+	// grouping category for the saved prompt (Default when unset in storage)
+	Category string `json:"category"`
 	// the saved prompt text
 	Prompt *string `json:"prompt,omitempty"`
 	// the workbench this prompt belongs to
@@ -10111,6 +10192,10 @@ type WorkbenchPrompt struct {
 }
 
 type WorkbenchPromptAttributes struct {
+	// display title for the saved prompt
+	Title *string `json:"title,omitempty"`
+	// grouping category for the saved prompt
+	Category *string `json:"category,omitempty"`
 	// the saved prompt text
 	Prompt string `json:"prompt"`
 }
@@ -10208,8 +10293,10 @@ type WorkbenchTool struct {
 	McpServer *McpServer `json:"mcpServer,omitempty"`
 	// the cloud connection bound to this tool
 	CloudConnection *CloudConnection `json:"cloudConnection,omitempty"`
-	InsertedAt      *string          `json:"insertedAt,omitempty"`
-	UpdatedAt       *string          `json:"updatedAt,omitempty"`
+	// the SCM connection bound to this tool
+	ScmConnection *ScmConnection `json:"scmConnection,omitempty"`
+	InsertedAt    *string        `json:"insertedAt,omitempty"`
+	UpdatedAt     *string        `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchToolAssociationAttributes struct {
@@ -10246,6 +10333,8 @@ type WorkbenchToolAttributes struct {
 	McpServerID *string `json:"mcpServerId,omitempty"`
 	// the cloud connection for this tool (e.g. infrastructure cloud tools)
 	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
+	// the SCM connection for this tool (e.g. shared Git provider credentials)
+	ScmConnectionID *string `json:"scmConnectionId,omitempty"`
 	// users who can read and execute this tool
 	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	// users who can modify this tool
@@ -10276,6 +10365,42 @@ type WorkbenchToolAzureConnectionAttributes struct {
 	ClientSecret string `json:"clientSecret"`
 	// Optional azure managed prometheus url if you wish to use it for metrics
 	PrometheusURL *string `json:"prometheusUrl,omitempty"`
+}
+
+type WorkbenchToolAzureDevopsConnection struct {
+	// Azure DevOps REST API root in use (PAT never exposed); defaults to https://dev.azure.com when unset.
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolAzureDevopsConnectionAttributes struct {
+	// Optional REST API root (defaults to https://dev.azure.com). Use https://dev.azure.com/{organization} to bake the org into the URL, or an on-premises root such as https://server/tfs/Collection.
+	URL *string `json:"url,omitempty"`
+	// Azure DevOps personal access token (PAT; encrypted at rest)
+	Token *string `json:"token,omitempty"`
+}
+
+type WorkbenchToolBitbucketConnection struct {
+	// Bitbucket Cloud API base URL when set (tokens never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolBitbucketConnectionAttributes struct {
+	// optional Bitbucket Cloud API base URL
+	URL *string `json:"url,omitempty"`
+	// Bitbucket app password or access token (encrypted at rest)
+	Token *string `json:"token,omitempty"`
+}
+
+type WorkbenchToolBitbucketDatacenterConnection struct {
+	// Bitbucket Data Center REST API base URL (tokens never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolBitbucketDatacenterConnectionAttributes struct {
+	// Bitbucket Data Center REST API base URL
+	URL string `json:"url"`
+	// HTTP access token or personal access token (encrypted at rest)
+	Token *string `json:"token,omitempty"`
 }
 
 type WorkbenchToolCloudwatchConnection struct {
@@ -10331,12 +10456,24 @@ type WorkbenchToolConfiguration struct {
 	Azure *WorkbenchToolAzureConnection `json:"azure,omitempty"`
 	// linear connection (no secrets)
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
+	// slack connection (no secrets)
+	Slack *WorkbenchToolSlackConnection `json:"slack,omitempty"`
+	// microsoft teams / graph connection (no secrets)
+	Teams *WorkbenchToolTeamsConnection `json:"teams,omitempty"`
 	// atlassian connection (no secrets)
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 	// exa connection (no secrets)
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 	// github connection (no secrets)
 	Github *WorkbenchToolGithubConnection `json:"github,omitempty"`
+	// gitlab connection (no secrets)
+	Gitlab *WorkbenchToolGitlabConnection `json:"gitlab,omitempty"`
+	// bitbucket cloud connection (no secrets)
+	Bitbucket *WorkbenchToolBitbucketConnection `json:"bitbucket,omitempty"`
+	// bitbucket data center connection (no secrets)
+	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnection `json:"bitbucketDatacenter,omitempty"`
+	// azure devops connection (no secrets)
+	AzureDevops *WorkbenchToolAzureDevopsConnection `json:"azureDevops,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -10364,12 +10501,24 @@ type WorkbenchToolConfigurationAttributes struct {
 	Azure *WorkbenchToolAzureConnectionAttributes `json:"azure,omitempty"`
 	// linear connection (ticketing)
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
+	// slack connection (integration)
+	Slack *WorkbenchToolSlackConnectionAttributes `json:"slack,omitempty"`
+	// microsoft teams / graph connection (integration)
+	Teams *WorkbenchToolTeamsConnectionAttributes `json:"teams,omitempty"`
 	// atlassian/jira connection (ticketing)
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 	// exa connection (search)
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 	// github connection (integration)
 	Github *WorkbenchToolGithubConnectionAttributes `json:"github,omitempty"`
+	// gitlab connection (scm)
+	Gitlab *WorkbenchToolGitlabConnectionAttributes `json:"gitlab,omitempty"`
+	// bitbucket cloud connection (scm)
+	Bitbucket *WorkbenchToolBitbucketConnectionAttributes `json:"bitbucket,omitempty"`
+	// bitbucket data center connection (scm)
+	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnectionAttributes `json:"bitbucketDatacenter,omitempty"`
+	// azure devops connection (scm)
+	AzureDevops *WorkbenchToolAzureDevopsConnectionAttributes `json:"azureDevops,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -10439,19 +10588,41 @@ type WorkbenchToolExaConnectionAttributes struct {
 }
 
 type WorkbenchToolGithubConnection struct {
-	// github MCP URL (credentials never exposed)
+	// GitHub REST API base URL in use (defaults to https://api.github.com/)
 	URL string `json:"url"`
-	// configured github MCP toolset
+	// configured native GitHub tool subset
 	Toolset *string `json:"toolset,omitempty"`
+	// GitHub App ID when using app authentication (secrets such as private keys are never exposed)
+	AppID *string `json:"appId,omitempty"`
+	// GitHub App installation ID when using app authentication
+	InstallationID *string `json:"installationId,omitempty"`
 }
 
 type WorkbenchToolGithubConnectionAttributes struct {
-	// github MCP URL (defaults to public github MCP server)
+	// optional GitHub REST API base URL (defaults to https://api.github.com/; set for GitHub Enterprise Server)
 	URL *string `json:"url,omitempty"`
-	// github token for MCP authentication
+	// optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)
 	AccessToken *string `json:"accessToken,omitempty"`
-	// optional github MCP toolset query parameter
+	// optional native tool subset: issues, pull_requests, repos, default/all, or omit for all tools
 	Toolset *string `json:"toolset,omitempty"`
+	// GitHub App ID (use with installation_id and private_key instead of access_token)
+	AppID *string `json:"appId,omitempty"`
+	// GitHub App installation ID for this organization or account
+	InstallationID *string `json:"installationId,omitempty"`
+	// PEM private key for the GitHub App (encrypted at rest); alternative to access_token
+	PrivateKey *string `json:"privateKey,omitempty"`
+}
+
+type WorkbenchToolGitlabConnection struct {
+	// GitLab API base URL in use (tokens never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolGitlabConnectionAttributes struct {
+	// optional GitLab API base URL (defaults to https://gitlab.com when omitted)
+	URL *string `json:"url,omitempty"`
+	// GitLab personal access token or project/group token (encrypted at rest)
+	Token *string `json:"token,omitempty"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -10571,6 +10742,16 @@ type WorkbenchToolQueryData struct {
 	Summary *string `json:"summary,omitempty"`
 }
 
+type WorkbenchToolSlackConnection struct {
+	// Slack hosted MCP endpoint (credentials never exposed)
+	URL string `json:"url"`
+}
+
+type WorkbenchToolSlackConnectionAttributes struct {
+	// slack bot user OAuth token (xoxb-...) for MCP
+	BotToken *string `json:"botToken,omitempty"`
+}
+
 type WorkbenchToolSplunkConnection struct {
 	// splunk base url
 	URL *string `json:"url,omitempty"`
@@ -10587,6 +10768,22 @@ type WorkbenchToolSplunkConnectionAttributes struct {
 	Username *string `json:"username,omitempty"`
 	// basic auth password
 	Password *string `json:"password,omitempty"`
+}
+
+type WorkbenchToolTeamsConnection struct {
+	// microsoft entra application (client) id
+	ClientID *string `json:"clientId,omitempty"`
+	// microsoft entra tenant (directory) id (client secret never exposed)
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolTeamsConnectionAttributes struct {
+	// microsoft entra application (client) id
+	ClientID string `json:"clientId"`
+	// microsoft entra client secret
+	ClientSecret string `json:"clientSecret"`
+	// microsoft entra tenant (directory) id
+	TenantID string `json:"tenantId"`
 }
 
 type WorkbenchToolTempoConnection struct {
@@ -10618,8 +10815,12 @@ type WorkbenchWebhook struct {
 	Name *string `json:"name,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// higher values are preferred when multiple webhooks match the same payload
+	Priority *int64 `json:"priority,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
+	// user this webhook runs as
+	UserID *string `json:"userId,omitempty"`
 	// the workbench this webhook belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
 	// the observability webhook that receives events
@@ -10643,6 +10844,10 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// higher values are preferred when multiple webhooks match the same payload
+	Priority *int64 `json:"priority,omitempty"`
+	// user this webhook runs as; must have read access to the workbench
+	UserID *string `json:"userId,omitempty"`
 	// when true on update, sets userId to the authenticated user
 	OverrideWebhookUser *bool `json:"overrideWebhookUser,omitempty"`
 }
@@ -16912,6 +17117,7 @@ const (
 	WorkbenchToolCategoryErrorTracking  WorkbenchToolCategory = "ERROR_TRACKING"
 	WorkbenchToolCategoryInfrastructure WorkbenchToolCategory = "INFRASTRUCTURE"
 	WorkbenchToolCategorySearch         WorkbenchToolCategory = "SEARCH"
+	WorkbenchToolCategoryScm            WorkbenchToolCategory = "SCM"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -16923,11 +17129,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryErrorTracking,
 	WorkbenchToolCategoryInfrastructure,
 	WorkbenchToolCategorySearch,
+	WorkbenchToolCategoryScm,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm:
 		return true
 	}
 	return false
@@ -17032,24 +17239,30 @@ func (e WorkbenchToolHTTPMethod) MarshalJSON() ([]byte, error) {
 type WorkbenchToolType string
 
 const (
-	WorkbenchToolTypeHTTP       WorkbenchToolType = "HTTP"
-	WorkbenchToolTypeElastic    WorkbenchToolType = "ELASTIC"
-	WorkbenchToolTypeDatadog    WorkbenchToolType = "DATADOG"
-	WorkbenchToolTypePrometheus WorkbenchToolType = "PROMETHEUS"
-	WorkbenchToolTypeLoki       WorkbenchToolType = "LOKI"
-	WorkbenchToolTypeTempo      WorkbenchToolType = "TEMPO"
-	WorkbenchToolTypeSentry     WorkbenchToolType = "SENTRY"
-	WorkbenchToolTypeMcp        WorkbenchToolType = "MCP"
-	WorkbenchToolTypeLinear     WorkbenchToolType = "LINEAR"
-	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
-	WorkbenchToolTypeSplunk     WorkbenchToolType = "SPLUNK"
-	WorkbenchToolTypeDynatrace  WorkbenchToolType = "DYNATRACE"
-	WorkbenchToolTypeCloudwatch WorkbenchToolType = "CLOUDWATCH"
-	WorkbenchToolTypeAzure      WorkbenchToolType = "AZURE"
-	WorkbenchToolTypeCloud      WorkbenchToolType = "CLOUD"
-	WorkbenchToolTypeJaeger     WorkbenchToolType = "JAEGER"
-	WorkbenchToolTypeExa        WorkbenchToolType = "EXA"
-	WorkbenchToolTypeGithub     WorkbenchToolType = "GITHUB"
+	WorkbenchToolTypeHTTP                WorkbenchToolType = "HTTP"
+	WorkbenchToolTypeElastic             WorkbenchToolType = "ELASTIC"
+	WorkbenchToolTypeDatadog             WorkbenchToolType = "DATADOG"
+	WorkbenchToolTypePrometheus          WorkbenchToolType = "PROMETHEUS"
+	WorkbenchToolTypeLoki                WorkbenchToolType = "LOKI"
+	WorkbenchToolTypeTempo               WorkbenchToolType = "TEMPO"
+	WorkbenchToolTypeSentry              WorkbenchToolType = "SENTRY"
+	WorkbenchToolTypeMcp                 WorkbenchToolType = "MCP"
+	WorkbenchToolTypeLinear              WorkbenchToolType = "LINEAR"
+	WorkbenchToolTypeAtlassian           WorkbenchToolType = "ATLASSIAN"
+	WorkbenchToolTypeSplunk              WorkbenchToolType = "SPLUNK"
+	WorkbenchToolTypeDynatrace           WorkbenchToolType = "DYNATRACE"
+	WorkbenchToolTypeCloudwatch          WorkbenchToolType = "CLOUDWATCH"
+	WorkbenchToolTypeAzure               WorkbenchToolType = "AZURE"
+	WorkbenchToolTypeCloud               WorkbenchToolType = "CLOUD"
+	WorkbenchToolTypeJaeger              WorkbenchToolType = "JAEGER"
+	WorkbenchToolTypeExa                 WorkbenchToolType = "EXA"
+	WorkbenchToolTypeGithub              WorkbenchToolType = "GITHUB"
+	WorkbenchToolTypeSLACk               WorkbenchToolType = "SLACK"
+	WorkbenchToolTypeTeams               WorkbenchToolType = "TEAMS"
+	WorkbenchToolTypeGitlab              WorkbenchToolType = "GITLAB"
+	WorkbenchToolTypeBitbucket           WorkbenchToolType = "BITBUCKET"
+	WorkbenchToolTypeBitbucketDatacenter WorkbenchToolType = "BITBUCKET_DATACENTER"
+	WorkbenchToolTypeAzureDevops         WorkbenchToolType = "AZURE_DEVOPS"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17071,11 +17284,17 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeJaeger,
 	WorkbenchToolTypeExa,
 	WorkbenchToolTypeGithub,
+	WorkbenchToolTypeSLACk,
+	WorkbenchToolTypeTeams,
+	WorkbenchToolTypeGitlab,
+	WorkbenchToolTypeBitbucket,
+	WorkbenchToolTypeBitbucketDatacenter,
+	WorkbenchToolTypeAzureDevops,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops:
 		return true
 	}
 	return false

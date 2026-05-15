@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     Result,
     Skills,
     Skill,
+    Scratchpad,
     History
   }
   alias Console.AI.Tools.Workbench.Canvas.{
@@ -43,6 +44,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     [
       %Skills{skills: Environment.subagent_skills(skills, :canvas)},
       %Skill{skills: Environment.subagent_skills(skills, :canvas)},
+      Scratchpad,
       Result,
       Canvas,
       MarkdownBlock,

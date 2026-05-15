@@ -223,8 +223,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :aws_cloud_connection_attributes do
-    field :access_key_id,     non_null(:string)
-    field :secret_access_key, non_null(:string)
+    field :access_key_id,     :string
+    field :secret_access_key, :string
     field :region,            :string
     field :regions,           list_of(:string)
     field :assume_role_arn,   :string, description: "optional IAM role ARN for the console to assume when using this connection"
@@ -408,7 +408,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :bedrock_ai_settings do
     field :model_id,        :string, description: "the bedrock model to use (omit for Plural defaults)"
     field :tool_model_id,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
-    field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)"
+    field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)",
+      resolve: fn b, _, _ -> {:ok, Map.get(b, :aws_access_key_id)} end
     field :region,          :string, description: "the aws region the model is hosted in"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
@@ -469,7 +470,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "The configuration for a cloud provider"
   object :aws_connection_attributes do
-    field :access_key_id,   non_null(:string), description: "the access key id for aws"
+    field :access_key_id,   :string, description: "the access key id for aws"
     field :region,          :string, description: "the region for aws"
     field :regions,         list_of(:string), description: "the regions for aws"
     field :assume_role_arn, :string, description: "IAM role ARN for the console to assume when using this connection"
