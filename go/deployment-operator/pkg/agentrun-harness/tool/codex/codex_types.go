@@ -43,6 +43,9 @@ type StreamEvent struct {
 	// "item.started", "item.completed", "turn.completed".
 	Type string `json:"type"`
 
+	// Message is populated with "error" events.
+	Message string `json:"message"`
+
 	// ThreadID is set on "thread.started" events and carries the session
 	// identifier that must be forwarded to the API (analogous to session_id in Claude).
 	ThreadID string `json:"thread_id,omitempty"`

@@ -353,6 +353,11 @@ func mapCodexStreamEventToAgentMessage(event *StreamEvent, threadID string) *con
 				},
 			},
 		}
+	case "error":
+		return &console.AgentMessageAttributes{
+			Role:    console.AiRoleAssistant,
+			Message: event.Message,
+		}
 	}
 	return nil
 }
