@@ -3,7 +3,7 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import {
-  actionsColumn,
+  actionColumns,
   promptColumn,
   userColumn,
   workbenchColumn,
@@ -86,7 +86,12 @@ export function FlowWorkbenches() {
             pageInfo={jobsPageInfo}
             fetchNextPage={fetchNextJobsPage}
             setVirtualSlice={setJobsVirtualSlice}
-            columns={[userColumn, promptColumn, workbenchColumn, actionsColumn]}
+            columns={[
+              userColumn,
+              promptColumn,
+              workbenchColumn,
+              ...actionColumns,
+            ]}
           />
         </TableContainerSC>
       </WrapperSC>
