@@ -54,7 +54,15 @@ func (in *Opencode) Configure(consoleURL, consoleToken, deployToken string) erro
 		return fmt.Errorf("failed configuring opencode config file %q: %w", ConfigFileName, err)
 	}
 
-	klog.V(log.LogLevelExtended).InfoS("opencode configured", "configFile", in.configFilePath())
+	klog.V(log.LogLevelExtended).InfoS(
+		"opencode configured",
+		"configFile", in.configFilePath(),
+		"provider", in.provider,
+		"model", in.model,
+		"endpoint", endpoint,
+		"mode", in.Config.Run.Mode,
+	)
+
 	return nil
 }
 
@@ -140,11 +148,14 @@ func (in *Opencode) handleStreamLine(line []byte, state *streamState) error {
 			message = event.Error.Data.Message
 		}
 
-		klog.V(log.LogLevelDebug).InfoS(
-			"opencode error",
+		klog.ErrorS(
+			fmt.Errorf("opencode stream error"),
+			"opencode stream error event",
 			"name", event.Error.Name,
 			"message", message,
+			"session_id", event.SessionID,
 			"events", len(state.events),
+			"raw_line", truncateForLog(string(line), 4096),
 		)
 		return fmt.Errorf("opencode error: %s: %s", event.Error.Name, message)
 	}
@@ -203,6 +214,19 @@ func (in *Opencode) emitCompletedToolEvent(event EventListResponse) bool {
 		return true
 	}
 
+	if event.Part.State.Status == StreamToolStatusError {
+		klog.ErrorS(
+			fmt.Errorf("opencode tool call failed"),
+			"opencode tool event returned error status",
+			"session_id", event.SessionID,
+			"tool", event.Part.Tool,
+			"call_id", event.Part.CallID,
+			"message_id", event.Part.MessageID,
+			"input", truncateForLog(string(event.Part.State.Input), 4096),
+			"output", truncateForLog(event.Part.State.Output, 4096),
+		)
+	}
+
 	toolEvent := &Event{}
 	toolEvent.FromEventResponse(event)
 	toolEvent.Sanitize()
@@ -249,6 +273,14 @@ func (in *Opencode) agent() string {
 
 func (in *Opencode) configFilePath() string {
 	return path.Join(in.Config.WorkDir, ".opencode", ConfigFileName)
+}
+
+func truncateForLog(value string, limit int) string {
+	if limit <= 0 || len(value) <= limit {
+		return value
+	}
+
+	return value[:limit] + "...(truncated)"
 }
 
 func (in *Opencode) ensure() error {

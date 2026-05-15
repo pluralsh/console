@@ -679,8 +679,8 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			config := &v1alpha1.AgentRuntimeConfigRaw{
 				OpenCode: &v1alpha1.OpenCodeConfigRaw{
-					Provider: "openai",
-					Endpoint: "https://api.openai.com",
+					Provider: new("openai"),
+					Endpoint: new("https://api.openai.com"),
 					Model:    lo.ToPtr("gpt-4"),
 					Token:    "openai-token",
 				},

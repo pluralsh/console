@@ -322,8 +322,14 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 		return nil, nil
 	}
 
+	result := &CodexConfigRaw{
+		Model:    in.Model,
+		Endpoint: in.Endpoint,
+		Timeout:  in.Timeout,
+	}
+
 	if in.ApiKeySecretRef == nil {
-		return nil, nil
+		return result, nil
 	}
 
 	tokenSecret, err := secretGetter(*in.ApiKeySecretRef)
@@ -336,12 +342,8 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 		return nil, fmt.Errorf("token secret does not contain key %s", in.ApiKeySecretRef.Key)
 	}
 
-	return &CodexConfigRaw{
-		ApiKey:   string(token),
-		Model:    in.Model,
-		Endpoint: in.Endpoint,
-		Timeout:  in.Timeout,
-	}, nil
+	result.ApiKey = string(token)
+	return result, nil
 }
 
 // ClaudeConfig contains configuration for the Claude CLI runtime.
@@ -411,8 +413,17 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 		return nil, nil
 	}
 
+	result := &ClaudeConfigRaw{
+		Model:          in.Model,
+		Endpoint:       in.Endpoint,
+		ExtraArgs:      in.ExtraArgs,
+		Timeout:        in.Timeout,
+		BashTimeout:    in.BashTimeout,
+		BashMaxTimeout: in.BashMaxTimeout,
+	}
+
 	if in.ApiKeySecretRef == nil {
-		return nil, nil
+		return result, nil
 	}
 
 	tokenSecret, err := secretGetter(*in.ApiKeySecretRef)
@@ -425,36 +436,29 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 		return nil, fmt.Errorf("token secret does not contain key %s", in.ApiKeySecretRef.Key)
 	}
 
-	return &ClaudeConfigRaw{
-		ApiKey:         string(token),
-		Model:          in.Model,
-		Endpoint:       in.Endpoint,
-		ExtraArgs:      in.ExtraArgs,
-		Timeout:        in.Timeout,
-		BashTimeout:    in.BashTimeout,
-		BashMaxTimeout: in.BashMaxTimeout,
-	}, nil
+	result.ApiKey = string(token)
+	return result, nil
 }
 
 // OpenCodeConfig contains configuration for the OpenCode CLI runtime.
 type OpenCodeConfig struct {
 	// Provider is the OpenCode provider to use.
 	// +kubebuilder:validation:Enum=plural;openai
-	// +kubebuilder:validation:Required
-	Provider string `json:"provider"`
+	// +kubebuilder:validation:Optional
+	Provider *string `json:"provider,omitempty"`
 
 	// Endpoint API endpoint for the OpenCode service.
-	// +kubebuilder:validation:Required
 	// Endpoint for the OpenCode service (can be any OpenAI-compatible API endpoint).
-	Endpoint string `json:"endpoint"`
+	// +kubebuilder:validation:Optional
+	Endpoint *string `json:"endpoint,omitempty"`
 
 	// Model is the LLM model to use.
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
 	// TokenSecretRef is a reference to a Kubernetes Secret containing the API token for OpenCode.
-	// +kubebuilder:validation:Required
-	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
 
 	// ExtraArgs args for advanced or experimental CLI flags.
 	//
@@ -471,7 +475,18 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 		return nil, nil
 	}
 
-	tokenSecret, err := secretGetter(in.TokenSecretRef)
+	result := &OpenCodeConfigRaw{
+		Provider: in.Provider,
+		Endpoint: in.Endpoint,
+		Model:    in.Model,
+		Timeout:  in.Timeout,
+	}
+
+	if in.TokenSecretRef == nil {
+		return result, nil
+	}
+
+	tokenSecret, err := secretGetter(*in.TokenSecretRef)
 	if err != nil {
 		return nil, err
 	}
@@ -481,13 +496,8 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 		return nil, fmt.Errorf("token secret does not contain key %s", in.TokenSecretRef.Key)
 	}
 
-	return &OpenCodeConfigRaw{
-		Provider: in.Provider,
-		Endpoint: in.Endpoint,
-		Model:    in.Model,
-		Token:    string(token),
-		Timeout:  in.Timeout,
-	}, nil
+	result.Token = string(token)
+	return result, nil
 }
 
 // OpenCodeConfigRaw contains configuration for the OpenCode CLI runtime.
@@ -497,10 +507,10 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 // able to inject it into the pod as env vars.
 type OpenCodeConfigRaw struct {
 	// Provider is the OpenCode provider to use.
-	Provider string `json:"provider"`
+	Provider *string `json:"provider,omitempty"`
 
 	// Endpoint API endpoint for the OpenCode service.
-	Endpoint string `json:"endpoint"`
+	Endpoint *string `json:"endpoint,omitempty"`
 
 	// Model is the LLM model to use.
 	Model *string `json:"model,omitempty"`
@@ -516,7 +526,7 @@ type OpenCodeConfigRaw struct {
 // GeminiConfig contains configuration for the Gemini CLI runtime.
 type GeminiConfig struct {
 	// APIKeySecretRef is a reference to a Kubernetes Secret containing the Gemini API key.
-	APIKeySecretRef corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
+	APIKeySecretRef *corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
 
 	// Model is the name of the model to use.
 	// NOTE: gemini flash lite models and are not fit for the write (agent) mode, and
@@ -541,7 +551,18 @@ func (in *GeminiConfig) Raw(secretGetter func(corev1.SecretKeySelector) (*corev1
 		return nil, nil
 	}
 
-	apiKeySecret, err := secretGetter(in.APIKeySecretRef)
+	result := &GeminiConfigRaw{
+		Model:             in.Model,
+		Timeout:           in.Timeout,
+		InactivityTimeout: in.InactivityTimeout,
+		Endpoint:          in.Endpoint,
+	}
+
+	if in.APIKeySecretRef == nil {
+		return result, nil
+	}
+
+	apiKeySecret, err := secretGetter(*in.APIKeySecretRef)
 	if err != nil {
 		return nil, err
 	}
@@ -551,13 +572,8 @@ func (in *GeminiConfig) Raw(secretGetter func(corev1.SecretKeySelector) (*corev1
 		return nil, fmt.Errorf("API key secret does not contain key %s", in.APIKeySecretRef.Key)
 	}
 
-	return &GeminiConfigRaw{
-		Model:             in.Model,
-		APIKey:            string(apiKey),
-		Timeout:           in.Timeout,
-		InactivityTimeout: in.InactivityTimeout,
-		Endpoint:          in.Endpoint,
-	}, nil
+	result.APIKey = string(apiKey)
+	return result, nil
 }
 
 // GeminiConfigRaw contains configuration for the Gemini CLI runtime.
