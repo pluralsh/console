@@ -174,7 +174,7 @@ jobs:
           prAutomation: deployment-operator-updater
           context: |
             {
-              "version": "${{ steps.version.outputs.version }}"
+              "tag": "${{ steps.version.outputs.version }}"
             }
       # - name: update chart
       #   uses: pluralsh/chart-releaser@v0.1.3

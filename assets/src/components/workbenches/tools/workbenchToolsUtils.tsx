@@ -254,6 +254,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Search]: 'Web Search',
   [WorkbenchToolCategory.Integration]: 'Integration',
   [WorkbenchToolCategory.Scm]: 'Source control',
+  [WorkbenchToolCategory.Chat]: 'Chat',
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
 }
