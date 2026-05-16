@@ -16074,6 +16074,7 @@ export type WorkbenchToolBitbucketDatacenterConnectionAttributes = {
 };
 
 export enum WorkbenchToolCategory {
+  Chat = 'CHAT',
   ErrorTracking = 'ERROR_TRACKING',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',

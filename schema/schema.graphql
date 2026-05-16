@@ -2353,6 +2353,7 @@ enum WorkbenchToolCategory {
   INFRASTRUCTURE
   SEARCH
   SCM
+  CHAT
 }
 
 enum WorkbenchToolHttpMethod {

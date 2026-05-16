@@ -31,7 +31,7 @@ defmodule Console.Schema.WorkbenchTool do
     bitbucket_datacenter: 22,
     azure_devops: 23
 
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8, chat: 9
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -302,8 +302,8 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:sentry), do: [:error_tracking]
   defp categories(:github), do: [:scm]
   defp categories(:linear), do: [:ticketing]
-  defp categories(:slack), do: [:integration]
-  defp categories(:teams), do: [:integration]
+  defp categories(:slack), do: [:chat]
+  defp categories(:teams), do: [:chat]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]

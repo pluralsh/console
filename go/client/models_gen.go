@@ -17122,6 +17122,7 @@ const (
 	WorkbenchToolCategoryInfrastructure WorkbenchToolCategory = "INFRASTRUCTURE"
 	WorkbenchToolCategorySearch         WorkbenchToolCategory = "SEARCH"
 	WorkbenchToolCategoryScm            WorkbenchToolCategory = "SCM"
+	WorkbenchToolCategoryChat           WorkbenchToolCategory = "CHAT"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -17134,11 +17135,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryInfrastructure,
 	WorkbenchToolCategorySearch,
 	WorkbenchToolCategoryScm,
+	WorkbenchToolCategoryChat,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat:
 		return true
 	}
 	return false
