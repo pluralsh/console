@@ -5,21 +5,22 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 85.0.3
+- version: 85.1.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ['CI/developer tooling: updated dependency `helm/helm` to v4.2.0
-        (CI only, no runtime impact).', 'Chart maintenance: pulled in non-major dependency
-        updates for kube-prometheus-stack (exact subchart/component version bumps
-        not listed in provided notes).', 'Bugfix: avoid duplicate Thanos image key
-        (prevents conflicting image settings in rendered manifests).']
-    features: []
+    chart_updates: [Grafana subchart/container release updated to **v12.3.3** (via
+        renovate) in kube-prometheus-stack **85.1.1**., 'Fix/cleanup: avoid duplicate
+        **Thanos image** key in values/templates in kube-prometheus-stack **85.0.1**
+        (prevents conflicting image settings).', 'Misc/CI only: .codespellrc ignore
+        list updated (no runtime impact).']
+    features: [Grafana version bump to v12.3.3 (brings upstream Grafana fixes and
+        improvements; behavior changes depend on Grafana release notes).]
     breaking_changes: []
-  chart_version: 85.0.3
+  chart_version: 85.1.1
   images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
     'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
     'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
