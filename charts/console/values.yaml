@@ -228,7 +228,7 @@ livenessProbe:
   httpGet:
     path: /health
     port: http
-  initialDelaySeconds: 15
+  initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 1
   failureThreshold: 3
@@ -240,7 +240,7 @@ readinessProbe:
     path: /health
     port: http
   initialDelaySeconds: 15
-  periodSeconds: 10
+  periodSeconds: 15
   timeoutSeconds: 1
   failureThreshold: 3
   successThreshold: 1
@@ -418,7 +418,7 @@ gitServer:
   gitPort: 9418
 
   image:
-    repository: ghcr.io/pluralsh/git-server
+    repository: git-server
     tag: ~
 
   containerSecurityContext:
