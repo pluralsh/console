@@ -57,7 +57,7 @@ genmock: --tool ## generates mocks before running tests
 
 .PHONY: codegen-chart-crds
 codegen-chart-crds: ## copy CRDs to the helm chart
-	@cp -a config/crd/bases/. charts/deployment-operator/crds
+	@cp -a ./config/crd/bases/. ../../charts/deployment-operator/crds
 
 .PHONY: velero-crds
 velero-crds: ## download velero CRDs

@@ -13,6 +13,10 @@ import (
 
 const AgentRuntimeNameLabel = "deployments.plural.sh/agent-runtime-name"
 
+func secretKeySelectorSet(ref *corev1.SecretKeySelector) bool {
+	return ref != nil && ref.Name != "" && ref.Key != ""
+}
+
 // AgentRuntimeSpec defines the desired state of AgentRuntime
 type AgentRuntimeSpec struct {
 	// Name of this AgentRuntime.
@@ -195,12 +199,12 @@ type AgentRuntimeConfig struct {
 	Codex *CodexConfig `json:"codex,omitempty"`
 }
 
-func (in *AgentRuntimeConfig) ToAgentRuntimeConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*AgentRuntimeConfigRaw, error) {
+func (in *AgentRuntimeConfig) ToAgentRuntimeConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error), aiProxy bool) (*AgentRuntimeConfigRaw, error) {
 	if in == nil {
 		return nil, nil
 	}
 
-	openCode, err := in.OpenCode.ToOpenCodeConfigRaw(secretGetter)
+	openCode, err := in.OpenCode.ToOpenCodeConfigRaw(secretGetter, aiProxy)
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +264,7 @@ func (in *ExaMcpServerConfig) ToExaMcpServerConfigRaw(secretGetter func(corev1.S
 		Name: in.Name,
 		Url:  in.Url,
 	}
-	if in.ApiKey != nil {
+	if secretKeySelectorSet(in.ApiKey) {
 		apiKeySecret, err := secretGetter(*in.ApiKey)
 		if err != nil {
 			return nil, err
@@ -287,7 +291,7 @@ type ExaMcpServerConfigRaw struct {
 
 type CodexConfigRaw struct {
 	// ApiKey is the raw API key to use.
-	ApiKey string `json:"apiKey"`
+	ApiKey string `json:"apiKey,omitempty"`
 
 	// Model to use.
 	Model *string `json:"model,omitempty"`
@@ -302,7 +306,9 @@ type CodexConfigRaw struct {
 }
 
 type CodexConfig struct {
-	// ApiKeySecretRef Reference to a Kubernetes Secret containing the Codex API key.
+	// ApiKeySecretRef references a Secret containing the Codex API key.
+	// Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
+	// +kubebuilder:validation:Optional
 	ApiKeySecretRef *corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
 
 	// Model to use.
@@ -328,7 +334,7 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 		Timeout:  in.Timeout,
 	}
 
-	if in.ApiKeySecretRef == nil {
+	if !secretKeySelectorSet(in.ApiKeySecretRef) {
 		return result, nil
 	}
 
@@ -348,7 +354,9 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 
 // ClaudeConfig contains configuration for the Claude CLI runtime.
 type ClaudeConfig struct {
-	// ApiKeySecretRef Reference to a Kubernetes Secret containing the Claude API key.
+	// ApiKeySecretRef references a Secret containing the Claude API key.
+	// Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
+	// +kubebuilder:validation:Optional
 	ApiKeySecretRef *corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
 
 	// Model Name of the model to use.
@@ -382,7 +390,7 @@ type ClaudeConfig struct {
 // able to inject it into the pod as env vars.
 type ClaudeConfigRaw struct {
 	// ApiKey is the raw API key to use.
-	ApiKey string `json:"apiKey"`
+	ApiKey string `json:"apiKey,omitempty"`
 
 	// Model Name of the model to use.
 	Model *string `json:"model,omitempty"`
@@ -422,7 +430,7 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 		BashMaxTimeout: in.BashMaxTimeout,
 	}
 
-	if in.ApiKeySecretRef == nil {
+	if !secretKeySelectorSet(in.ApiKeySecretRef) {
 		return result, nil
 	}
 
@@ -440,15 +448,55 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 	return result, nil
 }
 
+// openCodeOpenAICompatibleProvider is the fixed provider key written to opencode.json and used in CLI --model.
+const openCodeOpenAICompatibleProvider = "openai-compatible"
+
+// OpenCodeOpenAICompatibleConfig configures a custom OpenAI-compatible API provider in opencode.json.
+// The harness writes a provider block with npm @ai-sdk/openai-compatible. Use this for endpoints
+// that are not listed on https://models.dev (for example LiteLLM, vLLM, or a private gateway).
+//
+// When set and the parent AgentRuntime has spec.aiProxy false, spec.config.opencode.provider and
+// spec.config.opencode.endpoint are ignored in favor of this block.
+type OpenCodeOpenAICompatibleConfig struct {
+	// Endpoint is the OpenAI-compatible API base URL (for example https://litellm.example/v1).
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	Endpoint string `json:"endpoint"`
+
+	// Model is the model id exposed by that endpoint.
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
+	// TokenSecretRef references a Secret containing the API key for the endpoint.
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+}
+
 // OpenCodeConfig contains configuration for the OpenCode CLI runtime.
 type OpenCodeConfig struct {
-	// Provider is the OpenCode provider to use.
-	// +kubebuilder:validation:Enum=plural;openai
+	// OpenAICompatible configures a custom OpenAI-compatible provider block in opencode.json.
+	// When set (and aiProxy is false), provider and endpoint on this struct are ignored in favor
+	// of the nested openaiCompatible fields.
 	// +kubebuilder:validation:Optional
+	OpenAICompatible *OpenCodeOpenAICompatibleConfig `json:"openaiCompatible,omitempty"`
+
+	// Provider is the OpenCode provider id from https://models.dev (for example openai, anthropic,
+	// amazon-bedrock, google-vertex, google). Optional.
+	//
+	// When the parent AgentRuntime has spec.aiProxy enabled, the harness ignores this field and
+	// autowires provider "plural", routing requests through the Console AI proxy at /ext/ai/v1
+	// using the deploy token. Set spec.config.opencode.model to a bare model id; the harness
+	// prefixes it for proxy routing based on runtime type (for example gpt-5.4 -> openai/gpt-5.4).
+	//
+	// When aiProxy is false, this selects the native OpenCode provider block; credentials come from
+	// tokenSecretRef or the provider's usual environment variables. Defaults to plural when omitted.
+	// Use exact models.dev slugs (for example amazon-bedrock, google-vertex, google).
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxLength=128
 	Provider *string `json:"provider,omitempty"`
 
-	// Endpoint API endpoint for the OpenCode service.
-	// Endpoint for the OpenCode service (can be any OpenAI-compatible API endpoint).
+	// Endpoint optionally overrides the provider baseURL in opencode.json.
+	// When omitted, the harness omits baseURL so OpenCode uses the models.dev default for the provider.
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
 
@@ -456,7 +504,8 @@ type OpenCodeConfig struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
-	// TokenSecretRef is a reference to a Kubernetes Secret containing the API token for OpenCode.
+	// TokenSecretRef references a Secret containing the API token for OpenCode.
+	// Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
 
@@ -470,9 +519,42 @@ type OpenCodeConfig struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 }
 
-func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*OpenCodeConfigRaw, error) {
+func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error), aiProxy bool) (*OpenCodeConfigRaw, error) {
 	if in == nil {
 		return nil, nil
+	}
+
+	if !aiProxy && in.OpenAICompatible != nil {
+		compat := in.OpenAICompatible
+		result := &OpenCodeConfigRaw{
+			Provider:         lo.ToPtr(openCodeOpenAICompatibleProvider),
+			Endpoint:         &compat.Endpoint,
+			Model:            compat.Model,
+			Timeout:          in.Timeout,
+			OpenAICompatible: true,
+		}
+
+		tokenRef := compat.TokenSecretRef
+		if !secretKeySelectorSet(tokenRef) {
+			tokenRef = in.TokenSecretRef
+		}
+
+		if !secretKeySelectorSet(tokenRef) {
+			return result, nil
+		}
+
+		tokenSecret, err := secretGetter(*tokenRef)
+		if err != nil {
+			return nil, err
+		}
+
+		token, exists := tokenSecret.Data[tokenRef.Key]
+		if !exists {
+			return nil, fmt.Errorf("token secret does not contain key %s", tokenRef.Key)
+		}
+
+		result.Token = string(token)
+		return result, nil
 	}
 
 	result := &OpenCodeConfigRaw{
@@ -482,7 +564,7 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 		Timeout:  in.Timeout,
 	}
 
-	if in.TokenSecretRef == nil {
+	if !secretKeySelectorSet(in.TokenSecretRef) {
 		return result, nil
 	}
 
@@ -506,7 +588,10 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 // This is only used to read original OpenCodeConfig secret data and be
 // able to inject it into the pod as env vars.
 type OpenCodeConfigRaw struct {
-	// Provider is the OpenCode provider to use.
+	// OpenAICompatible is true when spec.config.opencode.openaiCompatible was set on the AgentRuntime.
+	OpenAICompatible bool `json:"openaiCompatible,omitempty"`
+
+	// Provider is the OpenCode provider id from https://models.dev.
 	Provider *string `json:"provider,omitempty"`
 
 	// Endpoint API endpoint for the OpenCode service.
@@ -516,7 +601,7 @@ type OpenCodeConfigRaw struct {
 	Model *string `json:"model,omitempty"`
 
 	// Token is the raw API token for OpenCode.
-	Token string `json:"tokenSecretRef"`
+	Token string `json:"token,omitempty"`
 
 	// Timeout bounds a single opencode run invocation.
 	// +kubebuilder:validation:Optional
@@ -525,7 +610,9 @@ type OpenCodeConfigRaw struct {
 
 // GeminiConfig contains configuration for the Gemini CLI runtime.
 type GeminiConfig struct {
-	// APIKeySecretRef is a reference to a Kubernetes Secret containing the Gemini API key.
+	// APIKeySecretRef references a Secret containing the Gemini API key.
+	// Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
+	// +kubebuilder:validation:Optional
 	APIKeySecretRef *corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
 
 	// Model is the name of the model to use.
@@ -558,7 +645,7 @@ func (in *GeminiConfig) Raw(secretGetter func(corev1.SecretKeySelector) (*corev1
 		Endpoint:          in.Endpoint,
 	}
 
-	if in.APIKeySecretRef == nil {
+	if !secretKeySelectorSet(in.APIKeySecretRef) {
 		return result, nil
 	}
 
@@ -583,7 +670,7 @@ func (in *GeminiConfig) Raw(secretGetter func(corev1.SecretKeySelector) (*corev1
 // able to inject it into the pod as env vars.
 type GeminiConfigRaw struct {
 	// APIKey is the raw Gemini API key to use.
-	APIKey string `json:"apiKey"`
+	APIKey string `json:"apiKey,omitempty"`
 
 	// Model is the name of the model to use.
 	Model *string `json:"model,omitempty"`
@@ -613,6 +700,10 @@ func (in *AgentRuntime) Diff(hasher Hasher) (changed bool, sha string, err error
 	}
 
 	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
+func (in *AgentRuntime) IsAiProxyEnabled() bool {
+	return in != nil && in.Spec.AiProxy != nil && *in.Spec.AiProxy
 }
 
 func (in *AgentRuntime) ConsoleName() string {

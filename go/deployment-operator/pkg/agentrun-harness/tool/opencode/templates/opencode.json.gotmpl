@@ -11,12 +11,14 @@
         "{{ .Name }}*": true{{ end }}
       },
       "permission": {
+        {{- if .DindEnabled }}
+        "bash": "allow",
+        {{- else }}
         "bash": {
           "ls": "allow",
           "cd": "allow",
           "pwd": "allow",
-          "git status": "allow",
-          "git diff": "allow",
+          "git": "allow",
           "head": "allow",
           "tail": "allow",
           "cat": "allow",
@@ -24,6 +26,7 @@
           "find": "allow",
           "*": "deny"
         },
+        {{- end }}
         "edit": "deny",
         "webfetch": "allow"
       }
@@ -71,12 +74,21 @@
   "username": "plural",
   "provider": {
     "{{ .Provider }}": {
-      {{ if eq .Provider "plural" }}"npm": "@ai-sdk/openai-compatible",
+      {{ if or (eq .Provider "plural") .OpenAICompatible }}"npm": "@ai-sdk/openai-compatible",
       {{ end }}"name": "{{ .Provider }}",
       "options": {
-        {{ if eq .Provider "plural" }}"baseURL": "{{ .ConsoleURL }}/ext/ai/v1",
-        "apiKey": "{{ .ConsoleToken }}"{{ else }}"baseURL": "{{ .Endpoint }}",
-        "apiKey": "{{ .Token }}"{{ end }}
+        {{- if eq .Provider "plural" }}
+        "baseURL": "{{ .ConsoleURL }}/ext/ai/v1",
+        "apiKey": "{{ .ConsoleToken }}"
+        {{- else if .OpenAICompatible }}
+        "baseURL": "{{ .Endpoint }}",
+        "apiKey": "{{ .Token }}"
+        {{- else }}
+        {{- if .Endpoint }}
+        "baseURL": "{{ .Endpoint }}",
+        {{- end }}
+        "apiKey": "{{ .Token }}"
+        {{- end }}
       },
       "models": {
         "{{ .Model }}": {

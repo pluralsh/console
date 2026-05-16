@@ -16,6 +16,7 @@ func (in *OpenAIRouter) newResponsesRoute() RouteConfig {
 		RequestConverter:           in.responsesRequestConverter,
 		ResponsesResponseConverter: in.responsesResponseConverter,
 		ErrorConverter:             in.errorConverter,
+		PreCallback:                in.openAIRoutePreCallback(string(RouteResponses)),
 		StreamConfig: &StreamConfig{
 			ResponsesStreamResponseConverter: in.responsesStreamResponseConverter,
 			ErrorConverter:                   in.errorConverter,
@@ -45,6 +46,13 @@ func (in *OpenAIRouter) responsesRequestConverter(ctx *schemas.BifrostContext, r
 
 	bifrostReq.Provider = provider
 	bifrostReq.Model = model
+
+	if responsesViaChat(ctx) {
+		chatReq := bifrostReq.ToChatRequest()
+		chatReq.Provider = provider
+		chatReq.Model = model
+		return &schemas.BifrostRequest{ChatRequest: chatReq}, nil
+	}
 
 	return &schemas.BifrostRequest{ResponsesRequest: bifrostReq}, nil
 }

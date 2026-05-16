@@ -133,13 +133,21 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 
 	switch provider {
 	case schemas.OpenAI:
-		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetBaseUrl() != "" {
-			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
+		if cfg := aiConfig.GetOpenai(); cfg != nil {
+			if cfg.GetBaseUrl() != "" {
+				config.NetworkConfig.BaseURL = bifrostNetworkBaseURL(cfg.GetBaseUrl())
+			}
+			if allowed := openAIAllowedRequests(cfg); allowed != nil {
+				config.CustomProviderConfig = &schemas.CustomProviderConfig{
+					BaseProviderType: schemas.OpenAI,
+					AllowedRequests:  allowed,
+				}
+			}
 		}
 
 	case schemas.Anthropic:
 		if cfg := aiConfig.GetAnthropic(); cfg != nil && cfg.GetBaseUrl() != "" {
-			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
+			config.NetworkConfig.BaseURL = bifrostNetworkBaseURL(cfg.GetBaseUrl())
 		}
 
 	case schemas.Vertex:

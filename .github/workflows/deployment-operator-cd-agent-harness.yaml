@@ -7,9 +7,7 @@ on:
     paths:
     - ".github/workflows/deployment-operator-cd-agent-harness.yaml"
     - "go/deployment-operator/dockerfiles/agent-harness/**"
-    - "go/deployment-operator/cmd/agent-harness/**"
-    - "go/deployment-operator/cmd/mcpserver/**"
-    - "go/deployment-operator/pkg/agentrun-harness/**"
+    - "go/deployment-operator/**"
   push:
     tags:
     - 'go/deployment-operator/v*.*.*'
@@ -24,6 +22,7 @@ permissions:
   contents: read
 
 env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
   REGISTRY_IMAGE: pluralsh/agent-harness-base
 
 jobs:
