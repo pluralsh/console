@@ -102,6 +102,11 @@ func (in *AISettings) DeepCopyInto(out *AISettings) {
 		*out = new(client.AiProvider)
 		**out = **in
 	}
+	if in.LogAnalysis != nil {
+		in, out := &in.LogAnalysis, &out.LogAnalysis
+		*out = new(bool)
+		**out = **in
+	}
 	if in.OpenAI != nil {
 		in, out := &in.OpenAI, &out.OpenAI
 		*out = new(OpenAISettings)

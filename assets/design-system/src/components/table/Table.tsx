@@ -425,6 +425,7 @@ function Table({
                                     cell.column?.columnDef?.meta?.truncate
                                   }
                                   $center={cell.column?.columnDef?.meta?.center}
+                                  $right={cell.column?.columnDef?.meta?.right}
                                   $rowsHaveLinks={!!getRowLink}
                                 >
                                   {flexRender(

@@ -95,6 +95,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :provider,           :ai_provider
     field :tool_provider,      :ai_provider, description: "ai provider to use with tool calls"
     field :embedding_provider, :ai_provider, description: "ai provider to use with embeddings (for vector indexing)"
+    field :log_analysis,       :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
     field :openai,             :openai_settings_attributes
     field :anthropic,          :anthropic_settings_attributes
     field :ollama,             :ollama_attributes
@@ -348,6 +349,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tools_enabled,  :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
     field :provider,       :ai_provider
     field :tool_provider,  :ai_provider, description: "ai provider to use with tool calls"
+    field :log_analysis,   :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
     field :openai,         :openai_settings
     field :anthropic,      :anthropic_settings
     field :ollama,         :ollama_settings

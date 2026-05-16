@@ -3,8 +3,12 @@
     "properties": {
         "handle": {
             "type": "string",
-            "description": "The cluster handle (as shown in cluster lists)"
+            "description": "The cluster handle (as shown in cluster lists). Provide this or cluster_id (at least one is required)."
+        },
+        "cluster_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Plural cluster ID (UUID from plrl_clusters). Provide this or handle (at least one is required). When both are present, cluster_id takes precedence."
         }
-    },
-    "required": ["handle"]
+    }
 }

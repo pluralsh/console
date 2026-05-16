@@ -179,6 +179,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 		return
 	case <-in.runDone:
 		klog.Info("initial agent run completed, starting babysit loop")
+		in.ensureAnalysisPersistedAfterInitialRun(ctx)
 		if !in.agentRun.Babysit {
 			return
 		}

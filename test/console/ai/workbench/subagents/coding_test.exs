@@ -62,6 +62,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
 
       run = Repo.get(Console.Schema.AgentRun, activity.agent_run_id)
       insert(:pull_request, agent_run: run)
+      update_record(run, %{status: :successful})
 
       assert_receive {:result, result}, :timer.seconds(20)
 

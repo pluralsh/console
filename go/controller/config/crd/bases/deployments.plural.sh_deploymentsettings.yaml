@@ -365,6 +365,10 @@ spec:
                         - ELASTIC
                         type: string
                     type: object
+                  logAnalysis:
+                    description: LogAnalysis defines whether to enable log analysis
+                      in AI insights (turn off to save on log query costs)
+                    type: boolean
                   nexus:
                     description: Nexus holds configuration for using the Nexus embeddings
                       proxy

@@ -16,6 +16,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
+  AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
   useCancelAgentRunMutation,
@@ -81,7 +82,22 @@ export function AIAgentRun() {
   const isCancellable = isRunning || run?.status == AgentRunStatus.Babysitting
   const prevIsRunning = usePrevious(isRunning)
 
-  if (prevIsRunning && !isRunning && !showAnalysisToast && !isAnalysisInView)
+  const hasPullRequests = Boolean(run?.pullRequests?.some(Boolean))
+  const isTerminalStatus =
+    run?.status === AgentRunStatus.Successful ||
+    run?.status === AgentRunStatus.Failed ||
+    run?.status === AgentRunStatus.Cancelled
+  const showAnalysisSection =
+    !!run?.analysis &&
+    (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
+
+  if (
+    prevIsRunning &&
+    !isRunning &&
+    showAnalysisSection &&
+    !showAnalysisToast &&
+    !isAnalysisInView
+  )
     setShowAnalysisToast(true)
 
   useSetBreadcrumbs(
@@ -155,12 +171,12 @@ export function AIAgentRun() {
             }
           />
         )}
-        {run?.analysis && (
+        {showAnalysisSection && run?.analysis ? (
           <AgentRunAnalysis
             ref={analysisRef}
             analysis={run.analysis}
           />
-        )}
+        ) : null}
         {!isRunning && (
           <StackedText
             first="Agent activity"
@@ -196,7 +212,7 @@ export function AIAgentRun() {
       </Toast>
       <SimpleToastChip
         clickable
-        show={showAnalysisToast && !isAnalysisInView}
+        show={showAnalysisToast && !isAnalysisInView && showAnalysisSection}
         onClose={() => setShowAnalysisToast(false)}
         onClick={() => {
           analysisRef.current?.scrollIntoView({

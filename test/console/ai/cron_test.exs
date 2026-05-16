@@ -42,6 +42,18 @@ defmodule Console.AI.CronTest do
     end
   end
 
+  describe "#trim_runs/0" do
+    test "it will prune agent runs older than the retention window" do
+      remove = insert_list(2, :agent_run, inserted_at: Timex.now() |> Timex.shift(days: -15))
+      keep = insert_list(2, :agent_run, inserted_at: Timex.now() |> Timex.shift(days: -1))
+
+      :ok = Cron.trim_runs()
+
+      for run <- remove, do: refute refetch(run)
+      for run <- keep, do: assert refetch(run)
+    end
+  end
+
   describe "#services/0" do
     test "it will gather info from all service components and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
@@ -91,7 +103,7 @@ defmodule Console.AI.CronTest do
           driver: :elastic,
           elastic: es_settings(),
         },
-        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+        ai: %{enabled: true, log_analysis: true, provider: :openai, openai: %{access_token: "key"}}
       )
       service = insert(:service, status: :failed, errors: [%{source: "manifests", error: "some error"}])
       insert(:service_component,
@@ -240,7 +252,7 @@ defmodule Console.AI.CronTest do
     test "it will gather evidence from a statefulset and its pvcs" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: %{host: "localhost", index: "test"}},
-        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+        ai: %{enabled: true, log_analysis: true, provider: :openai, openai: %{access_token: "key"}}
       )
 
       cluster = insert(:cluster,
@@ -376,7 +388,7 @@ defmodule Console.AI.CronTest do
     test "it can query cert manager logs when needed" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
-        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+        ai: %{enabled: true, log_analysis: true, provider: :openai, openai: %{access_token: "key"}}
       )
       cluster = insert(:cluster,
         operational_layout: build(:operational_layout,
@@ -470,7 +482,7 @@ defmodule Console.AI.CronTest do
     test "it will gather info from alerts and generate" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
-        ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}}
+        ai: %{enabled: true, log_analysis: true, provider: :openai, openai: %{access_token: "key"}}
       )
       expect(Console.AI.OpenAI, :tool_call, fn _, _, [_], _ -> {:ok, [
         %Console.AI.Tool{
@@ -509,6 +521,7 @@ defmodule Console.AI.CronTest do
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{
           enabled: true,
+          log_analysis: true,
           provider: :openai,
           openai: %{access_token: "key"},
           vector_store: %{

@@ -154,31 +154,41 @@ jobs:
     needs: [publish-image]
     permissions:
       contents: read
+      id-token: write  # This permission is required to enable GitHub Actions to mint OIDC tokens for authentication. Required for retrieving a valid GitHub JWT via OIDC.
     steps:
       - name: Extract version
         id: version
         run: echo "version=${GITHUB_REF_NAME#go/deployment-operator/}" >> "$GITHUB_OUTPUT"
-      - name: Checkout deployment-operator
-        uses: actions/checkout@v6
+      - name: Authenticate
+        id: plural
+        uses: pluralsh/setup-plural@v2
         with:
-          repository: pluralsh/deployment-operator
-          token: ${{ secrets.PLURAL_BOT_PAT }}
-          path: deployment-operator
-          persist-credentials: false
-          fetch-depth: 0
-      - name: update chart
-        uses: pluralsh/chart-releaser@v0.1.3
+          consoleUrl: https://console.plrldemo.onplural.sh
+          email: console@plural.sh # the email bound to your OIDC federated credential
+      - name: Trigger deployment operator PR
+        uses: pluralsh/trigger-pull-request@v2
         with:
-          path: deployment-operator/charts/deployment-operator
-          release: ${{ steps.version.outputs.version }}
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
-        with:
-          path: deployment-operator
-          token: ${{ secrets.PLURAL_BOT_PAT }}
-          title: Release ${{ steps.version.outputs.version }}
-          body: Automated Pull Request to release ${{ steps.version.outputs.version }}
-          commit-message: Updated chart to release ${{ steps.version.outputs.version }}
-          labels: release
-          base: main
+          url: https://console.plrldemo.onplural.sh
+          token: ${{ steps.plural.outputs.consoleToken }}
           branch: release-${{ steps.version.outputs.version }}
+          prAutomation: deployment-operator-updater
+          context: |
+            {
+              "version": "${{ steps.version.outputs.version }}"
+            }
+      # - name: update chart
+      #   uses: pluralsh/chart-releaser@v0.1.3
+      #   with:
+      #     path: deployment-operator/charts/deployment-operator
+      #     release: ${{ steps.version.outputs.version }}
+      # - name: Create Pull Request
+      #   uses: peter-evans/create-pull-request@v8
+      #   with:
+      #     path: deployment-operator
+      #     token: ${{ secrets.PLURAL_BOT_PAT }}
+      #     title: Release ${{ steps.version.outputs.version }}
+      #     body: Automated Pull Request to release ${{ steps.version.outputs.version }}
+      #     commit-message: Updated chart to release ${{ steps.version.outputs.version }}
+      #     labels: release
+      #     base: main
+      #     branch: release-${{ steps.version.outputs.version }}

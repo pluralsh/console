@@ -22,7 +22,7 @@ function subtitleForItem(item: ChipAttrs) {
     case MentionKind.Cluster:
       return item.handle ?? item.provider
     case MentionKind.Service:
-      return item['cluster-name'] ?? item.namespace
+      return item['cluster-handle'] ?? item['cluster-name'] ?? item.namespace
     case MentionKind.Stack:
       return item.type
     case MentionKind.Skill:

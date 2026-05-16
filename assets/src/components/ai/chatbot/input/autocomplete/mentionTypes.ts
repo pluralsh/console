@@ -44,6 +44,8 @@ export type ServiceChipAttrs = BaseChipAttrs<MentionKind.Service> & {
   namespace?: Nullable<string>
   'cluster-id'?: string
   'cluster-name'?: string
+  /** Cluster handle (from Cluster.handle); preferred for tool-style disambiguation */
+  'cluster-handle'?: string
 }
 
 export type StackChipAttrs = BaseChipAttrs<MentionKind.Stack> & {
@@ -82,7 +84,35 @@ export const CHIP_ATTRIBUTE_SCHEMA: {
     'namespace',
     'cluster-id',
     'cluster-name',
+    'cluster-handle',
   ],
   [MentionKind.Stack]: ['item-id', 'item-name', 'type'],
   [MentionKind.Skill]: ['item-id', 'item-name', 'description', 'subagents'],
+}
+
+type ChipAttrRecord = Record<string, string | null | undefined>
+
+/** Visible chip label in the editor, markdown pills, and prettify/truncation (no @ or / prefix). */
+export function chipDisplayText(
+  kind: MentionKind,
+  attrs: ChipAttrRecord
+): string {
+  const name = attrs['item-name'] ?? ''
+  switch (kind) {
+    case MentionKind.Skill:
+      return name
+    case MentionKind.Cluster: {
+      const h = attrs.handle
+      if (h && name && h !== name) return `${name} (${h})`
+      return name || h || ''
+    }
+    case MentionKind.Service: {
+      const ch = attrs['cluster-handle'] ?? attrs['cluster-name']
+      if (ch && name) return `${name} (${ch})`
+      return name
+    }
+    case MentionKind.Stack:
+    default:
+      return name
+  }
 }

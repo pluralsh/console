@@ -20,7 +20,7 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		AgentRunID:    "run-123",
 	}
 
-	t.Run("WRITE mode includes excludeTools for plural MCP server", func(t *testing.T) {
+	t.Run("WRITE mode does not exclude plural MCP tools and omits PLRL_EXCLUDE_TOOLS", func(t *testing.T) {
 		input := *baseInput
 		input.AgentRunMode = console.AgentRunModeWrite
 
@@ -43,30 +43,18 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Fatal("mcpServers.plural missing or not an object")
 		}
 
-		excludeTools, hasExclude := plural["excludeTools"]
-		if !hasExclude {
-			t.Fatal("mcpServers.plural.excludeTools missing in WRITE mode")
-		}
-
-		sl, ok := excludeTools.([]any)
+		env, ok := plural["env"].(map[string]any)
 		if !ok {
-			t.Fatalf("excludeTools is not an array: %T", excludeTools)
+			t.Fatal("mcpServers.plural.env missing or not an object")
 		}
-		var tools []string
-		for _, v := range sl {
-			if s, ok := v.(string); ok {
-				tools = append(tools, s)
-			}
+		if _, has := env["PLRL_EXCLUDE_TOOLS"]; has {
+			t.Errorf("did not expect PLRL_EXCLUDE_TOOLS in WRITE mode env, got %v", env["PLRL_EXCLUDE_TOOLS"])
 		}
-		found := false
-		for _, name := range tools {
-			if name == "updateAgentRunAnalysis" {
-				found = true
-				break
-			}
+		if _, has := plural["excludeTools"]; has {
+			t.Errorf("did not expect mcpServers.plural.excludeTools in WRITE mode, got %v", plural["excludeTools"])
 		}
-		if !found {
-			t.Errorf("excludeTools must contain updateAgentRunAnalysis in WRITE mode, got: %v", tools)
+		if _, has := plural["includeTools"]; has {
+			t.Errorf("did not expect mcpServers.plural.includeTools in WRITE mode, got %v", plural["includeTools"])
 		}
 	})
 

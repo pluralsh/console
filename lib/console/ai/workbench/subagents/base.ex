@@ -67,7 +67,8 @@ defmodule Console.AI.Workbench.Subagents.Base do
   @spec poll_run(AgentRun.t, integer) :: {:failed | :timeout | :success, AgentRun.t}
   def poll_run(run, iter \\ 0)
   def poll_run(%AgentRun{} = run, iters) when iters >= 60 * 6, do: {:timeout, run}
-  def poll_run(%AgentRun{mode: :write, pull_requests: [_ | _]} = run, _), do: {:success, run}
+  def poll_run(%AgentRun{mode: :write, status: s, pull_requests: [_ | _]} = run, _)
+    when s in [:successful, :babysitting, :failed, :cancelled], do: {:success, run}
   def poll_run(%AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{}} = run, _), do: {:success, run}
   def poll_run(%AgentRun{status: s} = run, _) when s in [:successful, :babysitting], do: {:success, run}
   def poll_run(%AgentRun{status: s} = run, _) when s in [:failed, :cancelled], do: {:failed, run}

@@ -114,6 +114,78 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	return false
 }
 
+// AnalysisFollowUpRun re-runs the Claude CLI with the same analyze agent and
+// system prompt as the initial run, swapping only the -p user prompt.
+// Errors are returned to the caller and must not be sent on ErrorChan.
+func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
+	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
+		return nil
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
+
+	if in.onMessage != nil {
+		in.onMessage(&console.AgentMessageAttributes{
+			Message: followUpPrompt,
+			Role:    console.AiRoleUser,
+		})
+	}
+
+	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
+	args := []string{
+		"--add-dir", in.Config.RepositoryDir,
+		"--agents", analysisAgent,
+		"--system-prompt-file", promptFile,
+		"--model", string(in.model),
+		"-p", followUpPrompt,
+		"--output-format", "stream-json",
+		"--verbose",
+	}
+
+	var opts []exec.Option
+	if in.Config.Run.IsProxyEnabled() {
+		opts = append(opts, exec.WithEnv([]string{
+			fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", in.consoleToken),
+			fmt.Sprintf("ANTHROPIC_BASE_URL=%s", fmt.Sprintf("%s/ext/ai/anthropic", in.consoleURL)),
+		}))
+	} else {
+		env := []string{fmt.Sprintf("ANTHROPIC_API_KEY=%s", in.token)}
+		if in.Config.Run.Runtime.Config.Claude.Endpoint != nil {
+			env = append(env, fmt.Sprintf("ANTHROPIC_BASE_URL=%s", *in.Config.Run.Runtime.Config.Claude.Endpoint))
+		}
+		opts = append(opts, exec.WithEnv(env))
+	}
+
+	in.executable = exec.NewExecutable(
+		"claude",
+		append(
+			opts,
+			exec.WithArgs(args),
+			exec.WithDir(in.Config.WorkDir),
+			exec.WithTimeout(in.Config.Run.Runtime.Config.Claude.Timeout),
+		)...,
+	)
+
+	err := in.executable.RunStream(ctx, func(line []byte) {
+		event := &StreamEvent{}
+		if err := json.Unmarshal(line, event); err != nil {
+			klog.ErrorS(err, "failed to unmarshal claude stream event (analysis follow-up)", "line", string(line))
+			return
+		}
+		if event.Message != nil {
+			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
+			if in.onMessage != nil && msg != nil {
+				in.onMessage(msg)
+			}
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("claude analysis follow-up execution failed: %w", err)
+	}
+	klog.V(log.LogLevelExtended).InfoS("claude analysis follow-up execution finished")
+	return nil
+}
+
 func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := analysisAgent
@@ -197,6 +269,7 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"MultiEdit",
 		"Bash",
 		"WebFetch",
+		"mcp__plural__updateAgentRunAnalysis",
 		"mcp__plural__createCommit",
 		"mcp__plural__fetchAgentRunTodos",
 		"mcp__plural__updateAgentRunTodos",
@@ -283,6 +356,7 @@ func (in *Claude) Configure(consoleURL, consoleToken, _ string) error {
 			"mcp__plural__createBranch",
 			"mcp__plural__fetchAgentRunTodos",
 			"mcp__plural__updateAgentRunTodos",
+			"mcp__plural__updateAgentRunAnalysis",
 			"mcp__plural__downloadServiceManifests",
 			"mcp__plural__createCommit",
 			"mcp__plural__getPRState",

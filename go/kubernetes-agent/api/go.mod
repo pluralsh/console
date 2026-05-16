@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/kubernetes-agent/api
 
-go 1.26.2
+go 1.26.3
 
 require (
 	github.com/Yiling-J/theine-go v0.6.0

@@ -108,6 +108,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:ok, parsed} = Tool.validate(%Cluster{user: user}, %{"handle" => cluster.handle})
       assert {:ok, content} = Cluster.implement(parsed)
       assert is_binary(content)
+
+      assert {:ok, parsed_id} = Tool.validate(%Cluster{user: user}, %{"cluster_id" => cluster.id})
+      assert {:ok, content_id} = Cluster.implement(parsed_id)
+      assert is_binary(content_id)
     end
 
     test "returns {:error, _} when the user cannot read the cluster" do

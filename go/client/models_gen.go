@@ -712,13 +712,15 @@ type AiSettings struct {
 	ToolsEnabled  *bool            `json:"toolsEnabled,omitempty"`
 	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
-	ToolProvider *AiProvider          `json:"toolProvider,omitempty"`
-	Openai       *OpenaiSettings      `json:"openai,omitempty"`
-	Anthropic    *AnthropicSettings   `json:"anthropic,omitempty"`
-	Ollama       *OllamaSettings      `json:"ollama,omitempty"`
-	Azure        *AzureOpenaiSettings `json:"azure,omitempty"`
-	Bedrock      *BedrockAiSettings   `json:"bedrock,omitempty"`
-	Vertex       *VertexAiSettings    `json:"vertex,omitempty"`
+	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to enable log analysis in AI insights (turn off to save on log query costs)
+	LogAnalysis *bool                `json:"logAnalysis,omitempty"`
+	Openai      *OpenaiSettings      `json:"openai,omitempty"`
+	Anthropic   *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama      *OllamaSettings      `json:"ollama,omitempty"`
+	Azure       *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock     *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex      *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -729,15 +731,17 @@ type AiSettingsAttributes struct {
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
-	EmbeddingProvider *AiProvider                  `json:"embeddingProvider,omitempty"`
-	Openai            *OpenaiSettingsAttributes    `json:"openai,omitempty"`
-	Anthropic         *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
-	Ollama            *OllamaAttributes            `json:"ollama,omitempty"`
-	Azure             *AzureOpenaiAttributes       `json:"azure,omitempty"`
-	Bedrock           *BedrockAiAttributes         `json:"bedrock,omitempty"`
-	Vertex            *VertexAiAttributes          `json:"vertex,omitempty"`
-	VectorStore       *VectorStoreAttributes       `json:"vectorStore,omitempty"`
-	Graph             *GraphStoreAttributes        `json:"graph,omitempty"`
+	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
+	// whether to enable log analysis in AI insights (turn off to save on log query costs)
+	LogAnalysis *bool                        `json:"logAnalysis,omitempty"`
+	Openai      *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	Anthropic   *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama      *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure       *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock     *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex      *VertexAiAttributes          `json:"vertex,omitempty"`
+	VectorStore *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph       *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 // An individual alert raised from an observability provider or monitor

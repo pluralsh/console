@@ -850,10 +850,10 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `provider` _string_ | Provider is the OpenCode provider to use. |  | Enum: [plural openai] <br />Required: \{\} <br /> |
-| `endpoint` _string_ | Endpoint API endpoint for the OpenCode service.<br />Endpoint for the OpenCode service (can be any OpenAI-compatible API endpoint). |  | Required: \{\} <br /> |
+| `provider` _string_ | Provider is the OpenCode provider to use. |  | Enum: [plural openai] <br />Optional: \{\} <br /> |
+| `endpoint` _string_ | Endpoint API endpoint for the OpenCode service.<br />Endpoint for the OpenCode service (can be any OpenAI-compatible API endpoint). |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model to use. |  | Optional: \{\} <br /> |
-| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to a Kubernetes Secret containing the API token for OpenCode. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to a Kubernetes Secret containing the API token for OpenCode. |  | Optional: \{\} <br /> |
 | `extraArgs` _string array_ | ExtraArgs args for advanced or experimental CLI flags.<br />Deprecated: It is being ignored by the agent harness. |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single opencode run invocation. |  | Optional: \{\} <br /> |
 

@@ -11,6 +11,9 @@ import (
 const (
 	statusCompleted = "completed"
 	statusFailed    = "failed"
+
+	// streamEventTypeThreadStarted is the Codex JSON stream event type that carries thread_id.
+	streamEventTypeThreadStarted = "thread.started"
 )
 
 type Codex struct {

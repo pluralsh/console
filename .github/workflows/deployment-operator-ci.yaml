@@ -1,4 +1,8 @@
 name: CI / Deployment Operator
+
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+
 on:
   push:
     branches:

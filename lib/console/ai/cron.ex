@@ -39,8 +39,19 @@ defmodule Console.AI.Cron do
   end
 
   def trim_runs() do
+    Logger.info "pruning expired agent runs"
     AgentRun.expired()
-    |> Repo.delete_all()
+    |> AgentRun.ordered(desc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 1)
+    |> Stream.chunk_every(20)
+    |> Task.async_stream(fn chunk ->
+      Logger.info "pruning #{length(chunk)} agent runs"
+      Enum.map(chunk, & &1.id)
+      |> AgentRun.for_ids()
+      |> Repo.delete_all(timeout: 300_000)
+    end, max_concurrency: 10)
+    |> Stream.run()
   end
 
   def trim_sentinel_runs() do
