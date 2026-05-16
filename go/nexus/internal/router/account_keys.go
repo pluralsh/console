@@ -175,7 +175,8 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 
 	return []schemas.Key{
 		{
-			Models: in.toBedrockModels(config),
+			Models:  in.toBedrockModels(config),
+			Aliases: schemas.KeyAliases(in.toBedrockDeployments(config)),
 			BedrockKeyConfig: &schemas.BedrockKeyConfig{
 				AccessKey: schemas.EnvVar{
 					Val: config.GetAwsAccessKeyId(),
@@ -186,7 +187,6 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 				Region: &schemas.EnvVar{
 					Val: config.GetRegion(),
 				},
-				Deployments: in.toBedrockDeployments(config),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
@@ -272,6 +272,7 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 				config.GetToolModel(),
 				config.GetEmbeddingModel(),
 			}, config.GetProxyModels()...)),
+			Aliases: schemas.KeyAliases(in.filterDeployments(config.GetDeployments())),
 			Value: schemas.EnvVar{
 				Val: config.GetAccessToken(),
 			},
@@ -280,7 +281,6 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 					// We need to remove the suffix since console deployment settings enforce it currently.
 					Val: strings.TrimSuffix(config.GetEndpoint(), "/openai/deployments"),
 				},
-				Deployments: in.filterDeployments(config.GetDeployments()),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,

@@ -8,7 +8,9 @@ on:
       - ".github/workflows/nexus-ci.yaml"
       - "go/nexus/**"
 
+
 env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: ghcr.io/pluralsh/nexus
