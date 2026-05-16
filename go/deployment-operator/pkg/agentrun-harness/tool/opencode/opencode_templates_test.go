@@ -46,19 +46,15 @@ func renderJSON(t *testing.T, input *ConfigTemplateInput) map[string]any {
 }
 
 func TestConfigTemplate_PluraMcpExcludeTools(t *testing.T) {
-	t.Run("WRITE mode excludes updateAgentRunAnalysis from plural env", func(t *testing.T) {
+	t.Run("WRITE mode omits PLRL_EXCLUDE_TOOLS from plural MCP env", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
 
 		mcp := out["mcp"].(map[string]any)
 		plural := mcp["plural"].(map[string]any)
 		env := plural["environment"].(map[string]any)
 
-		excluded, ok := env["PLRL_EXCLUDE_TOOLS"].(string)
-		if !ok {
-			t.Fatal("PLRL_EXCLUDE_TOOLS missing from plural MCP environment in WRITE mode")
-		}
-		if excluded != "updateAgentRunAnalysis" {
-			t.Errorf("expected PLRL_EXCLUDE_TOOLS=updateAgentRunAnalysis, got %q", excluded)
+		if _, ok := env["PLRL_EXCLUDE_TOOLS"]; ok {
+			t.Fatalf("did not expect PLRL_EXCLUDE_TOOLS in WRITE mode, got %v", env["PLRL_EXCLUDE_TOOLS"])
 		}
 	})
 

@@ -32,6 +32,7 @@ Check available tools (including Plural MCP server)
 5. **Verify** — run tests, linters, or other checks that the CI pipeline uses, where available.
 6. **Commit** — call plural MCP `createCommit` with a clear commit message.
 7. **React complete** — for each comment you addressed, call plural MCP `reactToComment` with `state='complete'`.
-8. **Final summary** — report what was changed and why.
+8. **Persist run analysis** — call plural MCP `updateAgentRunAnalysis` with a non-empty summary and detailed analysis of what you changed and verified (before your final summary).
+9. **Final summary** — report what was changed and why; confirm persisted analysis still matches the outcome.
 
 After the summary, do not wait for input. Your task is complete.

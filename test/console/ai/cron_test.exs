@@ -42,6 +42,18 @@ defmodule Console.AI.CronTest do
     end
   end
 
+  describe "#trim_runs/0" do
+    test "it will prune agent runs older than the retention window" do
+      remove = insert_list(2, :agent_run, inserted_at: Timex.now() |> Timex.shift(days: -15))
+      keep = insert_list(2, :agent_run, inserted_at: Timex.now() |> Timex.shift(days: -1))
+
+      :ok = Cron.trim_runs()
+
+      for run <- remove, do: refute refetch(run)
+      for run <- keep, do: assert refetch(run)
+    end
+  end
+
   describe "#services/0" do
     test "it will gather info from all service components and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})

@@ -50,11 +50,12 @@ export function IssueStatusChip({
       >
         {statusToChipIcon[status]}
         <span
-          css={
-            completedStatuses.has(status)
+          css={{
+            whiteSpace: 'nowrap',
+            ...(completedStatuses.has(status)
               ? { color: theme.colors['text-light'] }
-              : undefined
-          }
+              : {}),
+          }}
         >
           {startCase(status.toLowerCase())}
         </span>

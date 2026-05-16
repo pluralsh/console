@@ -1,5 +1,9 @@
 import { Merge } from 'type-fest'
-import { BellIcon, IconFrame, IconFrameProps } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  IconFrameProps,
+  LightningIcon,
+} from '@pluralsh/design-system'
 
 import { CountBadge } from '../utils/CountBadge'
 
@@ -14,7 +18,7 @@ export function NotificationsLauncherButton({
     <div css={{ position: 'relative', marginRight: count > 0 ? 6 : 0 }}>
       <IconFrame
         clickable
-        icon={<BellIcon />}
+        icon={<LightningIcon />}
         tooltip={open ? undefined : `You have ${count} notifications`}
         {...props}
       />

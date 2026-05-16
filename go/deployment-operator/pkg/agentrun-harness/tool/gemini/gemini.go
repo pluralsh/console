@@ -92,6 +92,59 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	return false
 }
 
+// AnalysisFollowUpRun re-runs the Gemini CLI with the same settings as the
+// initial run, using followUpPrompt as the user prompt. Errors are returned
+// to the caller and must not be sent on ErrorChan.
+func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
+	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
+		return nil
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
+
+	if in.onMessage != nil {
+		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
+	}
+
+	env := []string{fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey), fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true")}
+	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
+		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))
+	}
+
+	in.executable = exec.NewExecutable(
+		"gemini",
+		exec.WithArgs(in.args(followUpPrompt)),
+		exec.WithDir(in.Config.WorkDir),
+		exec.WithEnv(env),
+		exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
+	)
+
+	err := in.executable.RunStream(ctx, func(line []byte) {
+		klog.V(log.LogLevelTrace).InfoS("Gemini stream event (analysis follow-up)", "line", string(line))
+
+		trimmed := strings.TrimSpace(string(line))
+		if !strings.HasPrefix(trimmed, "{") {
+			klog.V(log.LogLevelDebug).InfoS("ignoring non-json Gemini stream line", "trimmed", trimmed)
+			return
+		}
+
+		event := &events.EventBase{}
+		if err := json.Unmarshal(line, event); err != nil {
+			klog.ErrorS(err, "failed to unmarshal Gemini stream event (analysis follow-up)", "line", line)
+			return
+		}
+
+		if err := event.OnMessage(line, in.onMessage); err != nil {
+			klog.ErrorS(err, "failed to process Gemini stream event (analysis follow-up)", "line", string(line))
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("gemini analysis follow-up execution failed: %w", err)
+	}
+	klog.V(log.LogLevelExtended).InfoS("Gemini analysis follow-up execution finished")
+	return nil
+}
+
 func (in *Gemini) ConfigureBabysitRun() error {
 	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeGemini)
 }

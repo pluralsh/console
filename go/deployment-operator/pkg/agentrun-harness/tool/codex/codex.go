@@ -159,7 +159,7 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 			Type:         "stdio",
 			Command:      "/usr/local/bin/mcpserver",
 			TrustPolicy:  "always",
-			EnabledTools: []string{"agentPullRequest", "createBranch", "fetchAgentRunTodos", "updateAgentRunTodos", "getPRState", "getCILogs", "reactToComment", "createCommit", "downloadServiceManifests"},
+			EnabledTools: []string{"agentPullRequest", "createBranch", "fetchAgentRunTodos", "updateAgentRunTodos", "updateAgentRunAnalysis", "getPRState", "getCILogs", "reactToComment", "createCommit", "downloadServiceManifests"},
 			Env:          mcpBaseEnv,
 		}}
 	default:
@@ -238,7 +238,7 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 			return
 		}
 
-		if event.Type == "thread.started" && event.ThreadID != "" {
+		if event.Type == streamEventTypeThreadStarted && event.ThreadID != "" {
 			in.threadID = event.ThreadID
 			klog.V(log.LogLevelDebug).InfoS("codex thread started", "thread_id", in.threadID)
 		}
@@ -256,6 +256,54 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 
 	klog.V(log.LogLevelExtended).InfoS("codex babysit run finished")
 	return false
+}
+
+// AnalysisFollowUpRun re-runs Codex with the analysis profile and
+// followUpPrompt. Errors are returned to the caller and must not be sent on
+// ErrorChan.
+func (in *Codex) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
+	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
+		return nil
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting codex", "prompt_len", len(followUpPrompt))
+
+	if in.onMessage != nil {
+		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
+	}
+
+	args := []string{"exec", "--profile", "analysis", "--skip-git-repo-check", "--json", followUpPrompt}
+
+	in.executable = exec.NewExecutable(
+		"codex",
+		exec.WithArgs(args),
+		exec.WithDir(in.Config.WorkDir),
+		exec.WithEnv([]string{fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken), fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex"))}),
+		exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
+	)
+
+	err := in.executable.RunStream(ctx, func(line []byte) {
+		event := &StreamEvent{}
+		if err := json.Unmarshal(line, event); err != nil {
+			klog.V(log.LogLevelExtended).InfoS("failed to unmarshal codex stream event (analysis follow-up)", "line", string(line))
+			return
+		}
+
+		if event.Type == streamEventTypeThreadStarted && event.ThreadID != "" {
+			in.threadID = event.ThreadID
+			klog.V(log.LogLevelDebug).InfoS("codex thread started (analysis follow-up)", "thread_id", in.threadID)
+		}
+
+		msg := mapCodexStreamEventToAgentMessage(event, in.threadID)
+		if in.onMessage != nil && msg != nil {
+			in.onMessage(msg)
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("codex analysis follow-up execution failed: %w", err)
+	}
+	klog.V(log.LogLevelExtended).InfoS("codex analysis follow-up execution finished")
+	return nil
 }
 
 func (in *Codex) start(ctx context.Context, options ...exec.Option) {
@@ -309,7 +357,7 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 			return
 		}
 
-		if event.Type == "thread.started" && event.ThreadID != "" {
+		if event.Type == streamEventTypeThreadStarted && event.ThreadID != "" {
 			in.threadID = event.ThreadID
 			klog.V(log.LogLevelDebug).InfoS("codex thread started", "thread_id", in.threadID)
 		}

@@ -126,8 +126,9 @@ Your **high‑level** order is:
 4. Execute todos **in listed order**
 5. Before committing, verify changes by running the application, tests, Docker files, and other applicable verification methods where available
 6. Commit via Plural MCP server `createBranch` tool (second‑to‑last todo)
-7. Create PR via Plural MCP server `agentPullRequest` tool (last todo)
-8. Final summary
+7. Persist run analysis via Plural MCP server `updateAgentRunAnalysis` tool (non‑empty summary and detailed analysis: what you changed, why, risks, and verification) **before** opening the PR
+8. Create PR via Plural MCP server `agentPullRequest` tool (last todo)
+9. Final summary (confirm persisted analysis still matches the final outcome)
 
 ** You should not attempt to clone the repo directly, it will already be cloned for you and ready for use in the current directory.**
 
@@ -155,7 +156,16 @@ When you reach the commit todo:
 
 ---
 
-## 5. Create pull request (must use Plural MCP server `agentPullRequest` tool)
+## 5. Persist run analysis (must use Plural MCP server `updateAgentRunAnalysis` tool)
+
+After the commit todo succeeds and **before** you call `agentPullRequest`:
+
+1. Call Plural MCP server `updateAgentRunAnalysis` with a non-empty **summary** and **detailed analysis** that reflects what you shipped: scope of changes, rationale, notable tradeoffs, verification performed (tests or checks run), and any follow-ups or risks worth tracking in Console.
+2. Retry on transient failures; do not open the PR until this tool succeeds.
+
+---
+
+## 6. Create pull request (must use Plural MCP server `agentPullRequest` tool)
 
 When you reach the final todo:
 
@@ -170,7 +180,7 @@ When you reach the final todo:
 
 ---
 
-## 6. Final summary
+## 7. Final summary
 
 After the PR todo is done, report:
 
@@ -179,6 +189,8 @@ After the PR todo is done, report:
 - Key changes (bullets)
 - PR URL/number and title
 - Tests/checks run, or that none were run
+
+Before you exit, confirm the agent run’s persisted analysis in Console (Plural MCP `updateAgentRunAnalysis`) still matches the final branch and PR; call the tool again if anything material changed after you last updated it.
 
 On critical errors, report:
 

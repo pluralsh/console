@@ -50,16 +50,10 @@
         "PLRL_CONSOLE_TOKEN": "{{ .ConsoleToken }}",
         "PLRL_CONSOLE_URL": "{{ .ConsoleURL }}",
         "PLRL_AGENT_RUN_ID": "{{ .AgentRunID }}",
-        "GIT_ACCESS_TOKEN": "{{ .GitAccessToken }}",
-        {{ if eq .AgentRunMode "WRITE" }}
-        "PLRL_EXCLUDE_TOOLS": "updateAgentRunAnalysis"
-        {{ else }}
-        "PLRL_EXCLUDE_TOOLS": "createBranch,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos"
-        {{ end }}
+        "GIT_ACCESS_TOKEN": "{{ .GitAccessToken }}"{{ if eq .AgentRunMode "ANALYZE" }},
+        "PLRL_EXCLUDE_TOOLS": "createBranch,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos"{{ end }}
       },
-      "trust": true{{ if eq .AgentRunMode "WRITE" }},
-      "excludeTools": ["updateAgentRunAnalysis"]
-{{ else }},
+      "trust": true{{ if eq .AgentRunMode "ANALYZE" }},
       "includeTools": ["updateAgentRunAnalysis", "downloadServiceManifests"]
 {{ end }}
     }{{ range .ExaMcpConfigs }},
