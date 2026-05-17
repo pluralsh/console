@@ -9,10 +9,6 @@ import (
 )
 
 const (
-	// nexusRouteChatViaResponsesKey marks /v1/chat/completions requests that should be
-	// executed through the Bifrost responses API and converted back to chat completions.
-	nexusRouteChatViaResponsesKey schemas.BifrostContextKey = "nexus-openai-route-chat-via-responses"
-
 	nexusChatToResponsesStreamStateKey schemas.BifrostContextKey = "nexus-chat-to-responses-stream-state"
 )
 
@@ -68,7 +64,9 @@ func applyOpenAIRoutingContext(ctx *schemas.BifrostContext, path string, policy 
 		}
 	case string(RouteChatCompletions):
 		if policy.chatViaResponses() {
-			ctx.SetValue(nexusRouteChatViaResponsesKey, true)
+			// Bifrost core converts chat requests to the responses API (and back) for both
+			// streaming and non-streaming calls when this key is set.
+			ctx.SetValue(schemas.BifrostContextKeyChangeRequestType, schemas.ResponsesRequest)
 		}
 	}
 }
@@ -79,8 +77,8 @@ func responsesViaChat(ctx *schemas.BifrostContext) bool {
 }
 
 func chatViaResponses(ctx *schemas.BifrostContext) bool {
-	v, ok := ctx.Value(nexusRouteChatViaResponsesKey).(bool)
-	return ok && v
+	changeType, ok := ctx.Value(schemas.BifrostContextKeyChangeRequestType).(schemas.RequestType)
+	return ok && changeType == schemas.ResponsesRequest
 }
 
 func chatToResponsesStreamState(ctx *schemas.BifrostContext) *schemas.ChatToResponsesStreamState {

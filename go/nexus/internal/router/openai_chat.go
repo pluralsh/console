@@ -47,33 +47,22 @@ func (in *OpenAIRouter) chatCompletionsRequestConverter(ctx *schemas.BifrostCont
 	bifrostReq.Provider = provider
 	bifrostReq.Model = model
 
-	if chatViaResponses(ctx) {
-		responsesReq := bifrostReq.ToResponsesRequest()
-		responsesReq.Provider = provider
-		responsesReq.Model = model
-		return &schemas.BifrostRequest{ResponsesRequest: responsesReq}, nil
-	}
-
 	return &schemas.BifrostRequest{ChatRequest: bifrostReq}, nil
 }
 
-func (in *OpenAIRouter) chatCompletionsResponseConverter(_ *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (interface{}, error) {
-	if resp.ExtraFields.Provider == schemas.OpenAI {
-		if resp.ExtraFields.RawResponse != nil {
-			return resp.ExtraFields.RawResponse, nil
-		}
+func (in *OpenAIRouter) chatCompletionsResponseConverter(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (interface{}, error) {
+	if raw, ok := openaiChatRawResponse(ctx, resp); ok {
+		return raw, nil
 	}
 
 	return resp, nil
 }
 
-func (in *OpenAIRouter) chatCompletionsStreamConverter(_ *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (string, interface{}, error) {
+func (in *OpenAIRouter) chatCompletionsStreamConverter(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (string, interface{}, error) {
 	in.chatCompletionsFixEarlyVertexStreamCompletion(resp)
 
-	if resp.ExtraFields.Provider == schemas.OpenAI {
-		if resp.ExtraFields.RawResponse != nil {
-			return "", resp.ExtraFields.RawResponse, nil
-		}
+	if raw, ok := openaiChatRawResponse(ctx, resp); ok {
+		return "", raw, nil
 	}
 
 	return "", resp, nil

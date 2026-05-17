@@ -40,23 +40,6 @@ func (in *GenericRouter) writeChatStreamAsResponses(
 	return nil
 }
 
-func (in *GenericRouter) convertResponsesStreamChunkToChat(
-	ctx *schemas.BifrostContext,
-	config RouteConfig,
-	responsesChunk *schemas.BifrostResponsesStreamResponse,
-) (string, interface{}, error) {
-	if config.StreamConfig == nil || config.StreamConfig.ChatStreamResponseConverter == nil {
-		return "", nil, fmt.Errorf("chat stream converter is not configured")
-	}
-
-	chatChunk := responsesChunk.ToBifrostChatResponse()
-	if chatChunk == nil {
-		return "", nil, nil
-	}
-
-	return config.StreamConfig.ChatStreamResponseConverter(ctx, chatChunk)
-}
-
 func writeStreamSSE(w io.Writer, eventType string, convertedResponse interface{}) error {
 	if eventType != "" {
 		if _, err := fmt.Fprintf(w, "event: %s\n", eventType); err != nil {

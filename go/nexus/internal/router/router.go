@@ -416,11 +416,7 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 			}
 			eventType, convertedResponse, err = config.StreamConfig.ChatStreamResponseConverter(ctx, chunk.BifrostChatResponse)
 		case chunk.BifrostResponsesStreamResponse != nil:
-			if chatViaResponses(ctx) {
-				eventType, convertedResponse, err = in.convertResponsesStreamChunkToChat(ctx, config, chunk.BifrostResponsesStreamResponse)
-			} else {
-				eventType, convertedResponse, err = config.StreamConfig.ResponsesStreamResponseConverter(ctx, chunk.BifrostResponsesStreamResponse)
-			}
+			eventType, convertedResponse, err = config.StreamConfig.ResponsesStreamResponseConverter(ctx, chunk.BifrostResponsesStreamResponse)
 		default:
 			requestType := in.safeGetRequestType(chunk)
 			convertedResponse, err = nil, fmt.Errorf("no response converter found for request type: %s", requestType)
@@ -614,16 +610,7 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 			return
 		}
 
-		if chatViaResponses(ctx) {
-			chatResponse := bifrostResponse.ToBifrostChatResponse()
-			if chatResponse == nil {
-				in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "failed to convert responses to chat format"))
-				return
-			}
-			response, err = config.ChatResponseConverter(ctx, chatResponse)
-		} else {
-			response, err = config.ResponsesResponseConverter(ctx, bifrostResponse)
-		}
+		response, err = config.ResponsesResponseConverter(ctx, bifrostResponse)
 	case bifrostReq.CountTokensRequest != nil:
 		bifrostResponse, bifrostErr := in.client.CountTokensRequest(ctx, bifrostReq.CountTokensRequest)
 		if bifrostErr != nil {
