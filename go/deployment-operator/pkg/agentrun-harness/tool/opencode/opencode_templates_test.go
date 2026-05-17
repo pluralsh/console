@@ -78,6 +78,9 @@ func TestConfigTemplate_DindPermissions(t *testing.T) {
 		if _, ok := bash["docker"]; ok {
 			t.Fatal("did not expect docker in restrictive bash allowlist")
 		}
+		if bash["rg"] != "allow" {
+			t.Fatalf("expected rg=allow in restrictive bash allowlist, got %v", bash["rg"])
+		}
 	})
 }
 

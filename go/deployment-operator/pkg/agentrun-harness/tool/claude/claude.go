@@ -337,6 +337,7 @@ func (in *Claude) Configure(consoleURL, consoleToken, _ string) error {
 			"Bash(tail:*)",
 			"Bash(cat:*)",
 			"Bash(grep:*)",
+			"Bash(rg:*)",
 			"Bash(find:*)",
 			"WebFetch",
 			"mcp__plural__updateAgentRunAnalysis",

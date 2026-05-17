@@ -61,7 +61,7 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
       https://download.docker.com/linux/debian bookworm stable" | \
       tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt update && \
-    apt install -y docker-ce-cli docker-compose-plugin && \
+    apt install -y docker-ce-cli docker-compose-plugin ripgrep && \
     ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/bin/docker-compose && \
     rm -rf /var/lib/apt/lists/*
 
