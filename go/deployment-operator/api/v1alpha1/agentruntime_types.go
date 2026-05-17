@@ -48,7 +48,19 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Optional
 	Config *AgentRuntimeConfig `json:"config,omitempty"`
 
-	// AiProxy specifies whether the agent runtime should be proxied through the AI proxy.
+	// AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,
+	// so provider API keys in spec.config are optional.
+	//
+	// Set the model on the runtime-specific config block (for example spec.config.codex.model).
+	// The proxy expects models in provider/name format (for example openai/gpt-5.4,
+	// anthropic/claude-sonnet-4-5, vertex/gemini-2.5-pro). Values that already include a "/"
+	// are passed through unchanged.
+	//
+	// When only a bare model id is given, the harness may prefix it by runtime type:
+	//   - CLAUDE: anthropic/{model} (for example claude-sonnet-4-5 -> anthropic/claude-sonnet-4-5)
+	//   - CODEX, OPENCODE: openai/{model} (for example gpt-5.4 -> openai/gpt-5.4)
+	//   - GEMINI: vertex/{model}
+	//   - CUSTOM: no automatic prefix; use provider/name explicitly
 	AiProxy *bool `json:"aiProxy,omitempty"`
 
 	// Dind enables Docker-in-Docker for this agent runtime.
