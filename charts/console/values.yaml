@@ -159,7 +159,13 @@ aiProxy:
     tag: ~
     pullPolicy: IfNotPresent
     extraArgs: []
-  resources: {}
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   podLabels: {}
   podAnnotations: {}
   nodeSelector: {}
