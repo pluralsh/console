@@ -16,12 +16,6 @@ spec:
     targetPort: http
     protocol: TCP
     name: http
-  {{- if .Values.aiProxy.enabled }}
-  - port: 8080
-    targetPort: nexus-http
-    protocol: TCP
-    name: nexus-http
-  {{- end }}
   - port: 50051
     targetPort: grpc
     protocol: TCP

@@ -9,10 +9,10 @@ defmodule Console.AI.Nexus do
   Similar to the Azure provider, this wraps the OpenAI provider with the Nexus URL
   and authentication token configured.
 
-  When deployed as a sidecar, Nexus runs at `http://localhost:8080/ext/ai` by default.
+  When deployed in-cluster, Nexus is reachable at the ingress path `/ext/ai` by default.
 
   Configuration is read from DeploymentSettings.ai.nexus:
-  - `url`: The Nexus extension mount without `/v1` (default: "http://localhost:8080/ext/ai").
+  - `url`: The Nexus extension mount without `/v1` (default: in-cluster via ingress at `/ext/ai`).
     OpenAI-compatible clients receive `{url}/v1` automatically.
   - `access_token`: The Bearer token for authentication
   - `model`: The model to use for completions
@@ -42,7 +42,7 @@ defmodule Console.AI.Nexus do
   Creates a new Nexus client from DeploymentSettings nexus config.
 
   Accepts either a nexus settings map from DeploymentSettings or a custom options map.
-  If no URL is provided, defaults to the standard sidecar location.
+  If no URL is provided, defaults to the standard in-cluster Nexus location.
   """
   def new(opts \\ %{}) do
     %__MODULE__{

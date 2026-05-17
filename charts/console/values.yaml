@@ -153,11 +153,40 @@ ociAuth:
 
 aiProxy:
   enabled: false
+  replicaCount: 2
   image:
     repository: nexus
     tag: ~
     pullPolicy: IfNotPresent
     extraArgs: []
+  resources: {}
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  livenessProbe:
+    httpGet:
+      path: /ext/ai/health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 2
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /ext/ai/ready
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 2
+    failureThreshold: 3
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ~
   config:
     server:
       address: ":8080"
@@ -165,7 +194,7 @@ aiProxy:
       readTimeout: "30s"
       idleTimeout: "120s"
     console:
-      grpcEndpoint: "localhost:50051"
+      grpcEndpoint: "console:50051"
       configTTL: "60s"
       requestTimeout: "10s"
       connectionRetry:
