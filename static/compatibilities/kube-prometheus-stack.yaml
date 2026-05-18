@@ -5,21 +5,21 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 85.1.2
+- version: 85.1.3
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ['Adjusted the `KubeletServerCertificateExpiration` alert rule
-        to be more appropriate/accurate (see PR #6919).', '(From 85.1.1) Bumped the
-        bundled Grafana Helm release/chart to Grafana v12.3.3 (PR #6921).']
-    features: ['Improved/updated alerting: the `KubeletServerCertificateExpiration`
-        alert was modified to behave more correctly (less noise / better signal depending
-        on your environment).']
+    chart_updates: [Chart bumps Grafana subchart to **v12.3.3** (included in 85.1.1).,
+      'PrometheusRule templating changed to **skip disabled single-rule groups** (85.1.3),
+        reducing/no longer emitting empty/disabled rule groups in rendered manifests.']
+    features: ['Improved rule rendering: disabled single-rule groups are not generated,
+        which can reduce noise and prevent creating effectively-empty PrometheusRule
+        groups.']
     breaking_changes: []
-  chart_version: 85.1.2
+  chart_version: 85.1.3
   images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.2',
     'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
     'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',

@@ -385,8 +385,7 @@ versions:
         and still follow the upstream upgrading guide when jumping minor versions
         (not applicable here since it's a patch upgrade within 2.10).]
   chart_version: 6.7.15
-  images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
-    'quay.io/argoproj/argocd:v2.10.7']
+  images: []
   eolAt: '2024-11-04'
 - version: 2.10.0
   kube: ['1.29', '1.28', '1.27']
