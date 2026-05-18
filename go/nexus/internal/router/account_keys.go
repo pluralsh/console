@@ -194,9 +194,11 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 	}, nil
 }
 
-// toBedrockModels returns an array of model IDs. We are assuming that
-// configured models can be inference profile IDs that contain regional prefix in
-// model ID, i.e.,
+// toBedrockModels returns client-facing model IDs registered on the Bifrost key.
+// Configured values may be foundation model IDs (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0)
+// or regional inference profile IDs with three dot-separated segments (e.g.
+// us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0).
+// For 3-part profile IDs, the bare model ID (provider.model) is registered for clients:
 //
 // Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
@@ -215,9 +217,10 @@ func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 	return result
 }
 
-// toBedrockDeployments returns a map of model IDs to inference profile IDs.
-// Similar to toBedrockModels, we are assuming that configured models can be
-// inference profile IDs that contain regional prefix in model ID, i.e.,
+// toBedrockDeployments returns Bifrost aliases (client model ID -> inference profile ID).
+// Prefer regional-prefixed profile IDs in modelId/proxyModels; explicit deployments in Console
+// config are only needed for overrides (logical names, application profile resource suffixes, etc.).
+// 3-part profile IDs in modelId/proxyModels are auto-mapped, e.g.:
 //
 // Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0

@@ -274,6 +274,7 @@ defmodule Console.Schema.DeploymentSettings do
       end
 
       embeds_one :bedrock, Bedrock, on_replace: :update do
+        # Foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or regional inference profile ID (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0).
         field :model_id,              :string
         field :tool_model_id,         :string
         field :access_token,          EncryptedString
@@ -281,7 +282,9 @@ defmodule Console.Schema.DeploymentSettings do
         field :embedding_model,       :string
         field :aws_access_key_id,     :string
         field :aws_secret_access_key, EncryptedString
+        # Additional model/profile IDs for the Nexus proxy; same formats as model_id.
         field :proxy_models,          {:array, :string}
+        # Deprecated for most configs; maps client model ID -> inference profile ID when aliases cannot be inferred (e.g. application profile suffixes).
         field :deployments,           :map
       end
 
