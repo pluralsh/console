@@ -16,6 +16,43 @@ permissions:
   packages: write
 
 jobs:
+  publish-test:
+    name: Publish test charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: console
+          dir: charts/console
+          repository: pluralsh/test-charts
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - uses: azure/setup-helm@v4
+
+    - name: Add repos
+      run: |
+        helm repo add vmware https://vmware-tanzu.github.io/helm-charts
+        helm repo add radar https://radar-base.github.io/radar-helm-charts
+        helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
+        helm repo add dexidp https://charts.dexidp.io
+
+    - name: Push chart (0.0.0+pr-<number>)
+      if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+      uses: appany/helm-oci-chart-releaser@v0.5.0
+      with:
+        name: ${{ matrix.name }}
+        repository: ${{ matrix.repository }}
+        tag: 0.0.0+test
+        path: ${{ matrix.dir }}
+        registry: ghcr.io
+        registry_username: ${{ github.actor }}
+        registry_password: ${{ secrets.GITHUB_TOKEN }}
+        update_dependencies: "true"
   publish:
     name: Publish charts
     runs-on: ubuntu-latest

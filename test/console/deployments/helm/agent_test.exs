@@ -109,20 +109,22 @@ defmodule Console.Deployments.Helm.AgentTest do
       Process.exit(pid, :kill)
     end
 
-    @tag :skip
+    # @tag :skip
     test  "it can handle authenticated oci registries" do
-      repo = "oci://prodcussrehelmacr.azurecr.io/helm"
-      insert(:helm_repository,
-        url: repo,
-        auth: %{basic: %{username: "plural-pull", password: System.get_env("LCE_OCI_PASSWORD")}}
-      )
+      if pwd = System.get_env("TEST_CHART_OCI_PASSWORD") do
+        repo = "oci://ghcr.io/pluralsh/test-charts"
+        insert(:helm_repository,
+          url: repo,
+          auth: %{basic: %{username: "apikey", password: pwd}}
+        )
 
-      {:ok, pid} = Agent.start(repo) |> handle()
+        {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _, _} = Agent.fetch(pid, "lce-cvcloud-store", "1.0.582849")
+        {:ok, f, _, _} = Agent.fetch(pid, "console", "0.0.0_test")
 
-      files = stream_and_untar(f)
-      assert files["Chart.yaml"]
+        files = stream_and_untar(f)
+        assert files["Chart.yaml"]
+      end
     end
   end
 

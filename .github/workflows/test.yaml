@@ -99,6 +99,8 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
@@ -139,6 +141,8 @@ jobs:
           key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'config/**/*.exs', 'native/**') }}
       - run: mix deps.get
       - run: mix test
+        env:
+          TEST_CHART_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN}}
       - name: Verify Changed files
         run: |
           git diff --exit-code -- priv || {
