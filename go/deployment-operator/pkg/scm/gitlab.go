@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/samber/lo"
 	gogitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -72,15 +73,15 @@ func (c *gitLabClient) allComments(ctx context.Context, projectPath string, mrII
 			return nil, fmt.Errorf("list MR notes: %w", err)
 		}
 		for _, n := range notes {
-			if n.System {
-				continue
+			if n.System || n.Position != nil {
+				continue // skip system notes and inline notes
 			}
 			all = append(all, PRComment{
 				ID:        strconv.FormatInt(n.ID, 10),
 				Type:      PRCommentTypeIssue,
 				Author:    n.Author.Username,
 				Body:      n.Body,
-				CreatedAt: *n.CreatedAt,
+				CreatedAt: lo.FromPtr(n.CreatedAt),
 			})
 		}
 		if resp.NextPage == 0 {
@@ -106,7 +107,7 @@ func (c *gitLabClient) allComments(ctx context.Context, projectPath string, mrII
 					Type:      PRCommentTypeReview,
 					Author:    n.Author.Username,
 					Body:      n.Body,
-					CreatedAt: *n.CreatedAt,
+					CreatedAt: lo.FromPtr(n.CreatedAt),
 				})
 			}
 		}
@@ -158,11 +159,13 @@ func (c *gitLabClient) GetCILogs(ctx context.Context, prURL string, checkRunID i
 		return "", err
 	}
 
-	reader, _, err := c.gl.Jobs.GetTraceFile(projectPath, checkRunID, gogitlab.WithContext(ctx))
+	reader, resp, err := c.gl.Jobs.GetTraceFile(projectPath, checkRunID, gogitlab.WithContext(ctx))
 	if err != nil {
 		return "", fmt.Errorf("get job trace for job %d: %w", checkRunID, err)
 	}
-
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
 	raw, err := io.ReadAll(io.LimitReader(reader, 512*1024))
 	if err != nil {
 		return "", fmt.Errorf("read job trace: %w", err)
