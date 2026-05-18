@@ -1,39 +1,49 @@
-ARG NODE_IMAGE_TAG=24
-ARG NODE_IMAGE=node:${NODE_IMAGE_TAG}-slim
 ARG AGENT_VERSION=latest
 
 ARG AGENT_HARNESS_BASE_IMAGE_TAG=latest
 ARG AGENT_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/agent-harness-base
 ARG AGENT_HARNESS_BASE_IMAGE=$AGENT_HARNESS_BASE_IMAGE_REPO:$AGENT_HARNESS_BASE_IMAGE_TAG
 
-# Stage 1: Install Claude CLI from npm in Chainguard Node image
-FROM $NODE_IMAGE AS node
+# Stage 1: Install Claude Code native binary (no npm — postinstall is unreliable in CI)
+FROM debian:13-slim AS claude-install
 
-# Switch to root temporarily to install global packages
-USER root
+ARG AGENT_VERSION
 
-# Install claude CLI globally using npm
-RUN npm install -g @anthropic-ai/claude-code@$AGENT_VERSION
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+    && arch="$(dpkg --print-architecture)" \
+    && case "$arch" in \
+      amd64) platform=linux-x64 ;; \
+      arm64) platform=linux-arm64 ;; \
+      *) echo "unsupported architecture: $arch" >&2; exit 1 ;; \
+    esac \
+    && if [ "$AGENT_VERSION" = "latest" ]; then \
+      version="$(curl -fsSL https://downloads.claude.ai/claude-code-releases/latest)"; \
+    else \
+      version="$AGENT_VERSION"; \
+    fi \
+    && curl -fsSL \
+      "https://downloads.claude.ai/claude-code-releases/${version}/${platform}/claude" \
+      -o /usr/local/bin/claude \
+    && chmod +x /usr/local/bin/claude \
+    && /usr/local/bin/claude --version \
+    && apt-get purge -y curl \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
-# Verify installation
-RUN claude --version
-
-# Stage 2: Copy claude CLI into agent-harness base
+# Stage 2: Copy claude binary into agent-harness base
 FROM $AGENT_HARNESS_BASE_IMAGE AS final
 
-# Copy the claude CLI from the Node.js image
-COPY --from=node /usr/local/bin/claude /usr/local/bin/claude
-COPY --from=node /usr/local/lib/node_modules/@anthropic-ai/claude-code /usr/local/lib/node_modules/@anthropic-ai/claude-code
+COPY --from=claude-install /usr/local/bin/claude /usr/local/bin/claude
 
-# Copy Node.js runtime (needed to run the CLI)
-COPY --from=node /usr/local/bin/node /usr/local/bin/node
-
-# Ensure proper ownership for nonroot user
 USER root
-RUN chown -R 65532:65532 /usr/local/bin/claude /usr/local/lib/node_modules/@anthropic-ai/claude-code /usr/local/bin/node
+RUN chown 65532:65532 /usr/local/bin/claude
 
-# Switch back to nonroot user
 USER 65532:65532
+
+# Verify the binary runs in the final image (same user and PATH as runtime)
+RUN claude --version
 
 # The entrypoint remains the agent-harness binary
 # The agent-harness will call the claude CLI as needed
