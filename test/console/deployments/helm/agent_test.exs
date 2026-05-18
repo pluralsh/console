@@ -108,6 +108,22 @@ defmodule Console.Deployments.Helm.AgentTest do
 
       Process.exit(pid, :kill)
     end
+
+    @tag :skip
+    test  "it can handle authenticated oci registries" do
+      repo = "oci://prodcussrehelmacr.azurecr.io/helm"
+      insert(:helm_repository,
+        url: repo,
+        auth: %{basic: %{username: "plural-pull", password: System.get_env("LCE_OCI_PASSWORD")}}
+      )
+
+      {:ok, pid} = Agent.start(repo) |> handle()
+
+      {:ok, f, _, _} = Agent.fetch(pid, "lce-cvcloud-store", "1.0.582849")
+
+      files = stream_and_untar(f)
+      assert files["Chart.yaml"]
+    end
   end
 
   defp stream_and_untar(f) do
