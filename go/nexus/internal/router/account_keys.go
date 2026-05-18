@@ -11,20 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// openAIAuthConfigured reports whether Console sent enough OpenAI config for Nexus to obtain a credential
-// (static apiKey or enabled tokenExchange with all required fields).
-func openAIAuthConfigured(cfg *pb.OpenAiConfig) bool {
-	if cfg == nil {
-		return false
-	}
-	tx := cfg.GetTokenExchange()
-	if tx != nil && tx.GetEnabled() &&
-		tx.GetTokenUrl() != "" && tx.GetClientId() != "" && tx.GetClientSecret() != "" {
-		return true
-	}
-	return cfg.GetApiKey() != ""
-}
-
 // GetKeysForProvider returns the API keys for a specific provider
 func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.ModelProvider) ([]schemas.Key, error) {
 	aiConfig, err := in.consoleClient.GetAiConfig(ctx)
@@ -84,7 +70,8 @@ func (in *Account) handleOpenAIKeys(ctx context.Context, config *pb.OpenAiConfig
 }
 
 // openAIAPIKey returns the bearer credential for OpenAI: either a cached OAuth2 client-credentials
-// token (when tokenExchange is enabled in the Console gRPC schema) or the static apiKey.
+// token (when tokenExchange is enabled in the Console gRPC schema), the static apiKey, or empty when
+// requests are authenticated by an upstream internal proxy (e.g. Plural Cloud) instead.
 func (in *Account) openAIAPIKey(ctx context.Context, config *pb.OpenAiConfig) (string, error) {
 	tx := config.GetTokenExchange()
 	if tx != nil && tx.GetEnabled() {
@@ -96,10 +83,7 @@ func (in *Account) openAIAPIKey(ctx context.Context, config *pb.OpenAiConfig) (s
 		}
 		return in.tokenCache.AccessToken(ctx, tokenURL, clientID, clientSecret)
 	}
-	if k := config.GetApiKey(); k != "" {
-		return k, nil
-	}
-	return "", fmt.Errorf("openai not configured: set apiKey or enable tokenExchange with tokenUrl, clientId, and clientSecret")
+	return config.GetApiKey(), nil
 }
 
 func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Key, error) {

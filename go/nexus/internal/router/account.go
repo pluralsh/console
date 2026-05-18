@@ -89,8 +89,7 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 
 	var providers []schemas.ModelProvider
 
-	// Check each provider and add if configured (OpenAI may authenticate via static apiKey or OAuth token exchange).
-	if openAIAuthConfigured(aiConfig.GetOpenai()) {
+	if cfg := aiConfig.GetOpenai(); cfg != nil {
 		providers = append(providers, schemas.OpenAI)
 	}
 
