@@ -908,6 +908,18 @@ query WorkbenchJobActivities($id: ID!) {
     workbench {
       id
     }
+    referencedJob {
+      id
+      prompt
+      status
+      workbench {
+        id
+      }
+      evalResult {
+        id
+        grade
+      }
+    }
     activities(first: 100) {
       edges {
         node {

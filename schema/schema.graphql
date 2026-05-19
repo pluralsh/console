@@ -3156,6 +3156,9 @@ type WorkbenchJob {
   "the issue this run was spawned from"
   issue: Issue
 
+  "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
+  referencedJob: WorkbenchJob
+
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
   metricsTool(

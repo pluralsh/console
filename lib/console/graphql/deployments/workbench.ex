@@ -426,8 +426,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
 
-    field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"
-    field :issue,        :issue, resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :alert,           :alert,        resolve: dataloader(Deployments), description: "the alert this run was spawned from"
+    field :issue,           :issue,        resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
       resolve &Deployments.list_workbench_job_activities/3
