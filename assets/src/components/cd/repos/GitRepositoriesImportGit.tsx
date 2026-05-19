@@ -23,7 +23,6 @@ import {
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
@@ -63,7 +62,7 @@ export function ImportGitModal({
 }) {
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState('')
-  const [requireAuth, setRequireAuth] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const authMethod = getAuthMethodFromGitUrl(gitUrl)
   const [privateKey, setPrivateKey] = useState<GitAttributes['privateKey']>('')
   const [passphrase, setPassphrase] = useState<GitAttributes['passphrase']>('')
@@ -76,7 +75,7 @@ export function ImportGitModal({
       attributes: {
         url: gitUrl,
         recurseSubmodules,
-        ...(requireAuth
+        ...(showAdvanced
           ? authMethod === AuthMethod.Ssh
             ? { privateKey, passphrase }
             : { username, password }
@@ -94,7 +93,7 @@ export function ImportGitModal({
 
   const disabled =
     !gitUrl ||
-    (requireAuth
+    (showAdvanced
       ? authMethod === AuthMethod.Ssh
         ? !privateKey
         : !username && !password
@@ -145,11 +144,11 @@ export function ImportGitModal({
           </Button>
           <div css={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
             <Switch
-              checked={requireAuth}
-              onChange={(val) => setRequireAuth(val)}
+              checked={showAdvanced}
+              onChange={(val) => setShowAdvanced(val)}
               css={{ width: 'fit-content' }}
             >
-              Requires authorization
+              Advanced configuration
             </Switch>
           </div>
         </>
@@ -175,38 +174,30 @@ export function ImportGitModal({
             titleContent={<GitHubLogoIcon />}
           />
         </div>
-        {requireAuth && (
-          <GitAuthFields
-            {...{
-              authMethod,
-              theme,
-              privateKey,
-              setPrivateKey,
-              passphrase,
-              setPassphrase,
-              username,
-              setUsername,
-              password,
-              setPassword,
-            }}
-          />
-        )}
-        <SimpleAccordion
-          label="Advanced configuration"
-          accordionStyles={{
-            border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.borderRadiuses.medium,
-          }}
-        >
-          <div css={{ padding: theme.spacing.medium }}>
+        {showAdvanced && (
+          <>
+            <GitAuthFields
+              {...{
+                authMethod,
+                theme,
+                privateKey,
+                setPrivateKey,
+                passphrase,
+                setPassphrase,
+                username,
+                setUsername,
+                password,
+                setPassword,
+              }}
+            />
             <Switch
               checked={recurseSubmodules}
               onChange={setRecurseSubmodules}
             >
               Recurse submodules
             </Switch>
-          </div>
-        </SimpleAccordion>
+          </>
+        )}
         {error && (
           <GqlError
             header="Problem importing repository"

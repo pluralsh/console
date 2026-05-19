@@ -16,7 +16,6 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { GqlError } from 'components/utils/Alert'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 import ModalAlt from '../ModalAlt'
 
@@ -60,7 +59,7 @@ export function ModalForm({
 }) {
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState(repo.url)
-  const [requireAuth, setRequireAuth] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const authMethod = getAuthMethodFromGitUrl(gitUrl)
   const [privateKey, setPrivateKey] = useState<GitAttributes['privateKey']>('')
   const [passphrase, setPassphrase] = useState<GitAttributes['passphrase']>('')
@@ -76,7 +75,7 @@ export function ModalForm({
       attributes: {
         url: gitUrl,
         recurseSubmodules,
-        ...(requireAuth
+        ...(showAdvanced
           ? authMethod === AuthMethod.Ssh
             ? { privateKey, passphrase, username: null, password: null }
             : { username, password, privateKey: null, passphrase: null }
@@ -94,7 +93,7 @@ export function ModalForm({
 
   const disabled =
     !gitUrl ||
-    (requireAuth
+    (showAdvanced
       ? authMethod === AuthMethod.Ssh
         ? !privateKey
         : !username && !password
@@ -143,11 +142,11 @@ export function ModalForm({
             Cancel
           </Button>
           <Switch
-            checked={requireAuth}
-            onChange={(val) => setRequireAuth(val)}
+            checked={showAdvanced}
+            onChange={(val) => setShowAdvanced(val)}
             css={{ flexGrow: 1 }}
           >
-            Modify authorization info
+            Advanced configuration
           </Switch>
         </>
       }
@@ -171,38 +170,30 @@ export function ModalForm({
           />
         </FormField>
       </div>
-      {requireAuth && (
-        <GitAuthFields
-          {...{
-            authMethod,
-            theme,
-            privateKey,
-            setPrivateKey,
-            passphrase,
-            setPassphrase,
-            username,
-            setUsername,
-            password,
-            setPassword,
-          }}
-        />
-      )}
-      <SimpleAccordion
-        label="Advanced configuration"
-        accordionStyles={{
-          border: `1px solid ${theme.colors.border}`,
-          borderRadius: theme.borderRadiuses.medium,
-        }}
-      >
-        <div css={{ padding: theme.spacing.medium }}>
+      {showAdvanced && (
+        <>
+          <GitAuthFields
+            {...{
+              authMethod,
+              theme,
+              privateKey,
+              setPrivateKey,
+              passphrase,
+              setPassphrase,
+              username,
+              setUsername,
+              password,
+              setPassword,
+            }}
+          />
           <Switch
             checked={recurseSubmodules}
             onChange={setRecurseSubmodules}
           >
             Recurse submodules
           </Switch>
-        </div>
-      </SimpleAccordion>
+        </>
+      )}
       {error && (
         <GqlError
           header="Problem updating repository"
