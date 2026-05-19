@@ -2,13 +2,40 @@ defmodule Console.AI.Tools.Workbench.SkillUpdateTest do
   use Console.DataCase, async: false
   use Mimic
 
+  alias Console.AI.Tool
   alias Console.AI.Tools.Workbench.SkillUpdate
   alias Console.AI.Tools.Pr
   alias Console.AI.Workbench.Skills
   alias Console.Schema.PullRequest
 
+  @valid_args %{
+    "name" => "my-skill",
+    "previous" => "old",
+    "replacement" => "new",
+    "branch_name" => "skill-update",
+    "pr_title" => "update skill",
+    "pr_description" => "skill pr body",
+    "commit_message" => "update my-skill"
+  }
+
+  describe "changeset/2" do
+    test "allows commit_message to be omitted for plural-backed updates" do
+      assert {:ok, %SkillUpdate{commit_message: nil}} =
+               Tool.validate(%SkillUpdate{}, %{
+                 "name" => "my-skill",
+                 "previous" => "old",
+                 "replacement" => "new"
+               })
+    end
+
+    test "casts commit_message when provided for git-backed updates" do
+      assert {:ok, %SkillUpdate{commit_message: "update my-skill"}} =
+               Tool.validate(%SkillUpdate{}, @valid_args)
+    end
+  end
+
   describe "implement/1" do
-    test "git_update creates a pull request via Pr when the skill is git-backed" do
+    test "git_update validates SkillUpdate then creates a pull request via Pr when the skill is git-backed" do
       user = insert(:user)
       repo = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       workbench = insert(:workbench, repository: repo)
@@ -44,19 +71,20 @@ defmodule Console.AI.Tools.Workbench.SkillUpdateTest do
         {:ok, pr_attrs}
       end)
 
-      model = %SkillUpdate{
-        job: job,
-        name: "my-skill",
-        previous: "old",
-        replacement: "new",
-        branch_name: "skill-update",
-        pr_title: "update skill",
-        pr_description: "skill pr body",
-        commit_message: "update my-skill"
-      }
+      impl = %SkillUpdate{job: job}
+
+      assert {:ok, %SkillUpdate{} = parsed} = Tool.validate(impl, @valid_args)
+      assert parsed.name == "my-skill"
+      assert parsed.previous == "old"
+      assert parsed.replacement == "new"
+      assert parsed.branch_name == "skill-update"
+      assert parsed.pr_title == "update skill"
+      assert parsed.pr_description == "skill pr body"
+      assert parsed.commit_message == "update my-skill"
+      assert parsed.job.id == job.id
 
       assert {:ok, %SkillUpdate.Result{result: %PullRequest{} = pr}} =
-               SkillUpdate.implement(model)
+               SkillUpdate.implement(parsed)
 
       assert pr.url == pr_attrs.url
       assert pr.title == pr_attrs.title
