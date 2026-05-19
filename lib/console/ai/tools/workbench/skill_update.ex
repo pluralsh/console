@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.SkillUpdate do
   use Console.AI.Tools.Workbench.Base
   alias Console.Schema.{WorkbenchSkill, WorkbenchJob, Workbench, PullRequest}
+  alias Console.AI.Tool
   alias Console.AI.Tools.Pr
   alias Console.AI.Workbench.Skills
   alias Console.AI.File.Editor
@@ -54,14 +55,15 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
 
   defp git_update(%__MODULE__{job: job, name: name, previous: previous, replacement: replacement} = mod)  do
     with {:ok, {repo, branch, path}} <- Skills.skill_file(name, job.workbench),
-         {:ok, attrs} <- Pr.implement(%Pr{
+         {:ok, tool} <-  Tool.validate(Pr, %{
                             repo_url: repo.url,
                             branch_name: branch,
                             commit_message: mod.commit_message,
                             pr_title: mod.pr_title,
                             pr_description: mod.pr_description,
                             file_updates: [%{file_name: path, previous: previous, replacement: replacement}]
-                          }) do
+                          }),
+         {:ok, attrs} <- Pr.implement(tool) do
       ctx = Console.AI.Tool.context()
       %PullRequest{author_id: ctx.user.id}
       |> PullRequest.changeset(Map.merge(context_attrs(ctx), attrs))
