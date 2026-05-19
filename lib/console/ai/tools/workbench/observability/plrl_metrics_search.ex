@@ -10,7 +10,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.MetricsSearch do
 
   @valid ~w(query limit)a
 
-  def json_schema(), do: Console.priv_file!("tools/workbench/observability/metrics_search.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/observability/metric_search.json") |> Jason.decode!()
+
+  def json_schema(), do: @json_schema
   def name(), do: "plrl_metrics_search"
   def description(), do: "Search for metric names in the (prometheus-compatible) Plural observability connection"
 

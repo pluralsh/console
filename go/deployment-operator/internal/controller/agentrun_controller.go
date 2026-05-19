@@ -38,10 +38,11 @@ const (
 	EnvDeployToken       = "PLRL_DEPLOY_TOKEN"
 	EnvAgentRunID        = "PLRL_AGENT_RUN_ID"
 
-	EnvOpenCodeProvider = "PLRL_OPENCODE_PROVIDER"
-	EnvOpenCodeEndpoint = "PLRL_OPENCODE_ENDPOINT"
-	EnvOpenCodeModel    = "PLRL_OPENCODE_MODEL"
-	EnvOpenCodeToken    = "PLRL_OPENCODE_TOKEN"
+	EnvOpenCodeProvider         = "PLRL_OPENCODE_PROVIDER"
+	EnvOpenCodeEndpoint         = "PLRL_OPENCODE_ENDPOINT"
+	EnvOpenCodeModel            = "PLRL_OPENCODE_MODEL"
+	EnvOpenCodeToken            = "PLRL_OPENCODE_TOKEN"
+	EnvOpenCodeOpenAICompatible = "PLRL_OPENCODE_OPENAI_COMPATIBLE"
 
 	EnvClaudeModel              = "PLRL_CLAUDE_MODEL"
 	EnvClaudeToken              = "PLRL_CLAUDE_TOKEN"
@@ -361,7 +362,7 @@ func (r *AgentRunReconciler) reconcileBootstrapConfigMap(ctx context.Context, ru
 func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) (*corev1.Secret, error) {
 	logger := log.FromContext(ctx)
 
-	config, err := r.getAgentRuntimeConfig(ctx, run.Namespace, runtime.Spec.Config)
+	config, err := r.getAgentRuntimeConfig(ctx, run.Namespace, runtime.Spec.Config, runtime.IsAiProxyEnabled())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get agent runtime config: %w", err)
 	}
@@ -422,7 +423,7 @@ func (r *AgentRunReconciler) getExaMcpConfig(ctx context.Context, namespace stri
 	})
 }
 
-func (r *AgentRunReconciler) getAgentRuntimeConfig(ctx context.Context, namespace string, config *v1alpha1.AgentRuntimeConfig) (*v1alpha1.AgentRuntimeConfigRaw, error) {
+func (r *AgentRunReconciler) getAgentRuntimeConfig(ctx context.Context, namespace string, config *v1alpha1.AgentRuntimeConfig, aiProxy bool) (*v1alpha1.AgentRuntimeConfigRaw, error) {
 	if config == nil {
 		return nil, nil
 	}
@@ -431,7 +432,7 @@ func (r *AgentRunReconciler) getAgentRuntimeConfig(ctx context.Context, namespac
 		secret := &corev1.Secret{}
 		err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: selector.Name}, secret)
 		return secret, err
-	})
+	}, aiProxy)
 }
 
 // resolveSigningKey fetches the signing key value from the secret referenced in runtime.Spec.Git.SigningKeyRef.
@@ -487,6 +488,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		result[EnvOpenCodeEndpoint] = lo.FromPtr(config.OpenCode.Endpoint)
 		result[EnvOpenCodeModel] = lo.FromPtr(config.OpenCode.Model)
 		result[EnvOpenCodeToken] = config.OpenCode.Token
+		if config.OpenCode.OpenAICompatible {
+			result[EnvOpenCodeOpenAICompatible] = "true"
+		}
 		if config.OpenCode.Timeout != nil {
 			result[EnvExecTimeout] = config.OpenCode.Timeout.Duration.String()
 		}

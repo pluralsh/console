@@ -370,7 +370,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert Enum.find(paths, &(&1["path"] == "/ext/ai")) == %{
                "path" => "/ext/ai",
                "pathType" => "Prefix",
-               "backend" => %{"serviceName" => "console", "servicePort" => "nexus-http"}
+               "backend" => %{"serviceName" => "console-nexus", "servicePort" => "http"}
              }
 
       assert Enum.find(paths, &(&1["path"] == "/")) == %{

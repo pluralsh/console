@@ -31,10 +31,14 @@ type AgentRunSpec struct {
 	FlowID *string `json:"flowId,omitempty"`
 
 	// Language is the programming language used in the agent run.
+	//
+	// Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
 	// +kubebuilder:validation:Optional
 	Language *console.AgentRunLanguage `json:"language,omitempty"`
 
 	// LanguageVersion is the version of the language to use, if you wish to specify.
+	//
+	// Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
 	// +kubebuilder:validation:Optional
 	LanguageVersion *string `json:"languageVersion,omitempty"`
 }

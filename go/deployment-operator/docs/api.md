@@ -167,8 +167,8 @@ _Appears in:_
 | `repository` _string_ | Repository is the git repository the agent will work with |  | Required: \{\} <br /> |
 | `mode` _[AgentRunMode](#agentrunmode)_ | Mode defines how the agent should run (ANALYZE, WRITE) |  | Required: \{\} <br /> |
 | `flowId` _string_ | FlowID is the flow this agent run is associated with (optional) |  | Optional: \{\} <br /> |
-| `language` _[AgentRunLanguage](#agentrunlanguage)_ | Language is the programming language used in the agent run. |  | Optional: \{\} <br /> |
-| `languageVersion` _string_ | LanguageVersion is the version of the language to use, if you wish to specify. |  | Optional: \{\} <br /> |
+| `language` _[AgentRunLanguage](#agentrunlanguage)_ | Language is the programming language used in the agent run.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |
+| `languageVersion` _string_ | LanguageVersion is the version of the language to use, if you wish to specify.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |
 
 
 
@@ -264,7 +264,7 @@ _Appears in:_
 | `bindings` _[AgentRuntimeBindings](#agentruntimebindings)_ | Bindings define the creation permissions for this agent runtime. |  | Optional: \{\} <br /> |
 | `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template defines the pod template for this agent runtime. |  |  |
 | `config` _[AgentRuntimeConfig](#agentruntimeconfig)_ | Config contains typed configuration depending on the chosen runtime type. |  | Optional: \{\} <br /> |
-| `aiProxy` _boolean_ | AiProxy specifies whether the agent runtime should be proxied through the AI proxy. |  |  |
+| `aiProxy` _boolean_ | AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,<br />so provider API keys in spec.config are optional.<br />Set the model on the runtime-specific config block (for example spec.config.codex.model).<br />The proxy expects models in provider/name format (for example openai/gpt-5.4,<br />anthropic/claude-sonnet-4-5, vertex/gemini-2.5-pro). Values that already include a "/"<br />are passed through unchanged.<br />When only a bare model id is given, the harness may prefix it by runtime type:<br />  - CLAUDE: anthropic/\{model\} (for example claude-sonnet-4-5 -> anthropic/claude-sonnet-4-5)<br />  - CODEX, OPENCODE: openai/\{model\} (for example gpt-5.4 -> openai/gpt-5.4)<br />  - GEMINI: vertex/\{model\}<br />  - CUSTOM: no automatic prefix; use provider/name explicitly |  |  |
 | `dind` _boolean_ | Dind enables Docker-in-Docker for this agent runtime.<br />When true, the runtime will be configured to run with DinD support. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this runtime. |  | Optional: \{\} <br /> |
 | `browser` _[BrowserConfig](#browserconfig)_ | Browser configuration augments agent runtime with a headless browser.<br />When provided, the runtime will be configured to run with a headless browser available<br />for the agent to use. |  | Optional: \{\} <br /> |
@@ -389,7 +389,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef Reference to a Kubernetes Secret containing the Claude API key. |  |  |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef references a Secret containing the Claude API key.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model Name of the model to use. |  |  |
 | `endpoint` _string_ | Endpoint is the base URL for the Claude API (supports Bedrock/Anthropic-compatible endpoints). |  | Optional: \{\} <br /> |
 | `extraArgs` _string array_ | ExtraArgs CLI args for advanced flags not modeled here |  |  |
@@ -494,7 +494,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef Reference to a Kubernetes Secret containing the Codex API key. |  |  |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef references a Secret containing the Codex API key.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model to use. |  |  |
 | `endpoint` _string_ | Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints). |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single codex run invocation. |  | Optional: \{\} <br /> |
@@ -655,7 +655,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | APIKeySecretRef is a reference to a Kubernetes Secret containing the Gemini API key. |  |  |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | APIKeySecretRef references a Secret containing the Gemini API key.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the name of the model to use.<br />NOTE: gemini flash lite models and are not fit for the write (agent) mode, and<br />should only be used for analysis. |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single gemini run invocation. |  | Optional: \{\} <br /> |
 | `inactivityTimeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | InactivityTimeout is the timeout for inactivity during a gemini run. |  | Optional: \{\} <br /> |
@@ -850,10 +850,11 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `provider` _string_ | Provider is the OpenCode provider to use. |  | Enum: [plural openai] <br />Optional: \{\} <br /> |
-| `endpoint` _string_ | Endpoint API endpoint for the OpenCode service.<br />Endpoint for the OpenCode service (can be any OpenAI-compatible API endpoint). |  | Optional: \{\} <br /> |
+| `openaiCompatible` _[OpenCodeOpenAICompatibleConfig](#opencodeopenaicompatibleconfig)_ | OpenAICompatible configures a custom OpenAI-compatible provider block in opencode.json.<br />When set (and aiProxy is false), provider and endpoint on this struct are ignored in favor<br />of the nested openaiCompatible fields. |  | Optional: \{\} <br /> |
+| `provider` _string_ | Provider is the OpenCode provider id from https://models.dev (for example openai, anthropic,<br />amazon-bedrock, google-vertex, google). Optional.<br />When the parent AgentRuntime has spec.aiProxy enabled, the harness ignores this field and<br />autowires provider "plural", routing requests through the Console AI proxy at /ext/ai/v1<br />using the deploy token. Set spec.config.opencode.model to a bare model id; the harness<br />prefixes it for proxy routing based on runtime type (for example gpt-5.4 -> openai/gpt-5.4).<br />When aiProxy is false, this selects the native OpenCode provider block; credentials come from<br />tokenSecretRef or the provider's usual environment variables. Defaults to plural when omitted.<br />Use exact models.dev slugs (for example amazon-bedrock, google-vertex, google). |  | MaxLength: 128 <br />Optional: \{\} <br /> |
+| `endpoint` _string_ | Endpoint optionally overrides the provider baseURL in opencode.json.<br />When omitted, the harness omits baseURL so OpenCode uses the models.dev default for the provider. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model to use. |  | Optional: \{\} <br /> |
-| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to a Kubernetes Secret containing the API token for OpenCode. |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef references a Secret containing the API token for OpenCode.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `extraArgs` _string array_ | ExtraArgs args for advanced or experimental CLI flags.<br />Deprecated: It is being ignored by the agent harness. |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single opencode run invocation. |  | Optional: \{\} <br /> |
 
@@ -875,11 +876,35 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `provider` _string_ | Provider is the OpenCode provider to use. |  |  |
+| `openaiCompatible` _boolean_ | OpenAICompatible is true when spec.config.opencode.openaiCompatible was set on the AgentRuntime. |  |  |
+| `provider` _string_ | Provider is the OpenCode provider id from https://models.dev. |  |  |
 | `endpoint` _string_ | Endpoint API endpoint for the OpenCode service. |  |  |
 | `model` _string_ | Model is the LLM model to use. |  |  |
-| `tokenSecretRef` _string_ | Token is the raw API token for OpenCode. |  |  |
+| `token` _string_ | Token is the raw API token for OpenCode. |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single opencode run invocation. |  | Optional: \{\} <br /> |
+
+
+#### OpenCodeOpenAICompatibleConfig
+
+
+
+OpenCodeOpenAICompatibleConfig configures a custom OpenAI-compatible API provider in opencode.json.
+The harness writes a provider block with npm @ai-sdk/openai-compatible. Use this for endpoints
+that are not listed on https://models.dev (for example LiteLLM, vLLM, or a private gateway).
+
+When set and the parent AgentRuntime has spec.aiProxy false, spec.config.opencode.provider and
+spec.config.opencode.endpoint are ignored in favor of this block.
+
+
+
+_Appears in:_
+- [OpenCodeConfig](#opencodeconfig)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `endpoint` _string_ | Endpoint is the OpenAI-compatible API base URL (for example https://litellm.example/v1). |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `model` _string_ | Model is the model id exposed by that endpoint. |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef references a Secret containing the API key for the endpoint. |  | Optional: \{\} <br /> |
 
 
 #### PipelineGate

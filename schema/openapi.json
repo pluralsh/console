@@ -2496,6 +2496,20 @@
         },
         "type": "object"
       },
+      "SentinelRunOverridesInput": {
+        "title": "SentinelRunOverridesInput",
+        "description": "Optional overrides applied when triggering a sentinel run",
+        "properties": {
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Tags to merge into integration test checks for this run",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "Service": {
         "title": "Service",
         "description": "A service deployment reference deployed from a git repo into a cluster",
@@ -3769,6 +3783,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SentinelRunOverridesInput"
+              }
+            }
+          },
+          "required": true
+        },
         "x-required-scopes": [
           "ai.write"
         ]

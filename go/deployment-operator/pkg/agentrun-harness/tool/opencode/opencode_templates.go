@@ -27,7 +27,11 @@ type ConfigTemplateInput struct {
 	// Provider is the AI provider to use.
 	Provider Provider
 
-	// Endpoint is the AI provider API endpoint.
+	// OpenAICompatible is true when using a custom OpenAI-compatible provider block (npm @ai-sdk/openai-compatible).
+	OpenAICompatible bool
+
+	// Endpoint is an optional override for the provider baseURL (for example a custom OpenAI-compatible URL).
+	// When empty, baseURL is omitted so OpenCode uses the models.dev default for the provider.
 	Endpoint string
 
 	// Model is the AI model to use.
@@ -38,6 +42,9 @@ type ConfigTemplateInput struct {
 
 	// Mode is the agent run mode.
 	Mode console.AgentRunMode
+
+	// DindEnabled is true when the agent run pod has Docker-in-Docker available.
+	DindEnabled bool
 
 	// ExaMcpConfigs holds additional external MCP server configurations.
 	ExaMcpConfigs []agentrunv1.ExaMcpServerConfig

@@ -9,10 +9,11 @@ defmodule Console.AI.Nexus do
   Similar to the Azure provider, this wraps the OpenAI provider with the Nexus URL
   and authentication token configured.
 
-  When deployed as a sidecar, Nexus runs at `http://localhost:8080/ext/ai` by default.
+  When deployed in-cluster, Nexus is reachable at the ingress path `/ext/ai` by default.
 
   Configuration is read from DeploymentSettings.ai.nexus:
-  - `url`: The URL of the Nexus proxy (default: "http://localhost:8080/ext/ai")
+  - `url`: The Nexus extension mount without `/v1` (default: in-cluster via ingress at `/ext/ai`).
+    OpenAI-compatible clients receive `{url}/v1` automatically.
   - `access_token`: The Bearer token for authentication
   - `model`: The model to use for completions
   - `tool_model`: The model to use for tool calls
@@ -41,7 +42,7 @@ defmodule Console.AI.Nexus do
   Creates a new Nexus client from DeploymentSettings nexus config.
 
   Accepts either a nexus settings map from DeploymentSettings or a custom options map.
-  If no URL is provided, defaults to the standard sidecar location.
+  If no URL is provided, defaults to the standard in-cluster Nexus location.
   """
   def new(opts \\ %{}) do
     %__MODULE__{
@@ -67,7 +68,7 @@ defmodule Console.AI.Nexus do
   @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | Console.error
   def embeddings(%__MODULE__{url: url, token: token, embedding_model: model}, text) when is_binary(url) do
     OpenAI.new(%{
-      base_url: Path.join(url, "/v1"),
+      base_url: openai_base_url(url),
       access_token: token,
       embedding_model: model || @default_embedding_model
     })
@@ -124,7 +125,7 @@ defmodule Console.AI.Nexus do
   def proxy(%__MODULE__{url: url, token: token}) when is_binary(url) do
     {:ok, %Console.AI.Proxy{
       backend: :openai,
-      url: Path.join(url, "/v1"),
+      url: openai_base_url(url),
       token: token,
       params: %{}
     }}
@@ -134,9 +135,17 @@ defmodule Console.AI.Nexus do
 
   defp openai_client(%__MODULE__{url: url, token: token}, model) do
     OpenAI.new(%{
-      base_url: Path.join(url, "/v1"),
+      base_url: openai_base_url(url),
       access_token: token,
       model: model || OpenAI.defaults()[:model]
     })
+  end
+
+  # Nexus is mounted at /ext/ai (or similar); OpenAI clients expect a /v1 API base.
+  defp openai_base_url(url) when is_binary(url) do
+    url
+    |> String.trim_trailing("/")
+    |> String.trim_trailing("/v1")
+    |> Path.join("/v1")
   end
 end

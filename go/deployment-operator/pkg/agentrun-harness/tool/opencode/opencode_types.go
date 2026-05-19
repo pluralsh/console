@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	console "github.com/pluralsh/console/go/client"
+	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/samber/lo"
 
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -15,34 +16,38 @@ const (
 	defaultWriteAgent    = "autonomous"
 )
 
+// Provider is an OpenCode provider id (https://models.dev).
 type Provider string
 
-func (in Provider) Endpoint() string {
-	if in == ProviderOpenAI {
-		return "https://api.openai.com/v1"
-	}
-
-	return ""
-}
-
 const (
+	// ProviderPlural routes requests through the Console AI proxy (/ext/ai/v1).
 	ProviderPlural Provider = "plural"
 	ProviderOpenAI Provider = "openai"
+
+	// Common models.dev provider ids for direct (non-proxy) usage.
+	ProviderAnthropic     Provider = "anthropic"
+	ProviderAmazonBedrock Provider = "amazon-bedrock"
+	ProviderGoogleVertex  Provider = "google-vertex"
+	ProviderGoogle        Provider = "google"
+
+	// ProviderOpenAICompatible is the fixed provider key for custom OpenAI-compatible endpoints.
+	ProviderOpenAICompatible Provider = "openai-compatible"
 )
 
+// EnsureProvider selects the OpenCode provider block written to opencode.json.
+// defaultProvider must be a models.dev provider slug (for example openai, anthropic, amazon-bedrock).
+// When aiProxy is enabled, the harness always uses ProviderPlural (Console /ext/ai/v1);
+// spec.config.opencode.provider is ignored in that mode.
 func EnsureProvider(defaultProvider string, proxyEnabled bool) Provider {
 	if proxyEnabled {
 		return ProviderPlural
 	}
 
-	switch defaultProvider {
-	case string(ProviderPlural):
-		return ProviderPlural
-	case string(ProviderOpenAI):
-		return ProviderOpenAI
-	default:
+	if defaultProvider == "" {
 		return ProviderPlural
 	}
+
+	return Provider(defaultProvider)
 }
 
 type Model string
@@ -57,10 +62,40 @@ const (
 
 func EnsureModel(model string) Model {
 	if len(model) == 0 {
-		return ModelGPT52
+		return ModelGPT54
 	}
 
 	return Model(model)
+}
+
+type opencodeSettings struct {
+	provider         Provider
+	model            string
+	openaiCompatible bool
+}
+
+// resolveOpenCodeSettings selects provider/model wiring for opencode.json and CLI args.
+// The aiProxy branch is kept separate so proxy behavior stays unchanged when openaiCompatible is added.
+func resolveOpenCodeSettings(provider, model string, openaiCompatible, proxyEnabled bool) opencodeSettings {
+	if proxyEnabled {
+		return opencodeSettings{
+			provider: EnsureProvider(provider, true),
+			model:    proxymodel.ProxyModel(console.AgentRuntimeTypeOpencode, string(EnsureModel(model))),
+		}
+	}
+
+	if openaiCompatible {
+		return opencodeSettings{
+			provider:         ProviderOpenAICompatible,
+			model:            string(EnsureModel(model)),
+			openaiCompatible: true,
+		}
+	}
+
+	return opencodeSettings{
+		provider: EnsureProvider(provider, false),
+		model:    string(EnsureModel(model)),
+	}
 }
 
 // Opencode implements toolv1.Tool interface.
@@ -72,6 +107,9 @@ type Opencode struct {
 
 	// provider is the named Opencode provider.
 	provider Provider
+
+	// openaiCompatible selects the @ai-sdk/openai-compatible provider block in opencode.json.
+	openaiCompatible bool
 
 	// executable is the opencode executable used to call CLI.
 	executable exec.Executable

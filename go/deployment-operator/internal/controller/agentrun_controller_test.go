@@ -693,6 +693,30 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			Expect(data[EnvOpenCodeToken]).Should(Equal("openai-token"))
 		})
 
+		It("should include OpenCode openaiCompatible flag in secret data", func() {
+			reconciler := &AgentRunReconciler{
+				ConsoleURL:  "https://console.test.com",
+				DeployToken: "test-token-123",
+			}
+			run := &v1alpha1.AgentRun{}
+			run.Status.ID = lo.ToPtr("run-123")
+
+			config := &v1alpha1.AgentRuntimeConfigRaw{
+				OpenCode: &v1alpha1.OpenCodeConfigRaw{
+					Provider:         new("openai-compatible"),
+					Endpoint:         new("https://litellm.example/v1"),
+					Model:            lo.ToPtr("gpt-4"),
+					Token:            "litellm-token",
+					OpenAICompatible: true,
+				},
+			}
+
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeOpencode, nil, nil)
+			Expect(data[EnvOpenCodeOpenAICompatible]).Should(Equal("true"))
+			Expect(data[EnvOpenCodeProvider]).Should(Equal("openai-compatible"))
+			Expect(data[EnvOpenCodeEndpoint]).Should(Equal("https://litellm.example/v1"))
+		})
+
 		It("should include Gemini config in secret data", func() {
 			reconciler := &AgentRunReconciler{
 				ConsoleURL:  "https://console.test.com",

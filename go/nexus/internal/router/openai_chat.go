@@ -16,6 +16,7 @@ func (in *OpenAIRouter) newChatCompletionsRoute() RouteConfig {
 		RequestConverter:       in.chatCompletionsRequestConverter,
 		ChatResponseConverter:  in.chatCompletionsResponseConverter,
 		ErrorConverter:         in.errorConverter,
+		PreCallback:            in.openAIRoutePreCallback(string(RouteChatCompletions)),
 		StreamConfig: &StreamConfig{
 			ChatStreamResponseConverter: in.chatCompletionsStreamConverter,
 			ErrorConverter:              in.errorConverter,
@@ -49,23 +50,19 @@ func (in *OpenAIRouter) chatCompletionsRequestConverter(ctx *schemas.BifrostCont
 	return &schemas.BifrostRequest{ChatRequest: bifrostReq}, nil
 }
 
-func (in *OpenAIRouter) chatCompletionsResponseConverter(_ *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (interface{}, error) {
-	if resp.ExtraFields.Provider == schemas.OpenAI {
-		if resp.ExtraFields.RawResponse != nil {
-			return resp.ExtraFields.RawResponse, nil
-		}
+func (in *OpenAIRouter) chatCompletionsResponseConverter(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (interface{}, error) {
+	if raw, ok := openaiChatRawResponse(ctx, resp); ok {
+		return raw, nil
 	}
 
 	return resp, nil
 }
 
-func (in *OpenAIRouter) chatCompletionsStreamConverter(_ *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (string, interface{}, error) {
+func (in *OpenAIRouter) chatCompletionsStreamConverter(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (string, interface{}, error) {
 	in.chatCompletionsFixEarlyVertexStreamCompletion(resp)
 
-	if resp.ExtraFields.Provider == schemas.OpenAI {
-		if resp.ExtraFields.RawResponse != nil {
-			return "", resp.ExtraFields.RawResponse, nil
-		}
+	if raw, ok := openaiChatRawResponse(ctx, resp); ok {
+		return "", raw, nil
 	}
 
 	return "", resp, nil

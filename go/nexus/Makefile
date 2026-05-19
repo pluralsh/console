@@ -80,8 +80,8 @@ proto: --tool install-protoc ## generate protobuf code
         --plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
 		--go_out=. \
 		--go-grpc_out=. \
-        --proto_path=proto \
-        proto/*.proto
+        --proto_path=$(ROOT_DIRECTORY)/proto \
+        $(ROOT_DIRECTORY)/proto/console.proto
 
 ##@ Deployment
 

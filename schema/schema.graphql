@@ -1239,7 +1239,7 @@ type RootMutationType {
 
   deleteSentinel(id: ID!): Sentinel
 
-  runSentinel(id: ID, name: String): SentinelRun
+  runSentinel(id: ID, name: String, overrides: SentinelRunOverrides): SentinelRun
 
   createWorkbench(attributes: WorkbenchAttributes): Workbench
 
@@ -4302,6 +4302,11 @@ input SentinelCheckIntegrationTestDefaultAttributes {
   resourceLabels: Json
 }
 
+input SentinelRunOverrides {
+  "the tags to apply to the sentinel run integration test cases"
+  tags: Json
+}
+
 input SentinelRunJobUpdateAttributes {
   "the status of the job"
   status: SentinelRunJobStatus
@@ -5409,10 +5414,10 @@ input AzureOpenaiAttributes {
 }
 
 input BedrockAiAttributes {
-  "the bedrock model id to use"
+  "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases."
   modelId: String
 
-  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
   toolModelId: String
 
   "the openai bedrock access token to use"
@@ -5427,13 +5432,13 @@ input BedrockAiAttributes {
   "the aws secret access key to use (DEPRECATED)"
   awsSecretAccessKey: String
 
-  "the model to use for vector embeddings"
+  "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
 
-  "addditional models to support within the integrated ai proxy"
+  "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
 
-  "mapping from model id to bedrock deployment if those require additional configuration"
+  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
   deployments: Json
 }
 
@@ -5796,10 +5801,10 @@ type AzureOpenaiSettings {
 
 "Settings for usage of AWS Bedrock for LLMs"
 type BedrockAiSettings {
-  "the bedrock model to use (omit for Plural defaults)"
+  "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults."
   modelId: String
 
-  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
   toolModelId: String
 
   "the openai bedrock aws access key id to use (DEPRECATED)"
@@ -5808,13 +5813,13 @@ type BedrockAiSettings {
   "the aws region the model is hosted in"
   region: String
 
-  "the model to use for vector embeddings"
+  "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
 
-  "addditional models to support within the integrated ai proxy"
+  "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
 
-  "mapping from model id to bedrock deployment if those require additional configuration"
+  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
   deployments: Map
 }
 

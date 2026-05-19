@@ -244,7 +244,7 @@ type ConsoleClient interface {
 	DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error)
 	GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error)
 	GetSentinelTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelTiny, error)
-	RunSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*RunSentinel, error)
+	RunSentinel(ctx context.Context, id string, overrides *SentinelRunOverrides, interceptors ...clientv2.RequestInterceptor) (*RunSentinel, error)
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
@@ -55539,8 +55539,8 @@ func (c *Client) GetSentinelTiny(ctx context.Context, id string, interceptors ..
 	return &res, nil
 }
 
-const RunSentinelDocument = `mutation RunSentinel ($id: ID!) {
-	runSentinel(id: $id) {
+const RunSentinelDocument = `mutation RunSentinel ($id: ID!, $overrides: SentinelRunOverrides) {
+	runSentinel(id: $id, overrides: $overrides) {
 		... SentinelRunFragment
 	}
 }
@@ -55694,9 +55694,10 @@ fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelChe
 }
 `
 
-func (c *Client) RunSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*RunSentinel, error) {
+func (c *Client) RunSentinel(ctx context.Context, id string, overrides *SentinelRunOverrides, interceptors ...clientv2.RequestInterceptor) (*RunSentinel, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":        id,
+		"overrides": overrides,
 	}
 
 	var res RunSentinel

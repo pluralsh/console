@@ -109,7 +109,7 @@ defmodule KubernetesScaffolds do
         path: "/ext/ai",
         path_type: "Prefix",
         backend: %{
-          service: %{name: "console", port: %{name: "nexus-http"}}
+          service: %{name: "console-nexus", port: %{name: "http"}}
         }
       },
       %Networking.HTTPIngressPath{

@@ -22,12 +22,12 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
 
   def index(_), do: {:ok, %Index{}}
 
-  def chart(%OCI{client: original} = oci, %Index{}, chart, vsn) do
+  def chart(%OCI{} = oci, %Index{}, chart, vsn) do
     with {:auth, {:ok, %{client: client} = oci}} <- {:auth, OCI.authenticate(oci)},
          chart_client = Client.append_repo(client, chart),
          {:charts, {:ok, oci, %Chart{} = chart}} <- {:charts, get_chart(%{oci | client: chart_client}, chart, vsn)},
          {:pull, {:ok, digest}} <- {:pull, get_digest(chart_client, chart.version)} do
-      {:ok, %{oci | client: original}, {chart.name, digest}, digest}
+      {:ok, %{oci | client: client}, {chart.name, digest}, digest}
     else
       {:auth, {:error, err}} -> {:error, {:auth, "failed to authenticate to oci: #{inspect(err)}"}}
       {:charts, {:error, err}} -> {:error, {:auth, "error fetching chart #{chart}: #{err}"}}

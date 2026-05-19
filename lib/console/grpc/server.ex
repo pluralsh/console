@@ -77,7 +77,8 @@ defmodule Console.GRPC.Server do
       toolModel: openai.tool_model || defaults[:tool_model],
       baseUrl: openai.base_url,
       proxyModels: proxy_models(openai),
-      tokenExchange: to_pb(openai.token_exchange)
+      tokenExchange: to_pb(openai.token_exchange),
+      method: openai_method_to_pb(openai.method)
     }
   end
 
@@ -146,6 +147,12 @@ defmodule Console.GRPC.Server do
   end
 
   defp to_pb(_), do: %Plrl.AiConfig{enabled: false}
+
+  defp openai_method_to_pb(:chat), do: :CHAT
+  defp openai_method_to_pb(:responses), do: :RESPONSES
+  defp openai_method_to_pb(:auto), do: :AUTO
+  defp openai_method_to_pb(nil), do: :AUTO
+  defp openai_method_to_pb(_), do: :AUTO
 
   defp proxy_models(%{proxy_models: [_ | _] = models}), do: models
   defp proxy_models(_), do: []

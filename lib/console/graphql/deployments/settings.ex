@@ -10,6 +10,12 @@ defmodule Console.GraphQl.Deployments.Settings do
   ecto_enum :open_ai_method, DeploymentSettings.OpenAIMethod
   ecto_enum :provider, CloudConnection.Provider
 
+  @bedrock_model_id_doc "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases."
+
+  @bedrock_proxy_models_doc "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
+
+  @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+
   input_object :project_attributes do
     field :name,          non_null(:string)
     field :description,   :string
@@ -166,15 +172,15 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :bedrock_ai_attributes do
-    field :model_id,              :string, description: "the bedrock model id to use"
-    field :tool_model_id,         :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :model_id,              :string, description: @bedrock_model_id_doc
+    field :tool_model_id,         :string, description: "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
     field :access_token,          :string, description: "the openai bedrock access token to use"
     field :region,                :string, description: "the aws region the model is hosted in"
     field :aws_access_key_id,     :string, description: "the aws access key id to use (DEPRECATED)"
     field :aws_secret_access_key, :string, description: "the aws secret access key to use (DEPRECATED)"
-    field :embedding_model,       :string, description: "the model to use for vector embeddings"
-    field :proxy_models,          list_of(:string), description: "addditional models to support within the integrated ai proxy"
-    field :deployments,           :json, description: "mapping from model id to bedrock deployment if those require additional configuration"
+    field :embedding_model,       :string, description: "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
+    field :proxy_models,          list_of(:string), description: @bedrock_proxy_models_doc
+    field :deployments,           :json, description: @bedrock_deployments_doc
   end
 
   input_object :vertex_ai_attributes do
@@ -408,14 +414,14 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
-    field :model_id,        :string, description: "the bedrock model to use (omit for Plural defaults)"
-    field :tool_model_id,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :model_id,        :string, description: @bedrock_model_id_doc <> " Omit for Plural defaults."
+    field :tool_model_id,   :string, description: "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
     field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)",
       resolve: fn b, _, _ -> {:ok, Map.get(b, :aws_access_key_id)} end
     field :region,          :string, description: "the aws region the model is hosted in"
-    field :embedding_model, :string, description: "the model to use for vector embeddings"
-    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
-    field :deployments,     :map, description: "mapping from model id to bedrock deployment if those require additional configuration"
+    field :embedding_model, :string, description: "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
+    field :proxy_models,    list_of(:string), description: @bedrock_proxy_models_doc
+    field :deployments,     :map, description: @bedrock_deployments_doc
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"

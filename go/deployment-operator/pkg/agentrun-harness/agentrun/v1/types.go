@@ -76,11 +76,12 @@ type AgentRuntimeConfig struct {
 }
 
 type OpencodeConfig struct {
-	Provider string        `json:"provider"`
-	Endpoint string        `json:"endpoint"`
-	Model    string        `json:"model,omitempty"`
-	Token    string        `json:"tokenSecretRef"`
-	Timeout  time.Duration `json:"timeout,omitempty"`
+	Provider         string        `json:"provider"`
+	Endpoint         string        `json:"endpoint"`
+	Model            string        `json:"model,omitempty"`
+	Token            string        `json:"token,omitempty"`
+	OpenAICompatible bool          `json:"openaiCompatible,omitempty"`
+	Timeout          time.Duration `json:"timeout,omitempty"`
 }
 
 type ClaudeConfig struct {
@@ -180,11 +181,12 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 		}
 	case console.AgentRuntimeTypeOpencode:
 		config.OpenCode = &OpencodeConfig{
-			Provider: helpers.GetPluralEnv(controller.EnvOpenCodeProvider, ""),
-			Endpoint: helpers.GetPluralEnv(controller.EnvOpenCodeEndpoint, ""),
-			Model:    helpers.GetPluralEnv(controller.EnvOpenCodeModel, ""),
-			Token:    helpers.GetPluralEnv(controller.EnvOpenCodeToken, ""),
-			Timeout:  helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
+			Provider:         helpers.GetPluralEnv(controller.EnvOpenCodeProvider, ""),
+			Endpoint:         helpers.GetPluralEnv(controller.EnvOpenCodeEndpoint, ""),
+			Model:            helpers.GetPluralEnv(controller.EnvOpenCodeModel, ""),
+			Token:            helpers.GetPluralEnv(controller.EnvOpenCodeToken, ""),
+			OpenAICompatible: helpers.GetPluralEnvBool(controller.EnvOpenCodeOpenAICompatible, false),
+			Timeout:          helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
 		}
 	case console.AgentRuntimeTypeGemini:
 		config.Gemini = &GeminiConfig{

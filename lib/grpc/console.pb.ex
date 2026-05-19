@@ -1,3 +1,18 @@
+defmodule Plrl.OpenAiMethod do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "plrl.OpenAiMethod",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :OPEN_AI_METHOD_UNSPECIFIED, 0
+  field :CHAT, 1
+  field :RESPONSES, 2
+  field :AUTO, 3
+end
+
 defmodule Plrl.AiConfigRequest do
   @moduledoc false
 
@@ -49,6 +64,7 @@ defmodule Plrl.OpenAiConfig do
   field :baseUrl, 5, proto3_optional: true, type: :string
   field :proxyModels, 6, repeated: true, type: :string
   field :tokenExchange, 7, proto3_optional: true, type: Plrl.OpenAiTokenExchange
+  field :method, 8, proto3_optional: true, type: Plrl.OpenAiMethod, enum: true
 end
 
 defmodule Plrl.AnthropicConfig do

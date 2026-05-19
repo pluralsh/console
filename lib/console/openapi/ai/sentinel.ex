@@ -109,6 +109,29 @@ defmodule Console.OpenAPI.AI.SentinelCheckResult do
   }
 end
 
+defmodule Console.OpenAPI.AI.SentinelRunOverridesInput do
+  @moduledoc """
+  OpenAPI schema for sentinel run overrides.
+
+  Allows ad-hoc overrides when triggering a sentinel run without modifying
+  the sentinel configuration.
+  """
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "SentinelRunOverridesInput",
+    description: "Optional overrides applied when triggering a sentinel run",
+    properties: %{
+      tags: %{
+        type: :object,
+        description: "Tags to merge into integration test checks for this run",
+        additionalProperties: %{type: :string}
+      }
+    }
+  }
+end
+
 defmodule Console.OpenAPI.AI.SentinelRunJob do
   @moduledoc """
   OpenAPI schema for sentinel run jobs.

@@ -16,6 +16,7 @@ func (in *OpenAIRouter) newResponsesRoute() RouteConfig {
 		RequestConverter:           in.responsesRequestConverter,
 		ResponsesResponseConverter: in.responsesResponseConverter,
 		ErrorConverter:             in.errorConverter,
+		PreCallback:                in.openAIRoutePreCallback(string(RouteResponses)),
 		StreamConfig: &StreamConfig{
 			ResponsesStreamResponseConverter: in.responsesStreamResponseConverter,
 			ErrorConverter:                   in.errorConverter,
@@ -46,24 +47,27 @@ func (in *OpenAIRouter) responsesRequestConverter(ctx *schemas.BifrostContext, r
 	bifrostReq.Provider = provider
 	bifrostReq.Model = model
 
+	if responsesViaChat(ctx) {
+		chatReq := bifrostReq.ToChatRequest()
+		chatReq.Provider = provider
+		chatReq.Model = model
+		return &schemas.BifrostRequest{ChatRequest: chatReq}, nil
+	}
+
 	return &schemas.BifrostRequest{ResponsesRequest: bifrostReq}, nil
 }
 
-func (in *OpenAIRouter) responsesResponseConverter(_ *schemas.BifrostContext, resp *schemas.BifrostResponsesResponse) (interface{}, error) {
-	if resp.ExtraFields.Provider == schemas.OpenAI {
-		if resp.ExtraFields.RawResponse != nil {
-			return resp.ExtraFields.RawResponse, nil
-		}
+func (in *OpenAIRouter) responsesResponseConverter(ctx *schemas.BifrostContext, resp *schemas.BifrostResponsesResponse) (interface{}, error) {
+	if raw, ok := openaiResponsesRawResponse(ctx, resp); ok {
+		return raw, nil
 	}
 
 	return resp, nil
 }
 
-func (in *OpenAIRouter) responsesStreamResponseConverter(_ *schemas.BifrostContext, resp *schemas.BifrostResponsesStreamResponse) (string, interface{}, error) {
-	if resp.ExtraFields.Provider == schemas.OpenAI {
-		if resp.ExtraFields.RawResponse != nil {
-			return string(resp.Type), resp.ExtraFields.RawResponse, nil
-		}
+func (in *OpenAIRouter) responsesStreamResponseConverter(ctx *schemas.BifrostContext, resp *schemas.BifrostResponsesStreamResponse) (string, interface{}, error) {
+	if raw, ok := openaiResponsesStreamRawResponse(ctx, resp); ok {
+		return string(resp.Type), raw, nil
 	}
 
 	return string(resp.Type), resp, nil

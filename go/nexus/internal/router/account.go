@@ -89,8 +89,7 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 
 	var providers []schemas.ModelProvider
 
-	// Check each provider and add if configured (OpenAI may authenticate via static apiKey or OAuth token exchange).
-	if openAIAuthConfigured(aiConfig.GetOpenai()) {
+	if cfg := aiConfig.GetOpenai(); cfg != nil {
 		providers = append(providers, schemas.OpenAI)
 	}
 
@@ -133,13 +132,21 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 
 	switch provider {
 	case schemas.OpenAI:
-		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetBaseUrl() != "" {
-			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
+		if cfg := aiConfig.GetOpenai(); cfg != nil {
+			if cfg.GetBaseUrl() != "" {
+				config.NetworkConfig.BaseURL = bifrostNetworkBaseURL(cfg.GetBaseUrl())
+			}
+			if allowed := openAIAllowedRequests(cfg); allowed != nil {
+				config.CustomProviderConfig = &schemas.CustomProviderConfig{
+					BaseProviderType: schemas.OpenAI,
+					AllowedRequests:  allowed,
+				}
+			}
 		}
 
 	case schemas.Anthropic:
 		if cfg := aiConfig.GetAnthropic(); cfg != nil && cfg.GetBaseUrl() != "" {
-			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
+			config.NetworkConfig.BaseURL = bifrostNetworkBaseURL(cfg.GetBaseUrl())
 		}
 
 	case schemas.Vertex:

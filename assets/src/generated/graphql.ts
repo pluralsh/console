@@ -1504,17 +1504,17 @@ export type BedrockAiAttributes = {
   awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
   /** the aws secret access key to use (DEPRECATED) */
   awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
-  /** mapping from model id to bedrock deployment if those require additional configuration */
+  /** Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"} */
   deployments?: InputMaybe<Scalars['Json']['input']>;
-  /** the model to use for vector embeddings */
+  /** Bedrock model or inference profile for embeddings. Same ID formats as modelId. */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
-  /** the bedrock model id to use */
+  /** AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. */
   modelId?: InputMaybe<Scalars['String']['input']>;
-  /** addditional models to support within the integrated ai proxy */
+  /** Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId. */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the aws region the model is hosted in */
   region?: InputMaybe<Scalars['String']['input']>;
-  /** the model to use for tool calls, which are less frequent and require more complex reasoning */
+  /** Bedrock model or inference profile for tool calls. Same ID formats as modelId. */
   toolModelId?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1523,17 +1523,17 @@ export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
   /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
-  /** mapping from model id to bedrock deployment if those require additional configuration */
+  /** Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"} */
   deployments?: Maybe<Scalars['Map']['output']>;
-  /** the model to use for vector embeddings */
+  /** Bedrock model or inference profile for embeddings. Same ID formats as modelId. */
   embeddingModel?: Maybe<Scalars['String']['output']>;
-  /** the bedrock model to use (omit for Plural defaults) */
+  /** AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults. */
   modelId?: Maybe<Scalars['String']['output']>;
-  /** addditional models to support within the integrated ai proxy */
+  /** Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId. */
   proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the aws region the model is hosted in */
   region?: Maybe<Scalars['String']['output']>;
-  /** the model to use for tool calls, which are less frequent and require more complex reasoning */
+  /** Bedrock model or inference profile for tool calls. Same ID formats as modelId. */
   toolModelId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -9960,6 +9960,7 @@ export type RootMutationTypeRollbackServiceArgs = {
 export type RootMutationTypeRunSentinelArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  overrides?: InputMaybe<SentinelRunOverrides>;
 };
 
 
@@ -13024,6 +13025,11 @@ export type SentinelRunJobUpdateAttributes = {
   reference?: InputMaybe<NamespacedName>;
   /** the status of the job */
   status?: InputMaybe<SentinelRunJobStatus>;
+};
+
+export type SentinelRunOverrides = {
+  /** the tags to apply to the sentinel run integration test cases */
+  tags?: InputMaybe<Scalars['Json']['input']>;
 };
 
 export type SentinelRunResult = {

@@ -7,6 +7,7 @@ import (
 
 	bifrostcore "github.com/maximhq/bifrost/core"
 	"github.com/maximhq/bifrost/core/schemas"
+	"github.com/pluralsh/console/go/nexus/internal/console"
 	"github.com/pluralsh/console/go/nexus/internal/log"
 	"go.uber.org/zap"
 )
@@ -27,6 +28,7 @@ const (
 // read from the Plural Console API.
 type OpenAIRouter struct {
 	*GenericRouter
+	consoleClient console.Client
 }
 
 func (in *OpenAIRouter) validateModelFormat(model string) (schemas.ModelProvider, string, error) {
@@ -58,11 +60,12 @@ func (in *OpenAIRouter) init() Router {
 	return in
 }
 
-func NewOpenAIRouter(client *bifrostcore.Bifrost, resolver *EmbeddingsResolver) Router {
+func NewOpenAIRouter(bifrostClient *bifrostcore.Bifrost, resolver *EmbeddingsResolver, consoleClient console.Client) Router {
 	return (&OpenAIRouter{
 		GenericRouter: &GenericRouter{
-			client:   client,
+			client:   bifrostClient,
 			resolver: resolver,
 		},
+		consoleClient: consoleClient,
 	}).init()
 }

@@ -7,8 +7,8 @@ on:
     paths:
     - ".github/workflows/deployment-operator-cd-sentinel-harness.yaml"
     - "go/deployment-operator/dockerfiles/sentinel-harness/**"
-    - "go/deployment-operator/cmd/sentinel-harness/**"
-    - "go/deployment-operator/pkg/sentinel-harness/**"
+    - "go/deployment-operator/**"
+    - "go/deployment-operator/**"
   push:
     tags:
     - 'go/deployment-operator/v*.*.*'
@@ -23,6 +23,7 @@ permissions:
   contents: read
 
 env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
   REGISTRY_IMAGE: pluralsh/sentinel-harness-base
 
 jobs:

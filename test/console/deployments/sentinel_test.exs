@@ -92,7 +92,7 @@ defmodule Console.Deployments.SentinelTest do
         %{type: :log, name: "test", configuration: %{log: %{namespace: "test", duration: "1h", query: "error"}}}
       ])
 
-      {:ok, run} = Sentinels.run_sentinel(sentinel.id, user)
+      {:ok, run} = Sentinels.run_sentinel(%{}, sentinel.id, user)
 
       assert run.sentinel_id == sentinel.id
       assert run.status == :pending
@@ -106,7 +106,7 @@ defmodule Console.Deployments.SentinelTest do
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       sentinel = insert(:sentinel, project: project, crontab: "*/5 * * * *")
 
-      {:ok, run} = Sentinels.run_sentinel(sentinel.id, user)
+      {:ok, run} = Sentinels.run_sentinel(%{}, sentinel.id, user)
 
       assert run.sentinel_id == sentinel.id
 
@@ -118,9 +118,36 @@ defmodule Console.Deployments.SentinelTest do
       project = insert(:project)
       sentinel = insert(:sentinel, project: project)
 
-      {:error, _} = Sentinels.run_sentinel(sentinel.id, user)
+      {:error, _} = Sentinels.run_sentinel(%{}, sentinel.id, user)
 
       assert refetch(sentinel)
+    end
+
+    test "it merges tag overrides into integration test checks" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project, checks: [
+        %{
+          type: :integration_test,
+          name: "test",
+          configuration: %{
+            integration_test: %{
+              format: :junit,
+              job: %{namespace: "test"},
+              tags: %{"tier" => "dev"},
+              distro: :eks
+            }
+          }
+        }
+      ])
+
+      {:ok, run} = Sentinels.run_sentinel(%{tags: %{"tier" => "staging", "region" => "us"}}, sentinel.id, user)
+
+      [check] = run.checks
+      assert check.configuration.integration_test.tags == %{"tier" => "staging", "region" => "us"}
+
+      [sentinel_check] = refetch(sentinel).checks
+      assert sentinel_check.configuration.integration_test.tags == %{"tier" => "dev"}
     end
   end
 

@@ -31,23 +31,23 @@ func (m *mockConsoleClient) IsConnected() bool { return true }
 
 func (m *mockConsoleClient) Close() error { return nil }
 
-func TestOpenAIAuthConfigured(t *testing.T) {
-	require.False(t, openAIAuthConfigured(nil))
-
-	require.False(t, openAIAuthConfigured(&pb.OpenAiConfig{}))
-
-	require.True(t, openAIAuthConfigured(&pb.OpenAiConfig{ApiKey: lo.ToPtr("sk-")}))
-
-	tx := &pb.OpenAiTokenExchange{
-		Enabled:      lo.ToPtr(true),
-		TokenUrl:     lo.ToPtr("https://id.example/oauth/token"),
-		ClientId:     lo.ToPtr("cid"),
-		ClientSecret: lo.ToPtr("sec"),
+func TestHandleOpenAIKeys_noAPIKey(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Openai: &pb.OpenAiConfig{
+			Model: lo.ToPtr("gpt-4"),
+		},
 	}
-	require.True(t, openAIAuthConfigured(&pb.OpenAiConfig{TokenExchange: tx}))
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
 
-	incomplete := &pb.OpenAiTokenExchange{Enabled: lo.ToPtr(true), ClientId: lo.ToPtr("x")}
-	require.False(t, openAIAuthConfigured(&pb.OpenAiConfig{TokenExchange: incomplete}))
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.OpenAI)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.Empty(t, keys[0].Value.Val)
 }
 
 func TestHandleOpenAIKeys_tokenExchangeUsesCache(t *testing.T) {

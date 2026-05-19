@@ -12,6 +12,7 @@ import (
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
+	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 
@@ -54,9 +55,6 @@ func (in *Codex) ensure() error {
 		return fmt.Errorf("repository directory is not set")
 	}
 
-	if !in.proxy && len(in.apiKey) == 0 {
-		return fmt.Errorf("codex API key is not set")
-	}
 	return nil
 }
 
@@ -79,18 +77,18 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 		allowedEnvVars = append(allowedEnvVars, "GIT_SIGNING_KEY_PATH")
 	}
 
+	model := string(in.model)
+	if in.proxy {
+		model = proxymodel.ProxyModel(console.AgentRuntimeTypeCodex, model)
+	}
+
 	baseAgent := AgentInput{
-		Model:                string(in.model),
+		Model:                model,
 		ApprovalPolicy:       "never",
 		ModelReasoningEffort: "medium",
 		AllowedEnvVars:       allowedEnvVars,
 		EnableWebSearch:      true,
 		EnableShellCache:     true,
-	}
-
-	// The plural proxy requires models in "provider/model" format.
-	if in.proxy {
-		baseAgent.Model = "openai/" + baseAgent.Model
 	}
 
 	var (

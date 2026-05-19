@@ -2,6 +2,7 @@ name: CI / Deployment Operator
 
 env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  REGISTRY_IMAGE: pluralsh/deployment-operator
 
 on:
   push:
@@ -22,8 +23,7 @@ on:
       - "go/client/**"
 permissions:
   contents: read
-env:
-  REGISTRY_IMAGE: pluralsh/deployment-operator
+
 jobs:
   build:
     name: Build

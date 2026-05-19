@@ -74,26 +74,12 @@ var (
 	defaultContainerImage    = "ghcr.io/pluralsh/agent-harness"
 	defaultContainerImageTag = "0.6.18"
 
-	// Check .github/workflows/publish-agent-harness.yaml to see images being published.
+	// Check .github/workflows/deployment-operator-cd-agent-harness.yaml to see images being published.
 	defaultContainerVersions = map[console.AgentRuntimeType]string{
 		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.72",
 		console.AgentRuntimeTypeGemini:   "%s-gemini-0.6.1",
 		console.AgentRuntimeTypeOpencode: "%s-opencode-1.14.50",
 		console.AgentRuntimeTypeCodex:    "%s-codex-0.104.0",
-	}
-
-	languages = map[console.AgentRunLanguage]string{
-		console.AgentRunLanguageGo:         "golang",
-		console.AgentRunLanguageJava:       "java",
-		console.AgentRunLanguageJavascript: "node",
-		console.AgentRunLanguagePython:     "python",
-	}
-
-	defaultVersions = map[console.AgentRunLanguage]string{
-		console.AgentRunLanguageGo:         "1.24",
-		console.AgentRunLanguageJava:       "25",
-		console.AgentRunLanguageJavascript: "24",
-		console.AgentRunLanguagePython:     "3.14",
 	}
 
 	defaultBrowserImages = map[v1alpha1.Browser]string{
@@ -189,7 +175,7 @@ func ensureDefaultContainer(containers []corev1.Container, run *v1alpha1.AgentRu
 		containers = append(containers, getDefaultContainer(run, runtime))
 	} else {
 		if containers[index].Image == "" {
-			containers[index].Image = getDefaultContainerImage(containers[index].Image, runtime.Spec.Type, run.Spec.Language, run.Spec.LanguageVersion)
+			containers[index].Image = getDefaultContainerImage(containers[index].Image, runtime.Spec.Type)
 		}
 
 		containers[index].SecurityContext = ensureDefaultContainerSecurityContext(containers[index].SecurityContext)
@@ -251,7 +237,7 @@ func ensureDefaultPodSecurityContext(psc *corev1.PodSecurityContext) *corev1.Pod
 func getDefaultContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) corev1.Container {
 	return corev1.Container{
 		Name:            defaultContainer,
-		Image:           getDefaultContainerImage("", runtime.Spec.Type, run.Spec.Language, run.Spec.LanguageVersion),
+		Image:           getDefaultContainerImage("", runtime.Spec.Type),
 		VolumeMounts:    []corev1.VolumeMount{defaultTmpContainerVolumeMount},
 		SecurityContext: ensureDefaultContainerSecurityContext(nil),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
@@ -259,19 +245,12 @@ func getDefaultContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime)
 	}
 }
 
-func getDefaultContainerImage(image string, agentRuntimeType console.AgentRuntimeType, language *console.AgentRunLanguage, version *string) string {
+func getDefaultContainerImage(image string, agentRuntimeType console.AgentRuntimeType) string {
 	if image != "" {
 		return image
 	}
 
 	tag := fmt.Sprintf(defaultContainerVersions[agentRuntimeType], defaultContainerImageTag)
-
-	// If the language name is recognized, append it to the tag along with the version (or default version).
-	if lang, ok := languages[lo.FromPtr(language)]; ok {
-		tag = fmt.Sprintf("%s-%s-%s", tag, lang,
-			lo.Ternary(lo.IsEmpty(version), defaultVersions[lo.FromPtr(language)], lo.FromPtr(version)))
-	}
-
 	return fmt.Sprintf("%s:%s", common.GetConfigurationManager().SwapBaseRegistry(defaultContainerImage), tag)
 }
 
