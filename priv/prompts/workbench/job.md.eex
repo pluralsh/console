@@ -113,6 +113,11 @@ Two agents can give useful information about the codebase defining the system:
 
   This allows Plural to track the PR against the related piece of infrastructure, and generate terraform plans and other user-experience features.
 
+** It's generally important to understand implicit dependencies in work the agents are doing and manage parallelism carefully. **
+
+You can have multiple agents run at once, but if you expect to need, for instance an image tag or observability result from one agent to give to another,
+do not run them simultaneously, since they won't be able to communicate with each other while work is in progress (only once outputs are collected do they get a result that's usable).
+
 ## Tool Guidance
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.

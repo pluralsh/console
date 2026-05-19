@@ -2,9 +2,6 @@ import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThrea
 import { truncateKeepingChips } from 'components/utils/contentEditableChips'
 import styled, { css } from 'styled-components'
 
-/** Target ~3 caption lines with ellipsis (not a hard clip). */
-const CLAMP_VISIBLE_LINES = 3
-
 const MarkdownWrapSC = styled.div(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-light'],
@@ -12,20 +9,26 @@ const MarkdownWrapSC = styled.div(({ theme }) => ({
   wordBreak: 'break-word',
 }))
 
-const clampedMarkdownInnerStyles = ({ theme }) => css`
+const clampedMarkdownInnerStyles = ({
+  theme,
+  lines = 3,
+}: {
+  theme: any
+  lines?: number
+}) => css`
   margin: 0;
   min-height: 0;
   min-width: 0;
   padding: 0;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: ${CLAMP_VISIBLE_LINES};
-  line-clamp: ${CLAMP_VISIBLE_LINES};
+  -webkit-line-clamp: ${lines};
+  line-clamp: ${lines};
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
 
-  /* Tighter than default block markdown so margins don’t steal the line budget. */
+  /* Tighter than default block markdown so margins don't steal the line budget. */
   & > *:not(:last-child) {
     margin-bottom: ${theme.spacing.xxxsmall}px;
   }
@@ -62,19 +65,25 @@ const SidePanelMarkdownWrapSC = styled(MarkdownWrapSC)`
   ${sidePanelClampStyles}
 `
 
-const jobCardClampStyles = ({ theme }) => css`
+const jobCardClampStyles = ({
+  theme,
+  lines = 3,
+}: {
+  theme: any
+  lines?: number
+}) => css`
   ${theme.partials.text.body2};
   color: ${theme.colors['text-light']};
   min-width: 0;
   overflow: hidden;
 
   & > div {
-    ${clampedMarkdownInnerStyles({ theme })}
+    ${clampedMarkdownInnerStyles({ theme, lines })}
   }
 `
 
-const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)`
-  ${jobCardClampStyles}
+const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
+  ${({ theme, $lines }) => jobCardClampStyles({ theme, lines: $lines })}
 `
 
 /**
@@ -85,12 +94,15 @@ export function WorkbenchStoredPromptMarkdown({
   text,
   truncateVisibleChars,
   density = 'default',
+  clampLines = 3,
 }: {
   text: string
   /** When set, trims by visible length without splitting chips (like job previews). */
   truncateVisibleChars?: number
   /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). `jobCard`: body2 + `text-light` + same clamp (home recent jobs). */
   density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard'
+  /** Number of lines before truncation when density is `jobCard`. Default 3. */
+  clampLines?: number
 }) {
   const clampedDensity =
     density === 'tableCell' || density === 'sidePanel' || density === 'jobCard'
@@ -100,21 +112,43 @@ export function WorkbenchStoredPromptMarkdown({
       ? truncateKeepingChips(text, truncateVisibleChars)
       : text
 
-  const Wrap =
-    density === 'tableCell'
-      ? TableCellMarkdownWrapSC
-      : density === 'sidePanel'
-        ? SidePanelMarkdownWrapSC
-        : density === 'jobCard'
-          ? JobCardMarkdownWrapSC
-          : MarkdownWrapSC
+  if (density === 'tableCell') {
+    return (
+      <TableCellMarkdownWrapSC>
+        <SimplifiedMarkdown
+          text={trimmed}
+          rootLayout="block"
+        />
+      </TableCellMarkdownWrapSC>
+    )
+  }
+  if (density === 'sidePanel') {
+    return (
+      <SidePanelMarkdownWrapSC>
+        <SimplifiedMarkdown
+          text={trimmed}
+          rootLayout="block"
+        />
+      </SidePanelMarkdownWrapSC>
+    )
+  }
+  if (density === 'jobCard') {
+    return (
+      <JobCardMarkdownWrapSC $lines={clampLines}>
+        <SimplifiedMarkdown
+          text={trimmed}
+          rootLayout="block"
+        />
+      </JobCardMarkdownWrapSC>
+    )
+  }
 
   return (
-    <Wrap>
+    <MarkdownWrapSC>
       <SimplifiedMarkdown
         text={trimmed}
         rootLayout="block"
       />
-    </Wrap>
+    </MarkdownWrapSC>
   )
 }

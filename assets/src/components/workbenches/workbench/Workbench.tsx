@@ -13,6 +13,7 @@ import {
   WebhooksIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useWorkbenchJobsQuery, WorkbenchJobStatus } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -29,6 +30,7 @@ import {
   WorkbenchTinyFragment,
 } from 'generated/graphql'
 import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
+import { mapExistingNodes } from 'utils/graphql'
 import {
   Link,
   Outlet,
@@ -52,7 +54,7 @@ import {
   WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
 
@@ -119,9 +121,24 @@ export function WorkbenchPageLayout({
   )
 
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
+  const jobsTabPath = `${workbenchBasePath}/${WORKBENCH_JOBS_REL_PATH}`
+  const hasInProgressJobs = useWorkbenchHasInProgressJobs(workbenchId)
+
   const subTabDirectory = useMemo(
     () => [
-      { label: 'Jobs', path: workbenchBasePath },
+      { label: 'Launch', path: workbenchBasePath },
+      {
+        label: (
+          <Flex
+            align="center"
+            gap="xxsmall"
+          >
+            Jobs
+            {hasInProgressJobs && <InProgressDotSC />}
+          </Flex>
+        ),
+        path: jobsTabPath,
+      },
       {
         label: 'Issues',
         path: `${workbenchBasePath}/${WORKBENCHES_ISSUES_REL_PATH}`,
@@ -135,7 +152,7 @@ export function WorkbenchPageLayout({
         path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,
       },
     ],
-    [workbenchBasePath]
+    [workbenchBasePath, jobsTabPath, hasInProgressJobs]
   )
 
   const handleMoreMenuSelection = useCallback(
@@ -196,12 +213,11 @@ export function WorkbenchPageLayout({
           >
             <SubTabs
               directory={subTabDirectory}
-              activeFn={(path) =>
-                path ===
-                (tab === '' || tab === WORKBENCH_JOBS_REL_PATH
-                  ? workbenchBasePath
-                  : `${workbenchBasePath}/${tab}`)
-              }
+              activeFn={(path) => {
+                if (path === workbenchBasePath) return !tab
+                if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
+                return path === `${workbenchBasePath}/${tab}`
+              }}
             />
             <Flex grow={1} />
             {showEditWorkbenchButton && (
@@ -283,6 +299,31 @@ export function WorkbenchPageLayout({
     </Flex>
   )
 }
+
+function useWorkbenchHasInProgressJobs(workbenchId: string) {
+  const { data } = useWorkbenchJobsQuery({
+    variables: { id: workbenchId, first: 50 },
+    skip: !workbenchId,
+    pollInterval: 5_000,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  return useMemo(() => {
+    return mapExistingNodes(data?.workbench?.runs).some(
+      (job) =>
+        job.status === WorkbenchJobStatus.Pending ||
+        job.status === WorkbenchJobStatus.Running
+    )
+  }, [data])
+}
+
+const InProgressDotSC = styled.span(({ theme }) => ({
+  width: 6,
+  height: 6,
+  borderRadius: '50%',
+  backgroundColor: theme.colors['icon-info'],
+  flexShrink: 0,
+}))
 
 function renderWorkbenchSidebar(
   sidebar: WorkbenchSidebar,

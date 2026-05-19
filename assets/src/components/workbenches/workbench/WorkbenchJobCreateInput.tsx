@@ -382,7 +382,7 @@ function SavedPromptsChip({
 
 const InputWrapperSC = styled.div({
   position: 'relative',
-  maxWidth: MAX_WIDTH,
+  width: '100%',
 })
 
 const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({

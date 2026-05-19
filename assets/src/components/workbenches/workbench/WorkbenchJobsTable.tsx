@@ -151,7 +151,13 @@ export const workbenchColumn = columnHelper.accessor(
   }
 )
 
-function JobSourceChips({ job }: { job: WorkbenchJobTinyFragment }) {
+function JobSourceChips({
+  job,
+  fillLevel = 1,
+}: {
+  job: WorkbenchJobTinyFragment
+  fillLevel?: 1 | 2 | 3
+}) {
   const { issue, alert } = job
   if (!issue && !alert) return null
 
@@ -161,7 +167,7 @@ function JobSourceChips({ job }: { job: WorkbenchJobTinyFragment }) {
         <span css={{ display: 'inline-flex', flexShrink: 0 }}>
           <IssueStatusChip
             status={issue.status}
-            fillLevel={1}
+            fillLevel={fillLevel}
             {...(issue.url && {
               ...chipAsLinkProps,
               href: issue.url,
@@ -172,6 +178,7 @@ function JobSourceChips({ job }: { job: WorkbenchJobTinyFragment }) {
       )}
       {alert && (
         <AlertStateChip
+          fillLevel={fillLevel}
           state={alert.state}
           {...(alert.url && {
             ...chipAsLinkProps,
@@ -233,9 +240,47 @@ function JobEvalBadge({ job }: { job: WorkbenchJobTinyFragment }) {
   )
 }
 
-function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
+export function WorkbenchJobActionsRow({
+  job,
+  chipFillLevel = 1,
+}: {
+  job: WorkbenchJobTinyFragment
+  chipFillLevel?: 1 | 2 | 3
+}) {
   const theme = useTheme()
   const prs = job.pullRequests?.filter(isNonNullable) ?? []
+  const hasActions =
+    !!job.issue ||
+    !!job.alert ||
+    prs.length > 0 ||
+    job.evalResult?.grade != null ||
+    !!job.result?.conclusion
+
+  if (!hasActions) return null
+
+  return (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      css={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: theme.spacing.small,
+        alignItems: 'center',
+      }}
+    >
+      <JobSourceChips
+        job={job}
+        fillLevel={chipFillLevel}
+      />
+      <PRsModalIcon prs={prs} />
+      <JobEvalBadge job={job} />
+      <JobConclusionIcon result={job.result} />
+    </div>
+  )
+}
+
+function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
+  const theme = useTheme()
 
   return (
     <div
@@ -248,10 +293,7 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
         justifyContent: 'end',
       }}
     >
-      <JobSourceChips job={job} />
-      <PRsModalIcon prs={prs} />
-      <JobEvalBadge job={job} />
-      <JobConclusionIcon result={job.result} />
+      <WorkbenchJobActionsRow job={job} />
       <RunStatusIcon
         fullColor
         status={job.status}
