@@ -49,6 +49,7 @@ RUN apt update && apt install -y \
     gnupg \
     git \
     jq \
+    make \
     tar
 
 # Install Docker CLI + Compose (no daemon)

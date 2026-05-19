@@ -1239,7 +1239,7 @@ type RootMutationType {
 
   deleteSentinel(id: ID!): Sentinel
 
-  runSentinel(id: ID, name: String): SentinelRun
+  runSentinel(id: ID, name: String, overrides: SentinelRunOverrides): SentinelRun
 
   createWorkbench(attributes: WorkbenchAttributes): Workbench
 
@@ -4300,6 +4300,11 @@ input SentinelCheckIntegrationTestDefaultAttributes {
 
   "labels to apply to test deployments, useful if you need to opt out of policy enforcement"
   resourceLabels: Json
+}
+
+input SentinelRunOverrides {
+  "the tags to apply to the sentinel run integration test cases"
+  tags: Json
 }
 
 input SentinelRunJobUpdateAttributes {

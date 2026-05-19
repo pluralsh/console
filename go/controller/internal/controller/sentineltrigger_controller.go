@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 
+	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
@@ -84,7 +86,13 @@ func (r *SentinelTriggerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 	if !exists || !trigger.Status.IsSHAEqual(sha) {
-		sr, err := r.ConsoleClient.RunSentinel(ctx, sentinel.Status.GetID())
+		overrides, err := sentinelRunOverrides(trigger.Spec.Overrides)
+		if err != nil {
+			utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		sr, err := r.ConsoleClient.RunSentinel(ctx, sentinel.Status.GetID(), overrides)
 		if err != nil {
 			utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -97,6 +105,19 @@ func (r *SentinelTriggerReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	utils.MarkCondition(trigger.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func sentinelRunOverrides(overrides *v1alpha1.SentinelRunOverrides) (*gqlclient.SentinelRunOverrides, error) {
+	if overrides == nil || len(overrides.Tags) == 0 {
+		return nil, nil
+	}
+
+	jsonTags, err := json.Marshal(overrides.Tags)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gqlclient.SentinelRunOverrides{Tags: lo.ToPtr(string(jsonTags))}, nil
 }
 
 func (r *SentinelTriggerReconciler) isAlreadyExists(ctx context.Context, trigger *v1alpha1.SentinelTrigger) (bool, error) {

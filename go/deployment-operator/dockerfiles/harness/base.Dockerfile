@@ -47,4 +47,6 @@ COPY --from=aquasec/trivy:0.69.3 /usr/local/bin/trivy /usr/local/bin/trivy
 
 WORKDIR /plural
 
+ENV HELM_CACHE_HOME=/plural/.cache/helm
+
 ENTRYPOINT ["/harness", "--working-dir=/plural"]

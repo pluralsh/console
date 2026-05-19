@@ -85,13 +85,13 @@ defmodule Console.Deployments.Sentinels do
   Runs a sentinel if the user has write access to the sentinel
   """
   @spec run_sentinel(binary, User.t) :: sentinel_run_resp
-  def run_sentinel(id, %User{} = user) do
+  def run_sentinel(overrides, id, %User{} = user) do
     start_transaction()
     |> add_operation(:fetch, fn _ ->
       get_sentinel!(id)
       |> allow(user, :write)
     end)
-    |> add_operation(:run, fn %{fetch: sentinel} -> run_sentinel(sentinel) end)
+    |> add_operation(:run, fn %{fetch: sentinel} -> run_sentinel(overrides, sentinel) end)
     |> execute(extract: :run)
   end
 
@@ -107,8 +107,8 @@ defmodule Console.Deployments.Sentinels do
   @doc """
   Runs a sentinel directly
   """
-  @spec run_sentinel(Sentinel.t) :: sentinel_run_resp
-  def run_sentinel(%Sentinel{} = sentinel) do
+  @spec run_sentinel(map, Sentinel.t) :: sentinel_run_resp
+  def run_sentinel(overrides \\ %{}, %Sentinel{} = sentinel) do
     start_transaction()
     |> add_operation(:update, fn _ ->
       sentinel
@@ -117,11 +117,20 @@ defmodule Console.Deployments.Sentinels do
     end)
     |> add_operation(:run, fn %{update: sentinel} ->
       %SentinelRun{sentinel_id: sentinel.id, status: :pending}
-      |> SentinelRun.changeset(%{checks: Console.mapify(sentinel.checks)})
+      |> SentinelRun.changeset(%{checks: Console.mapify(apply_overrides(overrides, sentinel.checks))})
       |> Repo.insert()
     end)
     |> execute(extract: :run)
   end
+
+  defp apply_overrides(%{tags: %{} = tags}, checks) do
+    Enum.map(checks, fn
+      %SentinelCheck{type: :integration_test, configuration: %{integration_test: %{}}} = check ->
+        update_in(check.configuration.integration_test.tags, &Map.merge(&1 || %{}, tags))
+      check -> check
+    end)
+  end
+  defp apply_overrides(_, checks), do: checks
 
   @doc """
   Fetches a file handle to the tarball for a stack run

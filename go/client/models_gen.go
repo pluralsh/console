@@ -7885,6 +7885,11 @@ type SentinelRunJobUpdateAttributes struct {
 	Output *string `json:"output,omitempty"`
 }
 
+type SentinelRunOverrides struct {
+	// the tags to apply to the sentinel run integration test cases
+	Tags *string `json:"tags,omitempty"`
+}
+
 type SentinelRunResult struct {
 	// the name of the check
 	Name *string `json:"name,omitempty"`

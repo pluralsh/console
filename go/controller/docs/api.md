@@ -4485,6 +4485,22 @@ _Appears in:_
 | `facets` _object (keys:string, values:string)_ | Facets the log facets to run the query against. |  |  |
 
 
+#### SentinelRunOverrides
+
+
+
+SentinelRunOverrides defines ad-hoc overrides applied when triggering a sentinel run.
+
+
+
+_Appears in:_
+- [SentinelTriggerSpec](#sentineltriggerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `tags` _object (keys:string, values:string)_ | Tags are merged into integration test checks for this run. |  | Optional: \{\} <br /> |
+
+
 #### SentinelSpec
 
 
@@ -4540,6 +4556,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef is a reference to the Sentinel resource. |  | Required: \{\} <br /> |
+| `overrides` _[SentinelRunOverrides](#sentinelrunoverrides)_ | Overrides are applied when triggering the sentinel run. |  | Optional: \{\} <br /> |
 
 
 #### ServiceAccount

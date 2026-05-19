@@ -107,7 +107,7 @@ func (in *StackRun) Env() []string {
 		env = append(env, fmt.Sprintf("PLURAL_CONSOLE_URL=%s", lo.FromPtr(in.Creds.URL)))
 	}
 
-	return env
+	return appendDefaultHelmCacheHome(env)
 }
 
 // Vars parses the StackRun.Variables map as a valid JSON.

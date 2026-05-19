@@ -58,8 +58,8 @@ query GetSentinelTiny($id: ID!) {
     }
 }
 
-mutation RunSentinel($id: ID!) {
-    runSentinel(id: $id) {
+mutation RunSentinel($id: ID!, $overrides: SentinelRunOverrides) {
+    runSentinel(id: $id, overrides: $overrides) {
         ...SentinelRunFragment
     }
 }
