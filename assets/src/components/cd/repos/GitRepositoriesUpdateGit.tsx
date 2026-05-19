@@ -16,6 +16,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { GqlError } from 'components/utils/Alert'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 import ModalAlt from '../ModalAlt'
 
@@ -65,12 +66,16 @@ export function ModalForm({
   const [passphrase, setPassphrase] = useState<GitAttributes['passphrase']>('')
   const [username, setUsername] = useState<GitAttributes['username']>('')
   const [password, setPassword] = useState<GitAttributes['password']>('')
+  const [recurseSubmodules, setRecurseSubmodules] = useState(
+    repo.recurseSubmodules ?? false
+  )
 
   const [mutation, { loading, error }] = useUpdateGitRepositoryMutation({
     variables: {
       id: repo.id,
       attributes: {
         url: gitUrl,
+        recurseSubmodules,
         ...(requireAuth
           ? authMethod === AuthMethod.Ssh
             ? { privateKey, passphrase, username: null, password: null }
@@ -182,6 +187,22 @@ export function ModalForm({
           }}
         />
       )}
+      <SimpleAccordion
+        label="Advanced configuration"
+        accordionStyles={{
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.borderRadiuses.medium,
+        }}
+      >
+        <div css={{ padding: theme.spacing.medium }}>
+          <Switch
+            checked={recurseSubmodules}
+            onChange={setRecurseSubmodules}
+          >
+            Recurse submodules
+          </Switch>
+        </div>
+      </SimpleAccordion>
       {error && (
         <GqlError
           header="Problem updating repository"

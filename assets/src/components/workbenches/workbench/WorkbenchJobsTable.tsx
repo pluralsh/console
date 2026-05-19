@@ -263,7 +263,6 @@ export function WorkbenchJobActionsRow({
       onClick={(e) => e.stopPropagation()}
       css={{
         display: 'flex',
-        flexWrap: 'wrap',
         gap: theme.spacing.small,
         alignItems: 'center',
       }}

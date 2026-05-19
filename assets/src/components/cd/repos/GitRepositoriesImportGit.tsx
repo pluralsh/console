@@ -23,6 +23,7 @@ import {
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 
 import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
@@ -68,11 +69,13 @@ export function ImportGitModal({
   const [passphrase, setPassphrase] = useState<GitAttributes['passphrase']>('')
   const [username, setUsername] = useState<GitAttributes['username']>('')
   const [password, setPassword] = useState<GitAttributes['password']>('')
+  const [recurseSubmodules, setRecurseSubmodules] = useState(false)
 
   const [mutation, { loading, error }] = useCreateGitRepositoryMutation({
     variables: {
       attributes: {
         url: gitUrl,
+        recurseSubmodules,
         ...(requireAuth
           ? authMethod === AuthMethod.Ssh
             ? { privateKey, passphrase }
@@ -188,6 +191,22 @@ export function ImportGitModal({
             }}
           />
         )}
+        <SimpleAccordion
+          label="Advanced configuration"
+          accordionStyles={{
+            border: `1px solid ${theme.colors.border}`,
+            borderRadius: theme.borderRadiuses.medium,
+          }}
+        >
+          <div css={{ padding: theme.spacing.medium }}>
+            <Switch
+              checked={recurseSubmodules}
+              onChange={setRecurseSubmodules}
+            >
+              Recurse submodules
+            </Switch>
+          </div>
+        </SimpleAccordion>
         {error && (
           <GqlError
             header="Problem importing repository"
