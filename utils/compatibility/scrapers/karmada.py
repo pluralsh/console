@@ -11,7 +11,6 @@ from utils import (
 
 APP_NAME = "karmada"
 README_URL = "https://raw.githubusercontent.com/karmada-io/karmada/master/README.md"
-HELM_REPO_URL = "https://raw.githubusercontent.com/karmada-io/karmada/master/charts"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
 SUPPORTED_MARKERS = {"\u2713", "+", "\u2714"}
 
@@ -42,11 +41,15 @@ def parse_header(line: str) -> list[str]:
 
 
 def normalize_version(label: str) -> str | None:
-    match = re.search(r"(\d+\.\d+)", label)
-    if not match:
-        return None
+    match = re.search(r"(\d+\.\d+\.\d+)", label)
+    if match:
+        version = match.group(1)
+    else:
+        match = re.search(r"(\d+\.\d+)", label)
+        if not match:
+            return None
+        version = f"{match.group(1)}.0"
 
-    version = f"{match.group(1)}.0"
     semver = validate_semver(version)
     if not semver:
         return None
