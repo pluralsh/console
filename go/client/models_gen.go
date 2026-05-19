@@ -1197,9 +1197,9 @@ type BackupAttributes struct {
 }
 
 type BedrockAiAttributes struct {
-	// the bedrock model id to use
+	// AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases.
 	ModelID *string `json:"modelId,omitempty"`
-	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	// Bedrock model or inference profile for tool calls. Same ID formats as modelId.
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock access token to use
 	AccessToken *string `json:"accessToken,omitempty"`
@@ -1209,29 +1209,29 @@ type BedrockAiAttributes struct {
 	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
 	// the aws secret access key to use (DEPRECATED)
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
-	// the model to use for vector embeddings
+	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
-	// addditional models to support within the integrated ai proxy
+	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// mapping from model id to bedrock deployment if those require additional configuration
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
 	Deployments *string `json:"deployments,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
 type BedrockAiSettings struct {
-	// the bedrock model to use (omit for Plural defaults)
+	// AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults.
 	ModelID *string `json:"modelId,omitempty"`
-	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	// Bedrock model or inference profile for tool calls. Same ID formats as modelId.
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock aws access key id to use (DEPRECATED)
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// the aws region the model is hosted in
 	Region *string `json:"region,omitempty"`
-	// the model to use for vector embeddings
+	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
-	// addditional models to support within the integrated ai proxy
+	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// mapping from model id to bedrock deployment if those require additional configuration
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
 	Deployments map[string]any `json:"deployments,omitempty"`
 }
 
@@ -3509,6 +3509,8 @@ type GitAttributes struct {
 	ConnectionID *string `json:"connectionId,omitempty"`
 	// whether to run plural crypto on this repo
 	Decrypt *bool `json:"decrypt,omitempty"`
+	// whether to recurse submodules when cloning this repo
+	RecurseSubmodules *bool `json:"recurseSubmodules,omitempty"`
 }
 
 // a file fetched from a git repository, eg a docs .md file
@@ -3556,6 +3558,8 @@ type GitRepository struct {
 	URLFormat *string `json:"urlFormat,omitempty"`
 	// whether to run plural crypto unlock on this repo
 	Decrypt *bool `json:"decrypt,omitempty"`
+	// whether to recurse submodules when cloning this repo
+	RecurseSubmodules *bool `json:"recurseSubmodules,omitempty"`
 	// named refs like branches/tags for a repository
 	Refs []string `json:"refs,omitempty"`
 	// whether the current user can edit this repo

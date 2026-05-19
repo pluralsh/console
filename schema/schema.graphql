@@ -12118,6 +12118,9 @@ input GitAttributes {
 
   "whether to run plural crypto on this repo"
   decrypt: Boolean
+
+  "whether to recurse submodules when cloning this repo"
+  recurseSubmodules: Boolean
 }
 
 input HelmRepositoryAttributes {
@@ -12759,6 +12762,9 @@ type GitRepository {
 
   "whether to run plural crypto unlock on this repo"
   decrypt: Boolean
+
+  "whether to recurse submodules when cloning this repo"
+  recurseSubmodules: Boolean
 
   "named refs like branches\/tags for a repository"
   refs: [String!]

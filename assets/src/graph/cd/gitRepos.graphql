@@ -10,6 +10,7 @@ fragment GitRepository on GitRepository {
   updatedAt
   urlFormat
   httpsPath
+  recurseSubmodules
 }
 
 fragment HelmRepository on HelmRepository {

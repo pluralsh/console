@@ -2097,12 +2097,13 @@ func (t *ContainerSpecFragment) GetEnvFrom() []*ContainerSpecFragment_EnvFrom {
 }
 
 type GitRepositoryFragment struct {
-	ID         string      "json:\"id\" graphql:\"id\""
-	Error      *string     "json:\"error,omitempty\" graphql:\"error\""
-	Health     *GitHealth  "json:\"health,omitempty\" graphql:\"health\""
-	AuthMethod *AuthMethod "json:\"authMethod,omitempty\" graphql:\"authMethod\""
-	URL        string      "json:\"url\" graphql:\"url\""
-	Decrypt    *bool       "json:\"decrypt,omitempty\" graphql:\"decrypt\""
+	ID                string      "json:\"id\" graphql:\"id\""
+	Error             *string     "json:\"error,omitempty\" graphql:\"error\""
+	Health            *GitHealth  "json:\"health,omitempty\" graphql:\"health\""
+	AuthMethod        *AuthMethod "json:\"authMethod,omitempty\" graphql:\"authMethod\""
+	URL               string      "json:\"url\" graphql:\"url\""
+	Decrypt           *bool       "json:\"decrypt,omitempty\" graphql:\"decrypt\""
+	RecurseSubmodules *bool       "json:\"recurseSubmodules,omitempty\" graphql:\"recurseSubmodules\""
 }
 
 func (t *GitRepositoryFragment) GetID() string {
@@ -2140,6 +2141,12 @@ func (t *GitRepositoryFragment) GetDecrypt() *bool {
 		t = &GitRepositoryFragment{}
 	}
 	return t.Decrypt
+}
+func (t *GitRepositoryFragment) GetRecurseSubmodules() *bool {
+	if t == nil {
+		t = &GitRepositoryFragment{}
+	}
+	return t.RecurseSubmodules
 }
 
 type PrGovernanceFragment struct {
@@ -41097,6 +41104,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -41328,6 +41336,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -41568,6 +41577,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -41707,6 +41717,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -41847,6 +41858,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -42083,6 +42095,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -42330,6 +42343,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -42566,6 +42580,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -42861,6 +42876,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -43093,6 +43109,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -43310,6 +43327,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -43449,6 +43467,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -43601,6 +43620,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -43707,6 +43727,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -43856,6 +43877,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -44565,6 +44587,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -44799,6 +44822,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -44977,6 +45001,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -45093,6 +45118,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -45265,6 +45291,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -45499,6 +45526,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -45678,6 +45706,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -45796,6 +45825,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -45915,6 +45945,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -46032,6 +46063,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -46153,6 +46185,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ComponentContentFragment on ComponentContent {
 	id
@@ -46242,6 +46275,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment AISettingsFragment on AiSettings {
 	enabled
@@ -46328,6 +46362,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment AISettingsFragment on AiSettings {
 	enabled
@@ -46496,6 +46531,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -46920,6 +46956,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -47088,6 +47125,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -47167,6 +47205,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -47438,6 +47477,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -47889,6 +47929,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -48122,6 +48163,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment NodePoolFragment on NodePool {
 	id
@@ -49449,6 +49491,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -49481,6 +49524,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -49514,6 +49558,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -49554,6 +49599,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -49588,6 +49634,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 `
 
@@ -53153,6 +53200,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PipelineStageEdgeFragment on PipelineStageEdge {
 	id
@@ -53996,6 +54044,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment ServiceDeploymentFragment on ServiceDeployment {
 	id
@@ -54934,6 +54983,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyProjectFragment on Project {
 	id
@@ -55130,6 +55180,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyProjectFragment on Project {
 	id
@@ -55351,6 +55402,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyProjectFragment on Project {
 	id
@@ -56137,6 +56189,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -56583,6 +56636,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -57014,6 +57068,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -57343,6 +57398,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -57672,6 +57728,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -57959,6 +58016,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -58181,6 +58239,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -58458,6 +58517,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -59152,6 +59212,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -59485,6 +59546,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -60403,6 +60465,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
@@ -60627,6 +60690,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
@@ -60852,6 +60916,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
@@ -61555,6 +61620,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
@@ -61787,6 +61853,7 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+	recurseSubmodules
 }
 fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id

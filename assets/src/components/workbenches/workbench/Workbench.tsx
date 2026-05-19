@@ -13,7 +13,14 @@ import {
   WebhooksIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useWorkbenchJobsQuery, WorkbenchJobStatus } from 'generated/graphql'
+import {
+  useWorkbenchJobsQuery,
+  WorkbenchJobStatus,
+  useDeleteWorkbenchMutation,
+  useWorkbenchQuery,
+  WorkbenchQuery,
+  WorkbenchTinyFragment,
+} from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -23,12 +30,6 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubTabs } from 'components/utils/SubTabs'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
-import {
-  useDeleteWorkbenchMutation,
-  useWorkbenchQuery,
-  WorkbenchQuery,
-  WorkbenchTinyFragment,
-} from 'generated/graphql'
 import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import {
