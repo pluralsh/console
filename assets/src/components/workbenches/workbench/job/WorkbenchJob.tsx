@@ -5,23 +5,17 @@ import {
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
-import { Confirm } from 'components/utils/Confirm'
 import { MetadataIcons } from 'components/utils/MetadataIcons'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
-import {
-  useCancelWorkbenchJobMutation,
-  useWorkbenchJobQuery,
-  WorkbenchJobStatus,
-} from 'generated/graphql'
+import { useWorkbenchJobQuery } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -41,9 +35,6 @@ import { prettifyPrompt } from 'components/utils/contentEditableChips'
 export function WorkbenchJob() {
   const theme = useTheme()
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
-  const { popToast } = useSimpleToast()
-  const [cancelModalOpen, setCancelModalOpen] = useState(false)
-
   const {
     data,
     loading,
@@ -72,23 +63,6 @@ export function WorkbenchJob() {
   const trimmedPrompt = job?.prompt?.trim() ?? ''
   const breadcrumbPrompt = prettifyPrompt(trimmedPrompt) || 'workbench job'
 
-  const [cancelWorkbenchJob, { loading: cancelLoading, error: cancelError }] =
-    useCancelWorkbenchJobMutation({
-      awaitRefetchQueries: true,
-      refetchQueries: [
-        'WorkbenchJob',
-        'WorkbenchJobs',
-        'WorkbenchJobActivities',
-      ],
-      onCompleted: () => {
-        setCancelModalOpen(false)
-        popToast({ content: 'job cancelled', severity: 'danger' })
-      },
-    })
-
-  const canCancelJob =
-    job?.status === WorkbenchJobStatus.Pending ||
-    job?.status === WorkbenchJobStatus.Running
   const jobTools = job?.workbench?.tools?.filter(isNonNullable) ?? []
 
   useSetBreadcrumbs(
@@ -197,21 +171,10 @@ export function WorkbenchJob() {
             align="center"
             gap="small"
           >
-            {canCancelJob ? (
-              <Button
-                small
-                destructive
-                onClick={() => setCancelModalOpen(true)}
-              >
-                Cancel job
-              </Button>
-            ) : (
-              <RunStatusChip
-                loading={isLoading}
-                status={job?.status}
-                showSpinner={false}
-              />
-            )}
+            <RunStatusIcon
+              fullColor
+              status={job?.status}
+            />
             <SaveWorkbenchPromptButton
               workbenchId={workbenchId}
               prompt={trimmedPrompt}
@@ -219,17 +182,6 @@ export function WorkbenchJob() {
           </Flex>
         </StretchedFlex>
         <WorkbenchJobActivities jobId={jobId} />
-        <Confirm
-          open={cancelModalOpen}
-          close={() => setCancelModalOpen(false)}
-          destructive
-          label="Cancel job"
-          loading={cancelLoading}
-          error={cancelError}
-          submit={() => cancelWorkbenchJob({ variables: { jobId } })}
-          title="Cancel job"
-          text="Are you sure you want to cancel this job?"
-        />
       </WrapperSC>
       {!isOpen && (
         <PanelOpenBtnSC
