@@ -218,7 +218,7 @@ config :kazan, :httpoison_options,
   hackney: [pool: :kazan_pool]
 
 config :req_llm,
-  receive_timeout: :timer.minutes(1),
+  receive_timeout: :timer.minutes(3),
   finch: [
     name: ReqLLM.Finch,
     pools: %{
