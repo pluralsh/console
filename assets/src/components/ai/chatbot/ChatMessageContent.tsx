@@ -110,9 +110,13 @@ export function ChatMessageContent({
           isPending={isPending}
         />
       ) : (
-        <SimpleToolCall
-          content={content ?? ''}
+        <SimpleToolMessageContent
+          id={id}
+          content={content}
           attributes={attributes}
+          confirm={confirm}
+          confirmedAt={confirmedAt}
+          serverName={serverName}
           isPending={isPending}
         />
       )
@@ -426,6 +430,116 @@ function ToolMessageContent({
     </Flex>
   )
 }
+
+function SimpleToolMessageContent({
+  id,
+  content,
+  attributes,
+  confirm,
+  confirmedAt,
+  serverName,
+  isPending,
+}: ChatMessageContentProps) {
+  const pendingConfirmation = confirm && !confirmedAt
+  const customResultBody = getToolMessageDetailsBody(content, attributes)
+  const [deleteMessage, { loading: deleteLoading, error: deleteError }] =
+    useDeleteChatMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
+    })
+  const [confirmMessage, { loading: confirmLoading, error: confirmError }] =
+    useConfirmChatMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: ['ChatThreadDetails', 'ChatThreadMessages'],
+    })
+
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      width="100%"
+    >
+      {(confirmError || deleteError) && (
+        <GqlError error={confirmError || deleteError} />
+      )}
+      <SimpleToolCall
+        content={content ?? ''}
+        attributes={attributes}
+        isPending={isPending}
+        customLabel={
+          serverName || pendingConfirmation ? (
+            <ToolCallLabel
+              toolName={attributes?.tool?.name}
+              serverName={serverName}
+              pendingConfirmation={!!pendingConfirmation}
+              isPending={isPending}
+            />
+          ) : undefined
+        }
+        customResultBody={customResultBody}
+      />
+      {pendingConfirmation && (
+        <Flex
+          justify="flex-end"
+          gap="small"
+        >
+          <Button
+            secondary
+            small
+            loading={deleteLoading}
+            onClick={() => deleteMessage({ variables: { id: id ?? '' } })}
+          >
+            Cancel
+          </Button>
+          <Button
+            small
+            loading={confirmLoading}
+            onClick={() => confirmMessage({ variables: { id: id ?? '' } })}
+          >
+            Confirm
+          </Button>
+        </Flex>
+      )}
+    </Flex>
+  )
+}
+
+function ToolCallLabel({
+  toolName,
+  serverName,
+  pendingConfirmation,
+  isPending,
+}: {
+  toolName?: Nullable<string>
+  serverName?: Nullable<string>
+  pendingConfirmation?: boolean
+  isPending?: boolean
+}) {
+  const { colors } = useTheme()
+
+  return (
+    <Flex
+      gap="xsmall"
+      align="center"
+      wrap="wrap"
+    >
+      <CaptionP
+        $shimmer={isPending}
+        $color="text-xlight"
+      >
+        {pendingConfirmation
+          ? 'Pending confirmation for'
+          : isPending
+            ? 'Calling'
+            : 'Called'}{' '}
+        {serverName ? `MCP tool for ${serverName}` : 'tool'}{' '}
+        <span css={{ color: colors['text-light'] }}>{toolName}</span>
+      </CaptionP>
+      {serverName && <Chip size="small">{serverName}</Chip>}
+    </Flex>
+  )
+}
+
 const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   width: 480,
   maxWidth: '100%',
@@ -443,16 +557,24 @@ enum ToolCall {
 }
 
 function ToolMessageDetails({ content, attributes }): ReactElement | null {
+  return getToolMessageDetailsBody(content, attributes)
+}
+
+function getToolMessageDetailsBody(
+  content?: Nullable<string>,
+  attributes?: Nullable<ChatTypeAttributes>
+): ReactElement | null {
   if (!content) {
     return null
   }
+  const query = attributes?.tool?.arguments?.query
 
   switch (attributes?.tool?.name) {
     case ToolCall.CloudQuery:
       return (
         <CloudObjectsCard
           content={content}
-          query={attributes?.tool?.arguments?.query}
+          query={typeof query === 'string' ? query : undefined}
         />
       )
     default:

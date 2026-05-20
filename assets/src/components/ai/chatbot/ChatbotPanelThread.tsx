@@ -24,6 +24,11 @@ import { useChatbot } from '../AIContext.tsx'
 import { ChatbotPanelEvidence } from './ChatbotPanelEvidence.tsx'
 import { ChatbotPanelExamplePrompts } from './ChatbotPanelExamplePrompts.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
+import {
+  ChatDisplayItem,
+  ChatToolCallGroup,
+  groupConsecutiveToolMessages,
+} from './ChatToolCallGroup.tsx'
 import { ChatInput } from './input/ChatInput.tsx'
 
 export function ChatbotPanelThread({
@@ -93,6 +98,16 @@ export function ChatbotPanelThread({
       ),
     }),
     [curThreadDetails]
+  )
+
+  const displayItems = useMemo(
+    () => groupConsecutiveToolMessages(messages),
+    [messages]
+  )
+
+  const streamedDisplayItems = useMemo(
+    () => groupConsecutiveToolMessages(streamedMessages.map(toStreamedChat)),
+    [streamedMessages]
   )
 
   const scrollToBottom = useCallback(
@@ -192,24 +207,20 @@ export function ChatbotPanelThread({
           <VirtualList
             isReversed
             listRef={messageListRef}
-            data={messages}
+            data={displayItems}
+            getRowId={(row) =>
+              Array.isArray(row) ? (row[0]?.id ?? 'tool-group') : (row.id ?? '')
+            }
             loadNextPage={fetchNextPage}
             hasNextPage={hasNextPage}
             isLoadingNextPage={isLoadingNextPage}
             renderer={({ rowData }) => (
-              <div>
-                <ChatMessage
-                  {...rowData}
-                  threadId={threadId ?? ''}
-                  serverName={rowData.server?.name}
-                  session={curThreadDetails?.session}
-                />
-                {!isEmpty(evidence) && // only attaches evidence to the initial insight
-                  rowData.seq === 0 &&
-                  rowData.role === AiRole.Assistant && (
-                    <ChatbotPanelEvidence evidence={evidence ?? []} />
-                  )}
-              </div>
+              <ChatbotMessageRow
+                item={rowData}
+                threadId={threadId ?? ''}
+                session={curThreadDetails?.session}
+                evidence={evidence}
+              />
             )}
             bottomContent={
               <>
@@ -221,28 +232,24 @@ export function ChatbotPanelThread({
                     disableActions="keep-spacing"
                   />
                 )}
-                {streaming && !isEmpty(streamedMessages) ? (
-                  streamedMessages.map((message, i) => {
-                    const { tool, role } = message[0] ?? {}
-                    return (
+                {streaming && !isEmpty(streamedDisplayItems) ? (
+                  streamedDisplayItems.map((item) =>
+                    Array.isArray(item) ? (
+                      <ChatToolCallGroup
+                        key={item[0]?.id ?? 'streaming-tool-group'}
+                        messages={item}
+                        isRunning
+                        chatMessageProps={streamingToolMessageProps}
+                      />
+                    ) : (
                       <ChatMessage
-                        key={i}
+                        key={item.id}
+                        {...item}
                         isStreaming
                         disableActions="keep-spacing"
-                        role={role ?? AiRole.Assistant}
-                        type={!!tool ? ChatType.Tool : ChatType.Text}
-                        attributes={
-                          tool ? { tool: { name: tool.name } } : undefined
-                        }
-                        isPending={!!tool?.pending}
-                        highlightToolContent={false}
-                        content={message
-                          .toSorted((a, b) => a.seq - b.seq)
-                          .map((delta) => delta.content)
-                          .join('')}
                       />
                     )
-                  })
+                  )
                 ) : sendingMessage ||
                   curThreadDetails?.session?.done === false ? (
                   <TypingIndicator css={{ marginLeft: theme.spacing.small }} />
@@ -267,6 +274,79 @@ export function ChatbotPanelThread({
       />
     </Flex>
   )
+}
+
+function ChatbotMessageRow({
+  item,
+  threadId,
+  session,
+  evidence,
+}: {
+  item: ChatDisplayItem
+  threadId: string
+  session: Parameters<typeof ChatMessage>[0]['session']
+  evidence?: Parameters<typeof ChatbotPanelEvidence>[0]['evidence']
+}) {
+  return (
+    <div>
+      {Array.isArray(item) ? (
+        <ChatToolCallGroup
+          messages={item}
+          chatMessageProps={groupedToolMessageProps}
+          getChatMessageProps={(message) => ({
+            threadId,
+            serverName: message.server?.name,
+            session,
+          })}
+        />
+      ) : (
+        <ChatMessage
+          {...item}
+          threadId={threadId}
+          serverName={item.server?.name}
+          session={session}
+        />
+      )}
+      {!Array.isArray(item) && // only attaches evidence to the initial insight
+        !isEmpty(evidence) &&
+        item.seq === 0 &&
+        item.role === AiRole.Assistant && (
+          <ChatbotPanelEvidence evidence={evidence ?? []} />
+        )}
+    </div>
+  )
+}
+
+function toStreamedChat(
+  message: AiDeltaFragment[],
+  index: number
+): ChatFragment {
+  const { tool, role } = message[0] ?? {}
+
+  return {
+    id: `streaming-${index}`,
+    seq: index,
+    role: role ?? AiRole.Assistant,
+    type: !!tool ? ChatType.Tool : ChatType.Text,
+    attributes: tool ? { tool: { name: tool.name } } : undefined,
+    isPending: !!tool?.pending,
+    content: message
+      .toSorted((a, b) => a.seq - b.seq)
+      .map((delta) => delta.content)
+      .join(''),
+  } as ChatFragment
+}
+
+const groupedToolMessageProps = {
+  disableActions: 'no-spacing' as const,
+  toolDisplayType: 'simple' as const,
+  style: { padding: 0 },
+}
+
+const streamingToolMessageProps = {
+  ...groupedToolMessageProps,
+  isStreaming: true,
+  highlightToolContent: false,
 }
 
 export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
