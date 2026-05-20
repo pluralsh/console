@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	graphql "github.com/hasura/go-graphql-client"
 	"github.com/hasura/go-graphql-client/pkg/jsonutil"
@@ -199,6 +200,7 @@ func (s *socket) newSubscriptionClient(gen uint64) *graphql.SubscriptionClient {
 		WithRetryTimeout(0).
 		WithExitWhenNoSubscription(false).
 		WithSyncMode(true).
+		WithWebSocketKeepAlive(30 * time.Second).
 		OnConnected(func() {
 			if s.isStaleOrClosed(gen) {
 				return
