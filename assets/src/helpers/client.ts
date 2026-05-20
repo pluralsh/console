@@ -91,6 +91,12 @@ export function buildClient(
         const token = fetchToken()
         return token ? { token: `Bearer ${token}` } : {}
       },
+      // Send a JSON-level ping every 5s so Bandit's 60s read_timeout is never hit
+      // and silent TCP drops (from LBs / NAT) are detected within one interval.
+      // Absinthe responds to {"type":"ping"} with {"type":"pong"} per graphql-ws spec.
+      keepAlive: 5_000,
+      // Never give up reconnecting — this is a long-lived application socket.
+      retryAttempts: Infinity,
     })
   )
 
