@@ -8,11 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
+	console "github.com/pluralsh/console/go/client"
+
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -290,17 +292,14 @@ func (in *Claude) ConfigureBabysitRun() error {
 	return settings.WriteToFile(filepath.Join(in.configPath(), "settings.local.json"))
 }
 
-func (in *Claude) Configure(consoleURL, consoleToken, _ string) error {
+func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeClaude); err != nil {
 		return err
 	}
 
 	mcp := NewMCPConfigBuilder()
 	mcp.
-		AddServer("plural", "mcpserver").
-		Env("PLRL_CONSOLE_TOKEN", consoleToken).
-		Env("PLRL_CONSOLE_URL", consoleURL).
-		Env("PLRL_AGENT_RUN_ID", in.Config.Run.ID).
+		AddURLServer("plural", common.AgentMCPServerURL).
 		Done()
 
 	if len(in.Config.Run.Runtime.ExaMcpConfigs) > 0 {

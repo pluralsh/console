@@ -19,7 +19,6 @@ const (
 type ConfigTemplateInput struct {
 	ConsoleURL   string
 	ConsoleToken string
-	DeployToken  string
 	AgentRunID   string
 
 	// Fields used when AI proxy is disabled.

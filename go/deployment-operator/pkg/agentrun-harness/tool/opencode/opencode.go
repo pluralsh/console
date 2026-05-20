@@ -8,9 +8,10 @@ import (
 	"path"
 	"path/filepath"
 
+	"k8s.io/klog/v2"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
-	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -22,7 +23,7 @@ func (in *Opencode) Run(ctx context.Context, options ...exec.Option) {
 	go in.start(ctx, options...)
 }
 
-func (in *Opencode) Configure(consoleURL, consoleToken, deployToken string) error {
+func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeOpencode); err != nil {
 		return err
 	}
@@ -35,7 +36,6 @@ func (in *Opencode) Configure(consoleURL, consoleToken, deployToken string) erro
 	input := &ConfigTemplateInput{
 		ConsoleURL:    consoleURL,
 		ConsoleToken:  consoleToken,
-		DeployToken:   deployToken,
 		AgentRunID:    in.Config.Run.ID,
 		Provider:      in.provider,
 		Endpoint:      endpoint,

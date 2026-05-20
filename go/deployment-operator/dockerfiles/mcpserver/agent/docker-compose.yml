@@ -1,0 +1,106 @@
+services:
+  shared-permissions:
+    build:
+      context: ../../../..
+      dockerfile: deployment-operator/dockerfiles/agent-harness/base.Dockerfile
+      args:
+        VERSION: "0.0.0-dev"
+    image: agent-harness-base:local
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-lc"]
+    command:
+      - "mkdir -p /plural/shared && chown -R 65532:65532 /plural/shared && chmod 0775 /plural/shared"
+    volumes:
+      - shared-context:/plural/shared
+    restart: "no"
+
+  bootstrap:
+    image: agent-harness-base:local
+    depends_on:
+      shared-permissions:
+        condition: service_completed_successfully
+    entrypoint: ["/agent-bootstrap"]
+    command: ["--working-dir=/plural/shared"]
+    environment:
+      PLRL_CONSOLE_URL: ${PLRL_CONSOLE_URL:?PLRL_CONSOLE_URL is required}
+      PLRL_DEPLOY_TOKEN: ${PLRL_DEPLOY_TOKEN:?PLRL_DEPLOY_TOKEN is required}
+      PLRL_AGENT_RUN_ID: ${PLRL_AGENT_RUN_ID:?PLRL_AGENT_RUN_ID is required}
+      PLRL_GIT_PROXY: ${PLRL_GIT_PROXY:-}
+    volumes:
+      - shared-context:/plural/shared
+    restart: "no"
+
+  mcpserver:
+    image: agent-harness-base:local
+    depends_on:
+      shared-permissions:
+        condition: service_completed_successfully
+      bootstrap:
+        condition: service_completed_successfully
+    entrypoint: ["/agent-mcpserver"]
+    command:
+      - "--address=:8080"
+      - "--grpc-address=:8081"
+      - "--v=4"
+    environment:
+      PLRL_CONSOLE_URL: ${PLRL_CONSOLE_URL:?PLRL_CONSOLE_URL is required}
+      PLRL_CONSOLE_TOKEN: ${PLRL_CONSOLE_TOKEN:?PLRL_CONSOLE_TOKEN is required}
+      PLRL_AGENT_RUN_ID: ${PLRL_AGENT_RUN_ID:?PLRL_AGENT_RUN_ID is required}
+      GIT_ACCESS_TOKEN: ${GIT_ACCESS_TOKEN:?GIT_ACCESS_TOKEN is required}
+      PLRL_GIT_PROXY: ${PLRL_GIT_PROXY:-}
+      PLRL_EXCLUDE_TOOLS: ${PLRL_EXCLUDE_TOOLS:-}
+    volumes:
+      - shared-context:/plural/shared
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  harness:
+    build:
+      context: ../../../..
+      dockerfile: deployment-operator/dockerfiles/agent-harness/${PLRL_AGENT_PROVIDER:-opencode}.Dockerfile
+      args:
+        AGENT_HARNESS_BASE_IMAGE_REPO: agent-harness-base
+        AGENT_HARNESS_BASE_IMAGE_TAG: local
+    image: agent-harness-${PLRL_AGENT_PROVIDER:-opencode}:local
+    depends_on:
+      shared-permissions:
+        condition: service_completed_successfully
+      bootstrap:
+        condition: service_completed_successfully
+      mcpserver:
+        condition: service_healthy
+    # Simulate Kubernetes pod networking where sidecars share localhost.
+    network_mode: service:mcpserver
+    environment:
+      PLRL_CONSOLE_URL: ${PLRL_CONSOLE_URL:?PLRL_CONSOLE_URL is required}
+      PLRL_DEPLOY_TOKEN: ${PLRL_DEPLOY_TOKEN:?PLRL_DEPLOY_TOKEN is required}
+      PLRL_AGENT_RUN_ID: ${PLRL_AGENT_RUN_ID:?PLRL_AGENT_RUN_ID is required}
+      PLRL_CODEX_MODEL: ${PLRL_CODEX_MODEL:-}
+      PLRL_CODEX_API_KEY: ${PLRL_CODEX_API_KEY:-}
+      PLRL_CODEX_ENDPOINT: ${PLRL_CODEX_ENDPOINT:-}
+      PLRL_CLAUDE_MODEL: ${PLRL_CLAUDE_MODEL:-}
+      PLRL_CLAUDE_TOKEN: ${PLRL_CLAUDE_TOKEN:-}
+      PLRL_CLAUDE_ENDPOINT: ${PLRL_CLAUDE_ENDPOINT:-}
+      PLRL_GEMINI_MODEL: ${PLRL_GEMINI_MODEL:-}
+      PLRL_GEMINI_API_KEY: ${PLRL_GEMINI_API_KEY:-}
+      PLRL_GEMINI_ENDPOINT: ${PLRL_GEMINI_ENDPOINT:-}
+      PLRL_OPENCODE_PROVIDER: ${PLRL_OPENCODE_PROVIDER:-}
+      PLRL_OPENCODE_ENDPOINT: ${PLRL_OPENCODE_ENDPOINT:-}
+      PLRL_OPENCODE_MODEL: ${PLRL_OPENCODE_MODEL:-}
+      PLRL_OPENCODE_TOKEN: ${PLRL_OPENCODE_TOKEN:-}
+      PLRL_GIT_PROXY: ${PLRL_GIT_PROXY:-}
+      PLRL_DIND_ENABLED: ${PLRL_DIND_ENABLED:-false}
+      PLRL_BROWSER_ENABLED: ${PLRL_BROWSER_ENABLED:-false}
+    volumes:
+      - shared-context:/plural/shared
+    restart: "no"
+
+volumes:
+  shared-context:

@@ -6,8 +6,9 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
+
+	"github.com/pluralsh/console/go/client"
 
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
@@ -30,7 +31,7 @@ func (in *UpdateAnalysis) Install(server *server.MCPServer) {
 				mcp.WithStringItems(),
 			),
 		),
-		in.handler,
+		logHandlerWrapper(in.handler),
 	)
 }
 

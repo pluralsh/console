@@ -6,21 +6,28 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
+
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const (
+	EnvAddress     = "PLRL_MCP_ADDRESS"
+	EnvGRPCAddress = "PLRL_MCP_GRPC_ADDRESS"
+
 	EnvConsoleToken = "PLRL_CONSOLE_TOKEN"
 	EnvExcludeTools = "PLRL_EXCLUDE_TOOLS"
 )
 
 var (
+	argAddress      = pflag.String("address", helpers.GetEnv(EnvAddress, common.AgentMCPServerAddress), "Address to listen on")
+	argGRPCAddress  = pflag.String("grpc-address", helpers.GetEnv(EnvGRPCAddress, common.AgentMCPGRPCServerAddress), "Address for internal babysit gRPC API listener")
 	argConsoleUrl   = pflag.String("console-url", helpers.GetEnv(controller.EnvConsoleURL, ""), "URL to the Console, i.e. https://console.onplural.sh")
 	argConsoleToken = pflag.String("console-token", helpers.GetEnv(EnvConsoleToken, ""), "Deploy token to the Console API")
 	argAgentRunID   = pflag.String("agent-run-id", helpers.GetEnv(controller.EnvAgentRunID, ""), "ID of the Agent Run being executed")
@@ -39,6 +46,22 @@ func init() {
 	pflag.Parse()
 
 	klog.V(log.LogLevelMinimal).InfoS("configured log level", "v", LogLevel())
+}
+
+func Address() string {
+	if argAddress == nil || len(*argAddress) == 0 {
+		return common.AgentMCPServerAddress
+	}
+
+	return *argAddress
+}
+
+func GRPCAddress() string {
+	if argGRPCAddress == nil || len(*argGRPCAddress) == 0 {
+		return common.AgentMCPGRPCServerAddress
+	}
+
+	return *argGRPCAddress
 }
 
 func ConsoleURL() string {

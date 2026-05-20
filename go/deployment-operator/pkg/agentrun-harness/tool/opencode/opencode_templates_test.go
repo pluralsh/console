@@ -45,32 +45,17 @@ func renderJSON(t *testing.T, input *ConfigTemplateInput) map[string]any {
 	return out
 }
 
-func TestConfigTemplate_PluraMcpExcludeTools(t *testing.T) {
-	t.Run("WRITE mode omits PLRL_EXCLUDE_TOOLS from plural MCP env", func(t *testing.T) {
+func TestConfigTemplate_PluralMcpServer(t *testing.T) {
+	t.Run("plural MCP server uses in-pod remote URL", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
 
 		mcp := out["mcp"].(map[string]any)
 		plural := mcp["plural"].(map[string]any)
-		env := plural["environment"].(map[string]any)
-
-		if _, ok := env["PLRL_EXCLUDE_TOOLS"]; ok {
-			t.Fatalf("did not expect PLRL_EXCLUDE_TOOLS in WRITE mode, got %v", env["PLRL_EXCLUDE_TOOLS"])
+		if plural["type"] != "remote" {
+			t.Fatalf("expected plural MCP type remote, got %v", plural["type"])
 		}
-	})
-
-	t.Run("ANALYZE mode excludes write tools from plural env", func(t *testing.T) {
-		out := renderJSON(t, baseInput(console.AgentRunModeAnalyze))
-
-		mcp := out["mcp"].(map[string]any)
-		plural := mcp["plural"].(map[string]any)
-		env := plural["environment"].(map[string]any)
-
-		excluded, ok := env["PLRL_EXCLUDE_TOOLS"].(string)
-		if !ok {
-			t.Fatal("PLRL_EXCLUDE_TOOLS missing from plural MCP environment in ANALYZE mode")
-		}
-		if excluded != "createBranch,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos" {
-			t.Errorf("unexpected PLRL_EXCLUDE_TOOLS in ANALYZE mode: %q", excluded)
+		if plural["url"] != "http://127.0.0.1:8080/mcp" {
+			t.Fatalf("expected plural MCP url http://127.0.0.1:8080/mcp, got %v", plural["url"])
 		}
 	})
 }

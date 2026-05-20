@@ -20,3 +20,12 @@ func FailAgentRun(client console.Client, id string, errorMsg string) error {
 	})
 	return err
 }
+
+func RestartAgentRun(client console.Client, id string) error {
+	_, err := client.UpdateAgentRun(context.Background(), id, gqlclient.AgentRunStatusAttributes{
+		Status:   gqlclient.AgentRunStatusPending,
+		Messages: nil, // clear messages
+		Error:    nil, // clear error
+	})
+	return err
+}

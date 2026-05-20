@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package babysit;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/internal/proto/scm";
+
+service ScmService {
+  rpc GetPRDetails(GetPRDetailsRequest) returns (GetPRDetailsResponse);
+}
+
+message GetPRDetailsRequest {
+  string pr_url = 1;
+}
+
+message PRComment {
+  string id = 1;
+  string type = 2;
+  string author = 3;
+  string body = 4;
+  int64 created_at_unix = 5;
+}
+
+message CICheck {
+  string name = 1;
+  string status = 2;
+  string conclusion = 3;
+  int64 check_run_id = 4;
+}
+
+message PRDetails {
+  string title = 1;
+  string body = 2;
+  string head_ref = 3;
+  string state = 4;
+  repeated PRComment comments = 5;
+  repeated CICheck ci_checks = 6;
+}
+
+message GetPRDetailsResponse {
+  PRDetails details = 1;
+}

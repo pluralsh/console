@@ -67,7 +67,7 @@ func (t *recordingTool) BabysitRun(context.Context, *toolv1.BabysitContext) bool
 
 func (t *recordingTool) ConfigureBabysitRun() error { return nil }
 
-func (t *recordingTool) Configure(_, _, _ string) error { return nil }
+func (t *recordingTool) Configure(_, _ string) error { return nil }
 
 func (t *recordingTool) OnMessage(func(*gqlclient.AgentMessageAttributes)) {}
 

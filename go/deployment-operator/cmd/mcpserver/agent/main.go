@@ -1,9 +1,17 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
+	"fmt"
+	"net"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/samber/lo"
+	"google.golang.org/grpc"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent/args"
@@ -11,6 +19,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
 
 const (
@@ -30,15 +39,122 @@ func init() {
 func main() {
 	klog.V(log.LogLevelDefault).InfoS("starting plural mcp server", "version", Version)
 
+	if err := run(); err != nil {
+		klog.Fatalf("plural mcp server exited with error: %v", err)
+	}
+}
+
+func run() error {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	client := console.New(args.ConsoleURL(), args.ConsoleToken())
-	server := agent.NewServer(
+
+	mcpServer := agent.NewServer(
 		client,
 		createServerOptions(client)...,
 	)
 
-	if err := server.Start(); err != nil {
-		klog.Fatalf("Plural Console MCP server error: %v, exiting", err)
+	grpcServer := grpc.NewServer()
+	scm.RegisterGRPCServer(grpcServer)
+
+	mcpErrChan := startMcpServer(mcpServer)
+	scmErrChan, err := startScmGrpcServer(grpcServer)
+	if err != nil {
+		return err
 	}
+
+	var serveErr error
+	select {
+	case <-ctx.Done():
+		klog.V(log.LogLevelDefault).InfoS("shutdown signal received")
+	case err = <-mcpErrChan:
+		if err != nil {
+			serveErr = fmt.Errorf("mcp server failed: %w", err)
+		} else {
+			klog.V(log.LogLevelDefault).InfoS("mcp server stopped")
+		}
+	case err = <-scmErrChan:
+		if err != nil {
+			serveErr = fmt.Errorf("scm grpc server failed: %w", err)
+		} else {
+			klog.V(log.LogLevelDefault).InfoS("scm grpc server stopped")
+		}
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	shutdownErr := shutdownServers(shutdownCtx, grpcServer, mcpServer)
+	if serveErr != nil {
+		if shutdownErr != nil {
+			return fmt.Errorf("%v; shutdown error: %w", serveErr, shutdownErr)
+		}
+		return serveErr
+	}
+
+	if shutdownErr != nil {
+		return shutdownErr
+	}
+
+	return nil
+}
+
+func shutdownServers(ctx context.Context, grpcServer *grpc.Server, mcpServer *agent.Server) error {
+	grpcDone := make(chan struct{})
+	go func() {
+		grpcServer.GracefulStop()
+		close(grpcDone)
+	}()
+
+	select {
+	case <-grpcDone:
+	case <-ctx.Done():
+		grpcServer.Stop()
+	}
+
+	if err := mcpServer.Shutdown(ctx); err != nil && !errors.Is(err, context.Canceled) {
+		return fmt.Errorf("mcp server shutdown failed: %w", err)
+	}
+
+	return nil
+}
+
+func startMcpServer(server *agent.Server) <-chan error {
+	errChan := make(chan error, 1)
+
+	go func() {
+		errChan <- server.Start(args.Address())
+		close(errChan)
+	}()
+
+	return errChan
+}
+
+func startScmGrpcServer(grpcServer *grpc.Server) (<-chan error, error) {
+	listener, err := net.Listen("tcp", args.GRPCAddress())
+	if err != nil {
+		return nil, fmt.Errorf("could not listen for scm grpc api: %w", err)
+	}
+
+	errChan := make(chan error, 1)
+
+	go func() {
+		defer func() { _ = listener.Close() }()
+		klog.V(log.LogLevelDefault).InfoS("starting scm grpc api", "address", args.GRPCAddress())
+		serveErr := grpcServer.Serve(listener)
+
+		if serveErr != nil && !errors.Is(serveErr, grpc.ErrServerStopped) {
+			errChan <- serveErr
+			close(errChan)
+			return
+		}
+
+		errChan <- nil
+		close(errChan)
+	}()
+
+	return errChan, nil
 }
 
 func createServerOptions(client console.Client) []agent.Option {

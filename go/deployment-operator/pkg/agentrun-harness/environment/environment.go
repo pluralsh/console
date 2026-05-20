@@ -20,6 +20,7 @@ import (
 // gitSigningKeyPath is the mount path for the SSH signing key inside the container.
 // Defined in pkg/common to stay in sync with the controller's agentrun_pod.go.
 const gitSigningKeyPath = common.GitSigningKeyMountPath
+const gitAskpassFileName = ".git-askpass"
 
 // Setup implements Environment interface.
 func (in *environment) Setup() error {
@@ -50,13 +51,15 @@ func (in *environment) cloneRepository() error {
 	}
 
 	repoDir := "repository"
+	repoDirPath := path.Join(in.dir, repoDir)
+	askpassPath, err := in.configureGitCredentials()
+	if err != nil {
+		return err
+	}
 
-	// Add auth if SCM credentials are available
-	if in.agentRun.ScmCreds != nil {
-		klog.V(log.LogLevelDefault).InfoS("configuring git credentials", "username", in.agentRun.ScmCreds.Username)
-		if err := os.Setenv("GIT_ACCESS_TOKEN", in.agentRun.ScmCreds.Token); err != nil {
-			return err
-		}
+	if _, err := os.Stat(path.Join(repoDirPath, ".git")); err == nil {
+		klog.V(log.LogLevelInfo).InfoS("repository already exists, skipping clone", "dir", repoDirPath)
+		return in.configureRepository(repoDirPath, "", "", askpassPath)
 	}
 
 	// Set proxy for clone via environment variable so it takes effect immediately.
@@ -95,19 +98,36 @@ func (in *environment) cloneRepository() error {
 		userEmail = "agent@plural.sh" // fallback
 	}
 
-	repoDirPath := path.Join(in.dir, repoDir)
-	if err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"config", "user.name", userName}),
-		exec.WithDir(repoDirPath),
-	).Run(context.Background()); err != nil {
-		return err
+	repoDirPath = path.Join(in.dir, repoDir)
+	return in.configureRepository(repoDirPath, userName, userEmail, askpassPath)
+}
+
+func (in *environment) configureRepository(repoDirPath, userName, userEmail, askpassPath string) error {
+	if userName != "" {
+		if err := exec.NewExecutable("git",
+			exec.WithArgs([]string{"config", "user.name", userName}),
+			exec.WithDir(repoDirPath),
+		).Run(context.Background()); err != nil {
+			return err
+		}
 	}
 
-	if err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"config", "user.email", userEmail}),
-		exec.WithDir(repoDirPath),
-	).Run(context.Background()); err != nil {
-		return err
+	if userEmail != "" {
+		if err := exec.NewExecutable("git",
+			exec.WithArgs([]string{"config", "user.email", userEmail}),
+			exec.WithDir(repoDirPath),
+		).Run(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	if askpassPath != "" {
+		if err := exec.NewExecutable("git",
+			exec.WithArgs([]string{"config", "core.askPass", askpassPath}),
+			exec.WithDir(repoDirPath),
+		).Run(context.Background()); err != nil {
+			return err
+		}
 	}
 
 	if err := in.configureGitSigning(repoDirPath); err != nil {
@@ -129,8 +149,33 @@ func (in *environment) cloneRepository() error {
 		BaseBranch: strings.TrimSpace(string(output)),
 	}
 
-	klog.V(log.LogLevelInfo).InfoS("repository cloned", "url", in.agentRun.Repository, "dir", repoDir)
+	klog.V(log.LogLevelInfo).InfoS("repository ready", "url", in.agentRun.Repository, "dir", repoDirPath)
 	return config.Save()
+}
+
+func (in *environment) configureGitCredentials() (string, error) {
+	if in.agentRun.ScmCreds == nil || in.agentRun.ScmCreds.Token == "" {
+		return "", nil
+	}
+
+	klog.V(log.LogLevelDefault).InfoS("configuring git credentials", "username", in.agentRun.ScmCreds.Username)
+	if err := os.Setenv("GIT_ACCESS_TOKEN", in.agentRun.ScmCreds.Token); err != nil {
+		return "", err
+	}
+
+	askpassPath := path.Join(in.dir, gitAskpassFileName)
+	if err := os.WriteFile(askpassPath, []byte("#!/bin/sh\necho ${GIT_ACCESS_TOKEN}\n"), 0700); err != nil {
+		return "", err
+	}
+
+	if err := os.Setenv("GIT_ASKPASS", askpassPath); err != nil {
+		return "", err
+	}
+	if err := os.Setenv("GIT_TERMINAL_PROMPT", "0"); err != nil {
+		return "", err
+	}
+
+	return askpassPath, nil
 }
 
 // configureGitSigning configures SSH commit signing using the mounted private key.

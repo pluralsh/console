@@ -49,15 +49,10 @@
   },
   "mcp": {
     "plural": {
-      "type": "local",
-      "command": ["mcpserver"],
+      "type": "remote",
+      "url": "http://127.0.0.1:8080/mcp",
       "enabled": true,
-      "environment": {
-        "PLRL_CONSOLE_TOKEN": "{{ .ConsoleToken }}",
-        "PLRL_CONSOLE_URL": "{{ .ConsoleURL }}",
-        "PLRL_AGENT_RUN_ID": "{{ .AgentRunID }}"{{ if ne .Mode "WRITE" }},
-        "PLRL_EXCLUDE_TOOLS": "createBranch,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos"{{ end }}
-      }
+      "headers": {}
     }{{ range .ExaMcpConfigs }},
     "{{ .Name }}": {
       "type": "remote",

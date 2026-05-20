@@ -54,7 +54,7 @@ type Tool interface {
 	ConfigureBabysitRun() error
 
 	// Configure configures the provider CLI.
-	Configure(consoleURL, consoleToken, deployToken string) error
+	Configure(consoleURL, consoleToken string) error
 
 	// OnMessage registers a callback called when a new message is received.
 	OnMessage(func(message *console.AgentMessageAttributes))
