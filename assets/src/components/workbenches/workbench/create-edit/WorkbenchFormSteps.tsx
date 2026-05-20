@@ -461,7 +461,6 @@ export function WorkbenchCodingAgentStep({
               update((d) => {
                 d.agentRuntimeId = id ?? null
               })
-              setCodingRepos([])
             }}
             outerStyles={{ width: '100%' }}
           />
