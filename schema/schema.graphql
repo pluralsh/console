@@ -2768,6 +2768,18 @@ input WorkbenchToolPrometheusConnectionAttributes {
 
   "optional tenant id (e.g. for Mimir)"
   tenantId: String
+
+  "whether to sign requests with AWS SigV4"
+  awsSigv4: Boolean
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS secret access key for SigV4 authentication"
+  awsSecretAccessKey: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
 }
 
 input WorkbenchToolLokiConnectionAttributes {
@@ -3887,6 +3899,15 @@ type WorkbenchToolPrometheusConnection {
 
   "optional tenant id"
   tenantId: String
+
+  "whether requests are signed with AWS SigV4"
+  awsSigv4: Boolean
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
 }
 
 type WorkbenchToolLokiConnection {

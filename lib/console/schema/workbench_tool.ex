@@ -96,6 +96,11 @@ defmodule Console.Schema.WorkbenchTool do
         field :tenant_id, :string
         field :username,  :string
         field :password,  EncryptedString
+
+        field :aws_sigv4, :boolean, default: false
+        field :aws_access_key_id, :string
+        field :aws_secret_access_key, EncryptedString
+        field :aws_region, :string
       end
 
       embeds_one :loki, LokiConnection, on_replace: :update do
@@ -355,7 +360,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp prom_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token tenant_id username password)a)
+    |> cast(attrs, ~w(url token tenant_id username password aws_sigv4 aws_access_key_id aws_secret_access_key aws_region)a)
     |> validate_required([:url])
   end
 

@@ -166,6 +166,9 @@ fragment WorkbenchTool on WorkbenchTool {
       url
       username
       tenantId
+      awsSigv4
+      awsAccessKeyId
+      awsRegion
     }
     tempo {
       url

@@ -177,11 +177,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_prometheus_connection_attributes do
-    field :url,       non_null(:string), description: "prometheus base url"
-    field :token,     :string, description: "bearer token or api key"
-    field :username,  :string, description: "basic auth username"
-    field :password,  :string, description: "basic auth password"
-    field :tenant_id, :string, description: "optional tenant id (e.g. for Mimir)"
+    field :url,                   non_null(:string), description: "prometheus base url"
+    field :token,                 :string, description: "bearer token or api key"
+    field :username,              :string, description: "basic auth username"
+    field :password,              :string, description: "basic auth password"
+    field :tenant_id,             :string, description: "optional tenant id (e.g. for Mimir)"
+    field :aws_sigv4,             :boolean, description: "whether to sign requests with AWS SigV4"
+    field :aws_access_key_id,     :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_secret_access_key, :string, description: "AWS secret access key for SigV4 authentication"
+    field :aws_region,            :string, description: "AWS region for SigV4 authentication"
   end
 
   input_object :workbench_tool_loki_connection_attributes do
@@ -848,9 +852,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_prometheus_connection do
-    field :url,       :string, description: "prometheus base url"
-    field :username,  :string, description: "basic auth username"
-    field :tenant_id, :string, description: "optional tenant id"
+    field :url,               :string, description: "prometheus base url"
+    field :username,          :string, description: "basic auth username"
+    field :tenant_id,         :string, description: "optional tenant id"
+    field :aws_sigv4,         :boolean, description: "whether requests are signed with AWS SigV4"
+    field :aws_access_key_id, :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_region,        :string, description: "AWS region for SigV4 authentication"
   end
 
   object :workbench_tool_loki_connection do

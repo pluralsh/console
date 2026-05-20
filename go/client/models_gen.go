@@ -9934,11 +9934,13 @@ type WorkbenchJob struct {
 	// the alert this run was spawned from
 	Alert *Alert `json:"alert,omitempty"`
 	// the issue this run was spawned from
-	Issue       *Issue                          `json:"issue,omitempty"`
-	Activities  *WorkbenchJobActivityConnection `json:"activities,omitempty"`
-	MetricsTool []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
-	LogsTool    []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
-	TracesTool  []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
+	Issue *Issue `json:"issue,omitempty"`
+	// the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)
+	ReferencedJob *WorkbenchJob                   `json:"referencedJob,omitempty"`
+	Activities    *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	MetricsTool   []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
+	LogsTool      []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
+	TracesTool    []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -10731,6 +10733,12 @@ type WorkbenchToolPrometheusConnection struct {
 	Username *string `json:"username,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+	// whether requests are signed with AWS SigV4
+	AWSSigv4 *bool `json:"awsSigv4,omitempty"`
+	// AWS access key id for SigV4 authentication
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS region for SigV4 authentication
+	AWSRegion *string `json:"awsRegion,omitempty"`
 }
 
 type WorkbenchToolPrometheusConnectionAttributes struct {
@@ -10744,6 +10752,14 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id (e.g. for Mimir)
 	TenantID *string `json:"tenantId,omitempty"`
+	// whether to sign requests with AWS SigV4
+	AWSSigv4 *bool `json:"awsSigv4,omitempty"`
+	// AWS access key id for SigV4 authentication
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS secret access key for SigV4 authentication
+	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
+	// AWS region for SigV4 authentication
+	AWSRegion *string `json:"awsRegion,omitempty"`
 }
 
 type WorkbenchToolQueryData struct {
