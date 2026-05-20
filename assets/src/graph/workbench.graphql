@@ -217,6 +217,9 @@ fragment WorkbenchTool on WorkbenchTool {
     dynatrace {
       url
     }
+    sentry {
+      url
+    }
     github {
       url
       toolset

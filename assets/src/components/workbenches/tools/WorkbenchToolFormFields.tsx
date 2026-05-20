@@ -109,6 +109,8 @@ export function WorkbenchToolFormFields({
       return render(type, AzureFormFields)
     case WorkbenchToolType.Dynatrace:
       return render(type, DynatraceFormFields)
+    case WorkbenchToolType.Sentry:
+      return render(type, SentryFormFields)
   }
 }
 
@@ -873,6 +875,31 @@ function DynatraceFormFields({
         revealer
         value={c.platformToken ?? ''}
         onChange={(e) => set({ ...c, platformToken: e.target.value })}
+      />
+    </>
+  )
+}
+
+function SentryFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Sentry>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        hint="Optional. Defaults to https://sentry.io. Set the base URL for self-hosted Sentry."
+        placeholder="https://sentry.io"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <InputField
+        label="Access token"
+        required
+        revealer
+        hint="Create a user auth token or internal integration token with event:read and project:read scopes to list issues, read issue details, and retrieve stack traces."
+        value={c.accessToken ?? ''}
+        onChange={(e) => set({ ...c, accessToken: e.target.value })}
       />
     </>
   )

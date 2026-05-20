@@ -10469,6 +10469,8 @@ type WorkbenchToolConfiguration struct {
 	Cloudwatch *WorkbenchToolCloudwatchConnection `json:"cloudwatch,omitempty"`
 	// azure monitor connection (no secrets)
 	Azure *WorkbenchToolAzureConnection `json:"azure,omitempty"`
+	// sentry connection (no secrets)
+	Sentry *WorkbenchToolSentryConnection `json:"sentry,omitempty"`
 	// linear connection (no secrets)
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// slack connection (no secrets)
@@ -10514,6 +10516,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Cloudwatch *WorkbenchToolCloudwatchConnectionAttributes `json:"cloudwatch,omitempty"`
 	// azure monitor connection (metrics)
 	Azure *WorkbenchToolAzureConnectionAttributes `json:"azure,omitempty"`
+	// sentry connection (error tracking)
+	Sentry *WorkbenchToolSentryConnectionAttributes `json:"sentry,omitempty"`
 	// linear connection (ticketing)
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// slack connection (integration)
@@ -10769,6 +10773,18 @@ type WorkbenchToolQueryData struct {
 	ToolArgs map[string]any `json:"toolArgs,omitempty"`
 	// a short summary describing what this query means
 	Summary *string `json:"summary,omitempty"`
+}
+
+type WorkbenchToolSentryConnection struct {
+	// Sentry API host in use (defaults to https://sentry.io; credentials never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolSentryConnectionAttributes struct {
+	// optional Sentry API host (defaults to https://sentry.io; set for self-hosted)
+	URL *string `json:"url,omitempty"`
+	// Sentry user auth token or internal integration token (encrypted at rest)
+	AccessToken *string `json:"accessToken,omitempty"`
 }
 
 type WorkbenchToolSlackConnection struct {

@@ -156,6 +156,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
     field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
+    field :sentry,     :workbench_tool_sentry_connection_attributes, description: "sentry connection (error tracking)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :slack,      :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
     field :teams,      :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
@@ -245,6 +246,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :client_id,       non_null(:string), description: "azure client id"
     field :client_secret,   non_null(:string), description: "azure client secret"
     field :prometheus_url,  :string, description: "Optional azure managed prometheus url if you wish to use it for metrics"
+  end
+
+  input_object :workbench_tool_sentry_connection_attributes do
+    field :url, :string,
+      description: "optional Sentry API host (defaults to https://sentry.io; set for self-hosted)"
+
+    field :access_token, :string,
+      description: "Sentry user auth token or internal integration token (encrypted at rest)"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -834,6 +843,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :dynatrace, :workbench_tool_dynatrace_connection, description: "dynatrace connection (no secrets)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
     field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
+    field :sentry,    :workbench_tool_sentry_connection, description: "sentry connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :slack,     :workbench_tool_slack_connection, description: "slack connection (no secrets)"
     field :teams,     :workbench_tool_teams_connection, description: "microsoft teams / graph connection (no secrets)"
@@ -904,6 +914,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id,       :string, description: "azure tenant id"
     field :client_id,       :string, description: "azure client id"
     field :prometheus_url,  :string, description: "optional Azure Managed Prometheus query URL for metrics tools"
+  end
+
+  object :workbench_tool_sentry_connection do
+    field :url, :string,
+      description: "Sentry API host in use (defaults to https://sentry.io; credentials never exposed)",
+      resolve: fn
+        %{url: url}, _ when is_binary(url) and url != "" -> {:ok, url}
+        _, _ -> {:ok, "https://sentry.io"}
+      end
   end
 
   object :workbench_tool_linear_connection do

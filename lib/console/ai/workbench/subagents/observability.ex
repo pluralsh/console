@@ -76,6 +76,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       _ -> false
     end)
     |> Enum.flat_map(fn
+      %WorkbenchTool{tool: :sentry} = tool -> SentryTools.expand(tool)
       %WorkbenchTool{categories: [_ | _] = categories} = tool ->
         Enum.flat_map(categories, fn c -> to_tool(tool, c) end)
       _ -> []
@@ -85,7 +86,6 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp to_tool(%WorkbenchTool{} = tool, :metrics), do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}]
   defp to_tool(%WorkbenchTool{} = tool, :logs), do: [%Logs{tool: tool}]
   defp to_tool(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
-  defp to_tool(%WorkbenchTool{tool: :sentry} = tool, _), do: SentryTools.expand(tool)
   defp to_tool(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns])

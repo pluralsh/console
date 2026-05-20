@@ -55,6 +55,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Dynatrace,
   WorkbenchToolType.Cloudwatch,
   WorkbenchToolType.Azure,
+  WorkbenchToolType.Sentry,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -86,6 +87,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Dynatrace]: 'dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
   [WorkbenchToolType.Azure]: 'azure',
+  [WorkbenchToolType.Sentry]: 'sentry',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -245,6 +247,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Query Azure Monitor metrics and logs for Azure resources.',
   [WorkbenchToolType.Jaeger]:
     'Query distributed traces from Jaeger with structured filters.',
+  [WorkbenchToolType.Sentry]:
+    'Connect to Sentry to list issues, inspect error details, and read stack traces.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -392,4 +396,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,
   [WorkbenchToolType.Azure]: AzureLogoIcon,
   [WorkbenchToolType.Jaeger]: ToolsIcon,
+  [WorkbenchToolType.Sentry]: SentryLogoIcon,
 }

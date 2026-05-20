@@ -29,7 +29,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Slack]: extractSlackMetadata,
   [WorkbenchToolType.Teams]: extractTeamsMetadata,
   [WorkbenchToolType.Mcp]: () => [],
-  [WorkbenchToolType.Sentry]: () => [],
+  [WorkbenchToolType.Sentry]: extractSentryMetadata,
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
   [WorkbenchToolType.Dynatrace]: extractDynatraceMetadata,
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
@@ -169,6 +169,12 @@ function extractLinearMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.linear?.url }]
+}
+
+function extractSentryMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.sentry?.url }]
 }
 
 function extractSlackMetadata(

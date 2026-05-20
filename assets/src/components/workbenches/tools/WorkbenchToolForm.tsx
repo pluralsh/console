@@ -86,6 +86,12 @@ function scmTokenIsSet(token: string | null | undefined): boolean {
   return (token ?? '').trim().length > 0
 }
 
+function sentryConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['sentry'] | null | undefined
+): boolean {
+  return scmTokenIsSet(c?.accessToken)
+}
+
 function bitbucketDatacenterConfigurationIsComplete(
   c:
     | WorkbenchToolConfigurationAttributes['bitbucketDatacenter']
@@ -187,7 +193,10 @@ export function WorkbenchToolForm({
       hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.azureDevops?.token)) &&
     (type !== WorkbenchToolType.Teams ||
-      teamsConfigurationIsComplete(state.configuration?.teams))
+      teamsConfigurationIsComplete(state.configuration?.teams)) &&
+    (type !== WorkbenchToolType.Sentry ||
+      !!tool?.id ||
+      sentryConfigurationIsComplete(state.configuration?.sentry))
   const allowSave = hasUpdates && configurationStepComplete
   return (
     <FormCardSC>
@@ -530,6 +539,10 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         clientSecret: '',
       },
     }
+  },
+  [WorkbenchToolType.Sentry]: (config) => {
+    const { url } = config?.sentry ?? {}
+    return { sentry: { url: url ?? undefined, accessToken: '' } }
   },
 }
 

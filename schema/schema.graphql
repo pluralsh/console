@@ -2708,6 +2708,9 @@ input WorkbenchToolConfigurationAttributes {
   "azure monitor connection (metrics)"
   azure: WorkbenchToolAzureConnectionAttributes
 
+  "sentry connection (error tracking)"
+  sentry: WorkbenchToolSentryConnectionAttributes
+
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
@@ -2901,6 +2904,14 @@ input WorkbenchToolAzureConnectionAttributes {
 
   "Optional azure managed prometheus url if you wish to use it for metrics"
   prometheusUrl: String
+}
+
+input WorkbenchToolSentryConnectionAttributes {
+  "optional Sentry API host (defaults to https:\/\/sentry.io; set for self-hosted)"
+  url: String
+
+  "Sentry user auth token or internal integration token (encrypted at rest)"
+  accessToken: String
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -3848,6 +3859,9 @@ type WorkbenchToolConfiguration {
   "azure monitor connection (no secrets)"
   azure: WorkbenchToolAzureConnection
 
+  "sentry connection (no secrets)"
+  sentry: WorkbenchToolSentryConnection
+
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
@@ -3984,6 +3998,11 @@ type WorkbenchToolAzureConnection {
 
   "optional Azure Managed Prometheus query URL for metrics tools"
   prometheusUrl: String
+}
+
+type WorkbenchToolSentryConnection {
+  "Sentry API host in use (defaults to https:\/\/sentry.io; credentials never exposed)"
+  url: String
 }
 
 type WorkbenchToolLinearConnection {
