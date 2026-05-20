@@ -1,7 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Notes do
   use Console.AI.Tools.Workbench.Base
   alias Console.Schema.WorkbenchJobResult
-  alias Console.MermaidValidator
 
   embedded_schema do
     embeds_one :status, Status, on_replace: :update do
