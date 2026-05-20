@@ -20,10 +20,6 @@ spec:
       port: {{ .Values.service.port }}
     - protocol: TCP
       port: 9090
-    {{- if .Values.aiProxy.enabled }}
-    - protocol: TCP
-      port: 8080
-    {{- end }}
   - from:
     - podSelector:
         matchLabels:
@@ -37,11 +33,26 @@ spec:
       port: 4369
     - protocol: TCP
       port: 6000
+  {{- /* gRPC is only reachable from Nexus and observability-proxy pods; Nexus HTTP stays unscoped here. */}}
+  {{- if or .Values.aiProxy.enabled .Values.observabilityProxy.enabled }}
   - from:
-    - namespaceSelector:
+    {{- if .Values.aiProxy.enabled }}
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: nexus
+          app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- end }}
+    {{- if .Values.observabilityProxy.enabled }}
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: observability-proxy
+          app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- end }}
+      namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: {{ .Release.Namespace }}
     ports:
     - protocol: TCP
       port: 50051
+  {{- end }}
 {{- end }}

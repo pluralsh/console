@@ -45,8 +45,20 @@ spec:
             description: AgentRuntimeSpec defines the desired state of AgentRuntime
             properties:
               aiProxy:
-                description: AiProxy specifies whether the agent runtime should be
-                  proxied through the AI proxy.
+                description: |-
+                  AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,
+                  so provider API keys in spec.config are optional.
+
+                  Set the model on the runtime-specific config block (for example spec.config.codex.model).
+                  The proxy expects models in provider/name format (for example openai/gpt-5.4,
+                  anthropic/claude-sonnet-4-5, vertex/gemini-2.5-pro). Values that already include a "/"
+                  are passed through unchanged.
+
+                  When only a bare model id is given, the harness may prefix it by runtime type:
+                    - CLAUDE: anthropic/{model} (for example claude-sonnet-4-5 -> anthropic/claude-sonnet-4-5)
+                    - CODEX, OPENCODE: openai/{model} (for example gpt-5.4 -> openai/gpt-5.4)
+                    - GEMINI: vertex/{model}
+                    - CUSTOM: no automatic prefix; use provider/name explicitly
                 type: boolean
               allowedRepositories:
                 description: AllowedRepositories the git repositories allowed to be
@@ -1684,8 +1696,9 @@ spec:
                     description: Config for Claude CLI runtime.
                     properties:
                       apiKeySecretRef:
-                        description: ApiKeySecretRef Reference to a Kubernetes Secret
-                          containing the Claude API key.
+                        description: |-
+                          ApiKeySecretRef references a Secret containing the Claude API key.
+                          Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -1738,8 +1751,9 @@ spec:
                     description: Codex config for Codex CLI runtime.
                     properties:
                       apiKeySecretRef:
-                        description: ApiKeySecretRef Reference to a Kubernetes Secret
-                          containing the Codex API key.
+                        description: |-
+                          ApiKeySecretRef references a Secret containing the Codex API key.
+                          Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -1777,8 +1791,9 @@ spec:
                     description: Config for Gemini CLI runtime.
                     properties:
                       apiKeySecretRef:
-                        description: APIKeySecretRef is a reference to a Kubernetes
-                          Secret containing the Gemini API key.
+                        description: |-
+                          APIKeySecretRef references a Secret containing the Gemini API key.
+                          Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -1822,8 +1837,8 @@ spec:
                     properties:
                       endpoint:
                         description: |-
-                          Endpoint API endpoint for the OpenCode service.
-                          Endpoint for the OpenCode service (can be any OpenAI-compatible API endpoint).
+                          Endpoint optionally overrides the provider baseURL in opencode.json.
+                          When omitted, the harness omits baseURL so OpenCode uses the models.dev default for the provider.
                         type: string
                       extraArgs:
                         description: |-
@@ -1836,18 +1851,70 @@ spec:
                       model:
                         description: Model is the LLM model to use.
                         type: string
+                      openaiCompatible:
+                        description: |-
+                          OpenAICompatible configures a custom OpenAI-compatible provider block in opencode.json.
+                          When set (and aiProxy is false), provider and endpoint on this struct are ignored in favor
+                          of the nested openaiCompatible fields.
+                        properties:
+                          endpoint:
+                            description: Endpoint is the OpenAI-compatible API base
+                              URL (for example https://litellm.example/v1).
+                            minLength: 1
+                            type: string
+                          model:
+                            description: Model is the model id exposed by that endpoint.
+                            type: string
+                          tokenSecretRef:
+                            description: TokenSecretRef references a Secret containing
+                              the API key for the endpoint.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                        required:
+                        - endpoint
+                        type: object
                       provider:
-                        description: Provider is the OpenCode provider to use.
-                        enum:
-                        - plural
-                        - openai
+                        description: |-
+                          Provider is the OpenCode provider id from https://models.dev (for example openai, anthropic,
+                          amazon-bedrock, google-vertex, google). Optional.
+
+                          When the parent AgentRuntime has spec.aiProxy enabled, the harness ignores this field and
+                          autowires provider "plural", routing requests through the Console AI proxy at /ext/ai/v1
+                          using the deploy token. Set spec.config.opencode.model to a bare model id; the harness
+                          prefixes it for proxy routing based on runtime type (for example gpt-5.4 -> openai/gpt-5.4).
+
+                          When aiProxy is false, this selects the native OpenCode provider block; credentials come from
+                          tokenSecretRef or the provider's usual environment variables. Defaults to plural when omitted.
+                          Use exact models.dev slugs (for example amazon-bedrock, google-vertex, google).
+                        maxLength: 128
                         type: string
                       timeout:
                         description: Timeout bounds a single opencode run invocation.
                         type: string
                       tokenSecretRef:
-                        description: TokenSecretRef is a reference to a Kubernetes
-                          Secret containing the API token for OpenCode.
+                        description: |-
+                          TokenSecretRef references a Secret containing the API token for OpenCode.
+                          Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must
@@ -1870,10 +1937,6 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
-                    required:
-                    - endpoint
-                    - provider
-                    - tokenSecretRef
                     type: object
                 type: object
               default:

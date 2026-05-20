@@ -8943,9 +8943,9 @@ func (_c *ConsoleClientMock_ListRepositories_Call) RunAndReturn(run func() (*cli
 	return _c
 }
 
-// RunSentinel provides a mock function with given fields: ctx, id
-func (_m *ConsoleClientMock) RunSentinel(ctx context.Context, id string) (*string, error) {
-	ret := _m.Called(ctx, id)
+// RunSentinel provides a mock function with given fields: ctx, id, overrides
+func (_m *ConsoleClientMock) RunSentinel(ctx context.Context, id string, overrides *client.SentinelRunOverrides) (*string, error) {
+	ret := _m.Called(ctx, id, overrides)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RunSentinel")
@@ -8953,19 +8953,19 @@ func (_m *ConsoleClientMock) RunSentinel(ctx context.Context, id string) (*strin
 
 	var r0 *string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*string, error)); ok {
-		return rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *client.SentinelRunOverrides) (*string, error)); ok {
+		return rf(ctx, id, overrides)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *string); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *client.SentinelRunOverrides) *string); ok {
+		r0 = rf(ctx, id, overrides)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *client.SentinelRunOverrides) error); ok {
+		r1 = rf(ctx, id, overrides)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -8981,13 +8981,14 @@ type ConsoleClientMock_RunSentinel_Call struct {
 // RunSentinel is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-func (_e *ConsoleClientMock_Expecter) RunSentinel(ctx interface{}, id interface{}) *ConsoleClientMock_RunSentinel_Call {
-	return &ConsoleClientMock_RunSentinel_Call{Call: _e.mock.On("RunSentinel", ctx, id)}
+//   - overrides *client.SentinelRunOverrides
+func (_e *ConsoleClientMock_Expecter) RunSentinel(ctx interface{}, id interface{}, overrides interface{}) *ConsoleClientMock_RunSentinel_Call {
+	return &ConsoleClientMock_RunSentinel_Call{Call: _e.mock.On("RunSentinel", ctx, id, overrides)}
 }
 
-func (_c *ConsoleClientMock_RunSentinel_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_RunSentinel_Call {
+func (_c *ConsoleClientMock_RunSentinel_Call) Run(run func(ctx context.Context, id string, overrides *client.SentinelRunOverrides)) *ConsoleClientMock_RunSentinel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(*client.SentinelRunOverrides))
 	})
 	return _c
 }
@@ -8997,7 +8998,7 @@ func (_c *ConsoleClientMock_RunSentinel_Call) Return(_a0 *string, _a1 error) *Co
 	return _c
 }
 
-func (_c *ConsoleClientMock_RunSentinel_Call) RunAndReturn(run func(context.Context, string) (*string, error)) *ConsoleClientMock_RunSentinel_Call {
+func (_c *ConsoleClientMock_RunSentinel_Call) RunAndReturn(run func(context.Context, string, *client.SentinelRunOverrides) (*string, error)) *ConsoleClientMock_RunSentinel_Call {
 	_c.Call.Return(run)
 	return _c
 }

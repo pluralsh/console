@@ -28,21 +28,18 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		return err
 	}
 
-	endpoint := in.provider.Endpoint()
-	if in.Config.Run.Runtime.Config.OpenCode.Endpoint != "" {
-		endpoint = in.Config.Run.Runtime.Config.OpenCode.Endpoint
-	}
-
 	input := &ConfigTemplateInput{
-		ConsoleURL:    consoleURL,
-		ConsoleToken:  consoleToken,
-		AgentRunID:    in.Config.Run.ID,
-		Provider:      in.provider,
-		Endpoint:      endpoint,
-		Model:         in.model,
-		Token:         in.Config.Run.Runtime.Config.OpenCode.Token,
-		Mode:          in.Config.Run.Mode,
-		ExaMcpConfigs: in.Config.Run.Runtime.ExaMcpConfigs,
+		ConsoleURL:       consoleURL,
+		ConsoleToken:     consoleToken,
+		AgentRunID:       in.Config.Run.ID,
+		Provider:         in.provider,
+		OpenAICompatible: in.openaiCompatible,
+		Endpoint:         in.Config.Run.Runtime.Config.OpenCode.Endpoint,
+		Model:            in.model,
+		Token:            in.Config.Run.Runtime.Config.OpenCode.Token,
+		Mode:             in.Config.Run.Mode,
+		DindEnabled:      in.Config.Run.DindEnabled,
+		ExaMcpConfigs:    in.Config.Run.Runtime.ExaMcpConfigs,
 	}
 
 	_, content, err := configTemplate(input)
@@ -59,7 +56,7 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		"configFile", in.configFilePath(),
 		"provider", in.provider,
 		"model", in.model,
-		"endpoint", endpoint,
+		"endpoint", in.Config.Run.Runtime.Config.OpenCode.Endpoint,
 		"mode", in.Config.Run.Mode,
 	)
 
@@ -405,20 +402,14 @@ func (in *Opencode) ConfigureBabysitRun() error {
 }
 
 func New(config v1.Config) v1.Tool {
-	provider := EnsureProvider(config.Run.Runtime.Config.OpenCode.Provider, config.Run.IsProxyEnabled())
-	model := string(EnsureModel(config.Run.Runtime.Config.OpenCode.Model))
-
-	if provider == ProviderPlural {
-		// AI Proxy requires the model in the request to be in format <provider/model>
-		// Currently, agent run schema does not provide a way to set a custom AI provider,
-		// so we default to OpenAI.
-		model = fmt.Sprintf("openai/%s", model)
-	}
+	oc := config.Run.Runtime.Config.OpenCode
+	settings := resolveOpenCodeSettings(oc.Provider, oc.Model, oc.OpenAICompatible, config.Run.IsProxyEnabled())
 
 	result := &Opencode{
-		DefaultTool: v1.DefaultTool{Config: config},
-		model:       model,
-		provider:    provider,
+		DefaultTool:      v1.DefaultTool{Config: config},
+		model:            settings.model,
+		provider:         settings.provider,
+		openaiCompatible: settings.openaiCompatible,
 	}
 
 	if err := result.ensure(); err != nil {

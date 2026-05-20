@@ -1035,22 +1035,25 @@ type AzureOpenAISettings struct {
 }
 
 type BedrockSettings struct {
-	// ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported.
+	// ModelID is the primary AWS Bedrock model or inference profile identifier.
+	// Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,
+	// global.anthropic.claude-haiku-4-5-20251001-v1:0).
 	//
 	// +kubebuilder:validation:Optional
 	ModelID *string `json:"modelId"`
 
-	// ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning
+	// ToolModelId is the Bedrock model or inference profile for tool calling. Same ID formats as modelId.
 	//
 	// +kubebuilder:validation:Optional
 	ToolModelId *string `json:"toolModelId,omitempty"`
 
-	// EmbeddingModel to use for generating embeddings
+	// EmbeddingModel is the Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
-	// ProxyModels are additional models to support within the integrated ai proxy.
+	// ProxyModels lists additional Bedrock model or inference profile IDs exposed through the Nexus
+	// OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	//
 	// +kubebuilder:validation:Optional
 	ProxyModels []string `json:"proxyModels,omitempty"`
@@ -1076,7 +1079,12 @@ type BedrockSettings struct {
 	// +kubebuilder:validation:Optional
 	AwsSecretAccessKeyRef *corev1.SecretKeySelector `json:"awsSecretAccessKeyRef,omitempty"`
 
-	// Deployments is a mapping from model id to bedrock deployment if those require additional configuration
+	// Deployments is deprecated for most configurations: prefer regional-prefixed inference profile IDs in
+	// modelId, toolModelId, embeddingModel, or proxyModels (Nexus infers Bifrost aliases automatically).
+	// Still needed when clients use a logical model name that must resolve to a different Bedrock identifier,
+	// for application inference profile resource IDs (use the profile resource suffix, not the full ARN),
+	// or other explicit alias overrides. Maps client-facing model ID to inference profile ID. Example:
+	// {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
 	//
 	// +kubebuilder:validation:Optional
 	Deployments map[string]string `json:"deployments,omitempty"`

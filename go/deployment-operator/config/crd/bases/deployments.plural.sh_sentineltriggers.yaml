@@ -83,6 +83,15 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              overrides:
+                description: Overrides are applied when triggering the sentinel run.
+                properties:
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Tags are merged into integration test checks for this run.
+                    type: object
+                type: object
             required:
             - sentinelRef
             type: object

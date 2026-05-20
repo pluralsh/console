@@ -23,4 +23,6 @@ USER 65532:65532
 
 WORKDIR /plural
 
+ENV HELM_CACHE_HOME=/plural/.cache/helm
+
 ENTRYPOINT ["harness", "--working-dir=/plural"]

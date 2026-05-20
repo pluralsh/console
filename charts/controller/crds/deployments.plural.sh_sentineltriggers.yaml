@@ -39,6 +39,16 @@ spec:
           spec:
             description: SentinelTriggerSpec defines the desired state of SentinelTrigger
             properties:
+              overrides:
+                description: Overrides are applied when triggering the sentinel run.
+                properties:
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Tags are merged into integration test checks for
+                      this run.
+                    type: object
+                type: object
               sentinelRef:
                 description: SentinelRef is a reference to the Sentinel resource.
                 properties:

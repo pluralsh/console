@@ -1,0 +1,17 @@
+{{- if .Values.aiProxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: console-nexus
+  labels:
+    {{- include "nexus.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  selector:
+    {{- include "nexus.selectorLabels" . | nindent 4 }}
+{{- end }}

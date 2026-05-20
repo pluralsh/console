@@ -11,20 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// openAIAuthConfigured reports whether Console sent enough OpenAI config for Nexus to obtain a credential
-// (static apiKey or enabled tokenExchange with all required fields).
-func openAIAuthConfigured(cfg *pb.OpenAiConfig) bool {
-	if cfg == nil {
-		return false
-	}
-	tx := cfg.GetTokenExchange()
-	if tx != nil && tx.GetEnabled() &&
-		tx.GetTokenUrl() != "" && tx.GetClientId() != "" && tx.GetClientSecret() != "" {
-		return true
-	}
-	return cfg.GetApiKey() != ""
-}
-
 // GetKeysForProvider returns the API keys for a specific provider
 func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.ModelProvider) ([]schemas.Key, error) {
 	aiConfig, err := in.consoleClient.GetAiConfig(ctx)
@@ -84,7 +70,8 @@ func (in *Account) handleOpenAIKeys(ctx context.Context, config *pb.OpenAiConfig
 }
 
 // openAIAPIKey returns the bearer credential for OpenAI: either a cached OAuth2 client-credentials
-// token (when tokenExchange is enabled in the Console gRPC schema) or the static apiKey.
+// token (when tokenExchange is enabled in the Console gRPC schema), the static apiKey, or empty when
+// requests are authenticated by an upstream internal proxy (e.g. Plural Cloud) instead.
 func (in *Account) openAIAPIKey(ctx context.Context, config *pb.OpenAiConfig) (string, error) {
 	tx := config.GetTokenExchange()
 	if tx != nil && tx.GetEnabled() {
@@ -96,10 +83,7 @@ func (in *Account) openAIAPIKey(ctx context.Context, config *pb.OpenAiConfig) (s
 		}
 		return in.tokenCache.AccessToken(ctx, tokenURL, clientID, clientSecret)
 	}
-	if k := config.GetApiKey(); k != "" {
-		return k, nil
-	}
-	return "", fmt.Errorf("openai not configured: set apiKey or enable tokenExchange with tokenUrl, clientId, and clientSecret")
+	return config.GetApiKey(), nil
 }
 
 func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Key, error) {
@@ -175,7 +159,8 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 
 	return []schemas.Key{
 		{
-			Models: in.toBedrockModels(config),
+			Models:  in.toBedrockModels(config),
+			Aliases: schemas.KeyAliases(in.toBedrockDeployments(config)),
 			BedrockKeyConfig: &schemas.BedrockKeyConfig{
 				AccessKey: schemas.EnvVar{
 					Val: config.GetAwsAccessKeyId(),
@@ -186,7 +171,6 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 				Region: &schemas.EnvVar{
 					Val: config.GetRegion(),
 				},
-				Deployments: in.toBedrockDeployments(config),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
@@ -194,9 +178,11 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 	}, nil
 }
 
-// toBedrockModels returns an array of model IDs. We are assuming that
-// configured models can be inference profile IDs that contain regional prefix in
-// model ID, i.e.,
+// toBedrockModels returns client-facing model IDs registered on the Bifrost key.
+// Configured values may be foundation model IDs (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0)
+// or regional inference profile IDs with three dot-separated segments (e.g.
+// us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0).
+// For 3-part profile IDs, the bare model ID (provider.model) is registered for clients:
 //
 // Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
@@ -215,9 +201,10 @@ func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 	return result
 }
 
-// toBedrockDeployments returns a map of model IDs to inference profile IDs.
-// Similar to toBedrockModels, we are assuming that configured models can be
-// inference profile IDs that contain regional prefix in model ID, i.e.,
+// toBedrockDeployments returns Bifrost aliases (client model ID -> inference profile ID).
+// Prefer regional-prefixed profile IDs in modelId/proxyModels; explicit deployments in Console
+// config are only needed for overrides (logical names, application profile resource suffixes, etc.).
+// 3-part profile IDs in modelId/proxyModels are auto-mapped, e.g.:
 //
 // Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
@@ -272,6 +259,7 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 				config.GetToolModel(),
 				config.GetEmbeddingModel(),
 			}, config.GetProxyModels()...)),
+			Aliases: schemas.KeyAliases(in.filterDeployments(config.GetDeployments())),
 			Value: schemas.EnvVar{
 				Val: config.GetAccessToken(),
 			},
@@ -280,7 +268,6 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 					// We need to remove the suffix since console deployment settings enforce it currently.
 					Val: strings.TrimSuffix(config.GetEndpoint(), "/openai/deployments"),
 				},
-				Deployments: in.filterDeployments(config.GetDeployments()),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,

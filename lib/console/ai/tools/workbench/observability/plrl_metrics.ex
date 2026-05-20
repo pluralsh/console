@@ -14,7 +14,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
 
   @valid ~w(query step)a
 
-  def json_schema(), do: Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
+
+  def json_schema(), do: @json_schema
   def name(), do: "plrl_metrics"
   def description(), do: "Gather metrics from the (prometheus-compatible) Plural observability connection"
 

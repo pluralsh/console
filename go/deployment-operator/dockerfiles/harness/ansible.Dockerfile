@@ -71,6 +71,7 @@ ENV PIP_CACHE_DIR=/home/nonroot/.cache/pip
 ENV PIP_USER=false
 ENV PYTHONUSERBASE=/home/nonroot/.local
 ENV PYTHONPATH=/home/nonroot/.local/lib/python3.12/site-packages
+ENV HELM_CACHE_HOME=/plural/.cache/helm
 
 # Switch to the non-root user
 USER 65532:65532

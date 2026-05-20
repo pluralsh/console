@@ -445,13 +445,23 @@ defmodule Console.AI.NexusTest do
     test "tools? returns true" do
       assert Nexus.tools?() == true
     end
+  end
 
-    @tag :skip
-    test "proxy returns ok when url is configured" do
-      client = Nexus.new(%{url: "http://localhost:8080"})
-      {:ok, proxy} = Nexus.proxy(client)
+  describe "proxy/1 openai base url" do
+    test "appends /v1 to the extension mount" do
+      {:ok, proxy} = Nexus.proxy(Nexus.new(%{url: "http://localhost:8080/ext/ai"}))
       assert proxy.backend == :openai
-      assert proxy.url == "http://localhost:8080/v1"
+      assert proxy.url == "http://localhost:8080/ext/ai/v1"
+    end
+
+    test "does not double-append /v1" do
+      {:ok, proxy} = Nexus.proxy(Nexus.new(%{url: "http://localhost:8080/ext/ai/v1"}))
+      assert proxy.url == "http://localhost:8080/ext/ai/v1"
+    end
+
+    test "trims a trailing slash before appending /v1" do
+      {:ok, proxy} = Nexus.proxy(Nexus.new(%{url: "http://localhost:8080/ext/ai/"}))
+      assert proxy.url == "http://localhost:8080/ext/ai/v1"
     end
   end
 end

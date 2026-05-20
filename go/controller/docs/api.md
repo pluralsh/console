@@ -321,15 +321,15 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Optional: \{\} <br /> |
-| `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
-| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
-| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
+| `modelId` _string_ | ModelID is the primary AWS Bedrock model or inference profile identifier.<br />Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,<br />global.anthropic.claude-haiku-4-5-20251001-v1:0). |  | Optional: \{\} <br /> |
+| `toolModelId` _string_ | ToolModelId is the Bedrock model or inference profile for tool calling. Same ID formats as modelId. |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel is the Bedrock model or inference profile for embeddings. Same ID formats as modelId. |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels lists additional Bedrock model or inference profile IDs exposed through the Nexus<br />OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId. |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
 | `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
 | `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use for authentication |  | Optional: \{\} <br /> |
-| `deployments` _object (keys:string, values:string)_ | Deployments is a mapping from model id to bedrock deployment if those require additional configuration |  | Optional: \{\} <br /> |
+| `deployments` _object (keys:string, values:string)_ | Deployments is deprecated for most configurations: prefer regional-prefixed inference profile IDs in<br />modelId, toolModelId, embeddingModel, or proxyModels (Nexus infers Bifrost aliases automatically).<br />Still needed when clients use a logical model name that must resolve to a different Bedrock identifier,<br />for application inference profile resource IDs (use the profile resource suffix, not the full ARN),<br />or other explicit alias overrides. Maps client-facing model ID to inference profile ID. Example:<br />\{"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"\} |  | Optional: \{\} <br /> |
 
 
 #### Binding
@@ -4485,6 +4485,22 @@ _Appears in:_
 | `facets` _object (keys:string, values:string)_ | Facets the log facets to run the query against. |  |  |
 
 
+#### SentinelRunOverrides
+
+
+
+SentinelRunOverrides defines ad-hoc overrides applied when triggering a sentinel run.
+
+
+
+_Appears in:_
+- [SentinelTriggerSpec](#sentineltriggerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `tags` _object (keys:string, values:string)_ | Tags are merged into integration test checks for this run. |  | Optional: \{\} <br /> |
+
+
 #### SentinelSpec
 
 
@@ -4540,6 +4556,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `sentinelRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SentinelRef is a reference to the Sentinel resource. |  | Required: \{\} <br /> |
+| `overrides` _[SentinelRunOverrides](#sentinelrunoverrides)_ | Overrides are applied when triggering the sentinel run. |  | Optional: \{\} <br /> |
 
 
 #### ServiceAccount

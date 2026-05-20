@@ -96,8 +96,8 @@ func (c *client) GetSentinelRun(ctx context.Context, id string) (*console.Sentin
 	return response.SentinelRun, err
 }
 
-func (c *client) RunSentinel(ctx context.Context, id string) (*string, error) {
-	run, err := c.consoleClient.RunSentinel(ctx, id)
+func (c *client) RunSentinel(ctx context.Context, id string, overrides *console.SentinelRunOverrides) (*string, error) {
+	run, err := c.consoleClient.RunSentinel(ctx, id, overrides)
 	if err != nil {
 		return nil, err
 	}

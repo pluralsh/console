@@ -79,11 +79,14 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the sentinel to trigger"]
     ],
+    request_body: OpenAPI.AI.SentinelRunOverridesInput,
     responses: [ok: OpenAPI.AI.SentinelRun]
   def trigger(conn, %{"id" => id}) do
     user = Console.Guardian.Plug.current_resource(conn)
 
-    Sentinels.run_sentinel(id, user)
+    conn.private.oaskit.body_params
+    |> to_attrs()
+    |> then(&Sentinels.run_sentinel(&1, id, user))
     |> when_ok(&Repo.preload(&1, [:jobs]))
     |> successful(conn, OpenAPI.AI.SentinelRun)
   end

@@ -24,6 +24,14 @@ message OpenAiTokenExchange {
   optional string clientSecret = 4;
 }
 
+// OpenAiMethod selects which OpenAI HTTP APIs the Nexus proxy exposes.
+enum OpenAiMethod {
+  OPEN_AI_METHOD_UNSPECIFIED = 0;
+  CHAT = 1;
+  RESPONSES = 2;
+  AUTO = 3;
+}
+
 message OpenAiConfig {
   optional string apiKey = 1;
   optional string model = 2;
@@ -32,6 +40,7 @@ message OpenAiConfig {
   optional string baseUrl = 5;
   repeated string proxyModels = 6;
   optional OpenAiTokenExchange tokenExchange = 7;
+  optional OpenAiMethod method = 8;
 }
 
 message AnthropicConfig {

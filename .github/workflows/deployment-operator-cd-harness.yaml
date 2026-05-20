@@ -7,8 +7,7 @@ on:
     paths:
       - ".github/workflows/deployment-operator-cd-harness.yaml"
       - "go/deployment-operator/dockerfiles/harness/**"
-      - "go/deployment-operator/cmd/harness/**"
-      - "go/deployment-operator/pkg/harness/**"
+      - "go/deployment-operator/**"
   push:
     tags:
       - "go/deployment-operator/v*.*.*"
@@ -17,6 +16,7 @@ permissions:
   contents: read
 
 env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
   REGISTRY_IMAGE: pluralsh/stackrun-harness-base
 
 jobs:

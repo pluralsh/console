@@ -23,7 +23,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
 
   @valid ~w(service_id cluster_id query limit field operator)a
 
-  def json_schema(_), do: Console.priv_file!("tools/workbench/observability/plrl_logs_labels.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/observability/plrl_logs_labels.json") |> Jason.decode!()
+
+  def json_schema(_), do: @json_schema
   def name(_), do: "plrl_logs_facets"
   def description(_), do: "Gather log facets from Plural's built-in log aggregation integration.  If you want to find the values for a specific facet, provide the `field` parameter.  This requires either a Plural service_id or Plural cluster_id to be provided to authorize log extraction"
 

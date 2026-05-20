@@ -12,3 +12,7 @@ spec:
   sentinelRef:
     name: sentinel-terratest
     namespace: default
+  overrides:
+    tags:
+      tier: staging
+      region: us-east-1

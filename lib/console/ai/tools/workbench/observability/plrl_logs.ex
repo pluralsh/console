@@ -21,7 +21,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
 
   @valid ~w(service_id cluster_id query limit operator)a
 
-  def json_schema(_), do: Console.priv_file!("tools/workbench/observability/plrl_logs.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/observability/plrl_logs.json") |> Jason.decode!()
+
+  def json_schema(_), do: @json_schema
   def name(_), do: "plrl_logs"
   def description(_), do: "Gather logs from the Plural's built-in log aggregation integration.  This requires either a Plural service_id or Plural cluster_id to be provided to authorize log extraction"
 

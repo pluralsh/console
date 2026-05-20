@@ -6,11 +6,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// SentinelRunOverrides defines ad-hoc overrides applied when triggering a sentinel run.
+type SentinelRunOverrides struct {
+	// Tags are merged into integration test checks for this run.
+	// +kubebuilder:validation:Optional
+	Tags map[string]string `json:"tags,omitempty"`
+}
+
 // SentinelTriggerSpec defines the desired state of SentinelTrigger
 type SentinelTriggerSpec struct {
 	// SentinelRef is a reference to the Sentinel resource.
 	// +kubebuilder:validation:Required
 	SentinelRef corev1.ObjectReference `json:"sentinelRef"`
+
+	// Overrides are applied when triggering the sentinel run.
+	// +kubebuilder:validation:Optional
+	Overrides *SentinelRunOverrides `json:"overrides,omitempty"`
 }
 
 //+kubebuilder:object:root=true

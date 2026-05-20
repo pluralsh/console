@@ -12,7 +12,7 @@ server:
 
 console:
   # Console gRPC endpoint - REQUIRED
-  grpcEndpoint: "localhost:50051"
+  grpcEndpoint: "console:50051"
 
   # How often to refresh console configuration
   configTTL: "60s"

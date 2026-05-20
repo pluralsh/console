@@ -1,5 +1,6 @@
 defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
   use ConsoleWeb.ConnCase, async: true
+  alias Console.Schema.SentinelRun
 
   describe "#show/2" do
     test "returns the sentinel if user has project access", %{conn: conn} do
@@ -124,7 +125,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> post("/v1/api/ai/sentinels/#{sentinel.id}/trigger")
+        |> json_post("/v1/api/ai/sentinels/#{sentinel.id}/trigger", %{})
         |> json_response(200)
 
       assert result["id"]
@@ -138,7 +139,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> post("/v1/api/ai/sentinels/#{sentinel.id}/trigger")
+        |> json_post("/v1/api/ai/sentinels/#{sentinel.id}/trigger", %{})
         |> json_response(200)
 
       assert result["id"]
@@ -152,8 +153,39 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> post("/v1/api/ai/sentinels/#{sentinel.id}/trigger")
+      |> json_post("/v1/api/ai/sentinels/#{sentinel.id}/trigger", %{})
       |> json_response(403)
+    end
+
+    test "it applies tag overrides from the request body", %{conn: conn} do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project, checks: [
+        %{
+          type: :integration_test,
+          name: "test",
+          configuration: %{
+            integration_test: %{
+              format: :junit,
+              job: %{namespace: "test"},
+              tags: %{"tier" => "dev"},
+              distro: :eks
+            }
+          }
+        }
+      ])
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/ai/sentinels/#{sentinel.id}/trigger", %{
+          tags: %{"tier" => "staging", "region" => "us"}
+        })
+        |> json_response(200)
+
+      run = Console.Repo.get!(SentinelRun, result["id"])
+      [check] = run.checks
+      assert check.configuration.integration_test.tags == %{"tier" => "staging", "region" => "us"}
     end
   end
 end

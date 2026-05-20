@@ -75,6 +75,10 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :resource_labels,      :json, description: "labels to apply to test deployments, useful if you need to opt out of policy enforcement"
   end
 
+  input_object :sentinel_run_overrides do
+    field :tags, :json, description: "the tags to apply to the sentinel run integration test cases"
+  end
+
   input_object :sentinel_run_job_update_attributes do
     field :status,    :sentinel_run_job_status, description: "the status of the job"
     field :reference, :namespaced_name, description: "the reference to the job that was run"
@@ -423,8 +427,9 @@ defmodule Console.GraphQl.Deployments.Sentinel do
       middleware Scope,
         resource: :sentinel,
         action: :write
-      arg :id,   :id
-      arg :name, :string
+      arg :id,        :id
+      arg :name,      :string
+      arg :overrides, :sentinel_run_overrides
 
       resolve &Deployments.run_sentinel/2
     end

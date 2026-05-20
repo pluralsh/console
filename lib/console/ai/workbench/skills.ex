@@ -69,7 +69,7 @@ defmodule Console.AI.Workbench.Skills do
         end
       end)
       |> case do
-        {filename, _} -> {:ok, {r, ref.branch, Path.join([ref.folder, filename])}}
+        {filename, _} -> {:ok, {r, ref.ref, Path.join([ref.folder, filename])}}
         _ -> {:error, "skill not found in git"}
       end
     end

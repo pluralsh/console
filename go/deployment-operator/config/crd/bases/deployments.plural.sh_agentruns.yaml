@@ -49,12 +49,14 @@ spec:
                   (optional)
                 type: string
               language:
-                description: Language is the programming language used in the agent
-                  run.
+                description: |-
+                  Language is the programming language used in the agent run.
+                  Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
                 type: string
               languageVersion:
-                description: LanguageVersion is the version of the language to use,
-                  if you wish to specify.
+                description: |-
+                  LanguageVersion is the version of the language to use, if you wish to specify.
+                  Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
                 type: string
               mode:
                 description: Mode defines how the agent should run (ANALYZE, WRITE)
