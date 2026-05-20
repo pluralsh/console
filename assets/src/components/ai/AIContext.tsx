@@ -110,8 +110,18 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     'plural-ai-view-type',
     AIViewTypes.ChatThread
   )
-  const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
-  const [mcpPanelOpen, setMcpPanelOpen] = useState<boolean>(false)
+  const [actionsPanelOpen, setActionsPanelOpenState] = useState<boolean>(false)
+  const [mcpPanelOpen, setMcpPanelOpenState] = useState<boolean>(false)
+
+  const setActionsPanelOpen = useCallback((show: boolean) => {
+    setActionsPanelOpenState(show)
+    if (show) setMcpPanelOpenState(false)
+  }, [])
+
+  const setMcpPanelOpen = useCallback((show: boolean) => {
+    setMcpPanelOpenState(show)
+    if (show) setActionsPanelOpenState(false)
+  }, [])
   const [currentThreadId, setCurrentThreadId] = usePersistedState<
     Nullable<string>
   >('plural-ai-current-thread-id', null)
