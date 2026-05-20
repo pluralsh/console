@@ -33,6 +33,10 @@ defmodule Console.AI.Workbench.Conversion do
         username: prom.username,
         password: prom.password,
         tenant_id: prom.tenant_id,
+        aws_sigv4: prom.aws_sigv4,
+        aws_access_key_id: prom.aws_access_key_id,
+        aws_secret_access_key: prom.aws_secret_access_key,
+        aws_region: prom.aws_region,
       }}
     }}
   end

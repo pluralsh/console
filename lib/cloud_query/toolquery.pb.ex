@@ -38,6 +38,15 @@ defmodule Toolquery.PrometheusConnection do
   field :username, 3, proto3_optional: true, type: :string
   field :password, 4, proto3_optional: true, type: :string
   field :tenant_id, 5, proto3_optional: true, type: :string, json_name: "tenantId"
+  field :aws_sigv4, 6, proto3_optional: true, type: :bool, json_name: "awsSigv4"
+  field :aws_access_key_id, 7, proto3_optional: true, type: :string, json_name: "awsAccessKeyId"
+
+  field :aws_secret_access_key, 8,
+    proto3_optional: true,
+    type: :string,
+    json_name: "awsSecretAccessKey"
+
+  field :aws_region, 9, proto3_optional: true, type: :string, json_name: "awsRegion"
 end
 
 defmodule Toolquery.LokiConnection do

@@ -19,7 +19,9 @@ defmodule ConsoleWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: ConsoleWeb
+      use Phoenix.Controller,
+        formats: [html: "View", json: "View"],
+        layouts: [html: {ConsoleWeb.LayoutView, :app}]
 
       import Plug.Conn
       use Gettext, backend: ConsoleWeb.Gettext
@@ -62,7 +64,7 @@ defmodule ConsoleWeb do
 
   def api_controller do
     quote do
-      use Phoenix.Controller, namespace: ConsoleWeb
+      use Phoenix.Controller, formats: []
       use Oaskit.Controller
       import ConsoleWeb.Controllers.Base
       import Console.Services.Base, only: [when_ok: 2]

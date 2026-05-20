@@ -1,9 +1,15 @@
 package client
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/prometheus/client_golang/api"
+	promconfig "github.com/prometheus/common/config"
+	"github.com/prometheus/sigv4"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
@@ -41,18 +47,74 @@ func (rt *prometheusAuthRoundTripper) RoundTrip(req *http.Request) (*http.Respon
 	return rt.base.RoundTrip(req)
 }
 
-func NewPrometheusHTTPClient(conn *toolquery.PrometheusConnection) *http.Client {
+func newPrometheusSigV4Config(ctx context.Context, conn *toolquery.PrometheusConnection) (*sigv4.SigV4Config, error) {
+	accessKeyID := strings.TrimSpace(conn.GetAwsAccessKeyId())
+	secretAccessKey := strings.TrimSpace(conn.GetAwsSecretAccessKey())
+	if (accessKeyID == "") != (secretAccessKey == "") {
+		return nil, fmt.Errorf("aws_access_key_id and aws_secret_access_key must be provided together")
+	}
+
+	region := strings.TrimSpace(conn.GetAwsRegion())
+	cfg := &sigv4.SigV4Config{Region: region}
+
+	if accessKeyID != "" {
+		cfg.AccessKey = accessKeyID
+		cfg.SecretKey = promconfig.Secret(secretAccessKey)
+		return cfg, nil
+	}
+
+	// No static credentials: resolve via the AWS SDK default chain
+	// (environment variables → IRSA/web identity → pod identity → instance profile).
+	loadOptions := []func(*config.LoadOptions) error{}
+	if region != "" {
+		loadOptions = append(loadOptions, config.WithRegion(region))
+	}
+
+	awsCfg, err := config.LoadDefaultConfig(ctx, loadOptions...)
+	if err != nil {
+		return nil, fmt.Errorf("loading default AWS credentials for Prometheus SigV4: %w", err)
+	}
+	if _, err = awsCfg.Credentials.Retrieve(ctx); err != nil {
+		return nil, fmt.Errorf("retrieving default AWS credentials for Prometheus SigV4: %w", err)
+	}
+	if region == "" {
+		if awsCfg.Region == "" {
+			return nil, fmt.Errorf("aws region is required for Prometheus SigV4 signing when not available from the default credential chain")
+		}
+		cfg.Region = awsCfg.Region
+	}
+
+	return cfg, nil
+}
+
+func NewPrometheusHTTPClient(conn *toolquery.PrometheusConnection) (*http.Client, error) {
 	if conn == nil {
-		return &http.Client{Transport: api.DefaultRoundTripper}
+		return &http.Client{Transport: api.DefaultRoundTripper}, nil
+	}
+
+	base := api.DefaultRoundTripper
+	if conn.GetAwsSigv4() {
+		cfg, err := newPrometheusSigV4Config(context.Background(), conn)
+		if err != nil {
+			return nil, fmt.Errorf("invalid prometheus AWS SigV4 config: %w", err)
+		}
+		if err := cfg.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid prometheus AWS SigV4 config: %w", err)
+		}
+		rt, err := sigv4.NewSigV4RoundTripper(cfg, base)
+		if err != nil {
+			return nil, fmt.Errorf("configure prometheus AWS SigV4 signing: %w", err)
+		}
+		base = rt
 	}
 
 	return &http.Client{
 		Transport: &prometheusAuthRoundTripper{
-			base:     api.DefaultRoundTripper,
+			base:     base,
 			token:    conn.GetToken(),
 			username: conn.GetUsername(),
 			password: conn.GetPassword(),
 			tenantID: conn.GetTenantId(),
 		},
-	}
+	}, nil
 }

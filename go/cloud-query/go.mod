@@ -22,7 +22,8 @@ require (
 	github.com/lib/pq v1.11.2
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/prometheus/common v0.67.4
+	github.com/prometheus/common v0.67.5
+	github.com/prometheus/sigv4 v0.4.1
 	github.com/samber/lo v1.52.0
 	github.com/spf13/pflag v1.0.10
 	google.golang.org/api v0.247.0

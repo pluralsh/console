@@ -421,8 +421,19 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { loki: { url: url ?? '', username, tenantId } }
   },
   [WorkbenchToolType.Prometheus]: (config) => {
-    const { url, username, tenantId } = config?.prometheus ?? {}
-    return { prometheus: { url: url ?? '', username, tenantId } }
+    const { url, username, tenantId, awsSigv4, awsAccessKeyId, awsRegion } =
+      config?.prometheus ?? {}
+    return {
+      prometheus: {
+        url: url ?? '',
+        username,
+        tenantId,
+        awsSigv4: awsSigv4 ?? false,
+        awsAccessKeyId: awsAccessKeyId ?? undefined,
+        awsSecretAccessKey: undefined,
+        awsRegion: awsRegion ?? undefined,
+      },
+    }
   },
   [WorkbenchToolType.Tempo]: (config) => {
     const { url, username, tenantId } = config?.tempo ?? {}

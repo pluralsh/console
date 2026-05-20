@@ -12,6 +12,7 @@ import {
   AddIcon,
   MinusIcon,
   Select,
+  Switch,
 } from '@pluralsh/design-system'
 import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
@@ -75,7 +76,7 @@ export function WorkbenchToolFormFields({
     case WorkbenchToolType.Loki:
       return render(type, UrlUsernamePasswordTokenTenantFormFields)
     case WorkbenchToolType.Prometheus:
-      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+      return render(type, PrometheusFormFields)
     case WorkbenchToolType.Tempo:
       return render(type, UrlUsernamePasswordTokenTenantFormFields)
     case WorkbenchToolType.Jaeger:
@@ -332,6 +333,83 @@ function UrlUsernamePasswordTokenTenantFormFields<
         value={c.token ?? ''}
         onChange={(e) => set({ ...c, token: e.target.value || undefined })}
       />
+    </>
+  )
+}
+
+function PrometheusFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Prometheus>) {
+  const { colors } = useTheme()
+  const sigv4Enabled = !!c.awsSigv4
+
+  return (
+    <>
+      <UrlUsernamePasswordTokenTenantFormFields
+        config={c}
+        setConfig={set}
+      />
+      <Switch
+        checked={sigv4Enabled}
+        onChange={(checked) =>
+          set({
+            ...c,
+            awsSigv4: checked,
+            ...(checked
+              ? {}
+              : {
+                  awsAccessKeyId: undefined,
+                  awsSecretAccessKey: undefined,
+                  awsRegion: undefined,
+                }),
+          })
+        }
+      >
+        Sign requests with AWS SigV4
+      </Switch>
+      {sigv4Enabled && (
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          <p
+            css={{
+              margin: 0,
+              fontSize: 14,
+              color: colors['text-xlight'],
+            }}
+          >
+            Provide static credentials here, or leave them blank to use IRSA,
+            pod identity, or another AWS credential source available to the
+            Console runtime.
+          </p>
+          <InputField
+            label="AWS region"
+            placeholder="us-east-1"
+            value={c.awsRegion ?? ''}
+            onChange={(e) =>
+              set({ ...c, awsRegion: e.target.value || undefined })
+            }
+          />
+          <InputField
+            label="Access key ID"
+            value={c.awsAccessKeyId ?? ''}
+            onChange={(e) =>
+              set({ ...c, awsAccessKeyId: e.target.value || undefined })
+            }
+          />
+          <InputField
+            label="Secret access key"
+            hint="Leave blank when editing to keep the stored secret unless you are rotating it."
+            revealer
+            value={c.awsSecretAccessKey ?? ''}
+            onChange={(e) =>
+              set({ ...c, awsSecretAccessKey: e.target.value || undefined })
+            }
+          />
+        </Flex>
+      )}
     </>
   )
 }
