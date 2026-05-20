@@ -817,7 +817,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             workbench { id }
           }
         }
-      """, %{"workbenchId" => workbench.id, "attributes" => %{"prompt" => "saved hello"}}, %{current_user: admin_user()})
+      """, %{"workbenchId" => workbench.id, "attributes" => %{
+        "prompt" => "saved hello",
+        "title" => "Saved hello",
+        "category" => "General"
+      }}, %{current_user: admin_user()})
 
       assert prompt["workbench"]["id"] == workbench.id
       assert prompt["prompt"] == "saved hello"
@@ -836,7 +840,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             workbench { id }
           }
         }
-      """, %{"workbenchId" => workbench.id, "attributes" => %{"prompt" => "from reader"}}, %{current_user: user})
+      """, %{"workbenchId" => workbench.id, "attributes" => %{
+        "prompt" => "from reader",
+        "title" => "From reader",
+        "category" => "General"
+      }}, %{current_user: user})
 
       assert prompt["workbench"]["id"] == workbench.id
       assert prompt["prompt"] == "from reader"
@@ -853,7 +861,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             prompt
           }
         }
-      """, %{"workbenchId" => workbench.id, "attributes" => %{"prompt" => "nope"}}, %{current_user: user})
+      """, %{"workbenchId" => workbench.id, "attributes" => %{
+        "prompt" => "nope",
+        "title" => "Nope",
+        "category" => "General"
+      }}, %{current_user: user})
     end
   end
 

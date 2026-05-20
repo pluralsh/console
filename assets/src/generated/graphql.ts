@@ -15842,7 +15842,7 @@ export type WorkbenchPrompt = {
   /** the saved prompt text */
   prompt?: Maybe<Scalars['String']['output']>;
   /** display title for the saved prompt */
-  title?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the workbench this prompt belongs to */
   workbench?: Maybe<Workbench>;
@@ -20235,7 +20235,7 @@ export type WorkbenchTextStreamFragment = { __typename?: 'WorkbenchTextStream', 
 
 export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
-export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, title?: string | null, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, title: string, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
 export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, priority?: number | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
@@ -20397,7 +20397,7 @@ export type WorkbenchPromptsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchPromptsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, prompts?: { __typename?: 'WorkbenchPromptConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchPromptEdge', node?: { __typename?: 'WorkbenchPrompt', id: string, title?: string | null, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+export type WorkbenchPromptsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, prompts?: { __typename?: 'WorkbenchPromptConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchPromptEdge', node?: { __typename?: 'WorkbenchPrompt', id: string, title: string, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchWebhooksQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20613,7 +20613,7 @@ export type CreateWorkbenchPromptMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchPromptMutation = { __typename?: 'RootMutationType', createWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string, title?: string | null, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type CreateWorkbenchPromptMutation = { __typename?: 'RootMutationType', createWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string, title: string, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type UpdateWorkbenchPromptMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20621,7 +20621,7 @@ export type UpdateWorkbenchPromptMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchPromptMutation = { __typename?: 'RootMutationType', updateWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string, title?: string | null, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type UpdateWorkbenchPromptMutation = { __typename?: 'RootMutationType', updateWorkbenchPrompt?: { __typename?: 'WorkbenchPrompt', id: string, title: string, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type DeleteWorkbenchPromptMutationVariables = Exact<{
   id: Scalars['ID']['input'];

@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "description": "Generate a useful title and category for a saved prompt",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the saved prompt"
+    },
+    "category": {
+      "type": "string",
+      "description": "The category of the saved prompt (eg troubleshooting, self-service, etc)"
+    }
+  },
+  "required": ["title", "category"]
+}

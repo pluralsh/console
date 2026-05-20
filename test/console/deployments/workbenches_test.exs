@@ -1,5 +1,7 @@
 defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
+  use Mimic
+  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
   alias Console.PubSub
   alias Console.Deployments.Workbenches
   alias Console.Schema.{WorkbenchJob}
@@ -987,10 +989,16 @@ defmodule Console.Deployments.WorkbenchesTest do
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
 
-      {:ok, prompt} = Workbenches.create_workbench_prompt(%{prompt: "hello"}, workbench.id, user)
+      {:ok, prompt} = Workbenches.create_workbench_prompt(
+        %{prompt: "hello", title: "Hello", category: "General"},
+        workbench.id,
+        user
+      )
 
       assert prompt.workbench_id == workbench.id
       assert prompt.prompt == "hello"
+      assert prompt.title == "Hello"
+      assert prompt.category == "General"
       assert_receive {:event, %PubSub.WorkbenchPromptCreated{item: ^prompt}}
     end
 
@@ -999,7 +1007,11 @@ defmodule Console.Deployments.WorkbenchesTest do
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
 
-      {:ok, prompt} = Workbenches.create_workbench_prompt(%{prompt: "from writer"}, workbench.id, user)
+      {:ok, prompt} = Workbenches.create_workbench_prompt(
+        %{prompt: "from writer", title: "Writer prompt", category: "Jobs"},
+        workbench.id,
+        user
+      )
 
       assert prompt.workbench_id == workbench.id
       assert prompt.prompt == "from writer"
@@ -1009,7 +1021,36 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       workbench = insert(:workbench)
 
-      {:error, _} = Workbenches.create_workbench_prompt(%{prompt: "nope"}, workbench.id, user)
+      {:error, _} = Workbenches.create_workbench_prompt(
+        %{prompt: "nope", title: "Nope", category: "General"},
+        workbench.id,
+        user
+      )
+    end
+
+    test "it backfills title and category from the prompt when omitted" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      expect(Provider, :simple_tool_call, fn msgs, SavedPrompt ->
+        assert [{:user, msg}] = msgs
+        assert msg =~ "restart the api deployment"
+
+        {:ok, %SavedPrompt{title: "Restart API", category: "Troubleshooting"}}
+      end)
+
+      {:ok, prompt} = Workbenches.create_workbench_prompt(
+        %{prompt: "restart the api deployment"},
+        workbench.id,
+        user
+      )
+
+      assert prompt.workbench_id == workbench.id
+      assert prompt.prompt == "restart the api deployment"
+      assert prompt.title == "Restart API"
+      assert prompt.category == "Troubleshooting"
+      assert_receive {:event, %PubSub.WorkbenchPromptCreated{item: ^prompt}}
     end
   end
 

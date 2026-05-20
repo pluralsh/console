@@ -10195,7 +10195,7 @@ type WorkbenchPrompt struct {
 	// the id of the saved prompt
 	ID string `json:"id"`
 	// display title for the saved prompt
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title"`
 	// grouping category for the saved prompt (Default when unset in storage)
 	Category string `json:"category"`
 	// the saved prompt text

@@ -668,7 +668,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_prompt do
     field :id,    non_null(:string), description: "the id of the saved prompt"
-    field :title, :string, description: "display title for the saved prompt"
+    field :title, non_null(:string), description: "display title for the saved prompt", resolve: fn prompt, _, _ ->
+      {:ok, prompt.title || "Default"}
+    end
 
     field :category, non_null(:string),
       description: "grouping category for the saved prompt (Default when unset in storage)" do

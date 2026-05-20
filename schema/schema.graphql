@@ -3546,7 +3546,7 @@ type WorkbenchPrompt {
   id: String!
 
   "display title for the saved prompt"
-  title: String
+  title: String!
 
   "grouping category for the saved prompt (Default when unset in storage)"
   category: String!
