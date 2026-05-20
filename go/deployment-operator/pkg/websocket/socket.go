@@ -171,13 +171,14 @@ func (s *socket) publishClient(handle *subscriptionHandle) bool {
 }
 
 func (s *socket) runSubscriptionClient(ctx context.Context, gen uint64, handle *subscriptionHandle) {
-	if err := handle.client.RunWithContext(ctx); err != nil {
-		klog.V(log.LogLevelDefault).InfoS("graphql websocket subscription client exited with error", "error", err)
-	}
+	err := handle.client.RunWithContext(ctx)
+	ctxErr := ctx.Err()
 	klog.V(log.LogLevelDefault).InfoS(
 		"graphql websocket connection closed",
 		"clusterID", s.clusterID,
 		"generation", gen,
+		"error", err,
+		"ctxErr", ctxErr,
 	)
 
 	if gen != s.clientGen.Load() {
@@ -201,6 +202,18 @@ func (s *socket) newSubscriptionClient(gen uint64) *graphql.SubscriptionClient {
 		WithExitWhenNoSubscription(false).
 		WithSyncMode(true).
 		WithWebSocketKeepAlive(5 * time.Second).
+		// Surface the library's internal reconnect events (keepalive failures,
+		// session restarts, connection init timeouts) which bypass OnError entirely.
+		WithLog(func(args ...any) {
+			if len(args) >= 1 {
+				klog.V(log.LogLevelVerbose).InfoS("graphql websocket library",
+					"clusterID", s.clusterID,
+					"generation", gen,
+					"msg", args[0],
+					"detail", args[1:],
+				)
+			}
+		}).
 		OnConnected(func() {
 			if s.isStaleOrClosed(gen) {
 				return
