@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Fetch the latest error event for a Sentry issue, including the full stack trace by default.",
+  "properties": {
+    "organization_slug": {
+      "type": "string",
+      "description": "Sentry organization slug."
+    },
+    "issue_id": {
+      "type": "string",
+      "description": "Numeric Sentry issue ID."
+    },
+    "full": {
+      "type": "boolean",
+      "description": "When true (default), include the full event body with stack trace."
+    }
+  },
+  "required": ["organization_slug", "issue_id"],
+  "additionalProperties": false
+}

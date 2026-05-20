@@ -12,6 +12,7 @@ import {
   IconProps,
   LinearLogoIcon,
   LokiLogoIcon,
+  McpLogoIcon,
   MsTeamsLogoIcon,
   PrometheusLogoIcon,
   SentryLogoIcon,
@@ -182,7 +183,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.BitbucketDatacenter]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.AzureDevops]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
-  [WorkbenchToolType.Mcp]: [],
+  [WorkbenchToolType.Mcp]: [WorkbenchToolCategory.Integration],
   [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
   [WorkbenchToolType.Splunk]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Dynatrace]: [
@@ -269,6 +270,13 @@ export type WorkbenchToolCard = {
 
 export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
   {
+    type: WorkbenchToolType.Mcp,
+    label: 'MCP',
+    description:
+      'Connect to a generic MCP server not covered by another integration.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Integration]],
+  },
+  {
     type: WorkbenchToolType.Cloud,
     provider: Provider.Aws,
     label: 'AWS',
@@ -325,9 +333,11 @@ export function WorkbenchToolIcon({
       ? PROVIDER_TO_ICON[provider]
       : type === WorkbenchToolType.Sentry
         ? SentryLogoIcon
-        : isConfigurableWorkbenchToolType(type)
-          ? toolToIcon[type]
-          : ToolsIcon
+        : type === WorkbenchToolType.Mcp
+          ? McpLogoIcon
+          : isConfigurableWorkbenchToolType(type)
+            ? toolToIcon[type]
+            : ToolsIcon
   return (
     <Icon
       fullColor={fullColor}

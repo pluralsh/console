@@ -123,6 +123,11 @@ fragment WorkbenchToolTiny on WorkbenchTool {
   cloudConnection {
     ...CloudConnectionTiny
   }
+  mcpServer {
+    id
+    name
+    url
+  }
 }
 
 fragment WorkbenchTool on WorkbenchTool {

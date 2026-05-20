@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "description": "List or search Sentry issues for an organization. Uses Sentry issue search syntax in `query` (default unresolved). Returns live error groups with metadata; use issue_read or list_issue_events for stack traces.",
+  "properties": {
+    "organization_slug": {
+      "type": "string",
+      "description": "Sentry organization slug."
+    },
+    "query": {
+      "type": "string",
+      "description": "Sentry issue search query (e.g. is:unresolved, level:error, assigned:me). Omit for default is:unresolved; pass empty string for no filter."
+    },
+    "stats_period": {
+      "type": "string",
+      "description": "Relative time window for stats, e.g. 24h, 14d, 7d."
+    },
+    "project": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "description": "Project IDs to filter by. Use -1 for all projects."
+    },
+    "environment": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Environment names to filter by."
+    },
+    "sort": {
+      "type": "string",
+      "description": "Sort order: date, freq, inbox, new, recommended, trends, or user."
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum issues to return (max 100)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from a prior response Link header or cursor field."
+    }
+  },
+  "required": ["organization_slug"],
+  "additionalProperties": false
+}
