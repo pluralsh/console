@@ -1,5 +1,6 @@
 import {
   Button,
+  Divider,
   Modal,
   Sidecar,
   SidecarItem,
@@ -20,7 +21,11 @@ import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import { deepOmitFalsy } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { formatLocalizedDateTime, fromNow } from '../../../../utils/datetime'
+import {
+  formatDateTime,
+  formatLocalizedDateTime,
+  fromNow,
+} from '../../../../utils/datetime'
 import { getSentinelCheckIcon } from '../SentinelsTableCols'
 import { useTheme } from 'styled-components'
 
@@ -35,6 +40,24 @@ export function SentinelDetailsSidecar({
         <SidecarSkeleton />
       ) : (
         <Sidecar>
+          {(sentinel.crontab || sentinel.nextRunAt) && (
+            <>
+              <SidecarItem heading="Sentinel crontab">
+                {sentinel.crontab || '--'}
+              </SidecarItem>
+              <SidecarItem heading="Next run">
+                {sentinel.nextRunAt
+                  ? formatDateTime(
+                      sentinel.nextRunAt,
+                      'YYYY-MM-DD HH:mm:ss [UTC]',
+                      false,
+                      true
+                    )
+                  : '--'}
+              </SidecarItem>
+              <Divider backgroundColor="border" />
+            </>
+          )}
           {sentinel.lastRunAt && (
             <SidecarItem heading="Last run">
               {fromNow(sentinel.lastRunAt)}
