@@ -1,7 +1,6 @@
 package scm
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -10,10 +9,8 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/klog/v2"
 
-	consoleclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
@@ -21,25 +18,14 @@ import (
 type Server struct {
 	*grpc.Server
 
-	client   client.Client
-	agentRun *consoleclient.AgentRunFragment
+	token string
 }
 
 func (in *Server) init() (*Server, error) {
-	agentRun, err := in.client.GetAgentRun(context.Background(), args.AgentRunID())
-	if err != nil {
-		return nil, fmt.Errorf("could not get agent run: %w", err)
-	}
-
-	if agentRun.ScmCreds == nil || agentRun.ScmCreds.Token == "" {
-		return nil, fmt.Errorf("agent run does not have scm creds")
-	}
-
-	if err = os.Setenv(environment.EnvGitAccessToken, agentRun.ScmCreds.Token); err != nil {
+	if err := os.Setenv(environment.EnvGitAccessToken, in.token); err != nil {
 		return nil, fmt.Errorf("could not set git access token: %w", err)
 	}
 
-	in.agentRun = agentRun
 	return in, nil
 }
 
@@ -80,8 +66,12 @@ func (in *Server) Stop() {
 	in.Server.Stop()
 }
 
-func NewServer(client client.Client) (*Server, error) {
+func NewServer(token string) (*Server, error) {
+	if len(token) == 0 {
+		return nil, errors.New("git access token is required")
+	}
+
 	return (&Server{
-		client: client,
+		token: token,
 	}).init()
 }

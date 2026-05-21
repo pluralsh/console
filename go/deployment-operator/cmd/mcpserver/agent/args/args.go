@@ -75,6 +75,10 @@ func ConsoleURL() string {
 	return consoleURL
 }
 
+func ConsoleApiURL() string {
+	return fmt.Sprintf("%s/gql", ConsoleURL())
+}
+
 func ConsoleExtApiURL() string {
 	return fmt.Sprintf("%s/ext/gql", ConsoleURL())
 }

@@ -46,14 +46,19 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	client := console.New(args.ConsoleExtApiURL(), args.DeployToken())
+	extClient := console.New(args.ConsoleExtApiURL(), args.DeployToken())
+	scmToken, consoleToken, err := getCredentials(ctx, extClient)
+	if err != nil {
+		return fmt.Errorf("could not get credentials: %w", err)
+	}
 
+	client := console.New(args.ConsoleApiURL(), consoleToken)
 	mcpServer := agent.NewServer(
 		client,
 		createServerOptions(client)...,
 	)
 
-	grpcServer, err := scm.NewServer(client)
+	grpcServer, err := scm.NewServer(scmToken)
 	if err != nil {
 		return fmt.Errorf("could not create grpc server: %w", err)
 	}
@@ -98,6 +103,23 @@ func run() error {
 	}
 
 	return nil
+}
+
+func getCredentials(ctx context.Context, client console.Client) (scmToken, consoleToken string, err error) {
+	agentRun, err := client.GetAgentRun(ctx, args.AgentRunID())
+	if err != nil {
+		return "", "", fmt.Errorf("could not get agent run: %w", err)
+	}
+
+	if agentRun.ScmCreds == nil || agentRun.ScmCreds.Token == "" {
+		return "", "", fmt.Errorf("agent run does not have scm creds")
+	}
+
+	if agentRun.PluralCreds == nil || agentRun.PluralCreds.Token == nil {
+		return "", "", fmt.Errorf("agent run does not have plural creds")
+	}
+
+	return agentRun.ScmCreds.Token, *agentRun.PluralCreds.Token, nil
 }
 
 func shutdownServers(ctx context.Context, grpcServer *scm.Server, mcpServer *agent.Server) error {
