@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Plrl}
+  alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -65,7 +66,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     do: [Plrl.Metrics, Plrl.MetricsSearch]
   defp plrl_metric_tools(_), do: []
 
-  @allowed_tools MapSet.new(~w(metrics logs traces)a)
+  @allowed_tools MapSet.new(~w(metrics logs traces error_tracking)a)
 
   defp obs_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
@@ -75,6 +76,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       _ -> false
     end)
     |> Enum.flat_map(fn
+      %WorkbenchTool{tool: :sentry} = tool -> SentryTools.expand(tool)
       %WorkbenchTool{categories: [_ | _] = categories} = tool ->
         Enum.flat_map(categories, fn c -> to_tool(tool, c) end)
       _ -> []

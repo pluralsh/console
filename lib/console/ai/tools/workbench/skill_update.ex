@@ -30,8 +30,8 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:name, :previous, :replacement, :branch_name, :pr_title, :pr_description])
-    |> validate_required([:name, :previous, :replacement, :branch_name, :pr_title, :pr_description])
+    |> cast(attrs, [:name, :previous, :replacement, :commit_message, :branch_name, :pr_title, :pr_description])
+    |> validate_required([:name, :previous, :replacement])
   end
 
   def implement(%__MODULE__{job: job, name: name, previous: previous, replacement: replacement} = model) do

@@ -3,6 +3,8 @@ fragment Sentinel on Sentinel {
   name
   description
   status
+  crontab
+  nextRunAt
   lastRunAt
   git {
     ref

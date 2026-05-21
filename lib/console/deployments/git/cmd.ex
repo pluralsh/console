@@ -50,7 +50,7 @@ defmodule Console.Deployments.Git.Cmd do
   defp maybe_overwrite_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
-    with {:ok, _} <- git(repo, "fetch", ["--all", "--tags", "--force", "--prune", "--prune-tags"]),
+    with {:ok, _} <- git(repo, "fetch", maybe_recurse_submodules(repo, ["--all", "--tags", "--force", "--prune", "--prune-tags"])),
       do: reset(repo)
   end
 
@@ -128,7 +128,7 @@ defmodule Console.Deployments.Git.Cmd do
   def msg(%GitRepository{} = repo, sha), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B", "#{sha}"])
 
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
-    with {:ok, _} = res <- git(git, "clone", ["--filter=blob:none", url(git), git.dir]),
+    with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),
          :ok <- branches(git),
          :ok <- unlock(git),
       do: res
@@ -176,6 +176,9 @@ defmodule Console.Deployments.Git.Cmd do
   defp passphrase(%GitRepository{passphrase: pass}) when is_binary(pass),
     do: [{"SSH_PASSPHRASE", pass}, {"SSH_ASKPASS", ssh_askpass()}, {"DISPLAY", "1"}, {"SSH_ASKPASS_REQUIRE", "force"}]
   defp passphrase(_), do: []
+
+  defp maybe_recurse_submodules(%GitRepository{recurse_submodules: true}, args), do: ["--recurse-submodules" | args]
+  defp maybe_recurse_submodules(_, args), do: args
 
   defp git_askpass(), do: Console.conf(:git_askpass)
   defp ssh_askpass(), do: Console.conf(:ssh_askpass)

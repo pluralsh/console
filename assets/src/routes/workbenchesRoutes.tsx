@@ -5,12 +5,14 @@ import { WorkbenchesAlerts } from 'components/workbenches/WorkbenchesAlerts'
 import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
 import { CloudConnectionCreateForm } from 'components/workbenches/tools/cloud-connection/CloudConnectionCreateForm'
+import { McpServerCreateForm } from 'components/workbenches/tools/mcp-server/McpServerCreateForm'
 import { WorkbenchesIntegrations } from 'components/workbenches/WorkbenchesIntegrations'
 import { WorkbenchesConfiguredTools } from 'components/workbenches/WorkbenchesConfiguredTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
 import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
 import { WorkbenchJobs } from 'components/workbenches/workbench/WorkbenchJobs'
+import { WorkbenchLaunch } from 'components/workbenches/workbench/WorkbenchLaunch'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
 import { SavedPrompts } from 'components/workbenches/workbench/prompts/SavedPrompts'
@@ -37,6 +39,7 @@ import {
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_CREATE_CLOUD_CONNECTION_ABS_PATH,
+  WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH,
   WORKBENCHES_TOOLS_EDIT_ABS_PATH,
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
   WORKBENCHES_CRON_PARAM_ID,
@@ -92,6 +95,10 @@ export const workbenchesRoutes = [
     element={<CloudConnectionCreateForm />}
   />,
   <Route
+    path={WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH}
+    element={<McpServerCreateForm />}
+  />,
+  <Route
     path={WORKBENCHES_TOOLS_EDIT_ABS_PATH}
     element={<WorkbenchToolCreateOrEdit mode="edit" />}
   />,
@@ -101,6 +108,10 @@ export const workbenchesRoutes = [
   >
     <Route
       index
+      element={<WorkbenchLaunch />}
+    />
+    <Route
+      path={WORKBENCH_JOBS_REL_PATH}
       element={<WorkbenchJobs />}
     />
     <Route

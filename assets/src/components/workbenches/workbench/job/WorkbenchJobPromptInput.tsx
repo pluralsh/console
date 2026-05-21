@@ -1,6 +1,8 @@
 import {
+  useCancelWorkbenchJobMutation,
   useCreateWorkbenchMessageMutation,
   WorkbenchJobActivitiesQuery,
+  WorkbenchJobStatus,
 } from 'generated/graphql'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
@@ -8,6 +10,7 @@ import {
   Card,
   CircleDashIcon,
   IconFrame,
+  Tooltip,
   TrashCanIcon,
   usePrevious,
 } from '@pluralsh/design-system'
@@ -17,6 +20,7 @@ import {
 } from 'components/ai/chatbot/input/ChatInput'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { GqlError } from 'components/utils/Alert'
+import { Confirm } from 'components/utils/Confirm'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
@@ -31,6 +35,7 @@ export function WorkbenchJobPromptInput({
   job: Nullable<WorkbenchJobActivitiesQuery['workbenchJob']>
 }) {
   const [newMessage, setNewMessage] = useState('')
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const [chatQueue, setChatQueue] = useState<{ id: string; message: string }[]>(
     []
@@ -46,8 +51,22 @@ export function WorkbenchJobPromptInput({
     refetchQueries: ['WorkbenchJob'],
   })
 
+  const [cancelWorkbenchJob, { loading: cancelLoading, error: cancelError }] =
+    useCancelWorkbenchJobMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        'WorkbenchJob',
+        'WorkbenchJobs',
+        'WorkbenchJobActivities',
+      ],
+      onCompleted: () => setCancelModalOpen(false),
+    })
+
   const isRunning = isJobRunning(job?.status)
   const prevIsRunning = usePrevious(isRunning)
+  const canCancel =
+    job?.status === WorkbenchJobStatus.Pending ||
+    job?.status === WorkbenchJobStatus.Running
 
   const submitJob = () => {
     if (isRunning) {
@@ -130,11 +149,62 @@ export function WorkbenchJobPromptInput({
           wrapperStyles={{ minHeight: 90 }}
           enableAutoComplete
           workbenchId={job?.workbench?.id}
+          submitButton={
+            canCancel ? (
+              <Tooltip label="Cancel job">
+                <CancelSquareButtonSC
+                  type="button"
+                  onClick={() => setCancelModalOpen(true)}
+                >
+                  <CancelSquareIconSC />
+                </CancelSquareButtonSC>
+              </Tooltip>
+            ) : undefined
+          }
         />
       </div>
+      <Confirm
+        open={cancelModalOpen}
+        close={() => setCancelModalOpen(false)}
+        destructive
+        label="Cancel job"
+        loading={cancelLoading}
+        error={cancelError}
+        submit={() =>
+          cancelWorkbenchJob({ variables: { jobId: job?.id ?? '' } })
+        }
+        title="Cancel job"
+        text="Are you sure you want to cancel this job?"
+      />
     </>
   )
 }
+
+const CancelSquareButtonSC = styled.button(({ theme }) => ({
+  position: 'absolute',
+  bottom: theme.spacing.small,
+  right: theme.spacing.small,
+  padding: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: 28,
+  width: 28,
+  minHeight: 0,
+  borderRadius: 25,
+  border: 'none',
+  background: theme.colors['fill-two'],
+  cursor: 'pointer',
+  '&:hover': { background: theme.colors['fill-three'] },
+}))
+
+const CancelSquareIconSC = styled.div(({ theme }) => ({
+  height: 10,
+  width: 10,
+  borderRadius: 2,
+  background: theme.colors['icon-light'],
+  flexShrink: 0,
+}))
 
 const QueueItemSC = styled.div(({ theme }) => ({
   display: 'flex',

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "description": "List error events for a Sentry issue. Set full=true to include stack traces and full event payloads.",
+  "properties": {
+    "organization_slug": {
+      "type": "string",
+      "description": "Sentry organization slug."
+    },
+    "issue_id": {
+      "type": "string",
+      "description": "Numeric Sentry issue ID."
+    },
+    "full": {
+      "type": "boolean",
+      "description": "When true, include full event bodies with stack traces."
+    },
+    "stats_period": {
+      "type": "string",
+      "description": "Relative time window, e.g. 24h or 14d."
+    },
+    "query": {
+      "type": "string",
+      "description": "Optional Sentry event search query to filter events within the issue."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from a prior page."
+    }
+  },
+  "required": ["organization_slug", "issue_id"],
+  "additionalProperties": false
+}

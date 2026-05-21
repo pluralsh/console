@@ -164,6 +164,7 @@ export function ChatInputSimple({
   workbenchId,
   submitOnEnter = true,
   showSubmitButton = true,
+  submitButton,
   onKeyDown: onKeyDownProp,
   setValue: setValueProp,
   ...props
@@ -180,6 +181,7 @@ export function ChatInputSimple({
   workbenchId?: Nullable<string>
   submitOnEnter?: boolean
   showSubmitButton?: boolean
+  submitButton?: ReactNode
 } & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
   const divRef = useRef<HTMLDivElement>(null)
@@ -230,24 +232,27 @@ export function ChatInputSimple({
       <div
         css={{
           width: '100%',
-          ...(showSubmitButton ? { paddingRight: spacing.xlarge } : {}),
+          ...(showSubmitButton || submitButton
+            ? { paddingRight: spacing.xlarge }
+            : {}),
         }}
       >
         {options}
       </div>
-      {showSubmitButton && (
-        <ChatSubmitButton
-          loading={loading}
-          loadingIndicator={<SpinnerAlt color="icon-xlight" />}
-          disabled={!allowSubmit || loading || disabled}
-          onClick={handleSubmit}
-          css={{
-            position: 'absolute',
-            bottom: spacing.small,
-            right: spacing.small,
-          }}
-        />
-      )}
+      {submitButton ??
+        (showSubmitButton && (
+          <ChatSubmitButton
+            loading={loading}
+            loadingIndicator={<SpinnerAlt color="icon-xlight" />}
+            disabled={!allowSubmit || loading || disabled}
+            onClick={handleSubmit}
+            css={{
+              position: 'absolute',
+              bottom: spacing.small,
+              right: spacing.small,
+            }}
+          />
+        ))}
       <MentionMenu
         autoCompleteState={autocomplete.state}
         onSelect={autocomplete.commit}

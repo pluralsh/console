@@ -1,6 +1,5 @@
 defmodule Console.AI.Tools.Workbench.Complete do
   use Console.AI.Tools.Workbench.Base
-  alias Console.MermaidValidator
   alias Console.Schema.WorkbenchJobActivity
   alias Console.Schema.WorkbenchJobResult
   alias Console.Schema.WorkbenchJobResult.ToolQuery

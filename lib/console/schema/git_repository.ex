@@ -7,18 +7,19 @@ defmodule Console.Schema.GitRepository do
   defenum Health, pullable: 0, failed: 1
 
   schema "git_repositories" do
-    field :url,          :string
-    field :auth_method,  AuthMethod
-    field :health,       Health
-    field :pulled_at,    :utc_datetime_usec
-    field :private_key,  Piazza.Ecto.EncryptedString
-    field :passphrase,   :string
-    field :username,     :string
-    field :password,     Piazza.Ecto.EncryptedString
-    field :error,        :string
-    field :https_path,   :string
-    field :url_format,   :string
-    field :decrypt,      :boolean
+    field :url,                :string
+    field :auth_method,        AuthMethod
+    field :health,             Health
+    field :pulled_at,          :utc_datetime_usec
+    field :private_key,        Piazza.Ecto.EncryptedString
+    field :passphrase,         :string
+    field :username,           :string
+    field :password,           Piazza.Ecto.EncryptedString
+    field :error,              :string
+    field :https_path,         :string
+    field :url_format,         :string
+    field :decrypt,            :boolean
+    field :recurse_submodules, :boolean, default: false
 
     field :dir,              :string, virtual: true
     field :private_key_file, :string, virtual: true
@@ -45,7 +46,7 @@ defmodule Console.Schema.GitRepository do
     from(g in query, group_by: g.health, select: %{health: g.health, count: count(g.id, :distinct)})
   end
 
-  @valid ~w(url pulled_at private_key connection_id decrypt passphrase username password https_path url_format)a
+  @valid ~w(url pulled_at private_key connection_id decrypt passphrase username password https_path url_format recurse_submodules)a
 
   def changeset(model, attrs \\ %{}) do
     model

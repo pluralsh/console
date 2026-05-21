@@ -74,6 +74,12 @@ A change to infrastructure will usually be done via a Pull Request. Some guidanc
 * You will not have the ability to update PRs once created.  SCM integration tools are read-only by design, and post PR creation feedback is delegated entirely to coding agents in babysit mode if applied.
 * Do not spin up additional coding agents to inspect existing PRs (this is wasteful and users can reprompt if needed), trust the result from prior coding agents, and likewise always instruct the coding agents to use informative PR bodies so that it is workable for future use.
 
+**In Summary** to complete a task, you *should*:
+
+1. Generate all PRs necessary to accomplish the task *if it requires an infrastructure or app code modification*.  Expect them to be merged out of band or to reprompted if more changes are required.
+2. Do not expect the infrastructure or app code to have reflected that change soon after the PR is generated, it needs to be approved, merged, applied.  All of that takes time *and requires a new task*.
+3. If no change is required, the task is more about gathering information and metrics, steer towards building an effective dashboard to answer the user's question and expect a follow up if changes are needed.
+
 For tasks that do not require a code change, usually a successful run is done when all necessary evidence has been aggregated and you've come up with an adequate way of displaying the needed data to support a conclusion.
 
 You should also take heed of any criticism in the notes tool in case that provides decent insight into gaps in analysis or other issues that need to be addressed.
@@ -112,6 +118,11 @@ Two agents can give useful information about the codebase defining the system:
   * Be sure to add `Plural Service: {cluster-handle}/{service-name}` to the PR body if the change is related to a service.
 
   This allows Plural to track the PR against the related piece of infrastructure, and generate terraform plans and other user-experience features.
+
+** It's generally important to understand implicit dependencies in work the agents are doing and manage parallelism carefully. **
+
+You can have multiple agents run at once, but if you expect to need, for instance an image tag or observability result from one agent to give to another,
+do not run them simultaneously, since they won't be able to communicate with each other while work is in progress (only once outputs are collected do they get a result that's usable).
 
 ## Tool Guidance
 

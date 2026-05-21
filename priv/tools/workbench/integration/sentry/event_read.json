@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Retrieve a specific Sentry project event by ID, including stack trace when available.",
+  "properties": {
+    "organization_slug": {
+      "type": "string",
+      "description": "Sentry organization slug."
+    },
+    "project_slug": {
+      "type": "string",
+      "description": "Project slug (from issue.project.slug in list_issues or issue_read)."
+    },
+    "event_id": {
+      "type": "string",
+      "description": "Event ID (eventID or id from list_issue_events)."
+    }
+  },
+  "required": ["organization_slug", "project_slug", "event_id"],
+  "additionalProperties": false
+}

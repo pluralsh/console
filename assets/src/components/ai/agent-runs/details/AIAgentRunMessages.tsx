@@ -1,7 +1,9 @@
-import { Flex } from '@pluralsh/design-system'
 import { ChatMessage } from 'components/ai/chatbot/ChatMessage'
-import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { EaseIn } from 'components/utils/EaseIn'
+import {
+  ChatDisplayItem,
+  ChatToolCallGroup,
+  groupConsecutiveToolMessages,
+} from 'components/ai/chatbot/ChatToolCallGroup'
 import { VirtualList } from 'components/utils/VirtualList'
 import {
   AgentMessageFragment,
@@ -13,16 +15,11 @@ import {
   useAgentRunChatSubscription,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { countBy, isEmpty, sumBy, uniqWith } from 'lodash'
-import pluralize from 'pluralize'
+import { isEmpty, uniqWith } from 'lodash'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AILoadingText } from 'components/utils/AILoadingText'
-
-type DisplayItem = ChatFragment | ChatFragment[]
-
-const BATCHED_TOOLS = ['bash', 'read', 'grep', 'edit'] as const
 
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   const { spacing, colors } = useTheme()
@@ -59,7 +56,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
     [subscribedMessages, run.messages]
   )
 
-  const displayItems: DisplayItem[] = useMemo(
+  const displayItems: ChatDisplayItem[] = useMemo(
     () =>
       groupConsecutiveToolMessages(
         isEmpty(messages) ? [getMockUserChat(run.prompt)] : messages
@@ -79,9 +76,10 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
         style={{ padding: `${spacing.large}px ${spacing.xxxlarge}px` }}
         renderer={({ rowData }) =>
           Array.isArray(rowData) ? (
-            <ToolCallGroup
+            <ChatToolCallGroup
               messages={rowData}
               isRunning={isRunning}
+              chatMessageProps={chatMessagePropsShared}
             />
           ) : (
             <ChatMessage
@@ -101,70 +99,6 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   )
 }
 
-function ToolCallGroup({
-  messages,
-  isRunning,
-}: {
-  messages: ChatFragment[]
-  isRunning: boolean
-}) {
-  const { spacing } = useTheme()
-  const [isExpanded, setIsExpanded] = useState(false)
-  const lastMessage = messages.at(-1)
-  const header = useMemo(() => {
-    const counts = countBy(messages, (m) =>
-      m.attributes?.tool?.name?.toLowerCase()
-    )
-    const other = messages.length - sumBy(BATCHED_TOOLS, (t) => counts[t] ?? 0)
-    return [
-      other > 0 && `${other} tool ${pluralize('call', other)}`,
-      ...BATCHED_TOOLS.filter((t) => counts[t]).map(
-        (t) => `${counts[t]} ${pluralize(t, counts[t])}`
-      ),
-    ]
-      .filter(Boolean)
-      .join(', ')
-  }, [messages])
-
-  return (
-    <>
-      <SimpleAccordion
-        label={header}
-        loading={false}
-        isOpen={isExpanded}
-        setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          '.icon': { width: 10 },
-        }}
-      >
-        <Flex
-          direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
-        >
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              {...message}
-              {...chatMessagePropsShared}
-            />
-          ))}
-        </Flex>
-      </SimpleAccordion>
-      {!isExpanded && lastMessage && isRunning && (
-        <EaseIn currentKey={lastMessage.id}>
-          <ChatMessage
-            {...lastMessage}
-            {...chatMessagePropsShared}
-          />
-        </EaseIn>
-      )}
-    </>
-  )
-}
-
 const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
@@ -175,20 +109,6 @@ const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.large,
   background: theme.colors['fill-one'],
 }))
-
-function groupConsecutiveToolMessages(messages: ChatFragment[]): DisplayItem[] {
-  const result: DisplayItem[] = []
-  messages.forEach((msg) => {
-    if (msg.type !== ChatType.Tool) {
-      result.push(msg)
-      return
-    }
-    const last = result.at(-1)
-    if (Array.isArray(last)) last.push(msg)
-    else result.push([msg])
-  })
-  return result
-}
 
 const chatMessagePropsShared = {
   disableActions: 'no-spacing' as const,

@@ -59,19 +59,23 @@ export function ModalForm({
 }) {
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState(repo.url)
-  const [requireAuth, setRequireAuth] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const authMethod = getAuthMethodFromGitUrl(gitUrl)
   const [privateKey, setPrivateKey] = useState<GitAttributes['privateKey']>('')
   const [passphrase, setPassphrase] = useState<GitAttributes['passphrase']>('')
   const [username, setUsername] = useState<GitAttributes['username']>('')
   const [password, setPassword] = useState<GitAttributes['password']>('')
+  const [recurseSubmodules, setRecurseSubmodules] = useState(
+    repo.recurseSubmodules ?? false
+  )
 
   const [mutation, { loading, error }] = useUpdateGitRepositoryMutation({
     variables: {
       id: repo.id,
       attributes: {
         url: gitUrl,
-        ...(requireAuth
+        recurseSubmodules,
+        ...(showAdvanced
           ? authMethod === AuthMethod.Ssh
             ? { privateKey, passphrase, username: null, password: null }
             : { username, password, privateKey: null, passphrase: null }
@@ -89,7 +93,7 @@ export function ModalForm({
 
   const disabled =
     !gitUrl ||
-    (requireAuth
+    (showAdvanced
       ? authMethod === AuthMethod.Ssh
         ? !privateKey
         : !username && !password
@@ -138,11 +142,11 @@ export function ModalForm({
             Cancel
           </Button>
           <Switch
-            checked={requireAuth}
-            onChange={(val) => setRequireAuth(val)}
+            checked={showAdvanced}
+            onChange={(val) => setShowAdvanced(val)}
             css={{ flexGrow: 1 }}
           >
-            Modify authorization info
+            Advanced configuration
           </Switch>
         </>
       }
@@ -166,21 +170,29 @@ export function ModalForm({
           />
         </FormField>
       </div>
-      {requireAuth && (
-        <GitAuthFields
-          {...{
-            authMethod,
-            theme,
-            privateKey,
-            setPrivateKey,
-            passphrase,
-            setPassphrase,
-            username,
-            setUsername,
-            password,
-            setPassword,
-          }}
-        />
+      {showAdvanced && (
+        <>
+          <GitAuthFields
+            {...{
+              authMethod,
+              theme,
+              privateKey,
+              setPrivateKey,
+              passphrase,
+              setPassphrase,
+              username,
+              setUsername,
+              password,
+              setPassword,
+            }}
+          />
+          <Switch
+            checked={recurseSubmodules}
+            onChange={setRecurseSubmodules}
+          >
+            Recurse submodules
+          </Switch>
+        </>
       )}
       {error && (
         <GqlError

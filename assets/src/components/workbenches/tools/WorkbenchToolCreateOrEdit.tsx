@@ -115,7 +115,9 @@ export function WorkbenchToolCreateOrEdit({
 
     const nextType =
       tool?.tool ??
-      (isConfigurableWorkbenchToolType(type) || type === WorkbenchToolType.Cloud
+      (isConfigurableWorkbenchToolType(type) ||
+      type === WorkbenchToolType.Cloud ||
+      type === WorkbenchToolType.Mcp
         ? type
         : WorkbenchToolType.Http)
     const nextProvider =
@@ -263,6 +265,7 @@ function formStateToAttributes(
     categories,
     configuration,
     cloudConnectionId,
+    mcpServerId,
     scmConnectionId,
     readBindings,
     writeBindings,
@@ -282,6 +285,13 @@ function formStateToAttributes(
     return {
       ...base,
       cloudConnectionId: cloudConnectionId ?? null,
+      ...scmPatch,
+    }
+
+  if (type === WorkbenchToolType.Mcp)
+    return {
+      ...base,
+      mcpServerId: mcpServerId ?? null,
       ...scmPatch,
     }
 

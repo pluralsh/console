@@ -37,5 +37,30 @@ defmodule Console.AI.Workbench.ConversionTest do
       {:ok, _} = Protobuf.JSON.encode(res)
       assert is_binary(Protobuf.encode(res))
     end
+
+    test "converts prometheus sigv4 config to proto" do
+      tool = insert(:workbench_tool,
+        tool: :prometheus,
+        configuration: %{
+          prometheus: %{
+            url: "https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-123",
+            aws_sigv4: true,
+            aws_access_key_id: "AKIA_TEST",
+            aws_secret_access_key: "SECRET",
+            aws_region: "us-east-1"
+          }
+        }
+      )
+
+      {:ok, res} = Conversion.to_proto(tool)
+      {:prometheus, prom} = res.connection
+
+      assert prom.aws_sigv4
+      assert prom.aws_access_key_id == "AKIA_TEST"
+      assert prom.aws_secret_access_key == "SECRET"
+      assert prom.aws_region == "us-east-1"
+      {:ok, _} = Protobuf.JSON.encode(res)
+      assert is_binary(Protobuf.encode(res))
+    end
   end
 end

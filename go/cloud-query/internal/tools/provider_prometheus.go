@@ -29,9 +29,14 @@ func (in *PrometheusProvider) newClient() (v1.API, error) {
 		return nil, fmt.Errorf("%w: missing url", ErrInvalidArgument)
 	}
 
+	httpClient, err := client.NewPrometheusHTTPClient(in.conn)
+	if err != nil {
+		return nil, err
+	}
+
 	apiClient, err := api.NewClient(api.Config{
 		Address: in.conn.GetUrl(),
-		Client:  client.NewPrometheusHTTPClient(in.conn),
+		Client:  httpClient,
 	})
 	if err != nil {
 		return nil, err

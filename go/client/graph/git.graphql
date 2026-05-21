@@ -5,6 +5,7 @@ fragment GitRepositoryFragment on GitRepository {
     authMethod
     url
     decrypt
+    recurseSubmodules
 }
 
 mutation CreateGitRepository($attributes: GitAttributes!) {

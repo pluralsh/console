@@ -123,6 +123,11 @@ fragment WorkbenchToolTiny on WorkbenchTool {
   cloudConnection {
     ...CloudConnectionTiny
   }
+  mcpServer {
+    id
+    name
+    url
+  }
 }
 
 fragment WorkbenchTool on WorkbenchTool {
@@ -166,6 +171,9 @@ fragment WorkbenchTool on WorkbenchTool {
       url
       username
       tenantId
+      awsSigv4
+      awsAccessKeyId
+      awsRegion
     }
     tempo {
       url
@@ -207,6 +215,9 @@ fragment WorkbenchTool on WorkbenchTool {
       prometheusUrl
     }
     dynatrace {
+      url
+    }
+    sentry {
       url
     }
     github {
@@ -907,6 +918,18 @@ query WorkbenchJobActivities($id: ID!) {
     prompt
     workbench {
       id
+    }
+    referencedJob {
+      id
+      prompt
+      status
+      workbench {
+        id
+      }
+      evalResult {
+        id
+        grade
+      }
     }
     activities(first: 100) {
       edges {

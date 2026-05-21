@@ -22,6 +22,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
   }
+  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -230,12 +231,25 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec create_workbench_prompt(map, binary, User.t()) :: prompt_resp
   def create_workbench_prompt(attrs, workbench_id, %User{} = user) do
-    %WorkbenchPrompt{workbench_id: workbench_id}
-    |> WorkbenchPrompt.changeset(attrs)
-    |> allow(user, :read)
-    |> when_ok(:insert)
-    |> notify(:create, user)
+    with {:ok, attrs} <- backfill_prompt_attrs(attrs) do
+      %WorkbenchPrompt{workbench_id: workbench_id}
+      |> WorkbenchPrompt.changeset(attrs)
+      |> allow(user, :read)
+      |> when_ok(:insert)
+      |> notify(:create, user)
+    end
   end
+
+  defp backfill_prompt_attrs(%{title: t, category: c} = attrs) when is_binary(t) and is_binary(c), do: {:ok, attrs}
+  defp backfill_prompt_attrs(%{prompt: p} = attrs) do
+    [{:user, "I need to generate a decent title and category to describe the following saved prompt:\n```\n#{p}\n```\nUse the given tool to do it for me."}]
+    |> Provider.simple_tool_call(SavedPrompt)
+    |> case do
+      {:ok, %SavedPrompt{title: t, category: c}} -> {:ok, Map.merge(attrs, %{title: t, category: c})}
+      err -> err
+    end
+  end
+  defp backfill_prompt_attrs(_), do: {:error, "you need to at least provide a prompt to create a workbench prompt"}
 
   @doc """
   Updates a saved workbench prompt. Requires read access to the workbench.

@@ -18,6 +18,7 @@ import {
   WorkbenchJobActivity,
   WorkbenchJobJobLevelThinking,
 } from './WorkbenchJobActivity'
+import { WorkbenchJobEvalPromptCard } from './WorkbenchJobEvalPromptCard'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 import {
@@ -98,10 +99,18 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
             }}
             keepMounted={userPromptIndices}
             topContent={
-              <ExpandableUserPrompt
-                prompt={job?.prompt}
-                css={{ width: '100%', marginTop: 0 }}
-              />
+              job?.referencedJob && job.prompt ? (
+                <WorkbenchJobEvalPromptCard
+                  prompt={job.prompt}
+                  referencedJob={job.referencedJob}
+                  css={{ width: '100%', marginTop: 0 }}
+                />
+              ) : (
+                <ExpandableUserPrompt
+                  prompt={job?.prompt}
+                  css={{ width: '100%', marginTop: 0 }}
+                />
+              )
             }
             bottomContent={
               <>

@@ -2708,6 +2708,9 @@ input WorkbenchToolConfigurationAttributes {
   "azure monitor connection (metrics)"
   azure: WorkbenchToolAzureConnectionAttributes
 
+  "sentry connection (error tracking)"
+  sentry: WorkbenchToolSentryConnectionAttributes
+
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
@@ -2768,6 +2771,18 @@ input WorkbenchToolPrometheusConnectionAttributes {
 
   "optional tenant id (e.g. for Mimir)"
   tenantId: String
+
+  "whether to sign requests with AWS SigV4"
+  awsSigv4: Boolean
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS secret access key for SigV4 authentication"
+  awsSecretAccessKey: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
 }
 
 input WorkbenchToolLokiConnectionAttributes {
@@ -2889,6 +2904,14 @@ input WorkbenchToolAzureConnectionAttributes {
 
   "Optional azure managed prometheus url if you wish to use it for metrics"
   prometheusUrl: String
+}
+
+input WorkbenchToolSentryConnectionAttributes {
+  "optional Sentry API host (defaults to https:\/\/sentry.io; set for self-hosted)"
+  url: String
+
+  "Sentry user auth token or internal integration token (encrypted at rest)"
+  accessToken: String
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -3155,6 +3178,9 @@ type WorkbenchJob {
 
   "the issue this run was spawned from"
   issue: Issue
+
+  "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
+  referencedJob: WorkbenchJob
 
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
@@ -3531,7 +3557,7 @@ type WorkbenchPrompt {
   id: String!
 
   "display title for the saved prompt"
-  title: String
+  title: String!
 
   "grouping category for the saved prompt (Default when unset in storage)"
   category: String!
@@ -3833,6 +3859,9 @@ type WorkbenchToolConfiguration {
   "azure monitor connection (no secrets)"
   azure: WorkbenchToolAzureConnection
 
+  "sentry connection (no secrets)"
+  sentry: WorkbenchToolSentryConnection
+
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
@@ -3884,6 +3913,15 @@ type WorkbenchToolPrometheusConnection {
 
   "optional tenant id"
   tenantId: String
+
+  "whether requests are signed with AWS SigV4"
+  awsSigv4: Boolean
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
 }
 
 type WorkbenchToolLokiConnection {
@@ -3960,6 +3998,11 @@ type WorkbenchToolAzureConnection {
 
   "optional Azure Managed Prometheus query URL for metrics tools"
   prometheusUrl: String
+}
+
+type WorkbenchToolSentryConnection {
+  "Sentry API host in use (defaults to https:\/\/sentry.io; credentials never exposed)"
+  url: String
 }
 
 type WorkbenchToolLinearConnection {
@@ -12118,6 +12161,9 @@ input GitAttributes {
 
   "whether to run plural crypto on this repo"
   decrypt: Boolean
+
+  "whether to recurse submodules when cloning this repo"
+  recurseSubmodules: Boolean
 }
 
 input HelmRepositoryAttributes {
@@ -12759,6 +12805,9 @@ type GitRepository {
 
   "whether to run plural crypto unlock on this repo"
   decrypt: Boolean
+
+  "whether to recurse submodules when cloning this repo"
+  recurseSubmodules: Boolean
 
   "named refs like branches\/tags for a repository"
   refs: [String!]

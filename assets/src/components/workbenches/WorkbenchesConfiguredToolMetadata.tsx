@@ -29,7 +29,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Slack]: extractSlackMetadata,
   [WorkbenchToolType.Teams]: extractTeamsMetadata,
   [WorkbenchToolType.Mcp]: () => [],
-  [WorkbenchToolType.Sentry]: () => [],
+  [WorkbenchToolType.Sentry]: extractSentryMetadata,
   [WorkbenchToolType.Splunk]: extractSplunkMetadata,
   [WorkbenchToolType.Dynatrace]: extractDynatraceMetadata,
   [WorkbenchToolType.Cloudwatch]: extractCloudwatchMetadata,
@@ -56,16 +56,21 @@ export function WorkbenchesConfiguredToolMetadata({
     fetchPolicy: 'cache-and-network',
   })
 
-  const metadata = getToolMetadataRows(
-    toolType,
-    data?.workbenchTool?.configuration ?? null
-  ).filter(({ value }) => hasDisplayValue(value))
+  const metadata =
+    toolType === WorkbenchToolType.Mcp
+      ? getMcpServerMetadataRows(data?.workbenchTool?.mcpServer)
+      : getToolMetadataRows(
+          toolType,
+          data?.workbenchTool?.configuration ?? null
+        )
 
-  if (isEmpty(metadata)) return null
+  const visibleMetadata = metadata.filter(({ value }) => hasDisplayValue(value))
+
+  if (isEmpty(visibleMetadata)) return null
 
   return (
     <ToolMetaSC>
-      {metadata.map(({ label, value }) => (
+      {visibleMetadata.map(({ label, value }) => (
         <ToolMetaRowSC key={label}>
           <ToolMetaLabelSC>{label}</ToolMetaLabelSC>
           <ToolMetaValueSC>{value}</ToolMetaValueSC>
@@ -73,6 +78,15 @@ export function WorkbenchesConfiguredToolMetadata({
       ))}
     </ToolMetaSC>
   )
+}
+
+function getMcpServerMetadataRows(
+  mcpServer?: { name?: string | null; url?: string | null } | null
+): MetadataRow[] {
+  return [
+    { label: 'Server', value: mcpServer?.name },
+    { label: 'URL', value: mcpServer?.url },
+  ]
 }
 
 function getToolMetadataRows(
@@ -155,6 +169,12 @@ function extractLinearMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.linear?.url }]
+}
+
+function extractSentryMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.sentry?.url }]
 }
 
 function extractSlackMetadata(

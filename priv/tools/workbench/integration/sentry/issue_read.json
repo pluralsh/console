@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Retrieve a single Sentry issue by ID, including summary metadata and counts.",
+  "properties": {
+    "organization_slug": {
+      "type": "string",
+      "description": "Sentry organization slug."
+    },
+    "issue_id": {
+      "type": "string",
+      "description": "Numeric Sentry issue ID (from list_issues)."
+    }
+  },
+  "required": ["organization_slug", "issue_id"],
+  "additionalProperties": false
+}

@@ -28,6 +28,7 @@ import {
   StickyActionsFooterSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
+import { McpServerSelectField } from './mcp-server/McpServerSelectField'
 import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
 import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
@@ -85,6 +86,12 @@ function scmTokenIsSet(token: string | null | undefined): boolean {
   return (token ?? '').trim().length > 0
 }
 
+function sentryConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['sentry'] | null | undefined
+): boolean {
+  return scmTokenIsSet(c?.accessToken)
+}
+
 function bitbucketDatacenterConfigurationIsComplete(
   c:
     | WorkbenchToolConfigurationAttributes['bitbucketDatacenter']
@@ -101,6 +108,7 @@ export type WorkbenchToolFormState = Omit<
     | 'categories'
     | 'configuration'
     | 'cloudConnectionId'
+    | 'mcpServerId'
     | 'scmConnectionId'
     | 'readBindings'
     | 'writeBindings'
@@ -151,6 +159,7 @@ export function WorkbenchToolForm({
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
     cloudConnectionId: tool?.cloudConnection?.id,
+    mcpServerId: tool?.mcpServer?.id,
     scmConnectionId: tool?.scmConnection?.id,
     readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
@@ -162,6 +171,7 @@ export function WorkbenchToolForm({
   const configurationStepComplete =
     !!state.name.trim() &&
     (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId) &&
+    (type !== WorkbenchToolType.Mcp || !!state.mcpServerId) &&
     (type !== WorkbenchToolType.Github ||
       hasRegisteredScm ||
       githubWorkbenchAuthIsValid(state.configuration?.github, {
@@ -183,7 +193,10 @@ export function WorkbenchToolForm({
       hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.azureDevops?.token)) &&
     (type !== WorkbenchToolType.Teams ||
-      teamsConfigurationIsComplete(state.configuration?.teams))
+      teamsConfigurationIsComplete(state.configuration?.teams)) &&
+    (type !== WorkbenchToolType.Sentry ||
+      !!tool?.id ||
+      sentryConfigurationIsComplete(state.configuration?.sentry))
   const allowSave = hasUpdates && configurationStepComplete
   return (
     <FormCardSC>
@@ -213,6 +226,11 @@ export function WorkbenchToolForm({
               provider={provider}
               selectedId={state.cloudConnectionId ?? null}
               onChange={(id) => update({ cloudConnectionId: id })}
+            />
+          ) : type === WorkbenchToolType.Mcp ? (
+            <McpServerSelectField
+              selectedId={state.mcpServerId ?? null}
+              onChange={(id) => update({ mcpServerId: id })}
             />
           ) : (
             <>
@@ -421,8 +439,19 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { loki: { url: url ?? '', username, tenantId } }
   },
   [WorkbenchToolType.Prometheus]: (config) => {
-    const { url, username, tenantId } = config?.prometheus ?? {}
-    return { prometheus: { url: url ?? '', username, tenantId } }
+    const { url, username, tenantId, awsSigv4, awsAccessKeyId, awsRegion } =
+      config?.prometheus ?? {}
+    return {
+      prometheus: {
+        url: url ?? '',
+        username,
+        tenantId,
+        awsSigv4: awsSigv4 ?? false,
+        awsAccessKeyId: awsAccessKeyId ?? undefined,
+        awsSecretAccessKey: undefined,
+        awsRegion: awsRegion ?? undefined,
+      },
+    }
   },
   [WorkbenchToolType.Tempo]: (config) => {
     const { url, username, tenantId } = config?.tempo ?? {}
@@ -510,6 +539,10 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         clientSecret: '',
       },
     }
+  },
+  [WorkbenchToolType.Sentry]: (config) => {
+    const { url } = config?.sentry ?? {}
+    return { sentry: { url: url ?? undefined, accessToken: '' } }
   },
 }
 

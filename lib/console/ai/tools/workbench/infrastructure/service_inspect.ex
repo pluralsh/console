@@ -33,6 +33,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
     |> Repo.preload([:repository, :cluster, :errors, owner: [parent: :cluster], parent: [:cluster]])
     |> Policies.allow(user, :read)
     |> case do
+      {:ok, nil} -> {:error, "could not find service with id #{id}"}
       {:ok, svc} -> {:ok, String.trim(service_prompt(service: svc, vulns: sideload_vulns(svc, model.vuln_reports)))}
       nil -> {:error, "could not find service with id #{id}"}
       error -> error

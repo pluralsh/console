@@ -156,6 +156,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
     field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
+    field :sentry,     :workbench_tool_sentry_connection_attributes, description: "sentry connection (error tracking)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :slack,      :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
     field :teams,      :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
@@ -177,11 +178,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_prometheus_connection_attributes do
-    field :url,       non_null(:string), description: "prometheus base url"
-    field :token,     :string, description: "bearer token or api key"
-    field :username,  :string, description: "basic auth username"
-    field :password,  :string, description: "basic auth password"
-    field :tenant_id, :string, description: "optional tenant id (e.g. for Mimir)"
+    field :url,                   non_null(:string), description: "prometheus base url"
+    field :token,                 :string, description: "bearer token or api key"
+    field :username,              :string, description: "basic auth username"
+    field :password,              :string, description: "basic auth password"
+    field :tenant_id,             :string, description: "optional tenant id (e.g. for Mimir)"
+    field :aws_sigv4,             :boolean, description: "whether to sign requests with AWS SigV4"
+    field :aws_access_key_id,     :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_secret_access_key, :string, description: "AWS secret access key for SigV4 authentication"
+    field :aws_region,            :string, description: "AWS region for SigV4 authentication"
   end
 
   input_object :workbench_tool_loki_connection_attributes do
@@ -241,6 +246,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :client_id,       non_null(:string), description: "azure client id"
     field :client_secret,   non_null(:string), description: "azure client secret"
     field :prometheus_url,  :string, description: "Optional azure managed prometheus url if you wish to use it for metrics"
+  end
+
+  input_object :workbench_tool_sentry_connection_attributes do
+    field :url, :string,
+      description: "optional Sentry API host (defaults to https://sentry.io; set for self-hosted)"
+
+    field :access_token, :string,
+      description: "Sentry user auth token or internal integration token (encrypted at rest)"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -426,8 +439,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
 
-    field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"
-    field :issue,        :issue, resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :alert,           :alert,        resolve: dataloader(Deployments), description: "the alert this run was spawned from"
+    field :issue,           :issue,        resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
       resolve &Deployments.list_workbench_job_activities/3
@@ -663,7 +677,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_prompt do
     field :id,    non_null(:string), description: "the id of the saved prompt"
-    field :title, :string, description: "display title for the saved prompt"
+    field :title, non_null(:string), description: "display title for the saved prompt", resolve: fn prompt, _, _ ->
+      {:ok, prompt.title || "Default"}
+    end
 
     field :category, non_null(:string),
       description: "grouping category for the saved prompt (Default when unset in storage)" do
@@ -827,6 +843,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :dynatrace, :workbench_tool_dynatrace_connection, description: "dynatrace connection (no secrets)"
     field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
     field :azure,     :workbench_tool_azure_connection, description: "azure monitor connection (no secrets)"
+    field :sentry,    :workbench_tool_sentry_connection, description: "sentry connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :slack,     :workbench_tool_slack_connection, description: "slack connection (no secrets)"
     field :teams,     :workbench_tool_teams_connection, description: "microsoft teams / graph connection (no secrets)"
@@ -847,9 +864,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_prometheus_connection do
-    field :url,       :string, description: "prometheus base url"
-    field :username,  :string, description: "basic auth username"
-    field :tenant_id, :string, description: "optional tenant id"
+    field :url,               :string, description: "prometheus base url"
+    field :username,          :string, description: "basic auth username"
+    field :tenant_id,         :string, description: "optional tenant id"
+    field :aws_sigv4,         :boolean, description: "whether requests are signed with AWS SigV4"
+    field :aws_access_key_id, :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_region,        :string, description: "AWS region for SigV4 authentication"
   end
 
   object :workbench_tool_loki_connection do
@@ -894,6 +914,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id,       :string, description: "azure tenant id"
     field :client_id,       :string, description: "azure client id"
     field :prometheus_url,  :string, description: "optional Azure Managed Prometheus query URL for metrics tools"
+  end
+
+  object :workbench_tool_sentry_connection do
+    field :url, :string,
+      description: "Sentry API host in use (defaults to https://sentry.io; credentials never exposed)",
+      resolve: fn
+        %{url: url}, _ when is_binary(url) and url != "" -> {:ok, url}
+        _, _ -> {:ok, "https://sentry.io"}
+      end
   end
 
   object :workbench_tool_linear_connection do

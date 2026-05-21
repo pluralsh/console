@@ -12,6 +12,7 @@ import {
   IconProps,
   LinearLogoIcon,
   LokiLogoIcon,
+  McpLogoIcon,
   MsTeamsLogoIcon,
   PrometheusLogoIcon,
   SentryLogoIcon,
@@ -54,6 +55,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Dynatrace,
   WorkbenchToolType.Cloudwatch,
   WorkbenchToolType.Azure,
+  WorkbenchToolType.Sentry,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -85,6 +87,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Dynatrace]: 'dynatrace',
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
   [WorkbenchToolType.Azure]: 'azure',
+  [WorkbenchToolType.Sentry]: 'sentry',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -182,7 +185,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.BitbucketDatacenter]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.AzureDevops]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
-  [WorkbenchToolType.Mcp]: [],
+  [WorkbenchToolType.Mcp]: [WorkbenchToolCategory.Integration],
   [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
   [WorkbenchToolType.Splunk]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Dynatrace]: [
@@ -244,6 +247,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Query Azure Monitor metrics and logs for Azure resources.',
   [WorkbenchToolType.Jaeger]:
     'Query distributed traces from Jaeger with structured filters.',
+  [WorkbenchToolType.Sentry]:
+    'Connect to Sentry to list issues, inspect error details, and read stack traces.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -268,6 +273,13 @@ export type WorkbenchToolCard = {
 }
 
 export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
+  {
+    type: WorkbenchToolType.Mcp,
+    label: 'MCP',
+    description:
+      'Connect to a generic MCP server not covered by another integration.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Integration]],
+  },
   {
     type: WorkbenchToolType.Cloud,
     provider: Provider.Aws,
@@ -325,9 +337,11 @@ export function WorkbenchToolIcon({
       ? PROVIDER_TO_ICON[provider]
       : type === WorkbenchToolType.Sentry
         ? SentryLogoIcon
-        : isConfigurableWorkbenchToolType(type)
-          ? toolToIcon[type]
-          : ToolsIcon
+        : type === WorkbenchToolType.Mcp
+          ? McpLogoIcon
+          : isConfigurableWorkbenchToolType(type)
+            ? toolToIcon[type]
+            : ToolsIcon
   return (
     <Icon
       fullColor={fullColor}
@@ -382,4 +396,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Cloudwatch]: AwsLogoIcon,
   [WorkbenchToolType.Azure]: AzureLogoIcon,
   [WorkbenchToolType.Jaeger]: ToolsIcon,
+  [WorkbenchToolType.Sentry]: SentryLogoIcon,
 }

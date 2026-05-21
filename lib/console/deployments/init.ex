@@ -110,8 +110,10 @@ defmodule Console.Deployments.Init do
       # {true, :aws} ->
       #   Map.put(attrs, :ai, %{
       #     provider: :bedrock,
+      #     embedding_provider: :openai,
       #     enabled: true,
-      #     bedrock: %{region: "us-east-1"}
+      #     bedrock: %{region: "us-east-1"},
+      #     openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
       #   })
       {true, _} ->
         Map.put(attrs, :ai, %{
@@ -139,6 +141,7 @@ defmodule Console.Deployments.Init do
          } = settings <- Settings.fetch_consistent() do
       DeploymentSettings.changeset(settings, %{ai: %{
         provider: :bedrock,
+        embedding_provider: :openai,
         bedrock: %{region: "us-east-1"}
       }})
       |> Repo.update()

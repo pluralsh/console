@@ -165,7 +165,11 @@ export function PRsModalIcon({
       <Chip
         clickable
         size="small"
-        onClick={() => setModalOpen(true)}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setModalOpen(true)
+        }}
         tooltip="View pull requests"
         fillLevel={0}
       >

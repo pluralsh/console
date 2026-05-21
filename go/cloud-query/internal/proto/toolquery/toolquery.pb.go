@@ -152,14 +152,18 @@ func (x *DatadogConnection) GetAppKey() string {
 }
 
 type PrometheusConnection struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Token         *string                `protobuf:"bytes,2,opt,name=token,proto3,oneof" json:"token,omitempty"`
-	Username      *string                `protobuf:"bytes,3,opt,name=username,proto3,oneof" json:"username,omitempty"`
-	Password      *string                `protobuf:"bytes,4,opt,name=password,proto3,oneof" json:"password,omitempty"`
-	TenantId      *string                `protobuf:"bytes,5,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Url                string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Token              *string                `protobuf:"bytes,2,opt,name=token,proto3,oneof" json:"token,omitempty"`
+	Username           *string                `protobuf:"bytes,3,opt,name=username,proto3,oneof" json:"username,omitempty"`
+	Password           *string                `protobuf:"bytes,4,opt,name=password,proto3,oneof" json:"password,omitempty"`
+	TenantId           *string                `protobuf:"bytes,5,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
+	AwsSigv4           *bool                  `protobuf:"varint,6,opt,name=aws_sigv4,json=awsSigv4,proto3,oneof" json:"aws_sigv4,omitempty"`
+	AwsAccessKeyId     *string                `protobuf:"bytes,7,opt,name=aws_access_key_id,json=awsAccessKeyId,proto3,oneof" json:"aws_access_key_id,omitempty"`
+	AwsSecretAccessKey *string                `protobuf:"bytes,8,opt,name=aws_secret_access_key,json=awsSecretAccessKey,proto3,oneof" json:"aws_secret_access_key,omitempty"`
+	AwsRegion          *string                `protobuf:"bytes,9,opt,name=aws_region,json=awsRegion,proto3,oneof" json:"aws_region,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *PrometheusConnection) Reset() {
@@ -223,6 +227,34 @@ func (x *PrometheusConnection) GetPassword() string {
 func (x *PrometheusConnection) GetTenantId() string {
 	if x != nil && x.TenantId != nil {
 		return *x.TenantId
+	}
+	return ""
+}
+
+func (x *PrometheusConnection) GetAwsSigv4() bool {
+	if x != nil && x.AwsSigv4 != nil {
+		return *x.AwsSigv4
+	}
+	return false
+}
+
+func (x *PrometheusConnection) GetAwsAccessKeyId() string {
+	if x != nil && x.AwsAccessKeyId != nil {
+		return *x.AwsAccessKeyId
+	}
+	return ""
+}
+
+func (x *PrometheusConnection) GetAwsSecretAccessKey() string {
+	if x != nil && x.AwsSecretAccessKey != nil {
+		return *x.AwsSecretAccessKey
+	}
+	return ""
+}
+
+func (x *PrometheusConnection) GetAwsRegion() string {
+	if x != nil && x.AwsRegion != nil {
+		return *x.AwsRegion
 	}
 	return ""
 }
@@ -2508,18 +2540,28 @@ const file_toolquery_proto_rawDesc = "" +
 	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\x12\x1b\n" +
 	"\x06appKey\x18\x03 \x01(\tH\x01R\x06appKey\x88\x01\x01B\a\n" +
 	"\x05_siteB\t\n" +
-	"\a_appKey\"\xd9\x01\n" +
+	"\a_appKey\"\xd4\x03\n" +
 	"\x14PrometheusConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x19\n" +
 	"\x05token\x18\x02 \x01(\tH\x00R\x05token\x88\x01\x01\x12\x1f\n" +
 	"\busername\x18\x03 \x01(\tH\x01R\busername\x88\x01\x01\x12\x1f\n" +
 	"\bpassword\x18\x04 \x01(\tH\x02R\bpassword\x88\x01\x01\x12 \n" +
-	"\ttenant_id\x18\x05 \x01(\tH\x03R\btenantId\x88\x01\x01B\b\n" +
+	"\ttenant_id\x18\x05 \x01(\tH\x03R\btenantId\x88\x01\x01\x12 \n" +
+	"\taws_sigv4\x18\x06 \x01(\bH\x04R\bawsSigv4\x88\x01\x01\x12.\n" +
+	"\x11aws_access_key_id\x18\a \x01(\tH\x05R\x0eawsAccessKeyId\x88\x01\x01\x126\n" +
+	"\x15aws_secret_access_key\x18\b \x01(\tH\x06R\x12awsSecretAccessKey\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"aws_region\x18\t \x01(\tH\aR\tawsRegion\x88\x01\x01B\b\n" +
 	"\x06_tokenB\v\n" +
 	"\t_usernameB\v\n" +
 	"\t_passwordB\f\n" +
 	"\n" +
-	"_tenant_id\"\xd3\x01\n" +
+	"_tenant_idB\f\n" +
+	"\n" +
+	"_aws_sigv4B\x14\n" +
+	"\x12_aws_access_key_idB\x18\n" +
+	"\x16_aws_secret_access_keyB\r\n" +
+	"\v_aws_region\"\xd3\x01\n" +
 	"\x0eLokiConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x19\n" +
 	"\x05token\x18\x02 \x01(\tH\x00R\x05token\x88\x01\x01\x12 \n" +
