@@ -32,6 +32,7 @@ require (
 	github.com/fluxcd/helm-controller/api v1.4.3
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-logr/logr v1.4.3
+	github.com/go-git/go-git/v5 v5.19.1
 	github.com/go-openapi/jsonpointer v0.22.1
 	github.com/gobuffalo/flect v1.0.3
 	github.com/google/gnostic-models v0.7.0
