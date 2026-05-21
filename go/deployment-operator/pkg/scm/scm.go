@@ -132,8 +132,12 @@ func (d *dispatchClient) clientFor(prURL string) (Client, error) {
 		return newGitHubClient(d.token, host), nil
 	case strings.Contains(host, "gitlab"):
 		return newGitLabClient(d.token, host), nil
+	case strings.Contains(host, "bitbucket"):
+		return newBitBucketClient(d.token, host), nil
+	case host == "dev.azure.com" || strings.HasSuffix(host, ".visualstudio.com"):
+		return newAzureDevOpsClient(d.token), nil
 	default:
-		return nil, fmt.Errorf("unsupported SCM host %q: only GitHub and GitLab are supported", host)
+		return nil, fmt.Errorf("unsupported SCM host %q: only GitHub, GitLab, Bitbucket and Azure DevOps are supported", host)
 	}
 }
 
