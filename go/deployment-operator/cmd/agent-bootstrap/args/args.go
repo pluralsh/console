@@ -40,11 +40,15 @@ func ConsoleURL() string {
 	ensureOrDie("console-url", argConsoleURL)
 	consoleURL := *argConsoleURL
 
-	consoleURL = strings.TrimSuffix(consoleURL, "/")
-	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
 	consoleURL = strings.TrimSuffix(consoleURL, "/ext/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/")
 
-	return fmt.Sprintf("%s/ext/gql", consoleURL)
+	return consoleURL
+}
+
+func ConsoleApiURL() string {
+	return fmt.Sprintf("%s/ext/gql", ConsoleURL())
 }
 
 func DeployToken() string {

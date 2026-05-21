@@ -19,7 +19,7 @@ func main() {
 		"working-dir", args.WorkingDir(),
 	)
 
-	consoleClient := client.New(args.ConsoleURL(), args.DeployToken())
+	consoleClient := client.New(args.ConsoleApiURL(), args.DeployToken())
 	fragment, err := consoleClient.GetAgentRun(context.Background(), args.AgentRunID())
 	if err != nil {
 		klog.Fatalf("could not fetch agent run (%s): %v", args.AgentRunID(), err)

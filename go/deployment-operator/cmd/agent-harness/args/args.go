@@ -70,8 +70,6 @@ func ConsoleUrl() string {
 }
 
 func ConsoleAPIUrl() string {
-	ensureOrDie("console-url", argConsoleUrl)
-
 	return fmt.Sprintf("%s/ext/gql", ConsoleUrl())
 }
 

@@ -5,21 +5,19 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"net"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/samber/lo"
-	"google.golang.org/grpc"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent"
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/scm"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
 
 const (
@@ -48,20 +46,22 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	client := console.New(args.ConsoleURL(), args.ConsoleToken())
+	client := console.New(args.ConsoleExtApiURL(), args.DeployToken())
 
 	mcpServer := agent.NewServer(
 		client,
 		createServerOptions(client)...,
 	)
 
-	grpcServer := grpc.NewServer()
-	scm.RegisterGRPCServer(grpcServer)
+	grpcServer, err := scm.NewServer(client)
+	if err != nil {
+		return fmt.Errorf("could not create grpc server: %w", err)
+	}
 
 	mcpErrChan := startMcpServer(mcpServer)
-	scmErrChan, err := startScmGrpcServer(grpcServer)
+	scmErrChan, err := grpcServer.Start()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not start scm grpc server: %w", err)
 	}
 
 	var serveErr error
@@ -100,7 +100,7 @@ func run() error {
 	return nil
 }
 
-func shutdownServers(ctx context.Context, grpcServer *grpc.Server, mcpServer *agent.Server) error {
+func shutdownServers(ctx context.Context, grpcServer *scm.Server, mcpServer *agent.Server) error {
 	grpcDone := make(chan struct{})
 	go func() {
 		grpcServer.GracefulStop()
@@ -129,32 +129,6 @@ func startMcpServer(server *agent.Server) <-chan error {
 	}()
 
 	return errChan
-}
-
-func startScmGrpcServer(grpcServer *grpc.Server) (<-chan error, error) {
-	listener, err := net.Listen("tcp", args.GRPCAddress())
-	if err != nil {
-		return nil, fmt.Errorf("could not listen for scm grpc api: %w", err)
-	}
-
-	errChan := make(chan error, 1)
-
-	go func() {
-		defer func() { _ = listener.Close() }()
-		klog.V(log.LogLevelDefault).InfoS("starting scm grpc api", "address", args.GRPCAddress())
-		serveErr := grpcServer.Serve(listener)
-
-		if serveErr != nil && !errors.Is(serveErr, grpc.ErrServerStopped) {
-			errChan <- serveErr
-			close(errChan)
-			return
-		}
-
-		errChan <- nil
-		close(errChan)
-	}()
-
-	return errChan, nil
 }
 
 func createServerOptions(client console.Client) []agent.Option {

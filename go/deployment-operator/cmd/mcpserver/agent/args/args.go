@@ -21,7 +21,7 @@ const (
 	EnvAddress     = "PLRL_MCP_ADDRESS"
 	EnvGRPCAddress = "PLRL_MCP_GRPC_ADDRESS"
 
-	EnvConsoleToken = "PLRL_CONSOLE_TOKEN"
+	EnvDeployToken  = "PLRL_DEPLOY_TOKEN"
 	EnvExcludeTools = "PLRL_EXCLUDE_TOOLS"
 )
 
@@ -29,7 +29,7 @@ var (
 	argAddress      = pflag.String("address", helpers.GetEnv(EnvAddress, common.AgentMCPServerAddress), "Address to listen on")
 	argGRPCAddress  = pflag.String("grpc-address", helpers.GetEnv(EnvGRPCAddress, common.AgentMCPGRPCServerAddress), "Address for internal babysit gRPC API listener")
 	argConsoleUrl   = pflag.String("console-url", helpers.GetEnv(controller.EnvConsoleURL, ""), "URL to the Console, i.e. https://console.onplural.sh")
-	argConsoleToken = pflag.String("console-token", helpers.GetEnv(EnvConsoleToken, ""), "Deploy token to the Console API")
+	argDeployToken  = pflag.String("deploy-token", helpers.GetEnv(EnvDeployToken, ""), "Deploy token to the Console API")
 	argAgentRunID   = pflag.String("agent-run-id", helpers.GetEnv(controller.EnvAgentRunID, ""), "ID of the Agent Run being executed")
 	argExcludeTools = pflag.String("exclude-tools", helpers.GetEnv(EnvExcludeTools, ""), "Comma-separated list of tools to exclude from the default set. Available tools: createBranch, agentPullRequest, fetchAgentRunTodos, updateAgentRunAnalysis, updateAgentRunTodos, downloadServiceManifests")
 )
@@ -68,11 +68,15 @@ func ConsoleURL() string {
 	ensureOrDie("console-url", argConsoleUrl)
 	consoleURL := *argConsoleUrl
 
-	consoleURL = strings.TrimSuffix(consoleURL, "/")
-	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
 	consoleURL = strings.TrimSuffix(consoleURL, "/ext/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/")
 
-	return fmt.Sprintf("%s/gql", consoleURL)
+	return consoleURL
+}
+
+func ConsoleExtApiURL() string {
+	return fmt.Sprintf("%s/ext/gql", ConsoleURL())
 }
 
 func AgentRunID() string {
@@ -80,9 +84,9 @@ func AgentRunID() string {
 	return *argAgentRunID
 }
 
-func ConsoleToken() string {
-	ensureOrDie("console-token", argConsoleToken)
-	return *argConsoleToken
+func DeployToken() string {
+	ensureOrDie("deploy-token", argDeployToken)
+	return *argDeployToken
 }
 
 func ExcludeTools() ([]tool.ID, error) {
