@@ -2,11 +2,9 @@ package codex
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
@@ -33,6 +31,7 @@ func New(config v1.Config) v1.Tool {
 		apiKey:      config.Run.Runtime.Config.Codex.ApiKey,
 		model:       EnsureModel(config.Run.Runtime.Config.Codex.Model),
 		proxy:       config.Run.IsProxyEnabled(),
+		toolItems:   make(map[string]*StreamItem),
 	}
 
 	if config.Run.PluralCreds != nil {
@@ -177,7 +176,7 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 		mcps = append(mcps, mcp)
 	}
 
-	cfg, err := BuildCodexConfig(in.Config.WorkDir, agents, mcps, providers)
+	cfg, err := BuildCodexConfig(in.Config.RepositoryDir, agents, mcps, providers)
 	if err != nil {
 		return err
 	}
@@ -212,14 +211,11 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 	}
 
 	agent := "autonomous"
-	args := []string{"exec", "--profile", agent, "--skip-git-repo-check", "--json", bCtx.Prompt}
+	args := []string{"exec", "--profile", agent, "--json", bCtx.Prompt}
 
 	in.executable = exec.NewExecutable(
 		"codex",
-		exec.WithArgs(args),
-		exec.WithDir(in.Config.WorkDir),
-		exec.WithEnv([]string{fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken), fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex"))}),
-		exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
+		append(in.codexExecOptions(), exec.WithArgs(args))...,
 	)
 
 	klog.V(log.LogLevelInfo).InfoS("codex executable configured", "timeout", in.Config.Run.Runtime.Config.Codex.Timeout)
@@ -229,23 +225,8 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser})
 	}
 
-	err := in.executable.RunStream(ctx, func(line []byte) {
-		event := &StreamEvent{}
-		if err := json.Unmarshal(line, event); err != nil {
-			klog.V(log.LogLevelExtended).InfoS("failed to unmarshal codex stream event", "line", string(line))
-			return
-		}
-
-		if event.Type == streamEventTypeThreadStarted && event.ThreadID != "" {
-			in.threadID = event.ThreadID
-			klog.V(log.LogLevelDebug).InfoS("codex thread started", "thread_id", in.threadID)
-		}
-
-		msg := mapCodexStreamEventToAgentMessage(event, in.threadID)
-		if in.onMessage != nil && msg != nil {
-			in.onMessage(msg)
-		}
-	})
+	in.resetToolItems()
+	err := in.executable.RunStream(ctx, in.handleStreamLine)
 	if err != nil {
 		klog.ErrorS(err, "codex execution failed")
 		in.Config.ErrorChan <- err
@@ -270,33 +251,15 @@ func (in *Codex) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string)
 		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
 	}
 
-	args := []string{"exec", "--profile", "analysis", "--skip-git-repo-check", "--json", followUpPrompt}
+	args := []string{"exec", "--profile", "analysis", "--json", followUpPrompt}
 
 	in.executable = exec.NewExecutable(
 		"codex",
-		exec.WithArgs(args),
-		exec.WithDir(in.Config.WorkDir),
-		exec.WithEnv([]string{fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken), fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex"))}),
-		exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
+		append(in.codexExecOptions(), exec.WithArgs(args))...,
 	)
 
-	err := in.executable.RunStream(ctx, func(line []byte) {
-		event := &StreamEvent{}
-		if err := json.Unmarshal(line, event); err != nil {
-			klog.V(log.LogLevelExtended).InfoS("failed to unmarshal codex stream event (analysis follow-up)", "line", string(line))
-			return
-		}
-
-		if event.Type == streamEventTypeThreadStarted && event.ThreadID != "" {
-			in.threadID = event.ThreadID
-			klog.V(log.LogLevelDebug).InfoS("codex thread started (analysis follow-up)", "thread_id", in.threadID)
-		}
-
-		msg := mapCodexStreamEventToAgentMessage(event, in.threadID)
-		if in.onMessage != nil && msg != nil {
-			in.onMessage(msg)
-		}
-	})
+	in.resetToolItems()
+	err := in.executable.RunStream(ctx, in.handleStreamLine)
 	if err != nil {
 		return fmt.Errorf("codex analysis follow-up execution failed: %w", err)
 	}
@@ -328,16 +291,13 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 		agent = "autonomous"
 	}
 
-	args := []string{"exec", "--profile", agent, "--skip-git-repo-check", "--json", in.Config.Run.Prompt}
+	args := []string{"exec", "--profile", agent, "--json", in.Config.Run.Prompt}
 
 	in.executable = exec.NewExecutable(
 		"codex",
 		append(
 			options,
-			exec.WithArgs(args),
-			exec.WithDir(in.Config.WorkDir),
-			exec.WithEnv([]string{fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken), fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex"))}),
-			exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
+			append(in.codexExecOptions(), exec.WithArgs(args))...,
 		)...,
 	)
 
@@ -348,23 +308,8 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser})
 	}
 
-	err := in.executable.RunStream(ctx, func(line []byte) {
-		event := &StreamEvent{}
-		if err := json.Unmarshal(line, event); err != nil {
-			klog.V(log.LogLevelExtended).InfoS("failed to unmarshal codex stream event", "line", string(line))
-			return
-		}
-
-		if event.Type == streamEventTypeThreadStarted && event.ThreadID != "" {
-			in.threadID = event.ThreadID
-			klog.V(log.LogLevelDebug).InfoS("codex thread started", "thread_id", in.threadID)
-		}
-
-		msg := mapCodexStreamEventToAgentMessage(event, in.threadID)
-		if in.onMessage != nil && msg != nil {
-			in.onMessage(msg)
-		}
-	})
+	in.resetToolItems()
+	err := in.executable.RunStream(ctx, in.handleStreamLine)
 	if err != nil {
 		klog.ErrorS(err, "codex execution failed")
 		in.Config.ErrorChan <- err
@@ -374,155 +319,13 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 	// FinishedChan is closed by the controller after the babysit loop exits.
 }
 
-// mapCodexStreamEventToAgentMessage converts a single Codex CLI JSON stream event into an
-// AgentMessageAttributes to be forwarded to the API.
-func mapCodexStreamEventToAgentMessage(event *StreamEvent, threadID string) *console.AgentMessageAttributes {
-	switch event.Type {
-	case "item.completed":
-		if event.Item == nil {
-			return nil
-		}
-		return mapStreamItem(event.Item, threadID)
-	case "turn.completed":
-		if event.Usage == nil {
-			return nil
-		}
-		totalTokens := float64(event.Usage.InputTokens + event.Usage.OutputTokens)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: "turn.completed",
-			Cost: &console.AgentMessageCostAttributes{
-				Total: totalTokens,
-				Tokens: &console.AgentMessageTokensAttributes{
-					Input:  lo.ToPtr(float64(event.Usage.InputTokens)),
-					Output: lo.ToPtr(float64(event.Usage.OutputTokens)),
-				},
-			},
-		}
-	case "error":
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: event.Message,
-		}
+func (in *Codex) codexExecOptions() []exec.Option {
+	return []exec.Option{
+		exec.WithDir(in.Config.RepositoryDir),
+		exec.WithEnv([]string{
+			fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken),
+			fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex")),
+		}),
+		exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 	}
-	return nil
-}
-
-// mapStreamItem maps a completed StreamItem to an AgentMessageAttributes.
-func mapStreamItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
-	switch item.Type {
-	case "error":
-		msg := lo.Ternary(len(item.Message) == 0, item.Text, item.Message)
-		if len(msg) == 0 {
-			return nil
-		}
-
-		klog.V(log.LogLevelDebug).InfoS("codex item error", "message", msg, "thread_id", threadID)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: msg,
-		}
-	case "reasoning":
-		if item.Text == "" {
-			return nil
-		}
-		klog.V(log.LogLevelDebug).InfoS("codex reasoning", "text", item.Text, "thread_id", threadID)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: item.Text,
-		}
-
-	case "agent_message":
-		if item.Text == "" {
-			return nil
-		}
-		klog.V(log.LogLevelDebug).InfoS("codex agent message", "text", item.Text, "thread_id", threadID)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: item.Text,
-		}
-
-	case "command_execution":
-		if item.Status != statusCompleted && item.Status != statusFailed {
-			return nil
-		}
-		exitCode := 0
-		if item.ExitCode != nil {
-			exitCode = *item.ExitCode
-		}
-		state := console.AgentMessageToolStateCompleted
-		if item.Status == statusFailed || exitCode != 0 {
-			state = console.AgentMessageToolStateError
-		}
-		klog.V(log.LogLevelDebug).InfoS("codex command execution", "command", item.Command, "exit_code", exitCode, "thread_id", threadID)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: "Called tool",
-			Metadata: &console.AgentMessageMetadataAttributes{
-				Tool: &console.AgentMessageToolAttributes{
-					Name:   lo.ToPtr(item.Command),
-					State:  lo.ToPtr(state),
-					Output: lo.ToPtr(item.AggregatedOutput),
-				},
-			},
-		}
-
-	case "mcp_tool_call":
-		if item.Status != statusCompleted && item.Status != statusFailed {
-			return nil
-		}
-		state := console.AgentMessageToolStateCompleted
-		errMsg := ""
-		if item.Status == statusFailed {
-			state = console.AgentMessageToolStateError
-			if item.Error != nil {
-				errMsg = item.Error.Message
-			}
-		}
-		toolName := fmt.Sprintf("%s/%s", item.Server, item.Tool)
-		output := errMsg
-		if output == "" && item.Result != nil {
-			output = string(item.Result)
-		}
-		klog.V(log.LogLevelDebug).InfoS("codex mcp tool call", "server", item.Server, "tool", item.Tool, "status", item.Status, "thread_id", threadID)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: "Called tool",
-			Metadata: &console.AgentMessageMetadataAttributes{
-				Tool: &console.AgentMessageToolAttributes{
-					Name:   lo.ToPtr(toolName),
-					State:  lo.ToPtr(state),
-					Output: lo.ToPtr(output),
-				},
-			},
-		}
-
-	case "file_change":
-		if item.Status != statusCompleted && item.Status != statusFailed {
-			return nil
-		}
-		state := console.AgentMessageToolStateCompleted
-		if item.Status == statusFailed {
-			state = console.AgentMessageToolStateError
-		}
-		paths := make([]string, 0, len(item.Changes))
-		for _, c := range item.Changes {
-			paths = append(paths, fmt.Sprintf("%s:%s", c.Kind, c.Path))
-		}
-		output := strings.Join(paths, ", ")
-		klog.V(log.LogLevelDebug).InfoS("codex file change", "changes", output, "thread_id", threadID)
-		return &console.AgentMessageAttributes{
-			Role:    console.AiRoleAssistant,
-			Message: "File changes applied",
-			Metadata: &console.AgentMessageMetadataAttributes{
-				Tool: &console.AgentMessageToolAttributes{
-					Name:   lo.ToPtr("file_change"),
-					State:  lo.ToPtr(state),
-					Output: lo.ToPtr(output),
-				},
-			},
-		}
-	}
-
-	return nil
 }

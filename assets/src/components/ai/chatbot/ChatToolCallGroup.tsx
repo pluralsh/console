@@ -7,10 +7,24 @@ import { ComponentProps, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { ChatMessage } from './ChatMessage'
 import { SimpleAccordion } from './multithread/MultiThreadViewerMessage'
+import {
+  resolveToolCallKind,
+  toolCallBatchKey,
+  toolCallBatchLabelFromKey,
+} from './toolCallDisplay'
 
 export type ChatDisplayItem = ChatFragment | ChatFragment[]
 
-const BATCHED_TOOLS = ['bash', 'read', 'grep', 'edit'] as const
+const BATCHED_TOOL_KEYS = [
+  'bash',
+  'read',
+  'grep',
+  'edit',
+  'command',
+  'mcp',
+  'files',
+  'search',
+] as const
 
 export function ChatToolCallGroup({
   messages,
@@ -87,14 +101,20 @@ export function groupConsecutiveToolMessages(
 
 function getToolCallGroupHeader(messages: ChatFragment[]): string {
   const counts = countBy(messages, (m) =>
-    m.attributes?.tool?.name?.toLowerCase()
+    toolCallBatchKey(
+      resolveToolCallKind(
+        m.attributes?.tool?.name ?? '',
+        m.attributes?.tool?.arguments
+      )
+    )
   )
-  const other = messages.length - sumBy(BATCHED_TOOLS, (t) => counts[t] ?? 0)
+  const batched = sumBy(BATCHED_TOOL_KEYS, (t) => counts[t] ?? 0)
+  const other = messages.length - batched
 
   return [
     other > 0 && `${other} tool ${pluralize('call', other)}`,
-    ...BATCHED_TOOLS.filter((t) => counts[t]).map(
-      (t) => `${counts[t]} ${pluralize(t, counts[t])}`
+    ...BATCHED_TOOL_KEYS.filter((t) => counts[t]).map((t) =>
+      toolCallBatchLabelFromKey(t, counts[t] ?? 0)
     ),
   ]
     .filter(Boolean)

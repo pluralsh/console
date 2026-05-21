@@ -10,7 +10,7 @@ import {
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
-import { isNil, truncate } from 'lodash'
+import { isNil } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
@@ -18,6 +18,16 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
+import {
+  formatFileChangeSummary,
+  getCommand,
+  getSearchQuery,
+  isStyledToolCall,
+  resolveToolCallKind,
+  toolCallDisplaySubtitle,
+  toolCallDisplayTitle,
+  toolCallModalHeader,
+} from '../toolCallDisplay'
 
 import {
   CHIP_ATTRIBUTE_SCHEMA,
@@ -78,42 +88,120 @@ export function SimpleToolCall({
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
-  const command = `${attributes?.tool?.arguments?.['command'] ?? ''}`
-  if (!customLabel && toolName.toLowerCase().includes('bash')) {
-    return (
-      <SimpleAccordion
-        label={
+  const args = attributes?.tool?.arguments
+  const kind = resolveToolCallKind(toolName, args)
+
+  if (!customLabel && isStyledToolCall(toolName, attributes)) {
+    const title = toolCallDisplayTitle(kind, toolName, args)
+    const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
+
+    const label = (
+      <CaptionP
+        as="span"
+        $color="text"
+      >
+        {title}{' '}
+        {subtitle && (
           <CaptionP
             as="span"
-            $color="text-light"
+            $color="text-xlight"
           >
-            Bash{' '}
-            <CaptionP
-              as="span"
-              $color="text-xlight"
-            >
-              {truncate(command, { length: 30 })}
-            </CaptionP>
+            {subtitle}
           </CaptionP>
-        }
-      >
-        <Flex
-          direction="column"
-          gap="xsmall"
-          minWidth={0}
-          width="100%"
-        >
-          <Code
-            language="bash"
-            showHeader={false}
-          >
-            {command}
-          </Code>
-          <Code showHeader={false}>{content ?? ''}</Code>
-        </Flex>
-      </SimpleAccordion>
+        )}
+      </CaptionP>
     )
+
+    switch (kind) {
+      case 'bash':
+      case 'command_execution': {
+        const command = getCommand(toolName, args)
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="xsmall"
+              minWidth={0}
+              width="100%"
+            >
+              <Code
+                language="bash"
+                showHeader={false}
+              >
+                {command}
+              </Code>
+              {content ? <Code showHeader={false}>{content}</Code> : null}
+            </Flex>
+          </SimpleAccordion>
+        )
+      }
+      case 'web_search': {
+        const query = getSearchQuery(args)
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="xsmall"
+              minWidth={0}
+              width="100%"
+            >
+              <Code showHeader={false}>{query}</Code>
+              {content ? <Code showHeader={false}>{content}</Code> : null}
+            </Flex>
+          </SimpleAccordion>
+        )
+      }
+      case 'mcp_tool_call':
+        return (
+          <SimpleAccordion label={label}>
+            <ToolCallContent
+              content={content ?? ''}
+              attributes={attributes}
+              customResultBody={customResultBody}
+            />
+          </SimpleAccordion>
+        )
+      case 'file_change':
+      case 'edit': {
+        const summary = formatFileChangeSummary(args, content)
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="xsmall"
+              minWidth={0}
+              width="100%"
+            >
+              {Array.isArray(args) ? (
+                <Code
+                  language="json"
+                  showHeader={false}
+                >
+                  {JSON.stringify(args, null, 2)}
+                </Code>
+              ) : (
+                <Code showHeader={false}>{summary}</Code>
+              )}
+            </Flex>
+          </SimpleAccordion>
+        )
+      }
+      case 'read':
+      case 'grep':
+        return (
+          <SimpleAccordion label={label}>
+            <ToolCallContent
+              content={content ?? ''}
+              attributes={attributes}
+              customResultBody={customResultBody}
+            />
+          </SimpleAccordion>
+        )
+      default:
+        break
+    }
   }
+
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
@@ -134,7 +222,7 @@ export function SimpleToolCall({
           setFinishedAnimating(false)
         }}
         onAnimationEnd={() => setFinishedAnimating(true)}
-        header={`Tool: ${toolName}`}
+        header={toolCallModalHeader(kind, toolName, args)}
         size="large"
       >
         <ToolCallContent
@@ -317,8 +405,10 @@ export function SimpleAccordion({
         trigger={
           loading ? (
             <RectangleSkeleton />
-          ) : (
+          ) : typeof label === 'string' ? (
             <CaptionP $color="text-xlight">{label}</CaptionP>
+          ) : (
+            <AccordionLabelSC>{label}</AccordionLabelSC>
           )
         }
         padding="none"
@@ -330,6 +420,14 @@ export function SimpleAccordion({
     </Accordion>
   )
 }
+
+/** Keeps styled tool labels on one line inside the accordion flex trigger. */
+const AccordionLabelSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  flex: 1,
+  minWidth: 0,
+  textAlign: 'left',
+}))
 
 export const ClickableLabelSC = styled.button(({ theme }) => ({
   background: 'none',
