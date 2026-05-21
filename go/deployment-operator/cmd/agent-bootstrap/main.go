@@ -13,12 +13,16 @@ import (
 )
 
 func main() {
-	klog.V(log.LogLevelDefault).InfoS("starting agent bootstrap")
+	klog.V(log.LogLevelDefault).InfoS("starting agent bootstrap",
+		"console-url", args.ConsoleURL(),
+		"agent-run-id", args.AgentRunID(),
+		"working-dir", args.WorkingDir(),
+	)
 
 	consoleClient := client.New(args.ConsoleURL(), args.DeployToken())
 	fragment, err := consoleClient.GetAgentRun(context.Background(), args.AgentRunID())
 	if err != nil {
-		klog.Fatalf("could not fetch agent run: %v", err)
+		klog.Fatalf("could not fetch agent run (%s): %v", args.AgentRunID(), err)
 	}
 
 	run := (&agentrunv1.AgentRun{}).FromAgentRunFragment(fragment)
