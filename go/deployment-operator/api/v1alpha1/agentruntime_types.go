@@ -315,6 +315,13 @@ type CodexConfigRaw struct {
 	// Timeout bounds a single codex run invocation.
 	// +kubebuilder:validation:Optional
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
+
+	// DisableStream disables model provider API streaming when set to true explicitly.
+	// When true with aiProxy, the harness sets X-Plural-Enable-Stream: false on the
+	// plural model provider in config.toml. Codex has no direct env var; non-proxy
+	// mode may not apply.
+	// +kubebuilder:validation:Optional
+	DisableStream *bool `json:"disableStream,omitempty"`
 }
 
 type CodexConfig struct {
@@ -333,6 +340,10 @@ type CodexConfig struct {
 	// Timeout bounds a single codex run invocation.
 	// +kubebuilder:validation:Optional
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
+
+	// DisableStream disables model provider API streaming when set to true explicitly.
+	// +kubebuilder:validation:Optional
+	DisableStream *bool `json:"disableStream,omitempty"`
 }
 
 func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*CodexConfigRaw, error) {
@@ -341,9 +352,10 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 	}
 
 	result := &CodexConfigRaw{
-		Model:    in.Model,
-		Endpoint: in.Endpoint,
-		Timeout:  in.Timeout,
+		Model:        in.Model,
+		Endpoint:     in.Endpoint,
+		Timeout:      in.Timeout,
+		DisableStream: in.DisableStream,
 	}
 
 	if !secretKeySelectorSet(in.ApiKeySecretRef) {
@@ -393,6 +405,12 @@ type ClaudeConfig struct {
 	// for a command before it is terminated.
 	// +kubebuilder:validation:Optional
 	BashMaxTimeout *metav1.Duration `json:"bashMaxTimeout,omitempty"`
+
+	// DisableStream disables model provider API streaming when set to true explicitly.
+	// The harness sets CLAUDE_CODE_EXTRA_BODY to {"stream":false} in settings.local.json.
+	// With aiProxy, ANTHROPIC_CUSTOM_HEADERS also sends X-Plural-Enable-Stream: false.
+	// +kubebuilder:validation:Optional
+	DisableStream *bool `json:"disableStream,omitempty"`
 }
 
 // ClaudeConfigRaw contains configuration for the Claude CLI runtime.
@@ -426,6 +444,10 @@ type ClaudeConfigRaw struct {
 	// for a command before it is terminated.
 	// +kubebuilder:validation:Optional
 	BashMaxTimeout *metav1.Duration `json:"bashMaxTimeout,omitempty"`
+
+	// DisableStream disables model provider API streaming when set to true explicitly.
+	// +kubebuilder:validation:Optional
+	DisableStream *bool `json:"disableStream,omitempty"`
 }
 
 func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*ClaudeConfigRaw, error) {
@@ -440,6 +462,7 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 		Timeout:        in.Timeout,
 		BashTimeout:    in.BashTimeout,
 		BashMaxTimeout: in.BashMaxTimeout,
+		DisableStream:  in.DisableStream,
 	}
 
 	if !secretKeySelectorSet(in.ApiKeySecretRef) {

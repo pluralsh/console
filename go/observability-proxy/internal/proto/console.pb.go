@@ -21,6 +21,59 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// OpenAiMethod selects which OpenAI HTTP APIs the Nexus proxy exposes.
+type OpenAiMethod int32
+
+const (
+	OpenAiMethod_OPEN_AI_METHOD_UNSPECIFIED OpenAiMethod = 0
+	OpenAiMethod_CHAT                       OpenAiMethod = 1
+	OpenAiMethod_RESPONSES                  OpenAiMethod = 2
+	OpenAiMethod_AUTO                       OpenAiMethod = 3
+)
+
+// Enum value maps for OpenAiMethod.
+var (
+	OpenAiMethod_name = map[int32]string{
+		0: "OPEN_AI_METHOD_UNSPECIFIED",
+		1: "CHAT",
+		2: "RESPONSES",
+		3: "AUTO",
+	}
+	OpenAiMethod_value = map[string]int32{
+		"OPEN_AI_METHOD_UNSPECIFIED": 0,
+		"CHAT":                       1,
+		"RESPONSES":                  2,
+		"AUTO":                       3,
+	}
+)
+
+func (x OpenAiMethod) Enum() *OpenAiMethod {
+	p := new(OpenAiMethod)
+	*p = x
+	return p
+}
+
+func (x OpenAiMethod) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OpenAiMethod) Descriptor() protoreflect.EnumDescriptor {
+	return file_console_proto_enumTypes[0].Descriptor()
+}
+
+func (OpenAiMethod) Type() protoreflect.EnumType {
+	return &file_console_proto_enumTypes[0]
+}
+
+func (x OpenAiMethod) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OpenAiMethod.Descriptor instead.
+func (OpenAiMethod) EnumDescriptor() ([]byte, []int) {
+	return file_console_proto_rawDescGZIP(), []int{0}
+}
+
 type AiConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -218,6 +271,7 @@ type OpenAiConfig struct {
 	BaseUrl        *string                `protobuf:"bytes,5,opt,name=baseUrl,proto3,oneof" json:"baseUrl,omitempty"`
 	ProxyModels    []string               `protobuf:"bytes,6,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	TokenExchange  *OpenAiTokenExchange   `protobuf:"bytes,7,opt,name=tokenExchange,proto3,oneof" json:"tokenExchange,omitempty"`
+	Method         *OpenAiMethod          `protobuf:"varint,8,opt,name=method,proto3,enum=plrl.OpenAiMethod,oneof" json:"method,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -299,6 +353,13 @@ func (x *OpenAiConfig) GetTokenExchange() *OpenAiTokenExchange {
 		return x.TokenExchange
 	}
 	return nil
+}
+
+func (x *OpenAiConfig) GetMethod() OpenAiMethod {
+	if x != nil && x.Method != nil {
+		return *x.Method
+	}
+	return OpenAiMethod_OPEN_AI_METHOD_UNSPECIFIED
 }
 
 type AnthropicConfig struct {
@@ -504,6 +565,9 @@ type BedrockConfig struct {
 	AwsSecretAccessKey *string                `protobuf:"bytes,7,opt,name=awsSecretAccessKey,proto3,oneof" json:"awsSecretAccessKey,omitempty"`
 	ProxyModels        []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	Deployments        map[string]string      `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	BaseUrl            *string                `protobuf:"bytes,10,opt,name=baseUrl,proto3,oneof" json:"baseUrl,omitempty"`
+	TokenExchange      *OpenAiTokenExchange   `protobuf:"bytes,11,opt,name=tokenExchange,proto3,oneof" json:"tokenExchange,omitempty"`
+	EnableStream       *bool                  `protobuf:"varint,12,opt,name=enableStream,proto3,oneof" json:"enableStream,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -599,6 +663,27 @@ func (x *BedrockConfig) GetDeployments() map[string]string {
 		return x.Deployments
 	}
 	return nil
+}
+
+func (x *BedrockConfig) GetBaseUrl() string {
+	if x != nil && x.BaseUrl != nil {
+		return *x.BaseUrl
+	}
+	return ""
+}
+
+func (x *BedrockConfig) GetTokenExchange() *OpenAiTokenExchange {
+	if x != nil {
+		return x.TokenExchange
+	}
+	return nil
+}
+
+func (x *BedrockConfig) GetEnableStream() bool {
+	if x != nil && x.EnableStream != nil {
+		return *x.EnableStream
+	}
+	return false
 }
 
 type AzureOpenAiConfig struct {
@@ -1027,7 +1112,7 @@ const file_console_proto_rawDesc = "" +
 	"\b_enabledB\v\n" +
 	"\t_tokenUrlB\v\n" +
 	"\t_clientIdB\x0f\n" +
-	"\r_clientSecret\"\xf1\x02\n" +
+	"\r_clientSecret\"\xad\x03\n" +
 	"\fOpenAiConfig\x12\x1b\n" +
 	"\x06apiKey\x18\x01 \x01(\tH\x00R\x06apiKey\x88\x01\x01\x12\x19\n" +
 	"\x05model\x18\x02 \x01(\tH\x01R\x05model\x88\x01\x01\x12+\n" +
@@ -1035,7 +1120,8 @@ const file_console_proto_rawDesc = "" +
 	"\ttoolModel\x18\x04 \x01(\tH\x03R\ttoolModel\x88\x01\x01\x12\x1d\n" +
 	"\abaseUrl\x18\x05 \x01(\tH\x04R\abaseUrl\x88\x01\x01\x12 \n" +
 	"\vproxyModels\x18\x06 \x03(\tR\vproxyModels\x12D\n" +
-	"\rtokenExchange\x18\a \x01(\v2\x19.plrl.OpenAiTokenExchangeH\x05R\rtokenExchange\x88\x01\x01B\t\n" +
+	"\rtokenExchange\x18\a \x01(\v2\x19.plrl.OpenAiTokenExchangeH\x05R\rtokenExchange\x88\x01\x01\x12/\n" +
+	"\x06method\x18\b \x01(\x0e2\x12.plrl.OpenAiMethodH\x06R\x06method\x88\x01\x01B\t\n" +
 	"\a_apiKeyB\b\n" +
 	"\x06_modelB\x11\n" +
 	"\x0f_embeddingModelB\f\n" +
@@ -1043,7 +1129,8 @@ const file_console_proto_rawDesc = "" +
 	"_toolModelB\n" +
 	"\n" +
 	"\b_baseUrlB\x10\n" +
-	"\x0e_tokenExchange\"\x9c\x02\n" +
+	"\x0e_tokenExchangeB\t\n" +
+	"\a_method\"\x9c\x02\n" +
 	"\x0fAnthropicConfig\x12\x1d\n" +
 	"\abaseUrl\x18\x01 \x01(\tH\x00R\abaseUrl\x88\x01\x01\x12\x1b\n" +
 	"\x06apiKey\x18\x02 \x01(\tH\x01R\x06apiKey\x88\x01\x01\x12\x19\n" +
@@ -1077,7 +1164,7 @@ const file_console_proto_rawDesc = "" +
 	"_toolModelB\n" +
 	"\n" +
 	"\b_projectB\v\n" +
-	"\t_location\"\xcc\x04\n" +
+	"\t_location\"\x89\x06\n" +
 	"\rBedrockConfig\x12\x1d\n" +
 	"\amodelId\x18\x01 \x01(\tH\x00R\amodelId\x88\x01\x01\x12%\n" +
 	"\vtoolModelId\x18\x02 \x01(\tH\x01R\vtoolModelId\x88\x01\x01\x12%\n" +
@@ -1087,7 +1174,11 @@ const file_console_proto_rawDesc = "" +
 	"\x0eawsAccessKeyId\x18\x06 \x01(\tH\x05R\x0eawsAccessKeyId\x88\x01\x01\x123\n" +
 	"\x12awsSecretAccessKey\x18\a \x01(\tH\x06R\x12awsSecretAccessKey\x88\x01\x01\x12 \n" +
 	"\vproxyModels\x18\b \x03(\tR\vproxyModels\x12F\n" +
-	"\vdeployments\x18\t \x03(\v2$.plrl.BedrockConfig.DeploymentsEntryR\vdeployments\x1a>\n" +
+	"\vdeployments\x18\t \x03(\v2$.plrl.BedrockConfig.DeploymentsEntryR\vdeployments\x12\x1d\n" +
+	"\abaseUrl\x18\n" +
+	" \x01(\tH\aR\abaseUrl\x88\x01\x01\x12D\n" +
+	"\rtokenExchange\x18\v \x01(\v2\x19.plrl.OpenAiTokenExchangeH\bR\rtokenExchange\x88\x01\x01\x12'\n" +
+	"\fenableStream\x18\f \x01(\bH\tR\fenableStream\x88\x01\x01\x1a>\n" +
 	"\x10DeploymentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
@@ -1098,7 +1189,11 @@ const file_console_proto_rawDesc = "" +
 	"\a_regionB\x13\n" +
 	"\x11_embeddingModelIdB\x11\n" +
 	"\x0f_awsAccessKeyIdB\x15\n" +
-	"\x13_awsSecretAccessKey\"\xf0\x03\n" +
+	"\x13_awsSecretAccessKeyB\n" +
+	"\n" +
+	"\b_baseUrlB\x10\n" +
+	"\x0e_tokenExchangeB\x0f\n" +
+	"\r_enableStream\"\xf0\x03\n" +
 	"\x11AzureOpenAiConfig\x12#\n" +
 	"\n" +
 	"apiVersion\x18\x01 \x01(\tH\x00R\n" +
@@ -1143,7 +1238,12 @@ const file_console_proto_rawDesc = "" +
 	"\x05bytes\x18\x01 \x01(\x03R\x05bytes\"0\n" +
 	"\x14MeterMetricsResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x1c\n" +
-	"\x1aObservabilityConfigRequest2\xbe\x02\n" +
+	"\x1aObservabilityConfigRequest*Q\n" +
+	"\fOpenAiMethod\x12\x1e\n" +
+	"\x1aOPEN_AI_METHOD_UNSPECIFIED\x10\x00\x12\b\n" +
+	"\x04CHAT\x10\x01\x12\r\n" +
+	"\tRESPONSES\x10\x02\x12\b\n" +
+	"\x04AUTO\x10\x032\xbe\x02\n" +
 	"\fPluralServer\x12E\n" +
 	"\fMeterMetrics\x12\x19.plrl.MeterMetricsRequest\x1a\x1a.plrl.MeterMetricsResponse\x124\n" +
 	"\vGetAiConfig\x12\x15.plrl.AiConfigRequest\x1a\x0e.plrl.AiConfig\x12U\n" +
@@ -1162,47 +1262,51 @@ func file_console_proto_rawDescGZIP() []byte {
 	return file_console_proto_rawDescData
 }
 
+var file_console_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_console_proto_goTypes = []any{
-	(*AiConfigRequest)(nil),             // 0: plrl.AiConfigRequest
-	(*AiConfig)(nil),                    // 1: plrl.AiConfig
-	(*OpenAiTokenExchange)(nil),         // 2: plrl.OpenAiTokenExchange
-	(*OpenAiConfig)(nil),                // 3: plrl.OpenAiConfig
-	(*AnthropicConfig)(nil),             // 4: plrl.AnthropicConfig
-	(*VertexAiConfig)(nil),              // 5: plrl.VertexAiConfig
-	(*BedrockConfig)(nil),               // 6: plrl.BedrockConfig
-	(*AzureOpenAiConfig)(nil),           // 7: plrl.AzureOpenAiConfig
-	(*ProxyAuthenticationRequest)(nil),  // 8: plrl.ProxyAuthenticationRequest
-	(*ProxyAuthenticationResponse)(nil), // 9: plrl.ProxyAuthenticationResponse
-	(*ObservabilityConfig)(nil),         // 10: plrl.ObservabilityConfig
-	(*MeterMetricsRequest)(nil),         // 11: plrl.MeterMetricsRequest
-	(*MeterMetricsResponse)(nil),        // 12: plrl.MeterMetricsResponse
-	(*ObservabilityConfigRequest)(nil),  // 13: plrl.ObservabilityConfigRequest
-	nil,                                 // 14: plrl.BedrockConfig.DeploymentsEntry
-	nil,                                 // 15: plrl.AzureOpenAiConfig.DeploymentsEntry
+	(OpenAiMethod)(0),                   // 0: plrl.OpenAiMethod
+	(*AiConfigRequest)(nil),             // 1: plrl.AiConfigRequest
+	(*AiConfig)(nil),                    // 2: plrl.AiConfig
+	(*OpenAiTokenExchange)(nil),         // 3: plrl.OpenAiTokenExchange
+	(*OpenAiConfig)(nil),                // 4: plrl.OpenAiConfig
+	(*AnthropicConfig)(nil),             // 5: plrl.AnthropicConfig
+	(*VertexAiConfig)(nil),              // 6: plrl.VertexAiConfig
+	(*BedrockConfig)(nil),               // 7: plrl.BedrockConfig
+	(*AzureOpenAiConfig)(nil),           // 8: plrl.AzureOpenAiConfig
+	(*ProxyAuthenticationRequest)(nil),  // 9: plrl.ProxyAuthenticationRequest
+	(*ProxyAuthenticationResponse)(nil), // 10: plrl.ProxyAuthenticationResponse
+	(*ObservabilityConfig)(nil),         // 11: plrl.ObservabilityConfig
+	(*MeterMetricsRequest)(nil),         // 12: plrl.MeterMetricsRequest
+	(*MeterMetricsResponse)(nil),        // 13: plrl.MeterMetricsResponse
+	(*ObservabilityConfigRequest)(nil),  // 14: plrl.ObservabilityConfigRequest
+	nil,                                 // 15: plrl.BedrockConfig.DeploymentsEntry
+	nil,                                 // 16: plrl.AzureOpenAiConfig.DeploymentsEntry
 }
 var file_console_proto_depIdxs = []int32{
-	3,  // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
-	4,  // 1: plrl.AiConfig.anthropic:type_name -> plrl.AnthropicConfig
-	5,  // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
-	6,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
-	7,  // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
-	2,  // 5: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
-	14, // 6: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
-	15, // 7: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
-	11, // 8: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
-	0,  // 9: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	13, // 10: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
-	8,  // 11: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	12, // 12: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
-	1,  // 13: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	10, // 14: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
-	9,  // 15: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	12, // [12:16] is the sub-list for method output_type
-	8,  // [8:12] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	4,  // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
+	5,  // 1: plrl.AiConfig.anthropic:type_name -> plrl.AnthropicConfig
+	6,  // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
+	7,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
+	8,  // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
+	3,  // 5: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
+	0,  // 6: plrl.OpenAiConfig.method:type_name -> plrl.OpenAiMethod
+	15, // 7: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
+	3,  // 8: plrl.BedrockConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
+	16, // 9: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	12, // 10: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
+	1,  // 11: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
+	14, // 12: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
+	9,  // 13: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
+	13, // 14: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
+	2,  // 15: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	11, // 16: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
+	10, // 17: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	14, // [14:18] is the sub-list for method output_type
+	10, // [10:14] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_console_proto_init() }
@@ -1222,13 +1326,14 @@ func file_console_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_console_proto_rawDesc), len(file_console_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_console_proto_goTypes,
 		DependencyIndexes: file_console_proto_depIdxs,
+		EnumInfos:         file_console_proto_enumTypes,
 		MessageInfos:      file_console_proto_msgTypes,
 	}.Build()
 	File_console_proto = out.File

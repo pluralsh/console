@@ -34,9 +34,10 @@ func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput
 		cfg.ModelProviders = make(map[string]*ModelProviderConfig, len(providers))
 		for _, p := range providers {
 			cfg.ModelProviders[p.Name] = &ModelProviderConfig{
-				Name:    p.Name,
-				BaseURL: p.BaseURL,
-				EnvKey:  p.EnvKey,
+				Name:        p.Name,
+				BaseURL:     p.BaseURL,
+				EnvKey:      p.EnvKey,
+				HttpHeaders: p.HttpHeaders,
 			}
 		}
 	}

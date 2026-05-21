@@ -277,6 +277,7 @@ defmodule Console.Schema.DeploymentSettings do
         # Foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or regional inference profile ID (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0).
         field :model_id,              :string
         field :tool_model_id,         :string
+        field :base_url,              :string
         field :access_token,          EncryptedString
         field :region,                :string
         field :embedding_model,       :string
@@ -286,6 +287,9 @@ defmodule Console.Schema.DeploymentSettings do
         field :proxy_models,          {:array, :string}
         # Deprecated for most configs; maps client model ID -> inference profile ID when aliases cannot be inferred (e.g. application profile suffixes).
         field :deployments,           :map
+        field :enable_stream,         :boolean, default: true
+
+        embeds_one :token_exchange, Console.Schema.DeploymentSettings.OauthToken, on_replace: :update
       end
 
       embeds_one :vertex, Vertex, on_replace: :update do
@@ -428,7 +432,8 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments)a)
+    |> cast(attrs, ~w(model_id tool_model_id base_url access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments enable_stream)a)
+    |> cast_embed(:token_exchange)
     |> validate_required(~w(region)a)
   end
 

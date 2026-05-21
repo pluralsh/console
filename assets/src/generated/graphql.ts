@@ -1504,16 +1504,22 @@ export type BedrockAiAttributes = {
   awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
   /** the aws secret access key to use (DEPRECATED) */
   awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** the base url to use when querying a Bedrock-compatible API */
+  baseUrl?: InputMaybe<Scalars['String']['input']>;
   /** Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"} */
   deployments?: InputMaybe<Scalars['Json']['input']>;
   /** Bedrock model or inference profile for embeddings. Same ID formats as modelId. */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
+  /** whether to enable streaming responses */
+  enableStream?: InputMaybe<Scalars['Boolean']['input']>;
   /** AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. */
   modelId?: InputMaybe<Scalars['String']['input']>;
   /** Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId. */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the aws region the model is hosted in */
   region?: InputMaybe<Scalars['String']['input']>;
+  /** OAuth2 client credentials against a token endpoint to obtain access tokens */
+  tokenExchange?: InputMaybe<OpenaiTokenExchangeAttributes>;
   /** Bedrock model or inference profile for tool calls. Same ID formats as modelId. */
   toolModelId?: InputMaybe<Scalars['String']['input']>;
 };
@@ -1523,16 +1529,22 @@ export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
   /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** the base url to use when querying a Bedrock-compatible API */
+  baseUrl?: Maybe<Scalars['String']['output']>;
   /** Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"} */
   deployments?: Maybe<Scalars['Map']['output']>;
   /** Bedrock model or inference profile for embeddings. Same ID formats as modelId. */
   embeddingModel?: Maybe<Scalars['String']['output']>;
+  /** whether streaming responses are enabled */
+  enableStream?: Maybe<Scalars['Boolean']['output']>;
   /** AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults. */
   modelId?: Maybe<Scalars['String']['output']>;
   /** Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId. */
   proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the aws region the model is hosted in */
   region?: Maybe<Scalars['String']['output']>;
+  /** OAuth2 client credentials configured for token endpoint exchange */
+  tokenExchange?: Maybe<OpenaiTokenExchange>;
   /** Bedrock model or inference profile for tool calls. Same ID formats as modelId. */
   toolModelId?: Maybe<Scalars['String']['output']>;
 };

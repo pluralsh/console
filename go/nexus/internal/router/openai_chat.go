@@ -16,7 +16,10 @@ func (in *OpenAIRouter) newChatCompletionsRoute() RouteConfig {
 		RequestConverter:       in.chatCompletionsRequestConverter,
 		ChatResponseConverter:  in.chatCompletionsResponseConverter,
 		ErrorConverter:         in.errorConverter,
-		PreCallback:            in.openAIRoutePreCallback(string(RouteChatCompletions)),
+		PreCallback: chainPreCallbacks(
+			in.openAIRoutePreCallback(string(RouteChatCompletions)),
+			disableProviderStreamingPreCallback(),
+		),
 		StreamConfig: &StreamConfig{
 			ChatStreamResponseConverter: in.chatCompletionsStreamConverter,
 			ErrorConverter:              in.errorConverter,

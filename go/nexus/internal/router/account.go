@@ -153,7 +153,17 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 		// Vertex uses project/location + auth in keys; no base URL override required.
 
 	case schemas.Bedrock:
-		// Bedrock uses AWS region + credentials in keys; no base URL override required.
+		if cfg := aiConfig.GetBedrock(); cfg != nil {
+			if cfg.GetBaseUrl() != "" {
+				config.NetworkConfig.BaseURL = bedrockNetworkBaseURL(cfg.GetBaseUrl())
+			}
+			if allowed := bedrockAllowedRequests(cfg); allowed != nil {
+				config.CustomProviderConfig = &schemas.CustomProviderConfig{
+					BaseProviderType: schemas.Bedrock,
+					AllowedRequests:  allowed,
+				}
+			}
+		}
 
 	case schemas.Azure:
 		// Azure uses endpoint + token in keys; no base URL override required.

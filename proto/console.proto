@@ -74,6 +74,9 @@ message BedrockConfig {
   optional string awsSecretAccessKey = 7;
   repeated string proxyModels = 8;
   map<string, string> deployments = 9;
+  optional string baseUrl = 10;
+  optional OpenAiTokenExchange tokenExchange = 11;
+  optional bool enableStream = 12;
 }
 
 message AzureOpenAiConfig {

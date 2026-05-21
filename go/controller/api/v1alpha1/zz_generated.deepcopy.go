@@ -444,6 +444,21 @@ func (in *BedrockSettings) DeepCopyInto(out *BedrockSettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.BaseUrl != nil {
+		in, out := &in.BaseUrl, &out.BaseUrl
+		*out = new(string)
+		**out = **in
+	}
+	if in.EnableStream != nil {
+		in, out := &in.EnableStream, &out.EnableStream
+		*out = new(bool)
+		**out = **in
+	}
+	if in.TokenExchange != nil {
+		in, out := &in.TokenExchange, &out.TokenExchange
+		*out = new(OAuth2TokenExchange)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.EmbeddingModel != nil {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
 		*out = new(string)

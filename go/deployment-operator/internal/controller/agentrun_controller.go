@@ -50,6 +50,7 @@ const (
 	EnvClaudeBashDefaultTimeout = "PLRL_CLAUDE_BASH_DEFAULT_TIMEOUT"
 	EnvClaudeBashMaxTimeout     = "PLRL_CLAUDE_BASH_MAX_TIMEOUT"
 	EnvClaudeEndpoint           = "PLRL_CLAUDE_ENDPOINT"
+	EnvClaudeDisableStream      = "PLRL_CLAUDE_DISABLE_STREAM"
 
 	EnvGeminiModel             = "PLRL_GEMINI_MODEL"
 	EnvGeminiAPIKey            = "PLRL_GEMINI_API_KEY"
@@ -58,7 +59,8 @@ const (
 
 	EnvCodexModel    = "PLRL_CODEX_MODEL"
 	EnvCodexAPIKey   = "PLRL_CODEX_API_KEY"
-	EnvCodexEndpoint = "PLRL_CODEX_ENDPOINT"
+	EnvCodexEndpoint     = "PLRL_CODEX_ENDPOINT"
+	EnvCodexDisableStream = "PLRL_CODEX_DISABLE_STREAM"
 
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
@@ -523,6 +525,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		if config.Claude.Endpoint != nil {
 			result[EnvClaudeEndpoint] = lo.FromPtr(config.Claude.Endpoint)
 		}
+		if config.Claude.DisableStream != nil && *config.Claude.DisableStream {
+			result[EnvClaudeDisableStream] = "true"
+		}
 	}
 
 	if runtimeType == console.AgentRuntimeTypeGemini {
@@ -554,6 +559,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		}
 		if config.Codex.Endpoint != nil {
 			result[EnvCodexEndpoint] = lo.FromPtr(config.Codex.Endpoint)
+		}
+		if config.Codex.DisableStream != nil && *config.Codex.DisableStream {
+			result[EnvCodexDisableStream] = "true"
 		}
 	}
 

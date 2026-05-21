@@ -57,6 +57,13 @@ func (in *Codex) ensure() error {
 	return nil
 }
 
+func (in *Codex) providerStreamingDisabled() bool {
+	if in.Config.Run.Runtime == nil || in.Config.Run.Runtime.Config == nil || in.Config.Run.Runtime.Config.Codex == nil {
+		return false
+	}
+	return in.Config.Run.Runtime.Config.Codex.DisableStream
+}
+
 func (in *Codex) Run(ctx context.Context, options ...exec.Option) {
 	go in.start(ctx, options...)
 }
@@ -99,11 +106,15 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 	modelProvider := ""
 	if in.proxy {
 		modelProvider = "plural"
-		providers = []ModelProviderInput{{
+		provider := ModelProviderInput{
 			Name:    "plural",
 			BaseURL: fmt.Sprintf("%s/ext/ai/v1", consoleURL),
 			EnvKey:  consoleTokenEnv,
-		}}
+		}
+		if in.providerStreamingDisabled() {
+			provider.HttpHeaders = map[string]string{"X-Plural-Enable-Stream": "false"}
+		}
+		providers = []ModelProviderInput{provider}
 	} else if in.Config.Run.Runtime.Config.Codex.Endpoint != nil {
 		modelProvider = "custom"
 		providers = []ModelProviderInput{{

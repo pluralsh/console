@@ -126,10 +126,14 @@ defmodule Console.GRPC.Server do
       toolModelId: bedrock.tool_model_id || defaults[:tool_model],
       embeddingModelId: bedrock.embedding_model || defaults[:embedding_model],
       region: bedrock.region,
+      accessToken: bedrock.access_token,
+      baseUrl: bedrock.base_url,
       awsAccessKeyId: bedrock.aws_access_key_id,
       awsSecretAccessKey: bedrock.aws_secret_access_key,
       proxyModels: proxy_models(bedrock),
-      deployments: to_string_map(bedrock.deployments)
+      deployments: to_string_map(bedrock.deployments),
+      tokenExchange: to_pb(bedrock.token_exchange),
+      enableStream: bedrock_enable_stream(bedrock.enable_stream)
     }
   end
 
@@ -147,6 +151,9 @@ defmodule Console.GRPC.Server do
   end
 
   defp to_pb(_), do: %Plrl.AiConfig{enabled: false}
+
+  defp bedrock_enable_stream(false), do: false
+  defp bedrock_enable_stream(_), do: true
 
   defp openai_method_to_pb(:chat), do: :CHAT
   defp openai_method_to_pb(:responses), do: :RESPONSES

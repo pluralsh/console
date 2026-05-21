@@ -286,6 +286,7 @@ func (in *Claude) ConfigureBabysitRun() error {
 	settings.WithEnv("BASH_DEFAULT_TIMEOUT_MS", defaultTimeout)
 	settings.WithEnv("BASH_MAX_TIMEOUT_MS", maxTimeout)
 	klog.V(log.LogLevelInfo).InfoS("claude timeouts configured", "default_timeout", defaultTimeout, "max_timeout", maxTimeout)
+	in.applyProviderStreamingSettings(settings)
 
 	return settings.WriteToFile(filepath.Join(in.configPath(), "settings.local.json"))
 }
@@ -374,6 +375,7 @@ func (in *Claude) Configure(consoleURL, consoleToken, _ string) error {
 	settings.WithEnv("BASH_DEFAULT_TIMEOUT_MS", defaultTimeout)
 	settings.WithEnv("BASH_MAX_TIMEOUT_MS", maxTimeout)
 	klog.V(log.LogLevelInfo).InfoS("claude timeouts configured", "default_timeout", defaultTimeout, "max_timeout", maxTimeout)
+	in.applyProviderStreamingSettings(settings)
 
 	return settings.WriteToFile(filepath.Join(in.configPath(), "settings.local.json"))
 }
