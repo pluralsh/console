@@ -47,7 +47,6 @@
       "url": "http://127.0.0.1:8080/mcp",
       "description": "Plural MCP Server",
       "trust": true
-{{ end }}
     }{{ range .ExaMcpConfigs }},
     "{{ .Name }}": {
       "url": "{{ .Url }}"{{ if .ApiKey }},

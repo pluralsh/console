@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	"github.com/samber/lo"
 )
 
 const (
 	testConsoleURL   = "https://console.test"
 	testConsoleToken = "console-token"
-	testDeployToken  = "deploy-token"
 	testAgentRunID   = "run-123"
 	testEndpoint     = "https://api.openai.com/v1"
 	testToken        = "openai-token"
@@ -22,7 +22,6 @@ func baseInput(mode console.AgentRunMode) *ConfigTemplateInput {
 	return &ConfigTemplateInput{
 		ConsoleURL:   testConsoleURL,
 		ConsoleToken: testConsoleToken,
-		DeployToken:  testDeployToken,
 		AgentRunID:   testAgentRunID,
 		Provider:     ProviderOpenAI,
 		Model:        string(ModelGPT52),

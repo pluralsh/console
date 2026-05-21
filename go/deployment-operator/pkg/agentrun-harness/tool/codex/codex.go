@@ -11,19 +11,13 @@ import (
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
-	"github.com/pluralsh/console/go/deployment-operator/cmd/agent-harness/args"
-	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
-)
-
-const (
-	gitAccessTokenEnv = "GIT_ACCESS_TOKEN"
-	gitSigningKeyPath = common.GitSigningKeyMountPath
 )
 
 func New(config v1.Config) v1.Tool {
@@ -98,7 +92,7 @@ func (in *Codex) Configure(consoleURL, _ string) error {
 		providers = []ModelProviderInput{{
 			Name:    "plural",
 			BaseURL: fmt.Sprintf("%s/ext/ai/v1", consoleURL),
-			EnvKey:  helpers.GetPluralEnv(args.EnvConsoleUrl, ""),
+			EnvKey:  environment.EnvConsoleToken,
 		}}
 	} else if in.Config.Run.Runtime.Config.Codex.Endpoint != nil {
 		modelProvider = "custom"

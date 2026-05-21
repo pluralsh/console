@@ -438,14 +438,14 @@ func getMCPServerContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntim
 	}
 }
 
-func getPodDefaultContainerImage(pod *corev1.Pod, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) string {
+func getPodDefaultContainerImage(pod *corev1.Pod, _ *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) string {
 	for _, c := range pod.Spec.Containers {
 		if c.Name == defaultContainer && c.Image != "" {
 			return c.Image
 		}
 	}
 
-	return getDefaultContainerImage("", runtime.Spec.Type, run.Spec.Language, run.Spec.LanguageVersion)
+	return getDefaultContainerImage("", runtime.Spec.Type)
 }
 
 func getMCPServerStartupProbe() *corev1.Probe {

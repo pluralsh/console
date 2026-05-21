@@ -187,7 +187,7 @@ func (r *StackRunJobReconciler) reconcileJobStatus(ctx context.Context, run *v1a
 		status = console.StackStatusCancelled
 	// Exit if stack run is not in running state (run status already updated),
 	// or if the job is still running (harness controls run status).
-	case stackRunStatus != console.StackStatusRunning || job.Status.CompletionTime.IsZero():
+	case stackRunStatus != console.StackStatusRunning || (job.Status.CompletionTime.IsZero() && !hasFailed(job)):
 		if isActiveJobTimout(stackRunStatus, job) || r.isActiveJobPodFailed(ctx, stackRunStatus, job) {
 			if err := r.killJob(ctx, job); err != nil {
 				return status, err

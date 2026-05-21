@@ -135,7 +135,15 @@ var _ = Describe("PipelineGate Controller", Ordered, func() {
 
 			Expect(common.MaybePatch(kClient, existingJob,
 				func(p *batchv1.Job) {
+					start := metav1.NewTime(time.Now().Add(-1 * time.Minute))
+					now := metav1.Now()
+					p.Status.StartTime = &start
+					p.Status.CompletionTime = &now
 					p.Status.Conditions = []batchv1.JobCondition{
+						{
+							Type:   batchv1.JobSuccessCriteriaMet,
+							Status: corev1.ConditionTrue,
+						},
 						{
 							Type:   batchv1.JobComplete,
 							Status: corev1.ConditionTrue,

@@ -4,19 +4,17 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	"github.com/samber/lo"
 )
 
 //nolint:gocyclo
 func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model:         ModelGemini25Pro,
+		Model:         ModelGemini31FlashLite,
 		RepositoryDir: "/repo",
-		ConsoleURL:    "https://console.test",
-		ConsoleToken:  "token",
-		DeployToken:   "deploy-token",
 		AgentRunID:    "run-123",
 	}
 
@@ -49,58 +47,6 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 		if url != "http://127.0.0.1:8080/mcp" {
 			t.Errorf("expected mcpServers.plural.url=http://127.0.0.1:8080/mcp, got %q", url)
-		}
-	})
-
-	t.Run("ANALYZE mode sets includeTools for plural MCP server", func(t *testing.T) {
-		input := *baseInput
-		input.AgentRunMode = console.AgentRunModeAnalyze
-
-		_, content, err := settings(&input)
-		if err != nil {
-			t.Fatalf("settings() failed: %v", err)
-		}
-
-		var out map[string]any
-		if err := json.Unmarshal([]byte(content), &out); err != nil {
-			t.Fatalf("generated content is not valid JSON: %v", err)
-		}
-
-		mcpServers, ok := out["mcpServers"].(map[string]any)
-		if !ok {
-			t.Fatal("mcpServers missing or not an object")
-		}
-		plural, ok := mcpServers["plural"].(map[string]any)
-		if !ok {
-			t.Fatal("mcpServers.plural missing or not an object")
-		}
-
-		includeTools, hasInclude := plural["includeTools"]
-		if !hasInclude {
-			t.Fatal("mcpServers.plural.includeTools missing in ANALYZE mode")
-		}
-		sl, ok := includeTools.([]any)
-		if !ok {
-			t.Fatalf("includeTools is not an array: %T", includeTools)
-		}
-		var tools []string
-		for _, v := range sl {
-			if s, ok := v.(string); ok {
-				tools = append(tools, s)
-			}
-		}
-		want := map[string]struct{}{
-			"updateAgentRunAnalysis":   {},
-			"downloadServiceManifests": {},
-		}
-		for _, name := range tools {
-			delete(want, name)
-		}
-		if len(tools) != 2 {
-			t.Errorf("includeTools must contain exactly 2 tools in ANALYZE mode, got: %v", tools)
-		}
-		if len(want) != 0 {
-			t.Errorf("includeTools missing expected entries in ANALYZE mode, missing: %v", want)
 		}
 	})
 
@@ -156,11 +102,8 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 
 func TestSettingsTemplate_ExaMcpServers(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model:         ModelGemini25Pro,
+		Model:         ModelGemini31FlashLite,
 		RepositoryDir: "/repo",
-		ConsoleURL:    "https://console.test",
-		ConsoleToken:  "token",
-		DeployToken:   "deploy-token",
 		AgentRunID:    "run-123",
 		AgentRunMode:  console.AgentRunModeWrite,
 	}

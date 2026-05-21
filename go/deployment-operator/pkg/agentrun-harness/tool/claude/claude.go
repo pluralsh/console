@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
@@ -227,7 +226,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Claude.Timeout),
 		)...,
 	)
-	klog.V(log.LogLevelInfo).InfoS("claude executable configured", "timeout", in.Config.Run.Runtime.Config.Claude.Timeout)
+	klog.V(log.LogLevelInfo).InfoS("claude executable configured", "timeout", in.Config.Run.Runtime.Config.Claude.Timeout, "model", in.model)
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
@@ -271,7 +270,6 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"MultiEdit",
 		"Bash",
 		"WebFetch",
-		"mcp__plural__updateAgentRunAnalysis",
 		"mcp__plural__createCommit",
 		"mcp__plural__fetchAgentRunTodos",
 		"mcp__plural__updateAgentRunTodos",
@@ -339,10 +337,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"Bash(rg:*)",
 			"Bash(find:*)",
 			"WebFetch",
-			"mcp__plural__updateAgentRunAnalysis",
-			"mcp__plural__getPRState",
-			"mcp__plural__getCILogs",
-			"mcp__plural__downloadServiceManifests").
+			"mcp__plural__updateAgentRunAnalysis").
 			DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
 	} else {
 		settings.AllowTools(
@@ -356,7 +351,6 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"mcp__plural__createBranch",
 			"mcp__plural__fetchAgentRunTodos",
 			"mcp__plural__updateAgentRunTodos",
-			"mcp__plural__updateAgentRunAnalysis",
 			"mcp__plural__downloadServiceManifests",
 			"mcp__plural__createCommit",
 			"mcp__plural__getPRState",
@@ -441,15 +435,15 @@ func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]
 			msg.Role = console.AiRoleAssistant // Agent run tool calls should be marked as assistant messages.
 			msg.Metadata = &console.AgentMessageMetadataAttributes{
 				Tool: &console.AgentMessageToolAttributes{
-					Name:   lo.ToPtr(toolUseContent.Name),
-					State:  lo.ToPtr(state),
-					Output: lo.ToPtr(output),
+					Name:   new(toolUseContent.Name),
+					State:  new(state),
+					Output: new(output),
 				},
 			}
 
 			input, err := json.Marshal(toolUseContent.Input)
 			if err == nil {
-				msg.Metadata.Tool.Input = lo.ToPtr(string(input))
+				msg.Metadata.Tool.Input = new(string(input))
 			}
 
 			builder.WriteString("Called tool")
@@ -473,8 +467,8 @@ func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]
 		msg.Cost = &console.AgentMessageCostAttributes{
 			Total: total,
 			Tokens: &console.AgentMessageTokensAttributes{
-				Input:  &input,
-				Output: &output,
+				Input:  new(input),
+				Output: new(output),
 			},
 		}
 	}

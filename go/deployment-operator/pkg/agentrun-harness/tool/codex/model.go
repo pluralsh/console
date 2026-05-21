@@ -8,12 +8,13 @@ const (
 	// Primary Codex models
 	ModelGPT51Codex     Model = "gpt-5.1-codex"
 	ModelGPT51CodexMini Model = "gpt-5.1-codex-mini"
+	ModelGPT54          Model = "gpt-5.4"
 	ModelCodexMini      Model = "codex-mini-latest"
 
 	// Optional powerful Codex options
 	ModelGPT52Codex Model = "gpt-5.2-codex"
 
-	defaultModel = ModelGPT5
+	defaultModel = ModelGPT54
 )
 
 // EnsureModel returns a sensible default

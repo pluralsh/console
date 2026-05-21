@@ -11,15 +11,14 @@ type Model string
 
 const (
 	Sonnet45 Model = "claude-sonnet-4-5-20250929"
-	Sonnet4  Model = "claude-sonnet-4-20250514"
-	Opus45   Model = "claude-opus-4-5-20251101"
-	Opus4    Model = "claude-opus-4-20250514"
-	Opus41   Model = "claude-opus-4-1-20250805"
+	Sonnet46 Model = "claude-sonnet-4-6"
+	Opus46   Model = "claude-opus-4-6"
+	Opus47   Model = "claude-opus-4-7"
 )
 
 func EnsureModel(model string) Model {
 	if len(model) == 0 {
-		return Opus45
+		return Sonnet46
 	}
 
 	return Model(model)

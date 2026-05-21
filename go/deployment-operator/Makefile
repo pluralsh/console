@@ -33,7 +33,7 @@ GIT_ACCESS_TOKEN := $(if $(GIT_ACCESS_TOKEN),$(GIT_ACCESS_TOKEN),"")
 VELERO_CHART_VERSION := 5.2.2 # It should be kept in sync with Velero chart version from console/charts/velero
 VELERO_CHART_URL := https://github.com/vmware-tanzu/helm-charts/releases/download/velero-$(VELERO_CHART_VERSION)/velero-$(VELERO_CHART_VERSION).tgz
 
-ENVTEST_K8S_VERSION := 1.28.3
+ENVTEST_K8S_VERSION := 1.35.0
 CONTROLLER_GEN_PATHS ?= ./api/...;./internal/...;./pkg/...
 
 PRE = --ensure
@@ -197,9 +197,8 @@ agent-mcpserver-run: agent-mcpserver ## run mcp server locally
 	./bin/agent-mcpserver
 
 .PHONY: agent-up
-agent-up: ## run bootstrap + harness + mcpserver via docker compose
+agent-up: agent-base-build ## run bootstrap + harness + mcpserver via docker compose
 	@cd dockerfiles/mcpserver/agent && \
-		PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose build shared-permissions harness && \
 		PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose up --no-build --force-recreate -d && \
 		HARNESS_ID=$$(docker compose ps -q harness) && \
 		if [ -z "$$HARNESS_ID" ]; then \
@@ -230,6 +229,12 @@ agent-up-claude: ## run local agent pod simulation with claude harness image
 .PHONY: agent-up-gemini
 agent-up-gemini: ## run local agent pod simulation with gemini harness image
 	@$(MAKE) agent-up PLRL_AGENT_PROVIDER=gemini
+
+.PHONY: agent-base-build
+agent-base-build: agent-clean ## build base agent image
+	@cd dockerfiles/mcpserver/agent && \
+    PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose build shared-permissions && \
+    PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose build harness
 
 .PHONY: agent-down
 agent-down: ## stop local agent pod simulation (keeps containers and logs)

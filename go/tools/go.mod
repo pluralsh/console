@@ -18,7 +18,7 @@ require (
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.0
 	google.golang.org/protobuf v1.36.11
 	gotest.tools/gotestsum v1.13.0
-	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20250911134410-157e6d282d89
+	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20260305142021-f9589b9f2b9d
 	sigs.k8s.io/controller-tools v0.19.0
 	sigs.k8s.io/kustomize/kustomize/v5 v5.7.1
 )

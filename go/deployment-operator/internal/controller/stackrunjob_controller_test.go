@@ -154,9 +154,15 @@ var _ = Describe("StackRunJob Controller", Ordered, func() {
 			Expect(kClient.Get(ctx, runNamespacedName, job)).NotTo(HaveOccurred())
 			Expect(common.MaybePatch(kClient, job,
 				func(p *batchv1.Job) {
+					start := metav1.NewTime(time.Now().Add(-1 * time.Minute))
 					now := metav1.Now()
+					p.Status.StartTime = &start
 					p.Status.CompletionTime = &now
 					p.Status.Conditions = []batchv1.JobCondition{
+						{
+							Type:   batchv1.JobSuccessCriteriaMet,
+							Status: corev1.ConditionTrue,
+						},
 						{
 							Type:   batchv1.JobComplete,
 							Status: corev1.ConditionTrue,
@@ -252,9 +258,13 @@ var _ = Describe("StackRunJob Controller", Ordered, func() {
 			// Update job to failed state
 			Expect(common.MaybePatch(kClient, job,
 				func(p *batchv1.Job) {
-					now := metav1.Now()
-					p.Status.CompletionTime = &now
+					start := metav1.NewTime(time.Now().Add(-1 * time.Minute))
+					p.Status.StartTime = &start
 					p.Status.Conditions = []batchv1.JobCondition{
+						{
+							Type:   batchv1.JobFailureTarget,
+							Status: corev1.ConditionTrue,
+						},
 						{
 							Type:   batchv1.JobFailed,
 							Status: corev1.ConditionTrue,

@@ -80,6 +80,7 @@ services:
     network_mode: service:mcpserver
     environment:
       PLRL_CONSOLE_URL: ${PLRL_CONSOLE_URL:?PLRL_CONSOLE_URL is required}
+      PLRL_CONSOLE_TOKEN: ${PLRL_CONSOLE_TOKEN:?PLRL_CONSOLE_TOKEN is required}
       PLRL_DEPLOY_TOKEN: ${PLRL_DEPLOY_TOKEN:?PLRL_DEPLOY_TOKEN is required}
       PLRL_AGENT_RUN_ID: ${PLRL_AGENT_RUN_ID:?PLRL_AGENT_RUN_ID is required}
       PLRL_CODEX_MODEL: ${PLRL_CODEX_MODEL:-}
