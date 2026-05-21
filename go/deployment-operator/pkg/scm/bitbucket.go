@@ -451,12 +451,12 @@ func bbHashKey(key string) int64 {
 func bbBuildStateToCheck(state string) (status, conclusion string) {
 	switch state {
 	case "SUCCESSFUL":
-		return "completed", "success"
+		return CICheckStatusCompleted, CICheckConclusionSuccess
 	case "FAILED":
-		return "completed", "failed"
+		return CICheckStatusCompleted, "failed"
 	case "STOPPED":
-		return "completed", "canceled"
+		return CICheckStatusCompleted, "canceled"
 	default: // INPROGRESS
-		return "in_progress", ""
+		return CICheckStatusInProgress, ""
 	}
 }

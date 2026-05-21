@@ -307,6 +307,8 @@ func (c *azureDevOpsClient) ReactToComment(_ context.Context, _ string, _ string
 	return nil
 }
 
+const adoBuildStatusCompleted = CICheckStatusCompleted
+
 // adoBranchName strips the "refs/heads/" prefix from an ADO ref name.
 func adoBranchName(ref string) string {
 	return strings.TrimPrefix(ref, "refs/heads/")
@@ -334,24 +336,24 @@ func adoBuildToCheck(status *adobuild.BuildStatus, result *adobuild.BuildResult)
 	switch *status {
 	case adobuild.BuildStatusValues.Completed:
 		if result == nil {
-			return "completed", ""
+			return adoBuildStatusCompleted, ""
 		}
 		switch *result {
 		case adobuild.BuildResultValues.Succeeded:
-			return "completed", "success"
+			return adoBuildStatusCompleted, CICheckConclusionSuccess
 		case adobuild.BuildResultValues.PartiallySucceeded:
-			return "completed", "neutral"
+			return adoBuildStatusCompleted, CICheckConclusionNeutral
 		case adobuild.BuildResultValues.Failed:
-			return "completed", "failure"
+			return adoBuildStatusCompleted, CICheckConclusionFailure
 		case adobuild.BuildResultValues.Canceled:
-			return "completed", "cancelled"
+			return adoBuildStatusCompleted, CICheckConclusionCancelled
 		default:
-			return "completed", ""
+			return adoBuildStatusCompleted, ""
 		}
 	case adobuild.BuildStatusValues.InProgress, adobuild.BuildStatusValues.Cancelling:
-		return "in_progress", ""
+		return CICheckStatusInProgress, ""
 	default: // NotStarted, Postponed
-		return "queued", ""
+		return CICheckStatusQueued, ""
 	}
 }
 
@@ -362,4 +364,3 @@ func adoTime(t *azuredevops.Time) time.Time {
 	}
 	return t.Time
 }
-

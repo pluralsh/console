@@ -12,6 +12,14 @@ import (
 	gogitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
+// gitlabJobStatusFailed and gitlabJobStatusCanceled are the raw GitLab job
+// status strings for terminal states (distinct from the shared "failure" /
+// "cancelled" conclusion constants which follow the GitHub naming convention).
+const (
+	gitlabJobStatusFailed   = "failed"
+	gitlabJobStatusCanceled = "canceled"
+)
+
 // gitlabMRPattern matches GitLab MR URLs, e.g.
 // https://gitlab.com/group/subgroup/project/-/merge_requests/123
 var gitlabMRPattern = regexp.MustCompile(`gitlab(?:\.[^/]+)?/(.+?)/-/merge_requests/(\d+)`)
@@ -139,7 +147,7 @@ func (c *gitLabClient) ciChecks(ctx context.Context, projectPath, sha string) ([
 		for _, j := range jobs {
 			conclusion := ""
 			switch j.Status {
-			case "success", "failed", "canceled", "skipped":
+			case CICheckConclusionSuccess, gitlabJobStatusFailed, gitlabJobStatusCanceled, CICheckConclusionSkipped:
 				conclusion = j.Status
 			}
 			all = append(all, CICheck{

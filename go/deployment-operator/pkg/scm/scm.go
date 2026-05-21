@@ -57,11 +57,27 @@ func (c PRComment) ReactableID() string {
 	return string(c.Type) + ":" + c.ID
 }
 
+// CICheckStatus values for CICheck.Status.
+const (
+	CICheckStatusQueued     = "queued"
+	CICheckStatusInProgress = "in_progress"
+	CICheckStatusCompleted  = "completed"
+)
+
+// CICheckConclusion values for CICheck.Conclusion.
+const (
+	CICheckConclusionSuccess   = "success"
+	CICheckConclusionFailure   = "failure"
+	CICheckConclusionNeutral   = "neutral"
+	CICheckConclusionCancelled = "cancelled"
+	CICheckConclusionSkipped   = "skipped"
+)
+
 // CICheck is a single CI check run or commit status.
 type CICheck struct {
 	Name       string
-	Status     string // "queued", "in_progress", "completed"
-	Conclusion string // "success", "failure", "neutral", "cancelled", "skipped", "timed_out", ""
+	Status     string // CICheckStatusQueued, CICheckStatusInProgress, CICheckStatusCompleted
+	Conclusion string // CICheckConclusionSuccess, …, or ""
 	// CheckRunID is the provider-specific ID used to fetch logs (GitHub check run ID).
 	CheckRunID int64
 }
