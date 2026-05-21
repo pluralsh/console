@@ -52,14 +52,9 @@ func Run(ctx context.Context, input RunInput) (*RunOutput, error) {
 	outputTable := l.NewTable()
 	l.SetGlobal("output", outputTable)
 
-	// Execute the script, capturing any return values.
+	// Execute the script.
 	if err := l.DoString(input.Script); err != nil {
 		return nil, fmt.Errorf("lua execution error: %w", err)
-	}
-
-	// Check context after execution in case it timed out right at the boundary.
-	if err := ctx.Err(); err != nil {
-		return nil, fmt.Errorf("lua execution timed out: %w", err)
 	}
 
 	result, err := extractOutput(l)
