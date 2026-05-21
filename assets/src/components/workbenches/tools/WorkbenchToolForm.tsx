@@ -313,6 +313,16 @@ export function WorkbenchToolForm({
           >
             {hasUpdates ? 'Cancel' : 'Back'}
           </Button>
+          {currentStep === 'access-policy' ? (
+            <Button
+              secondary
+              type="button"
+              onClick={() => setCurrentStep('configuration')}
+              disabled={mutationLoading}
+            >
+              Back to configuration
+            </Button>
+          ) : null}
           <Button
             disabled={
               currentStep === 'configuration'

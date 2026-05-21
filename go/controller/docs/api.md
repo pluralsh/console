@@ -4417,6 +4417,7 @@ _Appears in:_
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  | Optional: \{\} <br /> |
 | `rerunFailures` _boolean_ | RerunFailures when true, failed tests will be rerun (e.g. to reduce flakiness). Defaults to false. |  | Optional: \{\} <br /> |
 | `rerunFailuresCount` _integer_ | RerunFailuresCount is the number of times to rerun failed tests when RerunFailures is true. Defaults to 2. |  | Optional: \{\} <br /> |
+| `postrunScript` _string_ | PostrunScript is a script to run after the integration test job completes. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  | Optional: \{\} <br /> |
 | `default` _[SentinelCheckIntegrationTestDefault](#sentinelcheckintegrationtestdefault)_ | Default configures default test cases and global behavior (e.g. namespace labels and annotations for created resources). |  | Optional: \{\} <br /> |

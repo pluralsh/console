@@ -7686,6 +7686,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	RerunFailures *bool `json:"rerunFailures,omitempty"`
 	// how many times to rerun failures
 	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
+	// a script to run after the integration test job completes
+	PostrunScript *string `json:"postrunScript,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -7709,6 +7711,8 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	RerunFailures *bool `json:"rerunFailures,omitempty"`
 	// how many times to rerun failures
 	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
+	// a script to run after the integration test job completes
+	PostrunScript *string `json:"postrunScript,omitempty"`
 	// a list of custom test cases to run for this check
 	Cases []*SentinelCheckIntegrationTestCaseAttributes `json:"cases,omitempty"`
 }

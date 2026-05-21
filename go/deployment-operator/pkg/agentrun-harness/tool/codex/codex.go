@@ -3,19 +3,31 @@ package codex
 import (
 	"context"
 	"fmt"
+	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/dind"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+)
+
+const (
+	consoleTokenEnv   = "PLRL_CONSOLE_TOKEN"
+	gitAccessTokenEnv = "GIT_ACCESS_TOKEN"
+	gitAskpassPath    = "/plural/.git-askpass"
+	gitSigningKeyPath = common.GitSigningKeyMountPath
+	autonomousProfile = "autonomous"
+	// sandboxModeHarness disables Codex OS sandboxing; the agent-run pod is the isolation boundary.
+	sandboxModeHarness = "danger-full-access"
 )
 
 func New(config v1.Config) v1.Tool {
@@ -56,15 +68,37 @@ func (in *Codex) Run(ctx context.Context, options ...exec.Option) {
 
 func (in *Codex) ConfigureBabysitRun() error {
 	klog.Info("configuring codex babysit run")
+	// model_instructions_file points at AGENTS.md; re-rendering the file is enough.
 	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeCodex)
 }
 
-func (in *Codex) Configure(consoleURL, _ string) error {
+func (in *Codex) Configure(consoleURL, consoleToken string) error {
+	in.consoleURL = consoleURL
+	if consoleToken != "" {
+		in.consoleToken = consoleToken
+	}
+
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeCodex); err != nil {
 		return err
 	}
 
-	allowedEnvVars := []string{"PATH", "HOME"}
+	if in.Config.Run.DindEnabled {
+		if err := dind.PrepareClientEnv(); err != nil {
+			return fmt.Errorf("prepare codex docker client environment: %w", err)
+		}
+	}
+
+	return in.writeCodexConfig()
+}
+
+func (in *Codex) writeCodexConfig() error {
+	allowedEnvVars := codexAllowedEnvVars(in.Config.Run.DindEnabled)
+	modelInstructionsFile, err := in.systemPromptPath()
+	if err != nil {
+		return err
+	}
+	dindEnabled := in.Config.Run.DindEnabled
+
 	model := string(in.model)
 	if in.proxy {
 		model = proxymodel.ProxyModel(console.AgentRuntimeTypeCodex, model)
@@ -90,8 +124,8 @@ func (in *Codex) Configure(consoleURL, _ string) error {
 		modelProvider = "plural"
 		providers = []ModelProviderInput{{
 			Name:    "plural",
-			BaseURL: fmt.Sprintf("%s/ext/ai/v1", consoleURL),
-			EnvKey:  environment.EnvConsoleToken,
+			BaseURL: fmt.Sprintf("%s/ext/ai/v1", in.consoleURL),
+			EnvKey:  consoleTokenEnv,
 		}}
 	} else if in.Config.Run.Runtime.Config.Codex.Endpoint != nil {
 		modelProvider = "custom"
@@ -112,24 +146,28 @@ func (in *Codex) Configure(consoleURL, _ string) error {
 	switch in.Config.Run.Mode {
 	case console.AgentRunModeAnalyze:
 		agents = []AgentInput{{
-			Name:                 "analysis",
-			SandboxMode:          "read-only",
-			Model:                baseAgent.Model,
-			ApprovalPolicy:       baseAgent.ApprovalPolicy,
-			ModelReasoningEffort: baseAgent.ModelReasoningEffort,
-			AllowedEnvVars:       baseAgent.AllowedEnvVars,
-			ModelProvider:        modelProvider,
+			Name:                  "analysis",
+			SandboxMode:           sandboxModeHarness,
+			Model:                 baseAgent.Model,
+			ApprovalPolicy:        baseAgent.ApprovalPolicy,
+			ModelReasoningEffort:  baseAgent.ModelReasoningEffort,
+			AllowedEnvVars:        baseAgent.AllowedEnvVars,
+			ModelProvider:         modelProvider,
+			ModelInstructionsFile: modelInstructionsFile,
+			DindEnabled:           dindEnabled,
 		}}
 
 	case console.AgentRunModeWrite:
 		agents = []AgentInput{{
-			Name:                 "autonomous",
-			SandboxMode:          "workspace-write",
-			Model:                baseAgent.Model,
-			ApprovalPolicy:       baseAgent.ApprovalPolicy,
-			ModelReasoningEffort: baseAgent.ModelReasoningEffort,
-			AllowedEnvVars:       baseAgent.AllowedEnvVars,
-			ModelProvider:        modelProvider,
+			Name:                  autonomousProfile,
+			SandboxMode:           sandboxModeHarness,
+			Model:                 baseAgent.Model,
+			ApprovalPolicy:        baseAgent.ApprovalPolicy,
+			ModelReasoningEffort:  baseAgent.ModelReasoningEffort,
+			AllowedEnvVars:        baseAgent.AllowedEnvVars,
+			ModelProvider:         modelProvider,
+			ModelInstructionsFile: modelInstructionsFile,
+			DindEnabled:           dindEnabled,
 		}}
 	default:
 		return fmt.Errorf("unsupported agent run mode %q for codex", in.Config.Run.Mode)
@@ -172,10 +210,7 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 		return false
 	}
 
-	klog.V(log.LogLevelInfo).InfoS("starting codex babysit run", "agent_run_id", in.Config.Run.ID)
-
-	agent := "autonomous"
-	args := []string{"exec", "--profile", agent, "--json", bCtx.Prompt}
+	args := codexExecArgs(in.Config.RepositoryDir, autonomousProfile, bCtx.Prompt)
 
 	in.executable = exec.NewExecutable(
 		"codex",
@@ -215,7 +250,7 @@ func (in *Codex) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string)
 		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
 	}
 
-	args := []string{"exec", "--profile", "analysis", "--json", followUpPrompt}
+	args := codexExecArgs(in.Config.RepositoryDir, "analysis", followUpPrompt)
 
 	in.executable = exec.NewExecutable(
 		"codex",
@@ -240,7 +275,7 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 			"bash",
 			exec.WithArgs(loginArgs),
 			exec.WithDir(in.Config.WorkDir),
-			exec.WithEnv([]string{fmt.Sprintf("OPENAI_API_KEY=%s", in.apiKey), fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex"))}),
+			exec.WithEnv([]string{fmt.Sprintf("OPENAI_API_KEY=%s", in.apiKey), fmt.Sprintf("CODEX_HOME=%s", in.codexHome())}),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 		)
 		if err := in.executable.Run(ctx); err != nil {
@@ -252,10 +287,10 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 
 	agent := "analysis"
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		agent = "autonomous"
+		agent = autonomousProfile
 	}
 
-	args := []string{"exec", "--profile", agent, "--json", in.Config.Run.Prompt}
+	args := codexExecArgs(in.Config.RepositoryDir, agent, in.Config.Run.Prompt)
 
 	in.executable = exec.NewExecutable(
 		"codex",
@@ -288,8 +323,38 @@ func (in *Codex) codexExecOptions() []exec.Option {
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithEnv([]string{
 			fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken),
-			fmt.Sprintf("CODEX_HOME=%s", path.Join(in.Config.WorkDir, ".codex")),
+			fmt.Sprintf("CODEX_HOME=%s", in.codexHome()),
 		}),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 	}
+}
+
+func (in *Codex) codexHome() string {
+	return path.Join(in.Config.WorkDir, ".codex")
+}
+
+func (in *Codex) systemPromptPath() (string, error) {
+	p := path.Join(in.codexHome(), v1.SystemPromptFile)
+	return filepath.Abs(p)
+}
+
+func codexExecArgs(repositoryDir, profile, prompt string) []string {
+	return []string{
+		"exec",
+		"--sandbox", sandboxModeHarness,
+		"--cd", repositoryDir,
+		"--profile", profile,
+		"--json", prompt,
+	}
+}
+
+func codexAllowedEnvVars(dindEnabled bool) []string {
+	vars := []string{"PATH", "HOME", gitAccessTokenEnv}
+	if _, err := os.Stat(gitSigningKeyPath); err == nil {
+		vars = append(vars, "GIT_SIGNING_KEY_PATH")
+	}
+	if dindEnabled {
+		vars = append(vars, dind.DockerHostEnv, dind.DockerTLSVerifyEnv, dind.DockerCertPathEnv)
+	}
+	return vars
 }

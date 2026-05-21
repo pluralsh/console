@@ -49,6 +49,7 @@ type Codex struct {
 
 	proxy bool
 
+	consoleURL   string
 	consoleToken string
 }
 
@@ -167,16 +168,17 @@ type TodoItem struct {
 }
 
 type AgentInput struct {
-	Name                 string
-	Model                string
-	ModelProvider        string
-	SandboxMode          string
-	ApprovalPolicy       string
-	ModelReasoningEffort string
-	AllowedEnvVars       []string
-	EnableWebSearch      bool
-	EnableShellCache     bool
-	PromptFile           string
+	Name                  string
+	Model                 string
+	ModelProvider         string
+	SandboxMode           string
+	ApprovalPolicy        string
+	ModelReasoningEffort  string
+	AllowedEnvVars        []string
+	EnableWebSearch       bool
+	EnableShellCache      bool
+	ModelInstructionsFile string
+	DindEnabled           bool
 }
 
 type Project struct {
@@ -214,7 +216,13 @@ type ModelProviderConfig struct {
 }
 
 type ShellEnvPolicy struct {
-	IncludeOnly []string `toml:"include_only,omitempty"`
+	IncludeOnly []string          `toml:"include_only,omitempty"`
+	Set         map[string]string `toml:"set,omitempty"`
+}
+
+type SandboxWorkspaceWrite struct {
+	NetworkAccess bool     `toml:"network_access,omitempty"`
+	WritableRoots []string `toml:"writable_roots,omitempty"`
 }
 
 type Features struct {
@@ -223,14 +231,15 @@ type Features struct {
 }
 
 type Profile struct {
-	Model                  string          `toml:"model"`
-	ModelProvider          string          `toml:"model_provider,omitempty"`
-	SandboxMode            string          `toml:"sandbox_mode"`
-	ApprovalPolicy         string          `toml:"approval_policy"`
-	ModelReasoningEffort   string          `toml:"model_reasoning_effort"`
-	ShellEnvironmentPolicy *ShellEnvPolicy `toml:"shell_environment_policy,omitempty"`
-	Features               *Features       `toml:"features,omitempty"`
-	Prompt                 string          `toml:"prompt,omitempty"`
+	Model                  string                 `toml:"model"`
+	ModelProvider          string                 `toml:"model_provider,omitempty"`
+	SandboxMode            string                 `toml:"sandbox_mode"`
+	ApprovalPolicy         string                 `toml:"approval_policy"`
+	ModelReasoningEffort   string                 `toml:"model_reasoning_effort"`
+	ShellEnvironmentPolicy *ShellEnvPolicy        `toml:"shell_environment_policy,omitempty"`
+	Features               *Features              `toml:"features,omitempty"`
+	ModelInstructionsFile  string                 `toml:"model_instructions_file,omitempty"`
+	SandboxWorkspaceWrite  *SandboxWorkspaceWrite `toml:"sandbox_workspace_write,omitempty"`
 }
 
 type MCPServer struct {

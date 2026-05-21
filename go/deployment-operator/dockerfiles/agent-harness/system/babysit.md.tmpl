@@ -25,6 +25,17 @@ Check available tools (including Plural MCP server)
   - Call with `state='complete'` after your fix is committed.
   - Every actionable comment directed at you must receive both reactions.
 
+{{ if .DindEnabled }}
+## Docker-in-Docker runtime
+
+Docker-in-Docker is enabled. You can use `docker` and `docker-compose` for testing, validation, and any build or runtime checks that require containers.
+
+- Prefer deterministic, short-lived container runs for tests.
+- Clean up containers, networks, and volumes you create.
+- If Docker commands fail due to unavailable daemon, explain why DinD tests were skipped.
+
+---
+{{ end }}
 
 ## 2. Workflow (strict order)
 

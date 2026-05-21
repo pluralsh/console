@@ -13,17 +13,13 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/dind"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
 // Per-service trees land at "<base>/<manifestsSubdir>/<handle>-<service>/".
 const manifestsSubdir = "manifests"
-
-// agentHarnessSharedDir is the writable emptyDir mount the operator
-// provisions on every agent-run pod's default container. Must stay in
-// sync with `sharedContextVolumePath` in internal/controller/agentrun_pod.go.
-const agentHarnessSharedDir = "/plural/shared"
 
 // safeNamePattern intentionally excludes `.` so that handles like `..` collapse
 // to `-` and ultimately fall back to the sanitizeSegment sentinel rather than
@@ -168,7 +164,7 @@ func resolveManifestsBaseDir() string {
 	if cfg, err := environment.Load(); err == nil && cfg != nil && cfg.Dir != "" {
 		return filepath.Dir(cfg.Dir)
 	}
-	return agentHarnessSharedDir
+	return dind.SharedContextMountPath
 }
 
 // sanitizeSegment normalises an untrusted value into a safe directory segment.

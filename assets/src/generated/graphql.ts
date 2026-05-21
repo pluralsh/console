@@ -12769,6 +12769,8 @@ export type SentinelCheckIntegrationTestConfiguration = {
   gotestsum?: Maybe<SentinelCheckGotestsumConfiguration>;
   /** the job to run for this check */
   job?: Maybe<JobGateSpec>;
+  /** a script to run after the integration test job completes */
+  postrunScript?: Maybe<Scalars['String']['output']>;
   /** the repository to use for this check */
   repositoryId?: Maybe<Scalars['ID']['output']>;
   /** whether to rerun failed tests */
@@ -12794,6 +12796,8 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   gotestsum?: InputMaybe<SentinelCheckGotestsumAttributes>;
   /** the job to run for this check */
   job?: InputMaybe<GateJobAttributes>;
+  /** a script to run after the integration test job completes */
+  postrunScript?: InputMaybe<Scalars['String']['input']>;
   /** the repository to use for this check */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** whether to rerun failed tests */

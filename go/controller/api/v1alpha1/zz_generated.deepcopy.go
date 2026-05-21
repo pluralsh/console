@@ -7958,6 +7958,11 @@ func (in *SentinelCheckIntegrationTestConfiguration) DeepCopyInto(out *SentinelC
 		*out = new(int64)
 		**out = **in
 	}
+	if in.PostrunScript != nil {
+		in, out := &in.PostrunScript, &out.PostrunScript
+		*out = new(string)
+		**out = **in
+	}
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)

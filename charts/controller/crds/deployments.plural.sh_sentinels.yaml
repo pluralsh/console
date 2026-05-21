@@ -9949,6 +9949,10 @@ spec:
                               required:
                               - namespace
                               type: object
+                            postrunScript:
+                              description: PostrunScript is a script to run after
+                                the integration test job completes.
+                              type: string
                             repositoryRef:
                               description: RepositoryRef references a Git repository
                                 to use for this integration test.

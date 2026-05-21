@@ -4321,6 +4321,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
   "how many times to rerun failures"
   rerunFailuresCount: Int
 
+  "a script to run after the integration test job completes"
+  postrunScript: String
+
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseAttributes]
 }
@@ -4584,6 +4587,9 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "how many times to rerun failures"
   rerunFailuresCount: Int
+
+  "a script to run after the integration test job completes"
+  postrunScript: String
 }
 
 type SentinelCheckIntegrationTestDefaultConfiguration {

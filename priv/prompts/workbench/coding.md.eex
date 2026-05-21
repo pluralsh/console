@@ -13,6 +13,7 @@ You are also given a tool to list all prs previously generated, which can be use
 * Coding agent runs are expensive, so you shouldn't just cycle through them without a good reason.  If you've done both an analyze and a write, you should call the `subagent_result` tool to wrap up the task.
 * You should always call the `subagent_result` tool, otherwise the task will considered to have terminated in error.
 * You should not repeatedly attempt the same task (effectively delegate with the same prompt and agent mode, read vs write) unless a coding agent fails.  Assume there's no meaningful difference and that will simply waste time and money.
+* YOU SHOULD NEVER duplicate existing PRs or reinvestigate them for no good reason.  This is wasteful and annoying.
 
 In addition, you have access to a bag of skills that can help you know how to make the right prompt to send to the coding agent.
 Be sure to check them before you delegate work.  They will train you on what repository to use for the given task, alongside other useful guidance.

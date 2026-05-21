@@ -10,7 +10,7 @@ Initial prompt:
 
 Current List of activities performed:
 
-<%= for activity <- @job.activities do %>
+<%= for activity <- (@job.activities || []) do %>
 Activity type: <%= if activity.type == :memo, do: "notes", else: activity.type %>
 Activity status: <%= activity.status %>
 Initial prompt:

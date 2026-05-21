@@ -140,6 +140,10 @@ func (in *sentinelRunController) runTests(fragment *console.SentinelRunJobFragme
 		output = string(out)
 	}
 
+	if err := runPostrunScript(integrationTestConfig); err != nil {
+		return output, false, nil
+	}
+
 	return output, passed, nil
 }
 
@@ -194,6 +198,31 @@ func buildGotestsumRunArgs(outputDir, junitPath, timeout string, integrationTest
 	args = append(args, goTestArgs...)
 
 	return args
+}
+
+func runPostrunScript(integrationTestConfig *console.SentinelCheckIntegrationTestConfigurationFragment) error {
+	if integrationTestConfig == nil || integrationTestConfig.PostrunScript == nil {
+		return nil
+	}
+
+	script := strings.TrimSpace(*integrationTestConfig.PostrunScript)
+	if script == "" {
+		return nil
+	}
+
+	klog.V(log.LogLevelDefault).InfoS("running postrun script")
+	cmd := exec.Command("/bin/sh", "-c", script)
+	cmd.Env = os.Environ()
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		if len(output) > 0 {
+			klog.Warningf("postrun script output: %s", string(output))
+		}
+		return fmt.Errorf("postrun script failed: %w", err)
+	}
+
+	return nil
 }
 
 func (in *sentinelRunController) getIntegrationTestConfiguration(fragment *console.SentinelRunJobFragment) (*console.SentinelCheckIntegrationTestConfigurationFragment, error) {

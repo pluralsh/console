@@ -174,3 +174,38 @@ func TestDecodeTestJSONFileToString_OutputLines(t *testing.T) {
 		t.Errorf("output missing log line: %q", output)
 	}
 }
+
+func TestRunPostrunScript_SkipsWhenUnset(t *testing.T) {
+	if err := runPostrunScript(nil); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	empty := ""
+	if err := runPostrunScript(&console.SentinelCheckIntegrationTestConfigurationFragment{
+		PostrunScript: &empty,
+	}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestRunPostrunScript_ExecutesScript(t *testing.T) {
+	script := "echo hello-postrun"
+	if err := runPostrunScript(&console.SentinelCheckIntegrationTestConfigurationFragment{
+		PostrunScript: &script,
+	}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestRunPostrunScript_Failure(t *testing.T) {
+	script := "exit 1"
+	err := runPostrunScript(&console.SentinelCheckIntegrationTestConfigurationFragment{
+		PostrunScript: &script,
+	})
+	if err == nil {
+		t.Fatal("expected postrun script error")
+	}
+	if !strings.Contains(err.Error(), "postrun script failed") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
