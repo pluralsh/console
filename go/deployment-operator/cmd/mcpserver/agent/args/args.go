@@ -23,6 +23,7 @@ const (
 
 	EnvDeployToken  = "PLRL_DEPLOY_TOKEN"
 	EnvExcludeTools = "PLRL_EXCLUDE_TOOLS"
+	EnvWorkingDir   = "PLRL_WORKING_DIR"
 )
 
 var (
@@ -32,6 +33,7 @@ var (
 	argDeployToken  = pflag.String("deploy-token", helpers.GetEnv(EnvDeployToken, ""), "Deploy token to the Console API")
 	argAgentRunID   = pflag.String("agent-run-id", helpers.GetEnv(controller.EnvAgentRunID, ""), "ID of the Agent Run being executed")
 	argExcludeTools = pflag.String("exclude-tools", helpers.GetEnv(EnvExcludeTools, ""), "Comma-separated list of tools to exclude from the default set. Available tools: createBranch, agentPullRequest, fetchAgentRunTodos, updateAgentRunAnalysis, updateAgentRunTodos, downloadServiceManifests")
+	argWorkingDir   = pflag.String("working-dir", helpers.GetEnv(EnvWorkingDir, common.AgentRunSharedWorkDir), "Working directory used to prepare repository for shared pod workspace")
 )
 
 func init() {
@@ -130,6 +132,14 @@ func LogLevel() klog.Level {
 	}
 
 	return klog.Level(level)
+}
+
+func WorkingDir() string {
+	if argWorkingDir == nil || len(*argWorkingDir) == 0 {
+		return common.AgentRunSharedWorkDir
+	}
+
+	return *argWorkingDir
 }
 
 func ensureOrDie(argName string, arg *string) {

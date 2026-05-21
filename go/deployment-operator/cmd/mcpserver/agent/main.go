@@ -12,10 +12,13 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
+	consoleclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/scm"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -47,21 +50,32 @@ func run() error {
 	defer stop()
 
 	extClient := console.New(args.ConsoleExtApiURL(), args.DeployToken())
-	scmToken, consoleToken, err := getCredentials(ctx, extClient)
+
+	agentRun, err := extClient.GetAgentRun(ctx, args.AgentRunID())
 	if err != nil {
+		return fmt.Errorf("could not get agent run: %w", err)
+	}
+
+	if err = ensureCredentials(agentRun); err != nil {
 		return fmt.Errorf("could not get credentials: %w", err)
 	}
 
-	client := console.New(args.ConsoleApiURL(), consoleToken)
+	client := console.New(args.ConsoleApiURL(), *agentRun.PluralCreds.Token)
 	mcpServer := agent.NewServer(
 		client,
 		createServerOptions(client)...,
 	)
 
-	grpcServer, err := scm.NewServer(scmToken)
+	err = environment.New(
+		environment.WithAgentRun(new(v1.AgentRun).FromAgentRunFragment(agentRun)),
+		environment.WithWorkingDir(args.WorkingDir()),
+		environment.WithConsoleTokenClient(client),
+	).Setup()
 	if err != nil {
-		return fmt.Errorf("could not create grpc server: %w", err)
+		return fmt.Errorf("could not setup environment: %w", err)
 	}
+
+	grpcServer := scm.NewServer()
 
 	mcpErrChan := startMcpServer(mcpServer)
 	scmErrChan, err := grpcServer.Start()
@@ -105,21 +119,16 @@ func run() error {
 	return nil
 }
 
-func getCredentials(ctx context.Context, client console.Client) (scmToken, consoleToken string, err error) {
-	agentRun, err := client.GetAgentRun(ctx, args.AgentRunID())
-	if err != nil {
-		return "", "", fmt.Errorf("could not get agent run: %w", err)
-	}
-
+func ensureCredentials(agentRun *consoleclient.AgentRunFragment) error {
 	if agentRun.ScmCreds == nil || agentRun.ScmCreds.Token == "" {
-		return "", "", fmt.Errorf("agent run does not have scm creds")
+		return fmt.Errorf("agent run does not have scm creds")
 	}
 
 	if agentRun.PluralCreds == nil || agentRun.PluralCreds.Token == nil {
-		return "", "", fmt.Errorf("agent run does not have plural creds")
+		return fmt.Errorf("agent run does not have plural creds")
 	}
 
-	return agentRun.ScmCreds.Token, *agentRun.PluralCreds.Token, nil
+	return nil
 }
 
 func shutdownServers(ctx context.Context, grpcServer *scm.Server, mcpServer *agent.Server) error {
