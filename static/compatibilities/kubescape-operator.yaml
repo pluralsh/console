@@ -4,28 +4,60 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
-- version: 1.40.1
+- version: 1.40.2
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **kubevuln image tag bumped** to `v0.3.137` (from `v0.3.136`).\n\
-      - **New kubevuln setting:** a `riskAcceptance` flag was added to support SecurityException\
-      \ CRD integration (configure this only if you\u2019re using/plan to use SecurityException-based\
-      \ risk acceptance).\n- **Behavior change in chart templating:** `operator.httpExporterConfig`\
-      \ is now **gated by** `synchronizer.enabled`. If you previously set `operator.httpExporterConfig`\
-      \ while `synchronizer.enabled=false`, it will no longer render/apply; enable\
-      \ the synchronizer or move to the supported configuration path.\n"
-    chart_updates: [Update kubevuln component image tag to v0.3.137 and expose configuration
-        for risk acceptance integration., Fix templating so operator `httpExporterConfig`
-        is only applied when `synchronizer.enabled` is enabled.]
-    features: [Kubevuln adds a `riskAcceptance` flag to integrate with SecurityException
-        CRDs for risk acceptance workflows., Chart now supports/threads through the
-        kubevuln risk acceptance configuration (when enabled).]
-    breaking_changes: ['If you rely on `operator.httpExporterConfig` with `synchronizer.enabled=false`,
-        that configuration will no longer be deployed because it is now gated; you
-        must enable the synchronizer or adjust your configuration approach.']
-  chart_version: 1.40.1
+    helm_changes: "## Helm values / behavior changes to review\n\n- **New/changed\
+      \ Grype offline DB CronJob knobs** (chart 1.40.2):\n  - **CronJob schedule is\
+      \ now configurable** via `values.yaml`.\n  - **CronJob history limits are now\
+      \ configurable** via `values.yaml`.\n  - **A dedicated ServiceAccount is enforced/used**\
+      \ for the `grype-offline-db` components.\n\n- **grype-offline-db health probes\
+      \ added** (chart 1.40.2): liveness/readiness probes are now defined for the\
+      \ `grype-offline-db` Deployment (may affect clusters with strict probe/PSA policies\
+      \ or if endpoints are slow to become ready).\n\n- **kubevuln tmp-dir PVC rendering\
+      \ fix when disabled** (chart 1.40.2): if you previously disabled the tmp-dir\
+      \ PVC and had template/render issues, this should now work as expected.\n\n\
+      - **Certificate strategy hook changed to initContainer** (chart 1.40.2): any\
+      \ previous reliance on Helm hooks ordering/behavior for certificate strategy\
+      \ may change; review any customizations around cert provisioning.\n\n- **Service\
+      \ discovery components removed** (chart 1.40.2): if you previously enabled/relied\
+      \ on chart-managed service-discovery/sidecar behavior, verify the new model\
+      \ (services are now retrieved from the API in upstream components) and remove\
+      \ any values that referenced the old discovery components.\n"
+    chart_updates: [Removed redundant `GOMAXPROCS` setting from templates (1.40.0).,
+      Added ArgoCD GitOps support for Kubescape Helm (1.40.0)., Added artifact provenance
+        attestation for Helm chart releases (1.40.0)., Set `GOMEMLIMIT` to ~80% of
+        memory limit for node-agent + kubevuln (1.40.0) and later improved autoscaler
+        computation per node group in operator (1.40.0)., Extended rules CRD with
+        `profileDataRequired` for rule-aware profile projection (1.40.0)., Replaced
+        host sensor with node-agent sensing (1.40.0)., Ensured `grype-offline-db`
+        uses a dedicated ServiceAccount (1.40.2)., Made `grype-offline-db` CronJob
+        schedule and history limits configurable (1.40.2)., Added liveness/readiness
+        probes to `grype-offline-db` deployment (1.40.2)., Fixed kubevuln tmp-dir
+        PVC template rendering when disabled (1.40.2)., Removed service discovery
+        components from the chart (1.40.2)., Changed certificate strategy from Helm
+        hook to initContainer (1.40.2).]
+    features: [ArgoCD/GitOps-oriented Helm support was added to ease managing Kubescape
+        via GitOps workflows., Rule-aware profile projection support was introduced
+        by adding `profileDataRequired` to the rules CRD and corresponding node-agent
+        behavior., 'Resource/memory tuning improvements: chart sets `GOMEMLIMIT` based
+        on container limits (and operator autoscaler computes it per node group),
+        reducing OOM risk and improving performance.', Service discovery was simplified
+        by removing sidecar/discovery components; services are retrieved from the
+        API in the Kubescape stack., Kubescape CLI added support for TLS key configuration
+        via env vars and introduced an in-cluster ControlInput CRD for control configuration.]
+    breaking_changes: ['Service discovery components/sidecars were removed; if your
+        deployment depended on the old service-discovery sidecar or chart-managed
+        discovery resources, you must validate the new API-based discovery path and
+        adjust any custom values/manifests.', 'Certificate strategy behavior changed
+        from a Helm hook to an initContainer; if you depended on hook timing or had
+        hook-related policies, re-validate startup ordering and any custom certificate
+        handling.', 'Host sensor was replaced with node-agent sensing (introduced
+        in 1.40.0); clusters relying on the old host-sensor model should verify node-agent
+        permissions, DaemonSet behavior, and expected telemetry.']
+  chart_version: 1.40.2
   images: []
 - version: 1.40.0
   kube: ['1.36', '1.35', '1.34']
