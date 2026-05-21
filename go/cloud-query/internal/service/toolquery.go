@@ -15,6 +15,7 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools"
 	lambdatools "github.com/pluralsh/console/go/cloud-query/internal/tools/lambda"
+	luatools "github.com/pluralsh/console/go/cloud-query/internal/tools/lua"
 )
 
 // ToolQueryService implements the toolquery.ToolQueryServer interface.
@@ -155,6 +156,26 @@ func (in *ToolQueryService) InvokeLambda(ctx context.Context, input *toolquery.I
 	return &toolquery.InvokeLambdaOutput{
 		Result: output.Result,
 		Error:  output.Error,
+	}, nil
+}
+
+func (in *ToolQueryService) RunLua(ctx context.Context, input *toolquery.RunLuaInput) (*toolquery.RunLuaOutput, error) {
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+	if strings.TrimSpace(input.GetScript()) == "" {
+		return nil, status.Error(codes.InvalidArgument, "script is required")
+	}
+
+	output, err := luatools.Run(ctx, luatools.RunInput{
+		Script: input.GetScript(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "lua execution failed: %v", err)
+	}
+
+	return &toolquery.RunLuaOutput{
+		ResultJson: output.ResultJSON,
 	}, nil
 }
 
