@@ -23,8 +23,7 @@ type RunInput struct {
 // RunOutput holds the result of a sandboxed Lua execution.
 type RunOutput struct {
 	// ResultJSON is the JSON-encoded value produced by the script.
-	// The value is taken from the global variable `output`, or failing that,
-	// from the script's first return value.
+	// The value is taken from the global variable `output`.
 	ResultJSON string
 }
 
