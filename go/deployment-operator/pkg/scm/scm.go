@@ -76,8 +76,8 @@ const (
 // CICheck is a single CI check run or commit status.
 type CICheck struct {
 	Name       string
-	Status     string // CICheckStatusQueued, CICheckStatusInProgress, CICheckStatusCompleted
-	Conclusion string // CICheckConclusionSuccess, …, or ""
+	Status     string // "queued", "in_progress", "completed"
+	Conclusion string // "success", "failure", "neutral", "cancelled", "skipped", "timed_out", ""
 	// CheckRunID is the provider-specific ID used to fetch logs (GitHub check run ID).
 	CheckRunID int64
 }
