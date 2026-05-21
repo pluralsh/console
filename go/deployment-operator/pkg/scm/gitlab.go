@@ -18,6 +18,9 @@ import (
 const (
 	gitlabJobStatusFailed   = "failed"
 	gitlabJobStatusCanceled = "canceled"
+
+	gitlabMRStateMerged = "merged"
+	gitlabMRStateClosed = "closed"
 )
 
 // gitlabMRPattern matches GitLab MR URLs, e.g.
@@ -56,9 +59,10 @@ func (c *gitLabClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetai
 	}
 
 	state := PRStateOpen
-	if mr.State == "merged" {
+	switch mr.State {
+	case gitlabMRStateMerged:
 		state = PRStateMerged
-	} else if mr.State == "closed" {
+	case gitlabMRStateClosed:
 		state = PRStateClosed
 	}
 
