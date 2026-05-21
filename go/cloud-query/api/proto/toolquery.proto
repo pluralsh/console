@@ -246,10 +246,21 @@ message InvokeLambdaOutput {
   string error = 2;
 }
 
+message RunLuaInput {
+  // The Lua script to execute. Output is taken from the global `output` variable.
+  string script = 1;
+}
+
+message RunLuaOutput {
+  // JSON-encoded result produced by the script.
+  string result_json = 1;
+}
+
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
+  rpc RunLua(RunLuaInput) returns (RunLuaOutput) {}
 }

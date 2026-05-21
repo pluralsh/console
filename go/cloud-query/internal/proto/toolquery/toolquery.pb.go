@@ -2403,6 +2403,96 @@ func (x *InvokeLambdaOutput) GetError() string {
 	return ""
 }
 
+type RunLuaInput struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Lua script to execute. Output is taken from the global `output` variable.
+	Script        string `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RunLuaInput) Reset() {
+	*x = RunLuaInput{}
+	mi := &file_toolquery_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RunLuaInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RunLuaInput) ProtoMessage() {}
+
+func (x *RunLuaInput) ProtoReflect() protoreflect.Message {
+	mi := &file_toolquery_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RunLuaInput.ProtoReflect.Descriptor instead.
+func (*RunLuaInput) Descriptor() ([]byte, []int) {
+	return file_toolquery_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *RunLuaInput) GetScript() string {
+	if x != nil {
+		return x.Script
+	}
+	return ""
+}
+
+type RunLuaOutput struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// JSON-encoded result produced by the script.
+	ResultJson    string `protobuf:"bytes,1,opt,name=result_json,json=resultJson,proto3" json:"result_json,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RunLuaOutput) Reset() {
+	*x = RunLuaOutput{}
+	mi := &file_toolquery_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RunLuaOutput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RunLuaOutput) ProtoMessage() {}
+
+func (x *RunLuaOutput) ProtoReflect() protoreflect.Message {
+	mi := &file_toolquery_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RunLuaOutput.ProtoReflect.Descriptor instead.
+func (*RunLuaOutput) Descriptor() ([]byte, []int) {
+	return file_toolquery_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *RunLuaOutput) GetResultJson() string {
+	if x != nil {
+		return x.ResultJson
+	}
+	return ""
+}
+
 var File_toolquery_proto protoreflect.FileDescriptor
 
 const file_toolquery_proto_rawDesc = "" +
@@ -2655,13 +2745,19 @@ const file_toolquery_proto_rawDesc = "" +
 	"\fpayload_json\x18\x03 \x01(\tR\vpayloadJson\"B\n" +
 	"\x12InvokeLambdaOutput\x12\x16\n" +
 	"\x06result\x18\x01 \x01(\tR\x06result\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error2\xfe\x02\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"%\n" +
+	"\vRunLuaInput\x12\x16\n" +
+	"\x06script\x18\x01 \x01(\tR\x06script\"/\n" +
+	"\fRunLuaOutput\x12\x1f\n" +
+	"\vresult_json\x18\x01 \x01(\tR\n" +
+	"resultJson2\xbb\x03\n" +
 	"\tToolQuery\x12H\n" +
 	"\aMetrics\x12\x1c.toolquery.MetricsQueryInput\x1a\x1d.toolquery.MetricsQueryOutput\"\x00\x12P\n" +
 	"\rMetricsSearch\x12\x1d.toolquery.MetricsSearchInput\x1a\x1e.toolquery.MetricsSearchOutput\"\x00\x12?\n" +
 	"\x04Logs\x12\x19.toolquery.LogsQueryInput\x1a\x1a.toolquery.LogsQueryOutput\"\x00\x12E\n" +
 	"\x06Traces\x12\x1b.toolquery.TracesQueryInput\x1a\x1c.toolquery.TracesQueryOutput\"\x00\x12M\n" +
-	"\fInvokeLambda\x12\x1c.toolquery.InvokeLambdaInput\x1a\x1d.toolquery.InvokeLambdaOutput\"\x00BEZCgithub.com/pluralsh/console/go/cloud-query/internal/proto/toolqueryb\x06proto3"
+	"\fInvokeLambda\x12\x1c.toolquery.InvokeLambdaInput\x1a\x1d.toolquery.InvokeLambdaOutput\"\x00\x12;\n" +
+	"\x06RunLua\x12\x16.toolquery.RunLuaInput\x1a\x17.toolquery.RunLuaOutput\"\x00BEZCgithub.com/pluralsh/console/go/cloud-query/internal/proto/toolqueryb\x06proto3"
 
 var (
 	file_toolquery_proto_rawDescOnce sync.Once
@@ -2675,7 +2771,7 @@ func file_toolquery_proto_rawDescGZIP() []byte {
 	return file_toolquery_proto_rawDescData
 }
 
-var file_toolquery_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_toolquery_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_toolquery_proto_goTypes = []any{
 	(*ElasticConnection)(nil),         // 0: toolquery.ElasticConnection
 	(*DatadogConnection)(nil),         // 1: toolquery.DatadogConnection
@@ -2713,11 +2809,13 @@ var file_toolquery_proto_goTypes = []any{
 	(*TracesQueryOutput)(nil),         // 33: toolquery.TracesQueryOutput
 	(*InvokeLambdaInput)(nil),         // 34: toolquery.InvokeLambdaInput
 	(*InvokeLambdaOutput)(nil),        // 35: toolquery.InvokeLambdaOutput
-	nil,                               // 36: toolquery.MetricPoint.LabelsEntry
-	nil,                               // 37: toolquery.LogEntry.LabelsEntry
-	nil,                               // 38: toolquery.TraceSpan.TagsEntry
-	(*timestamppb.Timestamp)(nil),     // 39: google.protobuf.Timestamp
-	(*cloudquery.Connection)(nil),     // 40: cloudquery.Connection
+	(*RunLuaInput)(nil),               // 36: toolquery.RunLuaInput
+	(*RunLuaOutput)(nil),              // 37: toolquery.RunLuaOutput
+	nil,                               // 38: toolquery.MetricPoint.LabelsEntry
+	nil,                               // 39: toolquery.LogEntry.LabelsEntry
+	nil,                               // 40: toolquery.TraceSpan.TagsEntry
+	(*timestamppb.Timestamp)(nil),     // 41: google.protobuf.Timestamp
+	(*cloudquery.Connection)(nil),     // 42: cloudquery.Connection
 }
 var file_toolquery_proto_depIdxs = []int32{
 	0,  // 0: toolquery.ToolConnection.elastic:type_name -> toolquery.ElasticConnection
@@ -2730,8 +2828,8 @@ var file_toolquery_proto_depIdxs = []int32{
 	8,  // 7: toolquery.ToolConnection.cloudwatch:type_name -> toolquery.CloudwatchConnection
 	9,  // 8: toolquery.ToolConnection.azure:type_name -> toolquery.AzureConnection
 	5,  // 9: toolquery.ToolConnection.jaeger:type_name -> toolquery.JaegerConnection
-	39, // 10: toolquery.TimeRange.start:type_name -> google.protobuf.Timestamp
-	39, // 11: toolquery.TimeRange.end:type_name -> google.protobuf.Timestamp
+	41, // 10: toolquery.TimeRange.start:type_name -> google.protobuf.Timestamp
+	41, // 11: toolquery.TimeRange.end:type_name -> google.protobuf.Timestamp
 	10, // 12: toolquery.MetricsQueryInput.connection:type_name -> toolquery.ToolConnection
 	11, // 13: toolquery.MetricsQueryInput.range:type_name -> toolquery.TimeRange
 	13, // 14: toolquery.MetricsQueryInput.options:type_name -> toolquery.MetricsOptions
@@ -2746,33 +2844,35 @@ var file_toolquery_proto_depIdxs = []int32{
 	20, // 23: toolquery.TracesQueryInput.options:type_name -> toolquery.TracesOptions
 	22, // 24: toolquery.TracesOptions.jaeger:type_name -> toolquery.JaegerTracesOptions
 	21, // 25: toolquery.JaegerTracesOptions.attributes:type_name -> toolquery.JaegerTraceQueryAttribute
-	39, // 26: toolquery.MetricPoint.timestamp:type_name -> google.protobuf.Timestamp
-	36, // 27: toolquery.MetricPoint.labels:type_name -> toolquery.MetricPoint.LabelsEntry
+	41, // 26: toolquery.MetricPoint.timestamp:type_name -> google.protobuf.Timestamp
+	38, // 27: toolquery.MetricPoint.labels:type_name -> toolquery.MetricPoint.LabelsEntry
 	23, // 28: toolquery.MetricsQueryOutput.metrics:type_name -> toolquery.MetricPoint
 	10, // 29: toolquery.MetricsSearchInput.connection:type_name -> toolquery.ToolConnection
 	26, // 30: toolquery.MetricsSearchInput.options:type_name -> toolquery.MetricsSearchOptions
 	27, // 31: toolquery.MetricsSearchOptions.azure:type_name -> toolquery.AzureMetricsSearchOptions
 	28, // 32: toolquery.MetricsSearchOutput.metrics:type_name -> toolquery.MetricsSearchResult
-	39, // 33: toolquery.LogEntry.timestamp:type_name -> google.protobuf.Timestamp
-	37, // 34: toolquery.LogEntry.labels:type_name -> toolquery.LogEntry.LabelsEntry
+	41, // 33: toolquery.LogEntry.timestamp:type_name -> google.protobuf.Timestamp
+	39, // 34: toolquery.LogEntry.labels:type_name -> toolquery.LogEntry.LabelsEntry
 	30, // 35: toolquery.LogsQueryOutput.logs:type_name -> toolquery.LogEntry
-	39, // 36: toolquery.TraceSpan.start:type_name -> google.protobuf.Timestamp
-	39, // 37: toolquery.TraceSpan.end:type_name -> google.protobuf.Timestamp
-	38, // 38: toolquery.TraceSpan.tags:type_name -> toolquery.TraceSpan.TagsEntry
+	41, // 36: toolquery.TraceSpan.start:type_name -> google.protobuf.Timestamp
+	41, // 37: toolquery.TraceSpan.end:type_name -> google.protobuf.Timestamp
+	40, // 38: toolquery.TraceSpan.tags:type_name -> toolquery.TraceSpan.TagsEntry
 	32, // 39: toolquery.TracesQueryOutput.spans:type_name -> toolquery.TraceSpan
-	40, // 40: toolquery.InvokeLambdaInput.connection:type_name -> cloudquery.Connection
+	42, // 40: toolquery.InvokeLambdaInput.connection:type_name -> cloudquery.Connection
 	12, // 41: toolquery.ToolQuery.Metrics:input_type -> toolquery.MetricsQueryInput
 	25, // 42: toolquery.ToolQuery.MetricsSearch:input_type -> toolquery.MetricsSearchInput
 	16, // 43: toolquery.ToolQuery.Logs:input_type -> toolquery.LogsQueryInput
 	19, // 44: toolquery.ToolQuery.Traces:input_type -> toolquery.TracesQueryInput
 	34, // 45: toolquery.ToolQuery.InvokeLambda:input_type -> toolquery.InvokeLambdaInput
-	24, // 46: toolquery.ToolQuery.Metrics:output_type -> toolquery.MetricsQueryOutput
-	29, // 47: toolquery.ToolQuery.MetricsSearch:output_type -> toolquery.MetricsSearchOutput
-	31, // 48: toolquery.ToolQuery.Logs:output_type -> toolquery.LogsQueryOutput
-	33, // 49: toolquery.ToolQuery.Traces:output_type -> toolquery.TracesQueryOutput
-	35, // 50: toolquery.ToolQuery.InvokeLambda:output_type -> toolquery.InvokeLambdaOutput
-	46, // [46:51] is the sub-list for method output_type
-	41, // [41:46] is the sub-list for method input_type
+	36, // 46: toolquery.ToolQuery.RunLua:input_type -> toolquery.RunLuaInput
+	24, // 47: toolquery.ToolQuery.Metrics:output_type -> toolquery.MetricsQueryOutput
+	29, // 48: toolquery.ToolQuery.MetricsSearch:output_type -> toolquery.MetricsSearchOutput
+	31, // 49: toolquery.ToolQuery.Logs:output_type -> toolquery.LogsQueryOutput
+	33, // 50: toolquery.ToolQuery.Traces:output_type -> toolquery.TracesQueryOutput
+	35, // 51: toolquery.ToolQuery.InvokeLambda:output_type -> toolquery.InvokeLambdaOutput
+	37, // 52: toolquery.ToolQuery.RunLua:output_type -> toolquery.RunLuaOutput
+	47, // [47:53] is the sub-list for method output_type
+	41, // [41:47] is the sub-list for method input_type
 	41, // [41:41] is the sub-list for extension type_name
 	41, // [41:41] is the sub-list for extension extendee
 	0,  // [0:41] is the sub-list for field type_name
@@ -2819,7 +2919,7 @@ func file_toolquery_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_toolquery_proto_rawDesc), len(file_toolquery_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   39,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
