@@ -4,11 +4,12 @@ defmodule Console.AI.Bedrock do
   """
   @behaviour Console.AI.Provider
   import Console.AI.Provider.Base
-  alias Console.AI.{Utils, Stream}
+  alias Console.AI.{Utils, Stream, Provider.TokenExchange}
+  alias Console.Schema.DeploymentSettings.OauthToken
 
   require Logger
 
-  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :stream]
+  defstruct [:access_token, :model_id, :tool_model_id, :base_url, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :stream, :token_exchange]
 
   @type t :: %__MODULE__{}
 
@@ -23,8 +24,10 @@ defmodule Console.AI.Bedrock do
       aws_access_key_id: opts.aws_access_key_id,
       aws_secret_access_key: opts.aws_secret_access_key,
       access_token: opts.access_token,
+      base_url: opts.base_url,
       region: opts.region,
-      stream: Stream.stream(),
+      token_exchange: opts.token_exchange,
+      stream: add_stream(opts),
     }
   end
 
@@ -35,10 +38,14 @@ defmodule Console.AI.Bedrock do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = bedrock, messages, opts) do
-    messages
-    |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client])}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
-    |> reqllm_result()
+    with {:ok, provider_opts} <- provider_options(bedrock) do
+      provider_opts = Keyword.put(provider_opts, :tools, tools(opts))
+
+      messages
+      |> reqllm_messages()
+      |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client])}", bedrock.stream, provider_opts)
+      |> reqllm_result()
+    end
   end
 
   @doc """
@@ -46,24 +53,29 @@ defmodule Console.AI.Bedrock do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = bedrock, messages, tools, opts) do
-    provider_opts = Keyword.put(provider_options(bedrock), :tools, reqllm_tools(tools))
+    with {:ok, provider_opts} <- provider_options(bedrock) do
+      provider_opts = Keyword.put(provider_opts, :tools, reqllm_tools(tools))
 
-    messages
-    |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client] || :tool)}", bedrock.stream, provider_opts)
-    |> reqllm_result()
-    |> tool_calls()
+      messages
+      |> reqllm_messages()
+      |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client] || :tool)}", bedrock.stream, provider_opts)
+      |> reqllm_result()
+      |> tool_calls()
+    end
   end
 
   def embeddings(%__MODULE__{} = bedrock, text) do
     bedrock = choose_region(bedrock)
     chunked = Utils.chunk(text, 8000)
-    provider_options(bedrock)
-    |> Keyword.put(:dimensions, Utils.embedding_dims())
-    |> then(&ReqLLM.embed("amazon-bedrock:#{bedrock.embedding_model}", chunked, &1))
-    |> case do
-      {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
-      error -> error
+
+    with {:ok, provider} <- provider_options(bedrock) do
+      provider
+      |> Keyword.put(:dimensions, Utils.embedding_dims())
+      |> then(&ReqLLM.embed("amazon-bedrock:#{bedrock.embedding_model}", chunked, &1))
+      |> case do
+        {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
+        error -> error
+      end
     end
   end
 
@@ -76,11 +88,24 @@ defmodule Console.AI.Bedrock do
 
   def tools?(), do: true
 
-  def provider_options(%__MODULE__{region: region, access_token: token} = bedrock) do
-    [region: region, access_token: token]
-    |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
-    |> Enum.filter(fn {_, v} -> not is_nil(v) end)
+  def provider_options(%__MODULE__{region: region, base_url: base_url} = bedrock) do
+    with {:ok, token} <- api_key(bedrock) do
+      {:ok,
+       [region: region, api_key: token, base_url: base_url]
+       |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
+       |> Enum.filter(fn {_, v} -> not is_nil(v) end)}
+    end
   end
+
+  defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
+    with {:ok, %OAuth2.AccessToken{access_token: token}} <- TokenExchange.exchange(token.token_url, token.client_id, token.client_secret),
+      do: {:ok, token}
+  end
+  defp api_key(%__MODULE__{access_token: token}) when is_binary(token), do: {:ok, token}
+  defp api_key(_), do: {:ok, nil}
+
+  defp add_stream(%{enable_stream: false}), do: nil
+  defp add_stream(_), do: Stream.stream()
 
   defp choose_region(%__MODULE__{embedding_model: "cohere.embed-english-v3"} = rock),
     do: %{rock | region: "us-east-1"}

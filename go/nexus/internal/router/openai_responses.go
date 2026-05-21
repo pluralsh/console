@@ -16,7 +16,10 @@ func (in *OpenAIRouter) newResponsesRoute() RouteConfig {
 		RequestConverter:           in.responsesRequestConverter,
 		ResponsesResponseConverter: in.responsesResponseConverter,
 		ErrorConverter:             in.errorConverter,
-		PreCallback:                in.openAIRoutePreCallback(string(RouteResponses)),
+		PreCallback: chainPreCallbacks(
+			in.openAIRoutePreCallback(string(RouteResponses)),
+			disableProviderStreamingPreCallback(),
+		),
 		StreamConfig: &StreamConfig{
 			ResponsesStreamResponseConverter: in.responsesStreamResponseConverter,
 			ErrorConverter:                   in.errorConverter,

@@ -749,6 +749,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		attr.Bedrock = &console.BedrockAiAttributes{
 			ModelID:            in.Bedrock.ModelID,
 			ToolModelID:        in.Bedrock.ToolModelId,
+			BaseURL:            in.Bedrock.BaseUrl,
 			AccessToken:        secret,
 			Region:             lo.ToPtr(in.Bedrock.Region),
 			EmbeddingModel:     in.Bedrock.EmbeddingModel,
@@ -756,6 +757,14 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AWSSecretAccessKey: secretKey,
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
 			Deployments:        deployments,
+			EnableStream:       in.Bedrock.EnableStream,
+		}
+		if in.Bedrock.TokenExchange != nil {
+			tokenExchange, err := in.Bedrock.TokenExchange.Attributes(ctx, c, namespace)
+			if err != nil {
+				return nil, err
+			}
+			attr.Bedrock.TokenExchange = tokenExchange
 		}
 	}
 
@@ -1046,6 +1055,22 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	ToolModelId *string `json:"toolModelId,omitempty"`
+
+	// BaseUrl is the base url to use when querying a Bedrock-compatible API.
+	//
+	// +kubebuilder:validation:Optional
+	BaseUrl *string `json:"baseUrl,omitempty"`
+
+	// EnableStream controls whether streaming responses are enabled.  Set to false explicitly to disable, otherwise on.
+	//
+	// +kubebuilder:default=true
+	// +kubebuilder:validation:Optional
+	EnableStream *bool `json:"enableStream,omitempty"`
+
+	// TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens.
+	//
+	// +kubebuilder:validation:Optional
+	TokenExchange *OAuth2TokenExchange `json:"tokenExchange,omitempty"`
 
 	// EmbeddingModel is the Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	//

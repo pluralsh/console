@@ -1201,6 +1201,8 @@ type BedrockAiAttributes struct {
 	ModelID *string `json:"modelId,omitempty"`
 	// Bedrock model or inference profile for tool calls. Same ID formats as modelId.
 	ToolModelID *string `json:"toolModelId,omitempty"`
+	// the base url to use when querying a Bedrock-compatible API
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai bedrock access token to use
 	AccessToken *string `json:"accessToken,omitempty"`
 	// the aws region the model is hosted in
@@ -1215,6 +1217,10 @@ type BedrockAiAttributes struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
 	Deployments *string `json:"deployments,omitempty"`
+	// whether to enable streaming responses
+	EnableStream *bool `json:"enableStream,omitempty"`
+	// OAuth2 client credentials against a token endpoint to obtain access tokens
+	TokenExchange *OpenaiTokenExchangeAttributes `json:"tokenExchange,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1223,6 +1229,8 @@ type BedrockAiSettings struct {
 	ModelID *string `json:"modelId,omitempty"`
 	// Bedrock model or inference profile for tool calls. Same ID formats as modelId.
 	ToolModelID *string `json:"toolModelId,omitempty"`
+	// the base url to use when querying a Bedrock-compatible API
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai bedrock aws access key id to use (DEPRECATED)
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// the aws region the model is hosted in
@@ -1233,6 +1241,10 @@ type BedrockAiSettings struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
 	Deployments map[string]any `json:"deployments,omitempty"`
+	// whether streaming responses are enabled
+	EnableStream *bool `json:"enableStream,omitempty"`
+	// OAuth2 client credentials configured for token endpoint exchange
+	TokenExchange *OpenaiTokenExchange `json:"tokenExchange,omitempty"`
 }
 
 type BindingAttributes struct {

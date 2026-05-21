@@ -92,6 +92,7 @@ type ClaudeConfig struct {
 	BashTimeout    time.Duration `json:"bashTimeout"`
 	BashMaxTimeout time.Duration `json:"bashMaxTimeout"`
 	Endpoint       *string       `json:"endpoint,omitempty"`
+	DisableStream  bool          `json:"disableStream,omitempty"`
 }
 
 type GeminiConfig struct {
@@ -103,10 +104,11 @@ type GeminiConfig struct {
 }
 
 type CodexConfig struct {
-	ApiKey   string        `json:"apiKey"`
-	Model    string        `json:"model,omitempty"`
-	Timeout  time.Duration `json:"timeout"`
-	Endpoint *string       `json:"endpoint,omitempty"`
+	ApiKey       string        `json:"apiKey"`
+	Model        string        `json:"model,omitempty"`
+	Timeout      time.Duration `json:"timeout"`
+	Endpoint     *string       `json:"endpoint,omitempty"`
+	DisableStream bool          `json:"disableStream,omitempty"`
 }
 
 // FromAgentRunFragment converts Console API fragment to harness type
@@ -175,6 +177,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 			Timeout:        helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
 			BashTimeout:    helpers.GetPluralEnvDuration(controller.EnvClaudeBashDefaultTimeout, defaultBashTimeout),
 			BashMaxTimeout: helpers.GetPluralEnvDuration(controller.EnvClaudeBashMaxTimeout, defaultBashMaxTimeout),
+			DisableStream:  helpers.GetPluralEnvBool(controller.EnvClaudeDisableStream, false),
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvClaudeEndpoint, ""); endpoint != "" {
 			config.Claude.Endpoint = &endpoint
@@ -200,9 +203,10 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 		}
 	case console.AgentRuntimeTypeCodex:
 		config.Codex = &CodexConfig{
-			ApiKey:  helpers.GetPluralEnv(controller.EnvCodexAPIKey, ""),
-			Model:   helpers.GetPluralEnv(controller.EnvCodexModel, ""),
-			Timeout: helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
+			ApiKey:       helpers.GetPluralEnv(controller.EnvCodexAPIKey, ""),
+			Model:        helpers.GetPluralEnv(controller.EnvCodexModel, ""),
+			Timeout:      helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
+			DisableStream: helpers.GetPluralEnvBool(controller.EnvCodexDisableStream, false),
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvCodexEndpoint, ""); endpoint != "" {
 			config.Codex.Endpoint = &endpoint

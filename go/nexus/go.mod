@@ -93,3 +93,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/maximhq/bifrost/core => github.com/pluralsh/bifrost/core v0.0.0-20260521165326-8d3ebe79c07e

@@ -565,6 +565,9 @@ type BedrockConfig struct {
 	AwsSecretAccessKey *string                `protobuf:"bytes,7,opt,name=awsSecretAccessKey,proto3,oneof" json:"awsSecretAccessKey,omitempty"`
 	ProxyModels        []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	Deployments        map[string]string      `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	BaseUrl            *string                `protobuf:"bytes,10,opt,name=baseUrl,proto3,oneof" json:"baseUrl,omitempty"`
+	TokenExchange      *OpenAiTokenExchange   `protobuf:"bytes,11,opt,name=tokenExchange,proto3,oneof" json:"tokenExchange,omitempty"`
+	EnableStream       *bool                  `protobuf:"varint,12,opt,name=enableStream,proto3,oneof" json:"enableStream,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -660,6 +663,27 @@ func (x *BedrockConfig) GetDeployments() map[string]string {
 		return x.Deployments
 	}
 	return nil
+}
+
+func (x *BedrockConfig) GetBaseUrl() string {
+	if x != nil && x.BaseUrl != nil {
+		return *x.BaseUrl
+	}
+	return ""
+}
+
+func (x *BedrockConfig) GetTokenExchange() *OpenAiTokenExchange {
+	if x != nil {
+		return x.TokenExchange
+	}
+	return nil
+}
+
+func (x *BedrockConfig) GetEnableStream() bool {
+	if x != nil && x.EnableStream != nil {
+		return *x.EnableStream
+	}
+	return false
 }
 
 type AzureOpenAiConfig struct {
@@ -1140,7 +1164,7 @@ const file_console_proto_rawDesc = "" +
 	"_toolModelB\n" +
 	"\n" +
 	"\b_projectB\v\n" +
-	"\t_location\"\xcc\x04\n" +
+	"\t_location\"\x89\x06\n" +
 	"\rBedrockConfig\x12\x1d\n" +
 	"\amodelId\x18\x01 \x01(\tH\x00R\amodelId\x88\x01\x01\x12%\n" +
 	"\vtoolModelId\x18\x02 \x01(\tH\x01R\vtoolModelId\x88\x01\x01\x12%\n" +
@@ -1150,7 +1174,11 @@ const file_console_proto_rawDesc = "" +
 	"\x0eawsAccessKeyId\x18\x06 \x01(\tH\x05R\x0eawsAccessKeyId\x88\x01\x01\x123\n" +
 	"\x12awsSecretAccessKey\x18\a \x01(\tH\x06R\x12awsSecretAccessKey\x88\x01\x01\x12 \n" +
 	"\vproxyModels\x18\b \x03(\tR\vproxyModels\x12F\n" +
-	"\vdeployments\x18\t \x03(\v2$.plrl.BedrockConfig.DeploymentsEntryR\vdeployments\x1a>\n" +
+	"\vdeployments\x18\t \x03(\v2$.plrl.BedrockConfig.DeploymentsEntryR\vdeployments\x12\x1d\n" +
+	"\abaseUrl\x18\n" +
+	" \x01(\tH\aR\abaseUrl\x88\x01\x01\x12D\n" +
+	"\rtokenExchange\x18\v \x01(\v2\x19.plrl.OpenAiTokenExchangeH\bR\rtokenExchange\x88\x01\x01\x12'\n" +
+	"\fenableStream\x18\f \x01(\bH\tR\fenableStream\x88\x01\x01\x1a>\n" +
 	"\x10DeploymentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
@@ -1161,7 +1189,11 @@ const file_console_proto_rawDesc = "" +
 	"\a_regionB\x13\n" +
 	"\x11_embeddingModelIdB\x11\n" +
 	"\x0f_awsAccessKeyIdB\x15\n" +
-	"\x13_awsSecretAccessKey\"\xf0\x03\n" +
+	"\x13_awsSecretAccessKeyB\n" +
+	"\n" +
+	"\b_baseUrlB\x10\n" +
+	"\x0e_tokenExchangeB\x0f\n" +
+	"\r_enableStream\"\xf0\x03\n" +
 	"\x11AzureOpenAiConfig\x12#\n" +
 	"\n" +
 	"apiVersion\x18\x01 \x01(\tH\x00R\n" +
@@ -1260,20 +1292,21 @@ var file_console_proto_depIdxs = []int32{
 	3,  // 5: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
 	0,  // 6: plrl.OpenAiConfig.method:type_name -> plrl.OpenAiMethod
 	15, // 7: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
-	16, // 8: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
-	12, // 9: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
-	1,  // 10: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	14, // 11: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
-	9,  // 12: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	13, // 13: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
-	2,  // 14: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	11, // 15: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
-	10, // 16: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	13, // [13:17] is the sub-list for method output_type
-	9,  // [9:13] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	3,  // 8: plrl.BedrockConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
+	16, // 9: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	12, // 10: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
+	1,  // 11: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
+	14, // 12: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
+	9,  // 13: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
+	13, // 14: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
+	2,  // 15: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	11, // 16: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
+	10, // 17: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	14, // [14:18] is the sub-list for method output_type
+	10, // [10:14] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_console_proto_init() }

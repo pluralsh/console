@@ -174,6 +174,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :bedrock_ai_attributes do
     field :model_id,              :string, description: @bedrock_model_id_doc
     field :tool_model_id,         :string, description: "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
+    field :base_url,              :string, description: "the base url to use when querying a Bedrock-compatible API"
     field :access_token,          :string, description: "the openai bedrock access token to use"
     field :region,                :string, description: "the aws region the model is hosted in"
     field :aws_access_key_id,     :string, description: "the aws access key id to use (DEPRECATED)"
@@ -181,6 +182,8 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_model,       :string, description: "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
     field :proxy_models,          list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments,           :json, description: @bedrock_deployments_doc
+    field :enable_stream,         :boolean, description: "whether to enable streaming responses"
+    field :token_exchange,        :openai_token_exchange_attributes, description: "OAuth2 client credentials against a token endpoint to obtain access tokens"
   end
 
   input_object :vertex_ai_attributes do
@@ -416,12 +419,15 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :bedrock_ai_settings do
     field :model_id,        :string, description: @bedrock_model_id_doc <> " Omit for Plural defaults."
     field :tool_model_id,   :string, description: "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
+    field :base_url,        :string, description: "the base url to use when querying a Bedrock-compatible API"
     field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)",
       resolve: fn b, _, _ -> {:ok, Map.get(b, :aws_access_key_id)} end
     field :region,          :string, description: "the aws region the model is hosted in"
     field :embedding_model, :string, description: "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
     field :proxy_models,    list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments,     :map, description: @bedrock_deployments_doc
+    field :enable_stream,   :boolean, description: "whether streaming responses are enabled"
+    field :token_exchange,  :openai_token_exchange, description: "OAuth2 client credentials configured for token endpoint exchange"
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"

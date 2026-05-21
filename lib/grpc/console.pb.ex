@@ -132,6 +132,9 @@ defmodule Plrl.BedrockConfig do
   field :awsSecretAccessKey, 7, proto3_optional: true, type: :string
   field :proxyModels, 8, repeated: true, type: :string
   field :deployments, 9, repeated: true, type: Plrl.BedrockConfig.DeploymentsEntry, map: true
+  field :baseUrl, 10, proto3_optional: true, type: :string
+  field :tokenExchange, 11, proto3_optional: true, type: Plrl.OpenAiTokenExchange
+  field :enableStream, 12, proto3_optional: true, type: :bool
 end
 
 defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do

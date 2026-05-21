@@ -235,6 +235,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      baseUrl:
+                        description: BaseUrl is the base url to use when querying
+                          a Bedrock-compatible API.
+                        type: string
                       deployments:
                         additionalProperties:
                           type: string
@@ -250,6 +254,11 @@ spec:
                         description: EmbeddingModel is the Bedrock model or inference
                           profile for embeddings. Same ID formats as modelId.
                         type: string
+                      enableStream:
+                        default: true
+                        description: EnableStream controls whether streaming responses
+                          are enabled.
+                        type: boolean
                       modelId:
                         description: |-
                           ModelID is the primary AWS Bedrock model or inference profile identifier.
@@ -267,6 +276,46 @@ spec:
                         description: Region is the AWS region the model is hosted
                           in
                         type: string
+                      tokenExchange:
+                        description: TokenExchange configures OAuth2 client credentials
+                          against a token endpoint to obtain access tokens.
+                        properties:
+                          clientId:
+                            description: ClientID is the OAuth2 client identifier.
+                            type: string
+                          clientSecretSecretRef:
+                            description: ClientSecretSecretRef is a reference to a
+                              Kubernetes secret key holding the OAuth2 client secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          enabled:
+                            description: Enabled turns token exchange on for obtaining
+                              access tokens via the configured token endpoint.
+                            type: boolean
+                          tokenUrl:
+                            description: TokenURL is the OAuth2 token endpoint URL.
+                            type: string
+                        type: object
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access

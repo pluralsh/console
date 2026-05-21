@@ -30,7 +30,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 	case schemas.Vertex:
 		return in.handleVertexKeys(aiConfig.GetVertexAi())
 	case schemas.Bedrock:
-		return in.handleBedrockKeys(aiConfig.GetBedrock())
+		return in.handleBedrockKeys(ctx, aiConfig.GetBedrock())
 	case schemas.Azure:
 		return in.handleAzureKeys(aiConfig.GetAzure())
 	default:
@@ -73,15 +73,10 @@ func (in *Account) handleOpenAIKeys(ctx context.Context, config *pb.OpenAiConfig
 // token (when tokenExchange is enabled in the Console gRPC schema), the static apiKey, or empty when
 // requests are authenticated by an upstream internal proxy (e.g. Plural Cloud) instead.
 func (in *Account) openAIAPIKey(ctx context.Context, config *pb.OpenAiConfig) (string, error) {
-	tx := config.GetTokenExchange()
-	if tx != nil && tx.GetEnabled() {
-		tokenURL := tx.GetTokenUrl()
-		clientID := tx.GetClientId()
-		clientSecret := tx.GetClientSecret()
-		if tokenURL == "" || clientID == "" || clientSecret == "" {
-			return "", fmt.Errorf("openai tokenExchange enabled but tokenUrl, clientId, and clientSecret must all be set")
-		}
-		return in.tokenCache.AccessToken(ctx, tokenURL, clientID, clientSecret)
+	if token, err := in.oauthAccessToken(ctx, config.GetTokenExchange(), "openai"); err != nil {
+		return "", err
+	} else if token != "" {
+		return token, nil
 	}
 	return config.GetApiKey(), nil
 }
@@ -146,7 +141,7 @@ func (in *Account) handleVertexKeys(config *pb.VertexAiConfig) ([]schemas.Key, e
 	}, nil
 }
 
-func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, error) {
+func (in *Account) handleBedrockKeys(ctx context.Context, config *pb.BedrockConfig) ([]schemas.Key, error) {
 	if config == nil {
 		return nil, fmt.Errorf("bedrock not configured")
 	}
@@ -155,10 +150,19 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 		zap.String("model", config.GetModelId()),
 		zap.String("tool_model", config.GetToolModelId()),
 		zap.String("embedding_model", config.GetEmbeddingModelId()),
+		zap.String("base_url", config.GetBaseUrl()),
 	)
+
+	apiKey, err := in.bedrockAPIKey(ctx, config)
+	if err != nil {
+		return nil, err
+	}
 
 	return []schemas.Key{
 		{
+			Value: schemas.EnvVar{
+				Val: apiKey,
+			},
 			Models:  in.toBedrockModels(config),
 			Aliases: schemas.KeyAliases(in.toBedrockDeployments(config)),
 			BedrockKeyConfig: &schemas.BedrockKeyConfig{
@@ -176,6 +180,17 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 			Weight:         1.0,
 		},
 	}, nil
+}
+
+// bedrockAPIKey returns the bearer credential for Bedrock-compatible APIs: OAuth2 token exchange,
+// a static access token, or empty when AWS IAM credentials on the key are used instead.
+func (in *Account) bedrockAPIKey(ctx context.Context, config *pb.BedrockConfig) (string, error) {
+	if token, err := in.oauthAccessToken(ctx, config.GetTokenExchange(), "bedrock"); err != nil {
+		return "", err
+	} else if token != "" {
+		return token, nil
+	}
+	return config.GetAccessToken(), nil
 }
 
 // toBedrockModels returns client-facing model IDs registered on the Bifrost key.

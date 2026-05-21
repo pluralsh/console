@@ -13,3 +13,8 @@ func bifrostNetworkBaseURL(baseURL string) string {
 	}
 	return baseURL
 }
+
+// bedrockNetworkBaseURL normalizes custom Bedrock-compatible proxy base URLs for Bifrost.
+func bedrockNetworkBaseURL(baseURL string) string {
+	return strings.TrimRight(strings.TrimSpace(baseURL), "/")
+}

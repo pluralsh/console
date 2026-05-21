@@ -18,6 +18,7 @@ func (in *AnthropicRouter) newMessagesRoute() RouteConfig {
 		RequestConverter:           in.messagesRequestConverter,
 		ResponsesResponseConverter: in.messagesResponseConverter,
 		ErrorConverter:             in.anthropicErrorConverter,
+		PreCallback:                disableProviderStreamingPreCallback(),
 		SendDoneMarker:             new(false),
 		StreamConfig: &StreamConfig{
 			ResponsesStreamResponseConverter: in.messagesStreamResponseConverter,
