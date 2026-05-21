@@ -18,13 +18,13 @@ func loadPrompt(path string) (string, error) {
 	return string(data), nil
 }
 
-func BuildCodexConfig(dir string, agents []AgentInput, mcps []MCPInput, providers []ModelProviderInput) (*CodexConfig, error) {
+func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput, providers []ModelProviderInput) (*CodexConfig, error) {
 	cfg := &CodexConfig{
 		Profiles:   make(map[string]*Profile),
 		MCPServers: make(map[string]*MCPServer),
 	}
 	cfg.Projects = map[string]*Project{
-		dir: {
+		repositoryDir: {
 			TrustLevel: "trusted",
 		},
 	}

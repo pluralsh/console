@@ -2,7 +2,6 @@ package v1
 
 import (
 	"fmt"
-	"os"
 	"path"
 
 	console "github.com/pluralsh/console/go/client"
@@ -53,11 +52,7 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 		templateFile = path.Join(templateFile, systemPromptWriteTemplateFile)
 	}
 
-	content, err := systemPromptTemplate(templateFile, &SystemPromptTemplateInput{
-		Mode:           in.Config.Run.Mode,
-		BrowserEnabled: in.Config.Run.BrowserEnabled,
-		DindEnabled:    in.Config.Run.DindEnabled,
-	})
+	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
 	if err != nil {
 		return err
 	}
@@ -84,16 +79,26 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 	}
 
 	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
-	inputFile := path.Join(systemPromptTemplateDir, systemPromptBabysitTemplateFile)
+	templateFile := path.Join(systemPromptTemplateDir, systemPromptBabysitTemplateFile)
 
-	src, err := os.ReadFile(inputFile)
+	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
 	if err != nil {
-		return fmt.Errorf("failed to read babysit system prompt template %q: %w", inputFile, err)
+		return fmt.Errorf("failed to render babysit system prompt template %q: %w", templateFile, err)
 	}
 
-	if err = helpers.File().Create(outputFile, string(src), 0644); err != nil {
+	if err = helpers.File().Create(outputFile, content, 0644); err != nil {
 		return fmt.Errorf("failed to write babysit system prompt %q: %w", outputFile, err)
 	}
 
 	return nil
+}
+
+func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
+	return &SystemPromptTemplateInput{
+		Mode:           in.Config.Run.Mode,
+		BrowserEnabled: in.Config.Run.BrowserEnabled,
+		DindEnabled:    in.Config.Run.DindEnabled,
+		WorkDir:        in.Config.WorkDir,
+		RepositoryDir:  in.Config.RepositoryDir,
+	}
 }

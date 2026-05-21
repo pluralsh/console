@@ -11,9 +11,17 @@ import (
 const (
 	statusCompleted = "completed"
 	statusFailed    = "failed"
+	jsonNullLiteral = "null"
 
 	// streamEventTypeThreadStarted is the Codex JSON stream event type that carries thread_id.
 	streamEventTypeThreadStarted = "thread.started"
+
+	streamEventTypeItemStarted   = "item.started"
+	streamEventTypeItemCompleted = "item.completed"
+	streamEventTypeTurnCompleted = "turn.completed"
+	streamEventTypeTurnFailed    = "turn.failed"
+
+	streamItemTypeDynamicToolCall = "dynamic_tool_call"
 )
 
 type Codex struct {
@@ -34,6 +42,10 @@ type Codex struct {
 	// threadID is captured from the "thread.started" event and forwarded to the API
 	// as the session identifier (analogous to session_id in Claude).
 	threadID string
+
+	// toolItems caches in-progress stream items (keyed by item.id) so tool arguments
+	// from item.started are available when item.completed is emitted.
+	toolItems map[string]*StreamItem
 
 	proxy bool
 
@@ -58,6 +70,14 @@ type StreamEvent struct {
 
 	// Usage is populated on "turn.completed" events and contains token usage statistics.
 	Usage *TurnUsage `json:"usage,omitempty"`
+
+	// Error is populated on "turn.failed" events.
+	Error *TurnError `json:"error,omitempty"`
+}
+
+// TurnError holds the error payload for a failed turn.
+type TurnError struct {
+	Message string `json:"message,omitempty"`
 }
 
 // TurnUsage holds token usage statistics emitted in the "turn.completed" event.
@@ -73,7 +93,7 @@ type StreamItem struct {
 	ID string `json:"id"`
 
 	// Type describes what kind of item this is: "reasoning", "agent_message", "todo_list",
-	// "command_execution", "mcp_tool_call", "file_change", etc.
+	// "command_execution", "dynamic_tool_call", "mcp_tool_call", "file_change", etc.
 	Type string `json:"type"`
 
 	// Text is populated for "reasoning" and "agent_message" items.
@@ -91,15 +111,42 @@ type StreamItem struct {
 	// Items is populated for "todo_list" items.
 	Items []TodoItem `json:"items,omitempty"`
 
-	// MCP tool call fields are populated for "mcp_tool_call" items.
+	// Tool fields are populated for "mcp_tool_call" and "dynamic_tool_call" items.
 	Server    string          `json:"server,omitempty"`
+	Namespace string          `json:"namespace,omitempty"`
 	Tool      string          `json:"tool,omitempty"`
 	Arguments json.RawMessage `json:"arguments,omitempty"`
-	Result    json.RawMessage `json:"result,omitempty"`
+	Result    *MCPToolResult  `json:"result,omitempty"`
 	Error     *MCPToolError   `json:"error,omitempty"`
+
+	// ContentItems is populated for "dynamic_tool_call" items.
+	ContentItems []DynamicToolContentItem `json:"content_items,omitempty"`
+	Success      *bool                    `json:"success,omitempty"`
+
+	// Query is populated for "web_search" items.
+	Query string `json:"query,omitempty"`
 
 	// Changes is populated for "file_change" items.
 	Changes []FileChange `json:"changes,omitempty"`
+}
+
+// DynamicToolContentItem is a single output block for a "dynamic_tool_call" item.
+type DynamicToolContentItem struct {
+	Type string `json:"type"`
+	Text string `json:"text,omitempty"`
+}
+
+// MCPToolResult is the result payload for a completed "mcp_tool_call" item.
+// See https://takopi.dev/reference/runners/codex/exec-json-cheatsheet/
+type MCPToolResult struct {
+	Content           []MCPContentBlock `json:"content,omitempty"`
+	StructuredContent json.RawMessage   `json:"structured_content,omitempty"`
+}
+
+// MCPContentBlock is a single MCP content block inside MCPToolResult.Content.
+type MCPContentBlock struct {
+	Type string `json:"type"`
+	Text string `json:"text,omitempty"`
 }
 
 // MCPToolError holds the error payload for a failed "mcp_tool_call" item.

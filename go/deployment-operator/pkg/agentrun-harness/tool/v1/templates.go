@@ -12,6 +12,8 @@ type SystemPromptTemplateInput struct {
 	Mode           console.AgentRunMode
 	BrowserEnabled bool
 	DindEnabled    bool
+	WorkDir        string
+	RepositoryDir  string
 }
 
 func systemPromptTemplate(templateFilePath string, input *SystemPromptTemplateInput) (content string, err error) {

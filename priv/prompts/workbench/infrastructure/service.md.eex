@@ -9,7 +9,7 @@ Here are the details for the Plural service **<%= @service.name %>** (namespace:
   namespace: @service.namespace,
   status: @service.status,
   protect: @service.protect,
-  errors: Enum.map(@service.errors, & %{message: &1.message})
+  errors: Enum.map(@service.errors || [], & %{message: &1.message})
 }, pretty: true) %>
 ```
 
