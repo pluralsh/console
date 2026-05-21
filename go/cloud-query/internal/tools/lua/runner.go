@@ -84,6 +84,10 @@ func newSandboxedState(ctx context.Context) *lua.LState {
 	lua.OpenTable(l)
 	lua.OpenMath(l)
 
+	// Remove filesystem-capable functions exposed by the base library.
+	l.SetGlobal("dofile", lua.LNil)
+	l.SetGlobal("loadfile", lua.LNil)
+
 	p := &luautils.Processor{}
 	luautils.RegisterEncodingModule(p, l)
 	luautils.RegisterUtilsModule(l)
