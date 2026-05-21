@@ -141,7 +141,7 @@ secrets:
 # image is used to configure the image for the console container as follows: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
   repository: console
-  tag: ~
+  tag: sha-57eff70
   imagePullPolicy: IfNotPresent
   pullPolicy: ~
 
