@@ -57,6 +57,22 @@ func (c PRComment) ReactableID() string {
 	return string(c.Type) + ":" + c.ID
 }
 
+// CICheckStatus values for CICheck.Status.
+const (
+	CICheckStatusQueued     = "queued"
+	CICheckStatusInProgress = "in_progress"
+	CICheckStatusCompleted  = "completed"
+)
+
+// CICheckConclusion values for CICheck.Conclusion.
+const (
+	CICheckConclusionSuccess   = "success"
+	CICheckConclusionFailure   = "failure"
+	CICheckConclusionNeutral   = "neutral"
+	CICheckConclusionCancelled = "cancelled"
+	CICheckConclusionSkipped   = "skipped"
+)
+
 // CICheck is a single CI check run or commit status.
 type CICheck struct {
 	Name       string
@@ -132,8 +148,12 @@ func (d *dispatchClient) clientFor(prURL string) (Client, error) {
 		return newGitHubClient(d.token, host), nil
 	case strings.Contains(host, "gitlab"):
 		return newGitLabClient(d.token, host), nil
+	case strings.Contains(host, "bitbucket"):
+		return newBitBucketClient(d.token, host), nil
+	case host == "dev.azure.com" || strings.HasSuffix(host, ".visualstudio.com"):
+		return newAzureDevOpsClient(d.token), nil
 	default:
-		return nil, fmt.Errorf("unsupported SCM host %q: only GitHub and GitLab are supported", host)
+		return nil, fmt.Errorf("unsupported SCM host %q: only GitHub, GitLab, Bitbucket and Azure DevOps are supported", host)
 	}
 }
 
