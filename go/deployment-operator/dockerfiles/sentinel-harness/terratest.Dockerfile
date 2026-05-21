@@ -16,14 +16,20 @@ ENV CGO_ENABLED=0 \
 # Create directories and fix permissions
 RUN mkdir -p /sentinel/.cache && chown -R 65532:65532 /sentinel && chown -R 65532:65532 /plural
 
+WORKDIR /workspace
+
+# Copy required local modules referenced by go.mod replace directives
+COPY /client /workspace/client
+COPY /polly /workspace/polly
+
+WORKDIR /workspace/deployment-operator/terratest
+
 # Copy test files
-COPY deployment-operator/terratest /sentinel/terratest
+COPY deployment-operator/terratest ./
 
 # Switch to the nonroot user
 USER 65532:65532
 
-WORKDIR /sentinel/terratest
-
 RUN go mod download
 
-ENTRYPOINT ["sentinel-harness", "--test-dir=/sentinel", "--output-dir=/plural"]
+ENTRYPOINT ["sentinel-harness", "--test-dir=/workspace/deployment-operator", "--output-dir=/plural"]
