@@ -235,6 +235,13 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 	}
 
 	bCtx := in.buildBabysitContext(ctx, agentRun, babysitClient)
+	if bCtx != nil {
+		if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+			klog.ErrorS(err, "failed to update agent run status during babysit")
+			return false
+		}
+	}
+
 	return callback(ctx, bCtx)
 }
 

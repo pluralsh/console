@@ -169,10 +169,11 @@ func (in *Codex) OnMessage(f func(message *console.AgentMessageAttributes)) {
 }
 
 func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
-	klog.V(log.LogLevelInfo).InfoS("starting codex babysit run", "agent_run_id", in.Config.Run.ID)
 	if bCtx == nil {
 		return false
 	}
+
+	klog.V(log.LogLevelExtended).InfoS("starting codex babysit run", "agent_run_id", in.Config.Run.ID)
 
 	agent := "autonomous"
 	args := []string{"exec", "--profile", agent, "--skip-git-repo-check", "--json", bCtx.Prompt}
