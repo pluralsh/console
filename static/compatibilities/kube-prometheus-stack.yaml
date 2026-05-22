@@ -5,6 +5,25 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 85.2.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Bumps kube-prometheus-stack chart dependencies with non-major
+        updates (via renovate PR #6932).', 'No other chart-level changes called out
+        in the provided notes; prior version 85.2.0 updated kubernetes-mixin digest
+        to 1a2f5ad (PR #6926).']
+    features: ['Updated bundled dependencies in kube-prometheus-stack (non-major),
+        which may include patch/minor updates to subcharts/components.']
+    breaking_changes: []
+  chart_version: 85.2.1
+  images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+    'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
 - version: 85.2.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
