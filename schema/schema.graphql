@@ -2141,6 +2141,9 @@ type ScmCreds {
   username: String!
 
   token: String!
+
+  "the exa key for the agent"
+  exaKey: String
 }
 
 type AgentPodReference {

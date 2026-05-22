@@ -7387,6 +7387,8 @@ type ScmCreds struct {
 	BaseURL  *string `json:"baseUrl,omitempty"`
 	Username string  `json:"username"`
 	Token    string  `json:"token"`
+	// the exa key for the agent
+	ExaKey *string `json:"exaKey,omitempty"`
 }
 
 type ScmWebhook struct {

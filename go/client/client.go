@@ -475,8 +475,9 @@ func (t *AgentTodoFragment) GetTitle() string {
 }
 
 type ScmCredentialFragment struct {
-	Token    string "json:\"token\" graphql:\"token\""
-	Username string "json:\"username\" graphql:\"username\""
+	Token    string  "json:\"token\" graphql:\"token\""
+	Username string  "json:\"username\" graphql:\"username\""
+	ExaKey   *string "json:\"exaKey,omitempty\" graphql:\"exaKey\""
 }
 
 func (t *ScmCredentialFragment) GetToken() string {
@@ -490,6 +491,12 @@ func (t *ScmCredentialFragment) GetUsername() string {
 		t = &ScmCredentialFragment{}
 	}
 	return t.Username
+}
+func (t *ScmCredentialFragment) GetExaKey() *string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.ExaKey
 }
 
 type PluralCredsFragment struct {
@@ -39135,8 +39142,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39285,8 +39293,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39444,8 +39453,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39650,8 +39660,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39794,8 +39805,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token

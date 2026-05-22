@@ -59,10 +59,10 @@ type Tool interface {
 	// OnMessage registers a callback called when a new message is received.
 	OnMessage(func(message *console.AgentMessageAttributes))
 
-	// AnalysisFollowUpRun re-invokes the provider CLI in ANALYZE mode with a
-	// corrective user prompt when the initial run exited without persisting
-	// analysis via updateAgentRunAnalysis. It must not write to ErrorChan;
-	// failures are returned to the caller.
+	// AnalysisFollowUpRun re-invokes the provider CLI with a corrective user
+	// prompt when the initial run exited without persisting analysis via
+	// updateAgentRunAnalysis. It must not write to ErrorChan; failures are
+	// returned to the caller.
 	AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error
 }
 

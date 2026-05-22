@@ -6,7 +6,6 @@ import (
 	"text/template"
 
 	console "github.com/pluralsh/console/go/client"
-	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 )
 
 //go:embed templates/opencode.json.gotmpl
@@ -44,9 +43,6 @@ type ConfigTemplateInput struct {
 
 	// DindEnabled is true when the agent run pod has Docker-in-Docker available.
 	DindEnabled bool
-
-	// ExaMcpConfigs holds additional external MCP server configurations.
-	ExaMcpConfigs []agentrunv1.ExaMcpServerConfig
 }
 
 func configTemplate(input *ConfigTemplateInput) (fileName, content string, err error) {

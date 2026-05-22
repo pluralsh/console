@@ -37,6 +37,10 @@ func ToID(id string) (ID, error) {
 		return ReactToCommentTool, nil
 	case string(DownloadManifestsTool):
 		return DownloadManifestsTool, nil
+	case string(WebSearchExaTool):
+		return WebSearchExaTool, nil
+	case string(WebFetchExaTool):
+		return WebFetchExaTool, nil
 	}
 
 	return "", fmt.Errorf("invalid tool ID: %s", id)
@@ -53,6 +57,8 @@ const (
 	GetCILogsTool         ID = "getCILogs"
 	ReactToCommentTool    ID = "reactToComment"
 	DownloadManifestsTool ID = "downloadServiceManifests"
+	WebSearchExaTool      ID = "web_search_exa"
+	WebFetchExaTool       ID = "web_fetch_exa"
 )
 
 // Tool is an MCP tool that can be installed on the MCP server

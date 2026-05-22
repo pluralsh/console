@@ -86,17 +86,33 @@ func TestRequeuePendingInitialRunError(t *testing.T) {
 	require.EqualError(t, got, "initial failed")
 }
 
-func TestEnsureAnalysisPersistedAfterInitialRun_skipsOnWriteMode(t *testing.T) {
+func TestAnalysisGateEnabled(t *testing.T) {
+	t.Parallel()
+	require.True(t, analysisGateEnabled(gqlclient.AgentRunModeAnalyze))
+	require.True(t, analysisGateEnabled(gqlclient.AgentRunModeWrite))
+}
+
+func TestEnsureAnalysisPersistedAfterInitialRun_runsInWriteMode(t *testing.T) {
 	t.Parallel()
 	m := mocks.NewClientMock(t)
+	full := &gqlclient.AgentRunFragment{
+		ID: "r1",
+		Analysis: &gqlclient.AgentAnalysisFragment{
+			Summary:  "sum",
+			Analysis: "details",
+		},
+	}
+	m.On("GetAgentRun", mock.Anything, "r1").Return(full, nil).Once()
+
 	in := &agentRunController{
 		consoleClient: m,
 		agentRun:      &agentrunv1.AgentRun{Mode: gqlclient.AgentRunModeWrite},
+		agentRunID:    "r1",
 		errChan:       make(chan error, 1),
 		tool:          &recordingTool{},
 	}
 	in.ensureAnalysisPersistedAfterInitialRun(context.Background())
-	m.AssertNotCalled(t, "GetAgentRun")
+	m.AssertExpectations(t)
 }
 
 func TestEnsureAnalysisPersistedAfterInitialRun_skipsWhenInitialErrQueued(t *testing.T) {
@@ -167,7 +183,7 @@ func TestEnsureAnalysisPersistedAfterInitialRun_exhaustsFollowUps(t *testing.T) 
 	in.ensureAnalysisPersistedAfterInitialRun(context.Background())
 	require.Equal(t, maxAnalysisFollowUps, rt.analysisFollowUps)
 	err := <-in.errChan
-	require.ErrorContains(t, err, "ANALYZE mode")
+	require.ErrorContains(t, err, "updateAgentRunAnalysis")
 	m.AssertExpectations(t)
 }
 

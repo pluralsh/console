@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -58,8 +57,12 @@ func (in *agentRunController) requeuePendingInitialRunError() bool {
 	return false
 }
 
+func analysisGateEnabled(mode gqlclient.AgentRunMode) bool {
+	return mode == gqlclient.AgentRunModeAnalyze || mode == gqlclient.AgentRunModeWrite
+}
+
 func (in *agentRunController) ensureAnalysisPersistedAfterInitialRun(ctx context.Context) {
-	if in.agentRun.Mode != gqlclient.AgentRunModeAnalyze {
+	if !analysisGateEnabled(in.agentRun.Mode) {
 		return
 	}
 	if ctx.Err() != nil {
@@ -92,7 +95,10 @@ func (in *agentRunController) ensureAnalysisPersistedAfterInitialRun(ctx context
 			return
 		}
 		if i == maxAnalysisFollowUps {
-			in.errChan <- errors.New("agent run finished in ANALYZE mode without calling updateAgentRunAnalysis after follow-up reprompts")
+			in.errChan <- fmt.Errorf(
+				"agent run finished in %s mode without calling updateAgentRunAnalysis after follow-up reprompts",
+				in.agentRun.Mode,
+			)
 			return
 		}
 

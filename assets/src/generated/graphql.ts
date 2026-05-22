@@ -12443,6 +12443,8 @@ export type ScmCreds = {
   __typename?: 'ScmCreds';
   /** the base url of the scm connection */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  /** the exa key for the agent */
+  exaKey?: Maybe<Scalars['String']['output']>;
   token: Scalars['String']['output'];
   /** the type of the scm connection */
   type?: Maybe<ScmType>;

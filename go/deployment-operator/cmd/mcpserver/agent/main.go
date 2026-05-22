@@ -14,7 +14,10 @@ import (
 
 	consoleclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent"
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/exa"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/scm"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
@@ -63,7 +66,7 @@ func run() error {
 	client := console.New(args.ConsoleApiURL(), *agentRun.PluralCreds.Token)
 	mcpServer := agent.NewServer(
 		client,
-		createServerOptions(client)...,
+		createServerOptions(client, agentRun)...,
 	)
 
 	err = environment.New(
@@ -162,17 +165,17 @@ func startMcpServer(server *agent.Server) <-chan error {
 	return errChan
 }
 
-func createServerOptions(client console.Client) []agent.Option {
+func createServerOptions(client console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
 	return append(
 		[]agent.Option{
 			agent.WithTools(),
 			agent.WithVersion(Version),
 		},
-		createServerTools(client)...,
+		createServerTools(client, agentRun)...,
 	)
 }
 
-func createServerTools(client console.Client) []agent.Option {
+func createServerTools(client console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
 	excludedTools, err := args.ExcludeTools()
 	if err != nil {
 		klog.Fatalf("could not parse excluded tools: %v", err)
@@ -189,6 +192,15 @@ func createServerTools(client console.Client) []agent.Option {
 		tool.GetCILogsTool:         tool.NewGetCILogs(),
 		tool.ReactToCommentTool:    tool.NewReactToComment(),
 		tool.DownloadManifestsTool: tool.NewDownloadManifests(client),
+	}
+
+	if exaConn, enabled := exa.ResolveConnection(helpers.GetPluralEnv(controller.EnvExaConnection, ""), agentRun.ScmCreds); enabled {
+		exaClient, err := exa.NewClient(exaConn)
+		if err != nil {
+			klog.Fatalf("could not configure exa client: %v", err)
+		}
+		toolMap[tool.WebSearchExaTool] = tool.NewWebSearchExa(exaClient)
+		toolMap[tool.WebFetchExaTool] = tool.NewWebFetchExa(exaClient)
 	}
 
 	for _, excluded := range excludedTools {

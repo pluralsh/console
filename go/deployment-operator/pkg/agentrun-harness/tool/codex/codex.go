@@ -173,19 +173,6 @@ func (in *Codex) writeCodexConfig() error {
 		return fmt.Errorf("unsupported agent run mode %q for codex", in.Config.Run.Mode)
 	}
 
-	for _, cfg := range in.Config.Run.Runtime.ExaMcpConfigs {
-		mcp := MCPInput{
-			Name:        cfg.Name,
-			Type:        "http",
-			URL:         cfg.Url,
-			TrustPolicy: "always",
-		}
-		if cfg.ApiKey != nil {
-			mcp.Headers = map[string]string{"x-api-key": *cfg.ApiKey}
-		}
-		mcps = append(mcps, mcp)
-	}
-
 	cfg, err := BuildCodexConfig(in.Config.RepositoryDir, agents, mcps, providers)
 	if err != nil {
 		return err
@@ -240,17 +227,17 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 // followUpPrompt. Errors are returned to the caller and must not be sent on
 // ErrorChan.
 func (in *Codex) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
-		return nil
-	}
-
 	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting codex", "prompt_len", len(followUpPrompt))
 
 	if in.onMessage != nil {
 		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
 	}
 
-	args := codexExecArgs(in.Config.RepositoryDir, "analysis", followUpPrompt)
+	profile := "analysis"
+	if in.Config.Run.Mode == console.AgentRunModeWrite {
+		profile = autonomousProfile
+	}
+	args := codexExecArgs(in.Config.RepositoryDir, profile, followUpPrompt)
 
 	in.executable = exec.NewExecutable(
 		"codex",

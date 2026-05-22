@@ -53,7 +53,6 @@ const (
 	defaultPodTerminationGracePeriodSeconds = int64(30)
 
 	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getPRState,getCILogs,reactToComment,downloadServiceManifests"
-	writeModeExcludedTools   = "updateAgentRunAnalysis"
 )
 
 var dindClientEnvs = []corev1.EnvVar{
@@ -495,11 +494,8 @@ func getMCPServerStartupProbe() *corev1.Probe {
 func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 	result := make([]corev1.EnvVar, 0, 2)
 
-	switch run.Spec.Mode {
-	case console.AgentRunModeAnalyze:
+	if run.Spec.Mode == console.AgentRunModeAnalyze {
 		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: analyzeModeExcludedTools})
-	case console.AgentRunModeWrite:
-		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: writeModeExcludedTools})
 	}
 
 	if runtime.Spec.Git != nil && runtime.Spec.Git.Proxy != nil {
