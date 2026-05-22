@@ -463,9 +463,10 @@ func getMCPServerStartupProbe() *corev1.Probe {
 func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 	result := make([]corev1.EnvVar, 0, 2)
 
-	if run.Spec.Mode == console.AgentRunModeAnalyze {
+	switch run.Spec.Mode {
+	case console.AgentRunModeAnalyze:
 		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: analyzeModeExcludedTools})
-	} else if run.Spec.Mode == console.AgentRunModeWrite {
+	case console.AgentRunModeWrite:
 		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: writeModeExcludedTools})
 	}
 

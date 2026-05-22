@@ -33,7 +33,7 @@ func (in *Server) Start() (<-chan error, error) {
 	go func() {
 		defer func() { _ = listener.Close() }()
 		klog.V(log.LogLevelDefault).InfoS("starting scm grpc api", "address", args.GRPCAddress())
-		serveErr := in.Server.Serve(listener)
+		serveErr := in.Serve(listener)
 
 		if serveErr != nil && !errors.Is(serveErr, grpc.ErrServerStopped) {
 			errChan <- serveErr

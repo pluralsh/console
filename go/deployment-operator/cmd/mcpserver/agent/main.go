@@ -107,7 +107,7 @@ func run() error {
 	shutdownErr := shutdownServers(shutdownCtx, grpcServer, mcpServer)
 	if serveErr != nil {
 		if shutdownErr != nil {
-			return fmt.Errorf("%v; shutdown error: %w", serveErr, shutdownErr)
+			return fmt.Errorf("%w; shutdown error: %w", serveErr, shutdownErr)
 		}
 		return serveErr
 	}

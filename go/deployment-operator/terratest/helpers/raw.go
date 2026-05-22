@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -44,7 +45,7 @@ func (in RawResourceList) decode(yaml string) (RawResourceList, error) {
 	for {
 		raw := make(map[string]any)
 		if err := decoder.Decode(&raw); err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 
