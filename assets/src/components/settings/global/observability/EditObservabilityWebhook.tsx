@@ -31,7 +31,7 @@ import {
   useUpsertObservabilityWebhookMutation,
 } from 'generated/graphql'
 
-import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { SecretInputWithGenerate } from 'components/utils/SecretInputWithGenerate'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
@@ -226,7 +226,8 @@ export function EditObservabilityWebhook({
               label="Secret"
               required
             >
-              <InputRevealer
+              <SecretInputWithGenerate
+                masked
                 defaultRevealed={false}
                 value={formState.secret}
                 onChange={(e) => updateFormState({ secret: e.target.value })}

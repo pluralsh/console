@@ -193,6 +193,7 @@ export function WorkbenchToolCreateOrEdit({
               <WorkbenchToolIcon
                 type={type}
                 provider={provider}
+                fullColor
               />
             }
             textValue={capitalize(provider || type)}

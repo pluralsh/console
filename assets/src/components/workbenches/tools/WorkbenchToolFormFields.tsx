@@ -87,6 +87,8 @@ export function WorkbenchToolFormFields({
       return render(type, LinearFormFields)
     case WorkbenchToolType.Slack:
       return render(type, SlackFormFields)
+    case WorkbenchToolType.Pagerduty:
+      return render(type, PagerdutyFormFields)
     case WorkbenchToolType.Teams:
       return render(type, TeamsFormFields)
     case WorkbenchToolType.Exa:
@@ -476,6 +478,22 @@ function SlackFormFields({
       revealer
       value={c.botToken ?? ''}
       onChange={(e) => set({ ...c, botToken: e.target.value })}
+    />
+  )
+}
+
+function PagerdutyFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Pagerduty>) {
+  return (
+    <InputField
+      label="API token"
+      hint="PagerDuty REST API key from Integrations → API Access Keys. Used as Token token=… for incident lookups."
+      required
+      revealer
+      value={c.apiToken ?? ''}
+      onChange={(e) => set({ ...c, apiToken: e.target.value })}
     />
   )
 }

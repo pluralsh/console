@@ -82,6 +82,12 @@ function teamsConfigurationIsComplete(
   return clientId.length > 0 && tenantId.length > 0 && clientSecret.length > 0
 }
 
+function pagerdutyConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['pagerduty'] | null | undefined
+): boolean {
+  return scmTokenIsSet(c?.apiToken)
+}
+
 function scmTokenIsSet(token: string | null | undefined): boolean {
   return (token ?? '').trim().length > 0
 }
@@ -194,6 +200,9 @@ export function WorkbenchToolForm({
       scmTokenIsSet(state.configuration?.azureDevops?.token)) &&
     (type !== WorkbenchToolType.Teams ||
       teamsConfigurationIsComplete(state.configuration?.teams)) &&
+    (type !== WorkbenchToolType.Pagerduty ||
+      !!tool?.id ||
+      pagerdutyConfigurationIsComplete(state.configuration?.pagerduty)) &&
     (type !== WorkbenchToolType.Sentry ||
       !!tool?.id ||
       sentryConfigurationIsComplete(state.configuration?.sentry))
@@ -540,6 +549,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
   [WorkbenchToolType.Slack]: () => ({ slack: { botToken: '' } }),
+  [WorkbenchToolType.Pagerduty]: () => ({ pagerduty: { apiToken: '' } }),
   [WorkbenchToolType.Teams]: (config) => {
     const { clientId, tenantId } = config?.teams ?? {}
     return {

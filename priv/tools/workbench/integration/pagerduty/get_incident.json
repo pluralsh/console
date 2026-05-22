@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "description": "Retrieve a PagerDuty incident by id or incident number via GET /incidents/{id}. Returns title, status, urgency, priority, service, assignments, and body.details when present.",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "PagerDuty incident id (e.g. PGR0VU2) or incident number."
+    }
+  },
+  "required": ["incident_id"],
+  "additionalProperties": false
+}

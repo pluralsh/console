@@ -13,7 +13,7 @@ import {
   VisualInspectionIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { SecretInputWithGenerate } from 'components/utils/SecretInputWithGenerate'
 import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -596,7 +596,8 @@ function CreateWebhookForm({
                     label="Secret"
                     required
                   >
-                    <InputRevealer
+                    <SecretInputWithGenerate
+                      masked
                       defaultRevealed={false}
                       value={formState.observabilitySecret}
                       onChange={(e) =>
@@ -663,7 +664,7 @@ function CreateWebhookForm({
                           : undefined
                     }
                   >
-                    <Input2
+                    <SecretInputWithGenerate
                       value={formState.issueSecret}
                       onChange={(e) =>
                         setFormState((prev) => ({

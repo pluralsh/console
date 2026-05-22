@@ -221,6 +221,7 @@ export function WorkbenchesIntegrations() {
                                     size={20}
                                     type={type}
                                     provider={provider}
+                                    fullColor
                                   />
                                 }
                               />

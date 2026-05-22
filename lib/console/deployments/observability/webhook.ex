@@ -37,13 +37,13 @@ defmodule Console.Deployments.Observability.Webhook do
     |> ok()
   end
 
-  def payload(%ObservabilityWebhook{type: :pagerduty} = hook, %{"event" => event = %{"data" => data}} = payload) do
+  def payload(%ObservabilityWebhook{type: :pagerduty} = hook, %{"event" => %{"data" => data} = event} = payload) do
     # Create structured alert
     # Note that pagerduty doesn't have annotations like grafana does, so just use an empty map
     # Also, pagerduty has a single event per payload, so unlike grafana we don't iterate over messages
     Map.merge(%{
       type: :pagerduty,
-      fingerprint: event["id"],
+      fingerprint: data["id"] || event["id"],
       annotations: %{},
       state: Pagerduty.state(payload),
       severity: Pagerduty.severity(payload),
@@ -57,7 +57,6 @@ defmodule Console.Deployments.Observability.Webhook do
     |> workbench_association(hook)
     |> listify()
     |> ok()
-    |> IO.inspect(label: "pagerduty payload")
   end
 
   def payload(%ObservabilityWebhook{type: :sentry} = hook, %{"data" => payload}) do

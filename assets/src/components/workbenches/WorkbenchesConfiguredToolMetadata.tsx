@@ -27,6 +27,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
   [WorkbenchToolType.Slack]: extractSlackMetadata,
+  [WorkbenchToolType.Pagerduty]: extractPagerdutyMetadata,
   [WorkbenchToolType.Teams]: extractTeamsMetadata,
   [WorkbenchToolType.Mcp]: () => [],
   [WorkbenchToolType.Sentry]: extractSentryMetadata,
@@ -181,6 +182,12 @@ function extractSlackMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.slack?.url }]
+}
+
+function extractPagerdutyMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.pagerduty?.url }]
 }
 
 function extractTeamsMetadata(

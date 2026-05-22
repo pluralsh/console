@@ -10479,6 +10479,8 @@ type WorkbenchToolConfiguration struct {
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// slack connection (no secrets)
 	Slack *WorkbenchToolSlackConnection `json:"slack,omitempty"`
+	// pagerduty connection (no secrets)
+	Pagerduty *WorkbenchToolPagerdutyConnection `json:"pagerduty,omitempty"`
 	// microsoft teams / graph connection (no secrets)
 	Teams *WorkbenchToolTeamsConnection `json:"teams,omitempty"`
 	// atlassian connection (no secrets)
@@ -10526,6 +10528,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// slack connection (integration)
 	Slack *WorkbenchToolSlackConnectionAttributes `json:"slack,omitempty"`
+	// pagerduty connection (integration)
+	Pagerduty *WorkbenchToolPagerdutyConnectionAttributes `json:"pagerduty,omitempty"`
 	// microsoft teams / graph connection (integration)
 	Teams *WorkbenchToolTeamsConnectionAttributes `json:"teams,omitempty"`
 	// atlassian/jira connection (ticketing)
@@ -10732,6 +10736,16 @@ type WorkbenchToolLokiConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolPagerdutyConnection struct {
+	// PagerDuty REST API base URL (API token never exposed)
+	URL string `json:"url"`
+}
+
+type WorkbenchToolPagerdutyConnectionAttributes struct {
+	// pagerduty REST API key (Token token=...)
+	APIToken *string `json:"apiToken,omitempty"`
 }
 
 type WorkbenchToolPrometheusConnection struct {
@@ -17314,6 +17328,7 @@ const (
 	WorkbenchToolTypeBitbucket           WorkbenchToolType = "BITBUCKET"
 	WorkbenchToolTypeBitbucketDatacenter WorkbenchToolType = "BITBUCKET_DATACENTER"
 	WorkbenchToolTypeAzureDevops         WorkbenchToolType = "AZURE_DEVOPS"
+	WorkbenchToolTypePagerduty           WorkbenchToolType = "PAGERDUTY"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17341,11 +17356,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeBitbucket,
 	WorkbenchToolTypeBitbucketDatacenter,
 	WorkbenchToolTypeAzureDevops,
+	WorkbenchToolTypePagerduty,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty:
 		return true
 	}
 	return false

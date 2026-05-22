@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   alias Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Tools, as: BitbucketDatacenterTools
   alias Console.AI.Tools.Workbench.Integration.AzureDevops.Tools, as: AzureDevopsTools
   alias Console.AI.Tools.Workbench.Integration.Teams.Tools, as: TeamsTools
+  alias Console.AI.Tools.Workbench.Integration.Pagerduty.Tools, as: PagerdutyTools
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -49,7 +50,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     ])
   end
 
-  @allowed_tools ~w(http slack github gitlab bitbucket bitbucket_datacenter teams azure_devops)a
+  @allowed_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops)a
 
   defp workbench_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
@@ -75,6 +76,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
       %WorkbenchTool{tool: :bitbucket_datacenter} = tool -> BitbucketDatacenterTools.expand(tool)
       %WorkbenchTool{tool: :azure_devops} = tool -> AzureDevopsTools.expand(tool)
       %WorkbenchTool{tool: :teams} = tool -> TeamsTools.expand(tool)
+      %WorkbenchTool{tool: :pagerduty} = tool -> PagerdutyTools.expand(tool)
     end)
   end
 

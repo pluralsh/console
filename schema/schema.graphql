@@ -2341,6 +2341,7 @@ enum WorkbenchToolType {
   BITBUCKET
   BITBUCKET_DATACENTER
   AZURE_DEVOPS
+  PAGERDUTY
 }
 
 enum WorkbenchToolCategory {
@@ -2717,6 +2718,9 @@ input WorkbenchToolConfigurationAttributes {
   "slack connection (integration)"
   slack: WorkbenchToolSlackConnectionAttributes
 
+  "pagerduty connection (integration)"
+  pagerduty: WorkbenchToolPagerdutyConnectionAttributes
+
   "microsoft teams \/ graph connection (integration)"
   teams: WorkbenchToolTeamsConnectionAttributes
 
@@ -2922,6 +2926,11 @@ input WorkbenchToolLinearConnectionAttributes {
 input WorkbenchToolSlackConnectionAttributes {
   "slack bot user OAuth token (xoxb-...) for MCP"
   botToken: String
+}
+
+input WorkbenchToolPagerdutyConnectionAttributes {
+  "pagerduty REST API key (Token token=...)"
+  apiToken: String
 }
 
 input WorkbenchToolTeamsConnectionAttributes {
@@ -3868,6 +3877,9 @@ type WorkbenchToolConfiguration {
   "slack connection (no secrets)"
   slack: WorkbenchToolSlackConnection
 
+  "pagerduty connection (no secrets)"
+  pagerduty: WorkbenchToolPagerdutyConnection
+
   "microsoft teams \/ graph connection (no secrets)"
   teams: WorkbenchToolTeamsConnection
 
@@ -4012,6 +4024,11 @@ type WorkbenchToolLinearConnection {
 
 type WorkbenchToolSlackConnection {
   "Slack hosted MCP endpoint (credentials never exposed)"
+  url: String!
+}
+
+type WorkbenchToolPagerdutyConnection {
+  "PagerDuty REST API base URL (API token never exposed)"
   url: String!
 }
 

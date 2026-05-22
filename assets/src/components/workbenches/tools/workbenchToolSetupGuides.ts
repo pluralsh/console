@@ -12,6 +12,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Datadog]: '/setup-guides/tools/datadog.md',
   [WorkbenchToolType.Linear]: '/setup-guides/tools/linear.md',
   [WorkbenchToolType.Slack]: '/setup-guides/tools/slack.md',
+  [WorkbenchToolType.Pagerduty]: '/setup-guides/tools/pagerduty.md',
   [WorkbenchToolType.Atlassian]: '/setup-guides/tools/atlassian.md',
   [WorkbenchToolType.Exa]: '/setup-guides/tools/exa.md',
   [WorkbenchToolType.Github]: '/setup-guides/tools/github.md',
@@ -44,6 +45,8 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://docs.datadoghq.com/account_management/api-app-keys/',
   [WorkbenchToolType.Linear]: 'https://linear.app/docs/api-and-webhooks',
   [WorkbenchToolType.Slack]: 'https://api.slack.com/authentication/oauth-v2',
+  [WorkbenchToolType.Pagerduty]:
+    'https://developer.pagerduty.com/docs/rest-api-v2/authentication/',
   [WorkbenchToolType.Atlassian]:
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',

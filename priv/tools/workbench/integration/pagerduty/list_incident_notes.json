@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "description": "List notes on a PagerDuty incident via GET /incidents/{id}/notes.",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "PagerDuty incident id or incident number."
+    }
+  },
+  "required": ["incident_id"],
+  "additionalProperties": false
+}
