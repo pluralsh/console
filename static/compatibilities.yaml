@@ -1230,12 +1230,12 @@ addons:
   release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
   helm_repository_url: https://aws.github.io/eks-charts
   versions:
-  - version: 1.21.1
+  - version: 1.21.2
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.21.1
+    chart_version: 1.21.2
   - version: 1.21.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -7118,6 +7118,7 @@ addons:
     summary: null
     chart_version: 1.30.0
     images: ['registry.istio.io/release/pilot:1.30.0']
+    eolAt: '2026-11-30'
   - version: 1.29.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -7813,6 +7814,25 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 85.2.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Bumps kube-prometheus-stack chart dependencies with non-major
+          updates (via renovate PR #6932).', 'No other chart-level changes called
+          out in the provided notes; prior version 85.2.0 updated kubernetes-mixin
+          digest to 1a2f5ad (PR #6926).']
+      features: ['Updated bundled dependencies in kube-prometheus-stack (non-major),
+          which may include patch/minor updates to subcharts/components.']
+      breaking_changes: []
+    chart_version: 85.2.1
+    images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+      'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.90.1',
+      'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
   - version: 85.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -13054,7 +13074,7 @@ addons:
           the Helm chart, update the manifest URLs from `/v3.4.1/` to `/v3.4.2/`.']
       features: []
       breaking_changes: []
-    chart_version: 9.5.14
+    chart_version: 9.5.15
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.2']
   - version: 3.4.1
@@ -13696,7 +13716,15 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details are included in the provided v3.2.0 release notes
+          excerpt beyond links to the blog/CHANGELOG; treat this as a routine minor
+          upgrade pending review of the full CHANGELOG.]
+      breaking_changes: ["No breaking changes are listed in the provided notes; however,\
+          \ v3.2.0 points to the upstream upgrading guide\u2014review it for any required\
+          \ manifest/CRD changes before applying the new install.yaml/Helm chart."]
     chart_version: 0.8.2
     images: ['quay.io/argoproj/argocli:v3.2.0', 'quay.io/argoproj/workflow-controller:v3.2.0']
   - version: 3.1.5
@@ -16616,6 +16644,29 @@ addons:
   helm_repository_url: oci://ghcr.io/kserve/charts/kserve
   chart_name: kserve
   versions:
+  - version: 0.17.1
+    kube: ['1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm / values changes for 0.17.0 \u2192 0.17.1\n- No new user-facing\
+        \ values are called out in the 0.17.1 release notes.\n- 0.17.1 is primarily\
+        \ a **packaging/installation-script and Helm chart fix** release (cherry-picks).\n\
+        - Action for upgrade: **re-run a `helm diff`** against your current rendered\
+        \ manifests because the fix may change templates/packaging even if values\
+        \ stay the same.\n\n## Reminder from 0.17.0\n- 0.17.0 introduced **major Helm\
+        \ chart restructuring**. If you upgraded to 0.17.0 already, 0.17.1 does not\
+        \ add another restructuring step; if you are coming from \u22640.16.x, follow\
+        \ the 0.16 \u2192 0.17 upgrade guide first."
+      chart_updates: ['0.17.1 includes a cherry-picked fix for Helm chart packaging/templates
+          (PR #5556). Expect small rendered-manifest differences rather than new features.',
+        '0.17.1 re-includes/ships the 0.17.0 installation scripts as part of the release
+          artifacts (PR #5257), addressing missing/incorrect install assets in 0.17.0.',
+        'Version bump only beyond the above fixes (PR #5559).']
+      features: []
+      breaking_changes: []
+    chart_version: v0.17.1
+    images: []
   - version: 0.17.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []

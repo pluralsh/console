@@ -4,6 +4,29 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
+- version: 0.17.1
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes for 0.17.0 \u2192 0.17.1\n- No new user-facing\
+      \ values are called out in the 0.17.1 release notes.\n- 0.17.1 is primarily\
+      \ a **packaging/installation-script and Helm chart fix** release (cherry-picks).\n\
+      - Action for upgrade: **re-run a `helm diff`** against your current rendered\
+      \ manifests because the fix may change templates/packaging even if values stay\
+      \ the same.\n\n## Reminder from 0.17.0\n- 0.17.0 introduced **major Helm chart\
+      \ restructuring**. If you upgraded to 0.17.0 already, 0.17.1 does not add another\
+      \ restructuring step; if you are coming from \u22640.16.x, follow the 0.16 \u2192\
+      \ 0.17 upgrade guide first."
+    chart_updates: ['0.17.1 includes a cherry-picked fix for Helm chart packaging/templates
+        (PR #5556). Expect small rendered-manifest differences rather than new features.',
+      '0.17.1 re-includes/ships the 0.17.0 installation scripts as part of the release
+        artifacts (PR #5257), addressing missing/incorrect install assets in 0.17.0.',
+      'Version bump only beyond the above fixes (PR #5559).']
+    features: []
+    breaking_changes: []
+  chart_version: v0.17.1
+  images: []
 - version: 0.17.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
