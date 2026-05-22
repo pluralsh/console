@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
-	"github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -15,9 +14,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/console/go/deployment-operator/dockerfiles/sentinel-harness/terratest/dns"
-	"github.com/pluralsh/console/go/deployment-operator/dockerfiles/sentinel-harness/terratest/helpers"
-	"github.com/pluralsh/console/go/deployment-operator/dockerfiles/sentinel-harness/terratest/types"
+	"github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/terratest/dns"
+	"github.com/pluralsh/console/go/deployment-operator/terratest/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/terratest/types"
 )
 
 const filePathEnvVar = "TEST_CASES_FILE_PATH"

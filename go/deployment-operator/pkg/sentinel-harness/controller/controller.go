@@ -163,7 +163,6 @@ func buildGotestsumRunArgs(outputDir, junitPath, timeout string, integrationTest
 	}
 
 	goTestArgs := []string{
-		"--test.v",
 		"--test.timeout", timeout,
 	}
 

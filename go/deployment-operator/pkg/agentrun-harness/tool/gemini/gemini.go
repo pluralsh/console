@@ -8,8 +8,9 @@ import (
 	"path"
 	"strings"
 
-	console "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
+
+	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini/events"
@@ -227,15 +228,12 @@ func (in *Gemini) args(prompt string) []string {
 	}
 }
 
-func (in *Gemini) Configure(consoleURL, consoleToken, deployToken string) error {
+func (in *Gemini) Configure(_, _ string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeGemini); err != nil {
 		return err
 	}
 
 	input := &ConfigTemplateInput{
-		ConsoleURL:        consoleURL,
-		ConsoleToken:      consoleToken,
-		DeployToken:       deployToken,
 		RepositoryDir:     in.Config.RepositoryDir,
 		AgentRunID:        in.Config.Run.ID,
 		AgentRunMode:      in.Config.Run.Mode,

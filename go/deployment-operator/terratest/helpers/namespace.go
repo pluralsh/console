@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
-	"github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtimerrors "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pluralsh/console/go/client"
 )
 
 type NamespaceOptions struct {
@@ -110,6 +111,6 @@ func NewNamespace(name string, options ...NamespaceOption) Resource[corev1.Names
 		},
 	}
 
-	resource.baseResource.setSelf(resource)
+	resource.setSelf(resource)
 	return resource
 }

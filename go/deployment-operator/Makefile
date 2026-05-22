@@ -27,12 +27,13 @@ PLRL_GEMINI_MODEL := $(if $(PLRL_GEMINI_MODEL),$(PLRL_GEMINI_MODEL),"")
 PLRL_GEMINI_API_KEY := $(if $(PLRL_GEMINI_API_KEY),$(PLRL_GEMINI_API_KEY),"")
 PLRL_CODEX_MODEL := $(if $(PLRL_CODEX_MODEL),$(PLRL_CODEX_MODEL),"")
 PLRL_CODEX_API_KEY := $(if $(PLRL_CODEX_API_KEY),$(PLRL_CODEX_API_KEY),"")
+PLRL_AGENT_PROVIDER := $(if $(PLRL_AGENT_PROVIDER),$(PLRL_AGENT_PROVIDER),opencode)
 GIT_ACCESS_TOKEN := $(if $(GIT_ACCESS_TOKEN),$(GIT_ACCESS_TOKEN),"")
 
 VELERO_CHART_VERSION := 5.2.2 # It should be kept in sync with Velero chart version from console/charts/velero
 VELERO_CHART_URL := https://github.com/vmware-tanzu/helm-charts/releases/download/velero-$(VELERO_CHART_VERSION)/velero-$(VELERO_CHART_VERSION).tgz
 
-ENVTEST_K8S_VERSION := 1.28.3
+ENVTEST_K8S_VERSION := 1.35.0
 CONTROLLER_GEN_PATHS ?= ./api/...;./internal/...;./pkg/...
 
 PRE = --ensure
@@ -70,6 +71,20 @@ velero-crds: ## download velero CRDs
 crd-docs: TOOL = crd-ref-docs
 crd-docs: --tool ##generate docs from the CRDs
 	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=$(CRD_REF_DOCS_CONFIG)
+
+.PHONY: scm-grpc
+scm-grpc: TOOL = protoc-gen-go protoc-gen-go-grpc
+scm-grpc: --tool install-protoc ## regenerate SCM gRPC protobuf/go bindings
+	rm -f internal/proto/scm/*.pb.go
+	$(PROTOC) \
+		--plugin=protoc-gen-go=$(BINARIES_DIR)/protoc-gen-go \
+		--plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
+		--go_out=. \
+		--go_opt=module=github.com/pluralsh/console/go/deployment-operator \
+		--go-grpc_out=. \
+		--go-grpc_opt=module=github.com/pluralsh/console/go/deployment-operator \
+		--proto_path=. \
+		internal/proto/scm/scm.proto
 
 ##@ Run
 
@@ -181,6 +196,54 @@ agent-mcpserver-run: agent-mcpserver ## run mcp server locally
 	PLRL_AGENT_RUN_ID=${PLRL_AGENT_RUN_ID} \
 	./bin/agent-mcpserver
 
+.PHONY: agent-up
+agent-up: agent-base-build ## run bootstrap + harness + mcpserver via docker compose
+	@cd dockerfiles/mcpserver/agent && \
+		PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose up --no-build --force-recreate -d && \
+		HARNESS_ID=$$(docker compose ps -q harness) && \
+		if [ -z "$$HARNESS_ID" ]; then \
+			echo "harness container was not created"; \
+			docker compose stop; \
+			exit 1; \
+		fi; \
+		CODE=$$(docker wait $$HARNESS_ID); \
+		STATUS=$$?; \
+		docker compose stop; \
+		if [ $$STATUS -ne 0 ]; then \
+			exit $$STATUS; \
+		fi; \
+		exit $$CODE
+
+.PHONY: agent-up-opencode
+agent-up-opencode: ## run local agent pod simulation with opencode harness image
+	@$(MAKE) agent-up PLRL_AGENT_PROVIDER=opencode
+
+.PHONY: agent-up-codex
+agent-up-codex: ## run local agent pod simulation with codex harness image
+	@$(MAKE) agent-up PLRL_AGENT_PROVIDER=codex
+
+.PHONY: agent-up-claude
+agent-up-claude: ## run local agent pod simulation with claude harness image
+	@$(MAKE) agent-up PLRL_AGENT_PROVIDER=claude
+
+.PHONY: agent-up-gemini
+agent-up-gemini: ## run local agent pod simulation with gemini harness image
+	@$(MAKE) agent-up PLRL_AGENT_PROVIDER=gemini
+
+.PHONY: agent-base-build
+agent-base-build: agent-clean ## build base agent image
+	@cd dockerfiles/mcpserver/agent && \
+    PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose build shared-permissions && \
+    PLRL_AGENT_PROVIDER=$(PLRL_AGENT_PROVIDER) docker compose build harness
+
+.PHONY: agent-down
+agent-down: ## stop local agent pod simulation (keeps containers and logs)
+	cd dockerfiles/mcpserver/agent && docker compose stop
+
+.PHONY: agent-clean
+agent-clean: ## remove local agent pod simulation containers, networks and volumes
+	cd dockerfiles/mcpserver/agent && docker compose down -v
+
 .PHONY: terraform-mcpserver-run
 terraform-mcpserver-run: terraform-mcpserver ## run mcp server locally
 	PLURAL_ACCESS_TOKEN=${PLURAL_ACCESS_TOKEN} \
@@ -200,7 +263,7 @@ sentinel-run: docker-build-sentinel-harness
 		--console-url=${PLRL_CONSOLE_URL}/ext/gql \
 		--console-token=${PLRL_DEPLOY_TOKEN} \
 		--sentinel-run-id=${SENTINEL_RUN_ID} \
-		--test-dir=/sentinel \
+		--test-dir=/workspace/deployment-operator \
 		--output-dir=/plural \
 		--v=3; \
 	rm -f $$KUBECONFIG_TMP

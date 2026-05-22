@@ -1,7 +1,7 @@
 FROM golang:1.26.3-alpine AS builder
 
 ARG TARGETARCH
-ARG TARGETOS  
+ARG TARGETOS
 ARG VERSION
 
 WORKDIR /workspace
@@ -31,15 +31,25 @@ RUN CGO_ENABLED=0 \
     -o /agent-harness \
     cmd/agent-harness/main.go
 
-# Build the MCP server binary
+# Build agent MCP server binary
 RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
     -trimpath \
     -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent.Version=${VERSION}" \
-    -o /mcpserver \
+    -o /agent-mcpserver \
     cmd/mcpserver/agent/main.go
+
+# Build agent bootstrap binary
+RUN CGO_ENABLED=0 \
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH} \
+    go build \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o /agent-bootstrap \
+    cmd/agent-bootstrap/main.go
 
 FROM debian:13-slim
 
@@ -71,7 +81,8 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
 
     # Copy binaries before switching user to ensure proper permissions
 COPY --from=builder /agent-harness /agent-harness
-COPY --from=builder /mcpserver /usr/local/bin/mcpserver
+COPY --from=builder /agent-mcpserver /agent-mcpserver
+COPY --from=builder /agent-bootstrap /agent-bootstrap
 
 # Create the nonroot user with UID 65532
 RUN groupadd -g 65532 nonroot && \
@@ -86,14 +97,11 @@ RUN mkdir -p /plural/.opencode && \
     mkdir -p /plural/.gemini && \
     mkdir -p /plural/.codex
 
-RUN printf "#!/bin/sh\necho \${GIT_ACCESS_TOKEN}" > /plural/.git-askpass && \
-    chmod +x /plural/.git-askpass && \
-    git config --global core.askPass /plural/.git-askpass && \
-    chown -R 65532:65532 /plural
+RUN chown -R 65532:65532 /plural
 
 # Switch to the nonroot user
 USER 65532:65532
 
 WORKDIR /plural
 
-ENTRYPOINT ["/bin/sh", "-c", "GIT_ASKPASS=/plural/.git-askpass /agent-harness --working-dir=/plural \"$@\"", "--"]
+ENTRYPOINT ["/agent-harness", "--working-dir=/plural"]

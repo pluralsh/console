@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -24,6 +22,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
@@ -66,7 +67,8 @@ const (
 
 	EnvGitProxy = "PLRL_GIT_PROXY"
 
-	EnvExaMcpServers = "PLRL_EXA_MCP_SERVERS"
+	EnvExaMcpServers   = "PLRL_EXA_MCP_SERVERS"
+	EnvMcpExcludeTools = "PLRL_EXCLUDE_TOOLS"
 )
 
 var (

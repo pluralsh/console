@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"os"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/polly/algorithms"
 )
 
 const (
@@ -48,8 +48,16 @@ const (
 	bootstrapScriptConfigMapKey = "bootstrap.sh"
 
 	gitSigningKeyVolumeName = "git-signing-key"
-	gitSigningKeyMountPath  = common.GitSigningKeyMountPath
 	gitSigningKeySecretKey  = "git-signing.key"
+
+	agentBootstrapContainerName = "agent-bootstrap"
+	mcpServerContainerName      = "mcpserver"
+
+	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
+	defaultPodTerminationGracePeriodSeconds = int64(30)
+
+	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getPRState,getCILogs,reactToComment,downloadServiceManifests"
+	writeModeExcludedTools   = "updateAgentRunAnalysis"
 )
 
 var dindClientEnvs = []corev1.EnvVar{
@@ -77,7 +85,7 @@ var (
 	// Check .github/workflows/deployment-operator-cd-agent-harness.yaml to see images being published.
 	defaultContainerVersions = map[console.AgentRuntimeType]string{
 		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.72",
-		console.AgentRuntimeTypeGemini:   "%s-gemini-0.6.1",
+		console.AgentRuntimeTypeGemini:   "%s-gemini-0.36.0",
 		console.AgentRuntimeTypeOpencode: "%s-opencode-1.14.50",
 		console.AgentRuntimeTypeCodex:    "%s-codex-0.104.0",
 	}
@@ -116,7 +124,12 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 
 	pod.Spec.Containers = ensureDefaultContainer(pod.Spec.Containers, run, runtime)
 	pod.Spec.RestartPolicy = corev1.RestartPolicyNever
+	if pod.Spec.TerminationGracePeriodSeconds == nil {
+		pod.Spec.TerminationGracePeriodSeconds = lo.ToPtr(defaultPodTerminationGracePeriodSeconds)
+	}
 	pod.Spec.Volumes = ensureDefaultVolumes(pod.Spec.Volumes)
+	enableAgentBootstrap(run, runtime, pod)
+	enableMCPServer(run, runtime, pod)
 
 	// Ensure automountServiceAccountToken is disabled by default for security
 	if pod.Spec.AutomountServiceAccountToken == nil {
@@ -238,7 +251,7 @@ func getDefaultContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime)
 	return corev1.Container{
 		Name:            defaultContainer,
 		Image:           getDefaultContainerImage("", runtime.Spec.Type),
-		VolumeMounts:    []corev1.VolumeMount{defaultTmpContainerVolumeMount},
+		VolumeMounts:    ensureDefaultVolumeMounts([]corev1.VolumeMount{defaultTmpContainerVolumeMount}),
 		SecurityContext: ensureDefaultContainerSecurityContext(nil),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
 		Env:             getDefaultEnvVars(runtime),
@@ -320,6 +333,190 @@ func ensureDefaultPodSecurityContextWithDind(psc *corev1.PodSecurityContext) *co
 	return &corev1.PodSecurityContext{
 		FSGroup: lo.ToPtr(dindRootlessUID),
 	}
+}
+
+func enableAgentBootstrap(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
+	defaultImage := getPodDefaultContainerImage(pod, run, runtime)
+	index := algorithms.Index(pod.Spec.InitContainers, func(container corev1.Container) bool {
+		return container.Name == agentBootstrapContainerName
+	})
+
+	if index == -1 {
+		pod.Spec.InitContainers = append([]corev1.Container{getAgentBootstrapContainer(run, runtime, defaultImage)}, pod.Spec.InitContainers...)
+		return
+	}
+
+	if pod.Spec.InitContainers[index].Image == "" {
+		pod.Spec.InitContainers[index].Image = defaultImage
+	}
+
+	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext)
+	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
+	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
+	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
+
+	if len(pod.Spec.InitContainers[index].Command) == 0 {
+		pod.Spec.InitContainers[index].Command = []string{"/agent-bootstrap"}
+	}
+	if len(pod.Spec.InitContainers[index].Args) == 0 {
+		pod.Spec.InitContainers[index].Args = []string{"--working-dir", common.AgentRunSharedWorkDir}
+	}
+}
+
+func getAgentBootstrapContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, image string) corev1.Container {
+	return corev1.Container{
+		Name:            agentBootstrapContainerName,
+		Image:           image,
+		SecurityContext: ensureDefaultContainerSecurityContext(nil),
+		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
+		Env:             getMCPServerEnvVars(run, runtime),
+		Command:         []string{"/agent-bootstrap"},
+		Args:            []string{"--working-dir", common.AgentRunSharedWorkDir},
+		VolumeMounts:    ensureMCPServerVolumeMounts(nil, runtime),
+	}
+}
+
+func enableMCPServer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
+	defaultImage := getPodDefaultContainerImage(pod, run, runtime)
+	index := algorithms.Index(pod.Spec.InitContainers, func(container corev1.Container) bool {
+		return container.Name == mcpServerContainerName
+	})
+
+	if index == -1 {
+		pod.Spec.InitContainers = append(pod.Spec.InitContainers, getMCPServerContainer(run, runtime, defaultImage))
+		return
+	}
+
+	if pod.Spec.InitContainers[index].Image == "" {
+		pod.Spec.InitContainers[index].Image = defaultImage
+	}
+
+	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext)
+	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
+	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
+	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
+	pod.Spec.InitContainers[index].RestartPolicy = lo.ToPtr(corev1.ContainerRestartPolicyAlways)
+	if pod.Spec.InitContainers[index].StartupProbe == nil {
+		pod.Spec.InitContainers[index].StartupProbe = getMCPServerStartupProbe()
+	}
+	if len(pod.Spec.InitContainers[index].Args) == 0 {
+		pod.Spec.InitContainers[index].Args = []string{
+			"--address", common.AgentMCPServerAddress,
+			"--grpc-address", common.AgentMCPGRPCServerAddress,
+		}
+	}
+	if len(pod.Spec.InitContainers[index].Command) == 0 {
+		pod.Spec.InitContainers[index].Command = []string{"/agent-mcpserver"}
+	}
+}
+
+func getMCPServerContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, image string) corev1.Container {
+	return corev1.Container{
+		Name:            mcpServerContainerName,
+		Image:           image,
+		SecurityContext: ensureDefaultContainerSecurityContext(nil),
+		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
+		Env:             getMCPServerEnvVars(run, runtime),
+		Command:         []string{"/agent-mcpserver"},
+		Args: []string{
+			"--address", common.AgentMCPServerAddress,
+			"--grpc-address", common.AgentMCPGRPCServerAddress,
+		},
+		Ports: []corev1.ContainerPort{
+			{
+				Name:          "mcp",
+				ContainerPort: common.AgentMCPServerPort,
+			},
+			{
+				Name:          "mcp-grpc",
+				ContainerPort: common.AgentMCPGRPCPort,
+			},
+		},
+		VolumeMounts:  ensureMCPServerVolumeMounts(nil, runtime),
+		RestartPolicy: lo.ToPtr(corev1.ContainerRestartPolicyAlways),
+		StartupProbe:  getMCPServerStartupProbe(),
+	}
+}
+
+func getPodDefaultContainerImage(pod *corev1.Pod, _ *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) string {
+	for _, c := range pod.Spec.Containers {
+		if c.Name == defaultContainer && c.Image != "" {
+			return c.Image
+		}
+	}
+
+	return getDefaultContainerImage("", runtime.Spec.Type)
+}
+
+func getMCPServerStartupProbe() *corev1.Probe {
+	return &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			TCPSocket: &corev1.TCPSocketAction{
+				Port: intstr.FromInt32(common.AgentMCPServerPort),
+			},
+		},
+		PeriodSeconds:    2,
+		FailureThreshold: 30,
+	}
+}
+
+func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	result := make([]corev1.EnvVar, 0, 2)
+
+	switch run.Spec.Mode {
+	case console.AgentRunModeAnalyze:
+		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: analyzeModeExcludedTools})
+	case console.AgentRunModeWrite:
+		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: writeModeExcludedTools})
+	}
+
+	if runtime.Spec.Git != nil && runtime.Spec.Git.Proxy != nil {
+		result = append(result, corev1.EnvVar{Name: EnvGitProxy, Value: *runtime.Spec.Git.Proxy})
+	}
+
+	return result
+}
+
+func ensureMCPServerEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	defaultEnvs := getMCPServerEnvVars(run, runtime)
+
+	for _, defaultEnv := range defaultEnvs {
+		found := false
+		for _, existingEnv := range existing {
+			if existingEnv.Name == defaultEnv.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			existing = append(existing, defaultEnv)
+		}
+	}
+
+	return existing
+}
+
+func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.AgentRuntime) []corev1.VolumeMount {
+	result := append(
+		algorithms.Filter(mounts, func(v corev1.VolumeMount) bool {
+			return v.Name != defaultTmpVolumeName && v.Name != sharedContextVolumeName && v.Name != gitSigningKeyVolumeName
+		}),
+		defaultTmpContainerVolumeMount,
+		corev1.VolumeMount{
+			Name:      sharedContextVolumeName,
+			MountPath: sharedContextVolumePath,
+		},
+	)
+
+	if runtime.Spec.Git != nil && runtime.Spec.Git.SigningKeyRef != nil {
+		result = append(result, corev1.VolumeMount{
+			Name:      gitSigningKeyVolumeName,
+			MountPath: "/plural/git",
+			ReadOnly:  true,
+		})
+	}
+
+	return result
 }
 
 func enableDind(pod *corev1.Pod) {
@@ -483,6 +680,22 @@ func enableGitSigningKey(podSecretName string, pod *corev1.Pod) {
 				corev1.VolumeMount{
 					Name:      gitSigningKeyVolumeName,
 					MountPath: "/plural/git", // mount as directory; fsGroup chown applies to the whole dir
+					ReadOnly:  true,
+				},
+			)
+			break
+		}
+	}
+
+	for i := range pod.Spec.InitContainers {
+		if pod.Spec.InitContainers[i].Name == mcpServerContainerName {
+			pod.Spec.InitContainers[i].VolumeMounts = append(
+				algorithms.Filter(pod.Spec.InitContainers[i].VolumeMounts, func(v corev1.VolumeMount) bool {
+					return v.Name != gitSigningKeyVolumeName
+				}),
+				corev1.VolumeMount{
+					Name:      gitSigningKeyVolumeName,
+					MountPath: "/plural/git",
 					ReadOnly:  true,
 				},
 			)

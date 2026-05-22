@@ -3,20 +3,18 @@ package controller
 import (
 	"context"
 	"fmt"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
 
-	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	gqlclient "github.com/pluralsh/console/go/client"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -25,10 +23,10 @@ import (
 
 // Start starts the manager and waits indefinitely.
 // There are a couple of ways to have start return:
-//   - an error has occurred in one of the internal operations
-//   - all commands have finished their execution
-//   - it was running for too long and timed out
-//   - remote cancellation signal was received and stopped the execution
+//   - An error has occurred in one of the internal operations
+//   - All commands have finished their execution
+//   - It was running for too long and timed out
+//   - Remote cancellation signal was received and stopped the execution
 func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 	in.Lock()
 
@@ -94,17 +92,6 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 
 // prepare sets up the agent run environment and AI credentials
 func (in *agentRunController) prepare() error {
-	consoleTokenClient := client.New(fmt.Sprintf("%s/gql", in.consoleUrl), *in.agentRun.PluralCreds.Token)
-	env := environment.New(
-		environment.WithAgentRun(in.agentRun),
-		environment.WithWorkingDir(path.Join(in.dir, "shared")),
-		environment.WithConsoleTokenClient(consoleTokenClient),
-	)
-
-	if err := env.Setup(); err != nil {
-		return err
-	}
-
 	var err error
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
@@ -116,15 +103,14 @@ func (in *agentRunController) prepare() error {
 		klog.Fatal(err)
 	}
 
-	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token, in.deployToken)
+	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)
 }
 
 // completeAgentRun updates the agent run status in the Console API
 func (in *agentRunController) completeAgentRun(status gqlclient.AgentRunStatus, agentRunErr error) error {
 	var errorMsg *string
 	if agentRunErr != nil {
-		msg := agentRunErr.Error()
-		errorMsg = &msg
+		errorMsg = new(agentRunErr.Error())
 	}
 
 	statusAttrs := gqlclient.AgentRunStatusAttributes{
@@ -217,49 +203,52 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 		return true
 	}
 
-	// Check live PR status from SCM
-	if in.agentRun.ScmCreds == nil || in.agentRun.ScmCreds.Token == "" {
-		klog.V(log.LogLevelInfo).InfoS("no SCM credentials available, cannot check live PR status, continuing babysit loop")
-	} else {
-		scmClient := scm.NewClient(in.agentRun.ScmCreds.Token)
-		allDone := true
-		for _, pr := range agentRun.PullRequests {
-			// Skip if PR URL is empty
-			if pr.URL == "" {
-				continue
-			}
-			details, err := scmClient.GetPRDetails(ctx, pr.URL)
-			if err != nil {
-				klog.ErrorS(err, "failed to fetch PR details from SCM", "url", pr.URL)
-				allDone = false // If we can't check, don't exit babysit
-				break
-			}
-			if details.State == scm.PRStateOpen {
-				allDone = false
-				break
-			}
+	babysitClient, err := scm.NewGRPCClient(common.AgentMCPGRPCAddress)
+	if err != nil {
+		klog.ErrorS(err, "failed to initialize babysit grpc client")
+		return false
+	}
+
+	defer func() { _ = babysitClient.Close() }()
+
+	allDone := true
+	for _, pr := range agentRun.PullRequests {
+		// Skip if PR URL is empty
+		if pr.URL == "" {
+			continue
 		}
-		if allDone {
-			klog.V(log.LogLevelInfo).InfoS("all pull requests are merged or closed in SCM, stopping babysit loop")
-			return true
+		details, err := babysitClient.GetPRDetails(ctx, pr.URL)
+		if err != nil {
+			klog.ErrorS(err, "failed to fetch PR details via mcp sidecar", "url", pr.URL)
+			allDone = false // If we can't check, don't exit babysit
+			break
+		}
+		if details.State == scm.PRStateOpen {
+			allDone = false
+			break
 		}
 	}
 
-	bCtx := in.buildBabysitContext(ctx, agentRun)
+	if allDone {
+		klog.V(log.LogLevelInfo).InfoS("all pull requests are merged or closed in SCM, stopping babysit loop")
+		return true
+	}
+
+	bCtx := in.buildBabysitContext(ctx, agentRun, babysitClient)
+	if bCtx != nil {
+		if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+			klog.ErrorS(err, "failed to update agent run status during babysit")
+			return false
+		}
+	}
+
 	return callback(ctx, bCtx)
 }
 
 // buildBabysitContext fetches live PR data from the SCM provider, computes a
 // dedup SHA, and returns a populated BabysitContext if the state has changed
 // since the last check. Returns nil when nothing has changed (no reprompt needed).
-func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun *gqlclient.AgentRunFragment) *toolv1.BabysitContext {
-	if in.agentRun.ScmCreds == nil || in.agentRun.ScmCreds.Token == "" {
-		klog.V(log.LogLevelInfo).InfoS("no SCM credentials available, skipping PR state fetch")
-		return nil
-	}
-
-	scmClient := scm.NewClient(in.agentRun.ScmCreds.Token)
-
+func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun *gqlclient.AgentRunFragment, babysitClient scm.GRPCClient) *toolv1.BabysitContext {
 	var enriched []toolv1.EnrichedPR
 	var details []*scm.PRDetails
 	for _, pr := range agentRun.PullRequests {
@@ -268,9 +257,9 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 			continue
 		}
 
-		d, err := scmClient.GetPRDetails(ctx, pr.URL)
+		d, err := babysitClient.GetPRDetails(ctx, pr.URL)
 		if err != nil {
-			klog.ErrorS(err, "failed to fetch PR details from SCM", "url", pr.URL)
+			klog.ErrorS(err, "failed to fetch PR details via mcp sidecar", "url", pr.URL)
 			continue
 		}
 
@@ -331,7 +320,7 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 }
 
 // buildBabysitPrompt constructs a structured reprompt message for the AI agent
-// describing new PR activity (comments + CI failures) since the last check.
+// describing new PR activity (comments and CI failures) since the last check.
 func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked time.Time) string {
 	lastCheckedStr := "<beginning>"
 	if !lastChecked.IsZero() {
@@ -406,7 +395,6 @@ func NewAgentRunController(opts ...Option) (Controller, error) {
 		errChan: errChan,
 		done:    finishedChan,
 		runDone: make(chan struct{}),
-		dir:     "/plural", // default working directory from pod spec
 	}
 
 	for _, option := range opts {

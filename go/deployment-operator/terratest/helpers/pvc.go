@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
-	"github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtimerrors "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pluralsh/console/go/client"
 )
 
 type PersistentVolumeClaimOptions struct {
@@ -205,6 +206,6 @@ func NewPersistentVolumeClaim(name, namespace string, options ...PersistentVolum
 		options: pvcOptions,
 	}
 
-	resource.baseResource.setSelf(resource)
+	resource.setSelf(resource)
 	return resource
 }

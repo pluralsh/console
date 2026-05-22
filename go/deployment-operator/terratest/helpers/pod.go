@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
-	"github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtimerrors "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pluralsh/console/go/client"
 )
 
 const (
@@ -223,6 +224,6 @@ func NewPod(name, namespace string, options ...PodOption) Resource[corev1.Pod] {
 		options: podOptions,
 	}
 
-	resource.baseResource.setSelf(resource)
+	resource.setSelf(resource)
 	return resource
 }

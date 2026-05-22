@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	"k8s.io/klog/v2"
+
 	gqlclient "github.com/pluralsh/console/go/client"
 	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
-	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
@@ -23,6 +24,18 @@ const bootstrapScriptPath = "/bootstrap/bootstrap.sh"
 func (in *agentRunController) preStart() {
 	if in.agentRun.Status != gqlclient.AgentRunStatusPending && !environment.IsDev() {
 		klog.Fatalf("could not start stack run: invalid status: %s", in.agentRun.Status)
+	}
+
+	// When in dev mode, restart agent run and clear all messages and errors.
+	if in.agentRun.Status != gqlclient.AgentRunStatusPending && environment.IsDev() {
+		_ = agentrun.RestartAgentRun(in.consoleClient, in.agentRunID)
+		klog.V(log.LogLevelInfo).InfoS("agent run restarted",
+			"id", in.agentRunID,
+			"status", in.agentRun.Status,
+			"mode", in.agentRun.Mode,
+			"type", in.agentRun.Runtime.Type,
+			"dev", environment.IsDev(),
+		)
 	}
 
 	if err := agentrun.StartAgentRun(in.consoleClient, in.agentRunID); err != nil {

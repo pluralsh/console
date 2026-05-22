@@ -18,6 +18,7 @@ package controller
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -60,11 +61,16 @@ var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
+	binaryAssetsDirectory := os.Getenv("KUBEBUILDER_ASSETS")
+	if binaryAssetsDirectory == "" {
+		binaryAssetsDirectory = filepath.Join("..", "..", "bin", "k8s",
+			fmt.Sprintf("1.35.0-%s-%s", runtime.GOOS, runtime.GOARCH))
+	}
+
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases"), filepath.Join("..", "..", "test", "crd")},
 		ErrorIfCRDPathMissing: true,
-		BinaryAssetsDirectory: filepath.Join("..", "..", "bin", "k8s",
-			fmt.Sprintf("1.28.3-%s-%s", runtime.GOOS, runtime.GOARCH)),
+		BinaryAssetsDirectory: binaryAssetsDirectory,
 	}
 
 	cfg, err := testEnv.Start()

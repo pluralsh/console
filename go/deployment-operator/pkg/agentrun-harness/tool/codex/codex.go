@@ -3,26 +3,19 @@ package codex
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
-)
-
-const (
-	consoleTokenEnv   = "PLRL_CONSOLE_TOKEN"
-	gitAccessTokenEnv = "GIT_ACCESS_TOKEN"
-	gitAskpassPath    = "/plural/.git-askpass"
-	gitSigningKeyPath = common.GitSigningKeyMountPath
 )
 
 func New(config v1.Config) v1.Tool {
@@ -66,16 +59,12 @@ func (in *Codex) ConfigureBabysitRun() error {
 	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeCodex)
 }
 
-func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
+func (in *Codex) Configure(consoleURL, _ string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeCodex); err != nil {
 		return err
 	}
 
-	allowedEnvVars := []string{"PATH", "HOME", gitAccessTokenEnv}
-	if _, err := os.Stat(gitSigningKeyPath); err == nil {
-		allowedEnvVars = append(allowedEnvVars, "GIT_SIGNING_KEY_PATH")
-	}
-
+	allowedEnvVars := []string{"PATH", "HOME"}
 	model := string(in.model)
 	if in.proxy {
 		model = proxymodel.ProxyModel(console.AgentRuntimeTypeCodex, model)
@@ -102,7 +91,7 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 		providers = []ModelProviderInput{{
 			Name:    "plural",
 			BaseURL: fmt.Sprintf("%s/ext/ai/v1", consoleURL),
-			EnvKey:  consoleTokenEnv,
+			EnvKey:  environment.EnvConsoleToken,
 		}}
 	} else if in.Config.Run.Runtime.Config.Codex.Endpoint != nil {
 		modelProvider = "custom"
@@ -113,14 +102,12 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 		}}
 	}
 
-	mcpBaseEnv := map[string]string{
-		consoleTokenEnv:       consoleToken,
-		"PLRL_CONSOLE_URL":    consoleURL,
-		"PLRL_AGENT_RUN_ID":   in.Config.Run.ID,
-		gitAccessTokenEnv:     os.Getenv(gitAccessTokenEnv),
-		"GIT_ASKPASS":         gitAskpassPath,
-		"GIT_TERMINAL_PROMPT": "0",
-	}
+	mcps = []MCPInput{{
+		Name:        "plural",
+		Type:        "http",
+		URL:         common.AgentMCPServerURL,
+		TrustPolicy: "always",
+	}}
 
 	switch in.Config.Run.Mode {
 	case console.AgentRunModeAnalyze:
@@ -133,14 +120,7 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 			AllowedEnvVars:       baseAgent.AllowedEnvVars,
 			ModelProvider:        modelProvider,
 		}}
-		mcps = []MCPInput{{
-			Name:         "plural",
-			Type:         "stdio",
-			Command:      "/usr/local/bin/mcpserver",
-			TrustPolicy:  "always",
-			EnabledTools: []string{"updateAgentRunAnalysis", "downloadServiceManifests"},
-			Env:          mcpBaseEnv,
-		}}
+
 	case console.AgentRunModeWrite:
 		agents = []AgentInput{{
 			Name:                 "autonomous",
@@ -150,14 +130,6 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 			ModelReasoningEffort: baseAgent.ModelReasoningEffort,
 			AllowedEnvVars:       baseAgent.AllowedEnvVars,
 			ModelProvider:        modelProvider,
-		}}
-		mcps = []MCPInput{{
-			Name:         "plural",
-			Type:         "stdio",
-			Command:      "/usr/local/bin/mcpserver",
-			TrustPolicy:  "always",
-			EnabledTools: []string{"agentPullRequest", "createBranch", "fetchAgentRunTodos", "updateAgentRunTodos", "updateAgentRunAnalysis", "getPRState", "getCILogs", "reactToComment", "createCommit", "downloadServiceManifests"},
-			Env:          mcpBaseEnv,
 		}}
 	default:
 		return fmt.Errorf("unsupported agent run mode %q for codex", in.Config.Run.Mode)
@@ -181,15 +153,6 @@ func (in *Codex) Configure(consoleURL, consoleToken, deployToken string) error {
 		return err
 	}
 
-	// Trust the git signing key directory so codex can read the mounted key.
-	if _, err := os.Stat(gitSigningKeyPath); err == nil {
-		gitDir := path.Dir(gitSigningKeyPath)
-		if cfg.Projects == nil {
-			cfg.Projects = make(map[string]*Project)
-		}
-		cfg.Projects[gitDir] = &Project{TrustLevel: "trusted"}
-	}
-
 	config, err := WriteCodexConfig(path.Join(in.Config.WorkDir, ".codex"), cfg)
 	if err != nil {
 		return err
@@ -205,10 +168,11 @@ func (in *Codex) OnMessage(f func(message *console.AgentMessageAttributes)) {
 }
 
 func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
-	klog.V(log.LogLevelInfo).InfoS("starting codex babysit run", "agent_run_id", in.Config.Run.ID)
 	if bCtx == nil {
 		return false
 	}
+
+	klog.V(log.LogLevelInfo).InfoS("starting codex babysit run", "agent_run_id", in.Config.Run.ID)
 
 	agent := "autonomous"
 	args := []string{"exec", "--profile", agent, "--json", bCtx.Prompt}

@@ -8,6 +8,7 @@ use (
 	./datastore // github.com/pluralsh/console/go/datastore
 	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service
 	./deployment-operator // github.com/pluralsh/console/go/deployment-operator
+	./deployment-operator/terratest // github.com/pluralsh/console/go/deployment-operator/terratest
 	./helm-test // github.com/pluralsh/console/go/helm-test
 	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
 	./kubernetes-agent/api // github.com/pluralsh/console/go/kubernetes-agent/api

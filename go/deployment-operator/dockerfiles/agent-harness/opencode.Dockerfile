@@ -28,7 +28,7 @@ COPY --from=node /root/.opencode/bin/opencode /usr/bin/opencode
 
 # Ensure proper ownership for nonroot user
 USER root
-RUN mkdir /.local /.config /.cache
+RUN mkdir -p /.local /.config /.cache
 RUN chown -R 65532:65532 /usr/bin/opencode /.local /.config /.cache
 
 # Switch back to nonroot user

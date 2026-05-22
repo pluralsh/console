@@ -44,18 +44,9 @@
   },
   "mcpServers": {
     "plural": {
-      "command": "mcpserver",
+      "url": "http://127.0.0.1:8080/mcp",
       "description": "Plural MCP Server",
-      "env": {
-        "PLRL_CONSOLE_TOKEN": "{{ .ConsoleToken }}",
-        "PLRL_CONSOLE_URL": "{{ .ConsoleURL }}",
-        "PLRL_AGENT_RUN_ID": "{{ .AgentRunID }}",
-        "GIT_ACCESS_TOKEN": "{{ .GitAccessToken }}"{{ if eq .AgentRunMode "ANALYZE" }},
-        "PLRL_EXCLUDE_TOOLS": "createBranch,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos"{{ end }}
-      },
-      "trust": true{{ if eq .AgentRunMode "ANALYZE" }},
-      "includeTools": ["updateAgentRunAnalysis", "downloadServiceManifests"]
-{{ end }}
+      "trust": true
     }{{ range .ExaMcpConfigs }},
     "{{ .Name }}": {
       "url": "{{ .Url }}"{{ if .ApiKey }},

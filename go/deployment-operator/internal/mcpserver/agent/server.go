@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"context"
+
 	"github.com/mark3labs/mcp-go/server"
 	"k8s.io/klog/v2"
 
@@ -20,6 +22,9 @@ type Server struct {
 	// server is the MCP server instance
 	server *server.MCPServer
 
+	// httpServer is the streamable HTTP transport server
+	httpServer *server.StreamableHTTPServer
+
 	// client is the Plural console client
 	client console.Client
 
@@ -30,10 +35,19 @@ type Server struct {
 	tools []tool.Tool
 }
 
-// Start starts the MCP server with stdio transport
-func (in *Server) Start() error {
+// Start starts the MCP server with streamable HTTP transport
+func (in *Server) Start(addr string) error {
 	klog.V(log.LogLevelDefault).InfoS("started plural console mcp server", "version", in.version)
-	return server.ServeStdio(in.server)
+	return in.httpServer.Start(addr)
+}
+
+// Shutdown gracefully stops the MCP HTTP server.
+func (in *Server) Shutdown(ctx context.Context) error {
+	if in == nil || in.httpServer == nil {
+		return nil
+	}
+
+	return in.httpServer.Shutdown(ctx)
 }
 
 func (in *Server) init() *Server {
@@ -48,6 +62,7 @@ func (in *Server) init() *Server {
 		klog.V(log.LogLevelDefault).InfoS("registered tool with mcp server", "tool", tool.ID())
 	}
 
+	in.httpServer = server.NewStreamableHTTPServer(in.server)
 	return in
 }
 

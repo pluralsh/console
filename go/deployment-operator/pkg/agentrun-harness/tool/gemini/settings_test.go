@@ -4,23 +4,21 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
-	"github.com/samber/lo"
 )
 
 //nolint:gocyclo
 func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model:         ModelGemini25Pro,
+		Model:         ModelGemini31FlashLite,
 		RepositoryDir: "/repo",
-		ConsoleURL:    "https://console.test",
-		ConsoleToken:  "token",
-		DeployToken:   "deploy-token",
 		AgentRunID:    "run-123",
 	}
 
-	t.Run("WRITE mode does not exclude plural MCP tools and omits PLRL_EXCLUDE_TOOLS", func(t *testing.T) {
+	t.Run("plural MCP server uses in-pod remote URL", func(t *testing.T) {
 		input := *baseInput
 		input.AgentRunMode = console.AgentRunModeWrite
 
@@ -43,70 +41,12 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Fatal("mcpServers.plural missing or not an object")
 		}
 
-		env, ok := plural["env"].(map[string]any)
+		url, ok := plural["url"].(string)
 		if !ok {
-			t.Fatal("mcpServers.plural.env missing or not an object")
+			t.Fatal("mcpServers.plural.url missing or not a string")
 		}
-		if _, has := env["PLRL_EXCLUDE_TOOLS"]; has {
-			t.Errorf("did not expect PLRL_EXCLUDE_TOOLS in WRITE mode env, got %v", env["PLRL_EXCLUDE_TOOLS"])
-		}
-		if _, has := plural["excludeTools"]; has {
-			t.Errorf("did not expect mcpServers.plural.excludeTools in WRITE mode, got %v", plural["excludeTools"])
-		}
-		if _, has := plural["includeTools"]; has {
-			t.Errorf("did not expect mcpServers.plural.includeTools in WRITE mode, got %v", plural["includeTools"])
-		}
-	})
-
-	t.Run("ANALYZE mode sets includeTools for plural MCP server", func(t *testing.T) {
-		input := *baseInput
-		input.AgentRunMode = console.AgentRunModeAnalyze
-
-		_, content, err := settings(&input)
-		if err != nil {
-			t.Fatalf("settings() failed: %v", err)
-		}
-
-		var out map[string]any
-		if err := json.Unmarshal([]byte(content), &out); err != nil {
-			t.Fatalf("generated content is not valid JSON: %v", err)
-		}
-
-		mcpServers, ok := out["mcpServers"].(map[string]any)
-		if !ok {
-			t.Fatal("mcpServers missing or not an object")
-		}
-		plural, ok := mcpServers["plural"].(map[string]any)
-		if !ok {
-			t.Fatal("mcpServers.plural missing or not an object")
-		}
-
-		includeTools, hasInclude := plural["includeTools"]
-		if !hasInclude {
-			t.Fatal("mcpServers.plural.includeTools missing in ANALYZE mode")
-		}
-		sl, ok := includeTools.([]any)
-		if !ok {
-			t.Fatalf("includeTools is not an array: %T", includeTools)
-		}
-		var tools []string
-		for _, v := range sl {
-			if s, ok := v.(string); ok {
-				tools = append(tools, s)
-			}
-		}
-		want := map[string]struct{}{
-			"updateAgentRunAnalysis":   {},
-			"downloadServiceManifests": {},
-		}
-		for _, name := range tools {
-			delete(want, name)
-		}
-		if len(tools) != 2 {
-			t.Errorf("includeTools must contain exactly 2 tools in ANALYZE mode, got: %v", tools)
-		}
-		if len(want) != 0 {
-			t.Errorf("includeTools missing expected entries in ANALYZE mode, missing: %v", want)
+		if url != "http://127.0.0.1:8080/mcp" {
+			t.Errorf("expected mcpServers.plural.url=http://127.0.0.1:8080/mcp, got %q", url)
 		}
 	})
 
@@ -160,68 +100,10 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 	})
 }
 
-func TestSettingsTemplate_GitAccessToken(t *testing.T) {
-	baseInput := &ConfigTemplateInput{
-		Model:         ModelGemini25Pro,
-		RepositoryDir: "/repo",
-		ConsoleURL:    "https://console.test",
-		ConsoleToken:  "token",
-		DeployToken:   "deploy-token",
-		AgentRunID:    "run-123",
-		AgentRunMode:  console.AgentRunModeWrite,
-	}
-
-	getGitAccessToken := func(t *testing.T, content string) string {
-		t.Helper()
-		var out map[string]any
-		if err := json.Unmarshal([]byte(content), &out); err != nil {
-			t.Fatalf("generated content is not valid JSON: %v\n%s", err, content)
-		}
-		mcpServers := out["mcpServers"].(map[string]any)
-		plural := mcpServers["plural"].(map[string]any)
-		env := plural["env"].(map[string]any)
-		token, _ := env["GIT_ACCESS_TOKEN"].(string)
-		return token
-	}
-
-	t.Run("empty GitAccessToken renders empty string in env", func(t *testing.T) {
-		input := *baseInput
-		input.GitAccessToken = ""
-
-		_, content, err := settings(&input)
-		if err != nil {
-			t.Fatalf("settings() failed: %v", err)
-		}
-
-		token := getGitAccessToken(t, content)
-		if token != "" {
-			t.Errorf("expected empty GIT_ACCESS_TOKEN, got %q", token)
-		}
-	})
-
-	t.Run("non-empty GitAccessToken is rendered in env", func(t *testing.T) {
-		input := *baseInput
-		input.GitAccessToken = "ghp_mytoken123"
-
-		_, content, err := settings(&input)
-		if err != nil {
-			t.Fatalf("settings() failed: %v", err)
-		}
-
-		token := getGitAccessToken(t, content)
-		if token != "ghp_mytoken123" {
-			t.Errorf("expected GIT_ACCESS_TOKEN=ghp_mytoken123, got %q", token)
-		}
-	})
-}
-
 func TestSettingsTemplate_ExaMcpServers(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model:         ModelGemini25Pro,
+		Model:         ModelGemini31FlashLite,
 		RepositoryDir: "/repo",
-		ConsoleURL:    "https://console.test",
-		ConsoleToken:  "token",
-		DeployToken:   "deploy-token",
 		AgentRunID:    "run-123",
 		AgentRunMode:  console.AgentRunModeWrite,
 	}
