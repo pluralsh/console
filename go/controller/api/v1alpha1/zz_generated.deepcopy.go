@@ -9022,7 +9022,7 @@ func (in *ServiceTemplate) DeepCopyInto(out *ServiceTemplate) {
 	}
 	if in.Dependencies != nil {
 		in, out := &in.Dependencies, &out.Dependencies
-		*out = make([]v1.ObjectReference, len(*in))
+		*out = make([]ServiceDependency, len(*in))
 		copy(*out, *in)
 	}
 	if in.ConfigurationRef != nil {

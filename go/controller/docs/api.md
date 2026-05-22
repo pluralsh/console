@@ -4695,6 +4695,7 @@ _Appears in:_
 
 _Appears in:_
 - [ServiceSpec](#servicespec)
+- [ServiceTemplate](#servicetemplate)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -4875,7 +4876,7 @@ _Appears in:_
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm defines Helm-specific settings for deploying Helm charts as part of this service.<br />This includes chart specifications, values files, repository references,<br />and Helm-specific deployment options. |  | Optional: \{\} <br /> |
 | `kustomize` _[ServiceKustomize](#servicekustomize)_ | Kustomize defines Kustomize-specific settings for manifest customization.<br />This enables sophisticated YAML manipulation and configuration overlay<br />capabilities for complex deployment scenarios. |  | Optional: \{\} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig defines advanced synchronization settings for the service deployment.<br />This includes options for namespace management, drift detection configuration,<br />and deployment behavior customization. |  | Optional: \{\} <br /> |
-| `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies specify other services that must be healthy before this service is deployed.<br />This ensures proper deployment ordering and dependency resolution<br />within the managed namespace. |  | Optional: \{\} <br /> |
+| `dependencies` _[ServiceDependency](#servicedependency) array_ | Dependencies specify services that must be healthy before this service can be deployed. |  | Optional: \{\} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef references a Kubernetes Secret containing service-specific configuration.<br />This secret should contain key-value pairs that will be made available<br />to the service for runtime configuration and secrets management. |  | Optional: \{\} <br /> |
 | `configuration` _object (keys:string, values:string)_ | Configuration provides a set of non-secret service-specific configuration values.<br />These key-value pairs are useful for templating and can be referenced<br />in manifest templates for environment-specific customization. |  | Optional: \{\} <br /> |
 | `sources` _[Source](#source) array_ | Sources specify additional Git repositories or locations to source manifests from.<br />This enables multi-repository deployments and complex source composition<br />for sophisticated application architectures. |  | Optional: \{\} <br /> |

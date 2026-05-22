@@ -57,6 +57,7 @@ defmodule Console.Deployments.Observability.Webhook do
     |> workbench_association(hook)
     |> listify()
     |> ok()
+    |> IO.inspect(label: "pagerduty payload")
   end
 
   def payload(%ObservabilityWebhook{type: :sentry} = hook, %{"data" => payload}) do

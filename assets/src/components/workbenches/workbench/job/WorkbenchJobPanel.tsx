@@ -70,33 +70,36 @@ export function WorkbenchJobPanelContent() {
   return (
     <SidePanelContent>
       <PanelHeaderSC>
-        <TabList
-          scrollable
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: selectedTab,
-            onSelectionChange: (key) =>
-              setSelectedTab(String(key) as JobPanelTab),
-          }}
-          css={{ gap: spacing.small, width: 'fit-content', maxWidth: '100%' }}
-        >
-          {tabs.map(({ label, icon }) => (
-            <PanelSubTabSC
-              key={label}
-              textValue={label}
-            >
-              {icon}
-              {label !== 'Result'
-                ? label
-                : !isJobRunning(job?.status) && job?.result?.conclusion
-                  ? 'Conclusion'
-                  : 'Working theory'}
-            </PanelSubTabSC>
-          ))}
-        </TabList>
+        <TabListWrapperSC>
+          <TabList
+            scrollable
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: selectedTab,
+              onSelectionChange: (key) =>
+                setSelectedTab(String(key) as JobPanelTab),
+            }}
+            css={{ gap: spacing.small, width: '100%' }}
+          >
+            {tabs.map(({ label, icon }) => (
+              <PanelSubTabSC
+                key={label}
+                textValue={label}
+              >
+                {icon}
+                {label !== 'Result'
+                  ? label
+                  : !isJobRunning(job?.status) && job?.result?.conclusion
+                    ? 'Conclusion'
+                    : 'Working theory'}
+              </PanelSubTabSC>
+            ))}
+          </TabList>
+        </TabListWrapperSC>
         <IconFrame
           clickable
+          css={{ flexShrink: 0 }}
           icon={<CloseIcon />}
           onClick={() => setOpen(false)}
           tooltip="Close panel"
@@ -164,10 +167,17 @@ const ContentInnerSC = styled.div(({ theme }) => ({
   minHeight: '100%',
 }))
 
+const TabListWrapperSC = styled.div({
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+})
+
 const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
-  minWidth: 80,
+  flexShrink: 0,
+  minWidth: 'max-content',
   outline: active ? theme.borders.default : 'none',
   borderRadius: 20,
   background: active ? theme.colors['fill-one'] : 'transparent',

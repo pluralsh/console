@@ -212,11 +212,9 @@ type ServiceTemplate struct {
 	// +kubebuilder:validation:Optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
 
-	// Dependencies specify other services that must be healthy before this service is deployed.
-	// This ensures proper deployment ordering and dependency resolution
-	// within the managed namespace.
+	// Dependencies specify services that must be healthy before this service can be deployed.
 	// +kubebuilder:validation:Optional
-	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
+	Dependencies []ServiceDependency `json:"dependencies,omitempty"`
 
 	// ConfigurationRef references a Kubernetes Secret containing service-specific configuration.
 	// This secret should contain key-value pairs that will be made available

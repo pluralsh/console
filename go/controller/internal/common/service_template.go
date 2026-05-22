@@ -34,12 +34,8 @@ func ServiceTemplateAttributes(ctx context.Context, c runtimeclient.Client, name
 		Configuration: make([]*console.ConfigAttributes, 0),
 	}
 
-	if len(srv.Dependencies) > 0 {
-		serviceTemplate.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
-
-		for _, dep := range srv.Dependencies {
-			serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
-		}
+	if deps := srv.DependenciesAttribute(); len(deps) > 0 {
+		serviceTemplate.Dependencies = deps
 
 		slices.SortFunc(serviceTemplate.Dependencies, func(a, b *console.ServiceDependencyAttributes) int {
 			return strings.Compare(a.Name, b.Name)
