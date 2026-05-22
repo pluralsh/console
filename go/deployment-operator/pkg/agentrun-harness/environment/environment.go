@@ -52,14 +52,13 @@ func (in *environment) cloneRepository() error {
 
 	repoDir := "repository"
 	repoDirPath := path.Join(in.dir, repoDir)
-	askpassPath, err := in.configureGitCredentials()
-	if err != nil {
+	if _, err := in.configureGitCredentials(); err != nil {
 		return err
 	}
 
 	if _, err := os.Stat(path.Join(repoDirPath, ".git")); err == nil {
 		klog.V(log.LogLevelInfo).InfoS("repository already exists, skipping clone", "dir", repoDirPath)
-		return in.configureRepository(repoDirPath, "", "", askpassPath)
+		return in.configureRepository(repoDirPath, "", "")
 	}
 
 	// Set proxy for clone via environment variable so it takes effect immediately.
@@ -99,10 +98,10 @@ func (in *environment) cloneRepository() error {
 	}
 
 	repoDirPath = path.Join(in.dir, repoDir)
-	return in.configureRepository(repoDirPath, userName, userEmail, askpassPath)
+	return in.configureRepository(repoDirPath, userName, userEmail)
 }
 
-func (in *environment) configureRepository(repoDirPath, userName, userEmail, askpassPath string) error {
+func (in *environment) configureRepository(repoDirPath, userName, userEmail string) error {
 	if userName != "" {
 		if err := exec.NewExecutable("git",
 			exec.WithArgs([]string{"config", "user.name", userName}),
@@ -115,15 +114,6 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail, ask
 	if userEmail != "" {
 		if err := exec.NewExecutable("git",
 			exec.WithArgs([]string{"config", "user.email", userEmail}),
-			exec.WithDir(repoDirPath),
-		).Run(context.Background()); err != nil {
-			return err
-		}
-	}
-
-	if askpassPath != "" {
-		if err := exec.NewExecutable("git",
-			exec.WithArgs([]string{"config", "core.askPass", askpassPath}),
 			exec.WithDir(repoDirPath),
 		).Run(context.Background()); err != nil {
 			return err
@@ -164,18 +154,25 @@ func (in *environment) configureGitCredentials() (string, error) {
 	}
 
 	askpassPath := path.Join(in.dir, gitAskpassFileName)
-	if err := os.WriteFile(askpassPath, []byte("#!/bin/sh\necho ${GIT_ACCESS_TOKEN}\n"), 0700); err != nil {
+	if err := os.WriteFile(askpassPath, []byte(gitAskpassScript()), 0700); err != nil {
+		return "", err
+	}
+
+	if err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"config", "--global", "core.askPass", askpassPath}),
+	).Run(context.Background()); err != nil {
 		return "", err
 	}
 
 	if err := os.Setenv("GIT_ASKPASS", askpassPath); err != nil {
 		return "", err
 	}
-	if err := os.Setenv("GIT_TERMINAL_PROMPT", "0"); err != nil {
-		return "", err
-	}
 
 	return askpassPath, nil
+}
+
+func gitAskpassScript() string {
+	return "#!/bin/sh\necho ${GIT_ACCESS_TOKEN}"
 }
 
 // configureGitSigning configures SSH commit signing using the mounted private key.
