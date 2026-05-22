@@ -263,7 +263,7 @@ sentinel-run: docker-build-sentinel-harness
 		--console-url=${PLRL_CONSOLE_URL}/ext/gql \
 		--console-token=${PLRL_DEPLOY_TOKEN} \
 		--sentinel-run-id=${SENTINEL_RUN_ID} \
-		--test-dir=/sentinel \
+		--test-dir=/workspace/deployment-operator \
 		--output-dir=/plural \
 		--v=3; \
 	rm -f $$KUBECONFIG_TMP

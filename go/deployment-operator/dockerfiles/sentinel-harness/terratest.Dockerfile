@@ -11,10 +11,10 @@ ARG TARGETARCH
 ENV CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
-    GOCACHE=/sentinel/.cache
+    GOCACHE=/workspace/deployment-operator/.cache
 
 # Create directories and fix permissions
-RUN mkdir -p /sentinel/.cache && chown -R 65532:65532 /sentinel && chown -R 65532:65532 /plural
+RUN mkdir -p /workspace/deployment-operator/.cache && chown -R 65532:65532 /workspace/deployment-operator && chown -R 65532:65532 /plural
 
 WORKDIR /workspace
 
