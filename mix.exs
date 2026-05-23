@@ -184,7 +184,7 @@ defmodule Console.MixProject do
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.11"},
+      {:req_llm, "~> 1.12"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
 
