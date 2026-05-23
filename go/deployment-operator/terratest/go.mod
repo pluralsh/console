@@ -2,14 +2,9 @@ module github.com/pluralsh/console/go/deployment-operator/terratest
 
 go 1.26.3
 
-replace (
-	github.com/pluralsh/console/go/client => ../../client
-	github.com/pluralsh/console/go/polly => ../../polly
-)
-
 require (
 	github.com/gruntwork-io/terratest v0.51.0
-	github.com/pluralsh/console/go/client v1.67.0
+	github.com/pluralsh/console/go/client v1.76.2
 	github.com/pluralsh/console/go/polly v1.0.0
 	github.com/samber/lo v1.52.0
 	github.com/stretchr/testify v1.11.1

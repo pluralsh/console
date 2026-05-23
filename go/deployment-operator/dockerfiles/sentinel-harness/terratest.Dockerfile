@@ -11,18 +11,10 @@ ARG TARGETARCH
 ENV CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
-    GOCACHE=/workspace/deployment-operator/.cache
+    GOCACHE=/sentinel/.cache
 
 # Create directories and fix permissions
-RUN mkdir -p /workspace/deployment-operator/.cache && chown -R 65532:65532 /workspace/deployment-operator && chown -R 65532:65532 /plural
-
-WORKDIR /workspace
-
-# Copy required local modules referenced by go.mod replace directives
-COPY /client /workspace/client
-COPY /polly /workspace/polly
-
-WORKDIR /workspace/deployment-operator/terratest
+RUN mkdir -p /sentinel/.cache && chown -R 65532:65532 /sentinel && chown -R 65532:65532 /plural
 
 # Copy test files
 COPY deployment-operator/terratest ./
@@ -32,4 +24,4 @@ USER 65532:65532
 
 RUN go mod download
 
-ENTRYPOINT ["sentinel-harness", "--test-dir=/workspace/deployment-operator", "--output-dir=/plural"]
+ENTRYPOINT ["sentinel-harness", "--test-dir=/sentinel", "--output-dir=/plural"]
