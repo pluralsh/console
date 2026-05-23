@@ -103,6 +103,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     AgentPromptHistory,
     AgentPrompt,
     AgentMessage,
+    AgentRunUpload,
     SentinelRun,
     SentinelRunJob,
     ChatConnection,
@@ -219,6 +220,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(AgentPromptHistory, _), do: AgentPromptHistory
   def query(AgentPrompt, _), do: AgentPrompt.ordered()
   def query(AgentMessage, _), do: AgentMessage.ordered()
+  def query(AgentRunUpload, _), do: AgentRunUpload
   def query(ChatConnection, _), do: ChatConnection
   def query(ChatbotMessage, _), do: ChatbotMessage
   def query(ClusterUpgrade, _), do: ClusterUpgrade
