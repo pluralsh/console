@@ -39142,9 +39142,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39293,9 +39293,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39453,9 +39453,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39660,9 +39660,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39805,9 +39805,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
