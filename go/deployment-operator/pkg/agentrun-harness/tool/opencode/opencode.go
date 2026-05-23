@@ -39,7 +39,6 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		Token:            in.Config.Run.Runtime.Config.OpenCode.Token,
 		Mode:             in.Config.Run.Mode,
 		DindEnabled:      in.Config.Run.DindEnabled,
-		ExaMcpConfigs:    in.Config.Run.Runtime.ExaMcpConfigs,
 	}
 
 	_, content, err := configTemplate(input)
@@ -356,10 +355,6 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 // AnalysisFollowUpRun re-runs OpenCode with followUpPrompt. Errors are
 // returned to the caller and must not be sent on ErrorChan.
 func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
-		return nil
-	}
-
 	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting opencode", "prompt_len", len(followUpPrompt))
 
 	configFilePath, err := filepath.Abs(in.configFilePath())

@@ -400,17 +400,25 @@ type ServiceImport struct {
 	StackRef corev1.ObjectReference `json:"stackRef"`
 }
 
-func (ss *ServiceSpec) DependenciesAttribute() []*console.ServiceDependencyAttributes {
-	if len(ss.Dependencies) < 1 {
+func ServiceDependenciesAttribute(deps []ServiceDependency) []*console.ServiceDependencyAttributes {
+	if len(deps) < 1 {
 		return nil
 	}
 
-	deps := make([]*console.ServiceDependencyAttributes, 0)
-	for _, dep := range ss.Dependencies {
-		deps = append(deps, &console.ServiceDependencyAttributes{Name: dep.Name})
+	attrs := make([]*console.ServiceDependencyAttributes, 0, len(deps))
+	for _, dep := range deps {
+		attrs = append(attrs, &console.ServiceDependencyAttributes{Name: dep.Name})
 	}
 
-	return deps
+	return attrs
+}
+
+func (ss *ServiceSpec) DependenciesAttribute() []*console.ServiceDependencyAttributes {
+	return ServiceDependenciesAttribute(ss.Dependencies)
+}
+
+func (st *ServiceTemplate) DependenciesAttribute() []*console.ServiceDependencyAttributes {
+	return ServiceDependenciesAttribute(st.Dependencies)
 }
 
 func (ss *ServiceSpec) TemplatedAttribute() *bool {

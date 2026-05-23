@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"encoding/json"
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
@@ -56,16 +55,7 @@ type AgentRuntime struct {
 	Type          console.AgentRuntimeType `json:"type"`
 	AiProxy       bool                     `json:"aiProxy"`
 	Config        *AgentRuntimeConfig      `json:"config,omitempty"`
-	ExaMcpConfigs []ExaMcpServerConfig     `json:"exaMcpConfigs,omitempty"`
-}
-
-type ExaMcpServerConfig struct {
-	Name string `json:"name"`
-
-	Url string `json:"url"`
-
-	// ApiKey is the raw API key to use for the external MCP server.
-	ApiKey *string `json:"apiKey,omitempty"`
+	ExaConnection bool                     `json:"exaConnection,omitempty"`
 }
 
 type AgentRuntimeConfig struct {
@@ -159,11 +149,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 	result.Name = runtime.Name
 	result.Type = runtime.Type
 	result.AiProxy = runtime.AiProxy != nil && *runtime.AiProxy
-
-	if exaMcpServers := helpers.GetPluralEnv(controller.EnvExaMcpServers, ""); exaMcpServers != "" {
-		result.ExaMcpConfigs = []ExaMcpServerConfig{}
-		_ = json.Unmarshal([]byte(exaMcpServers), &result.ExaMcpConfigs)
-	}
+	result.ExaConnection = helpers.GetPluralEnv(controller.EnvExaConnection, "") != ""
 
 	config := &AgentRuntimeConfig{}
 	switch runtime.Type {
@@ -215,4 +201,15 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 
 func (ar *AgentRun) IsProxyEnabled() bool {
 	return ar.Runtime != nil && ar.Runtime.AiProxy
+}
+
+func (ar *AgentRun) ExaConnectionEnabled() bool {
+	return ar.Runtime != nil && ar.Runtime.ExaConnection
+}
+
+func ExaPluralToolAllowlist() []string {
+	return []string{
+		"mcp__plural__web_search_exa",
+		"mcp__plural__web_fetch_exa",
+	}
 }

@@ -115,7 +115,7 @@ func (p *kubernetesApiProxy) Run(ctx context.Context, listener net.Listener) err
 		otelhttp.WithTracerProvider(p.traceProvider),
 		otelhttp.WithPropagators(p.tracePropagator),
 		otelhttp.WithMeterProvider(p.meterProvider),
-		otelhttp.WithPublicEndpoint(),
+		otelhttp.WithPublicEndpointFn(func(*http.Request) bool { return true }),
 	)
 	srv := &http.Server{
 		Handler:           handler,

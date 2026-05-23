@@ -159,6 +159,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :sentry,     :workbench_tool_sentry_connection_attributes, description: "sentry connection (error tracking)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :slack,      :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
+    field :pagerduty,  :workbench_tool_pagerduty_connection_attributes, description: "pagerduty connection (integration)"
     field :teams,      :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
@@ -262,6 +263,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_slack_connection_attributes do
     field :bot_token, :string, description: "slack bot user OAuth token (xoxb-...) for MCP"
+  end
+
+  input_object :workbench_tool_pagerduty_connection_attributes do
+    field :api_token, :string, description: "pagerduty REST API key (Token token=...)"
   end
 
   input_object :workbench_tool_teams_connection_attributes do
@@ -846,6 +851,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :sentry,    :workbench_tool_sentry_connection, description: "sentry connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :slack,     :workbench_tool_slack_connection, description: "slack connection (no secrets)"
+    field :pagerduty, :workbench_tool_pagerduty_connection, description: "pagerduty connection (no secrets)"
     field :teams,     :workbench_tool_teams_connection, description: "microsoft teams / graph connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
@@ -933,6 +939,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_slack_connection do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.slack.com/mcp"} end,
       description: "Slack hosted MCP endpoint (credentials never exposed)"
+  end
+
+  object :workbench_tool_pagerduty_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://api.pagerduty.com"} end,
+      description: "PagerDuty REST API base URL (API token never exposed)"
   end
 
   object :workbench_tool_teams_connection do

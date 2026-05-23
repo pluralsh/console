@@ -97,10 +97,6 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 // initial run, using followUpPrompt as the user prompt. Errors are returned
 // to the caller and must not be sent on ErrorChan.
 func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
-		return nil
-	}
-
 	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
 
 	if in.onMessage != nil {
@@ -239,7 +235,6 @@ func (in *Gemini) Configure(_, _ string) error {
 		AgentRunMode:      in.Config.Run.Mode,
 		InactivityTimeout: int64(in.Config.Run.Runtime.Config.Gemini.InactivityTimeout.Seconds()),
 		Model:             in.model,
-		ExaMcpConfigs:     in.Config.Run.Runtime.ExaMcpConfigs,
 		GitAccessToken:    os.Getenv("GIT_ACCESS_TOKEN"),
 	}
 

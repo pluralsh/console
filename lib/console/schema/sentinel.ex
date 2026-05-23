@@ -62,6 +62,7 @@ defmodule Console.Schema.Sentinel do
 
           field :rerun_failures,       :boolean, default: false
           field :rerun_failures_count, :integer, default: 2
+          field :postrun_script,       :string
 
           embeds_one :gotestsum, GoTestSum, on_replace: :update do
             field :p,        :string
@@ -206,7 +207,7 @@ defmodule Console.Schema.Sentinel do
 
   defp integration_test_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(tags distro format repository_id rerun_failures rerun_failures_count)a)
+    |> cast(attrs, ~w(tags distro format repository_id rerun_failures postrun_script rerun_failures_count)a)
     |> cast_embed(:job)
     |> cast_embed(:git)
     |> cast_embed(:gotestsum, with: &gotestsum_changeset/2)

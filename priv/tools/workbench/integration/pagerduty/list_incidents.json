@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "description": "List PagerDuty incidents via GET /incidents. Filter by status, service, time range, or incident key. Paginate with offset/limit; use more in the response for additional pages.",
+  "properties": {
+    "statuses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["triggered", "acknowledged", "resolved"]
+      },
+      "description": "Return only incidents with these statuses."
+    },
+    "service_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Return only incidents for these PagerDuty service ids."
+    },
+    "incident_key": {
+      "type": "string",
+      "description": "Filter by incident deduplication key."
+    },
+    "since": {
+      "type": "string",
+      "description": "ISO8601 start of date range."
+    },
+    "until": {
+      "type": "string",
+      "description": "ISO8601 end of date range."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Page size (PagerDuty default 25, max 100)."
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Pagination offset."
+    }
+  },
+  "additionalProperties": false
+}

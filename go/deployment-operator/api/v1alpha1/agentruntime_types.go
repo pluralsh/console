@@ -90,14 +90,22 @@ type AgentRuntimeSpec struct {
 	// BabysitInterval configures the interval for the operator to check on the health of the agent runtime and perform necessary babysitting actions (e.g. restarting unhealthy runtimes). When not provided, a default interval of 1 minute will be used.
 	BabysitInterval *metav1.Duration `json:"babysitInterval,omitempty"`
 
-	// ExaMcpServers defines external MCP servers that the agent runtime should connect to. When provided, the runtime will be configured to connect to these external MCP servers for tool and action execution.
-	ExaMcpServers []ExaMcpServerConfig `json:"exaMcpServers,omitempty"`
+	// ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server.
+	ExaConnection *ExaConnection `json:"exaConnection,omitempty"`
 }
 
-type ExaMcpServerConfig struct {
-	Name   string                    `json:"name"`
-	Url    string                    `json:"url"`
-	ApiKey *corev1.SecretKeySelector `json:"apiKey,omitempty"`
+type ExaConnection struct {
+	// URL is the Exa API base URL. Defaults to https://api.exa.ai when unset.
+	// +kubebuilder:validation:Optional
+	URL *string `json:"url,omitempty"`
+
+	// ApiKeySecretRef references a Secret containing the Exa API key.
+	// +kubebuilder:validation:Optional
+	ApiKeySecretRef *corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
+
+	// ProxyURL is an HTTP proxy URL used for Exa API requests.
+	// +kubebuilder:validation:Optional
+	ProxyURL *string `json:"proxyUrl,omitempty"`
 }
 
 type GitSpec struct {
@@ -267,38 +275,38 @@ type AgentRuntimeConfigRaw struct {
 	Codex *CodexConfigRaw `json:"codex,omitempty"`
 }
 
-func (in *ExaMcpServerConfig) ToExaMcpServerConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*ExaMcpServerConfigRaw, error) {
+func (in *ExaConnection) ToExaConnectionRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*ExaConnectionRaw, error) {
 	if in == nil {
 		return nil, nil
 	}
 
-	exaMcpServerConfig := &ExaMcpServerConfigRaw{
-		Name: in.Name,
-		Url:  in.Url,
+	exaConnection := &ExaConnectionRaw{
+		URL:      in.URL,
+		ProxyURL: in.ProxyURL,
 	}
-	if secretKeySelectorSet(in.ApiKey) {
-		apiKeySecret, err := secretGetter(*in.ApiKey)
+	if secretKeySelectorSet(in.ApiKeySecretRef) {
+		apiKeySecret, err := secretGetter(*in.ApiKeySecretRef)
 		if err != nil {
 			return nil, err
 		}
 
-		apiKey, exists := apiKeySecret.Data[in.ApiKey.Key]
+		apiKey, exists := apiKeySecret.Data[in.ApiKeySecretRef.Key]
 		if !exists {
-			return nil, fmt.Errorf("API key secret does not contain key %s", in.ApiKey.Key)
+			return nil, fmt.Errorf("API key secret does not contain key %s", in.ApiKeySecretRef.Key)
 		}
-		exaMcpServerConfig.ApiKey = lo.ToPtr(string(apiKey))
+		exaConnection.ApiKey = lo.ToPtr(string(apiKey))
 	}
 
-	return exaMcpServerConfig, nil
+	return exaConnection, nil
 }
 
-type ExaMcpServerConfigRaw struct {
-	Name string `json:"name"`
+type ExaConnectionRaw struct {
+	URL *string `json:"url,omitempty"`
 
-	Url string `json:"url"`
-
-	// ApiKey is the raw API key to use for the external MCP server.
+	// ApiKey is the raw Exa API key.
 	ApiKey *string `json:"apiKey,omitempty"`
+
+	ProxyURL *string `json:"proxyUrl,omitempty"`
 }
 
 type CodexConfigRaw struct {

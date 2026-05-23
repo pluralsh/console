@@ -7,8 +7,7 @@
       "mode": "primary",
       "temperature": 0.1,
       "tools": {
-        "plural*": true{{ range .ExaMcpConfigs }},
-        "{{ .Name }}*": true{{ end }}
+        "plural*": true
       },
       "permission": {
         {{- if .DindEnabled }}
@@ -38,8 +37,7 @@
       "mode": "primary",
       "temperature": 0.3,
       "tools": {
-        "plural*": true{{ range .ExaMcpConfigs }},
-        "{{ .Name }}*": true{{ end }},
+        "plural*": true,
         "write": false,
         "todowrite": false,
         "edit": false
@@ -58,15 +56,7 @@
       "url": "http://127.0.0.1:8080/mcp",
       "enabled": true,
       "headers": {}
-    }{{ range .ExaMcpConfigs }},
-    "{{ .Name }}": {
-      "type": "remote",
-      "url": "{{ .Url }}",
-      "enabled": true{{ if .ApiKey }},
-      "headers": {
-        "x-api-key": "{{ .ApiKey }}"
-      }{{ end }}
-    }{{ end }}
+    }
   },
   "username": "plural",
   "provider": {

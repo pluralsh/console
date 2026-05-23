@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 )
 
+// PluralMCPToolsWildcard allows any tool exposed by the in-pod plural MCP server.
+const PluralMCPToolsWildcard = "mcp__plural__*"
+
 type SettingsBuilder struct {
 	settings Settings
 }

@@ -2141,6 +2141,9 @@ type ScmCreds {
   username: String!
 
   token: String!
+
+  "the exa key for the agent"
+  exaKey: String
 }
 
 type AgentPodReference {
@@ -2341,6 +2344,7 @@ enum WorkbenchToolType {
   BITBUCKET
   BITBUCKET_DATACENTER
   AZURE_DEVOPS
+  PAGERDUTY
 }
 
 enum WorkbenchToolCategory {
@@ -2717,6 +2721,9 @@ input WorkbenchToolConfigurationAttributes {
   "slack connection (integration)"
   slack: WorkbenchToolSlackConnectionAttributes
 
+  "pagerduty connection (integration)"
+  pagerduty: WorkbenchToolPagerdutyConnectionAttributes
+
   "microsoft teams \/ graph connection (integration)"
   teams: WorkbenchToolTeamsConnectionAttributes
 
@@ -2922,6 +2929,11 @@ input WorkbenchToolLinearConnectionAttributes {
 input WorkbenchToolSlackConnectionAttributes {
   "slack bot user OAuth token (xoxb-...) for MCP"
   botToken: String
+}
+
+input WorkbenchToolPagerdutyConnectionAttributes {
+  "pagerduty REST API key (Token token=...)"
+  apiToken: String
 }
 
 input WorkbenchToolTeamsConnectionAttributes {
@@ -3868,6 +3880,9 @@ type WorkbenchToolConfiguration {
   "slack connection (no secrets)"
   slack: WorkbenchToolSlackConnection
 
+  "pagerduty connection (no secrets)"
+  pagerduty: WorkbenchToolPagerdutyConnection
+
   "microsoft teams \/ graph connection (no secrets)"
   teams: WorkbenchToolTeamsConnection
 
@@ -4012,6 +4027,11 @@ type WorkbenchToolLinearConnection {
 
 type WorkbenchToolSlackConnection {
   "Slack hosted MCP endpoint (credentials never exposed)"
+  url: String!
+}
+
+type WorkbenchToolPagerdutyConnection {
+  "PagerDuty REST API base URL (API token never exposed)"
   url: String!
 }
 
@@ -4321,6 +4341,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
   "how many times to rerun failures"
   rerunFailuresCount: Int
 
+  "a script to run after the integration test job completes"
+  postrunScript: String
+
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseAttributes]
 }
@@ -4584,6 +4607,9 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "how many times to rerun failures"
   rerunFailuresCount: Int
+
+  "a script to run after the integration test job completes"
+  postrunScript: String
 }
 
 type SentinelCheckIntegrationTestDefaultConfiguration {

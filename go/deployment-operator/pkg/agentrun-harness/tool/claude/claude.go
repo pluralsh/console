@@ -119,10 +119,6 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 // system prompt as the initial run, swapping only the -p user prompt.
 // Errors are returned to the caller and must not be sent on ErrorChan.
 func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	if in.Config.Run.Mode != console.AgentRunModeAnalyze {
-		return nil
-	}
-
 	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
 
 	if in.onMessage != nil {
@@ -133,9 +129,13 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 	}
 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
+	agent := analysisAgent
+	if in.Config.Run.Mode == console.AgentRunModeWrite {
+		agent = autonomousAgent
+	}
 	args := []string{
 		"--add-dir", in.Config.RepositoryDir,
-		"--agents", analysisAgent,
+		"--agents", agent,
 		"--system-prompt-file", promptFile,
 		"--model", string(in.model),
 		"-p", followUpPrompt,
@@ -270,17 +270,8 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"MultiEdit",
 		"Bash",
 		"WebFetch",
-		"mcp__plural__createCommit",
-		"mcp__plural__fetchAgentRunTodos",
-		"mcp__plural__updateAgentRunTodos",
-		"mcp__plural__getPRState",
-		"mcp__plural__getCILogs",
-		"mcp__plural__downloadServiceManifests",
-		"mcp__plural__reactToComment")
-
-	for _, cfg := range in.Config.Run.Runtime.ExaMcpConfigs {
-		settings.AllowTools(fmt.Sprintf("mcp__%s__*", cfg.Name))
-	}
+		PluralMCPToolsWildcard,
+	)
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())
 	maxTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashMaxTimeout.Milliseconds())
 	settings.WithEnv("BASH_DEFAULT_TIMEOUT_MS", defaultTimeout)
@@ -299,16 +290,6 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	mcp.
 		AddURLServer("plural", common.AgentMCPServerURL).
 		Done()
-
-	if len(in.Config.Run.Runtime.ExaMcpConfigs) > 0 {
-		for _, cfg := range in.Config.Run.Runtime.ExaMcpConfigs {
-			sb := mcp.AddURLServer(cfg.Name, cfg.Url)
-			if cfg.ApiKey != nil {
-				sb.Header("x-api-key", *cfg.ApiKey)
-			}
-			sb.Done()
-		}
-	}
 
 	if err := mcp.WriteToFile(filepath.Join(in.Config.WorkDir, ".mcp.json")); err != nil {
 		return err
@@ -337,8 +318,8 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"Bash(rg:*)",
 			"Bash(find:*)",
 			"WebFetch",
-			"mcp__plural__updateAgentRunAnalysis").
-			DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
+			PluralMCPToolsWildcard,
+		).DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
 	} else {
 		settings.AllowTools(
 			"Read",
@@ -347,19 +328,8 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"MultiEdit",
 			"Bash",
 			"WebFetch",
-			"mcp__plural__agentPullRequest",
-			"mcp__plural__createBranch",
-			"mcp__plural__fetchAgentRunTodos",
-			"mcp__plural__updateAgentRunTodos",
-			"mcp__plural__downloadServiceManifests",
-			"mcp__plural__createCommit",
-			"mcp__plural__getPRState",
-			"mcp__plural__getCILogs",
-			"mcp__plural__reactToComment")
-	}
-
-	for _, cfg := range in.Config.Run.Runtime.ExaMcpConfigs {
-		settings.AllowTools(fmt.Sprintf("mcp__%s__*", cfg.Name))
+			PluralMCPToolsWildcard,
+		)
 	}
 
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())

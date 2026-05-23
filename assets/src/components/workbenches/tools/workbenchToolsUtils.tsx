@@ -16,6 +16,7 @@ import {
   MsTeamsLogoIcon,
   PrometheusLogoIcon,
   SentryLogoIcon,
+  PagerdutyLogoIcon,
   SlackLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
@@ -44,6 +45,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Slack,
+  WorkbenchToolType.Pagerduty,
   WorkbenchToolType.Teams,
   WorkbenchToolType.Exa,
   WorkbenchToolType.Github,
@@ -75,6 +77,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Slack]: 'slack',
+  [WorkbenchToolType.Pagerduty]: 'pagerduty',
   [WorkbenchToolType.Teams]: 'teams',
   [WorkbenchToolType.Atlassian]: 'atlassian',
   [WorkbenchToolType.Exa]: 'exa',
@@ -134,6 +137,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Atlassian]: 'Atlassian',
   [WorkbenchToolType.Linear]: 'Linear',
   [WorkbenchToolType.Slack]: 'Slack',
+  [WorkbenchToolType.Pagerduty]: 'PagerDuty',
   [WorkbenchToolType.Teams]: 'Microsoft Teams',
   [WorkbenchToolType.Mcp]: 'MCP',
   [WorkbenchToolType.Sentry]: 'Sentry',
@@ -176,8 +180,9 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
-  [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Integration],
-  [WorkbenchToolType.Teams]: [WorkbenchToolCategory.Integration],
+  [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Chat],
+  [WorkbenchToolType.Pagerduty]: [WorkbenchToolCategory.Integration],
+  [WorkbenchToolType.Teams]: [WorkbenchToolCategory.Chat],
   [WorkbenchToolType.Exa]: [WorkbenchToolCategory.Search],
   [WorkbenchToolType.Github]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.Gitlab]: [WorkbenchToolCategory.Scm],
@@ -223,6 +228,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Slack]:
     'Connect to Slack to search channels, read threads, and post messages.',
+  [WorkbenchToolType.Pagerduty]:
+    'Connect to PagerDuty to fetch incident details, notes, and log entries missing from webhooks.',
   [WorkbenchToolType.Teams]:
     'Connect to Microsoft Teams via Graph to list teams and channels, search users, and post messages.',
   [WorkbenchToolType.Exa]:
@@ -335,13 +342,12 @@ export function WorkbenchToolIcon({
   const Icon =
     type === WorkbenchToolType.Cloud && provider
       ? PROVIDER_TO_ICON[provider]
-      : type === WorkbenchToolType.Sentry
-        ? SentryLogoIcon
-        : type === WorkbenchToolType.Mcp
-          ? McpLogoIcon
-          : isConfigurableWorkbenchToolType(type)
-            ? toolToIcon[type]
-            : ToolsIcon
+      : type === WorkbenchToolType.Mcp
+        ? McpLogoIcon
+        : isConfigurableWorkbenchToolType(type)
+          ? toolToIcon[type]
+          : ToolsIcon
+
   return (
     <Icon
       fullColor={fullColor}
@@ -384,6 +390,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Slack]: SlackLogoIcon,
+  [WorkbenchToolType.Pagerduty]: PagerdutyLogoIcon,
   [WorkbenchToolType.Teams]: MsTeamsLogoIcon,
   [WorkbenchToolType.Exa]: ExaLogoIcon,
   [WorkbenchToolType.Github]: GitHubLogoIcon,

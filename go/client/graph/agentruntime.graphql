@@ -165,6 +165,7 @@ fragment AgentTodoFragment on AgentTodo {
 fragment ScmCredentialFragment on ScmCreds {
     token
     username
+    exaKey
 }
 
 fragment PluralCredsFragment on PluralCreds {

@@ -475,8 +475,9 @@ func (t *AgentTodoFragment) GetTitle() string {
 }
 
 type ScmCredentialFragment struct {
-	Token    string "json:\"token\" graphql:\"token\""
-	Username string "json:\"username\" graphql:\"username\""
+	Token    string  "json:\"token\" graphql:\"token\""
+	Username string  "json:\"username\" graphql:\"username\""
+	ExaKey   *string "json:\"exaKey,omitempty\" graphql:\"exaKey\""
 }
 
 func (t *ScmCredentialFragment) GetToken() string {
@@ -490,6 +491,12 @@ func (t *ScmCredentialFragment) GetUsername() string {
 		t = &ScmCredentialFragment{}
 	}
 	return t.Username
+}
+func (t *ScmCredentialFragment) GetExaKey() *string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.ExaKey
 }
 
 type PluralCredsFragment struct {
@@ -5037,6 +5044,7 @@ type SentinelCheckIntegrationTestConfigurationFragment struct {
 	Tags               map[string]any                                               "json:\"tags,omitempty\" graphql:\"tags\""
 	RerunFailures      *bool                                                        "json:\"rerunFailures,omitempty\" graphql:\"rerunFailures\""
 	RerunFailuresCount *int64                                                       "json:\"rerunFailuresCount,omitempty\" graphql:\"rerunFailuresCount\""
+	PostrunScript      *string                                                      "json:\"postrunScript,omitempty\" graphql:\"postrunScript\""
 	Gotestsum          *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum "json:\"gotestsum,omitempty\" graphql:\"gotestsum\""
 	Job                *JobSpecFragment                                             "json:\"job,omitempty\" graphql:\"job\""
 	Cases              []*TestCaseConfigurationFragment                             "json:\"cases,omitempty\" graphql:\"cases\""
@@ -5066,6 +5074,12 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment) GetRerunFailuresCoun
 		t = &SentinelCheckIntegrationTestConfigurationFragment{}
 	}
 	return t.RerunFailuresCount
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment) GetPostrunScript() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment{}
+	}
+	return t.PostrunScript
 }
 func (t *SentinelCheckIntegrationTestConfigurationFragment) GetGotestsum() *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum {
 	if t == nil {
@@ -39128,8 +39142,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39278,8 +39293,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39437,8 +39453,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39643,8 +39660,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39787,8 +39805,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
+    token
+    username
+    exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -54314,6 +54333,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -54512,6 +54532,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -54639,6 +54660,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -54879,6 +54901,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -55032,6 +55055,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -55229,6 +55253,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -55451,6 +55476,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel
@@ -55648,6 +55674,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	tags
 	rerunFailures
 	rerunFailuresCount
+	postrunScript
 	gotestsum {
 		p
 		parallel

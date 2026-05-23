@@ -194,6 +194,9 @@ fragment WorkbenchTool on WorkbenchTool {
     slack {
       url
     }
+    pagerduty {
+      url
+    }
     teams {
       clientId
       tenantId

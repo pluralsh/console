@@ -61,6 +61,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :default,              :sentinel_check_integration_test_default_attributes, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
     field :rerun_failures,       :boolean, description: "whether to rerun failed tests"
     field :rerun_failures_count, :integer, description: "how many times to rerun failures"
+    field :postrun_script,       :string, description: "a script to run after the integration test job completes"
 
     field :cases, list_of(:sentinel_check_integration_test_case_attributes), description: "a list of custom test cases to run for this check"
 
@@ -193,6 +194,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :cases,         list_of(:sentinel_check_integration_test_case_configuration), description: "a list of custom test cases to run for this check"
     field :rerun_failures,       :boolean, description: "whether to rerun failed tests"
     field :rerun_failures_count, :integer, description: "how many times to rerun failures"
+    field :postrun_script,       :string, description: "a script to run after the integration test job completes"
   end
 
   object :sentinel_check_integration_test_default_configuration do

@@ -7958,6 +7958,11 @@ func (in *SentinelCheckIntegrationTestConfiguration) DeepCopyInto(out *SentinelC
 		*out = new(int64)
 		**out = **in
 	}
+	if in.PostrunScript != nil {
+		in, out := &in.PostrunScript, &out.PostrunScript
+		*out = new(string)
+		**out = **in
+	}
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)
@@ -9017,7 +9022,7 @@ func (in *ServiceTemplate) DeepCopyInto(out *ServiceTemplate) {
 	}
 	if in.Dependencies != nil {
 		in, out := &in.Dependencies, &out.Dependencies
-		*out = make([]v1.ObjectReference, len(*in))
+		*out = make([]ServiceDependency, len(*in))
 		copy(*out, *in)
 	}
 	if in.ConfigurationRef != nil {

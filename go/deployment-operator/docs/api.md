@@ -271,7 +271,7 @@ _Appears in:_
 | `bootstrapScript` _string_ | BootstrapScript is a bash script that will be executed inside the cloned repository<br />directory before the coding agent starts. It can be used to install dependencies,<br />configure tooling, or perform any other setup required by the agent. |  | Optional: \{\} <br /> |
 | `git` _[GitSpec](#gitspec)_ | Git configure commit signing on agent run. When provided, the runtime will be configured to sign git commits using the provided key reference. |  |  |
 | `babysitInterval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | BabysitInterval configures the interval for the operator to check on the health of the agent runtime and perform necessary babysitting actions (e.g. restarting unhealthy runtimes). When not provided, a default interval of 1 minute will be used. |  |  |
-| `exaMcpServers` _[ExaMcpServerConfig](#examcpserverconfig) array_ | ExaMcpServers defines external MCP servers that the agent runtime should connect to. When provided, the runtime will be configured to connect to these external MCP servers for tool and action execution. |  |  |
+| `exaConnection` _[ExaConnection](#exaconnection)_ | ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server. |  |  |
 
 
 #### Binding
@@ -561,7 +561,7 @@ _Appears in:_
 
 
 
-#### ExaMcpServerConfig
+#### ExaConnection
 
 
 
@@ -574,9 +574,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ |  |  |  |
-| `url` _string_ |  |  |  |
-| `apiKey` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  |  |
+| `url` _string_ | URL is the Exa API base URL. Defaults to https://api.exa.ai when unset. |  | Optional: \{\} <br /> |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef references a Secret containing the Exa API key. |  | Optional: \{\} <br /> |
+| `proxyUrl` _string_ | ProxyURL is an HTTP proxy URL used for Exa API requests. |  | Optional: \{\} <br /> |
 
 
 

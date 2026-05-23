@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "description": "List log entries for a PagerDuty incident via GET /incidents/{id}/log_entries. Trigger log entries may include channel details with additional context from manual or integration triggers.",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "PagerDuty incident id or incident number."
+    },
+    "is_overview": {
+      "type": "boolean",
+      "description": "When true, return only the most important log entries."
+    },
+    "since": {
+      "type": "string",
+      "description": "ISO8601 start of date range."
+    },
+    "until": {
+      "type": "string",
+      "description": "ISO8601 end of date range."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Page size."
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Pagination offset."
+    }
+  },
+  "required": ["incident_id"],
+  "additionalProperties": false
+}

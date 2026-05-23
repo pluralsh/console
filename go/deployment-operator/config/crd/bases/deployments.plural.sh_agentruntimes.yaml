@@ -1948,45 +1948,42 @@ spec:
                   Dind enables Docker-in-Docker for this agent runtime.
                   When true, the runtime will be configured to run with DinD support.
                 type: boolean
-              exaMcpServers:
-                description: ExaMcpServers defines external MCP servers that the agent
-                  runtime should connect to. When provided, the runtime will be configured
-                  to connect to these external MCP servers for tool and action execution.
-                items:
-                  properties:
-                    apiKey:
-                      description: SecretKeySelector selects a key of a Secret.
-                      properties:
-                        key:
-                          description: The key of the secret to select from.  Must
-                            be a valid secret key.
-                          type: string
-                        name:
-                          default: ""
-                          description: |-
-                            Name of the referent.
-                            This field is effectively required, but due to backwards compatibility is
-                            allowed to be empty. Instances of this type with an empty value here are
-                            almost certainly wrong.
-                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          type: string
-                        optional:
-                          description: Specify whether the Secret or its key must
-                            be defined
-                          type: boolean
-                      required:
-                      - key
-                      type: object
-                      x-kubernetes-map-type: atomic
-                    name:
-                      type: string
-                    url:
-                      type: string
-                  required:
-                  - name
-                  - url
-                  type: object
-                type: array
+              exaConnection:
+                description: ExaConnection enables Exa web search and content retrieval
+                  tools on the Plural MCP server.
+                properties:
+                  apiKeySecretRef:
+                    description: SecretKeySelector selects a key of a Secret.
+                    properties:
+                      key:
+                        description: The key of the secret to select from.  Must
+                          be a valid secret key.
+                        type: string
+                      name:
+                        default: ""
+                        description: |-
+                          Name of the referent.
+                          This field is effectively required, but due to backwards compatibility is
+                          allowed to be empty. Instances of this type with an empty value here are
+                          almost certainly wrong.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      optional:
+                        description: Specify whether the Secret or its key must
+                          be defined
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  url:
+                    description: URL is the Exa API base URL. Defaults to https://api.exa.ai
+                      when unset.
+                    type: string
+                  proxyUrl:
+                    description: ProxyURL is an HTTP proxy URL used for Exa API requests.
+                    type: string
+                type: object
               git:
                 description: Git configure commit signing on agent run. When provided,
                   the runtime will be configured to sign git commits using the provided

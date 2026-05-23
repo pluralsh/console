@@ -294,6 +294,7 @@ func (r *SentinelReconciler) buildIntegrationTestConfiguration(ctx context.Conte
 		Format:             integrationTest.Format,
 		RerunFailures:      integrationTest.RerunFailures,
 		RerunFailuresCount: integrationTest.RerunFailuresCount,
+		PostrunScript:      integrationTest.PostrunScript,
 	}
 
 	if integrationTest.Gotestsum != nil {

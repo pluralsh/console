@@ -96,6 +96,10 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	// +kubebuilder:validation:Optional
 	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
 
+	// PostrunScript is a script to run after the integration test job completes.
+	// +kubebuilder:validation:Optional
+	PostrunScript *string `json:"postrunScript,omitempty"`
+
 	// RepositoryRef references a Git repository to use for this integration test.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`

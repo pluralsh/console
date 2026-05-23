@@ -29,7 +29,8 @@ defmodule Console.Schema.WorkbenchTool do
     gitlab: 20,
     bitbucket: 21,
     bitbucket_datacenter: 22,
-    azure_devops: 23
+    azure_devops: 23,
+    pagerduty: 24
 
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8, chat: 9
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
@@ -76,6 +77,10 @@ defmodule Console.Schema.WorkbenchTool do
 
       embeds_one :slack, SlackConnection, on_replace: :update do
         field :bot_token, EncryptedString
+      end
+
+      embeds_one :pagerduty, PagerdutyConnection, on_replace: :update do
+        field :api_token, EncryptedString
       end
 
       embeds_one :teams, TeamsConnection, on_replace: :update do
@@ -308,6 +313,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:github), do: [:scm]
   defp categories(:linear), do: [:ticketing]
   defp categories(:slack), do: [:chat]
+  defp categories(:pagerduty), do: [:integration]
   defp categories(:teams), do: [:chat]
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
@@ -336,6 +342,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:github, with: &github_configuration_changeset/2)
     |> cast_embed(:linear, with: &linear_configuration_changeset/2)
     |> cast_embed(:slack, with: &slack_configuration_changeset/2)
+    |> cast_embed(:pagerduty, with: &pagerduty_configuration_changeset/2)
     |> cast_embed(:teams, with: &teams_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
@@ -440,6 +447,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(bot_token)a)
     |> validate_required([:bot_token])
+  end
+
+  defp pagerduty_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(api_token)a)
+    |> validate_required([:api_token])
   end
 
   defp teams_configuration_changeset(model, attrs) do

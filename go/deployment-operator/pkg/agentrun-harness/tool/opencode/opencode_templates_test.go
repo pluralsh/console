@@ -4,10 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/samber/lo"
-
 	console "github.com/pluralsh/console/go/client"
-	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 )
 
 const (
@@ -193,89 +190,8 @@ func TestConfigTemplate_Provider(t *testing.T) {
 	})
 }
 
-func TestConfigTemplate_ExaMcpServers(t *testing.T) {
-	t.Run("no ExaMcpConfigs renders only plural MCP server", func(t *testing.T) {
-		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
-
-		mcp := out["mcp"].(map[string]any)
-		if len(mcp) != 1 {
-			t.Errorf("expected 1 MCP server, got %d: %v", len(mcp), mcp)
-		}
-		if _, ok := mcp["plural"]; !ok {
-			t.Error("mcp.plural missing")
-		}
-	})
-
-	t.Run("ExaMcpConfig without ApiKey renders remote server without headers", func(t *testing.T) {
-		input := baseInput(console.AgentRunModeWrite)
-		input.ExaMcpConfigs = []agentrunv1.ExaMcpServerConfig{
-			{Name: "exa", Url: "https://mcp.exa.ai/mcp"},
-		}
-
-		out := renderJSON(t, input)
-
-		mcp := out["mcp"].(map[string]any)
-		exa, ok := mcp["exa"].(map[string]any)
-		if !ok {
-			t.Fatal("mcp.exa missing or not an object")
-		}
-		if exa["type"] != "remote" {
-			t.Errorf("expected type=remote, got %v", exa["type"])
-		}
-		if exa["url"] != "https://mcp.exa.ai/mcp" {
-			t.Errorf("expected url=https://mcp.exa.ai/mcp, got %v", exa["url"])
-		}
-		if exa["enabled"] != true {
-			t.Errorf("expected enabled=true, got %v", exa["enabled"])
-		}
-		if _, hasHeaders := exa["headers"]; hasHeaders {
-			t.Error("headers should not be present when ApiKey is nil")
-		}
-	})
-
-	t.Run("ExaMcpConfig with ApiKey renders x-api-key header", func(t *testing.T) {
-		input := baseInput(console.AgentRunModeWrite)
-		input.ExaMcpConfigs = []agentrunv1.ExaMcpServerConfig{
-			{Name: "exa", Url: "https://mcp.exa.ai/mcp", ApiKey: lo.ToPtr("secret-key")},
-		}
-
-		out := renderJSON(t, input)
-
-		mcp := out["mcp"].(map[string]any)
-		exa := mcp["exa"].(map[string]any)
-		headers, ok := exa["headers"].(map[string]any)
-		if !ok {
-			t.Fatal("mcp.exa.headers missing or not an object")
-		}
-		if headers["x-api-key"] != "secret-key" {
-			t.Errorf("expected x-api-key=secret-key, got %v", headers["x-api-key"])
-		}
-	})
-
-	t.Run("multiple ExaMcpConfigs are all rendered", func(t *testing.T) {
-		input := baseInput(console.AgentRunModeWrite)
-		input.ExaMcpConfigs = []agentrunv1.ExaMcpServerConfig{
-			{Name: "exa", Url: "https://mcp.exa.ai/mcp", ApiKey: lo.ToPtr("key1")},
-			{Name: "search", Url: "https://mcp.search.example/mcp"},
-		}
-
-		out := renderJSON(t, input)
-
-		mcp := out["mcp"].(map[string]any)
-		if len(mcp) != 3 {
-			t.Errorf("expected 3 MCP servers (plural + 2 exa), got %d: %v", len(mcp), mcp)
-		}
-		if _, ok := mcp["exa"]; !ok {
-			t.Error("mcp.exa missing")
-		}
-		if _, ok := mcp["search"]; !ok {
-			t.Error("mcp.search missing")
-		}
-	})
-}
-
 func TestConfigTemplate_AgentTools(t *testing.T) {
-	t.Run("no ExaMcpConfigs: analysis agent has plural* tool only", func(t *testing.T) {
+	t.Run("analysis agent has plural* tool only", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
 
 		agent := out["agent"].(map[string]any)
@@ -287,31 +203,7 @@ func TestConfigTemplate_AgentTools(t *testing.T) {
 		}
 		for k := range tools {
 			if k != "plural*" {
-				t.Errorf("unexpected tool %q in analysis agent tools (no ExaMcpConfigs)", k)
-			}
-		}
-	})
-
-	t.Run("ExaMcpConfigs: analysis agent includes <name>* tool entries", func(t *testing.T) {
-		input := baseInput(console.AgentRunModeWrite)
-		input.ExaMcpConfigs = []agentrunv1.ExaMcpServerConfig{
-			{Name: "exa", Url: "https://mcp.exa.ai/mcp"},
-			{Name: "search", Url: "https://mcp.search.example/mcp"},
-		}
-
-		out := renderJSON(t, input)
-
-		agent := out["agent"].(map[string]any)
-		for _, agentName := range []string{"analysis", "autonomous"} {
-			a := agent[agentName].(map[string]any)
-			tools := a["tools"].(map[string]any)
-			for _, cfg := range input.ExaMcpConfigs {
-				key := cfg.Name + "*"
-				if v, ok := tools[key]; !ok {
-					t.Errorf("agent.%s.tools missing %q", agentName, key)
-				} else if v != true {
-					t.Errorf("agent.%s.tools[%q] should be true, got %v", agentName, key, v)
-				}
+				t.Errorf("unexpected tool %q in analysis agent tools", k)
 			}
 		}
 	})

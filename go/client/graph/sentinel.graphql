@@ -145,6 +145,7 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
     tags
     rerunFailures
     rerunFailuresCount
+    postrunScript
     gotestsum {
         p
         parallel

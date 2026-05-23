@@ -5,18 +5,9 @@ import (
 	"path/filepath"
 
 	"github.com/pelletier/go-toml/v2"
-)
 
-func loadPrompt(path string) (string, error) {
-	if path == "" {
-		return "", nil
-	}
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
-}
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/dind"
+)
 
 func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput, providers []ModelProviderInput) (*CodexConfig, error) {
 	cfg := &CodexConfig{
@@ -43,26 +34,20 @@ func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput
 
 	// Add profiles
 	for _, a := range agents {
-		prompt, err := loadPrompt(a.PromptFile)
-		if err != nil {
-			return nil, err
-		}
-
-		cfg.Profiles[a.Name] = &Profile{
-			Model:                a.Model,
-			ModelProvider:        a.ModelProvider,
-			SandboxMode:          a.SandboxMode,
-			ApprovalPolicy:       a.ApprovalPolicy,
-			ModelReasoningEffort: a.ModelReasoningEffort,
-			ShellEnvironmentPolicy: &ShellEnvPolicy{
-				IncludeOnly: a.AllowedEnvVars,
-			},
+		profile := &Profile{
+			Model:                  a.Model,
+			ModelProvider:          a.ModelProvider,
+			SandboxMode:            a.SandboxMode,
+			ApprovalPolicy:         a.ApprovalPolicy,
+			ModelReasoningEffort:   a.ModelReasoningEffort,
+			ShellEnvironmentPolicy: shellEnvPolicy(a.DindEnabled),
 			Features: &Features{
 				WebSearchRequest: a.EnableWebSearch,
 				ShellSnapshot:    a.EnableShellCache,
 			},
-			Prompt: prompt,
+			ModelInstructionsFile: a.ModelInstructionsFile,
 		}
+		cfg.Profiles[a.Name] = profile
 	}
 
 	// Add MCP servers
@@ -99,4 +84,21 @@ func WriteCodexConfig(basePath string, cfg *CodexConfig) (string, error) {
 	}
 
 	return filePath, nil
+}
+
+func shellEnvPolicy(dindEnabled bool) *ShellEnvPolicy {
+	policy := &ShellEnvPolicy{
+		IncludeOnly: codexAllowedEnvVars(dindEnabled),
+	}
+	if !dindEnabled {
+		return policy
+	}
+
+	policy.Set = map[string]string{}
+	for _, key := range []string{dind.DockerHostEnv, dind.DockerTLSVerifyEnv, dind.DockerCertPathEnv} {
+		if val := os.Getenv(key); val != "" {
+			policy.Set[key] = val
+		}
+	}
+	return policy
 }
