@@ -158,7 +158,7 @@ jobs:
     steps:
       - name: Extract version
         id: version
-        run: echo "version=${GITHUB_REF_NAME#go/deployment-operator/}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${GITHUB_REF_NAME#go/deployment-operator/v}" >> "$GITHUB_OUTPUT"
       - name: Authenticate
         id: plural
         uses: pluralsh/setup-plural@v2
