@@ -6,7 +6,7 @@ defmodule Console.AI.Tools.ToolSearch do
   embedded_schema do
     field :enabled,     :map, virtual: true
     field :query,       :string
-    field :max_results, :integer
+    field :max_results, :integer, default: 10
   end
 
   @json_schema Console.priv_file!("tools/tool_search.json") |> Jason.decode!()

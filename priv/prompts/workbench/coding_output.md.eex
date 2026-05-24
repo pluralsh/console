@@ -6,7 +6,7 @@ The coding agent completed its task.  Here are the results:
 ## Summary
 <%= @analysis.summary %>
 
-<%= Enum.map(@analysis.bullets, &"- #{&1}") |> Enum.join("\n") %>
+<%= Enum.map(@analysis.bullets || [], &"- #{&1}") |> Enum.join("\n") %>
 
 ## Details
 <%= @analysis.analysis %>

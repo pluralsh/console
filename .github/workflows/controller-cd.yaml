@@ -27,7 +27,6 @@ jobs:
       run:
         shell: bash
         working-directory: go/controller
-    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v6

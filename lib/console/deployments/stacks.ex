@@ -911,10 +911,15 @@ defmodule Console.Deployments.Stacks do
     |> Repo.exists?()
   end
 
-  defp filter(%Stack{id: id}), do: StackRun.for_stack(id)
+  defp filter(%Stack{id: id}) do
+    StackRun.for_stack(id)
+    |> StackRun.wet()
+  end
+
   defp filter(%PullRequest{stack_id: sid, id: id}) do
     StackRun.for_stack(sid)
     |> StackRun.for_pr(id)
+    |> StackRun.dry()
   end
 
   @doc """
