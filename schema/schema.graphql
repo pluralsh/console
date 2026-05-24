@@ -1529,7 +1529,7 @@ type RootSubscriptionType {
 
   agentRunDelta(id: ID!): AgentRunDelta
 
-  workbenchJobDelta(id: ID!): WorkbenchJobDelta
+  workbenchJobDelta(id: ID, workbenchId: ID): WorkbenchJobDelta
 
   workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
 

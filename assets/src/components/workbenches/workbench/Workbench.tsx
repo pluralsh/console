@@ -58,6 +58,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
+import { useWorkbenchJobsDelta } from './useWorkbenchJobsDelta'
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
@@ -360,6 +361,8 @@ export function Workbench() {
   })
   const isLoading = !data && loading
   const workbench = data?.workbench
+
+  useWorkbenchJobsDelta(id)
 
   const openToolsEdit = useCallback(() => setToolsEditOpen(true), [])
   const openDelete = useCallback(() => setDeleteModalOpen(true), [])
