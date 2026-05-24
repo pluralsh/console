@@ -13,6 +13,7 @@ A few things to use to justify your grade:
   b. Was the solution satisfactorily defended.
   c. Was there human intervention needed to steer to the right solution.
   d. Was a pull request or some change able to be taken, if that was requested.
+4. Whether the user needed to resteer the investigation.  This usually means a wrong direction was taken, and you should provide clear criticism of that.
 
 <%= if (is_binary(@eval.conclusion_rules) && byte_size(@eval.conclusion_rules) > 0) ||
        (is_binary(@eval.prompt_rules) && byte_size(@eval.prompt_rules) > 0) ||

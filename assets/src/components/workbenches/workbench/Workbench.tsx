@@ -93,7 +93,6 @@ export type WorkbenchSidebar =
 
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
-  showDescription?: boolean
   showEditWorkbenchButton?: boolean
   headerActions?: ReactNode
   children?: ReactNode
@@ -101,7 +100,6 @@ export type WorkbenchPageLayoutProps = {
 
 export function WorkbenchPageLayout({
   sidebar = { kind: 'default' },
-  showDescription = true,
   showEditWorkbenchButton = true,
   headerActions,
   children,
@@ -111,6 +109,7 @@ export function WorkbenchPageLayout({
   const { workbenchId, isLoading, workbench, openToolsEdit, openDelete } =
     useOutletContext<WorkbenchOutletContext>()
 
+  const { pathname } = useLocation()
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
       ?.params ?? {}
@@ -122,6 +121,7 @@ export function WorkbenchPageLayout({
   )
 
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
+  const isLaunchTab = pathname === workbenchBasePath
   const jobsTabPath = `${workbenchBasePath}/${WORKBENCH_JOBS_REL_PATH}`
   const hasInProgressJobs = useWorkbenchHasInProgressJobs(workbenchId)
 
@@ -277,7 +277,7 @@ export function WorkbenchPageLayout({
               />
             </MoreMenu>
           </Flex>
-          {showDescription && (
+          {isLaunchTab && (
             <StretchedFlex>
               {isLoading ? (
                 <RectangleSkeleton

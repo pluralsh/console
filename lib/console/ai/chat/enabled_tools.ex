@@ -16,11 +16,11 @@ defmodule Console.AI.Chat.EnabledTools do
     Enum.filter(tools, &MapSet.member?(enabled, Console.AI.Tool.name(&1)))
   end
 
-  def search(%__MODULE__{tools: tools}, query, max_results \\ 5) do
+  def search(%__MODULE__{tools: tools}, query, max_results \\ 10) do
     with {:ok, regex} <- Regex.compile(query) do
       tools
       |> Enum.filter(&Regex.match?(regex, Console.AI.Tool.name(&1)))
-      |> Enum.take(max_results)
+      |> Enum.take(max_results || 10)
       |> Enum.map(& %{
         name: Console.AI.Tool.name(&1),
         description: Console.AI.Tool.description(&1),

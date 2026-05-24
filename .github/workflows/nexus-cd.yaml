@@ -30,7 +30,6 @@ jobs:
       run:
         shell: bash
         working-directory: go/nexus
-    timeout-minutes: 5
     steps:
     - uses: actions/checkout@v6
     - uses: actions/setup-go@v6

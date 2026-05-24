@@ -35,19 +35,25 @@ const clampedMarkdownInnerStyles = ({
 `
 
 /** Muted typography + line clamp (`SimplifiedMarkdown` uses `rootLayout="block"` so chips stay in-flow in `<p>`). */
-const tableCellClampStyles = ({ theme }) => css`
+const tableCellClampStyles = ({
+  theme,
+  lines = 3,
+}: {
+  theme: any
+  lines?: number
+}) => css`
   ${theme.partials.text.caption};
   color: ${theme.colors['text-light']};
   min-width: 0;
   overflow: hidden;
 
   & > div {
-    ${clampedMarkdownInnerStyles({ theme })}
+    ${clampedMarkdownInnerStyles({ theme, lines })}
   }
 `
 
-const TableCellMarkdownWrapSC = styled(MarkdownWrapSC)`
-  ${tableCellClampStyles}
+const TableCellMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
+  ${({ theme, $lines }) => tableCellClampStyles({ theme, lines: $lines })}
 `
 
 const sidePanelClampStyles = ({ theme }) => css`
@@ -101,7 +107,7 @@ export function WorkbenchStoredPromptMarkdown({
   truncateVisibleChars?: number
   /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). `jobCard`: body2 + `text-light` + same clamp (home recent jobs). */
   density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard'
-  /** Number of lines before truncation when density is `jobCard`. Default 3. */
+  /** Number of lines before truncation when density is `tableCell` or `jobCard`. Default 3. */
   clampLines?: number
 }) {
   const clampedDensity =
@@ -114,7 +120,7 @@ export function WorkbenchStoredPromptMarkdown({
 
   if (density === 'tableCell') {
     return (
-      <TableCellMarkdownWrapSC>
+      <TableCellMarkdownWrapSC $lines={clampLines}>
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"
