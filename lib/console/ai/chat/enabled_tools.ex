@@ -1,10 +1,12 @@
 defmodule Console.AI.Chat.EnabledTools do
   defstruct [:enabled, tool_names: [], tools: []]
 
-  def new(tools) do
+  def new(tools, enabled \\ []) do
     names = Enum.map(tools, &Console.AI.Tool.name/1)
-    %__MODULE__{enabled: MapSet.new(), tool_names: names, tools: tools}
+    %__MODULE__{enabled: MapSet.new(enabled, &Console.AI.Tool.name/1), tool_names: names, tools: tools}
   end
+
+  def enabled(%__MODULE__{enabled: enabled}), do: MapSet.to_list(enabled)
 
   def enable(%__MODULE__{enabled: enabled} = s, tools) when is_list(tools) do
     %{s | enabled: MapSet.union(enabled, MapSet.new(tools))}

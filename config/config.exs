@@ -95,8 +95,8 @@ config :console, :ai_defaults,
     tool_model: "claude-4-5-sonnet-latest"
   },
   bedrock: %{
-    model: "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    tool_model: "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model: "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    tool_model: "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
     embedding_model: "cohere.embed-english-v3"
   },
   ollama: %{},

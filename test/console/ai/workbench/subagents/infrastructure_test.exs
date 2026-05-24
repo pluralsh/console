@@ -24,6 +24,11 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
       )
 
       expect(Provider, :completion, fn _, _ ->
+        {:ok, "enabling tools", [
+          %Tool{name: "enable_tools", arguments: %{"tools" => ["__plrl__service_search"]}, id: "0"}
+        ]}
+      end)
+      expect(Provider, :completion, fn _, _ ->
         {:ok, "try infrastructure", [
           %Tool{name: "__plrl__service_search", arguments: %{"query" => "error"}, id: "1"}
         ]}
@@ -41,6 +46,11 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
               children: [],
             }
           }
+        ]}
+      end)
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete", [
+          %Tool{name: "enable_tools", arguments: %{"tools" => ["subagent_result"]}, id: "2"}
         ]}
       end)
       expect(Provider, :completion, fn _, _ ->
