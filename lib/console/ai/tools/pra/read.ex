@@ -4,7 +4,7 @@ defmodule Console.AI.Tools.Pra.Read do
   import Console.AI.Tools.Pra.Utils
 
   embedded_schema do
-    field :dir, :string, virtual: true
+    field :dir,  :string, virtual: true
     field :path, :string
   end
 
