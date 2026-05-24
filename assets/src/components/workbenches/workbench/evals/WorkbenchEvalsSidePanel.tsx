@@ -1,7 +1,7 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { type ComponentProps, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { prettifyPrompt } from 'components/utils/contentEditableChips'
+import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
@@ -11,8 +11,7 @@ import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/Workbench
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
-import { TRUNCATE } from 'components/utils/truncate'
-import { groupBy, truncate } from 'lodash'
+import { groupBy } from 'lodash'
 
 type EvalRow = WorkbenchEvalResultRowFragment & {
   workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
@@ -142,17 +141,11 @@ export function WorkbenchEvalsSidePanel({
                   gap="xxxsmall"
                   minWidth={0}
                 >
-                  <span
-                    css={{
-                      ...TRUNCATE,
-                      ...theme.partials.text.body2LooseLineHeight,
-                      color: theme.colors['text-light'],
-                    }}
-                  >
-                    {truncate(prettifyPrompt(row.workbenchJob.prompt ?? ''), {
-                      length: 150,
-                    })}
-                  </span>
+                  <WorkbenchStoredPromptMarkdown
+                    text={row.workbenchJob.prompt ?? ''}
+                    density="tableCell"
+                    clampLines={1}
+                  />
                   <span
                     css={{
                       ...theme.partials.text.caption,

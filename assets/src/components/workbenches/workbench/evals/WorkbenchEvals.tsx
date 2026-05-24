@@ -32,6 +32,7 @@ import {
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
+import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -56,9 +57,7 @@ export function WorkbenchEvals() {
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
   const [promptExpanded, setPromptExpanded] = useState(false)
-  const [promptHasOverflow, setPromptHasOverflow] = useState(false)
   const qualityTabsStateRef = useRef<any>(undefined)
-  const promptTextRef = useRef<HTMLSpanElement>(null)
 
   const { data, loading, error } = useWorkbenchEvalsQuery({
     variables: { id: workbenchId, first: 100 },
@@ -85,7 +84,7 @@ export function WorkbenchEvals() {
   }
   const selectedEvalResultIdForSkill = selectedEvalRow?.id
   const promptText = (selectedEvalRow?.workbenchJob?.prompt ?? '').trim()
-  const canExpandPrompt = promptHasOverflow || promptExpanded
+  const canExpandPrompt = promptText.length > 80 || promptExpanded
 
   useEffect(() => {
     if (!selectedEvalRow?.id || evalResultIdFromPath === selectedEvalRow.id)
@@ -102,26 +101,7 @@ export function WorkbenchEvals() {
 
   useEffect(() => {
     setPromptExpanded(false)
-    setPromptHasOverflow(false)
   }, [selectedEvalRow?.id])
-
-  useEffect(() => {
-    if (promptExpanded) return
-
-    const measureOverflow = () => {
-      const el = promptTextRef.current
-      if (!el) return
-      setPromptHasOverflow(el.scrollHeight > el.clientHeight + 1)
-    }
-
-    const rafId = requestAnimationFrame(measureOverflow)
-    window.addEventListener('resize', measureOverflow)
-
-    return () => {
-      cancelAnimationFrame(rafId)
-      window.removeEventListener('resize', measureOverflow)
-    }
-  }, [promptText, promptExpanded, qualityBreakdownCollapsed])
 
   return (
     <WorkbenchPageLayout
@@ -245,27 +225,22 @@ export function WorkbenchEvals() {
                       width="100%"
                       marginBottom="small"
                     >
-                      <span
-                        ref={promptTextRef}
-                        css={{
-                          ...theme.partials.text.caption,
-                          color: theme.colors['text-xlight'],
-                          display: 'block',
-                          maxWidth: '100%',
-                          overflowWrap: 'anywhere',
-                          wordBreak: 'break-word',
-                          ...(promptExpanded
-                            ? {}
-                            : {
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                              }),
-                        }}
-                      >
-                        {promptText || 'No prompt available'}
-                      </span>
+                      {promptText ? (
+                        <WorkbenchStoredPromptMarkdown
+                          text={promptText}
+                          density={promptExpanded ? 'default' : 'sidePanel'}
+                          clampLines={2}
+                        />
+                      ) : (
+                        <span
+                          css={{
+                            ...theme.partials.text.caption,
+                            color: theme.colors['text-xlight'],
+                          }}
+                        >
+                          No prompt available
+                        </span>
+                      )}
                       {canExpandPrompt && (
                         <span
                           onClick={() => setPromptExpanded((v) => !v)}
