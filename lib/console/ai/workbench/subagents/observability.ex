@@ -9,11 +9,14 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user}, %Environment{} = environment) do
-    tools(environment, user)
-    |> MemoryEngine.new(50,
+    tools = tools(environment, user)
+
+    MemoryEngine.new(tools, 50,
       system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
       acc: %{},
       callback: &callback(activity, &1),
+      tool_search: length(tools) > 10,
+      pre_enable: [ObservabilityResult, %Skills{} ,%Skill{}],
       continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)

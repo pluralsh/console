@@ -15,10 +15,13 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
-    tools(environment)
-    |> MemoryEngine.new(20,
+    tools = tools(environment)
+
+    MemoryEngine.new(tools, 20,
       system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
       acc: %{},
+      tool_search: length(tools) > 10,
+      pre_enable: [Result, %Skills{} ,%Skill{}],
       callback: &callback(activity, &1),
       continue_msg: cont_msg()
     )
