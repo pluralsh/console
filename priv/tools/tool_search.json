@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "description": "Search for tools by name and return their names and descriptions. Use this to discover tools before enabling them with enable_tools. The query is matched as a regular expression against each tool name.",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "A regular expression to match against available tool names (e.g. \"logs\", \"pagerduty.*\", \"^workbench_\")."
+        },
+        "max_results": {
+            "type": "integer",
+            "description": "The maximum number of matching tools to return. Defaults to 5 when omitted."
+        }
+    },
+    "required": ["query"]
+}
