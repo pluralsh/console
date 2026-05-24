@@ -25,7 +25,7 @@ defmodule Console.AI.Workbench.Engine do
     Canvas
   }
   alias Console.AI.Tools.Workbench.{
-    Calculator,
+    Lua,
     Complete,
     Subagents,
     Subagent,
@@ -256,7 +256,7 @@ defmodule Console.AI.Workbench.Engine do
       %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
-      Calculator,
+      Lua,
       Notes,
       Complete,
     ] ++ type_tools(job)

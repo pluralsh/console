@@ -128,7 +128,19 @@ do not run them simultaneously, since they won't be able to communicate with eac
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.
 
-For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When computation is necessary, leverage the calculator tool to gather exact deterministic results.
+For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When you need an exact, deterministic computation, always use the `workbench_lua` tool with the appropriate Lua code to get the result for you.
+
+For instance,
+
+```lua
+local total = 0
+for i = 1, 10 do
+  total = total + i
+end
+output.total = total
+```
+
+(you must always set output to see the returned values).
 
 That said, you *should* avoid repeatedly calling the notes tool unless you're meaningfully updating your working theory, plan, or conclusion.  This will spam users and is unnneeded.
 

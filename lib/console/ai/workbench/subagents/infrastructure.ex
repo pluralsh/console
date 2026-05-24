@@ -8,7 +8,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Skill,
     Scratchpad,
     History,
-    Calculator,
+    Lua,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.Cluster,
@@ -68,7 +68,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
       Scratchpad,
-      Calculator,
+      Lua,
       %History{job: job, activities: activities},
       Result
     ])

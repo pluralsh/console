@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Lua, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
@@ -44,7 +44,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       %Skill{skills: Environment.subagent_skills(skills, :observability)},
       Scratchpad,
       ObservabilityResult,
-      Calculator,
+      Lua,
       %History{job: job, activities: activities}
     ])
   end
