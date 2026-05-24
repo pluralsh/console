@@ -1548,11 +1548,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_subscriptions do
     field :workbench_job_delta, :workbench_job_delta do
-      arg :id, non_null(:id)
+      arg :id,           :id
+      arg :workbench_id, :id
 
-      config fn args, ctx ->
-        with {:ok, job} <- Deployments.workbench_job(args, ctx),
-          do: {:ok, topic: "workbench_jobs:#{job.id}"}
+      config fn
+        %{id: id}, ctx when is_binary(id) ->
+          with {:ok, job} <- Deployments.workbench_job(%{id: id}, ctx),
+            do: {:ok, topic: "workbench_jobs:#{job.id}"}
+
+        %{workbench_id: workbench_id}, ctx when is_binary(workbench_id) ->
+          with {:ok, _} <- Deployments.workbench(%{id: workbench_id}, ctx),
+            do: {:ok, topic: "workbenches:#{workbench_id}:jobs"}
+
+        _, _ ->
+          {:error, "Must specify either id or workbench_id"}
       end
     end
 

@@ -49,7 +49,11 @@ defimpl Console.GraphQl.Topic, for: Console.Schema.AgentRun do
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.WorkbenchJob do
-  def infer(%@for{id: id}, _), do: [workbench_job_delta: "workbench_jobs:#{id}"]
+  def infer(%@for{id: id, workbench_id: workbench_id}, _),
+    do: [
+      workbench_job_delta: "workbench_jobs:#{id}",
+      workbench_job_delta: "workbenches:#{workbench_id}:jobs"
+    ]
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.WorkbenchJobActivity do

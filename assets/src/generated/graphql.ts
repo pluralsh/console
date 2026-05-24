@@ -12264,7 +12264,8 @@ export type RootSubscriptionTypeWorkbenchJobActivityDeltaArgs = {
 
 
 export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -20764,11 +20765,12 @@ export type UpdateIssueWebhookMutationVariables = Exact<{
 export type UpdateIssueWebhookMutation = { __typename?: 'RootMutationType', updateIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, error?: string | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null } | null } | null };
+export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null, workingTheory?: string | null, criticism?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null } | null };
 
 export type WorkbenchJobActivityDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -44144,12 +44146,11 @@ export type UpdateIssueWebhookMutationHookResult = ReturnType<typeof useUpdateIs
 export type UpdateIssueWebhookMutationResult = Apollo.MutationResult<UpdateIssueWebhookMutation>;
 export type UpdateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>;
 export const WorkbenchJobDeltaDocument = gql`
-    subscription WorkbenchJobDelta($id: ID!) {
-  workbenchJobDelta(id: $id) {
+    subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
+  workbenchJobDelta(id: $id, workbenchId: $workbenchId) {
     delta
     payload {
-      id
-      status
+      ...WorkbenchJobTiny
       error
       result {
         ...WorkbenchJobResult
@@ -44157,7 +44158,8 @@ export const WorkbenchJobDeltaDocument = gql`
     }
   }
 }
-    ${WorkbenchJobResultFragmentDoc}`;
+    ${WorkbenchJobTinyFragmentDoc}
+${WorkbenchJobResultFragmentDoc}`;
 
 /**
  * __useWorkbenchJobDeltaSubscription__
@@ -44172,10 +44174,11 @@ export const WorkbenchJobDeltaDocument = gql`
  * const { data, loading, error } = useWorkbenchJobDeltaSubscription({
  *   variables: {
  *      id: // value for 'id'
+ *      workbenchId: // value for 'workbenchId'
  *   },
  * });
  */
-export function useWorkbenchJobDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobDeltaSubscription, WorkbenchJobDeltaSubscriptionVariables> & ({ variables: WorkbenchJobDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useWorkbenchJobDeltaSubscription(baseOptions?: Apollo.SubscriptionHookOptions<WorkbenchJobDeltaSubscription, WorkbenchJobDeltaSubscriptionVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useSubscription<WorkbenchJobDeltaSubscription, WorkbenchJobDeltaSubscriptionVariables>(WorkbenchJobDeltaDocument, options);
       }
