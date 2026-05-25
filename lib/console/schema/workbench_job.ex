@@ -166,6 +166,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
     status: binary,
     prompt: binary,
     conclusion: binary,
+    criticism: binary,
     topology: binary,
     activities: [%{prompt: binary, type: binary, status: binary}],
     pull_requests: [%{title: binary, url: binary, body: binary}]
@@ -173,7 +174,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
 
   @derive Jason.Encoder
 
-  defstruct [:id, :status, :prompt, :conclusion, :topology, :activities, :pull_requests]
+  defstruct [:id, :status, :prompt, :conclusion, :criticism, :topology, :activities, :pull_requests]
 
   def new(%WorkbenchJob{} = job) do
     job = Console.Repo.preload(job, [:result, :activities, :pull_requests])
@@ -181,8 +182,9 @@ defmodule Console.Schema.WorkbenchJob.Mini do
       id: job.id,
       status: job.status,
       prompt: job.prompt,
-      conclusion: job.result.conclusion,
-      topology: job.result.topology,
+      conclusion: job.result && job.result.conclusion,
+      criticism: job.result && job.result.criticism,
+      topology: job.result && job.result.topology,
       activities: Enum.map(job.activities, & %{prompt: &1.prompt, type: &1.type, status: &1.status}),
       pull_requests: Enum.map(job.pull_requests, & %{title: &1.title, url: &1.url, body: &1.body}),
     }
@@ -194,9 +196,23 @@ defmodule Console.Schema.WorkbenchJob.Mini do
       status: attrs["status"],
       prompt: attrs["prompt"],
       conclusion: attrs["conclusion"],
+      criticism: attrs["criticism"],
       topology: attrs["topology"],
       activities: Enum.map(attrs["activities"], & %{prompt: &1["prompt"], type: &1["type"], status: &1["status"]}),
       pull_requests: Enum.map(attrs["pull_requests"], & %{title: &1["title"], url: &1["url"], body: &1["body"]}),
+    }
+  end
+
+  def prompt_job(%__MODULE__{} = mini) do
+    %{
+      prompt: mini.prompt,
+      result: %{
+        conclusion: mini.conclusion,
+        criticism: mini.criticism,
+        topology: mini.topology
+      },
+      activities: mini.activities,
+      pull_requests: mini.pull_requests
     }
   end
 end

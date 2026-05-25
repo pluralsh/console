@@ -542,4 +542,96 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       assert c > 0
     end
   end
+
+  describe "WorkbenchJobCreated" do
+    test "it can vector index workbench jobs on creation" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      group = insert(:group)
+      user = insert(:user)
+
+      workbench = insert(:workbench, read_bindings: [%{group_id: group.id}], write_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench, user: user, status: :pending)
+
+      expect(Console.AI.OpenAI, :embeddings, 3, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      event = %PubSub.WorkbenchJobCreated{item: job}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+
+      {:ok, [result]} = Console.AI.VectorStore.fetch("workbench", count: 5, filters: [datatype: {:raw, :workbench_job}], user: Console.Services.Rbac.preload(user))
+      assert result.type == :workbench
+      assert result.workbench_job.id == job.id
+
+      {:ok, []} = Console.AI.VectorStore.fetch("workbench", count: 5, filters: [datatype: {:raw, :workbench_job}], user: Console.Services.Rbac.preload(insert(:user)))
+    end
+  end
+
+  describe "WorkbenchJobUpdated" do
+    test "it can vector index workbench jobs when they reach a final state" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      job = insert(:workbench_job, status: :successful, result: build(:workbench_job_result, conclusion: "done"))
+
+      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      event = %PubSub.WorkbenchJobUpdated{item: job}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
+
+    test "it ignores workbench job updates that are not in a final state" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      job = insert(:workbench_job, status: :running)
+
+      event = %PubSub.WorkbenchJobUpdated{item: job}
+      Consumer.handle_event(event)
+      ES.refresh(ES.vector_index())
+
+      {:ok, 0} = ES.count_index(ES.vector_index())
+    end
+  end
 end

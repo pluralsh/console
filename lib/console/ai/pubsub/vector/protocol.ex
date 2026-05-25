@@ -189,16 +189,34 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.CatalogDeleted do
   def resource(_), do: :ok
 end
 
-defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.WorkbenchJobResolved do
+defmodule Console.AI.PubSub.Vectorizable.WorkbenchJob do
   alias Console.Schema.WorkbenchJob
   alias Console.AI.PubSub.Vector.Indexable
 
-  def resource(%@for{item: %WorkbenchJob{} = job}) do
+  def indexable(%WorkbenchJob{} = job) do
     {users, groups} = Console.AI.Authorizable.authorize(job)
     %Indexable{
       data: WorkbenchJob.Mini.new(job),
       filters: [workbench_job_id: job.id, user_ids: users, group_ids: groups]
     }
   end
+end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.WorkbenchJobCreated do
+  alias Console.Schema.WorkbenchJob
+  alias Console.AI.PubSub.Vectorizable.WorkbenchJob, as: WorkbenchJobUtils
+
+  def resource(%@for{item: %WorkbenchJob{} = job}), do: WorkbenchJobUtils.indexable(job)
+  def resource(_), do: :ok
+end
+
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.WorkbenchJobUpdated do
+  alias Console.Schema.WorkbenchJob
+  alias Console.AI.PubSub.Vectorizable.WorkbenchJob, as: WorkbenchJobUtils
+
+  @final ~w(successful failed cancelled)a
+
+  def resource(%@for{item: %WorkbenchJob{status: s} = job}) when s in @final,
+    do: WorkbenchJobUtils.indexable(job)
   def resource(_), do: :ok
 end
