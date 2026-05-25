@@ -15,7 +15,6 @@ import {
 } from 'components/ai/chatbot/input/ChatInput'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { GqlError } from 'components/utils/Alert'
-import { TRUNCATE } from 'components/utils/truncate'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   useCreateWorkbenchJobMutation,
@@ -36,10 +35,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
-import {
-  prettifyPrompt,
-  truncateKeepingChips,
-} from 'components/utils/contentEditableChips.ts'
+import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { CaptionP } from 'components/utils/typography/Text'
 
 const MAX_WIDTH = 924
@@ -223,8 +219,6 @@ function WorkbenchPillSelector({
 }
 
 const SAVED_PROMPTS_PANEL_WIDTH = 460
-const SAVED_PROMPT_PANEL_PROMPT_CHARS = 70
-const SAVED_PROMPT_TOOLTIP_PROMPT_CHARS = 320
 
 function WorkbenchSavedPrompts({
   workbenchId,
@@ -318,7 +312,7 @@ function WorkbenchSavedPrompts({
           />,
           ...categoryPrompts.map((savedPrompt) => {
             const title = displaySavedPromptTitle(savedPrompt.title)
-            const promptText = prettifyPrompt(savedPrompt.prompt ?? '')
+            const prompt = savedPrompt.prompt ?? ''
 
             return (
               <Tooltip
@@ -348,10 +342,11 @@ function WorkbenchSavedPrompts({
                       {title}
                     </div>
                     <SavedPromptTooltipPromptSC>
-                      {truncateKeepingChips(
-                        promptText,
-                        SAVED_PROMPT_TOOLTIP_PROMPT_CHARS
-                      )}
+                      <WorkbenchStoredPromptMarkdown
+                        text={prompt}
+                        density="jobCard"
+                        clampLines={5}
+                      />
                     </SavedPromptTooltipPromptSC>
                     <CaptionP css={{ color: theme.colors['text-xlight'] }}>
                       Category: {category}
@@ -361,10 +356,13 @@ function WorkbenchSavedPrompts({
               >
                 <ListBoxItem
                   label={title}
-                  description={truncateKeepingChips(
-                    promptText,
-                    SAVED_PROMPT_PANEL_PROMPT_CHARS
-                  )}
+                  description={
+                    <WorkbenchStoredPromptMarkdown
+                      text={prompt}
+                      density="jobCard"
+                      clampLines={1}
+                    />
+                  }
                   textValue={title}
                   css={{
                     width: '100%',
@@ -375,8 +373,8 @@ function WorkbenchSavedPrompts({
                       maxWidth: '100%',
                     },
                     '.description': {
-                      ...theme.partials.text.body2,
-                      ...TRUNCATE,
+                      minWidth: 0,
+                      overflow: 'hidden',
                     },
                   }}
                 />
@@ -451,7 +449,6 @@ const SavedPromptTooltipPromptSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
   padding: theme.spacing.small,
-  ...theme.partials.text.body2,
-  color: theme.colors.text,
-  wordBreak: 'break-word',
+  minWidth: 0,
+  overflow: 'hidden',
 }))
