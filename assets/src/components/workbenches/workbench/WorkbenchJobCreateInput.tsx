@@ -256,9 +256,9 @@ function WorkbenchSavedPrompts({
       onOpenChange={setIsOpen}
       selectedKey=""
       label="Saved prompts"
-      width={420}
-      maxHeight={320}
-      placement="bottom-start"
+      width={460}
+      maxHeight={360}
+      placement="left"
       isDisabled={disabled || (loading && !data)}
       onSelectionChange={(key) => {
         const savedPrompt = key ? promptsById.get(`${key}`) : null
@@ -332,7 +332,7 @@ function SavedPromptCategoryHeader({ category }: { category: string }) {
       textValue=""
       css={{
         paddingTop: theme.spacing.small,
-        paddingBottom: theme.spacing.xxsmall,
+        paddingBottom: theme.spacing.small,
         cursor: 'default',
         pointerEvents: 'none',
         '&:hover': { backgroundColor: 'transparent' },
