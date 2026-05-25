@@ -9,9 +9,11 @@ export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
 
   return (
-    <WorkbenchPageLayout>
+    <WorkbenchPageLayout
+      showEditWorkbenchButton={false}
+      headerActions={<WorkbenchJobsSearch workbenchId={workbenchId} />}
+    >
       <WrapperSC>
-        <WorkbenchJobsSearch workbenchId={workbenchId} />
         <TableContainerSC>
           <WorkbenchJobsTable workbenchId={workbenchId} />
         </TableContainerSC>

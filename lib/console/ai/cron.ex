@@ -141,6 +141,11 @@ defmodule Console.AI.Cron do
         filters: [datatype: {:raw, [:service_component, :cluster]}],
         expiry: Timex.now() |> Timex.shift(hours: -10)
       )
+
+      VectorStore.expire(
+        filters: [datatype: {:raw, :workbench_job}],
+        expiry: Timex.now() |> Timex.shift(days: -7)
+      )
     end
   end
 

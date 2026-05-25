@@ -1,16 +1,20 @@
-import { useClickOutside, useDebounce } from '@react-hooks-library/core'
+import {
+  useClickOutside,
+  useDebounce,
+  useKeyDown,
+} from '@react-hooks-library/core'
 import {
   Card,
   CaretRightIcon,
   EmptyState,
   Flex,
-  Input,
-  MagnifyingGlassIcon,
+  SearchIcon,
   Spinner,
 } from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
+import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
   PullRequestBasicFragment,
@@ -26,14 +30,15 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { JobConclusionIcon } from './WorkbenchJobsTable'
 
 const SEARCH_LIMIT = 20
+const INPUT_WIDTH = 520
 
 export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [query, setQuery] = useState('')
-  const [open, setOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
   const debouncedQuery = useDebounce(query, 200)
   const trimmedQuery = debouncedQuery.trim()
-  const showDropdown = open && trimmedQuery.length > 0
+  const showDropdown = dropdownOpen && trimmedQuery.length > 0
 
   const { data, loading, error } = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: trimmedQuery, limit: SEARCH_LIMIT },
@@ -46,22 +51,36 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
     [data?.workbenchJobSearch]
   )
 
-  useClickOutside(ref, () => setOpen(false))
+  const clearSearch = () => {
+    setQuery('')
+    setDropdownOpen(false)
+  }
+
+  const closeDropdown = () => setDropdownOpen(false)
+
+  useClickOutside(ref, closeDropdown)
+
+  useKeyDown(['Escape'], clearSearch)
 
   return (
     <SearchWrapperSC ref={ref}>
-      <Input
-        value={query}
-        onChange={(e) => {
-          setQuery(e.currentTarget.value)
-          setOpen(true)
-        }}
-        onFocus={() => setOpen(true)}
-        placeholder="Search jobs"
-        startIcon={<MagnifyingGlassIcon color="icon-light" />}
-        showClearButton
-        width="100%"
-      />
+      <IconExpander
+        tooltip="Search jobs"
+        icon={<SearchIcon />}
+        active={!!query}
+        onClear={clearSearch}
+      >
+        <ExpandedInput
+          width={INPUT_WIDTH}
+          inputValue={query}
+          onChange={(value) => {
+            setQuery(value)
+            setDropdownOpen(true)
+          }}
+          onFocus={() => setDropdownOpen(true)}
+          placeholder="Search jobs"
+        />
+      </IconExpander>
       {showDropdown && (
         <DropdownSC
           fillLevel={1}
@@ -92,7 +111,7 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
                   key={result.id}
                   result={result}
                   workbenchId={workbenchId}
-                  onNavigate={() => setOpen(false)}
+                  onNavigate={closeDropdown}
                 />
               ))}
             </ResultsListSC>
@@ -168,15 +187,14 @@ function WorkbenchJobSearchResultRow({
 
 const SearchWrapperSC = styled.div({
   position: 'relative',
-  width: '100%',
-  maxWidth: 480,
+  display: 'inline-block',
 })
 
 const DropdownSC = styled(Card)(({ theme }) => ({
   position: 'absolute',
   top: `calc(100% + ${theme.spacing.xsmall}px)`,
   left: 0,
-  right: 0,
+  width: '100%',
   zIndex: theme.zIndexes.modal,
   maxHeight: 360,
   overflow: 'hidden',
