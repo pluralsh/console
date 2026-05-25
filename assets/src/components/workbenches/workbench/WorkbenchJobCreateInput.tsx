@@ -1,6 +1,5 @@
 import {
   ArrowTopRightIcon,
-  ArrowUpIcon,
   BookmarkIcon,
   Chip,
   ChipProps,
@@ -64,6 +63,11 @@ export function WorkbenchJobCreateInput({
   const navigate = useNavigate()
   const inputRef = useAutofocusRef<ChatInputSimpleRef>()
   const [prompt, setPrompt] = useState('')
+  const [promptSyncKey, setPromptSyncKey] = useState(0)
+
+  useEffect(() => {
+    if (promptSyncKey > 0) inputRef.current?.focus()
+  }, [inputRef, promptSyncKey])
 
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({
@@ -84,6 +88,11 @@ export function WorkbenchJobCreateInput({
       refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
       awaitRefetchQueries: true,
     })
+
+  const handleSelectSavedPrompt = (nextPrompt: string) => {
+    setPrompt(nextPrompt)
+    setPromptSyncKey((key) => key + 1)
+  }
 
   const handleSubmitPrompt = (nextPrompt?: string) => {
     const trimmedPrompt = (nextPrompt ?? prompt).trim()
@@ -110,9 +119,12 @@ export function WorkbenchJobCreateInput({
       {error && <GqlError error={error} />}
       <InputWrapperSC>
         <ChatInputSimple
+          key={`workbench-job-create-prompt-${promptSyncKey}`}
           ref={inputRef}
           disabled={disabled}
           placeholder={placeholder}
+          initialValue={prompt}
+          deserializePlrlInitialValue
           setValue={setPrompt}
           onSubmit={() => handleSubmitPrompt()}
           loading={loading}
@@ -135,7 +147,7 @@ export function WorkbenchJobCreateInput({
                   <WorkbenchSavedPrompts
                     workbenchId={workbenchId}
                     disabled={loading}
-                    onSelectPrompt={handleSubmitPrompt}
+                    onSelectPrompt={handleSelectSavedPrompt}
                   />
                   <SaveWorkbenchPromptButton
                     workbenchId={workbenchId}
@@ -311,12 +323,6 @@ function SavedPromptsOverlay({
             <SavedPromptsChip
               label={prettifyPrompt(rowData.prompt ?? '')}
               fillLevel={2}
-              rightContent={
-                <ArrowUpIcon
-                  size={12}
-                  color="icon-light"
-                />
-              }
               onClick={() => onSelectPrompt(rowData.prompt ?? '')}
             />
           )}
@@ -343,39 +349,20 @@ function SavedPromptsOverlay({
 function SavedPromptsChip({
   label,
   fillLevel,
-  rightContent,
   ...props
 }: {
   label: string
   fillLevel?: ComponentProps<typeof Chip>['fillLevel']
-  rightContent?: ComponentProps<typeof Chip>['rightContent']
 } & ChipProps) {
-  const [showRightContent, setShowRightContent] = useState(false)
-
   return (
     <Chip
       size="large"
       fillLevel={fillLevel}
       clickable
-      onMouseEnter={() => setShowRightContent(true)}
-      onMouseLeave={() => setShowRightContent(false)}
-      onFocus={() => setShowRightContent(true)}
-      onBlur={() => setShowRightContent(false)}
       style={{ borderRadius: 16, width: 'fit-content' }}
       {...props}
     >
       {truncate(label, { length: 116 })}
-      {rightContent && (
-        <span
-          css={{
-            width: showRightContent ? 'fit-content' : 0,
-            opacity: showRightContent ? 1 : 0,
-            transition: 'width 200ms ease, opacity 200ms ease',
-          }}
-        >
-          {rightContent}
-        </span>
-      )}
     </Chip>
   )
 }
