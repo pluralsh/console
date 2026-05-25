@@ -24,7 +24,7 @@ import {
 } from 'generated/graphql'
 import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
-import type { ComponentProps, CSSProperties } from 'react'
+import type { ComponentProps } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -310,17 +310,6 @@ function WorkbenchSavedPrompts({
               key={savedPrompt.id}
               label={displaySavedPromptTitle(savedPrompt.title)}
               description={prettifyPrompt(savedPrompt.prompt ?? '')}
-              descriptionProps={{
-                style: {
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  wordBreak: 'break-word',
-                  whiteSpace: 'normal',
-                },
-              }}
               textValue={displaySavedPromptTitle(savedPrompt.title)}
               css={{
                 width: '100%',
