@@ -1070,6 +1070,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.workbench_chatbot/2
     end
 
+    field :workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_prompt/2
+    end
+
     connection field :workbenches, node_type: :workbench do
       middleware Authenticated
       middleware Scope,

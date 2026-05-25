@@ -314,6 +314,10 @@ type ConsoleClient interface {
 	UpdateWorkbenchCron(ctx context.Context, id string, attributes WorkbenchCronAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchCron, error)
 	DeleteWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchCron, error)
 	GetWorkbenchCron(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchCron, error)
+	CreateWorkbenchPrompt(ctx context.Context, workbenchID string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchPrompt, error)
+	UpdateWorkbenchPrompt(ctx context.Context, id string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchPrompt, error)
+	DeleteWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchPrompt, error)
+	GetWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchPrompt, error)
 	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error)
 	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error)
 	DeleteWorkbenchWebhook(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchWebhook, error)
@@ -6919,6 +6923,17 @@ func (t *WorkbenchWebhookFragment) GetWorkbench() *WorkbenchWebhookFragment_Work
 		t = &WorkbenchWebhookFragment{}
 	}
 	return t.Workbench
+}
+
+type WorkbenchPromptFragment struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *WorkbenchPromptFragment) GetID() string {
+	if t == nil {
+		t = &WorkbenchPromptFragment{}
+	}
+	return t.ID
 }
 
 type TinyAgentRuntimeFragment_Cluster struct {
@@ -38710,6 +38725,50 @@ func (t *GetWorkbenchCron) GetWorkbenchCron() *WorkbenchCronFragment {
 	return t.WorkbenchCron
 }
 
+type CreateWorkbenchPrompt struct {
+	CreateWorkbenchPrompt *WorkbenchPromptFragment "json:\"createWorkbenchPrompt,omitempty\" graphql:\"createWorkbenchPrompt\""
+}
+
+func (t *CreateWorkbenchPrompt) GetCreateWorkbenchPrompt() *WorkbenchPromptFragment {
+	if t == nil {
+		t = &CreateWorkbenchPrompt{}
+	}
+	return t.CreateWorkbenchPrompt
+}
+
+type UpdateWorkbenchPrompt struct {
+	UpdateWorkbenchPrompt *WorkbenchPromptFragment "json:\"updateWorkbenchPrompt,omitempty\" graphql:\"updateWorkbenchPrompt\""
+}
+
+func (t *UpdateWorkbenchPrompt) GetUpdateWorkbenchPrompt() *WorkbenchPromptFragment {
+	if t == nil {
+		t = &UpdateWorkbenchPrompt{}
+	}
+	return t.UpdateWorkbenchPrompt
+}
+
+type DeleteWorkbenchPrompt struct {
+	DeleteWorkbenchPrompt *WorkbenchPromptFragment "json:\"deleteWorkbenchPrompt,omitempty\" graphql:\"deleteWorkbenchPrompt\""
+}
+
+func (t *DeleteWorkbenchPrompt) GetDeleteWorkbenchPrompt() *WorkbenchPromptFragment {
+	if t == nil {
+		t = &DeleteWorkbenchPrompt{}
+	}
+	return t.DeleteWorkbenchPrompt
+}
+
+type GetWorkbenchPrompt struct {
+	WorkbenchPrompt *WorkbenchPromptFragment "json:\"workbenchPrompt,omitempty\" graphql:\"workbenchPrompt\""
+}
+
+func (t *GetWorkbenchPrompt) GetWorkbenchPrompt() *WorkbenchPromptFragment {
+	if t == nil {
+		t = &GetWorkbenchPrompt{}
+	}
+	return t.WorkbenchPrompt
+}
+
 type CreateWorkbenchWebhook struct {
 	CreateWorkbenchWebhook *WorkbenchWebhookFragment "json:\"createWorkbenchWebhook,omitempty\" graphql:\"createWorkbenchWebhook\""
 }
@@ -39142,9 +39201,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39293,9 +39352,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39453,9 +39512,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39660,9 +39719,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -39805,9 +39864,9 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	bullets
 }
 fragment ScmCredentialFragment on ScmCreds {
-    token
-    username
-    exaKey
+	token
+	username
+	exaKey
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -62556,6 +62615,116 @@ func (c *Client) GetWorkbenchCron(ctx context.Context, id string, interceptors .
 	return &res, nil
 }
 
+const CreateWorkbenchPromptDocument = `mutation CreateWorkbenchPrompt ($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
+	createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+		... WorkbenchPromptFragment
+	}
+}
+fragment WorkbenchPromptFragment on WorkbenchPrompt {
+	id
+}
+`
+
+func (c *Client) CreateWorkbenchPrompt(ctx context.Context, workbenchID string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchPrompt, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"attributes":  attributes,
+	}
+
+	var res CreateWorkbenchPrompt
+	if err := c.Client.Post(ctx, "CreateWorkbenchPrompt", CreateWorkbenchPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateWorkbenchPromptDocument = `mutation UpdateWorkbenchPrompt ($id: ID!, $attributes: WorkbenchPromptAttributes!) {
+	updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+		... WorkbenchPromptFragment
+	}
+}
+fragment WorkbenchPromptFragment on WorkbenchPrompt {
+	id
+}
+`
+
+func (c *Client) UpdateWorkbenchPrompt(ctx context.Context, id string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchPrompt, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateWorkbenchPrompt
+	if err := c.Client.Post(ctx, "UpdateWorkbenchPrompt", UpdateWorkbenchPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteWorkbenchPromptDocument = `mutation DeleteWorkbenchPrompt ($id: ID!) {
+	deleteWorkbenchPrompt(id: $id) {
+		... WorkbenchPromptFragment
+	}
+}
+fragment WorkbenchPromptFragment on WorkbenchPrompt {
+	id
+}
+`
+
+func (c *Client) DeleteWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchPrompt, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteWorkbenchPrompt
+	if err := c.Client.Post(ctx, "DeleteWorkbenchPrompt", DeleteWorkbenchPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetWorkbenchPromptDocument = `query GetWorkbenchPrompt ($id: ID!) {
+	workbenchPrompt(id: $id) {
+		... WorkbenchPromptFragment
+	}
+}
+fragment WorkbenchPromptFragment on WorkbenchPrompt {
+	id
+}
+`
+
+func (c *Client) GetWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchPrompt, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetWorkbenchPrompt
+	if err := c.Client.Post(ctx, "GetWorkbenchPrompt", GetWorkbenchPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateWorkbenchWebhookDocument = `mutation CreateWorkbenchWebhook ($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
 	createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
 		... WorkbenchWebhookFragment
@@ -63052,6 +63221,10 @@ var DocumentOperationNames = map[string]string{
 	UpdateWorkbenchCronDocument:                       "UpdateWorkbenchCron",
 	DeleteWorkbenchCronDocument:                       "DeleteWorkbenchCron",
 	GetWorkbenchCronDocument:                          "GetWorkbenchCron",
+	CreateWorkbenchPromptDocument:                     "CreateWorkbenchPrompt",
+	UpdateWorkbenchPromptDocument:                     "UpdateWorkbenchPrompt",
+	DeleteWorkbenchPromptDocument:                     "DeleteWorkbenchPrompt",
+	GetWorkbenchPromptDocument:                        "GetWorkbenchPrompt",
 	CreateWorkbenchWebhookDocument:                    "CreateWorkbenchWebhook",
 	UpdateWorkbenchWebhookDocument:                    "UpdateWorkbenchWebhook",
 	DeleteWorkbenchWebhookDocument:                    "DeleteWorkbenchWebhook",

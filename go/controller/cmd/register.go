@@ -480,6 +480,16 @@ func init() {
 		}
 	})
 
+	types.RegisterController(types.WorkbenchPromptReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.WorkbenchPromptReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	})
+
 	types.RegisterController(types.WorkbenchWebhookReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.WorkbenchWebhookReconciler{
