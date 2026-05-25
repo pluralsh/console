@@ -2,6 +2,7 @@ import {
   AddIcon,
   BookmarkIcon,
   Flex,
+  IconFrame,
   ListBoxFooterPlus,
   ListBoxItem,
   Select,
@@ -35,7 +36,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
+import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { CaptionP } from 'components/utils/typography/Text'
 
@@ -141,17 +142,12 @@ export function WorkbenchJobCreateInput({
                 />
               )}
               {workbenchId && (
-                <>
-                  <WorkbenchSavedPrompts
-                    workbenchId={workbenchId}
-                    disabled={loading}
-                    onSelectPrompt={handleSelectSavedPrompt}
-                  />
-                  <SaveWorkbenchPromptButton
-                    workbenchId={workbenchId}
-                    prompt={prompt}
-                  />
-                </>
+                <WorkbenchSavedPrompts
+                  workbenchId={workbenchId}
+                  disabled={loading}
+                  currentPrompt={prompt}
+                  onSelectPrompt={handleSelectSavedPrompt}
+                />
               )}
             </Flex>
           }
@@ -224,10 +220,12 @@ const SAVED_PROMPTS_PANEL_WIDTH = 460
 function WorkbenchSavedPrompts({
   workbenchId,
   disabled,
+  currentPrompt,
   onSelectPrompt,
 }: {
   workbenchId: string
   disabled: boolean
+  currentPrompt: string
   onSelectPrompt: (prompt: string) => void
 }) {
   const navigate = useNavigate()
@@ -273,14 +271,13 @@ function WorkbenchSavedPrompts({
         setIsOpen(false)
       }}
       triggerButton={
-        <ChatOptionPill
-          isOpen={isOpen}
+        <IconFrame
+          type="tertiary"
+          clickable={!disabled}
+          icon={<BookmarkIcon size={12} />}
           disabled={disabled}
-          css={{ height: '100%' }}
-        >
-          <BookmarkIcon size={12} />
-          <span>Saved prompts</span>
-        </ChatOptionPill>
+          tooltip="Saved prompts"
+        />
       }
       dropdownFooterFixed={
         <ListBoxFooterPlus
@@ -292,7 +289,14 @@ function WorkbenchSavedPrompts({
           }
           onClick={() => {
             setIsOpen(false)
-            navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId))
+            const trimmedPrompt = currentPrompt.trim()
+            navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId), {
+              state: trimmedPrompt
+                ? ({
+                    prompt: trimmedPrompt,
+                  } satisfies SavedPromptCreateRouteState)
+                : undefined,
+            })
           }}
         >
           New prompt

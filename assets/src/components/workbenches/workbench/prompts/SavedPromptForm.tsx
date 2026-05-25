@@ -21,7 +21,7 @@ import {
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchSavedPromptsAbsPath,
   WORKBENCH_PARAM_ID,
@@ -40,12 +40,19 @@ type SavedPromptFormState = {
   category: string
 }
 
+export type SavedPromptCreateRouteState = {
+  prompt?: string
+}
+
 export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const createRouteState =
+    location.state as Nullable<SavedPromptCreateRouteState>
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const savedPromptId = useParams()[WORKBENCHES_SAVED_PROMPT_PARAM_ID]
-  const [formState, setFormState] = useState<SavedPromptFormState>(
-    getInitialFormState()
+  const [formState, setFormState] = useState<SavedPromptFormState>(() =>
+    getInitialFormState(undefined, createRouteState?.prompt)
   )
   const { popToast } = useSimpleToast()
 
@@ -266,11 +273,12 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function getInitialFormState(
-  savedPrompt?: Nullable<WorkbenchPromptFragment>
+  savedPrompt?: Nullable<WorkbenchPromptFragment>,
+  initialPrompt?: string
 ): SavedPromptFormState {
   return {
     title: displayStoredMetadata(savedPrompt?.title),
-    prompt: savedPrompt?.prompt ?? '',
+    prompt: savedPrompt?.prompt ?? initialPrompt ?? '',
     category: displayStoredMetadata(savedPrompt?.category),
   }
 }
