@@ -234,7 +234,8 @@ function getColumns({
         return (
           <StackedText
             truncate
-            first={prettifyPrompt(savedPrompt.prompt ?? '') || 'Saved prompt'}
+            first={savedPromptTitle(savedPrompt.title)}
+            second={prettifyPrompt(savedPrompt.prompt ?? '')}
           />
         )
       },
@@ -270,4 +271,8 @@ function getColumns({
       ),
     }),
   ]
+}
+
+function savedPromptTitle(title: string) {
+  return title === 'Default' ? 'Saved prompt' : title
 }
