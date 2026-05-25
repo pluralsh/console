@@ -1897,6 +1897,21 @@
          "name": "WorkbenchWebhooks",
          "body": "query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    webhooks(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchWebhook\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchWebhook on WorkbenchWebhook {\n  id\n  name\n  prompt\n  priority\n  userId\n  matches {\n    regex\n    substring\n    caseInsensitive\n    __typename\n  }\n  insertedAt\n  updatedAt\n  webhook {\n    id\n    name\n    type\n    url\n    __typename\n  }\n  issueWebhook {\n    ...IssueWebhook\n    __typename\n  }\n  __typename\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:eb649aa95560ad8671e8d2f128ffd6dcc81cb93f9377f5dcfcff0e1b6b5a2f5e": {
+         "type": "query",
+         "name": "WorkbenchChatbots",
+         "body": "query WorkbenchChatbots($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    chatbots(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchChatbot\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchChatbot on WorkbenchChatbot {\n  id\n  channel\n  prompt\n  userId\n  insertedAt\n  updatedAt\n  chatConnection {\n    ...ChatProviderConnection\n    __typename\n  }\n  user {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:bbbda6aca5f24e85d09161e653bd6c5dc80e5dfb759e5e6a8b97afeb1736959c": {
+         "type": "query",
+         "name": "WorkbenchChatbot",
+         "body": "query WorkbenchChatbot($id: ID!) {\n  workbenchChatbot(id: $id) {\n    ...WorkbenchChatbot\n    __typename\n  }\n}\n\nfragment WorkbenchChatbot on WorkbenchChatbot {\n  id\n  channel\n  prompt\n  userId\n  insertedAt\n  updatedAt\n  chatConnection {\n    ...ChatProviderConnection\n    __typename\n  }\n  user {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:e934099d7f9417782301e6fd9ad74a34dc522800ca32a9a4fa0ca5fd6d18fc6d": {
+         "type": "query",
+         "name": "ChatProviderConnections",
+         "body": "query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {\n  chatProviderConnections(first: $first, after: $after, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...ChatProviderConnection\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:16ce3c5e1c4a8e990d0de7eeceaf4dec13cb1b3bc23a86dcb49a30c4f458f646": {
          "type": "mutation",
          "name": "GetWorkbenchWebhook",
@@ -1907,10 +1922,10 @@
          "name": "IssueWebhooks",
          "body": "query IssueWebhooks($first: Int, $after: String) {\n  issueWebhooks(first: $first, after: $after) {\n    edges {\n      node {\n        ...IssueWebhook\n        __typename\n      }\n      __typename\n    }\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}"
       },
-      "sha256:5b0fa47a9be4bc73ab164dcfc491a75cfc825c355f635d916ed061e74b9208f5": {
+      "sha256:d4e5461da2e35a90846397ac858f55c8c151eb7e4ec84751046587986fdcd57e": {
          "type": "query",
          "name": "WorkbenchTriggersSummary",
-         "body": "query WorkbenchTriggersSummary($id: ID!) {\n  workbench(id: $id) {\n    id\n    name\n    description\n    tools {\n      ...WorkbenchToolTiny\n      __typename\n    }\n    crons(first: 30) {\n      edges {\n        node {\n          id\n          crontab\n          prompt\n          nextRunAt\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    webhooks(first: 30) {\n      edges {\n        node {\n          id\n          name\n          prompt\n          webhook {\n            id\n            name\n            type\n            url\n            __typename\n          }\n          issueWebhook {\n            ...IssueWebhook\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchToolTiny on WorkbenchTool {\n  id\n  name\n  tool\n  categories\n  cloudConnection {\n    ...CloudConnectionTiny\n    __typename\n  }\n  mcpServer {\n    id\n    name\n    url\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+         "body": "query WorkbenchTriggersSummary($id: ID!) {\n  workbench(id: $id) {\n    id\n    name\n    description\n    tools {\n      ...WorkbenchToolTiny\n      __typename\n    }\n    crons(first: 30) {\n      edges {\n        node {\n          id\n          crontab\n          prompt\n          nextRunAt\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    webhooks(first: 30) {\n      edges {\n        node {\n          id\n          name\n          prompt\n          webhook {\n            id\n            name\n            type\n            url\n            __typename\n          }\n          issueWebhook {\n            ...IssueWebhook\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    chatbots(first: 30) {\n      edges {\n        node {\n          id\n          channel\n          chatConnection {\n            ...ChatProviderConnection\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchToolTiny on WorkbenchTool {\n  id\n  name\n  tool\n  categories\n  cloudConnection {\n    ...CloudConnectionTiny\n    __typename\n  }\n  mcpServer {\n    id\n    name\n    url\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:60376cff26862555c041bbe9172b3597ad64ea7f0340165317a462d45eec80f7": {
          "type": "query",
@@ -2071,6 +2086,26 @@
          "type": "mutation",
          "name": "DeleteWorkbenchWebhook",
          "body": "mutation DeleteWorkbenchWebhook($id: ID!) {\n  deleteWorkbenchWebhook(id: $id) {\n    id\n    name\n    __typename\n  }\n}"
+      },
+      "sha256:6b955805880819dd4a3538e87262cb3aa7cfc306ef9a54c99f07c5d975268a42": {
+         "type": "mutation",
+         "name": "CreateWorkbenchChatbot",
+         "body": "mutation CreateWorkbenchChatbot($workbenchId: ID!, $attributes: WorkbenchChatbotAttributes!) {\n  createWorkbenchChatbot(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchChatbot\n    __typename\n  }\n}\n\nfragment WorkbenchChatbot on WorkbenchChatbot {\n  id\n  channel\n  prompt\n  userId\n  insertedAt\n  updatedAt\n  chatConnection {\n    ...ChatProviderConnection\n    __typename\n  }\n  user {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:19efb59f283a5d375d409f5d9dc3284c67c7481ec8882f1154568c1373bd3dd3": {
+         "type": "mutation",
+         "name": "UpdateWorkbenchChatbot",
+         "body": "mutation UpdateWorkbenchChatbot($id: ID!, $attributes: WorkbenchChatbotAttributes!) {\n  updateWorkbenchChatbot(id: $id, attributes: $attributes) {\n    ...WorkbenchChatbot\n    __typename\n  }\n}\n\nfragment WorkbenchChatbot on WorkbenchChatbot {\n  id\n  channel\n  prompt\n  userId\n  insertedAt\n  updatedAt\n  chatConnection {\n    ...ChatProviderConnection\n    __typename\n  }\n  user {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:3ff81f19b20a9fb7dd872ef07b26ede67afc71ee28befff34fc109053e7b84b2": {
+         "type": "mutation",
+         "name": "DeleteWorkbenchChatbot",
+         "body": "mutation DeleteWorkbenchChatbot($id: ID!) {\n  deleteWorkbenchChatbot(id: $id) {\n    id\n    channel\n    __typename\n  }\n}"
+      },
+      "sha256:20e0bfef02bd5b1069e45301d1e08e0748ecd05e12363d272d7901428e99337d": {
+         "type": "mutation",
+         "name": "UpsertChatProviderConnection",
+         "body": "mutation UpsertChatProviderConnection($attributes: ChatProviderConnectionAttributes!) {\n  upsertChatProviderConnection(attributes: $attributes) {\n    ...ChatProviderConnection\n    __typename\n  }\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:d00582cacd61fb5c32aaf054ab74ab79207fcafdc61f486ccf77ada13118fa36": {
          "type": "mutation",

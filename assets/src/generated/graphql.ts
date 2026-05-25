@@ -20278,6 +20278,10 @@ export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: stri
 
 export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, priority?: number | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
+export type ChatProviderConnectionFragment = { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } };
+
+export type WorkbenchChatbotFragment = { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null };
+
 export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null };
@@ -20447,6 +20451,31 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 
 export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, priority?: number | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
+export type WorkbenchChatbotsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchChatbotsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, chatbots?: { __typename?: 'WorkbenchChatbotConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchChatbotQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchChatbotQuery = { __typename?: 'RootQueryType', workbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+
+export type ChatProviderConnectionsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ChatProviderConnectionsQuery = { __typename?: 'RootQueryType', chatProviderConnections?: { __typename?: 'ChatProviderConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatProviderConnectionEdge', node?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null } | null> | null } | null };
+
 export type GetWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -20467,7 +20496,7 @@ export type WorkbenchTriggersSummaryQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null, chatbots?: { __typename?: 'WorkbenchChatbotConnection', edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20714,6 +20743,36 @@ export type DeleteWorkbenchWebhookMutationVariables = Exact<{
 
 
 export type DeleteWorkbenchWebhookMutation = { __typename?: 'RootMutationType', deleteWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null } | null };
+
+export type CreateWorkbenchChatbotMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  attributes: WorkbenchChatbotAttributes;
+}>;
+
+
+export type CreateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', createWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+
+export type UpdateWorkbenchChatbotMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchChatbotAttributes;
+}>;
+
+
+export type UpdateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', updateWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+
+export type DeleteWorkbenchChatbotMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWorkbenchChatbotMutation = { __typename?: 'RootMutationType', deleteWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string } | null };
+
+export type UpsertChatProviderConnectionMutationVariables = Exact<{
+  attributes: ChatProviderConnectionAttributes;
+}>;
+
+
+export type UpsertChatProviderConnectionMutation = { __typename?: 'RootMutationType', upsertChatProviderConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null } } | null };
 
 export type CreateIssueWebhookMutationVariables = Exact<{
   attributes: IssueWebhookAttributes;
@@ -25987,6 +26046,37 @@ export const WorkbenchWebhookFragmentDoc = gql`
   }
 }
     ${IssueWebhookFragmentDoc}`;
+export const ChatProviderConnectionFragmentDoc = gql`
+    fragment ChatProviderConnection on ChatProviderConnection {
+  id
+  name
+  type
+  configuration {
+    slack {
+      botId
+    }
+  }
+}
+    `;
+export const WorkbenchChatbotFragmentDoc = gql`
+    fragment WorkbenchChatbot on WorkbenchChatbot {
+  id
+  channel
+  prompt
+  userId
+  insertedAt
+  updatedAt
+  chatConnection {
+    ...ChatProviderConnection
+  }
+  user {
+    id
+    name
+    email
+    profile
+  }
+}
+    ${ChatProviderConnectionFragmentDoc}`;
 export const WorkbenchIssueFragmentDoc = gql`
     fragment WorkbenchIssue on Issue {
   id
@@ -42652,6 +42742,158 @@ export type WorkbenchWebhooksQueryHookResult = ReturnType<typeof useWorkbenchWeb
 export type WorkbenchWebhooksLazyQueryHookResult = ReturnType<typeof useWorkbenchWebhooksLazyQuery>;
 export type WorkbenchWebhooksSuspenseQueryHookResult = ReturnType<typeof useWorkbenchWebhooksSuspenseQuery>;
 export type WorkbenchWebhooksQueryResult = Apollo.QueryResult<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>;
+export const WorkbenchChatbotsDocument = gql`
+    query WorkbenchChatbots($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    chatbots(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchChatbot
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchChatbotFragmentDoc}`;
+
+/**
+ * __useWorkbenchChatbotsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchChatbotsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchChatbotsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchChatbotsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchChatbotsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables> & ({ variables: WorkbenchChatbotsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>(WorkbenchChatbotsDocument, options);
+      }
+export function useWorkbenchChatbotsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>(WorkbenchChatbotsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchChatbotsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>;
+export function useWorkbenchChatbotsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchChatbotsQuery | undefined, WorkbenchChatbotsQueryVariables>;
+export function useWorkbenchChatbotsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>(WorkbenchChatbotsDocument, options);
+        }
+export type WorkbenchChatbotsQueryHookResult = ReturnType<typeof useWorkbenchChatbotsQuery>;
+export type WorkbenchChatbotsLazyQueryHookResult = ReturnType<typeof useWorkbenchChatbotsLazyQuery>;
+export type WorkbenchChatbotsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchChatbotsSuspenseQuery>;
+export type WorkbenchChatbotsQueryResult = Apollo.QueryResult<WorkbenchChatbotsQuery, WorkbenchChatbotsQueryVariables>;
+export const WorkbenchChatbotDocument = gql`
+    query WorkbenchChatbot($id: ID!) {
+  workbenchChatbot(id: $id) {
+    ...WorkbenchChatbot
+  }
+}
+    ${WorkbenchChatbotFragmentDoc}`;
+
+/**
+ * __useWorkbenchChatbotQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchChatbotQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchChatbotQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchChatbotQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchChatbotQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables> & ({ variables: WorkbenchChatbotQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>(WorkbenchChatbotDocument, options);
+      }
+export function useWorkbenchChatbotLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>(WorkbenchChatbotDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchChatbotSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>;
+export function useWorkbenchChatbotSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchChatbotQuery | undefined, WorkbenchChatbotQueryVariables>;
+export function useWorkbenchChatbotSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>(WorkbenchChatbotDocument, options);
+        }
+export type WorkbenchChatbotQueryHookResult = ReturnType<typeof useWorkbenchChatbotQuery>;
+export type WorkbenchChatbotLazyQueryHookResult = ReturnType<typeof useWorkbenchChatbotLazyQuery>;
+export type WorkbenchChatbotSuspenseQueryHookResult = ReturnType<typeof useWorkbenchChatbotSuspenseQuery>;
+export type WorkbenchChatbotQueryResult = Apollo.QueryResult<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>;
+export const ChatProviderConnectionsDocument = gql`
+    query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
+  chatProviderConnections(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ChatProviderConnection
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ChatProviderConnectionFragmentDoc}`;
+
+/**
+ * __useChatProviderConnectionsQuery__
+ *
+ * To run a query within a React component, call `useChatProviderConnectionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatProviderConnectionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatProviderConnectionsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useChatProviderConnectionsQuery(baseOptions?: Apollo.QueryHookOptions<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>(ChatProviderConnectionsDocument, options);
+      }
+export function useChatProviderConnectionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>(ChatProviderConnectionsDocument, options);
+        }
+// @ts-ignore
+export function useChatProviderConnectionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>): Apollo.UseSuspenseQueryResult<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>;
+export function useChatProviderConnectionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>): Apollo.UseSuspenseQueryResult<ChatProviderConnectionsQuery | undefined, ChatProviderConnectionsQueryVariables>;
+export function useChatProviderConnectionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>(ChatProviderConnectionsDocument, options);
+        }
+export type ChatProviderConnectionsQueryHookResult = ReturnType<typeof useChatProviderConnectionsQuery>;
+export type ChatProviderConnectionsLazyQueryHookResult = ReturnType<typeof useChatProviderConnectionsLazyQuery>;
+export type ChatProviderConnectionsSuspenseQueryHookResult = ReturnType<typeof useChatProviderConnectionsSuspenseQuery>;
+export type ChatProviderConnectionsQueryResult = Apollo.QueryResult<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>;
 export const GetWorkbenchWebhookDocument = gql`
     mutation GetWorkbenchWebhook($id: ID!) {
   getWorkbenchWebhook(id: $id) {
@@ -42774,10 +43016,22 @@ export const WorkbenchTriggersSummaryDocument = gql`
         }
       }
     }
+    chatbots(first: 30) {
+      edges {
+        node {
+          id
+          channel
+          chatConnection {
+            ...ChatProviderConnection
+          }
+        }
+      }
+    }
   }
 }
     ${WorkbenchToolTinyFragmentDoc}
-${IssueWebhookFragmentDoc}`;
+${IssueWebhookFragmentDoc}
+${ChatProviderConnectionFragmentDoc}`;
 
 /**
  * __useWorkbenchTriggersSummaryQuery__
@@ -44043,6 +44297,141 @@ export function useDeleteWorkbenchWebhookMutation(baseOptions?: Apollo.MutationH
 export type DeleteWorkbenchWebhookMutationHookResult = ReturnType<typeof useDeleteWorkbenchWebhookMutation>;
 export type DeleteWorkbenchWebhookMutationResult = Apollo.MutationResult<DeleteWorkbenchWebhookMutation>;
 export type DeleteWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>;
+export const CreateWorkbenchChatbotDocument = gql`
+    mutation CreateWorkbenchChatbot($workbenchId: ID!, $attributes: WorkbenchChatbotAttributes!) {
+  createWorkbenchChatbot(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchChatbot
+  }
+}
+    ${WorkbenchChatbotFragmentDoc}`;
+export type CreateWorkbenchChatbotMutationFn = Apollo.MutationFunction<CreateWorkbenchChatbotMutation, CreateWorkbenchChatbotMutationVariables>;
+
+/**
+ * __useCreateWorkbenchChatbotMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchChatbotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchChatbotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchChatbotMutation, { data, loading, error }] = useCreateWorkbenchChatbotMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchChatbotMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchChatbotMutation, CreateWorkbenchChatbotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchChatbotMutation, CreateWorkbenchChatbotMutationVariables>(CreateWorkbenchChatbotDocument, options);
+      }
+export type CreateWorkbenchChatbotMutationHookResult = ReturnType<typeof useCreateWorkbenchChatbotMutation>;
+export type CreateWorkbenchChatbotMutationResult = Apollo.MutationResult<CreateWorkbenchChatbotMutation>;
+export type CreateWorkbenchChatbotMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchChatbotMutation, CreateWorkbenchChatbotMutationVariables>;
+export const UpdateWorkbenchChatbotDocument = gql`
+    mutation UpdateWorkbenchChatbot($id: ID!, $attributes: WorkbenchChatbotAttributes!) {
+  updateWorkbenchChatbot(id: $id, attributes: $attributes) {
+    ...WorkbenchChatbot
+  }
+}
+    ${WorkbenchChatbotFragmentDoc}`;
+export type UpdateWorkbenchChatbotMutationFn = Apollo.MutationFunction<UpdateWorkbenchChatbotMutation, UpdateWorkbenchChatbotMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchChatbotMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchChatbotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchChatbotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchChatbotMutation, { data, loading, error }] = useUpdateWorkbenchChatbotMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchChatbotMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchChatbotMutation, UpdateWorkbenchChatbotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchChatbotMutation, UpdateWorkbenchChatbotMutationVariables>(UpdateWorkbenchChatbotDocument, options);
+      }
+export type UpdateWorkbenchChatbotMutationHookResult = ReturnType<typeof useUpdateWorkbenchChatbotMutation>;
+export type UpdateWorkbenchChatbotMutationResult = Apollo.MutationResult<UpdateWorkbenchChatbotMutation>;
+export type UpdateWorkbenchChatbotMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchChatbotMutation, UpdateWorkbenchChatbotMutationVariables>;
+export const DeleteWorkbenchChatbotDocument = gql`
+    mutation DeleteWorkbenchChatbot($id: ID!) {
+  deleteWorkbenchChatbot(id: $id) {
+    id
+    channel
+  }
+}
+    `;
+export type DeleteWorkbenchChatbotMutationFn = Apollo.MutationFunction<DeleteWorkbenchChatbotMutation, DeleteWorkbenchChatbotMutationVariables>;
+
+/**
+ * __useDeleteWorkbenchChatbotMutation__
+ *
+ * To run a mutation, you first call `useDeleteWorkbenchChatbotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWorkbenchChatbotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWorkbenchChatbotMutation, { data, loading, error }] = useDeleteWorkbenchChatbotMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWorkbenchChatbotMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWorkbenchChatbotMutation, DeleteWorkbenchChatbotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWorkbenchChatbotMutation, DeleteWorkbenchChatbotMutationVariables>(DeleteWorkbenchChatbotDocument, options);
+      }
+export type DeleteWorkbenchChatbotMutationHookResult = ReturnType<typeof useDeleteWorkbenchChatbotMutation>;
+export type DeleteWorkbenchChatbotMutationResult = Apollo.MutationResult<DeleteWorkbenchChatbotMutation>;
+export type DeleteWorkbenchChatbotMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchChatbotMutation, DeleteWorkbenchChatbotMutationVariables>;
+export const UpsertChatProviderConnectionDocument = gql`
+    mutation UpsertChatProviderConnection($attributes: ChatProviderConnectionAttributes!) {
+  upsertChatProviderConnection(attributes: $attributes) {
+    ...ChatProviderConnection
+  }
+}
+    ${ChatProviderConnectionFragmentDoc}`;
+export type UpsertChatProviderConnectionMutationFn = Apollo.MutationFunction<UpsertChatProviderConnectionMutation, UpsertChatProviderConnectionMutationVariables>;
+
+/**
+ * __useUpsertChatProviderConnectionMutation__
+ *
+ * To run a mutation, you first call `useUpsertChatProviderConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertChatProviderConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertChatProviderConnectionMutation, { data, loading, error }] = useUpsertChatProviderConnectionMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertChatProviderConnectionMutation(baseOptions?: Apollo.MutationHookOptions<UpsertChatProviderConnectionMutation, UpsertChatProviderConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertChatProviderConnectionMutation, UpsertChatProviderConnectionMutationVariables>(UpsertChatProviderConnectionDocument, options);
+      }
+export type UpsertChatProviderConnectionMutationHookResult = ReturnType<typeof useUpsertChatProviderConnectionMutation>;
+export type UpsertChatProviderConnectionMutationResult = Apollo.MutationResult<UpsertChatProviderConnectionMutation>;
+export type UpsertChatProviderConnectionMutationOptions = Apollo.BaseMutationOptions<UpsertChatProviderConnectionMutation, UpsertChatProviderConnectionMutationVariables>;
 export const CreateIssueWebhookDocument = gql`
     mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
   createIssueWebhook(attributes: $attributes) {
@@ -44532,6 +44921,9 @@ export const namedOperations = {
     WorkbenchSkills: 'WorkbenchSkills',
     WorkbenchPrompts: 'WorkbenchPrompts',
     WorkbenchWebhooks: 'WorkbenchWebhooks',
+    WorkbenchChatbots: 'WorkbenchChatbots',
+    WorkbenchChatbot: 'WorkbenchChatbot',
+    ChatProviderConnections: 'ChatProviderConnections',
     IssueWebhooks: 'IssueWebhooks',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
@@ -44719,6 +45111,10 @@ export const namedOperations = {
     CreateWorkbenchWebhook: 'CreateWorkbenchWebhook',
     UpdateWorkbenchWebhook: 'UpdateWorkbenchWebhook',
     DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook',
+    CreateWorkbenchChatbot: 'CreateWorkbenchChatbot',
+    UpdateWorkbenchChatbot: 'UpdateWorkbenchChatbot',
+    DeleteWorkbenchChatbot: 'DeleteWorkbenchChatbot',
+    UpsertChatProviderConnection: 'UpsertChatProviderConnection',
     CreateIssueWebhook: 'CreateIssueWebhook',
     UpdateIssueWebhook: 'UpdateIssueWebhook'
   },
@@ -45041,6 +45437,8 @@ export const namedOperations = {
     WorkbenchCron: 'WorkbenchCron',
     WorkbenchPrompt: 'WorkbenchPrompt',
     WorkbenchWebhook: 'WorkbenchWebhook',
+    ChatProviderConnection: 'ChatProviderConnection',
+    WorkbenchChatbot: 'WorkbenchChatbot',
     WorkbenchIssue: 'WorkbenchIssue',
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJob: 'WorkbenchJob',
