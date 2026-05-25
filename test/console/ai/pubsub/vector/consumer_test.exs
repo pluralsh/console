@@ -574,7 +574,11 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       {:ok, c} = ES.count_index(ES.vector_index())
       assert c > 0
 
-      {:ok, [result]} = Console.AI.VectorStore.fetch("workbench", count: 5, filters: [datatype: {:raw, :workbench_job}], user: Console.Services.Rbac.preload(user))
+      {:ok, [result]} = Console.AI.VectorStore.fetch("workbench",
+        count: 5,
+        filters: [datatype: {:raw, :workbench_job}, workbench_id: workbench.id],
+        user: Console.Services.Rbac.preload(user)
+      )
       assert result.type == :workbench
       assert result.workbench_job.id == job.id
 

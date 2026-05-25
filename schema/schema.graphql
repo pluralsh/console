@@ -552,6 +552,9 @@ type RootQueryType {
   workbenchJobSearch(
     q: String!
 
+    "scope search to this workbench"
+    workbenchId: ID!
+
     "max results to return (defaults to 5)"
     limit: Int
   ): [WorkbenchJobSearchResult]

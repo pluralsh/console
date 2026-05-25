@@ -1140,8 +1140,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
         resource: :workbench,
         action: :read
       middleware VectorStoreEnabled
-      arg :q,     non_null(:string)
-      arg :limit, :integer, description: "max results to return (defaults to 5)"
+      arg :q,             non_null(:string)
+      arg :workbench_id,  non_null(:id), description: "scope search to this workbench"
+      arg :limit,         :integer, description: "max results to return (defaults to 5)"
 
       resolve &Deployments.workbench_job_search/2
     end

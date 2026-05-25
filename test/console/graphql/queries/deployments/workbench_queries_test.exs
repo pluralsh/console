@@ -1445,10 +1445,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       )
 
       job_id = Ecto.UUID.generate()
+      workbench = insert(:workbench)
 
       expect(Console.AI.VectorStore, :fetch, fn "database outage", opts ->
         assert opts[:count] == 2
-        assert opts[:filters] == [datatype: {:raw, :workbench_job}]
+        assert opts[:filters] == [datatype: {:raw, :workbench_job}, workbench_id: workbench.id]
         assert %{__struct__: Console.Schema.User} = opts[:user]
 
         {:ok, [
@@ -1468,8 +1469,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       end)
 
       {:ok, %{data: %{"workbenchJobSearch" => [found | _]}}} = run_query("""
-        query {
-          workbenchJobSearch(q: "database outage", limit: 2) {
+        query WorkbenchJobSearch($workbenchId: ID!) {
+          workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
             id
             status
             prompt
@@ -1477,7 +1478,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             pullRequests { title url body }
           }
         }
-      """, %{}, %{current_user: admin_user()})
+      """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
 
       assert found["id"] == job_id
       assert found["status"] == "SUCCESSFUL"
@@ -1500,13 +1501,15 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       reject(&Console.AI.VectorStore.fetch/2)
 
+      workbench = insert(:workbench)
+
       assert {:ok, %{errors: [%{message: message} | _]}} = run_query("""
-        query {
-          workbenchJobSearch(q: "database outage", limit: 2) {
+        query WorkbenchJobSearch($workbenchId: ID!) {
+          workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
             id
           }
         }
-      """, %{}, %{current_user: admin_user()})
+      """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
 
       assert message == "Vector store is not enabled, cannot query"
     end

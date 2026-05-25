@@ -197,7 +197,12 @@ defmodule Console.AI.PubSub.Vectorizable.WorkbenchJob do
     {users, groups} = Console.AI.Authorizable.authorize(job)
     %Indexable{
       data: WorkbenchJob.Mini.new(job),
-      filters: [workbench_job_id: job.id, user_ids: users, group_ids: groups]
+      filters: [
+        workbench_job_id: job.id,
+        workbench_id: job.workbench_id,
+        user_ids: users,
+        group_ids: groups
+      ]
     }
   end
 end

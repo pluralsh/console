@@ -1,5 +1,6 @@
 import { Flex } from '@pluralsh/design-system'
 import { WorkbenchJobsTable } from './WorkbenchJobsTable'
+import { WorkbenchJobsSearch } from './WorkbenchJobsSearch'
 import { useOutletContext } from 'react-router-dom'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
 import styled from 'styled-components'
@@ -10,6 +11,7 @@ export function WorkbenchJobs() {
   return (
     <WorkbenchPageLayout>
       <WrapperSC>
+        <WorkbenchJobsSearch workbenchId={workbenchId} />
         <TableContainerSC>
           <WorkbenchJobsTable workbenchId={workbenchId} />
         </TableContainerSC>

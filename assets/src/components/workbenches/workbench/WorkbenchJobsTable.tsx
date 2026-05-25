@@ -200,7 +200,7 @@ function JobSourceChips({
   )
 }
 
-function JobConclusionIcon({
+export function JobConclusionIcon({
   result,
 }: {
   result: WorkbenchJobTinyFragment['result']
