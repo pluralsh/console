@@ -122,6 +122,12 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
+  @indexable_statuses ~w(successful failed cancelled)a
+
+  def indexable(query \\ __MODULE__) do
+    from(j in query, where: j.status in ^@indexable_statuses and j.type == ^:job)
+  end
+
   def missing_evals(query \\ __MODULE__) do
     from(j in query,
       join: e in WorkbenchEval,

@@ -181,6 +181,28 @@ defmodule Console.AI.Cron do
     end
   end
 
+  @doc """
+  Backfills vector indexes for all terminal workbench jobs.
+
+  Unlike `vectorize_workbench_jobs/0`, which only re-indexes resolved jobs (those
+  with a merged pull request), this walks every successful, failed, or cancelled
+  job and emits `WorkbenchJobUpdated` events through the vector pubsub pipeline.
+  Useful for repairing missing indexes or refreshing stored metadata such as
+  `workbench_id`.
+  """
+  def backfill_workbench_job_vectors() do
+    with true <- VectorStore.enabled?() do
+      Logger.info "backfilling workbench job vectors"
+
+      WorkbenchJob.indexable()
+      |> WorkbenchJob.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
+      |> Stream.run()
+    end
+  end
+
   def workbench_job_knowledge_backfill() do
     WorkbenchJob.requires_backfill()
     |> WorkbenchJob.resolved()
