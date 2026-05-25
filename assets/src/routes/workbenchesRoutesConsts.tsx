@@ -5,15 +5,19 @@ export const WORKBENCH_PARAM_ID = 'workbenchId'
 export const WORKBENCHES_CRON_PARAM_ID = 'cronId'
 export const WORKBENCHES_SAVED_PROMPT_PARAM_ID = 'savedPromptId'
 export const WORKBENCHES_WEBHOOK_PARAM_ID = 'webhookId'
+export const WORKBENCHES_CHATBOT_PARAM_ID = 'chatbotId'
 export const WORKBENCHES_CREATE_REL_PATH = 'create'
 export const WORKBENCHES_EDIT_REL_PATH = 'edit'
 export const WORKBENCHES_CRON_SCHEDULES_REL_PATH = 'cron-schedules'
 export const WORKBENCHES_SAVED_PROMPTS_REL_PATH = 'saved-prompts'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH = 'webhook-triggers'
+export const WORKBENCHES_CHATBOTS_REL_PATH = 'chatbots'
 export const WORKBENCH_EVAL_SETTINGS_REL_PATH = 'eval-settings'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH =
   'create-webhook'
 export const WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM = 'selectedWebhook'
+export const WORKBENCHES_CHATBOTS_CREATE_CHATBOT_REL_PATH = 'create-chatbot'
+export const WORKBENCHES_CHATBOT_SELECTED_QUERY_PARAM = 'selectedChatbot'
 
 export const WORKBENCHES_TOOLS_REL_PATH = 'tools'
 export const WORKBENCHES_TOOLS_ADD_REL_PATH = 'integrations'
@@ -102,6 +106,28 @@ export const getWorkbenchWebhookTriggerEditAbsPath = ({
   webhookId: Nullable<string>
 }) =>
   `${getWorkbenchWebhookTriggersAbsPath(workbenchId)}/${webhookId ?? ''}/${WORKBENCHES_EDIT_REL_PATH}`
+
+export const getWorkbenchChatbotsAbsPath = (workbenchId: Nullable<string>) =>
+  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_CHATBOTS_REL_PATH}`
+
+export const getWorkbenchChatbotCreateAbsPath = (
+  workbenchId: Nullable<string>
+) =>
+  `${getWorkbenchChatbotsAbsPath(workbenchId)}/${WORKBENCHES_CREATE_REL_PATH}`
+
+export const getWorkbenchChatbotCreateConnectionAbsPath = (
+  workbenchId: Nullable<string>
+) =>
+  `${getWorkbenchChatbotsAbsPath(workbenchId)}/${WORKBENCHES_CHATBOTS_CREATE_CHATBOT_REL_PATH}`
+
+export const getWorkbenchChatbotEditAbsPath = ({
+  workbenchId,
+  chatbotId,
+}: {
+  workbenchId: Nullable<string>
+  chatbotId: Nullable<string>
+}) =>
+  `${getWorkbenchChatbotsAbsPath(workbenchId)}/${chatbotId ?? ''}/${WORKBENCHES_EDIT_REL_PATH}`
 
 export const getWorkbenchEvalSettingsAbsPath = (
   workbenchId: Nullable<string>
