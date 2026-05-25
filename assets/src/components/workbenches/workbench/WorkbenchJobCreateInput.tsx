@@ -5,6 +5,7 @@ import {
   ListBoxFooterPlus,
   ListBoxItem,
   Select,
+  Tooltip,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
 import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
@@ -226,7 +227,14 @@ function WorkbenchSavedPrompts({
   onSelectPrompt: (prompt: string) => void
 }) {
   const navigate = useNavigate()
+  const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+  const [hoverPreview, setHoverPreview] = useState<{
+    title: string
+    promptText: string
+    category: string
+    rect: DOMRect
+  } | null>(null)
 
   const { data, loading } = useWorkbenchPromptsQuery({
     variables: { id: workbenchId },
@@ -248,92 +256,200 @@ function WorkbenchSavedPrompts({
     [prompts]
   )
 
-  return (
-    <Select
-      transparent
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-      selectedKey=""
-      label="Saved prompts"
-      width={460}
-      maxHeight={360}
-      placement="left"
-      isDisabled={disabled || (loading && !data)}
-      onSelectionChange={(key) => {
-        const savedPrompt = key ? promptsById.get(`${key}`) : null
-        if (!savedPrompt?.prompt?.trim()) return
+  useEffect(() => {
+    if (!isOpen) setHoverPreview(null)
+  }, [isOpen])
 
-        onSelectPrompt(savedPrompt.prompt)
-        setIsOpen(false)
-      }}
-      triggerButton={
-        <ChatOptionPill
-          isOpen={isOpen}
-          disabled={disabled}
-          css={{ height: '100%' }}
-        >
-          <BookmarkIcon size={12} />
-          <span>Saved prompts</span>
-        </ChatOptionPill>
-      }
-      dropdownFooterFixed={
-        <ListBoxFooterPlus
-          leftContent={
-            <AddIcon
-              size={16}
-              color="text-primary-accent"
-            />
-          }
-          onClick={() => {
-            setIsOpen(false)
-            navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId))
-          }}
-        >
-          New prompt
-        </ListBoxFooterPlus>
-      }
-    >
-      {isEmpty(groupedPrompts) ? (
-        <ListBoxItem
-          key="empty"
-          label="No saved prompts yet"
-          disabled
-        />
-      ) : (
-        groupedPrompts.flatMap(([category, categoryPrompts]) => [
-          <SavedPromptCategoryHeader
-            key={`category:${category}`}
-            category={category}
-          />,
-          ...categoryPrompts.map((savedPrompt) => (
-            <ListBoxItem
-              key={savedPrompt.id}
-              label={displaySavedPromptTitle(savedPrompt.title)}
-              description={prettifyPrompt(savedPrompt.prompt ?? '')}
-              textValue={displaySavedPromptTitle(savedPrompt.title)}
-              css={{
-                width: '100%',
-                '.center-content': {
-                  flex: 1,
-                  minWidth: 0,
-                  width: 'auto',
-                  maxWidth: '100%',
-                },
-                '.description': {
+  return (
+    <>
+      <Select
+        transparent
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        selectedKey=""
+        label="Saved prompts"
+        width={460}
+        maxHeight={360}
+        placement="left"
+        isDisabled={disabled || (loading && !data)}
+        onSelectionChange={(key) => {
+          const savedPrompt = key ? promptsById.get(`${key}`) : null
+          if (!savedPrompt?.prompt?.trim()) return
+
+          onSelectPrompt(savedPrompt.prompt)
+          setIsOpen(false)
+        }}
+        triggerButton={
+          <ChatOptionPill
+            isOpen={isOpen}
+            disabled={disabled}
+            css={{ height: '100%' }}
+          >
+            <BookmarkIcon size={12} />
+            <span>Saved prompts</span>
+          </ChatOptionPill>
+        }
+        dropdownFooterFixed={
+          <ListBoxFooterPlus
+            leftContent={
+              <AddIcon
+                size={16}
+                color="text-primary-accent"
+              />
+            }
+            onClick={() => {
+              setIsOpen(false)
+              navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId))
+            }}
+          >
+            New prompt
+          </ListBoxFooterPlus>
+        }
+      >
+        {isEmpty(groupedPrompts) ? (
+          <ListBoxItem
+            key="empty"
+            label="No saved prompts yet"
+            disabled
+          />
+        ) : (
+          groupedPrompts.flatMap(([category, categoryPrompts]) => [
+            <SavedPromptCategoryHeader
+              key={`category:${category}`}
+              category={category}
+            />,
+            ...categoryPrompts.map((savedPrompt) => {
+              const title = displaySavedPromptTitle(savedPrompt.title)
+              const promptText = prettifyPrompt(savedPrompt.prompt ?? '')
+
+              return (
+                <ListBoxItem
+                  key={savedPrompt.id}
+                  label={title}
+                  description={promptText}
+                  textValue={title}
+                  onMouseEnter={(event) =>
+                    setHoverPreview({
+                      title,
+                      promptText,
+                      category,
+                      rect: event.currentTarget.getBoundingClientRect(),
+                    })
+                  }
+                  onMouseLeave={() => setHoverPreview(null)}
+                  css={{
+                    width: '100%',
+                    '.center-content': {
+                      flex: 1,
+                      minWidth: 0,
+                      width: 'auto',
+                      maxWidth: '100%',
+                    },
+                    '.description': {
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      wordBreak: 'break-word',
+                      whiteSpace: 'normal',
+                    },
+                  }}
+                />
+              )
+            }),
+          ])
+        )}
+      </Select>
+      {hoverPreview && (
+        <Tooltip
+          displayOn="manual"
+          manualOpen
+          placement="right"
+          arrow={false}
+          offset={theme.spacing.large}
+          label={
+            <Flex
+              direction="column"
+              gap="small"
+              width={320}
+            >
+              <Flex
+                direction="column"
+                gap="xxxsmall"
+              >
+                <div
+                  css={{
+                    ...theme.partials.text.body2Bold,
+                    color: theme.colors.text,
+                  }}
+                >
+                  {hoverPreview.title}
+                </div>
+                <div
+                  css={{
+                    ...theme.partials.text.caption,
+                    color: theme.colors['text-xlight'],
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  {hoverPreview.promptText}
+                </div>
+              </Flex>
+              <div
+                css={{
+                  backgroundColor: theme.colors['fill-one'],
+                  borderRadius: theme.borderRadiuses.medium,
+                  padding: theme.spacing.small,
+                  ...theme.partials.text.body2,
+                  color: theme.colors.text,
                   display: '-webkit-box',
-                  WebkitLineClamp: 2,
+                  WebkitLineClamp: 6,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   wordBreak: 'break-word',
                   whiteSpace: 'normal',
-                },
-              }}
-            />
-          )),
-        ])
+                }}
+              >
+                {hoverPreview.promptText}
+              </div>
+              <div
+                css={{
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                Category: {hoverPreview.category}
+              </div>
+            </Flex>
+          }
+          style={{
+            padding: theme.spacing.medium,
+            maxWidth: 360,
+            pointerEvents: 'none',
+          }}
+        >
+          <span
+            aria-hidden
+            style={{
+              position: 'fixed',
+              pointerEvents: 'none',
+              left: hoverPreview.rect.left,
+              top: hoverPreview.rect.top,
+              width: hoverPreview.rect.width,
+              height: hoverPreview.rect.height,
+            }}
+          />
+        </Tooltip>
       )}
-    </Select>
+    </>
   )
 }
 
