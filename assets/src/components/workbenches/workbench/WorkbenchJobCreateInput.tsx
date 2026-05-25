@@ -23,6 +23,7 @@ import {
   WorkbenchJobFragment,
   WorkbenchPromptFragment,
 } from 'generated/graphql'
+import capitalize from 'lodash/capitalize'
 import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import type { ComponentProps } from 'react'
@@ -350,7 +351,7 @@ function WorkbenchSavedPrompts({
                       />
                     </SavedPromptTooltipPromptSC>
                     <CaptionP css={{ color: theme.colors['text-xlight'] }}>
-                      Category: {category}
+                      Category: {capitalize(category)}
                     </CaptionP>
                   </Flex>
                 }
