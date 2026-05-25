@@ -15,6 +15,7 @@ import {
 } from 'components/ai/chatbot/input/ChatInput'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 import { GqlError } from 'components/utils/Alert'
+import { TRUNCATE } from 'components/utils/truncate'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   useCreateWorkbenchJobMutation,
@@ -35,7 +36,10 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
-import { prettifyPrompt } from 'components/utils/contentEditableChips.ts'
+import {
+  prettifyPrompt,
+  truncateKeepingChips,
+} from 'components/utils/contentEditableChips.ts'
 import { CaptionP } from 'components/utils/typography/Text'
 
 const MAX_WIDTH = 924
@@ -218,6 +222,10 @@ function WorkbenchPillSelector({
   )
 }
 
+const SAVED_PROMPTS_PANEL_WIDTH = 460
+const SAVED_PROMPT_PANEL_PROMPT_CHARS = 70
+const SAVED_PROMPT_TOOLTIP_PROMPT_CHARS = 320
+
 function WorkbenchSavedPrompts({
   workbenchId,
   disabled,
@@ -258,7 +266,7 @@ function WorkbenchSavedPrompts({
       onOpenChange={setIsOpen}
       selectedKey=""
       label="Saved prompts"
-      width={460}
+      width={SAVED_PROMPTS_PANEL_WIDTH}
       maxHeight={360}
       placement="left"
       isDisabled={disabled || (loading && !data)}
@@ -320,62 +328,31 @@ function WorkbenchSavedPrompts({
                 placement="right"
                 offset={theme.spacing.medium}
                 style={{
+                  width: SAVED_PROMPTS_PANEL_WIDTH,
+                  boxSizing: 'border-box',
                   padding: theme.spacing.medium,
-                  maxWidth: 360,
                   pointerEvents: 'none',
                 }}
                 label={
                   <Flex
                     direction="column"
                     gap="small"
-                    width={320}
+                    width="100%"
                   >
-                    <Flex
-                      direction="column"
-                      gap="xxxsmall"
-                    >
-                      <div
-                        css={{
-                          ...theme.partials.text.body2,
-                          color: theme.colors.text,
-                        }}
-                      >
-                        {title}
-                      </div>
-                      <div
-                        css={{
-                          ...theme.partials.text.body2,
-                          color: theme.colors['text-xlight'],
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          wordBreak: 'break-word',
-                          whiteSpace: 'normal',
-                        }}
-                      >
-                        {promptText}
-                      </div>
-                    </Flex>
                     <div
                       css={{
-                        backgroundColor: theme.colors['fill-three'],
-                        borderRadius: theme.borderRadiuses.medium,
-                        padding: theme.spacing.small,
                         ...theme.partials.text.body2,
                         color: theme.colors.text,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 6,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        wordBreak: 'break-word',
-                        whiteSpace: 'normal',
                       }}
                     >
-                      {promptText}
+                      {title}
                     </div>
+                    <SavedPromptTooltipPromptSC>
+                      {truncateKeepingChips(
+                        promptText,
+                        SAVED_PROMPT_TOOLTIP_PROMPT_CHARS
+                      )}
+                    </SavedPromptTooltipPromptSC>
                     <CaptionP css={{ color: theme.colors['text-xlight'] }}>
                       Category: {category}
                     </CaptionP>
@@ -384,7 +361,10 @@ function WorkbenchSavedPrompts({
               >
                 <ListBoxItem
                   label={title}
-                  description={promptText}
+                  description={truncateKeepingChips(
+                    promptText,
+                    SAVED_PROMPT_PANEL_PROMPT_CHARS
+                  )}
                   textValue={title}
                   css={{
                     width: '100%',
@@ -395,13 +375,8 @@ function WorkbenchSavedPrompts({
                       maxWidth: '100%',
                     },
                     '.description': {
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      wordBreak: 'break-word',
-                      whiteSpace: 'normal',
+                      ...theme.partials.text.body2,
+                      ...TRUNCATE,
                     },
                   }}
                 />
@@ -471,3 +446,12 @@ const InputWrapperSC = styled.div({
   position: 'relative',
   width: '100%',
 })
+
+const SavedPromptTooltipPromptSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-three'],
+  borderRadius: theme.borderRadiuses.medium,
+  padding: theme.spacing.small,
+  ...theme.partials.text.body2,
+  color: theme.colors.text,
+  wordBreak: 'break-word',
+}))
