@@ -557,7 +557,7 @@ type RootQueryType {
 
     "max results to return (defaults to 5)"
     limit: Int
-  ): [WorkbenchJobSearchResult]
+  ): [WorkbenchJob]
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
 
@@ -4231,20 +4231,6 @@ type WorkbenchJobActivityDelta {
 type WorkbenchJobThoughtDelta {
   delta: Delta
   payload: WorkbenchJobThought
-}
-
-type WorkbenchJobSearchPullRequest {
-  title: String
-  url: String
-  body: String
-}
-
-type WorkbenchJobSearchResult {
-  id: ID!
-  prompt: String
-  conclusion: String
-  pullRequests: [WorkbenchJobSearchPullRequest]
-  status: WorkbenchJobStatus
 }
 
 enum SentinelCheckType {

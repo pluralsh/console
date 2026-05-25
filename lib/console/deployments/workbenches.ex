@@ -88,37 +88,33 @@ defmodule Console.Deployments.Workbenches do
   @doc """
   Executes a semantic search for workbench jobs indexed in the vector store.
   """
-  @spec workbench_job_search(binary, User.t(), keyword) :: {:ok, [WorkbenchJob.Mini.t()]} | error
+  @spec workbench_job_search(binary, User.t(), keyword) :: {:ok, [WorkbenchJob.t()]} | error
   def workbench_job_search(q, %User{} = user, opts \\ []) do
     count = Keyword.get(opts, :limit, 5)
     workbench_id = Keyword.get(opts, :workbench_id)
+    user = Console.Services.Rbac.preload(user)
 
-    VectorStore.fetch(q, [
-      count: count,
-      filters: search_filters(workbench_id),
-      user: Console.Services.Rbac.preload(user)
-    ])
-    |> case do
-      {:ok, results} ->
-        minis =
-          results
-          |> Enum.map(fn
-            %VectorStore.Response{workbench_job: mini} when not is_nil(mini) -> mini
-            _ -> nil
-          end)
-          |> Enum.filter(& &1)
-
-        {:ok, minis}
-
-      err ->
-        err
+    with {:ok, results} <- VectorStore.fetch(q, [
+           count: count,
+           filters: search_filters(workbench_id),
+           user: user
+         ]) do
+      results
+      |> Enum.map(fn
+        %VectorStore.Response{workbench_job: %{id: id}} when is_binary(id) -> id
+        _ -> nil
+      end)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.uniq()
+      |> WorkbenchJob.for_ids()
+      |> Repo.all()
+      |> ok()
     end
   end
 
   defp search_filters(workbench_id) when is_binary(workbench_id) do
     [datatype: {:raw, :workbench_job}, workbench_id: workbench_id]
   end
-
   defp search_filters(_), do: [datatype: {:raw, :workbench_job}]
 
   @doc """

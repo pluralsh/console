@@ -17,9 +17,8 @@ import { GqlError } from 'components/utils/Alert'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
-  PullRequestBasicFragment,
   useWorkbenchJobSearchQuery,
-  WorkbenchJobSearchResultFragment,
+  WorkbenchJobSearchRowFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
@@ -106,10 +105,10 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
             </DropdownBodySC>
           ) : (
             <ResultsListSC>
-              {results.map((result) => (
+              {results.map((job) => (
                 <WorkbenchJobSearchResultRow
-                  key={result.id}
-                  result={result}
+                  key={job.id}
+                  job={job}
                   workbenchId={workbenchId}
                   onNavigate={closeDropdown}
                 />
@@ -123,42 +122,27 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
 }
 
 function WorkbenchJobSearchResultRow({
-  result,
+  job,
   workbenchId,
   onNavigate,
 }: {
-  result: WorkbenchJobSearchResultFragment
+  job: WorkbenchJobSearchRowFragment
   workbenchId: string
   onNavigate: () => void
 }) {
   const theme = useTheme()
   const prs = useMemo(
-    () =>
-      (result.pullRequests ?? [])
-        .filter(isNonNullable)
-        .filter((pr) => pr.url || pr.title)
-        .map(
-          (pr, index): PullRequestBasicFragment => ({
-            __typename: 'PullRequest',
-            id: pr.url ?? `${result.id}-pr-${index}`,
-            title: pr.title,
-            url: pr.url ?? '',
-            creator: null,
-            status: null,
-            insertedAt: null,
-            updatedAt: null,
-          })
-        ),
-    [result.id, result.pullRequests]
+    () => job.pullRequests?.filter(isNonNullable) ?? [],
+    [job.pullRequests]
   )
 
   return (
     <ResultRowSC
-      to={getWorkbenchJobAbsPath({ workbenchId, jobId: result.id })}
+      to={getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })}
       onClick={onNavigate}
     >
       <WorkbenchStoredPromptMarkdown
-        text={result.prompt ?? ''}
+        text={job.prompt ?? ''}
         density="tableCell"
         clampLines={1}
       />
@@ -172,12 +156,10 @@ function WorkbenchJobSearchResultRow({
         onClick={(e) => e.stopPropagation()}
       >
         <PRsModalIcon prs={prs} />
-        <JobConclusionIcon
-          result={{ id: result.id, conclusion: result.conclusion }}
-        />
+        <JobConclusionIcon result={job.result} />
         <RunStatusIcon
           fullColor
-          status={result.status}
+          status={job.status}
         />
         <CaretRightIcon color="icon-xlight" />
       </div>

@@ -686,21 +686,22 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-fragment WorkbenchJobSearchResult on WorkbenchJobSearchResult {
+fragment WorkbenchJobSearchRow on WorkbenchJob {
   id
-  status
   prompt
-  conclusion
+  status
+  result {
+    id
+    conclusion
+  }
   pullRequests {
-    title
-    url
-    body
+    ...PullRequestBasic
   }
 }
 
 query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
   workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
-    ...WorkbenchJobSearchResult
+    ...WorkbenchJobSearchRow
   }
 }
 

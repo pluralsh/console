@@ -1444,8 +1444,21 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         }
       )
 
-      job_id = Ecto.UUID.generate()
       workbench = insert(:workbench)
+
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          status: :successful,
+          prompt: "investigate database outage",
+          result: build(:workbench_job_result, conclusion: "root cause was connection pool exhaustion")
+        )
+
+      pr = insert(:pull_request,
+        workbench_job: job,
+        title: "fix pool size",
+        url: "https://github.com/org/repo/pull/1"
+      )
 
       expect(Console.AI.VectorStore, :fetch, fn "database outage", opts ->
         assert opts[:count] == 2
@@ -1455,15 +1468,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         {:ok, [
           %Console.AI.VectorStore.Response{
             type: :workbench,
-            workbench_job: %Console.Schema.WorkbenchJob.Mini{
-              id: job_id,
-              status: "successful",
-              prompt: "investigate database outage",
-              conclusion: "root cause was connection pool exhaustion",
-              pull_requests: [
-                %{title: "fix pool size", url: "https://github.com/org/repo/pull/1", body: "increase pool"}
-              ]
-            }
+            workbench_job: %Console.Schema.WorkbenchJob.Mini{id: job.id}
           }
         ]}
       end)
@@ -1474,18 +1479,18 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             id
             status
             prompt
-            conclusion
-            pullRequests { title url body }
+            result { conclusion }
+            pullRequests { title url }
           }
         }
       """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
 
-      assert found["id"] == job_id
+      assert found["id"] == job.id
       assert found["status"] == "SUCCESSFUL"
       assert found["prompt"] == "investigate database outage"
-      assert found["conclusion"] == "root cause was connection pool exhaustion"
+      assert found["result"]["conclusion"] == "root cause was connection pool exhaustion"
       assert found["pullRequests"] == [
-        %{"title" => "fix pool size", "url" => "https://github.com/org/repo/pull/1", "body" => "increase pool"}
+        %{"title" => pr.title, "url" => pr.url}
       ]
     end
 

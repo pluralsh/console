@@ -10754,7 +10754,7 @@ export type RootQueryType = {
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
   /** Semantic search over vector-indexed workbench jobs */
-  workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJobSearchResult>>>;
+  workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJob>>>;
   workbenchPrMergeRates?: Maybe<Array<Maybe<WorkbenchPrMergeRateEntry>>>;
   workbenchPrMergeRatesByWorkbench?: Maybe<Array<Maybe<WorkbenchPrMergeRateByWorkbenchEntry>>>;
   workbenchPullRequests: Scalars['Int']['output'];
@@ -15795,22 +15795,6 @@ export type WorkbenchJobResultTodo = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
-export type WorkbenchJobSearchPullRequest = {
-  __typename?: 'WorkbenchJobSearchPullRequest';
-  body?: Maybe<Scalars['String']['output']>;
-  title?: Maybe<Scalars['String']['output']>;
-  url?: Maybe<Scalars['String']['output']>;
-};
-
-export type WorkbenchJobSearchResult = {
-  __typename?: 'WorkbenchJobSearchResult';
-  conclusion?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  prompt?: Maybe<Scalars['String']['output']>;
-  pullRequests?: Maybe<Array<Maybe<WorkbenchJobSearchPullRequest>>>;
-  status?: Maybe<WorkbenchJobStatus>;
-};
-
 export enum WorkbenchJobStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
@@ -20421,7 +20405,7 @@ export type WorkbenchJobsQueryVariables = Exact<{
 
 export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null } | null> | null } | null } | null };
 
-export type WorkbenchJobSearchResultFragment = { __typename?: 'WorkbenchJobSearchResult', id: string, status?: WorkbenchJobStatus | null, prompt?: string | null, conclusion?: string | null, pullRequests?: Array<{ __typename?: 'WorkbenchJobSearchPullRequest', title?: string | null, url?: string | null, body?: string | null } | null> | null };
+export type WorkbenchJobSearchRowFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
 
 export type WorkbenchJobSearchQueryVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
@@ -20430,7 +20414,7 @@ export type WorkbenchJobSearchQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobSearchQuery = { __typename?: 'RootQueryType', workbenchJobSearch?: Array<{ __typename?: 'WorkbenchJobSearchResult', id: string, status?: WorkbenchJobStatus | null, prompt?: string | null, conclusion?: string | null, pullRequests?: Array<{ __typename?: 'WorkbenchJobSearchPullRequest', title?: string | null, url?: string | null, body?: string | null } | null> | null } | null> | null };
+export type WorkbenchJobSearchQuery = { __typename?: 'RootQueryType', workbenchJobSearch?: Array<{ __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null> | null };
 
 export type WorkbenchEvalsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -26204,19 +26188,20 @@ export const WorkbenchAccessibleUserFragmentDoc = gql`
   profile
 }
     `;
-export const WorkbenchJobSearchResultFragmentDoc = gql`
-    fragment WorkbenchJobSearchResult on WorkbenchJobSearchResult {
+export const WorkbenchJobSearchRowFragmentDoc = gql`
+    fragment WorkbenchJobSearchRow on WorkbenchJob {
   id
-  status
   prompt
-  conclusion
+  status
+  result {
+    id
+    conclusion
+  }
   pullRequests {
-    title
-    url
-    body
+    ...PullRequestBasic
   }
 }
-    `;
+    ${PullRequestBasicFragmentDoc}`;
 export const UnifiedWorkbenchSkillTinyFragmentDoc = gql`
     fragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {
   id
@@ -42229,10 +42214,10 @@ export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, Wo
 export const WorkbenchJobSearchDocument = gql`
     query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
   workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
-    ...WorkbenchJobSearchResult
+    ...WorkbenchJobSearchRow
   }
 }
-    ${WorkbenchJobSearchResultFragmentDoc}`;
+    ${WorkbenchJobSearchRowFragmentDoc}`;
 
 /**
  * __useWorkbenchJobSearchQuery__
@@ -45177,7 +45162,7 @@ export const namedOperations = {
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchEvalResultRow: 'WorkbenchEvalResultRow',
     WorkbenchAccessibleUser: 'WorkbenchAccessibleUser',
-    WorkbenchJobSearchResult: 'WorkbenchJobSearchResult',
+    WorkbenchJobSearchRow: 'WorkbenchJobSearchRow',
     UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny'
   }
 }
