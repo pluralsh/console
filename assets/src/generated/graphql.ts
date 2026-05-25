@@ -14747,7 +14747,8 @@ export enum ValidationUniqScope {
 
 export enum VectorStore {
   Elastic = 'ELASTIC',
-  Opensearch = 'OPENSEARCH'
+  Opensearch = 'OPENSEARCH',
+  Postgres = 'POSTGRES'
 }
 
 export type VectorStoreAttributes = {

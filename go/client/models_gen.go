@@ -10151,20 +10151,6 @@ type WorkbenchJobResultTodo struct {
 	Done        *bool   `json:"done,omitempty"`
 }
 
-type WorkbenchJobSearchPullRequest struct {
-	Title *string `json:"title,omitempty"`
-	URL   *string `json:"url,omitempty"`
-	Body  *string `json:"body,omitempty"`
-}
-
-type WorkbenchJobSearchResult struct {
-	ID           string                           `json:"id"`
-	Prompt       *string                          `json:"prompt,omitempty"`
-	Conclusion   *string                          `json:"conclusion,omitempty"`
-	PullRequests []*WorkbenchJobSearchPullRequest `json:"pullRequests,omitempty"`
-	Status       *WorkbenchJobStatus              `json:"status,omitempty"`
-}
-
 type WorkbenchJobThought struct {
 	// the id of the thought
 	ID string `json:"id"`
@@ -16530,16 +16516,18 @@ type VectorStore string
 const (
 	VectorStoreElastic    VectorStore = "ELASTIC"
 	VectorStoreOpensearch VectorStore = "OPENSEARCH"
+	VectorStorePostgres   VectorStore = "POSTGRES"
 )
 
 var AllVectorStore = []VectorStore{
 	VectorStoreElastic,
 	VectorStoreOpensearch,
+	VectorStorePostgres,
 }
 
 func (e VectorStore) IsValid() bool {
 	switch e {
-	case VectorStoreElastic, VectorStoreOpensearch:
+	case VectorStoreElastic, VectorStoreOpensearch, VectorStorePostgres:
 		return true
 	}
 	return false

@@ -5,17 +5,17 @@ defmodule Console.Chat.Registrar do
   alias Console.Chat.DynamicSupervisor
   require Logger
 
-  @poll :timer.minutes(5)
+  # @poll :timer.minutes(5)
 
   def start_link(arg \\ :ok) do
     GenServer.start_link(__MODULE__, arg, name: __MODULE__)
   end
 
   def init(_arg) do
-    if Console.conf(:initialize) do
-      :timer.send_interval(@poll, :poll)
-      send self(), :poll
-    end
+    # if Console.conf(:initialize) do
+    #   :timer.send_interval(@poll, :poll)
+    #   send self(), :poll
+    # end
 
     {:ok, %{}}
   end

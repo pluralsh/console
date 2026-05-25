@@ -1,6 +1,7 @@
 defmodule Console.AI.VectorStore do
   alias Console.AI.Vector.Elastic
   alias Console.AI.Vector.Opensearch
+  alias Console.AI.Vector.Postgres
   alias Console.Schema.{
     DeploymentSettings,
     DeploymentSettings.AI,
@@ -30,7 +31,7 @@ defmodule Console.AI.VectorStore do
 
   @latest_version Settings.vector_store_version()
 
-  @type store :: Console.AI.Vector.Elastic.t
+  @type store :: Console.AI.Vector.Elastic.t | Console.AI.Vector.Opensearch.t | Console.AI.Vector.Postgres.t
   @type data :: Response.t
   @type error :: Console.error
 
@@ -97,5 +98,7 @@ defmodule Console.AI.VectorStore do
     do: {:ok, Elastic.new(elastic, version: version, settings: vs)}
   defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :opensearch, opensearch: opensearch, version: version} = vs}}),
     do: {:ok, Opensearch.new(opensearch, version: version, settings: vs)}
+  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :postgres, version: version} = vs}}),
+    do: {:ok, Postgres.new(version: version, settings: vs)}
   defp store(_), do: {:error, "AI vector store not yet configured"}
 end

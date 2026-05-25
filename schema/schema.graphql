@@ -5250,6 +5250,7 @@ enum LogDriver {
 enum VectorStore {
   ELASTIC
   OPENSEARCH
+  POSTGRES
 }
 
 enum OpenAiMethod {
