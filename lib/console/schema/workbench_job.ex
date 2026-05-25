@@ -215,4 +215,16 @@ defmodule Console.Schema.WorkbenchJob.Mini do
       pull_requests: mini.pull_requests
     }
   end
+
+  @doc """
+  Coerces a workbench job status from vector-store decode (string or atom) into the
+  schema enum value used by GraphQL.
+  """
+  @spec normalize_status(term) :: WorkbenchJob.Status.t() | nil
+  def normalize_status(status) do
+    case WorkbenchJob.Status.cast(status) do
+      {:ok, status} -> status
+      :error -> nil
+    end
+  end
 end

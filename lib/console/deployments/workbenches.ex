@@ -22,7 +22,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
   }
-  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
+  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt, VectorStore}
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -83,6 +83,35 @@ defmodule Console.Deployments.Workbenches do
 
     User.for_policies(users, groups)
     |> Repo.all()
+  end
+
+  @doc """
+  Executes a semantic search for workbench jobs indexed in the vector store.
+  """
+  @spec workbench_job_search(binary, User.t(), keyword) :: {:ok, [WorkbenchJob.Mini.t()]} | error
+  def workbench_job_search(q, %User{} = user, opts \\ []) do
+    count = Keyword.get(opts, :limit, 5)
+
+    VectorStore.fetch(q, [
+      count: count,
+      filters: [datatype: {:raw, :workbench_job}],
+      user: Console.Services.Rbac.preload(user)
+    ])
+    |> case do
+      {:ok, results} ->
+        minis =
+          results
+          |> Enum.map(fn
+            %VectorStore.Response{workbench_job: mini} when not is_nil(mini) -> mini
+            _ -> nil
+          end)
+          |> Enum.filter(& &1)
+
+        {:ok, minis}
+
+      err ->
+        err
+    end
   end
 
   @doc """

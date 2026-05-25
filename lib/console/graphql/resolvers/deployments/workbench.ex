@@ -83,6 +83,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     end
   end
 
+  def workbench_job_search(%{q: q} = args, %{context: %{current_user: user}}) do
+    Workbenches.workbench_job_search(q, user, limit: Map.get(args, :limit, 5))
+  end
+
   def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do
     WorkbenchJob.for_flow(flow_id)
     |> workbench_job_filters(args)

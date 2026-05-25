@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Deployments.Workbench do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.{Deployments, User}
+  alias Console.Schema.WorkbenchJob.Mini
 
   ecto_enum :workbench_tool_type, Console.Schema.WorkbenchTool.Tool
   ecto_enum :workbench_tool_category, Console.Schema.WorkbenchTool.Category
@@ -1037,6 +1038,25 @@ defmodule Console.GraphQl.Deployments.Workbench do
   delta :workbench_job_activity
   delta :workbench_job_thought
 
+  object :workbench_job_search_pull_request do
+    field :title, :string
+    field :url,   :string
+    field :body,  :string
+  end
+
+  object :workbench_job_search_result do
+    field :id,            non_null(:id)
+    field :prompt,        :string
+    field :conclusion,    :string
+    field :pull_requests, list_of(:workbench_job_search_pull_request)
+
+    field :status, :workbench_job_status do
+      resolve fn %{status: status}, _, _ ->
+        {:ok, Mini.normalize_status(status)}
+      end
+    end
+  end
+
   object :workbench_queries do
     field :workbench, :workbench do
       middleware Authenticated
@@ -1111,6 +1131,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :count, :integer, description: "the maximum number of jobs to return (defaults to 3, max 20)"
 
       resolve &Deployments.recent_workbench_jobs/2
+    end
+
+    @desc "Semantic search over vector-indexed workbench jobs"
+    field :workbench_job_search, list_of(:workbench_job_search_result) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      middleware VectorStoreEnabled
+      arg :q,     non_null(:string)
+      arg :limit, :integer, description: "max results to return (defaults to 5)"
+
+      resolve &Deployments.workbench_job_search/2
     end
 
     field :workbench_job_activity, :workbench_job_activity do

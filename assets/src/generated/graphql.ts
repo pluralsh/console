@@ -10753,6 +10753,8 @@ export type RootQueryType = {
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
+  /** Semantic search over vector-indexed workbench jobs */
+  workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJobSearchResult>>>;
   workbenchPrMergeRates?: Maybe<Array<Maybe<WorkbenchPrMergeRateEntry>>>;
   workbenchPrMergeRatesByWorkbench?: Maybe<Array<Maybe<WorkbenchPrMergeRateByWorkbenchEntry>>>;
   workbenchPullRequests: Scalars['Int']['output'];
@@ -12161,6 +12163,12 @@ export type RootQueryTypeWorkbenchJobArgs = {
 
 export type RootQueryTypeWorkbenchJobActivityArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeWorkbenchJobSearchArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  q: Scalars['String']['input'];
 };
 
 
@@ -15784,6 +15792,22 @@ export type WorkbenchJobResultTodo = {
   description?: Maybe<Scalars['String']['output']>;
   done?: Maybe<Scalars['Boolean']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchJobSearchPullRequest = {
+  __typename?: 'WorkbenchJobSearchPullRequest';
+  body?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchJobSearchResult = {
+  __typename?: 'WorkbenchJobSearchResult';
+  conclusion?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  prompt?: Maybe<Scalars['String']['output']>;
+  pullRequests?: Maybe<Array<Maybe<WorkbenchJobSearchPullRequest>>>;
+  status?: Maybe<WorkbenchJobStatus>;
 };
 
 export enum WorkbenchJobStatus {

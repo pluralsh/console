@@ -548,6 +548,14 @@ type RootQueryType {
     count: Int
   ): [WorkbenchJob]
 
+  "Semantic search over vector-indexed workbench jobs"
+  workbenchJobSearch(
+    q: String!
+
+    "max results to return (defaults to 5)"
+    limit: Int
+  ): [WorkbenchJobSearchResult]
+
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
 
   workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection
@@ -4220,6 +4228,20 @@ type WorkbenchJobActivityDelta {
 type WorkbenchJobThoughtDelta {
   delta: Delta
   payload: WorkbenchJobThought
+}
+
+type WorkbenchJobSearchPullRequest {
+  title: String
+  url: String
+  body: String
+}
+
+type WorkbenchJobSearchResult {
+  id: ID!
+  prompt: String
+  conclusion: String
+  pullRequests: [WorkbenchJobSearchPullRequest]
+  status: WorkbenchJobStatus
 }
 
 enum SentinelCheckType {
