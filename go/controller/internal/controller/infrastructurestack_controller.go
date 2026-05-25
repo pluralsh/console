@@ -254,7 +254,7 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
 		Watches(&corev1.ConfigMap{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
 		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
