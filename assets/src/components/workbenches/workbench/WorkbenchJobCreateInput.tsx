@@ -1,6 +1,6 @@
 import {
   AddIcon,
-  BookmarkIcon,
+  BookmarkAddIcon,
   Flex,
   IconFrame,
   ListBoxFooterPlus,
@@ -274,7 +274,7 @@ function WorkbenchSavedPrompts({
         <IconFrame
           type="tertiary"
           clickable={!disabled}
-          icon={<BookmarkIcon size={12} />}
+          icon={<BookmarkAddIcon size={12} />}
           disabled={disabled}
           tooltip="Saved prompts"
         />
