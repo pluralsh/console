@@ -37,6 +37,10 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
+import {
+  displaySavedPromptCategory,
+  displaySavedPromptTitle,
+} from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { CaptionP } from 'components/utils/typography/Text'
 
@@ -437,14 +441,6 @@ function groupSavedPromptsByCategory(prompts: WorkbenchPromptFragment[]) {
           ),
         ] as const
     )
-}
-
-function displaySavedPromptTitle(title: string) {
-  return title === 'Default' ? 'Saved prompt' : title
-}
-
-function displaySavedPromptCategory(category: string) {
-  return category === 'Default' ? 'General' : category
 }
 
 const InputWrapperSC = styled.div({

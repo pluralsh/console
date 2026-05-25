@@ -13,6 +13,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
+import { displaySavedPromptTitle } from './savedPromptDisplay'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -234,7 +235,7 @@ function getColumns({
         return (
           <StackedText
             truncate
-            first={savedPromptTitle(savedPrompt.title)}
+            first={displaySavedPromptTitle(savedPrompt.title)}
             second={prettifyPrompt(savedPrompt.prompt ?? '')}
           />
         )
@@ -271,8 +272,4 @@ function getColumns({
       ),
     }),
   ]
-}
-
-function savedPromptTitle(title: string) {
-  return title === 'Default' ? 'Saved prompt' : title
 }
