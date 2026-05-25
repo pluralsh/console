@@ -1,5 +1,6 @@
 import {
   BookmarkIcon,
+  BotIcon,
   Button,
   EmptyState,
   EventScheduleIcon,
@@ -43,6 +44,7 @@ import {
 } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
+  getWorkbenchChatbotsAbsPath,
   getWorkbenchCronSchedulesAbsPath,
   getWorkbenchEvalSettingsAbsPath,
   getWorkbenchSavedPromptsAbsPath,
@@ -80,6 +82,7 @@ export enum WorkbenchMoreMenuKey {
   Edit = 'edit',
   Cron = 'cron',
   Webhook = 'webhook',
+  Chatbots = 'chatbots',
   Tools = 'tools',
   SavedPrompts = 'saved-prompts',
   EvalSettings = 'eval-settings',
@@ -167,6 +170,9 @@ export function WorkbenchPageLayout({
           return
         case WorkbenchMoreMenuKey.Webhook:
           navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
+          return
+        case WorkbenchMoreMenuKey.Chatbots:
+          navigate(getWorkbenchChatbotsAbsPath(workbenchId))
           return
         case WorkbenchMoreMenuKey.Tools:
           openToolsEdit()
@@ -258,6 +264,11 @@ export function WorkbenchPageLayout({
                 key={WorkbenchMoreMenuKey.Webhook}
                 leftContent={<WebhooksIcon />}
                 label="Webhook triggers"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Chatbots}
+                leftContent={<BotIcon />}
+                label="Chatbots"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.SavedPrompts}
