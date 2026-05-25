@@ -1,43 +1,39 @@
 import {
-  ArrowTopRightIcon,
+  AddIcon,
   BookmarkIcon,
-  Chip,
-  ChipProps,
   Flex,
+  ListBoxFooterPlus,
   ListBoxItem,
   Select,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { animated, useTransition } from '@react-spring/web'
-import chroma from 'chroma-js'
 import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
 import {
   ChatInputSimple,
   ChatOptionPill,
 } from 'components/ai/chatbot/input/ChatInput'
 import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
-import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { VirtualList } from 'components/utils/VirtualList'
 import {
   useCreateWorkbenchJobMutation,
   useWorkbenchesQuery,
   useWorkbenchPromptsQuery,
   WorkbenchJobFragment,
+  WorkbenchPromptFragment,
 } from 'generated/graphql'
+import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import truncate from 'lodash/truncate'
 import type { ComponentProps } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
-  getWorkbenchSavedPromptsAbsPath,
+  getWorkbenchSavedPromptCreateAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { Body2P } from '../../utils/typography/Text.tsx'
 import { SaveWorkbenchPromptButton } from './SaveWorkbenchPromptButton'
 import { prettifyPrompt } from 'components/utils/contentEditableChips.ts'
 
@@ -230,160 +226,156 @@ function WorkbenchSavedPrompts({
   disabled: boolean
   onSelectPrompt: (prompt: string) => void
 }) {
-  const [open, setOpen] = useState(false)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  useOutsideClick(wrapperRef, () => {
-    if (open) setOpen(false)
-  })
+  const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false)
 
-  return (
-    <div ref={wrapperRef}>
-      <ChatOptionPill
-        isOpen={open}
-        disabled={disabled}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <BookmarkIcon size={12} />
-        <span>Saved prompts</span>
-      </ChatOptionPill>
-      <SavedPromptsOverlay
-        open={open}
-        workbenchId={workbenchId}
-        onSelectPrompt={(p) => {
-          setOpen(false)
-          onSelectPrompt(p)
-        }}
-      />
-    </div>
-  )
-}
-
-function SavedPromptsOverlay({
-  open,
-  workbenchId,
-  onSelectPrompt,
-}: {
-  open: boolean
-  workbenchId: string
-  onSelectPrompt: (prompt: string) => void
-}) {
-  // this will get fetched fresh by SaveWorkbenchPromptButton, so we can rely on cache here
-  const {
-    data,
-    loading: promptsLoading,
-    error,
-  } = useWorkbenchPromptsQuery({
+  const { data, loading } = useWorkbenchPromptsQuery({
     variables: { id: workbenchId },
     skip: !workbenchId,
   })
 
   const prompts = useMemo(
-    () => mapExistingNodes(data?.workbench?.prompts).reverse(),
+    () => mapExistingNodes(data?.workbench?.prompts),
     [data]
   )
-  const isLoading = promptsLoading && !data
-  const noPrompts = isEmpty(prompts) && !isLoading
 
-  const theme = useTheme()
-
-  const transitionProps = useMemo(
-    () => ({
-      from: { opacity: 0, maxHeight: 0, marginTop: 0 },
-      enter: { opacity: 1, maxHeight: 480, marginTop: theme.spacing.small },
-      leave: { opacity: 0, maxHeight: 0, marginTop: 0 },
-      config: open
-        ? { mass: 0.6, tension: 280, velocity: 0.02 }
-        : { mass: 0.6, tension: 400, velocity: 0.02, restVelocity: 0.1 },
-    }),
-    [open, theme.spacing.small]
+  const promptsById = useMemo(
+    () => new Map(prompts.map((prompt) => [prompt.id, prompt])),
+    [prompts]
   )
 
-  const transitions = useTransition(open ? [true] : [], transitionProps)
+  const groupedPrompts = useMemo(
+    () => groupSavedPromptsByCategory(prompts),
+    [prompts]
+  )
 
-  if (error) return null
+  return (
+    <Select
+      transparent
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+      selectedKey=""
+      label="Saved prompts"
+      width={420}
+      maxHeight={320}
+      placement="bottom-start"
+      isDisabled={disabled || (loading && !data)}
+      onSelectionChange={(key) => {
+        const savedPrompt = key ? promptsById.get(`${key}`) : null
+        if (!savedPrompt?.prompt?.trim()) return
 
-  return transitions((styles) => (
-    <AnimatedPromptsPanelSC
-      style={{
-        opacity: styles.opacity,
-        maxHeight: styles.maxHeight,
-        marginTop: styles.marginTop,
+        onSelectPrompt(savedPrompt.prompt)
+        setIsOpen(false)
       }}
-    >
-      {noPrompts ? (
-        <Body2P $color="text-xlight">No saved prompts yet.</Body2P>
-      ) : (
-        <VirtualList
-          data={prompts}
-          itemGap="small"
-          style={{ height: Math.min(320, (prompts.length + 1) * 44) }}
-          loading={isLoading}
-          skeletonProps={{ numRows: 6, gap: 'small' }}
-          renderer={({ rowData }) => (
-            <SavedPromptsChip
-              label={prettifyPrompt(rowData.prompt ?? '')}
-              fillLevel={2}
-              onClick={() => onSelectPrompt(rowData.prompt ?? '')}
-            />
-          )}
-        />
-      )}
-      {!noPrompts && (
-        <SavedPromptsChip
-          label="View all saved prompts"
-          fillLevel={1}
-          forwardedAs={Link}
-          to={getWorkbenchSavedPromptsAbsPath(workbenchId)}
-          endIcon={
-            <ArrowTopRightIcon
-              size={12}
-              color="icon-light"
+      triggerButton={
+        <ChatOptionPill
+          isOpen={isOpen}
+          disabled={disabled}
+          css={{ height: '100%' }}
+        >
+          <BookmarkIcon size={12} />
+          <span>Saved prompts</span>
+        </ChatOptionPill>
+      }
+      dropdownFooterFixed={
+        <ListBoxFooterPlus
+          leftContent={
+            <AddIcon
+              size={16}
+              color="text-primary-accent"
             />
           }
+          onClick={() => {
+            setIsOpen(false)
+            navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId))
+          }}
+        >
+          New prompt
+        </ListBoxFooterPlus>
+      }
+    >
+      {isEmpty(groupedPrompts) ? (
+        <ListBoxItem
+          key="empty"
+          label="No saved prompts yet"
+          disabled
         />
+      ) : (
+        groupedPrompts.flatMap(([category, categoryPrompts]) => [
+          <SavedPromptCategoryHeader
+            key={`category:${category}`}
+            category={category}
+          />,
+          ...categoryPrompts.map((savedPrompt) => (
+            <ListBoxItem
+              key={savedPrompt.id}
+              label={displaySavedPromptTitle(savedPrompt.title)}
+              description={truncate(prettifyPrompt(savedPrompt.prompt ?? ''), {
+                length: 96,
+              })}
+              textValue={displaySavedPromptTitle(savedPrompt.title)}
+            />
+          )),
+        ])
       )}
-    </AnimatedPromptsPanelSC>
-  ))
+    </Select>
+  )
 }
 
-function SavedPromptsChip({
-  label,
-  fillLevel,
-  ...props
-}: {
-  label: string
-  fillLevel?: ComponentProps<typeof Chip>['fillLevel']
-} & ChipProps) {
+function SavedPromptCategoryHeader({ category }: { category: string }) {
+  const theme = useTheme()
+
   return (
-    <Chip
-      size="large"
-      fillLevel={fillLevel}
-      clickable
-      style={{ borderRadius: 16, width: 'fit-content' }}
-      {...props}
-    >
-      {truncate(label, { length: 116 })}
-    </Chip>
+    <ListBoxItem
+      label={category}
+      disabled
+      textValue=""
+      css={{
+        paddingTop: theme.spacing.small,
+        paddingBottom: theme.spacing.xxsmall,
+        cursor: 'default',
+        pointerEvents: 'none',
+        '&:hover': { backgroundColor: 'transparent' },
+        '.label': {
+          ...theme.partials.text.overline,
+          color: theme.colors['text-xlight'],
+        },
+      }}
+    />
   )
+}
+
+function groupSavedPromptsByCategory(prompts: WorkbenchPromptFragment[]) {
+  const grouped = groupBy(prompts, (prompt) =>
+    displaySavedPromptCategory(prompt.category)
+  )
+
+  return Object.entries(grouped)
+    .sort(([leftCategory], [rightCategory]) =>
+      leftCategory.localeCompare(rightCategory)
+    )
+    .map(
+      ([category, categoryPrompts]) =>
+        [
+          category,
+          [...categoryPrompts].sort(
+            (left, right) =>
+              new Date(right.insertedAt ?? 0).getTime() -
+              new Date(left.insertedAt ?? 0).getTime()
+          ),
+        ] as const
+    )
+}
+
+function displaySavedPromptTitle(title: string) {
+  return title === 'Default' ? 'Saved prompt' : title
+}
+
+function displaySavedPromptCategory(category: string) {
+  return category === 'Default' ? 'General' : category
 }
 
 const InputWrapperSC = styled.div({
   position: 'relative',
   width: '100%',
 })
-
-const AnimatedPromptsPanelSC = styled(animated.div)(({ theme }) => ({
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  right: 0,
-  zIndex: theme.zIndexes.modal + 1,
-  boxSizing: 'border-box',
-  overflow: 'hidden',
-  backdropFilter: 'blur(4px)',
-  border: `1px solid ${chroma(theme.colors['border-fill-two']).alpha(0.1).hex()}`,
-  borderRadius: theme.borderRadiuses.large,
-  padding: theme.spacing.medium,
-  backgroundColor: chroma(theme.colors['fill-zero']).alpha(0.4).hex(),
-  boxShadow: theme.boxShadows.modal,
-}))
