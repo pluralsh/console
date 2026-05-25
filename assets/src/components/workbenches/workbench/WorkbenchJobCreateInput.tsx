@@ -346,6 +346,7 @@ function WorkbenchSavedPrompts({
                         text={prompt}
                         density="jobCard"
                         clampLines={5}
+                        promptColor="text-xlight"
                       />
                     </SavedPromptTooltipPromptSC>
                     <CaptionP css={{ color: theme.colors['text-xlight'] }}>
@@ -361,6 +362,7 @@ function WorkbenchSavedPrompts({
                       text={prompt}
                       density="jobCard"
                       clampLines={1}
+                      promptColor="text-xlight"
                     />
                   }
                   textValue={title}
