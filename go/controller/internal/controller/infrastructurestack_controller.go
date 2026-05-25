@@ -119,43 +119,9 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
-	clusterID, result, err := r.handleClusterRef(ctx, stack)
+	attributes, result, err := r.getDynamicAttributes(ctx, stack)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	policyEngineRepositoryID, result, err := r.handlePolicyEngineRepositoryRef(ctx, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	metrics, result, err := r.handleObservableMetrics(ctx, stack)
-	if result != nil || err != nil {
-		return lo.FromPtr(result), err
-	}
-
-	attributes := dynamicAttributes{
-		clusterID:                clusterID,
-		repositoryID:             repositoryID,
-		policyEngineRepositoryID: policyEngineRepositoryID,
-		projectID:                project.Status.ID,
-		definitionID:             stackDefinitionID,
-		observableMetrics:        metrics,
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -216,6 +182,47 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
 }
 
+func (r *InfrastructureStackReconciler) getDynamicAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*dynamicAttributes, *ctrl.Result, error) {
+	clusterID, result, err := r.handleClusterRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	policyEngineRepositoryID, result, err := r.handlePolicyEngineRepositoryRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	metrics, result, err := r.handleObservableMetrics(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	return &dynamicAttributes{
+		clusterID:                clusterID,
+		repositoryID:             repositoryID,
+		policyEngineRepositoryID: policyEngineRepositoryID,
+		projectID:                project.Status.ID,
+		definitionID:             stackDefinitionID,
+		observableMetrics:        metrics,
+	}, nil, nil
+}
+
 func (r *InfrastructureStackReconciler) handleExistingResource(ctx context.Context, stack *v1alpha1.InfrastructureStack, apiStack *console.InfrastructureStackIDFragment) (ctrl.Result, error) {
 	stack.Status.ID = apiStack.ID
 
@@ -253,7 +260,7 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
 		Watches(&corev1.ConfigMap{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
 		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
@@ -327,7 +334,7 @@ type dynamicAttributes struct {
 func (r *InfrastructureStackReconciler) getStackAttributes(
 	ctx context.Context,
 	stack *v1alpha1.InfrastructureStack,
-	attributes dynamicAttributes,
+	attributes *dynamicAttributes,
 ) (*console.StackAttributes, error) {
 	attr := &console.StackAttributes{
 		Name:              stack.StackName(),
@@ -681,7 +688,7 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 		if !obsProvider.Status.HasID() {
 			logger.Info("ObservabilityProvider not ready", "provider", key)
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-			return nil, lo.ToPtr(stack.Spec.Reconciliation.Requeue()), nil
+			return nil, lo.ToPtr(common.WaitForResources()), nil
 		}
 
 		metrics = append(metrics, console.ObservableMetricAttributes{
