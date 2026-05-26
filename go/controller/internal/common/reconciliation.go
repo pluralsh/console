@@ -27,8 +27,12 @@ func HandleRequeue(result *ctrl.Result, err error, setCondition func(condition m
 		result = lo.ToPtr(Wait())
 	}
 
+	conditionReason := v1alpha1.SynchronizedConditionReason
+	if err != nil {
+		conditionReason = v1alpha1.SynchronizedConditionReasonError
+	}
 	utils.MarkCondition(setCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse,
-		v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, ""))
+		conditionReason, defaultErrMessage(err, ""))
 	return lo.FromPtr(result), lo.Ternary(result != nil, nil, err)
 }
 

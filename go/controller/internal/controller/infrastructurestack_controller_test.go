@@ -382,7 +382,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 						},
 						{
 							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
+							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
@@ -435,12 +435,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
-							Status: metav1.ConditionTrue,
+							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.ReadyConditionReason.String(),
 						},
 						{
 							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
+							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},

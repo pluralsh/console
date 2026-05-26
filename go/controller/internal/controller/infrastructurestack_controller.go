@@ -119,43 +119,9 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
-	clusterID, result, err := r.handleClusterRef(ctx, stack)
+	attributes, result, err := r.getDynamicAttributes(ctx, stack)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	policyEngineRepositoryID, result, err := r.handlePolicyEngineRepositoryRef(ctx, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
-	if result != nil || err != nil {
-		return common.HandleRequeue(result, err, stack.SetCondition)
-	}
-
-	metrics, result, err := r.handleObservableMetrics(ctx, stack)
-	if result != nil || err != nil {
-		return lo.FromPtr(result), err
-	}
-
-	attributes := dynamicAttributes{
-		clusterID:                clusterID,
-		repositoryID:             repositoryID,
-		policyEngineRepositoryID: policyEngineRepositoryID,
-		projectID:                project.Status.ID,
-		definitionID:             stackDefinitionID,
-		observableMetrics:        metrics,
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -194,7 +160,9 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		stack.Status.SHA = lo.ToPtr(sha)
 	}
 
+	changed := false
 	if !stack.Status.IsSHAEqual(sha) {
+		changed = true
 		_, err = r.ConsoleClient.UpdateStack(ctx, stack.Status.GetID(), *attr)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -205,38 +173,88 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		stack.Status.SHA = lo.ToPtr(sha)
 	}
 
-	if err := r.setReadyCondition(ctx, stack, existing != nil); err != nil {
-		return ctrl.Result{}, err
+	result, err = r.setReadyCondition(ctx, stack, existing != nil, changed)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
 }
 
+func (r *InfrastructureStackReconciler) getDynamicAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*dynamicAttributes, *ctrl.Result, error) {
+	clusterID, result, err := r.handleClusterRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	repositoryID, result, err := r.handleRepositoryRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	policyEngineRepositoryID, result, err := r.handlePolicyEngineRepositoryRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	project, result, err := common.Project(ctx, r.Client, r.Scheme, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	stackDefinitionID, result, err := r.handleStackDefinitionRef(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	metrics, result, err := r.handleObservableMetrics(ctx, stack)
+	if result != nil || err != nil {
+		return nil, result, err
+	}
+
+	return &dynamicAttributes{
+		clusterID:                clusterID,
+		repositoryID:             repositoryID,
+		policyEngineRepositoryID: policyEngineRepositoryID,
+		projectID:                project.Status.ID,
+		definitionID:             stackDefinitionID,
+		observableMetrics:        metrics,
+	}, nil, nil
+}
+
 func (r *InfrastructureStackReconciler) handleExistingResource(ctx context.Context, stack *v1alpha1.InfrastructureStack, apiStack *console.InfrastructureStackIDFragment) (ctrl.Result, error) {
 	stack.Status.ID = apiStack.ID
 
-	if err := r.setReadyCondition(ctx, stack, apiStack != nil); err != nil {
-		return ctrl.Result{}, err
+	result, err := r.setReadyCondition(ctx, stack, apiStack != nil, false)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	return stack.Spec.Reconciliation.Requeue(), nil
+	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
 }
 
-func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists bool) error {
+func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists, changed bool) (*ctrl.Result, error) {
 	if !exists {
-		return nil
+		return lo.ToPtr(common.WaitForResources()), nil
+	}
+
+	// wait a little bit before marking the stack as ready to give the console some time to process the updated stack
+	if changed {
+		return lo.ToPtr(ctrl.Result{RequeueAfter: v1alpha1.Jitter(5 * time.Second)}), nil
 	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	status, err := r.ConsoleClient.GetStackStatus(ctx, *stack.Status.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if status.Status == console.StackStatusSuccessful {
 		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+		return nil, nil
 	}
-	return nil
+
+	return lo.ToPtr(common.WaitForResources()), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -316,7 +334,7 @@ type dynamicAttributes struct {
 func (r *InfrastructureStackReconciler) getStackAttributes(
 	ctx context.Context,
 	stack *v1alpha1.InfrastructureStack,
-	attributes dynamicAttributes,
+	attributes *dynamicAttributes,
 ) (*console.StackAttributes, error) {
 	attr := &console.StackAttributes{
 		Name:              stack.StackName(),
@@ -670,7 +688,7 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 		if !obsProvider.Status.HasID() {
 			logger.Info("ObservabilityProvider not ready", "provider", key)
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-			return nil, lo.ToPtr(stack.Spec.Reconciliation.Requeue()), nil
+			return nil, lo.ToPtr(common.WaitForResources()), nil
 		}
 
 		metrics = append(metrics, console.ObservableMetricAttributes{
