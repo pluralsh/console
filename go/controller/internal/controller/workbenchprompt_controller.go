@@ -161,7 +161,7 @@ func (in *WorkbenchPromptReconciler) sync(ctx context.Context, workbenchPrompt *
 	}
 
 	existingPrompt, err := in.ConsoleClient.GetWorkbenchPrompt(ctx, workbenchPrompt.Status.GetID())
-	if err != nil {
+	if client.IgnoreNotFound(err) != nil {
 		return nil, err
 	}
 
