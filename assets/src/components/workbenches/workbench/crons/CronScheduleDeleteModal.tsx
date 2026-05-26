@@ -23,7 +23,7 @@ export function CronScheduleDeleteModal({
     onCompleted: () => {
       popToast({
         content: `${prettifyPrompt(cron?.prompt ?? '') || 'schedule'} deleted`,
-        severity: 'danger',
+        severity: 'success',
       })
       onClose()
     },

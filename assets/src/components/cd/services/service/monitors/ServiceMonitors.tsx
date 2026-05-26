@@ -133,7 +133,7 @@ const cols = [
         variables: { id },
         onCompleted: () => {
           setDeleteOpen(false)
-          popToast({ content: `${name} deleted`, severity: 'danger' })
+          popToast({ content: `${name} deleted`, severity: 'success' })
         },
         onError: () =>
           popToast({ content: `${name} failed to delete`, severity: 'danger' }),

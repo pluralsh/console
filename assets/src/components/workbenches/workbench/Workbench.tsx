@@ -384,7 +384,7 @@ export function Workbench() {
         navigate(WORKBENCHES_ABS_PATH)
         popToast({
           content: `${workbench?.name ?? 'workbench'} deleted`,
-          severity: 'danger',
+          severity: 'success',
         })
       },
     })

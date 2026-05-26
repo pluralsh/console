@@ -23,7 +23,7 @@ export function ChatbotDeleteModal({
     onCompleted: () => {
       popToast({
         content: `${label} deleted`,
-        severity: 'danger',
+        severity: 'success',
       })
       onClose()
     },
