@@ -688,4 +688,55 @@ defmodule Console.AI.CronTest do
       Cron.vectorize_stacks()
     end
   end
+
+  describe "#backfill_workbench_job_vectors/0" do
+    test "it re-indexes all terminal workbench jobs via pubsub events" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      insert(:workbench_job,
+        status: :successful,
+        result: build(:workbench_job_result, conclusion: "done")
+      )
+
+      insert(:workbench_job, status: :running)
+      insert(:workbench_job, status: :pending)
+
+      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      Cron.backfill_workbench_job_vectors()
+
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c == 1
+    end
+
+    test "it does nothing when vector store is disabled" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{enabled: false},
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+
+      insert(:workbench_job,
+        status: :successful,
+        result: build(:workbench_job_result, conclusion: "done")
+      )
+
+      Cron.backfill_workbench_job_vectors()
+    end
+  end
 end

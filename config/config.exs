@@ -87,16 +87,16 @@ config :console, :ai_defaults,
   },
   vertex: %{
     model: "claude-haiku-4-5@20251001",
-    tool_model: "claude-sonnet-4-5@20250929",
+    tool_model: "claude-sonnet-4-6@20260114",
     embedding_model: "gemini-embedding-001"
   },
   anthropic: %{
     model: "claude-4-5-haiku-latest",
-    tool_model: "claude-4-5-sonnet-latest"
+    tool_model: "claude-4-6-sonnet-latest"
   },
   bedrock: %{
     model: "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    tool_model: "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    tool_model: "global.anthropic.claude-sonnet-4-6",
     embedding_model: "cohere.embed-english-v3"
   },
   ollama: %{},
@@ -114,6 +114,7 @@ config :console, Console.Guardian,
   secret_key: "console_secret" # this gets overwritten in release config
 
 config :console, Console.Repo,
+  types: Console.PostgrexTypes,
   queue_target: 1000,
   migration_timestamps: [type: :utc_datetime_usec]
 

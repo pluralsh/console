@@ -86,6 +86,30 @@ console:
 
     qovePublicKey: ~
 
+    objectStore:
+      # path is used to configure the path within object storage for storing large files, useful for multi-tenant bucket usage.
+      path: ~
+      # s3 is used to configure the s3 bucket for storing large files, which include screen recordings of agent runs, workbench memory, etc.
+      s3:
+        # bucket is used to configure the s3 bucket name for storing large files
+        bucket: ~
+        # region is used to configure the s3 region for storing large files
+        region: ~
+        # endpoint is used to configure the s3 endpoint for storing large files
+        endpoint: ~
+        # accessKey is used to configure the s3 access key for storing large files
+        accessKey: ~
+        # secretKey is used to configure the s3 secret key for storing large files
+        secretKey: ~
+
+      azure:
+        # storageAccount is used to configure the azure storage account for storing large files
+        storageAccount: ~
+        # container is used to configure the azure container for storing large files
+        container: ~
+        # accessKey is used to configure the azure access key for storing large files
+        accessKey: ~
+
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:
     # enabled is used to configure whether custom oidc authentication should be enabled.

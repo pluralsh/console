@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "description": "Enable one or more tools by name so they become available to call in subsequent turns. Use tool_search first to discover tool names.",
+    "properties": {
+        "tools": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Tool names to enable. Each name must match an available tool exactly."
+        }
+    },
+    "required": ["tools"]
+}

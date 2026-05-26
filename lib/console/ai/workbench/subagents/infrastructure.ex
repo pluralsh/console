@@ -8,7 +8,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Skill,
     Scratchpad,
     History,
-    Calculator,
+    Lua,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.Cluster,
@@ -32,11 +32,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
-    tools(job, environment, FileCache.new())
-    |> MemoryEngine.new(50,
+    tools = tools(job, environment, FileCache.new())
+
+    MemoryEngine.new(tools, 50,
       system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
       acc: %{},
       continue_msg: cont_msg(),
+      tool_search: length(tools) > 10,
+      pre_enable: [Result, %Skills{} ,%Skill{}],
       callback: &callback(activity, &1)
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
@@ -68,7 +71,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
       %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
       Scratchpad,
-      Calculator,
+      Lua,
       %History{job: job, activities: activities},
       Result
     ])

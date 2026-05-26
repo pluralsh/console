@@ -1336,7 +1336,7 @@ type VectorStore struct {
 
 	// VectorStore is the type of the vector store to use.
 	//
-	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH
+	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH;POSTGRES
 	// +kubebuilder:validation:Optional
 	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
 
@@ -1363,6 +1363,10 @@ func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespac
 	attr := &console.VectorStoreAttributes{
 		Enabled: in.Enabled,
 		Store:   in.VectorStore,
+	}
+
+	if in.VectorStore == nil {
+		return attr, nil
 	}
 
 	switch *in.VectorStore {
@@ -1399,6 +1403,7 @@ func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespac
 			AWSSecretAccessKey: awsSecretAccessKey,
 			AWSRegion:          in.Opensearch.AwsRegion,
 		}
+	case console.VectorStorePostgres:
 	}
 	return attr, nil
 }

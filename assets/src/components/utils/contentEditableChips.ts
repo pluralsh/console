@@ -80,8 +80,15 @@ export function serializeEditableDiv(container: HTMLElement): string {
       out += '\n'
       return
     }
+    if (el.tagName === 'DIV' && el !== container) {
+      // Browsers often leave the first line as a root text node and wrap later
+      // lines in sibling divs — emit a leading newline so lines stay separated.
+      if (out.length > 0 && !out.endsWith('\n')) out += '\n'
+      for (const child of Array.from(el.childNodes)) walk(child)
+      out += '\n'
+      return
+    }
     for (const child of Array.from(el.childNodes)) walk(child)
-    if (el.tagName === 'DIV' && el !== container) out += '\n'
   }
   for (const child of Array.from(container.childNodes)) walk(child)
   return out

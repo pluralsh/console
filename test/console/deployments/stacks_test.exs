@@ -873,14 +873,40 @@ defmodule Console.Deployments.StacksTest do
       {:error, _} = Stacks.dequeue(stack)
     end
 
-    test "it will fail if the stack is currently running a pr run" do
+    test "it will dequeue wet runs while a pr dry run is running" do
+      stack = insert(:stack)
+      pr = insert(:pull_request, stack: stack)
+      insert(:stack_run, stack: stack, status: :pending, pull_request: pr, dry_run: true)
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued)
+
+      {:ok, dequeued} = Stacks.dequeue(stack)
+
+      assert dequeued.id == run.id
+      assert dequeued.status == :pending
+    end
+
+    test "it will fail if the pr is currently running a dry run" do
       stack = insert(:stack)
       pr = insert(:pull_request, stack: stack)
       insert(:stack_run, stack: stack, status: :pending, pull_request: pr, dry_run: true)
       :timer.sleep(1)
       insert(:stack_run, stack: stack, status: :queued, pull_request: pr, dry_run: true)
 
-      {:error, _} = Stacks.dequeue(stack)
+      {:error, _} = Stacks.dequeue(pr)
+    end
+
+    test "it will dequeue dry pr runs while a wet run is running" do
+      stack = insert(:stack)
+      pr = insert(:pull_request, stack: stack)
+      insert(:stack_run, stack: stack, status: :pending)
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued, pull_request: pr, dry_run: true)
+
+      {:ok, dequeued} = Stacks.dequeue(pr)
+
+      assert dequeued.id == run.id
+      assert dequeued.status == :pending
     end
 
     test "it will fail if there are no runs to dequeue" do

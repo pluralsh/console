@@ -20,6 +20,15 @@ import {
   serializeRange,
 } from './contentEditableChips'
 
+/** Hydrate plain multiline text without relying on `innerText` DOM quirks. */
+function setPlainTextContent(el: HTMLElement, text: string): void {
+  el.innerHTML = ''
+  text.split('\n').forEach((line, i) => {
+    if (i > 0) el.appendChild(document.createElement('br'))
+    if (line) el.appendChild(document.createTextNode(line))
+  })
+}
+
 export function EditableDiv({
   ref,
   initialValue,
@@ -58,7 +67,7 @@ export function EditableDiv({
 
         const content = serializeEditableDiv(domNode)
         setValue(content === '\n' ? '' : content)
-      } else domNode.innerText = initialValue
+      } else setPlainTextContent(domNode, initialValue)
     } else domNode.innerHTML = ''
 
     // One-time hydrate per editor mount — parents that load async prompts bump `syncKey` on ChatInputSimple.

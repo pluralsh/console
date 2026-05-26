@@ -1113,6 +1113,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.recent_workbench_jobs/2
     end
 
+    @desc "Semantic search over vector-indexed workbench jobs"
+    field :workbench_job_search, list_of(:workbench_job) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      middleware VectorStoreEnabled
+      arg :q,             non_null(:string)
+      arg :workbench_id,  non_null(:id), description: "scope search to this workbench"
+      arg :limit,         :integer, description: "max results to return (defaults to 5)"
+
+      resolve &Deployments.workbench_job_search/2
+    end
+
     field :workbench_job_activity, :workbench_job_activity do
       middleware Authenticated
       middleware Scope,
@@ -1548,11 +1562,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_subscriptions do
     field :workbench_job_delta, :workbench_job_delta do
-      arg :id, non_null(:id)
+      arg :id,           :id
+      arg :workbench_id, :id
 
-      config fn args, ctx ->
-        with {:ok, job} <- Deployments.workbench_job(args, ctx),
-          do: {:ok, topic: "workbench_jobs:#{job.id}"}
+      config fn
+        %{id: id}, ctx when is_binary(id) ->
+          with {:ok, job} <- Deployments.workbench_job(%{id: id}, ctx),
+            do: {:ok, topic: "workbench_jobs:#{job.id}"}
+
+        %{workbench_id: workbench_id}, ctx when is_binary(workbench_id) ->
+          with {:ok, _} <- Deployments.workbench(%{id: workbench_id}, ctx),
+            do: {:ok, topic: "workbenches:#{workbench_id}:jobs"}
+
+        _, _ ->
+          {:error, "Must specify either id or workbench_id"}
       end
     end
 

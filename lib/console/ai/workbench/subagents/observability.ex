@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Calculator, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Lua, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
@@ -9,11 +9,14 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   require EEx
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user}, %Environment{} = environment) do
-    tools(environment, user)
-    |> MemoryEngine.new(50,
+    tools = tools(environment, user)
+
+    MemoryEngine.new(tools, 50,
       system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
       acc: %{},
       callback: &callback(activity, &1),
+      tool_search: length(tools) > 10,
+      pre_enable: [ObservabilityResult, %Skills{} ,%Skill{}],
       continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
@@ -44,7 +47,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       %Skill{skills: Environment.subagent_skills(skills, :observability)},
       Scratchpad,
       ObservabilityResult,
-      Calculator,
+      Lua,
       %History{job: job, activities: activities}
     ])
   end

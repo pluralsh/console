@@ -138,8 +138,7 @@ defimpl Console.AI.Authorizable, for: Console.Schema.WorkbenchJob do
   def authorize(%@for{} = job) do
     job = preload(job)
 
-    job
-    |> recurse(job.workbench)
+    Console.AI.Authorizable.authorize(job.workbench)
   end
 end
 

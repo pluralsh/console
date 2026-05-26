@@ -1427,6 +1427,99 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
   end
 
+  describe "workbenchJobSearch" do
+    test "it can search vector-indexed workbench jobs" do
+      import ElasticsearchUtils
+
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings()
+          }
+        }
+      )
+
+      workbench = insert(:workbench)
+
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          status: :successful,
+          prompt: "investigate database outage",
+          result: build(:workbench_job_result, conclusion: "root cause was connection pool exhaustion")
+        )
+
+      pr = insert(:pull_request,
+        workbench_job: job,
+        title: "fix pool size",
+        url: "https://github.com/org/repo/pull/1"
+      )
+
+      expect(Console.AI.VectorStore, :fetch, fn "database outage", opts ->
+        assert opts[:count] == 2
+        assert opts[:filters] == [datatype: {:raw, :workbench_job}, workbench_id: workbench.id]
+        assert %{__struct__: Console.Schema.User} = opts[:user]
+
+        {:ok, [
+          %Console.AI.VectorStore.Response{
+            type: :workbench,
+            workbench_job: %Console.Schema.WorkbenchJob.Mini{id: job.id}
+          }
+        ]}
+      end)
+
+      {:ok, %{data: %{"workbenchJobSearch" => [found | _]}}} = run_query("""
+        query WorkbenchJobSearch($workbenchId: ID!) {
+          workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
+            id
+            status
+            prompt
+            result { conclusion }
+            pullRequests { title url }
+          }
+        }
+      """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["status"] == "SUCCESSFUL"
+      assert found["prompt"] == "investigate database outage"
+      assert found["result"]["conclusion"] == "root cause was connection pool exhaustion"
+      assert found["pullRequests"] == [
+        %{"title" => pr.title, "url" => pr.url}
+      ]
+    end
+
+    test "it errors when the vector store is not enabled" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{enabled: false}
+        }
+      )
+
+      reject(&Console.AI.VectorStore.fetch/2)
+
+      workbench = insert(:workbench)
+
+      assert {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query WorkbenchJobSearch($workbenchId: ID!) {
+          workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
+            id
+          }
+        }
+      """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
+
+      assert message == "Vector store is not enabled, cannot query"
+    end
+  end
+
   describe "workbench_tool" do
     test "it can fetch a workbench tool" do
       tool = insert(:workbench_tool)

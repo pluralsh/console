@@ -44,8 +44,8 @@ defmodule Console.Deployments.Stacks do
   @spec get_stack!(binary) :: Stack.t
   def get_stack!(id), do: Repo.get!(Stack, id)
 
-  @spec get_stack(binary) :: Stack.t
-  def get_stack(id), do: Repo.get!(Stack, id)
+  @spec get_stack(binary) :: Stack.t | nil
+  def get_stack(id), do: Repo.get(Stack, id)
 
   @spec get_stack_by_name(binary) :: Stack.t | nil
   def get_stack_by_name(name), do: Repo.get_by(Stack, name: name)
@@ -911,10 +911,15 @@ defmodule Console.Deployments.Stacks do
     |> Repo.exists?()
   end
 
-  defp filter(%Stack{id: id}), do: StackRun.for_stack(id)
+  defp filter(%Stack{id: id}) do
+    StackRun.for_stack(id)
+    |> StackRun.wet()
+  end
+
   defp filter(%PullRequest{stack_id: sid, id: id}) do
     StackRun.for_stack(sid)
     |> StackRun.for_pr(id)
+    |> StackRun.dry()
   end
 
   @doc """

@@ -89,7 +89,7 @@ defmodule Console.AI.Provider.Base do
   def tool_calls({:ok, binary}), do: {:error, "no tool calls in response, got: #{binary}"}
   def tool_calls(err), do: err
 
-  defp model(name) when is_binary(name), do: LLMDB.model(name)
+  defp model(name) when is_binary(name), do: ReqLLM.model(name)
   defp model(%LLMDB.Model{} = model), do: {:ok, model}
   defp model(model), do: {:error, "invalid model: #{inspect(model)}"}
 

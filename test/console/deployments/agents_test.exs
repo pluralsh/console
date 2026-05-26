@@ -529,6 +529,32 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
+  describe "agent_run_uploads/3" do
+    test "clusters can create uploads for their own agent runs" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:ok, upload} = Agents.agent_run_uploads(%{}, run.id, cluster)
+
+      assert upload.agent_run_id == run.id
+      assert is_nil(upload.session)
+      assert is_nil(upload.screen_recording)
+      assert is_nil(upload.patch)
+    end
+
+    test "clusters cannot create uploads for other's agent runs" do
+      run = insert(:agent_run)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:error, "clusters can only update their own agent runs"} =
+        Agents.agent_run_uploads(%{}, run.id, insert(:cluster))
+    end
+  end
+
   describe "create_agent_message/3" do
     test "it can create an agent message" do
       runtime = insert(:agent_runtime)

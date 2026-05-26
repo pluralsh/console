@@ -45,8 +45,8 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     case poll_run(run) do
       {:timeout, _} -> {:user, "agent run #{id} timed out"}
       {:failed, %AgentRun{error: error}} -> {:user, "Agent run failed: #{error}"}
-      {:success, %AgentRun{mode: :write, pull_requests: [_ | _] = prs}} ->
-        tool_msg(String.trim(analysis_prompt(analysis: nil, pull_requests: prs)), run)
+      {:success, %AgentRun{mode: :write, pull_requests: [_ | _] = prs, analysis: analysis}} ->
+        tool_msg(String.trim(analysis_prompt(analysis: analysis, pull_requests: prs)), run)
       {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
         tool_msg(String.trim(analysis_prompt(pull_requests: nil, analysis: analysis)), run)
       {:success, _} -> {:user, "Agent run completed successfully, but no output was generated"}

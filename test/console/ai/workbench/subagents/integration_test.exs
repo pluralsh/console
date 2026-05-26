@@ -92,6 +92,13 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       )
 
       expect(Provider, :completion, fn _, _ ->
+        {:ok, "enabling tools",
+         [
+           %Tool{name: "enable_tools", arguments: %{"tools" => ["mcp_example_echo"]}, id: "0"}
+         ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
         {:ok, "try mcp",
          [
            %Tool{name: "mcp_example_echo", arguments: %{"message" => "world"}, id: "1"}
@@ -101,6 +108,13 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       expect(Provider, :completion, fn msgs, _ ->
         assert Enum.any?(msgs, &match?({:tool, "Echo: world", _}, &1))
 
+        {:ok, "enabling result",
+         [
+           %Tool{name: "enable_tools", arguments: %{"tools" => ["subagent_result"]}, id: "2"}
+         ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
         {:ok, "complete",
          [
            %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
