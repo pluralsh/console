@@ -2,6 +2,7 @@ import {
   AppIcon,
   Card,
   CaretRightIcon,
+  Chip,
   Flex,
   Markdown,
   PaperCheckIcon,
@@ -37,6 +38,10 @@ import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ActivityModalIcon } from './job/WorkbenchJobActivityResults'
+import {
+  chatProviderConnectionIcon,
+  chatProviderConnectionLabel,
+} from './chatbots/utils'
 
 export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -158,11 +163,27 @@ function JobSourceChips({
   job: WorkbenchJobTinyFragment
   fillLevel?: 1 | 2 | 3
 }) {
-  const { issue, alert } = job
-  if (!issue && !alert) return null
+  const { issue, alert, chatbotMessage } = job
+  if (!issue && !alert && !chatbotMessage) return null
 
   return (
     <>
+      {chatbotMessage && (
+        <Chip
+          size="small"
+          severity="neutral"
+          fillLevel={fillLevel}
+          truncateWidth={80}
+          icon={chatProviderConnectionIcon(chatbotMessage.chatConnection?.type)}
+          tooltip={
+            chatbotMessage.chatConnection
+              ? `${chatProviderConnectionLabel(chatbotMessage.chatConnection.type)}: ${chatbotMessage.chatConnection.name}`
+              : 'Chatbot'
+          }
+        >
+          {chatbotMessage.channel}
+        </Chip>
+      )}
       {issue && (
         <span css={{ display: 'inline-flex', flexShrink: 0 }}>
           <IssueStatusChip
@@ -252,6 +273,7 @@ export function WorkbenchJobActionsRow({
   const hasActions =
     !!job.issue ||
     !!job.alert ||
+    !!job.chatbotMessage ||
     prs.length > 0 ||
     job.evalResult?.grade != null ||
     !!job.result?.conclusion
