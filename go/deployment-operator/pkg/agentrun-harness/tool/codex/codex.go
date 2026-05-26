@@ -82,11 +82,6 @@ func (in *Codex) Configure(consoleURL, consoleToken string) error {
 		return err
 	}
 
-	if in.Config.Run.DindEnabled {
-		if err := dind.PrepareClientEnv(); err != nil {
-			return fmt.Errorf("prepare codex docker client environment: %w", err)
-		}
-	}
 
 	return in.writeCodexConfig()
 }
@@ -341,7 +336,7 @@ func codexAllowedEnvVars(dindEnabled bool) []string {
 		vars = append(vars, "GIT_SIGNING_KEY_PATH")
 	}
 	if dindEnabled {
-		vars = append(vars, dind.DockerHostEnv, dind.DockerTLSVerifyEnv, dind.DockerCertPathEnv)
+		vars = append(vars, dind.DockerHostEnv)
 	}
 	return vars
 }
