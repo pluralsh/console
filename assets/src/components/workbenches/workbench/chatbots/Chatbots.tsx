@@ -75,7 +75,7 @@ export function Chatbots() {
     () => mapExistingNodes(data?.workbench?.chatbots),
     [data]
   )
-  const hasExistingChatbots = !isEmpty(
+  const hasExistingConnections = !isEmpty(
     mapExistingNodes(connectionsData?.chatProviderConnections)
   )
 
@@ -135,7 +135,7 @@ export function Chatbots() {
             <EmptyState
               message="No chatbots created yet"
               description={
-                hasExistingChatbots
+                hasExistingConnections
                   ? 'No chatbots connected. Select an existing connected chatbot or create a new one.'
                   : 'No chatbots connected. Setup a new chatbot trigger for your workbench.'
               }
@@ -144,7 +144,7 @@ export function Chatbots() {
               <Flex gap="small">
                 <Button
                   small
-                  secondary={hasExistingChatbots}
+                  secondary={hasExistingConnections}
                   onClick={() =>
                     navigate(
                       getWorkbenchChatbotCreateConnectionAbsPath(workbenchId)
@@ -153,7 +153,7 @@ export function Chatbots() {
                 >
                   Add new chatbot
                 </Button>
-                {hasExistingChatbots && (
+                {hasExistingConnections && (
                   <Button
                     small
                     onClick={() =>

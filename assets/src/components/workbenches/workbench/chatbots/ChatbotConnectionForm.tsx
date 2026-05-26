@@ -240,6 +240,7 @@ export function ChatbotConnectionForm() {
                         appToken: e.target.value,
                       }))
                     }
+                    inputProps={{ type: 'password' }}
                     disabled={loading}
                   />
                 </FormField>
@@ -255,6 +256,7 @@ export function ChatbotConnectionForm() {
                         botToken: e.target.value,
                       }))
                     }
+                    inputProps={{ type: 'password' }}
                     disabled={loading}
                   />
                 </FormField>
@@ -315,6 +317,7 @@ export function ChatbotConnectionForm() {
                         clientSecret: e.target.value,
                       }))
                     }
+                    inputProps={{ type: 'password' }}
                     disabled={loading}
                   />
                 </FormField>
