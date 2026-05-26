@@ -182,18 +182,29 @@ export function Chatbots() {
                 $color="text-light"
                 css={{ margin: 0 }}
               >
-                Add chatbots to trigger this workbench from chat.
+                Add chatbots to trigger this workbench.
               </Body2P>
-              <Button
-                small
-                onClick={() =>
-                  navigate(
-                    getWorkbenchChatbotCreateConnectionAbsPath(workbenchId)
-                  )
-                }
-              >
-                Add new chatbot
-              </Button>
+              <Flex gap="small">
+                <Button
+                  small
+                  secondary
+                  onClick={() =>
+                    navigate(
+                      getWorkbenchChatbotCreateConnectionAbsPath(workbenchId)
+                    )
+                  }
+                >
+                  Add new chatbot
+                </Button>
+                <Button
+                  small
+                  onClick={() =>
+                    navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
+                  }
+                >
+                  Add chatbot
+                </Button>
+              </Flex>
             </StretchedFlex>
             <Table
               hideHeader
