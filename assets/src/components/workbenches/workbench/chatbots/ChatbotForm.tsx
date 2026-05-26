@@ -312,7 +312,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                       Add new chatbot
                     </InlineA>
                   </Flex>
-                  <FormField hint="New chatbots added will appear in this list.">
+                  <FormField>
                     <Select
                       selectedKey={formState.chatConnectionId || null}
                       isDisabled={isSaving || connectionsLoading}
@@ -376,7 +376,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                 <FormField
                   required
                   label="Attach a channel"
-                  hint="Bot will only respond when @mentioned in this channel."
+                  hint="External channel identifier (globally unique)."
                 >
                   <Input2
                     value={formState.channel}
@@ -386,7 +386,6 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                         channel: e.target.value,
                       }))
                     }
-                    placeholder="Channel ID or name"
                     disabled={isSaving}
                   />
                 </FormField>
@@ -398,10 +397,11 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                     setFormState((prev) => ({ ...prev, userId }))
                   }
                   disabled={isSaving}
+                  hint="User this chatbot runs as; must have read access to the workbench."
                 />
                 <FormField
                   label="Prompt"
-                  hint="Optional instructions applied before the workbench responds from this chatbot."
+                  hint="Optional prompt text applied when this chatbot runs."
                 >
                   <WorkbenchPromptRichInput
                     workbenchId={workbenchId}
@@ -412,7 +412,6 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                         prompt: nextPrompt,
                       }))
                     }
-                    placeholder="Describe how the agent should respond from this channel"
                     disabled={isSaving}
                     syncKey={`${mode}-${chatbot?.id ?? 'create'}`}
                   />

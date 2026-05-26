@@ -223,7 +223,6 @@ export function ChatbotConnectionForm() {
                 onChange={(e) =>
                   setFormState((prev) => ({ ...prev, name: e.target.value }))
                 }
-                placeholder="Plural support bot"
                 disabled={loading}
               />
             </FormField>
