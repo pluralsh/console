@@ -1,7 +1,12 @@
-import { FC, ReactNode } from 'react'
+import { FC, ReactNode, useMemo } from 'react'
 
 import { CssBaseline, ThemeProvider, ThemeProviderProps } from 'honorable'
-import { honorableThemeDark, honorableThemeLight, useThemeColorMode } from '..'
+import {
+  createHonorableTheme,
+  useThemeColorMode,
+  useThemeEngineState,
+} from '..'
+import type { ColorMode } from '../theme'
 
 // workarounds for broken type from honorable
 const TypedHonorableThemeProvider = ThemeProvider as FC<ThemeProviderProps>
@@ -12,10 +17,14 @@ export default function HonorableThemeProvider({
 }: {
   children: ReactNode
 }) {
-  const colorMode = useThemeColorMode()
+  const colorMode = useThemeColorMode() as ColorMode
+  const { engine, presetId, custom } = useThemeEngineState()
 
-  const honorableTheme =
-    colorMode === 'light' ? honorableThemeLight : honorableThemeDark
+  const honorableTheme = useMemo(
+    () => createHonorableTheme({ mode: colorMode }),
+    // custom is a small object; it only changes when localStorage JSON changes.
+    [colorMode, engine, presetId, custom]
+  )
 
   return (
     <TypedHonorableThemeProvider theme={honorableTheme}>

@@ -330,19 +330,19 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
   }
 }
 
-export const honorableThemeDark = mergeTheme(defaultTheme, {
-  ...getBaseTheme({ mode: 'dark' }),
-  colors: getActiveThemeColors({ mode: 'dark' }),
-  ...getHonorableThemeProps({ mode: 'dark' }),
-})
+export function createHonorableTheme({ mode }: { mode: ColorMode }) {
+  return mergeTheme(defaultTheme, {
+    ...getBaseTheme({ mode }),
+    colors: getActiveThemeColors({ mode }),
+    ...getHonorableThemeProps({ mode }),
+  })
+}
 
-export const honorableThemeLight = mergeTheme(defaultTheme, {
-  ...getBaseTheme({ mode: 'light' }),
-  colors: getActiveThemeColors({ mode: 'light' }),
-  ...getHonorableThemeProps({ mode: 'light' }),
-})
+// Back-compat exports (note: these are snapshots at import time).
+export const honorableThemeDark = createHonorableTheme({ mode: 'dark' })
+export const honorableThemeLight = createHonorableTheme({ mode: 'light' })
 
-const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
+export const createStyledTheme = ({ mode }: { mode: ColorMode }) =>
   ({
     ...getBaseTheme({ mode }),
     ...{
@@ -374,10 +374,10 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
     },
   }) as const
 
-export const styledThemeDark = getStyledTheme({ mode: 'dark' })
+export const styledThemeDark = createStyledTheme({ mode: 'dark' })
 
 export const styledThemeLight = {
-  ...getStyledTheme({ mode: 'light' }),
+  ...createStyledTheme({ mode: 'light' }),
   colors: getActiveThemeColors({ mode: 'light' }),
 } as const
 

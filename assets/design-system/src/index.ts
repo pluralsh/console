@@ -179,6 +179,8 @@ export * from './components/TreeNavigation'
 // Theme
 export { default as GlobalStyle } from './GlobalStyle'
 export {
+  createHonorableTheme,
+  createStyledTheme,
   honorableThemeDark,
   honorableThemeLight,
   getActiveSemanticColors,

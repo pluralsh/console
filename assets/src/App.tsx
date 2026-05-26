@@ -4,15 +4,15 @@ import { loadDevMessages, loadErrorMessages } from '@apollo/client/dev'
 import {
   GlobalStyle,
   HonorableThemeProvider,
-  styledThemeDark,
-  styledThemeLight,
+  createStyledTheme,
+  useThemeEngineState,
   useThemeColorMode,
 } from '@pluralsh/design-system'
 import * as Sentry from '@sentry/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import DocSearchStyles from 'components/help/DocSearchStyles'
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import {
   StyleSheetManager,
@@ -49,9 +49,13 @@ export default function App() {
 }
 
 function ThemeProviders({ children }: { children: ReactNode }) {
-  const colorMode = useThemeColorMode()
+  const colorMode = useThemeColorMode() as 'light' | 'dark'
+  const { engine, presetId, custom } = useThemeEngineState()
 
-  const styledTheme = colorMode === 'light' ? styledThemeLight : styledThemeDark
+  const styledTheme = useMemo(
+    () => createStyledTheme({ mode: colorMode }),
+    [colorMode, engine, presetId, custom]
+  )
 
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>

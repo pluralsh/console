@@ -299,10 +299,8 @@ export function useThemeEngineState({
     return () => obs.disconnect()
   }, [element, engineAttr, presetAttr])
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = tick
-
   return {
+    _tick: tick,
     engine: getThemeEngine(),
     presetId: getThemePresetId(),
     custom: getThemeCustomConfig(),
