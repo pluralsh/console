@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pluralsh/console/go/controller/internal/common"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
+	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+
 	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -85,9 +85,6 @@ func (in *WorkbenchPromptReconciler) Reconcile(ctx context.Context, req reconcil
 		return *result, nil
 	}
 
-	// Mark resource as managed by this operator.
-	utils.MarkCondition(workbenchPrompt.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-
 	// Get WorkbenchPrompt SHA that can be saved back in the status to check for changes
 	changed, sha, err := workbenchPrompt.Diff(utils.HashObject)
 	if err != nil {
@@ -108,7 +105,7 @@ func (in *WorkbenchPromptReconciler) Reconcile(ctx context.Context, req reconcil
 		return common.HandleRequeue(nil, err, workbenchPrompt.SetCondition)
 	}
 
-	workbenchPrompt.Status.ID = &apiWorkbenchPrompt.ID
+	workbenchPrompt.Status.ID = new(apiWorkbenchPrompt.GetID())
 	workbenchPrompt.Status.SHA = &sha
 
 	utils.MarkCondition(workbenchPrompt.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
@@ -157,30 +154,36 @@ func (in *WorkbenchPromptReconciler) addOrRemoveFinalizer(ctx context.Context, w
 
 func (in *WorkbenchPromptReconciler) sync(ctx context.Context, workbenchPrompt *v1alpha1.WorkbenchPrompt, workbenchID string, changed bool) (*console.WorkbenchPromptFragment, error) {
 	logger := log.FromContext(ctx)
+	// If the workbench prompt does not have an ID synced, create it first.
+	if !workbenchPrompt.Status.HasID() {
+		logger.Info("workbench prompt does not have an ID, creating it")
+		return in.ConsoleClient.CreateWorkbenchPrompt(ctx, workbenchID, workbenchPrompt.Attributes())
+	}
 
-	// If we already have an ID, try to get the existing resource.
-	if workbenchPrompt.Status.HasID() {
-		existingPrompt, err := in.ConsoleClient.GetWorkbenchPrompt(ctx, workbenchPrompt.Status.GetID())
-		if err != nil {
-			if !errors.IsNotFound(err) {
-				return nil, err
-			}
-			// Not found by ID, create a new one.
-			logger.Info(fmt.Sprintf("workbench prompt %s not found by ID, creating it", workbenchPrompt.Name))
-			return in.ConsoleClient.CreateWorkbenchPrompt(ctx, workbenchID, workbenchPrompt.Attributes())
-		}
+	existingPrompt, err := in.ConsoleClient.GetWorkbenchPrompt(ctx, workbenchPrompt.Status.GetID())
+	if err != nil {
+		return nil, err
+	}
 
-		if changed {
-			logger.Info(fmt.Sprintf("updating workbench prompt %s", workbenchPrompt.Name))
-			return in.ConsoleClient.UpdateWorkbenchPrompt(ctx, existingPrompt.ID, workbenchPrompt.Attributes())
-		}
-
+	// If drift detection is disabled, return immediately
+	if !workbenchPrompt.Spec.Reconciliation.DriftDetect() {
+		logger.Info("workbench prompt drift detection is disabled, skipping sync")
 		return existingPrompt, nil
 	}
 
-	// No ID yet, create a new prompt.
-	logger.Info(fmt.Sprintf("creating workbench prompt %s", workbenchPrompt.Name))
-	return in.ConsoleClient.CreateWorkbenchPrompt(ctx, workbenchID, workbenchPrompt.Attributes())
+	// If the workbench prompt has been removed from Console API, recreate it
+	if existingPrompt == nil {
+		logger.Info("workbench prompt does not exist in the Console API, creating it")
+		return in.ConsoleClient.CreateWorkbenchPrompt(ctx, workbenchID, workbenchPrompt.Attributes())
+	}
+
+	// If the workbench prompt has changed, update it
+	if changed {
+		logger.Info("workbench prompt has changed, updating it")
+		return in.ConsoleClient.UpdateWorkbenchPrompt(ctx, existingPrompt.ID, workbenchPrompt.Attributes())
+	}
+
+	return existingPrompt, nil
 }
 
 // SetupWithManager is responsible for initializing a new reconciler within the provided ctrl.Manager.

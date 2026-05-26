@@ -6926,7 +6926,10 @@ func (t *WorkbenchWebhookFragment) GetWorkbench() *WorkbenchWebhookFragment_Work
 }
 
 type WorkbenchPromptFragment struct {
-	ID string "json:\"id\" graphql:\"id\""
+	ID       string  "json:\"id\" graphql:\"id\""
+	Title    string  "json:\"title\" graphql:\"title\""
+	Category string  "json:\"category\" graphql:\"category\""
+	Prompt   *string "json:\"prompt,omitempty\" graphql:\"prompt\""
 }
 
 func (t *WorkbenchPromptFragment) GetID() string {
@@ -6934,6 +6937,24 @@ func (t *WorkbenchPromptFragment) GetID() string {
 		t = &WorkbenchPromptFragment{}
 	}
 	return t.ID
+}
+func (t *WorkbenchPromptFragment) GetTitle() string {
+	if t == nil {
+		t = &WorkbenchPromptFragment{}
+	}
+	return t.Title
+}
+func (t *WorkbenchPromptFragment) GetCategory() string {
+	if t == nil {
+		t = &WorkbenchPromptFragment{}
+	}
+	return t.Category
+}
+func (t *WorkbenchPromptFragment) GetPrompt() *string {
+	if t == nil {
+		t = &WorkbenchPromptFragment{}
+	}
+	return t.Prompt
 }
 
 type TinyAgentRuntimeFragment_Cluster struct {
@@ -35054,6 +35075,39 @@ func (t *GetWorkbenchCron_WorkbenchCron_WorkbenchCronFragment_Workbench) GetName
 	return t.Name
 }
 
+type CreateWorkbenchPrompt_CreateWorkbenchPrompt struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CreateWorkbenchPrompt_CreateWorkbenchPrompt) GetID() string {
+	if t == nil {
+		t = &CreateWorkbenchPrompt_CreateWorkbenchPrompt{}
+	}
+	return t.ID
+}
+
+type UpdateWorkbenchPrompt_UpdateWorkbenchPrompt struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *UpdateWorkbenchPrompt_UpdateWorkbenchPrompt) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbenchPrompt_UpdateWorkbenchPrompt{}
+	}
+	return t.ID
+}
+
+type DeleteWorkbenchPrompt_DeleteWorkbenchPrompt struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteWorkbenchPrompt_DeleteWorkbenchPrompt) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbenchPrompt_DeleteWorkbenchPrompt{}
+	}
+	return t.ID
+}
+
 type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -38726,10 +38780,10 @@ func (t *GetWorkbenchCron) GetWorkbenchCron() *WorkbenchCronFragment {
 }
 
 type CreateWorkbenchPrompt struct {
-	CreateWorkbenchPrompt *WorkbenchPromptFragment "json:\"createWorkbenchPrompt,omitempty\" graphql:\"createWorkbenchPrompt\""
+	CreateWorkbenchPrompt *CreateWorkbenchPrompt_CreateWorkbenchPrompt "json:\"createWorkbenchPrompt,omitempty\" graphql:\"createWorkbenchPrompt\""
 }
 
-func (t *CreateWorkbenchPrompt) GetCreateWorkbenchPrompt() *WorkbenchPromptFragment {
+func (t *CreateWorkbenchPrompt) GetCreateWorkbenchPrompt() *CreateWorkbenchPrompt_CreateWorkbenchPrompt {
 	if t == nil {
 		t = &CreateWorkbenchPrompt{}
 	}
@@ -38737,10 +38791,10 @@ func (t *CreateWorkbenchPrompt) GetCreateWorkbenchPrompt() *WorkbenchPromptFragm
 }
 
 type UpdateWorkbenchPrompt struct {
-	UpdateWorkbenchPrompt *WorkbenchPromptFragment "json:\"updateWorkbenchPrompt,omitempty\" graphql:\"updateWorkbenchPrompt\""
+	UpdateWorkbenchPrompt *UpdateWorkbenchPrompt_UpdateWorkbenchPrompt "json:\"updateWorkbenchPrompt,omitempty\" graphql:\"updateWorkbenchPrompt\""
 }
 
-func (t *UpdateWorkbenchPrompt) GetUpdateWorkbenchPrompt() *WorkbenchPromptFragment {
+func (t *UpdateWorkbenchPrompt) GetUpdateWorkbenchPrompt() *UpdateWorkbenchPrompt_UpdateWorkbenchPrompt {
 	if t == nil {
 		t = &UpdateWorkbenchPrompt{}
 	}
@@ -38748,10 +38802,10 @@ func (t *UpdateWorkbenchPrompt) GetUpdateWorkbenchPrompt() *WorkbenchPromptFragm
 }
 
 type DeleteWorkbenchPrompt struct {
-	DeleteWorkbenchPrompt *WorkbenchPromptFragment "json:\"deleteWorkbenchPrompt,omitempty\" graphql:\"deleteWorkbenchPrompt\""
+	DeleteWorkbenchPrompt *DeleteWorkbenchPrompt_DeleteWorkbenchPrompt "json:\"deleteWorkbenchPrompt,omitempty\" graphql:\"deleteWorkbenchPrompt\""
 }
 
-func (t *DeleteWorkbenchPrompt) GetDeleteWorkbenchPrompt() *WorkbenchPromptFragment {
+func (t *DeleteWorkbenchPrompt) GetDeleteWorkbenchPrompt() *DeleteWorkbenchPrompt_DeleteWorkbenchPrompt {
 	if t == nil {
 		t = &DeleteWorkbenchPrompt{}
 	}
@@ -62617,11 +62671,8 @@ func (c *Client) GetWorkbenchCron(ctx context.Context, id string, interceptors .
 
 const CreateWorkbenchPromptDocument = `mutation CreateWorkbenchPrompt ($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
 	createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
-		... WorkbenchPromptFragment
+		id
 	}
-}
-fragment WorkbenchPromptFragment on WorkbenchPrompt {
-	id
 }
 `
 
@@ -62645,11 +62696,8 @@ func (c *Client) CreateWorkbenchPrompt(ctx context.Context, workbenchID string, 
 
 const UpdateWorkbenchPromptDocument = `mutation UpdateWorkbenchPrompt ($id: ID!, $attributes: WorkbenchPromptAttributes!) {
 	updateWorkbenchPrompt(id: $id, attributes: $attributes) {
-		... WorkbenchPromptFragment
+		id
 	}
-}
-fragment WorkbenchPromptFragment on WorkbenchPrompt {
-	id
 }
 `
 
@@ -62673,11 +62721,8 @@ func (c *Client) UpdateWorkbenchPrompt(ctx context.Context, id string, attribute
 
 const DeleteWorkbenchPromptDocument = `mutation DeleteWorkbenchPrompt ($id: ID!) {
 	deleteWorkbenchPrompt(id: $id) {
-		... WorkbenchPromptFragment
+		id
 	}
-}
-fragment WorkbenchPromptFragment on WorkbenchPrompt {
-	id
 }
 `
 
@@ -62705,6 +62750,9 @@ const GetWorkbenchPromptDocument = `query GetWorkbenchPrompt ($id: ID!) {
 }
 fragment WorkbenchPromptFragment on WorkbenchPrompt {
 	id
+	title
+	category
+	prompt
 }
 `
 

@@ -109,12 +109,6 @@ var _ = Describe("Workbench Prompt Controller", Ordered, func() {
 							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
-							Type:    v1alpha1.ReadonlyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadonlyConditionReason.String(),
-							Message: "",
-						},
-						{
 							Type:    v1alpha1.ReadyConditionType.String(),
 							Status:  metav1.ConditionTrue,
 							Reason:  v1alpha1.ReadyConditionReason.String(),
@@ -184,6 +178,32 @@ var _ = Describe("Workbench Prompt Controller", Ordered, func() {
 			})
 
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should restore the desired prompt fields when the API resource drifts", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetWorkbenchPrompt", mock.Anything, id).Return(&gqlclient.WorkbenchPromptFragment{
+				ID:       id,
+				Title:    "Changed externally",
+				Category: "Other",
+				Prompt:   lo.ToPtr("Changed externally."),
+			}, nil)
+			fakeConsoleClient.On("UpdateWorkbenchPrompt", mock.Anything, id, mock.Anything).Return(&gqlclient.WorkbenchPromptFragment{ID: id}, nil)
+
+			reconciler := &controller.WorkbenchPromptReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: nil,
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			fakeConsoleClient.AssertCalled(mocks.TestingT, "UpdateWorkbenchPrompt", mock.Anything, id, mock.Anything)
 		})
 
 		It("should successfully delete the resource", func() {

@@ -16,7 +16,12 @@ func (c *client) CreateWorkbenchPrompt(ctx context.Context, workbenchID string, 
 	if err != nil {
 		return nil, err
 	}
-	return response.CreateWorkbenchPrompt, nil
+
+	if response == nil || response.CreateWorkbenchPrompt == nil {
+		return nil, fmt.Errorf("could not create workbench prompt, response is empty")
+	}
+
+	return &console.WorkbenchPromptFragment{ID: response.GetCreateWorkbenchPrompt().GetID()}, nil
 }
 
 func (c *client) UpdateWorkbenchPrompt(ctx context.Context, id string, attributes console.WorkbenchPromptAttributes) (*console.WorkbenchPromptFragment, error) {
@@ -28,23 +33,30 @@ func (c *client) UpdateWorkbenchPrompt(ctx context.Context, id string, attribute
 	if err != nil {
 		return nil, err
 	}
-	return response.UpdateWorkbenchPrompt, nil
+
+	if response == nil || response.UpdateWorkbenchPrompt == nil {
+		return nil, fmt.Errorf("could not update workbench prompt, response is empty")
+	}
+
+	return &console.WorkbenchPromptFragment{ID: response.GetUpdateWorkbenchPrompt().GetID()}, nil
 }
 
 func (c *client) GetWorkbenchPrompt(ctx context.Context, id string) (*console.WorkbenchPromptFragment, error) {
-	if id == "" {
+	if len(id) == 0 {
 		return nil, fmt.Errorf("no id specified")
 	}
+
 	response, err := c.consoleClient.GetWorkbenchPrompt(ctx, id)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
-	if err == nil && (response == nil || response.WorkbenchPrompt == nil) {
-		return nil, errors.NewNotFound(schema.GroupResource{}, id)
-	}
-	if response == nil {
+	if err != nil {
 		return nil, err
 	}
+	if response == nil || response.WorkbenchPrompt == nil {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
 	return response.WorkbenchPrompt, err
 }
 
@@ -54,9 +66,10 @@ func (c *client) DeleteWorkbenchPrompt(ctx context.Context, id string) error {
 }
 
 func (c *client) IsWorkbenchPromptExists(ctx context.Context, id string) (bool, error) {
-	if id == "" {
+	if len(id) == 0 {
 		return false, fmt.Errorf("no id specified")
 	}
+
 	prompt, err := c.GetWorkbenchPrompt(ctx, id)
 	if errors.IsNotFound(err) {
 		return false, nil

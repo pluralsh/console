@@ -57,11 +57,6 @@ type WorkbenchPrompt struct {
 	Status Status `json:"status,omitempty"`
 }
 
-// SetReadOnlyStatus sets the read-only status of the workbench prompt.
-func (in *WorkbenchPrompt) SetReadOnlyStatus(readOnly bool) {
-	in.Status.ReadOnly = readOnly
-}
-
 // ConsoleID implements [PluralResource] interface.
 func (in *WorkbenchPrompt) ConsoleID() *string {
 	return in.Status.ID
@@ -77,7 +72,15 @@ func (in *WorkbenchPrompt) ConsoleName() string {
 
 // Diff compares the current WorkbenchPrompt spec with its last known state.
 func (in *WorkbenchPrompt) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(in.Spec)
+	currentSha, err := hasher(struct {
+		Title    *string
+		Category *string
+		Prompt   string
+	}{
+		Title:    in.Spec.Title,
+		Category: in.Spec.Category,
+		Prompt:   in.Spec.Prompt,
+	})
 	if err != nil {
 		return false, "", err
 	}
