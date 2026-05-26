@@ -76,6 +76,10 @@ func (t *recordingTool) AnalysisFollowUpRun(context.Context, string) error {
 	return t.followErr
 }
 
+func (t *recordingTool) UploadArtifacts(context.Context) (*toolv1.UploadArtifacts, error) {
+	return nil, nil
+}
+
 func TestRequeuePendingInitialRunError(t *testing.T) {
 	t.Parallel()
 	ch := make(chan error, 1)

@@ -25,6 +25,7 @@ type ConsoleClient interface {
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
+	CreateAgentRunUpload(ctx context.Context, runID string, attributes AgentRunUploadAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
 	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -570,6 +571,38 @@ func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 	return t.Todos
 }
 
+type AgentRunUploadFragment struct {
+	ID              string  "json:\"id\" graphql:\"id\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+}
+
+func (t *AgentRunUploadFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunUploadFragment) GetSession() *string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.Session
+}
+func (t *AgentRunUploadFragment) GetScreenRecording() *string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.ScreenRecording
+}
+func (t *AgentRunUploadFragment) GetPatch() *string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.Patch
+}
+
 type AgentRunFragment struct {
 	ID              string                     "json:\"id\" graphql:\"id\""
 	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
@@ -589,6 +622,7 @@ type AgentRunFragment struct {
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
 	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Uploads         []*AgentRunUploadFragment  "json:\"uploads,omitempty\" graphql:\"uploads\""
 	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
 	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
 }
@@ -700,6 +734,12 @@ func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.PullRequests
+}
+func (t *AgentRunFragment) GetUploads() []*AgentRunUploadFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Uploads
 }
 func (t *AgentRunFragment) GetBabysit() *bool {
 	if t == nil {
@@ -35531,6 +35571,17 @@ func (t *CreateAgentMessage) GetCreateAgentMessage() *CreateAgentMessage_CreateA
 	return t.CreateAgentMessage
 }
 
+type CreateAgentRunUpload struct {
+	CreateAgentRunUpload *AgentRunUploadFragment "json:\"createAgentRunUpload,omitempty\" graphql:\"createAgentRunUpload\""
+}
+
+func (t *CreateAgentRunUpload) GetCreateAgentRunUpload() *AgentRunUploadFragment {
+	if t == nil {
+		t = &CreateAgentRunUpload{}
+	}
+	return t.CreateAgentRunUpload
+}
+
 type AddClusterAuditLog struct {
 	AddClusterAuditLog *bool "json:\"addClusterAuditLog,omitempty\" graphql:\"addClusterAuditLog\""
 }
@@ -39124,6 +39175,9 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	uploads {
+		... AgentRunUploadFragment
+	}
 	babysit
 	babysitInterval
 }
@@ -39203,6 +39257,12 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 `
 
@@ -39275,6 +39335,9 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	uploads {
+		... AgentRunUploadFragment
+	}
 	babysit
 	babysitInterval
 }
@@ -39354,6 +39417,12 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -39435,6 +39504,9 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	uploads {
+		... AgentRunUploadFragment
+	}
 	babysit
 	babysitInterval
 }
@@ -39514,6 +39586,12 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -39642,6 +39720,9 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	uploads {
+		... AgentRunUploadFragment
+	}
 	babysit
 	babysitInterval
 }
@@ -39721,6 +39802,12 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 `
 
@@ -39787,6 +39874,9 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
+	uploads {
+		... AgentRunUploadFragment
+	}
 	babysit
 	babysitInterval
 }
@@ -39866,6 +39956,12 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 `
 
@@ -40017,6 +40113,37 @@ func (c *Client) CreateAgentMessage(ctx context.Context, runID string, attribute
 
 	var res CreateAgentMessage
 	if err := c.Client.Post(ctx, "CreateAgentMessage", CreateAgentMessageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentRunUploadDocument = `mutation CreateAgentRunUpload ($runId: ID!, $attributes: AgentRunUploadAttributes!) {
+	createAgentRunUpload(runId: $runId, attributes: $attributes) {
+		... AgentRunUploadFragment
+	}
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
+}
+`
+
+func (c *Client) CreateAgentRunUpload(ctx context.Context, runID string, attributes AgentRunUploadAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error) {
+	vars := map[string]any{
+		"runId":      runID,
+		"attributes": attributes,
+	}
+
+	var res CreateAgentRunUpload
+	if err := c.Client.Post(ctx, "CreateAgentRunUpload", CreateAgentRunUploadDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -62763,6 +62890,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
 	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
 	CreateAgentMessageDocument:                        "CreateAgentMessage",
+	CreateAgentRunUploadDocument:                      "CreateAgentRunUpload",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",

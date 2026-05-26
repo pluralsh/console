@@ -93,6 +93,19 @@ func (c *client) CreateAgentPullRequest(ctx context.Context, runID string, attrs
 	return response.AgentPullRequest, nil
 }
 
+func (c *client) CreateAgentRunUpload(ctx context.Context, runID string, attrs console.AgentRunUploadAttributes) (*console.AgentRunUploadFragment, error) {
+	response, err := c.consoleClient.CreateAgentRunUpload(ctx, runID, attrs)
+	if err != nil {
+		return nil, err
+	}
+
+	if response == nil || response.CreateAgentRunUpload == nil {
+		return nil, nil
+	}
+
+	return response.CreateAgentRunUpload, nil
+}
+
 func (c *client) CreateAgentMessage(ctx context.Context, runID string, attrs console.AgentMessageAttributes) (*console.CreateAgentMessage_CreateAgentMessage, error) {
 	response, err := c.consoleClient.CreateAgentMessage(ctx, runID, attrs)
 	if err != nil {

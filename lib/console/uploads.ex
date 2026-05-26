@@ -23,9 +23,8 @@ defmodule Console.Uploads do
 
   def validate({file, _}) do
     file.file_name
-    |> Path.extname()
     |> String.downcase()
-    |> then(& Enum.member?(@formats, &1))
+    |> then(fn name -> Enum.any?(@formats, &String.ends_with?(name, &1)) end)
     |> case do
       true -> :ok
       false -> {:error, "invalid file type, required to be one of: #{Enum.join(@formats, ", ")}"}

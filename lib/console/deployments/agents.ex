@@ -196,12 +196,21 @@ defmodule Console.Deployments.Agents do
     end)
     |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
     |> add_operation(:create, fn %{run: run} ->
-      %AgentRunUpload{agent_run_id: run.id}
+      run.id
+      |> latest_agent_run_upload()
+      |> Kernel.||(%AgentRunUpload{agent_run_id: run.id})
       |> AgentRunUpload.changeset(attrs)
-      |> Repo.insert()
+      |> Repo.insert_or_update()
     end)
     |> execute(extract: :create)
     |> notify(:create)
+  end
+
+  defp latest_agent_run_upload(run_id) do
+    AgentRunUpload.for_run(run_id)
+    |> AgentRunUpload.ordered()
+    |> AgentRunUpload.with_limit(1)
+    |> Repo.one()
   end
 
   @spec create_agent_message(map, binary, Cluster.t) :: agent_msg_resp

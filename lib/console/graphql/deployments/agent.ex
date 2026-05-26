@@ -173,6 +173,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
     field :messages, list_of(:agent_message), resolve: dataloader(Deployments), description: "the messages this agent run has generated during its run"
+    field :uploads,  list_of(:agent_run_upload), resolve: dataloader(Deployments), description: "the upload bundles this agent run has generated"
     field :runtime,  :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
     field :user,     :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
     field :flow,     :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"

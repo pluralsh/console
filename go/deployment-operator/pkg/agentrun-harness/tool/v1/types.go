@@ -64,6 +64,11 @@ type Tool interface {
 	// updateAgentRunAnalysis. It must not write to ErrorChan; failures are
 	// returned to the caller.
 	AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error
+
+	// UploadArtifacts collects provider-native session state and other
+	// best-effort artifacts for createAgentRunUpload. Failures must not be
+	// written to ErrorChan; the controller logs them without failing the run.
+	UploadArtifacts(ctx context.Context) (*UploadArtifacts, error)
 }
 
 // DefaultTool is a partial base implementation of the Tool interface.

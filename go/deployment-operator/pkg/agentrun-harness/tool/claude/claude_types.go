@@ -47,6 +47,9 @@ type Claude struct {
 
 	// consoleURL is the URL of the console API.
 	consoleURL string
+
+	// sessionIDs are native Claude session identifiers observed in stream events.
+	sessionIDs []string
 }
 
 type StreamEvent struct {

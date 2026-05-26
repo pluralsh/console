@@ -2127,6 +2127,9 @@ type AgentRun {
   "the messages this agent run has generated during its run"
   messages: [AgentMessage]
 
+  "the upload bundles this agent run has generated"
+  uploads: [AgentRunUpload]
+
   "the runtime this agent is using"
   runtime: AgentRuntime
 
