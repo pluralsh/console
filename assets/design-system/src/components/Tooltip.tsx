@@ -25,6 +25,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { mergeProps } from 'react-aria'
 import { mergeRefs } from 'react-merge-refs'
 import { CSSTransition } from 'react-transition-group'
 import styled, { useTheme } from 'styled-components'
@@ -48,6 +49,8 @@ type TooltipProps = {
   portal?: boolean
   portalProps?: any
   onOpenChange?: (open: boolean) => unknown
+  referenceRole?: boolean
+  textValue?: string
 } & ComponentPropsWithRef<'div'>
 
 const TooltipArrow = createIcon(({ size, color }) => (
@@ -83,7 +86,11 @@ function Tooltip({
   portalProps = {},
   onOpenChange,
   style,
-  ...props
+  className,
+  css,
+  textValue: _textValue,
+  referenceRole = true,
+  ...passThroughProps
 }: TooltipProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
@@ -130,7 +137,7 @@ function Tooltip({
     }),
     useClick(context, { enabled: displayOn === 'click' }),
     useFocus(context, { enabled: displayOn === 'focus' }),
-    useRole(context, { role: 'tooltip' }),
+    useRole(context, { role: 'tooltip', enabled: referenceRole }),
     useDismiss(context, { enabled: dismissable === true }),
   ])
 
@@ -165,11 +172,12 @@ function Tooltip({
     <>
       {cloneElement(
         children,
-        getReferenceProps({
-          ...children.props,
-          [TOOLTIP_TRIGGER_ATTRIBUTE]: 'true',
-          ref: childrenRef,
-        })
+        getReferenceProps(
+          mergeProps(passThroughProps, children.props, {
+            [TOOLTIP_TRIGGER_ATTRIBUTE]: 'true',
+            ref: childrenRef,
+          })
+        )
       )}
       <WrapWithIf
         condition={portal}
@@ -189,7 +197,8 @@ function Tooltip({
           unmountOnExit
         >
           <TipSC
-            {...props}
+            className={className}
+            css={css}
             ref={floating}
             style={{
               position: finalStrategy,

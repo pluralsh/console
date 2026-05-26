@@ -4,28 +4,41 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
-- version: 0.17.1
+- version: 0.18.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "## Helm / values changes for 0.17.0 \u2192 0.17.1\n- No new user-facing\
-      \ values are called out in the 0.17.1 release notes.\n- 0.17.1 is primarily\
-      \ a **packaging/installation-script and Helm chart fix** release (cherry-picks).\n\
-      - Action for upgrade: **re-run a `helm diff`** against your current rendered\
-      \ manifests because the fix may change templates/packaging even if values stay\
-      \ the same.\n\n## Reminder from 0.17.0\n- 0.17.0 introduced **major Helm chart\
-      \ restructuring**. If you upgraded to 0.17.0 already, 0.17.1 does not add another\
-      \ restructuring step; if you are coming from \u22640.16.x, follow the 0.16 \u2192\
-      \ 0.17 upgrade guide first."
-    chart_updates: ['0.17.1 includes a cherry-picked fix for Helm chart packaging/templates
-        (PR #5556). Expect small rendered-manifest differences rather than new features.',
-      '0.17.1 re-includes/ships the 0.17.0 installation scripts as part of the release
-        artifacts (PR #5257), addressing missing/incorrect install assets in 0.17.0.',
-      'Version bump only beyond the above fixes (PR #5559).']
-    features: []
-    breaking_changes: []
-  chart_version: v0.17.1
+    helm_changes: "## Helm / install changes to expect (0.17.0 \u2192 0.18.0)\n- **Chart\
+      \ naming change:** the main chart name is now **`kserve-resources`** (previously\
+      \ `kserve`). If your Helm release was installed from the old chart name, plan\
+      \ to **update your chart reference** accordingly (release name can stay the\
+      \ same, but the chart you `helm upgrade` from changes).\n- **New/updated bundled\
+      \ CRDs:** v0.18.0 includes **Gateway API Inference Extension (GIE) CRDs** in\
+      \ the KServe bundle. If you previously installed these separately, avoid double-installing\
+      \ or reconcile ownership/labels.\n- **Dependency version overrides:** charts\
+      \ gained support for **overriding dependency versions** via values (useful if\
+      \ you need to pin/align subchart deps in your environment).\n- **Runtime-configs\
+      \ chart metadata:** `kserve-runtime-configs` now includes the **helm chart version**\
+      \ in its output/packaging, which may affect your internal artifact tracking.\n"
+    chart_updates: ['Main chart renamed to `kserve-resources` (PR #5190).', 'Packaging
+        fix: skip `_folder` when packaging charts (PR #5186).', 'Charts support dependency
+        version overrides (PR #5268).', '`kserve-runtime-configs` includes helm chart
+        version metadata (PR #5209).', 'KServe bundle includes GIE CRDs (PR #5214).']
+    features: [Adds CSV and Parquet marshallers for inference logging/marshalling
+        use cases., Inference logger now records occurrence/time in CloudEvents for
+        better traceability., ModelCache gains a namespace-scoped mode; download jobs
+        can run in a dedicated job namespace for tighter multi-tenancy controls.,
+      'LLMInferenceService (llmisvc) improvements: autoscaling integration (KEDA/HPA
+        and WVA), TLS/config updates, better URL discovery, and more robust validation.',
+      'Gateway/GKE Gateway support improvements, including an option to disable HTTPRoute
+        timeouts and new `/v1/responses` route for OpenAI Responses API support.']
+    breaking_changes: ['Helm chart reference change: the primary KServe chart is now
+        `kserve-resources`; upgrade tooling/pipelines that still reference `kserve`
+        will fail until updated.', 'Potential installation/ownership conflicts if
+        you previously managed GIE CRDs separately, since they are now bundled with
+        KServe in v0.18.0.']
+  chart_version: v0.18.0
   images: []
 - version: 0.17.0
   kube: ['1.35', '1.34', '1.33', '1.32']
