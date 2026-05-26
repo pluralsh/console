@@ -30,6 +30,7 @@ Check available tools (including Plural MCP server)
 
 Docker-in-Docker is enabled. You can use `docker` and `docker-compose` for testing, validation, and any build or runtime checks that require containers.
 
+- Use this where relevant; it is especially useful for verifying compilation, running unit tests, and validating Terraform syntax.
 - Prefer deterministic, short-lived container runs for tests.
 - Clean up containers, networks, and volumes you create.
 - If Docker commands fail due to unavailable daemon, explain why DinD tests were skipped.

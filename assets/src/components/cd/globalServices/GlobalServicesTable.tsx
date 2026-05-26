@@ -24,7 +24,7 @@ function GlobalServicesTableComponent({
 }) {
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useThrottle(searchString, 100)
+  const debouncedSearchString = useThrottle(searchString.trim(), 100)
 
   const {
     data,
