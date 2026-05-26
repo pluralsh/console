@@ -3,7 +3,9 @@ import {
   Flex,
   FormField,
   Input2,
+  ListBoxItem,
   ReturnIcon,
+  Select,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -26,6 +28,10 @@ import {
   FormCardSC,
   StickyActionsFooterSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import {
+  chatProviderConnectionIcon,
+  chatProviderConnectionLabel,
+} from './utils'
 
 type RouteState = {
   returnPath?: string
@@ -33,11 +39,20 @@ type RouteState = {
 }
 
 type ChatbotConnectionFormState = {
+  type: ChatProviderConnectionType
   name: string
   appToken: string
   botToken: string
   botId: string
+  clientId: string
+  clientSecret: string
+  tenantId: string
 }
+
+const SUPPORTED_CHAT_PROVIDER_TYPES = [
+  ChatProviderConnectionType.Slack,
+  ChatProviderConnectionType.Teams,
+] as const
 
 export function ChatbotConnectionForm() {
   const navigate = useNavigate()
@@ -46,10 +61,14 @@ export function ChatbotConnectionForm() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const { popToast } = useSimpleToast()
   const [formState, setFormState] = useState<ChatbotConnectionFormState>({
+    type: ChatProviderConnectionType.Slack,
     name: '',
     appToken: '',
     botToken: '',
     botId: '',
+    clientId: '',
+    clientSecret: '',
+    tenantId: '',
   })
 
   const {
@@ -67,21 +86,39 @@ export function ChatbotConnectionForm() {
   const appToken = formState.appToken.trim()
   const botToken = formState.botToken.trim()
   const botId = formState.botId.trim()
-  const canSave = !!name && !!appToken && !!botToken
+  const clientId = formState.clientId.trim()
+  const clientSecret = formState.clientSecret.trim()
+  const tenantId = formState.tenantId.trim()
+  const canSave =
+    !!name &&
+    (formState.type === ChatProviderConnectionType.Slack
+      ? !!appToken && !!botToken
+      : !!clientId && !!clientSecret && !!tenantId)
+
+  const configuration =
+    formState.type === ChatProviderConnectionType.Slack
+      ? {
+          slack: {
+            appToken,
+            botToken,
+            botId: botId || null,
+          },
+        }
+      : {
+          teams: {
+            clientId,
+            clientSecret,
+            tenantId,
+          },
+        }
 
   const [upsertChatProviderConnection, { loading, error }] =
     useUpsertChatProviderConnectionMutation({
       variables: {
         attributes: {
           name,
-          type: ChatProviderConnectionType.Slack,
-          configuration: {
-            slack: {
-              appToken,
-              botToken,
-              botId: botId || null,
-            },
-          },
+          type: formState.type,
+          configuration,
         },
       },
       onCompleted: ({ upsertChatProviderConnection }) => {
@@ -152,7 +189,34 @@ export function ChatbotConnectionForm() {
             {error && <GqlError error={error} />}
             <FormField
               required
-              label="Chatbot name"
+              label="Chat platform"
+            >
+              <Select
+                selectedKey={formState.type}
+                label={chatProviderConnectionLabel(formState.type)}
+                leftContent={chatProviderConnectionIcon(formState.type)}
+                isDisabled={loading}
+                onSelectionChange={(key) => {
+                  if (!key) return
+
+                  setFormState((prev) => ({
+                    ...prev,
+                    type: String(key) as ChatProviderConnectionType,
+                  }))
+                }}
+              >
+                {SUPPORTED_CHAT_PROVIDER_TYPES.map((type) => (
+                  <ListBoxItem
+                    key={type}
+                    leftContent={chatProviderConnectionIcon(type)}
+                    label={chatProviderConnectionLabel(type)}
+                  />
+                ))}
+              </Select>
+            </FormField>
+            <FormField
+              required
+              label="Name"
             >
               <Input2
                 value={formState.name}
@@ -163,48 +227,100 @@ export function ChatbotConnectionForm() {
                 disabled={loading}
               />
             </FormField>
-            <FormField
-              required
-              label="Slack app token"
-            >
-              <Input2
-                value={formState.appToken}
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    appToken: e.target.value,
-                  }))
-                }
-                placeholder="xapp-..."
-                disabled={loading}
-              />
-            </FormField>
-            <FormField
-              required
-              label="Slack bot token"
-            >
-              <Input2
-                value={formState.botToken}
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    botToken: e.target.value,
-                  }))
-                }
-                placeholder="xoxb-..."
-                disabled={loading}
-              />
-            </FormField>
-            <FormField label="Slack bot ID">
-              <Input2
-                value={formState.botId}
-                onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, botId: e.target.value }))
-                }
-                placeholder="B0123456789"
-                disabled={loading}
-              />
-            </FormField>
+            {formState.type === ChatProviderConnectionType.Slack ? (
+              <>
+                <FormField
+                  required
+                  label="App token"
+                >
+                  <Input2
+                    value={formState.appToken}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        appToken: e.target.value,
+                      }))
+                    }
+                    disabled={loading}
+                  />
+                </FormField>
+                <FormField
+                  required
+                  label="Bot token"
+                >
+                  <Input2
+                    value={formState.botToken}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        botToken: e.target.value,
+                      }))
+                    }
+                    disabled={loading}
+                  />
+                </FormField>
+                <FormField label="Bot ID">
+                  <Input2
+                    value={formState.botId}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        botId: e.target.value,
+                      }))
+                    }
+                    disabled={loading}
+                  />
+                </FormField>
+              </>
+            ) : (
+              <>
+                <FormField
+                  required
+                  label="Client ID"
+                >
+                  <Input2
+                    value={formState.clientId}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        clientId: e.target.value,
+                      }))
+                    }
+                    disabled={loading}
+                  />
+                </FormField>
+                <FormField
+                  required
+                  label="Tenant ID"
+                >
+                  <Input2
+                    value={formState.tenantId}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        tenantId: e.target.value,
+                      }))
+                    }
+                    disabled={loading}
+                  />
+                </FormField>
+                <FormField
+                  required
+                  label="Client secret"
+                >
+                  <Input2
+                    value={formState.clientSecret}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        clientSecret: e.target.value,
+                      }))
+                    }
+                    disabled={loading}
+                  />
+                </FormField>
+              </>
+            )}
             <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
               <Button
                 secondary

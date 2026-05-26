@@ -474,6 +474,10 @@ fragment ChatProviderConnection on ChatProviderConnection {
     slack {
       botId
     }
+    teams {
+      clientId
+      tenantId
+    }
   }
 }
 

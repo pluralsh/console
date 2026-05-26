@@ -1648,12 +1648,19 @@ input ChatProviderConnectionAttributes {
 
 input ChatProviderConnectionConfigurationAttributes {
   slack: SlackConnectionConfigurationAttributes
+  teams: TeamsConnectionConfigurationAttributes
 }
 
 input SlackConnectionConfigurationAttributes {
   appToken: String!
   botToken: String!
   botId: String
+}
+
+input TeamsConnectionConfigurationAttributes {
+  clientId: String!
+  clientSecret: String!
+  tenantId: String!
 }
 
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
@@ -1683,11 +1690,22 @@ type ChatProviderConnection {
 type ChatProviderConnectionConfiguration {
   "the configuration for the slack connection"
   slack: SlackConnectionConfiguration
+
+  "the configuration for the teams connection"
+  teams: TeamsConnectionConfiguration
 }
 
 type SlackConnectionConfiguration {
   "the bot id for the slack connection"
   botId: String
+}
+
+type TeamsConnectionConfiguration {
+  "the client id for the teams connection"
+  clientId: String
+
+  "the tenant id for the teams connection"
+  tenantId: String
 }
 
 type ChatProviderConnectionConnection {
