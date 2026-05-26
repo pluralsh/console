@@ -271,70 +271,108 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                 direction="column"
                 gap="medium"
               >
-                <FormField
-                  required
-                  hint="New chatbots added will appear in this list."
-                  label="Select chatbot"
+                <Flex
+                  direction="column"
+                  gap="small"
                 >
-                  <Select
-                    selectedKey={formState.chatConnectionId || null}
-                    isDisabled={isSaving || connectionsLoading}
-                    label={selectedConnection?.name ?? 'Select chatbot'}
-                    leftContent={
-                      selectedConnection
-                        ? chatProviderConnectionIcon(selectedConnection.type)
-                        : undefined
-                    }
-                    onSelectionChange={(key) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        chatConnectionId: key ? String(key) : '',
-                      }))
-                    }
+                  <Flex
+                    align="center"
+                    justify="space-between"
                   >
-                    {[
-                      ...connections.map((connection) => (
-                        <ListBoxItem
-                          key={connection.id}
-                          leftContent={chatProviderConnectionIcon(
-                            connection.type
-                          )}
-                          description={chatProviderConnectionLabel(
-                            connection.type
-                          )}
-                          label={connection.name}
-                        />
-                      )),
-                      <ListBoxFooter key="create-chatbot-footer">
-                        <InlineA
-                          href=""
-                          onClick={(e) => {
-                            e.preventDefault()
-                            navigate(
-                              getWorkbenchChatbotCreateConnectionAbsPath(
-                                workbenchId
-                              ),
-                              {
-                                state: {
-                                  returnPath: `${location.pathname}${location.search}`,
-                                  draftState: formState,
-                                },
-                              }
-                            )
-                          }}
-                          css={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: theme.spacing.small,
-                          }}
-                        >
-                          <AddIcon size={14} />
-                          Add new chatbot
-                        </InlineA>
-                      </ListBoxFooter>,
-                    ]}
-                  </Select>
-                </FormField>
+                    <div
+                      css={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Select chatbot*
+                    </div>
+                    <InlineA
+                      href=""
+                      onClick={(e) => {
+                        e.preventDefault()
+                        navigate(
+                          getWorkbenchChatbotCreateConnectionAbsPath(
+                            workbenchId
+                          ),
+                          {
+                            state: {
+                              returnPath: `${location.pathname}${location.search}`,
+                              draftState: formState,
+                            },
+                          }
+                        )
+                      }}
+                      css={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      Add new chatbot
+                    </InlineA>
+                  </Flex>
+                  <FormField hint="New chatbots added will appear in this list.">
+                    <Select
+                      selectedKey={formState.chatConnectionId || null}
+                      isDisabled={isSaving || connectionsLoading}
+                      label={selectedConnection?.name ?? 'Select chatbot'}
+                      leftContent={
+                        selectedConnection
+                          ? chatProviderConnectionIcon(selectedConnection.type)
+                          : undefined
+                      }
+                      onSelectionChange={(key) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          chatConnectionId: key ? String(key) : '',
+                        }))
+                      }
+                    >
+                      {[
+                        ...connections.map((connection) => (
+                          <ListBoxItem
+                            key={connection.id}
+                            leftContent={chatProviderConnectionIcon(
+                              connection.type
+                            )}
+                            description={chatProviderConnectionLabel(
+                              connection.type
+                            )}
+                            label={connection.name}
+                          />
+                        )),
+                        <ListBoxFooter key="create-chatbot-footer">
+                          <InlineA
+                            href=""
+                            onClick={(e) => {
+                              e.preventDefault()
+                              navigate(
+                                getWorkbenchChatbotCreateConnectionAbsPath(
+                                  workbenchId
+                                ),
+                                {
+                                  state: {
+                                    returnPath: `${location.pathname}${location.search}`,
+                                    draftState: formState,
+                                  },
+                                }
+                              )
+                            }}
+                            css={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: theme.spacing.small,
+                            }}
+                          >
+                            <AddIcon size={14} />
+                            Add new chatbot
+                          </InlineA>
+                        </ListBoxFooter>,
+                      ]}
+                    </Select>
+                  </FormField>
+                </Flex>
                 <FormField
                   required
                   label="Attach a channel"
