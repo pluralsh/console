@@ -181,6 +181,7 @@ export { default as GlobalStyle } from './GlobalStyle'
 export {
   honorableThemeDark,
   honorableThemeLight,
+  getActiveSemanticColors,
   setThemeColorMode,
   styledTheme,
   styledThemeDark,
@@ -193,6 +194,30 @@ export { semanticColorCssVars, semanticColorKeys } from './theme/colors'
 export type { SemanticColorCssVar, SemanticColorKey } from './theme/colors'
 export { default as HonorableThemeProvider } from './theme/HonorableThemeProvider'
 export type { SemanticSpacingKey } from './theme/spacing'
+export {
+  DEFAULT_THEME_ENGINE,
+  THEME_CUSTOM_KEY,
+  THEME_ENGINE_DATA_ATTR,
+  THEME_ENGINE_KEY,
+  THEME_PRESET_DATA_ATTR,
+  THEME_PRESET_KEY,
+  THEME_PRESETS,
+  deriveSemanticColors,
+  getThemeCustomConfig,
+  getThemeEngine,
+  getThemePresetId,
+  resolveFill,
+  resolveThemeConfig,
+  setThemeCustomConfig,
+  setThemeEngine,
+  setThemePresetId,
+  useThemeEngineState,
+  type ThemeConfig,
+  type ThemeCustomConfig,
+  type ThemeEngine,
+  type ThemePreset,
+  type ThemePresetId,
+} from './theme/themeEngine'
 
 // Utils
 export { default as scrollIntoContainerView } from './utils/scrollIntoContainerView'

@@ -4,12 +4,11 @@ import {
   COLOR_THEME_KEY,
   type ColorMode,
   DEFAULT_COLOR_MODE,
+  getActiveSemanticColors,
   styledTheme as theme,
 } from './theme'
 import { getBoxShadows } from './theme/boxShadows'
 import { baseColors } from './theme/colors-base'
-import { semanticColorsDark } from './theme/colors-semantic-dark'
-import { semanticColorsLight } from './theme/colors-semantic-light'
 
 const {
   borderRadiuses,
@@ -38,15 +37,11 @@ export const colorsToCSSVars: (colors: unknown) => any = (colors) => {
   return cssVars
 }
 
-const semanticColorCSSVars = {
-  dark: colorsToCSSVars(semanticColorsDark),
-  light: colorsToCSSVars(semanticColorsLight),
-}
-
 const baseColorCSSVars = colorsToCSSVars(baseColors)
 
 const getSemanticColorCSSVars = ({ mode }: { mode: ColorMode }) =>
-  semanticColorCSSVars[mode] || semanticColorCSSVars[DEFAULT_COLOR_MODE]
+  colorsToCSSVars(getActiveSemanticColors({ mode })) ||
+  colorsToCSSVars(getActiveSemanticColors({ mode: DEFAULT_COLOR_MODE }))
 
 const fontCSSVars = Object.fromEntries(
   Object.entries(fontFamilies).map(([name, value]) => [`--font-${name}`, value])

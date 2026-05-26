@@ -16,6 +16,12 @@ import { getBoxShadows } from './theme/boxShadows'
 import { baseColors } from './theme/colors-base'
 import { semanticColorsDark } from './theme/colors-semantic-dark'
 import { semanticColorsLight } from './theme/colors-semantic-light'
+import {
+  deriveSemanticColors,
+  getThemeCustomConfig,
+  getThemeEngine,
+  getThemePresetId,
+} from './theme/themeEngine'
 import { getFocusPartials } from './theme/focus'
 import { fontFamilies } from './theme/fonts'
 import gradients from './theme/gradients'
@@ -59,15 +65,34 @@ const portals = {
   },
 }
 
-const colorsDark = {
-  ...baseColors,
-  ...semanticColorsDark,
-} as const
+export function getActiveSemanticColors({
+  mode,
+}: {
+  mode: ColorMode
+}): Record<string, string> {
+  if (getThemeEngine() !== 'v2') {
+    return (
+      mode === 'dark' ? semanticColorsDark : semanticColorsLight
+    ) as Record<string, string>
+  }
 
-const colorsLight = {
-  ...baseColors,
-  ...semanticColorsLight,
-} as const
+  return deriveSemanticColors({
+    mode,
+    presetId: getThemePresetId(),
+    custom: getThemeCustomConfig(),
+  })
+}
+
+export function getActiveThemeColors({
+  mode,
+}: {
+  mode: ColorMode
+}): Record<string, string> {
+  return {
+    ...(baseColors as unknown as Record<string, string>),
+    ...getActiveSemanticColors({ mode }),
+  }
+}
 
 const getBaseTheme = ({ mode }: { mode: ColorMode }) =>
   ({
@@ -307,13 +332,13 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
 
 export const honorableThemeDark = mergeTheme(defaultTheme, {
   ...getBaseTheme({ mode: 'dark' }),
-  colors: colorsDark,
+  colors: getActiveThemeColors({ mode: 'dark' }),
   ...getHonorableThemeProps({ mode: 'dark' }),
 })
 
 export const honorableThemeLight = mergeTheme(defaultTheme, {
   ...getBaseTheme({ mode: 'light' }),
-  colors: colorsLight,
+  colors: getActiveThemeColors({ mode: 'light' }),
   ...getHonorableThemeProps({ mode: 'light' }),
 })
 
@@ -345,7 +370,7 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
           }),
         },
       },
-      colors: mode === 'dark' ? colorsDark : colorsLight,
+      colors: getActiveThemeColors({ mode }),
     },
   }) as const
 
@@ -353,7 +378,7 @@ export const styledThemeDark = getStyledTheme({ mode: 'dark' })
 
 export const styledThemeLight = {
   ...getStyledTheme({ mode: 'light' }),
-  colors: colorsLight,
+  colors: getActiveThemeColors({ mode: 'light' }),
 } as const
 
 // Deprecate these later?
