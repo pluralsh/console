@@ -10,9 +10,9 @@ export function chatProviderConnectionIcon(
 ) {
   switch (type) {
     case ChatProviderConnectionTypeGql.Slack:
-      return <SlackLogoIcon />
+      return <SlackLogoIcon fullColor />
     case ChatProviderConnectionTypeGql.Teams:
-      return <MsTeamsLogoIcon />
+      return <MsTeamsLogoIcon fullColor />
     default:
       return <BotIcon />
   }
