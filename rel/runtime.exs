@@ -312,3 +312,27 @@ if is_set("CONSOLE_AI_DEFAULTS") do
     _ -> :ok
   end)
 end
+
+if is_set("CONSOLE_S3_BUCKET") do
+  config :console,
+    object_store: true,
+    object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+
+  config :waffle,
+    storage: Waffle.Storage.S3,
+    bucket: get_env("CONSOLE_S3_BUCKET"),
+    asset_host: get_env("CONSOLE_S3_ENDPOINT"),
+    region: get_env("CONSOLE_S3_REGION")
+end
+
+if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
+  config :console,
+    object_store: true,
+    object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+
+  config :waffle,
+    storage: Waffle.Storage.Azure,
+    storage_account: get_env("CONSOLE_AZURE_STORAGE_ACCOUNT"),
+    container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
+    access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
+end

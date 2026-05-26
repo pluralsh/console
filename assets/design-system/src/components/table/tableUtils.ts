@@ -112,10 +112,26 @@ export function measureElement(
   element: Element,
   dimension: 'height' | 'width' = 'height'
 ): number {
+  // <tr> uses display: contents; measure rendered cell boxes instead of Range,
+  // which over-reports height for clamped cell content and breaks virtual scroll.
+  if (element.tagName === 'TR' && element.children.length > 0) {
+    let maxSize = 0
+
+    for (const child of element.children) {
+      const size =
+        dimension === 'width'
+          ? (child as HTMLElement).offsetWidth
+          : (child as HTMLElement).offsetHeight
+
+      if (size > maxSize) maxSize = size
+    }
+
+    if (maxSize > 0) return maxSize
+  }
+
   const { width, height } = element.getBoundingClientRect()
   const value = dimension === 'width' ? width : height
-  // Since <tr>s are rendered with `display: contents`, we need to calculate
-  // row height/width from contents using Range
+
   if (value <= 0 && element?.hasChildNodes()) {
     const range = document.createRange()
     range.setStart(element, 0)
@@ -123,5 +139,6 @@ export function measureElement(
     const { width, height } = range.getBoundingClientRect()
     return dimension === 'width' ? width : height
   }
+
   return value
 }

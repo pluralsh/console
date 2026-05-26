@@ -247,6 +247,31 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "createAgentRunUpload" do
+    test "a cluster can create an agent run upload" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:ok, %{data: %{"createAgentRunUpload" => upload}}} = run_query("""
+        mutation Create($runId: ID!, $attrs: AgentRunUploadAttributes!) {
+          createAgentRunUpload(runId: $runId, attributes: $attrs) {
+            id
+            agentRun { id }
+          }
+        }
+      """, %{
+        "runId" => run.id,
+        "attrs" => %{}
+      }, %{cluster: cluster})
+
+      assert upload["id"]
+      assert upload["agentRun"]["id"] == run.id
+    end
+  end
+
   describe "createAgentMessage" do
     test "a user can create an agent message" do
       runtime = insert(:agent_runtime)

@@ -13,7 +13,7 @@ import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
-import { prettifyPrompt } from 'components/utils/contentEditableChips'
+import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
   VirtualSlice,
   useFetchPaginatedData,
@@ -26,7 +26,6 @@ import {
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -134,8 +133,18 @@ export const userColumn = columnHelper.accessor(({ user }) => user, {
 })
 
 export const promptColumn = columnHelper.accessor(
-  ({ prompt }) => truncate(prettifyPrompt(prompt ?? ''), { length: 150 }),
-  { id: 'prompt', meta: { gridTemplate: '1fr' } }
+  ({ prompt }) => prompt ?? '',
+  {
+    id: 'prompt',
+    meta: { gridTemplate: 'minmax(0, 1fr)' },
+    cell: ({ getValue }) => (
+      <WorkbenchStoredPromptMarkdown
+        text={getValue()}
+        density="tableCell"
+        clampLines={1}
+      />
+    ),
+  }
 )
 
 export const workbenchColumn = columnHelper.accessor(
@@ -191,7 +200,7 @@ function JobSourceChips({
   )
 }
 
-function JobConclusionIcon({
+export function JobConclusionIcon({
   result,
 }: {
   result: WorkbenchJobTinyFragment['result']

@@ -1,4 +1,5 @@
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import type { SemanticColorKey } from '@pluralsh/design-system'
 import { truncateKeepingChips } from 'components/utils/contentEditableChips'
 import styled, { css } from 'styled-components'
 
@@ -35,44 +36,14 @@ const clampedMarkdownInnerStyles = ({
 `
 
 /** Muted typography + line clamp (`SimplifiedMarkdown` uses `rootLayout="block"` so chips stay in-flow in `<p>`). */
-const tableCellClampStyles = ({ theme }) => css`
-  ${theme.partials.text.caption};
-  color: ${theme.colors['text-light']};
-  min-width: 0;
-  overflow: hidden;
-
-  & > div {
-    ${clampedMarkdownInnerStyles({ theme })}
-  }
-`
-
-const TableCellMarkdownWrapSC = styled(MarkdownWrapSC)`
-  ${tableCellClampStyles}
-`
-
-const sidePanelClampStyles = ({ theme }) => css`
-  ${theme.partials.text.caption};
-  color: ${theme.colors['text-xlight']};
-  min-width: 0;
-  overflow: hidden;
-
-  & > div {
-    ${clampedMarkdownInnerStyles({ theme })}
-  }
-`
-
-const SidePanelMarkdownWrapSC = styled(MarkdownWrapSC)`
-  ${sidePanelClampStyles}
-`
-
-const jobCardClampStyles = ({
+const tableCellClampStyles = ({
   theme,
   lines = 3,
 }: {
   theme: any
   lines?: number
 }) => css`
-  ${theme.partials.text.body2};
+  ${theme.partials.text.caption};
   color: ${theme.colors['text-light']};
   min-width: 0;
   overflow: hidden;
@@ -82,8 +53,56 @@ const jobCardClampStyles = ({
   }
 `
 
-const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
-  ${({ theme, $lines }) => jobCardClampStyles({ theme, lines: $lines })}
+const TableCellMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
+  ${({ theme, $lines }) => tableCellClampStyles({ theme, lines: $lines })}
+`
+
+const sidePanelClampStyles = ({
+  theme,
+  lines = 3,
+}: {
+  theme: any
+  lines?: number
+}) => css`
+  ${theme.partials.text.caption};
+  color: ${theme.colors['text-xlight']};
+  min-width: 0;
+  overflow: hidden;
+
+  & > div {
+    ${clampedMarkdownInnerStyles({ theme, lines })}
+  }
+`
+
+const SidePanelMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
+  ${({ theme, $lines }) => sidePanelClampStyles({ theme, lines: $lines })}
+`
+
+const jobCardClampStyles = ({
+  theme,
+  lines = 3,
+  promptColor = 'text-light',
+}: {
+  theme: any
+  lines?: number
+  promptColor?: SemanticColorKey
+}) => css`
+  ${theme.partials.text.body2};
+  color: ${theme.colors[promptColor]};
+  min-width: 0;
+  overflow: hidden;
+
+  & > div {
+    ${clampedMarkdownInnerStyles({ theme, lines })}
+  }
+`
+
+const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)<{
+  $lines: number
+  $promptColor?: SemanticColorKey
+}>`
+  ${({ theme, $lines, $promptColor = 'text-light' }) =>
+    jobCardClampStyles({ theme, lines: $lines, promptColor: $promptColor })}
 `
 
 /**
@@ -95,14 +114,16 @@ export function WorkbenchStoredPromptMarkdown({
   truncateVisibleChars,
   density = 'default',
   clampLines = 3,
+  promptColor = 'text-light',
 }: {
   text: string
   /** When set, trims by visible length without splitting chips (like job previews). */
   truncateVisibleChars?: number
   /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). `jobCard`: body2 + `text-light` + same clamp (home recent jobs). */
   density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard'
-  /** Number of lines before truncation when density is `jobCard`. Default 3. */
+  /** Number of lines before truncation when density is `tableCell`, `sidePanel`, or `jobCard`. Default 3. */
   clampLines?: number
+  promptColor?: SemanticColorKey
 }) {
   const clampedDensity =
     density === 'tableCell' || density === 'sidePanel' || density === 'jobCard'
@@ -114,7 +135,7 @@ export function WorkbenchStoredPromptMarkdown({
 
   if (density === 'tableCell') {
     return (
-      <TableCellMarkdownWrapSC>
+      <TableCellMarkdownWrapSC $lines={clampLines}>
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"
@@ -124,7 +145,7 @@ export function WorkbenchStoredPromptMarkdown({
   }
   if (density === 'sidePanel') {
     return (
-      <SidePanelMarkdownWrapSC>
+      <SidePanelMarkdownWrapSC $lines={clampLines}>
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"
@@ -134,7 +155,10 @@ export function WorkbenchStoredPromptMarkdown({
   }
   if (density === 'jobCard') {
     return (
-      <JobCardMarkdownWrapSC $lines={clampLines}>
+      <JobCardMarkdownWrapSC
+        $lines={clampLines}
+        $promptColor={promptColor}
+      >
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"

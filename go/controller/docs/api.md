@@ -5319,7 +5319,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled controls whether the vector store is enabled or not.. | false | Optional: \{\} <br /> |
-| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH] <br />Optional: \{\} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH POSTGRES] <br />Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | Elastic configuration for the vector store. |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnectionSettings](#opensearchconnectionsettings)_ | Opensearch configuration for the vector store. |  | Optional: \{\} <br /> |
 

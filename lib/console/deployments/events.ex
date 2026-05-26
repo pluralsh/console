@@ -144,7 +144,6 @@ defmodule Console.PubSub.WorkbenchChatbotCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchChatbotUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchChatbotDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobThoughtCreated, do: use Piazza.PubSub.Event
-defmodule Console.PubSub.WorkbenchJobResolved, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.IssueCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.IssueUpdated, do: use Piazza.PubSub.Event

@@ -22,7 +22,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought
   }
-  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
+  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt, VectorStore}
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -84,6 +84,38 @@ defmodule Console.Deployments.Workbenches do
     User.for_policies(users, groups)
     |> Repo.all()
   end
+
+  @doc """
+  Executes a semantic search for workbench jobs indexed in the vector store.
+  """
+  @spec workbench_job_search(binary, User.t(), keyword) :: {:ok, [WorkbenchJob.t()]} | error
+  def workbench_job_search(q, %User{} = user, opts \\ []) do
+    count = Keyword.get(opts, :limit, 5)
+    workbench_id = Keyword.get(opts, :workbench_id)
+    user = Console.Services.Rbac.preload(user)
+
+    with {:ok, results} <- VectorStore.fetch(q, [
+           count: count,
+           filters: search_filters(workbench_id),
+           user: user
+         ]) do
+      results
+      |> Enum.map(fn
+        %VectorStore.Response{workbench_job: %{id: id}} when is_binary(id) -> id
+        _ -> nil
+      end)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.uniq()
+      |> WorkbenchJob.for_ids()
+      |> Repo.all()
+      |> ok()
+    end
+  end
+
+  defp search_filters(workbench_id) when is_binary(workbench_id) do
+    [datatype: {:raw, :workbench_job}, workbench_id: workbench_id]
+  end
+  defp search_filters(_), do: [datatype: {:raw, :workbench_job}]
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.

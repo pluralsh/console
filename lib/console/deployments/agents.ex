@@ -18,12 +18,14 @@ defmodule Console.Deployments.Agents do
     PullRequest,
     AgentMessage,
     AgentRunRepository,
-    WorkbenchJobActivity
+    WorkbenchJobActivity,
+    AgentRunUpload
   }
   require EEx
 
   @type error :: Console.error
   @type agent_run_resp :: {:ok, AgentRun.t} | error
+  @type agent_run_upload_resp :: {:ok, AgentRunUpload.t} | error
   @type agent_runtime_resp :: {:ok, AgentRuntime.t} | error
   @type agent_msg_resp :: {:ok, AgentMessage.t} | error
   @type history_resp :: {:ok, AgentPromptHistory.t} | error
@@ -169,18 +171,9 @@ defmodule Console.Deployments.Agents do
   Updates an agent run, can only be performed by deployment operators
   """
   @spec update_agent_run(map, binary, Cluster.t) :: agent_run_resp
-  def update_agent_run(attrs, run_id, %Cluster{id: cluster_id}) do
+  def update_agent_run(attrs, run_id, %Cluster{} = cluster) do
     start_transaction()
-    |> add_operation(:run, fn _ ->
-      get_agent_run!(run_id)
-      |> Repo.preload([:runtime, :messages])
-      |> case do
-        %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run ->
-          {:ok, run}
-        _ ->
-          {:error, "clusters can only update their own agent runs"}
-      end
-    end)
+    |> add_operation(:run, fn _ -> validate_run(run_id, cluster, [:runtime, :messages]) end)
     |> add_operation(:update, fn %{run: run} ->
       AgentRun.changeset(run, attrs)
       |> Repo.update()
@@ -189,19 +182,32 @@ defmodule Console.Deployments.Agents do
     |> notify(:update)
   end
 
-  @spec create_agent_message(map, binary, Cluster.t) :: agent_msg_resp
-  def create_agent_message(attrs, run_id, %Cluster{id: cluster_id}) do
+  @doc """
+  Creates a new upload bundle for an agent run, can only be performed by the cluster it runs on.
+  """
+  @spec agent_run_uploads(map, binary, Cluster.t) :: agent_run_upload_resp
+  def agent_run_uploads(attrs, run_id, %Cluster{} = cluster) do
     start_transaction()
-    |> add_operation(:run, fn _ ->
-      get_agent_run!(run_id)
-      |> Repo.preload([:runtime])
-      |> case do
-        %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run ->
-          {:ok, run}
-        _ ->
-          {:error, "clusters can only update their own agent runs"}
+    |> add_operation(:upload, fn _ ->
+      case Console.conf(:object_store) do
+        true -> {:ok, true}
+        _ -> {:error, "object store is not enabled for this instance, uploads will fail"}
       end
     end)
+    |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
+    |> add_operation(:create, fn %{run: run} ->
+      %AgentRunUpload{agent_run_id: run.id}
+      |> AgentRunUpload.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> execute(extract: :create)
+    |> notify(:create)
+  end
+
+  @spec create_agent_message(map, binary, Cluster.t) :: agent_msg_resp
+  def create_agent_message(attrs, run_id, %Cluster{} = cluster) do
+    start_transaction()
+    |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
     |> add_operation(:create, fn %{run: run} ->
       %AgentMessage{agent_run_id: run.id}
       |> AgentMessage.changeset(attrs)
@@ -209,6 +215,15 @@ defmodule Console.Deployments.Agents do
     end)
     |> execute(extract: :create)
     |> notify(:create)
+  end
+
+  defp validate_run(run_id, %Cluster{id: cluster_id}, preloads \\ [:runtime]) do
+    get_agent_run!(run_id)
+    |> Repo.preload(preloads)
+    |> case do
+      %AgentRun{runtime: %AgentRuntime{cluster_id: ^cluster_id}} = run -> {:ok, run}
+      _ -> {:error, "clusters can only update their own agent runs"}
+    end
   end
 
   @doc """

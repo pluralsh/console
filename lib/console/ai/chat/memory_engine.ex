@@ -5,16 +5,34 @@ defmodule Console.AI.Chat.MemoryEngine do
   """
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.AI.{Provider, Tool}
+  alias Console.AI.Chat.EnabledTools
+  alias Console.AI.Tools.{EnableTools, ToolSearch}
   require Logger
 
-  defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, continue_msg: "looks like we aren't done, let's continue", messages: [], acc: [], tool_fmt: &Console.identity/1]
+  @type t :: %__MODULE__{}
+
+  defstruct [
+    :tools,
+    :system_prompt,
+    :max_iterations,
+    :reducer,
+    :enabled_tools,
+    :callback,
+    continue_msg: "looks like we aren't done let's continue",
+    messages: [],
+    pre_enable: [],
+    acc: [],
+    tool_fmt: &Console.identity/1,
+    tool_search: false
+  ]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
     struct(__MODULE__, Keyword.merge(opts, [tools: tools, max_iterations: max_iterations]))
   end
 
   def run(%__MODULE__{} = engine, [_ | _] = messages) do
-    engine = %__MODULE__{engine | reducer: fn l, acc -> {:cont, l ++ acc} end}
+    engine = setup_toolsearch(%__MODULE__{engine | reducer: fn l, acc -> {:cont, l ++ acc} end})
+
     put_in(engine.messages, engine.messages ++ messages)
     |> loop()
   end
@@ -25,7 +43,8 @@ defmodule Console.AI.Chat.MemoryEngine do
   The reducer function is a two-arity function of messages and accumulator.  It should return a tuple of {:halt, result} if the reduction should halt, or the new accumulator if the reduction should continue.
   """
   def reduce(%__MODULE__{} = engine, [_ | _] = messages, reducer) when is_function(reducer, 2) do
-    engine = %__MODULE__{engine | reducer: reducer}
+    engine = setup_toolsearch(%__MODULE__{engine | reducer: reducer})
+
     put_in(engine.messages, engine.messages ++ messages)
     |> loop()
   end
@@ -48,17 +67,18 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp loop(engine, iter \\ 0)
   defp loop(%__MODULE__{max_iterations: max, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
     preface = build_preface(preface, Map.put(engine, :iteration, iter))
+    tools = determine_tools(engine)
 
     messages
     |> append_continue(engine)
     |> Enum.map(&msg(&1, :tool))
     |> fit_context_window(preface)
-    |> Provider.completion(preface: preface, plural: engine.tools, client: :tool)
+    |> Provider.completion(preface: preface, plural: tools, client: :tool)
     |> case do
-      {:ok, content} -> [callback(engine, {:assistant, content})]
-      {:ok, content, tools} ->
-        case call_tools(engine, tools, engine.tools) do
-          {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
+      {:ok, content} -> {[callback(engine, {:assistant, content})], engine}
+      {:ok, content, calls} ->
+        case call_tools(engine, calls, tools) do
+          {:ok, tool_msgs, engine} -> {maybe_prepend(content, tool_msgs), engine}
           err -> err
         end
       {:error, %ReqLLM.Error.API.Request{status: nil}} = err ->
@@ -79,7 +99,7 @@ defmodule Console.AI.Chat.MemoryEngine do
       err -> err
     end
     |> then(fn
-      l when is_list(l) -> finalize_loop(l, engine, acc, iter)
+      {l, engine} when is_list(l) -> finalize_loop(l, engine, acc, iter)
       err -> err
     end)
   end
@@ -106,25 +126,33 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp build_preface(str, _) when is_binary(str), do: str
   defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)
 
-  @spec call_tools(%__MODULE__{}, [Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}]} | {:error, binary}
+  @spec call_tools(%__MODULE__{}, [Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}], t()} | {:error, binary}
   defp call_tools(engine, tools, impls) do
     by_name = Map.new(impls, & {Tool.name(&1), &1})
-    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args} = tool, acc ->
+    Enum.reduce_while(tools, {[], engine}, fn %Tool{id: id, name: name, arguments: args} = tool, {acc, engine} ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
-           {:ok, parsed}  <- Tool.validate(impl, args),
-           {:ok, content} <- Tool.implement(impl, Map.put(parsed, :id, tool)) do
-        {:cont, [callback(engine, tool_msg(content, id, name, args, engine.tool_fmt)) | acc]}
+           {:ok, parsed}  <- Tool.validate(impl, args) do
+        case Tool.implement(impl, Map.put(parsed, :id, tool)) do
+          %EnabledTools{} = enabled ->
+            msg = callback(engine, tool_msg("enabled tools: #{Enum.join(EnabledTools.enabled(enabled), ", ")}", id, name, args, engine.tool_fmt))
+            {:cont, {[msg | acc], %{engine | enabled_tools: enabled}}}
+          {:ok, result} ->
+            {:cont, {[callback(engine, tool_msg(result, id, name, args, engine.tool_fmt)) | acc], engine}}
+          err ->
+            msg = callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args, engine.tool_fmt))
+            {:cont, {[msg | acc], engine}}
+        end
       else
         :error ->
-          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args, engine.tool_fmt)) | acc]}
+          {:cont, {[callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args, engine.tool_fmt)) | acc], engine}}
         {:error, %Ecto.Changeset{} = cs} ->
-          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args, engine.tool_fmt)) | acc]}
+          {:cont, {[callback(engine, tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args, engine.tool_fmt)) | acc], engine}}
         err ->
-          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args, engine.tool_fmt)) | acc]}
+          {:cont, {[callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args, engine.tool_fmt)) | acc], engine}}
       end
     end)
     |> then(fn
-      l when is_list(l) -> {:ok, l}
+      {l, engine} when is_list(l) -> {:ok, l, engine}
       err -> err
     end)
   end
@@ -166,4 +194,12 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, args}), do: byte_size(content <> Jason.encode!(Map.take(args, [:name, :arguments])))
   defp msg_size(_), do: 0
+
+  defp setup_toolsearch(%__MODULE__{tool_search: true, pre_enable: pre_enable} = engine),
+    do: %__MODULE__{engine | enabled_tools: EnabledTools.new(engine.tools, pre_enable)}
+  defp setup_toolsearch(engine), do: engine
+
+  defp determine_tools(%__MODULE__{enabled_tools: %EnabledTools{} = enabled}),
+    do: [%ToolSearch{enabled: enabled}, %EnableTools{enabled: enabled} | EnabledTools.tools(enabled)]
+  defp determine_tools(%__MODULE__{tools: tools}), do: tools
 end

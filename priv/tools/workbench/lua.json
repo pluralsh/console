@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "description": "Execute a sandboxed Lua script for precise computation. Write results to the global `output` table (e.g. `output[\"total\"] = 42`). The tool returns the JSON-encoded contents of `output`. Available libraries: base, string, table, math, encoding (jsonEncode/jsonDecode, yamlEncode/yamlDecode), and utils (merge, splitString, pathJoin). There is no filesystem, network, os, io, or require access.",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Lua source code to execute. Assign fields on the global `output` table to return structured results."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Explanation of why you're running this script, such as 'I need to compute the total cost of all EC2 instances by type from this list of hourly rates.'."
+    }
+  },
+  "required": [
+    "code",
+    "explanation"
+  ]
+}

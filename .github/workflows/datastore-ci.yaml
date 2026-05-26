@@ -29,7 +29,6 @@ jobs:
       run:
         shell: bash
         working-directory: go/datastore
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
@@ -46,7 +45,6 @@ jobs:
       run:
         shell: bash
         working-directory: go/datastore
-    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v6

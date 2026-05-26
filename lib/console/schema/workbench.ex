@@ -1,5 +1,6 @@
 defmodule Console.Schema.Workbench do
   use Console.Schema.Base
+  use Waffle.Ecto.Schema
   alias Console.Schema.{
     Project,
     Service,
@@ -20,11 +21,13 @@ defmodule Console.Schema.Workbench do
     Alert
   }
   alias Console.Deployments.Policies.Rbac
+  alias Console.Uploads.Type
 
   schema "workbenches" do
     field :name,           :string
     field :description,    :string
     field :system_prompt,  :binary
+    field :memory,         Type
 
     embeds_one :configuration, Configuration, on_replace: :update do
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
@@ -122,6 +125,7 @@ defmodule Console.Schema.Workbench do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_attachments(attrs, [:memory])
     |> cast_assoc(:workbench_skills)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
