@@ -552,6 +552,16 @@ fragment WorkbenchJobTiny on WorkbenchJob {
     id
     grade
   }
+  chatbotMessage {
+    id
+    channel
+    message
+    chatConnection {
+      id
+      name
+      type
+    }
+  }
 }
 
 fragment WorkbenchJob on WorkbenchJob {
