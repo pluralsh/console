@@ -13,6 +13,7 @@ import (
 
 	gqlclient "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
@@ -36,8 +37,11 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 	defer closeFiles()
 
 	if _, err := in.consoleClient.CreateAgentRunUpload(ctx, in.agentRunID, attrs); err != nil {
-		klog.ErrorS(err, "failed to create agent run upload", "agentRunID", in.agentRunID)
+		klog.ErrorS(err, "failed to upload agent run artifacts", "agentRunID", in.agentRunID)
+		return
 	}
+
+	klog.V(log.LogLevelInfo).InfoS("agent run artifacts uploaded", "agentRunID", in.agentRunID)
 }
 
 func (in *agentRunController) uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUploadAttributes, func(), error) {
