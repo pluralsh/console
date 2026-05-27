@@ -64,6 +64,7 @@ const (
 	UpgradePlanCalloutReconciler         Reconciler = "upgradeplancallout"
 	WorkbenchReconciler                  Reconciler = "workbench"
 	WorkbenchCronReconciler              Reconciler = "workbenchcron"
+	WorkbenchPromptReconciler            Reconciler = "workbenchprompt"
 	WorkbenchToolReconciler              Reconciler = "workbenchtool"
 	WorkbenchWebhookReconciler           Reconciler = "workbenchwebhook"
 	SentinelTriggerReconciler            Reconciler = "sentineltrigger"

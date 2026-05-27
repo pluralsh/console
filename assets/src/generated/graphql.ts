@@ -10757,6 +10757,7 @@ export type RootQueryType = {
   workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJob>>>;
   workbenchPrMergeRates?: Maybe<Array<Maybe<WorkbenchPrMergeRateEntry>>>;
   workbenchPrMergeRatesByWorkbench?: Maybe<Array<Maybe<WorkbenchPrMergeRateByWorkbenchEntry>>>;
+  workbenchPrompt?: Maybe<WorkbenchPrompt>;
   workbenchPullRequests: Scalars['Int']['output'];
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
@@ -12180,6 +12181,11 @@ export type RootQueryTypeWorkbenchPrMergeRatesArgs = {
 
 export type RootQueryTypeWorkbenchPrMergeRatesByWorkbenchArgs = {
   period?: InputMaybe<EvalResultsPeriod>;
+};
+
+
+export type RootQueryTypeWorkbenchPromptArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

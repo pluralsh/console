@@ -307,6 +307,15 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Fetches a saved workbench prompt by id. Requires read permission on the workbench.
+  """
+  @spec fetch_workbench_prompt(binary, User.t()) :: prompt_resp
+  def fetch_workbench_prompt(id, %User{} = user) do
+    get_workbench_prompt!(id)
+    |> allow(user, :read)
+  end
+
+  @doc """
   Creates a saved workbench skill. Requires write access to the workbench.
   """
   @spec create_workbench_skill(map, binary, User.t()) :: skill_resp

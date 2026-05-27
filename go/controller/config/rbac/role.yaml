@@ -72,6 +72,7 @@ rules:
   - upgradeplancallouts
   - workbenchcrons
   - workbenches
+  - workbenchprompts
   - workbenchtools
   - workbenchwebhooks
   verbs:
@@ -130,6 +131,7 @@ rules:
   - upgradeplancallouts/finalizers
   - workbenchcrons/finalizers
   - workbenches/finalizers
+  - workbenchprompts/finalizers
   - workbenchtools/finalizers
   - workbenchwebhooks/finalizers
   verbs:
@@ -182,6 +184,7 @@ rules:
   - upgradeplancallouts/status
   - workbenchcrons/status
   - workbenches/status
+  - workbenchprompts/status
   - workbenchtools/status
   - workbenchwebhooks/status
   verbs:

@@ -510,6 +510,8 @@ type RootQueryType {
 
   workbenchChatbot(id: ID!): WorkbenchChatbot
 
+  workbenchPrompt(id: ID!): WorkbenchPrompt
+
   workbenches(
     after: String
 

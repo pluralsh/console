@@ -265,6 +265,29 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert Enum.any?(nodes, & &1["prompt"] == "second" and &1["category"] == "Jobs")
     end
 
+    test "it can fetch a workbench prompt by id" do
+      workbench = insert(:workbench)
+      prompt = insert(:workbench_prompt, workbench: workbench, prompt: "first", category: "Jobs")
+
+      {:ok, %{data: %{"workbenchPrompt" => found}}} = run_query("""
+        query WorkbenchPrompt($id: ID!) {
+          workbenchPrompt(id: $id) {
+            id
+            prompt
+            category
+            workbench {
+              id
+            }
+          }
+        }
+      """, %{"id" => prompt.id}, %{current_user: admin_user()})
+
+      assert found["id"] == prompt.id
+      assert found["prompt"] == "first"
+      assert found["category"] == "Jobs"
+      assert found["workbench"]["id"] == workbench.id
+    end
+
     test "it can fetch workbench skills" do
       workbench = insert(:workbench)
       s1 = insert(:workbench_skill, workbench: workbench, name: "skill-one", description: "first", contents: "echo one")

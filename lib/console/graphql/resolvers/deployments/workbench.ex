@@ -286,6 +286,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def delete_workbench_prompt(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_prompt(id, user)
 
+  def workbench_prompt(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.fetch_workbench_prompt(id, user)
+
   def create_workbench_skill(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_skill(attrs, workbench_id, user)
 

@@ -208,6 +208,11 @@ type ConsoleClient interface {
 	GetWorkbenchCron(ctx context.Context, id string) (*console.WorkbenchCronFragment, error)
 	DeleteWorkbenchCron(ctx context.Context, id string) error
 	IsWorkbenchCronExists(ctx context.Context, id string) (bool, error)
+	CreateWorkbenchPrompt(ctx context.Context, workbenchID string, attributes console.WorkbenchPromptAttributes) (*console.WorkbenchPromptFragment, error)
+	UpdateWorkbenchPrompt(ctx context.Context, id string, attributes console.WorkbenchPromptAttributes) (*console.WorkbenchPromptFragment, error)
+	GetWorkbenchPrompt(ctx context.Context, id string) (*console.WorkbenchPromptFragment, error)
+	DeleteWorkbenchPrompt(ctx context.Context, id string) error
+	IsWorkbenchPromptExists(ctx context.Context, id string) (bool, error)
 	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes console.WorkbenchWebhookAttributes) (*console.WorkbenchWebhookFragment, error)
 	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes console.WorkbenchWebhookAttributes) (*console.WorkbenchWebhookFragment, error)
 	GetWorkbenchWebhook(ctx context.Context, id string) (*console.WorkbenchWebhookFragment, error)
