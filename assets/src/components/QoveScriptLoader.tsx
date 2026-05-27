@@ -13,7 +13,9 @@ export function QoveScriptLoader({
   qoveKey?: string | null
 }) {
   const { configuration } = useLogin()
-  const qoveKey = (qoveKeyProp ?? configuration?.qoveKey)?.trim() ?? ''
+  const qoveKeySource =
+    qoveKeyProp === undefined ? configuration?.qoveKey : qoveKeyProp
+  const qoveKey = qoveKeySource?.trim() ?? ''
 
   useEffect(() => {
     if (!qoveKey) return
