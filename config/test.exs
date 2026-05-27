@@ -249,6 +249,22 @@ config :console,
   "extra_message": "plrl_project: test-project, plrl_cluster: test-cluster, plrl_service: test-service"
 }
 |,
+  alertops_webhook_payload: ~s|
+{
+  "IncidentSourceName": "PROD Server 1",
+  "IncidentSubject": "Server CPU Alert",
+  "IncidentId": "1527895AF1235DE",
+  "IncidentStatus": "PROBLEM",
+  "IncidentSeverity": "CRITICAL",
+  "IncidentURL": "http://myaccount.alertops.com/incidents",
+  "IncidentShortText": "The server CPU status is PROBLEM",
+  "IncidentLongText": "The Server Status for rule # 10576 is PROBLEM state. CPU utilization exceeds threshold.",
+  "IncidentAssignee": "georgeusername",
+  "plrl_project": "test-project",
+  "plrl_cluster": "test-cluster",
+  "plrl_service": "test-service"
+}
+|,
   sentry_webhook_payload: ~s|
 {
   "action": "triggered",

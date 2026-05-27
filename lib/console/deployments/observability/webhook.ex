@@ -4,12 +4,12 @@ defmodule Console.Deployments.Observability.Webhook do
   to handle provider-specific logic.
   """
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Newrelic, Raw, Sentry}
+  alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Newrelic, Raw, Sentry, Alertops}
   alias Console.Schema.{ObservabilityWebhook, WorkbenchWebhook}
   alias Console.Deployments.Workbenches
 
   @callback associations(atom, map, map) :: map
-  @callback state(binary) :: :firing | :resolved
+  @callback state(map) :: :firing | :resolved
   @callback severity(map) :: :low | :medium | :high | :critical | :undefined
   @callback summary(map) :: binary
 
@@ -114,6 +114,28 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Newrelic.summary(payload),
       tags: %{},
     }, add_associations(Newrelic, payload))
+    |> with_payload(payload)
+    |> workbench_association(hook)
+    |> backfill_raw()
+    |> listify()
+    |> ok()
+  end
+
+  def payload(%ObservabilityWebhook{type: :alertops} = hook, payload) when is_map(payload) do
+    # AlertOps outbound payloads are user-configurable; we key off the
+    # Standard Alert fields and let the Raw fallback fill in associations
+    # we can't read off the top of the body.
+    Map.merge(%{
+      type: :alertops,
+      fingerprint: Map.get(payload, "IncidentId") || "[NO_ID]",
+      annotations: %{},
+      state: Alertops.state(payload),
+      severity: Alertops.severity(payload),
+      url: Map.get(payload, "IncidentURL") || "[NO_URL]",
+      title: Map.get(payload, "IncidentSubject") || "[NO_TITLE]",
+      message: Alertops.summary(payload),
+      tags: tags(Map.get(payload, "tags") || %{}),
+    }, add_associations(Alertops, payload))
     |> with_payload(payload)
     |> workbench_association(hook)
     |> backfill_raw()
