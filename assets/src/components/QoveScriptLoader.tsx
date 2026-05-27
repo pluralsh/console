@@ -5,26 +5,34 @@ const QOVE_SCRIPT_SRC = 'https://cdn.qove.ai/v1/sureship.js'
 /** Marks scripts injected by the console SPA for cleanup/idempotency. */
 const PLURAL_QOVE_MARKER = 'plural-qove-console'
 
-export function QoveScriptLoader({ children }: { children: ReactNode }) {
+export function QoveScriptLoader({
+  children,
+  qoveKey: qoveKeyProp,
+}: {
+  children?: ReactNode
+  qoveKey?: string | null
+}) {
   const { configuration } = useLogin()
-  const qoveKey = configuration?.qoveKey?.trim() ?? ''
+  const qoveKey = (qoveKeyProp ?? configuration?.qoveKey)?.trim() ?? ''
 
   useEffect(() => {
     if (!qoveKey) return
 
-    const marker = `[data-${PLURAL_QOVE_MARKER}]`
-    if (document.querySelector(marker)) return
+    const marker = `script[data-${PLURAL_QOVE_MARKER}]`
+    const existing = document.querySelector<HTMLScriptElement>(marker)
+    if (existing) {
+      if (existing.getAttribute('data-client-key') !== qoveKey) {
+        existing.setAttribute('data-client-key', qoveKey)
+      }
+      return
+    }
 
     const script = document.createElement('script')
     script.src = QOVE_SCRIPT_SRC
-    script.defer = true
+    script.async = true
     script.setAttribute('data-client-key', qoveKey)
     script.setAttribute(`data-${PLURAL_QOVE_MARKER}`, 'true')
     document.head.appendChild(script)
-
-    return () => {
-      script.remove()
-    }
   }, [qoveKey])
 
   return <>{children}</>

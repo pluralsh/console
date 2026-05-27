@@ -32,6 +32,7 @@ import { FullPageLoadingIndicator } from '../utils/LoadingIndicator'
 import { Body1P } from 'components/utils/typography/Text'
 import { getLoginReturnPath, logoutWithReturnTo } from 'helpers/refreshToken'
 import { LoginPortal } from './LoginPortal'
+import { QoveScriptLoader } from '../QoveScriptLoader'
 
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
@@ -163,7 +164,8 @@ export default function Login() {
     }
   }, [jwt, challenge, client])
 
-  const { data } = useMeQuery()
+  const { data } = useMeQuery({ errorPolicy: 'ignore' })
+
   const { data: loginData, loading } = useLoginInfoQuery({
     variables: { redirect: localized('/oauth/callback') },
     pollInterval: POLL_INTERVAL,
@@ -189,11 +191,14 @@ export default function Login() {
 
   if (loginData?.loginInfo?.oidcUri) {
     return (
-      <OIDCLogin
-        oidcUri={loginData.loginInfo.oidcUri}
-        external={loginData.loginInfo.external}
-        oidcName={loginData.loginInfo.oidcName}
-      />
+      <>
+        <QoveScriptLoader qoveKey={data?.configuration?.qoveKey} />
+        <OIDCLogin
+          oidcUri={loginData.loginInfo.oidcUri}
+          external={loginData.loginInfo.external}
+          oidcName={loginData.loginInfo.oidcName}
+        />
+      </>
     )
   }
 
@@ -210,56 +215,59 @@ export default function Login() {
   const loginError = !passwordErrorMsg && loginMError
 
   return (
-    <LoginPortal>
-      <WelcomeHeader marginBottom="xlarge" />
-      <form onSubmit={onSubmit}>
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            marginBottom: 10,
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          {loginMError && (
-            <div css={{ marginBottom: theme.spacing.large }}>
-              <GqlError
-                header="Login failed"
-                error={loginError}
+    <>
+      <QoveScriptLoader qoveKey={data?.configuration?.qoveKey} />
+      <LoginPortal>
+        <WelcomeHeader marginBottom="xlarge" />
+        <form onSubmit={onSubmit}>
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              marginBottom: 10,
+              gap: theme.spacing.xsmall,
+            }}
+          >
+            {loginMError && (
+              <div css={{ marginBottom: theme.spacing.large }}>
+                <GqlError
+                  header="Login failed"
+                  error={loginError}
+                />
+              </div>
+            )}
+            <Flex
+              flexDirection="column"
+              gap="small"
+              marginBottom={theme.spacing.small}
+            >
+              <LabelledInput
+                ref={emailRef}
+                label="Email address"
+                value={form.email}
+                onChange={(email) => setForm({ ...form, email })}
+                placeholder="Enter email address"
               />
-            </div>
-          )}
-          <Flex
-            flexDirection="column"
-            gap="small"
-            marginBottom={theme.spacing.small}
-          >
-            <LabelledInput
-              ref={emailRef}
-              label="Email address"
-              value={form.email}
-              onChange={(email) => setForm({ ...form, email })}
-              placeholder="Enter email address"
-            />
-            <LabelledInput
-              label="Password"
-              type="password"
-              hint={passwordErrorMsg}
-              error={!!passwordErrorMsg}
-              value={form.password}
-              onChange={(password) => setForm({ ...form, password })}
-              placeholder="Enter password"
-            />
-          </Flex>
-          <Button
-            type="submit"
-            loading={loginMLoading}
-            disabled={disabled}
-          >
-            Log in
-          </Button>
-        </div>
-      </form>
-    </LoginPortal>
+              <LabelledInput
+                label="Password"
+                type="password"
+                hint={passwordErrorMsg}
+                error={!!passwordErrorMsg}
+                value={form.password}
+                onChange={(password) => setForm({ ...form, password })}
+                placeholder="Enter password"
+              />
+            </Flex>
+            <Button
+              type="submit"
+              loading={loginMLoading}
+              disabled={disabled}
+            >
+              Log in
+            </Button>
+          </div>
+        </form>
+      </LoginPortal>
+    </>
   )
 }
