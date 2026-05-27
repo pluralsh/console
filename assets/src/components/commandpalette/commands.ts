@@ -1,5 +1,6 @@
 import {
   AiSparkleOutlineIcon,
+  BotIcon,
   CatalogIcon,
   ChatOutlineIcon,
   ClusterIcon,
@@ -175,6 +176,17 @@ export function useCommands({
                   label: 'Enable Edge',
                   icon: EdgeComputeIcon,
                   callback: () => setFeatureFlag('Edge', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : []),
+          ...(!featureFlags.WorkbenchChatbots
+            ? [
+                {
+                  id: 'enable-workbench-chatbots',
+                  label: 'Enable Workbench Chatbots',
+                  icon: BotIcon,
+                  callback: () => setFeatureFlag('WorkbenchChatbots', true),
                   deps: [setFeatureFlag],
                 },
               ]
@@ -402,6 +414,7 @@ export function useCommands({
     [
       navigate,
       featureFlags.Edge,
+      featureFlags.WorkbenchChatbots,
       cluster?.id,
       openShareSecret,
       openAccessTokenModal,
