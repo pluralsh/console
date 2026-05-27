@@ -1168,8 +1168,7 @@ versions:
         mechanism for enforcement scenarios.']
     breaking_changes: []
   chart_version: 1.13.3
-  images: ['quay.io/cilium/cilium:v1.13.3@sha256:77176464a1e11ea7e89e984ac7db365e7af39851507e94f137dcf56c87746314',
-    'quay.io/cilium/operator-generic:v1.13.3@sha256:fa7003cbfdf8358cb71786afebc711b26e5e44a2ed99bd4944930bba915b8910']
+  images: []
   eolAt: '2024-07-24'
 - version: 1.13.0
   kube: ['1.26', '1.25', '1.24']
