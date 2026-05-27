@@ -39,8 +39,8 @@ export const Tr = styled.tr<{
     ...(clickable && {
       cursor: 'pointer',
 
-      // highlight when hovered, but don't highlight if a child button is hovered
-      '&:not(:has(button:hover)):hover': {
+      // highlight when hovered, but not when hovering nested actions
+      '&:not(:has(button:hover, [data-clickable="true"]:hover)):hover': {
         backgroundColor:
           theme.colors[tableCellHoverColor(fillLevel, selectable, selected)],
       },

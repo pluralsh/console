@@ -56,6 +56,7 @@ export function WorkbenchEvalGradeBadge({
           justifyContent: 'center',
           width: pixelSize,
         }}
+        {...(onClick && { 'data-clickable': 'true' })}
         onClick={onClick}
       >
         {Math.round(grade)}
