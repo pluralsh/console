@@ -279,7 +279,7 @@ export function WorkbenchSidePanel({
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor: theme.colors['fill-zero'],
   borderRight: theme.borders['fill-one'],
   display: 'flex',
   flexDirection: 'column',
