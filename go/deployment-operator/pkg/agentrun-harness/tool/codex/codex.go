@@ -82,7 +82,6 @@ func (in *Codex) Configure(consoleURL, consoleToken string) error {
 		return err
 	}
 
-
 	return in.writeCodexConfig()
 }
 
