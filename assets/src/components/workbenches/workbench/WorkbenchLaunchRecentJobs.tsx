@@ -140,6 +140,9 @@ const RecentJobCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   textDecoration: 'none',
   minHeight: 140,
+  '&&:has(button:hover, [data-clickable="true"]:hover):hover': {
+    backgroundColor: theme.colors['fill-one'],
+  },
 }))
 
 const BottomSectionSC = styled.div(({ theme }) => ({

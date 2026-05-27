@@ -258,6 +258,7 @@ function JobEvalBadge({ job }: { job: WorkbenchJobTinyFragment }) {
       size="xsmall"
       tooltip="View eval details"
       onClick={(e) => {
+        e.preventDefault()
         e.stopPropagation()
         navigate(
           getWorkbenchEvalResultAbsPath({
