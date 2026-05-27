@@ -33,4 +33,9 @@ type Terraform struct {
 	// refresh is a flag to refresh the state.
 	// Default: true
 	refresh *bool
+
+	// env is the list of stack run environment variables in "KEY=value" form.
+	// Used to detect optional integrations (e.g. infracost) and to pass them
+	// through to subprocesses started by the tool.
+	env []string
 }
