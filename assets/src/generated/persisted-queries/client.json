@@ -1847,6 +1847,11 @@
          "name": "WorkbenchJobs",
          "body": "query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  insertedAt\n  user {\n    id\n    name\n    profile\n    __typename\n  }\n  workbench {\n    id\n    name\n    __typename\n  }\n  alert {\n    id\n    state\n    url\n    __typename\n  }\n  issue {\n    id\n    status\n    url\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  result {\n    id\n    conclusion\n    __typename\n  }\n  evalResult {\n    id\n    grade\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
+      "sha256:e17c07739d809538797b5c568868dda3415b9e89f83360763a7b1107844706eb": {
+         "type": "query",
+         "name": "WorkbenchJobSearch",
+         "body": "query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {\n  workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {\n    ...WorkbenchJobSearchRow\n    __typename\n  }\n}\n\nfragment WorkbenchJobSearchRow on WorkbenchJob {\n  id\n  prompt\n  status\n  result {\n    id\n    conclusion\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:d6c30cb98595bff4b3b2450586470473816a3b8da849d9ac895ce02055a3057e": {
          "type": "query",
          "name": "WorkbenchEvals",

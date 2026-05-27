@@ -4,6 +4,7 @@ import {
   Flex,
   FormField,
   Input,
+  Input2,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -20,7 +21,7 @@ import {
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchSavedPromptsAbsPath,
   WORKBENCH_PARAM_ID,
@@ -34,15 +35,24 @@ import {
 } from '../create-edit/WorkbenchCreateOrEdit'
 
 type SavedPromptFormState = {
+  title: string
   prompt: string
+  category: string
+}
+
+export type SavedPromptCreateRouteState = {
+  prompt?: string
 }
 
 export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const createRouteState =
+    location.state as Nullable<SavedPromptCreateRouteState>
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const savedPromptId = useParams()[WORKBENCHES_SAVED_PROMPT_PARAM_ID]
-  const [formState, setFormState] = useState<SavedPromptFormState>(
-    getInitialFormState()
+  const [formState, setFormState] = useState<SavedPromptFormState>(() =>
+    getInitialFormState(undefined, createRouteState?.prompt)
   )
   const { popToast } = useSimpleToast()
 
@@ -84,11 +94,10 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     setFormState(getInitialFormState(savedPrompt))
   }, [savedPrompt])
 
-  const prompt = formState.prompt.trim()
-  const attributes = { prompt }
+  const attributes = toAttributes(formState)
 
   const canSave =
-    !!prompt && !isEqual(formState, getInitialFormState(savedPrompt))
+    !!attributes.prompt && !isEqual(formState, getInitialFormState(savedPrompt))
 
   const handleCompleted = () => {
     navigate(getWorkbenchSavedPromptsAbsPath(workbenchId))
@@ -197,6 +206,15 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
               height="100%"
               width="100%"
             >
+              <FormField label="Title">
+                <Input2
+                  value={formState.title}
+                  onChange={(e) =>
+                    setFormState((prev) => ({ ...prev, title: e.target.value }))
+                  }
+                  placeholder="e.g. Summarize recent customer feedback"
+                />
+              </FormField>
               <FormField
                 required
                 infoTooltip="The instruction your Workbench agent will use when this saved prompt is selected."
@@ -213,6 +231,18 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
                     setFormState((prev) => ({ ...prev, prompt: nextPrompt }))
                   }}
                   placeholder="Ask the agent use an integrated tool or service on your cluster"
+                />
+              </FormField>
+              <FormField label="Category">
+                <Input2
+                  value={formState.category}
+                  onChange={(e) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                    }))
+                  }
+                  placeholder="e.g. Development, Infra"
                 />
               </FormField>
               <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
@@ -243,9 +273,26 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function getInitialFormState(
-  savedPrompt?: Nullable<WorkbenchPromptFragment>
+  savedPrompt?: Nullable<WorkbenchPromptFragment>,
+  initialPrompt?: string
 ): SavedPromptFormState {
   return {
-    prompt: savedPrompt?.prompt ?? '',
+    title: displayStoredMetadata(savedPrompt?.title),
+    prompt: savedPrompt?.prompt ?? initialPrompt ?? '',
+    category: displayStoredMetadata(savedPrompt?.category),
+  }
+}
+
+function displayStoredMetadata(value?: Nullable<string>) {
+  return value === 'Default' ? '' : (value ?? '')
+}
+
+function toAttributes(state: SavedPromptFormState) {
+  const prompt = state.prompt.trim()
+
+  return {
+    title: state.title.trim() || undefined,
+    category: state.category.trim() || undefined,
+    prompt,
   }
 }

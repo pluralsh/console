@@ -686,6 +686,25 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+fragment WorkbenchJobSearchRow on WorkbenchJob {
+  id
+  prompt
+  status
+  result {
+    id
+    conclusion
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+}
+
+query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
+  workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
+    ...WorkbenchJobSearchRow
+  }
+}
+
 query WorkbenchEvals($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id

@@ -10753,8 +10753,11 @@ export type RootQueryType = {
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
+  /** Semantic search over vector-indexed workbench jobs */
+  workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJob>>>;
   workbenchPrMergeRates?: Maybe<Array<Maybe<WorkbenchPrMergeRateEntry>>>;
   workbenchPrMergeRatesByWorkbench?: Maybe<Array<Maybe<WorkbenchPrMergeRateByWorkbenchEntry>>>;
+  workbenchPrompt?: Maybe<WorkbenchPrompt>;
   workbenchPullRequests: Scalars['Int']['output'];
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
@@ -12164,6 +12167,13 @@ export type RootQueryTypeWorkbenchJobActivityArgs = {
 };
 
 
+export type RootQueryTypeWorkbenchJobSearchArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  q: Scalars['String']['input'];
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeWorkbenchPrMergeRatesArgs = {
   period?: InputMaybe<EvalResultsPeriod>;
 };
@@ -12171,6 +12181,11 @@ export type RootQueryTypeWorkbenchPrMergeRatesArgs = {
 
 export type RootQueryTypeWorkbenchPrMergeRatesByWorkbenchArgs = {
   period?: InputMaybe<EvalResultsPeriod>;
+};
+
+
+export type RootQueryTypeWorkbenchPromptArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -14738,7 +14753,8 @@ export enum ValidationUniqScope {
 
 export enum VectorStore {
   Elastic = 'ELASTIC',
-  Opensearch = 'OPENSEARCH'
+  Opensearch = 'OPENSEARCH',
+  Postgres = 'POSTGRES'
 }
 
 export type VectorStoreAttributes = {
@@ -20395,6 +20411,17 @@ export type WorkbenchJobsQueryVariables = Exact<{
 
 
 export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchJobSearchRowFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
+
+export type WorkbenchJobSearchQueryVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  q: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type WorkbenchJobSearchQuery = { __typename?: 'RootQueryType', workbenchJobSearch?: Array<{ __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null> | null };
 
 export type WorkbenchEvalsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -26168,6 +26195,20 @@ export const WorkbenchAccessibleUserFragmentDoc = gql`
   profile
 }
     `;
+export const WorkbenchJobSearchRowFragmentDoc = gql`
+    fragment WorkbenchJobSearchRow on WorkbenchJob {
+  id
+  prompt
+  status
+  result {
+    id
+    conclusion
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+}
+    ${PullRequestBasicFragmentDoc}`;
 export const UnifiedWorkbenchSkillTinyFragmentDoc = gql`
     fragment UnifiedWorkbenchSkillTiny on UnifiedWorkbenchSkill {
   id
@@ -42177,6 +42218,51 @@ export type WorkbenchJobsQueryHookResult = ReturnType<typeof useWorkbenchJobsQue
 export type WorkbenchJobsLazyQueryHookResult = ReturnType<typeof useWorkbenchJobsLazyQuery>;
 export type WorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobsSuspenseQuery>;
 export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
+export const WorkbenchJobSearchDocument = gql`
+    query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
+  workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
+    ...WorkbenchJobSearchRow
+  }
+}
+    ${WorkbenchJobSearchRowFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobSearchQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchJobSearchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobSearchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobSearchQuery({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      q: // value for 'q'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useWorkbenchJobSearchQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables> & ({ variables: WorkbenchJobSearchQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>(WorkbenchJobSearchDocument, options);
+      }
+export function useWorkbenchJobSearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>(WorkbenchJobSearchDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchJobSearchSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>;
+export function useWorkbenchJobSearchSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobSearchQuery | undefined, WorkbenchJobSearchQueryVariables>;
+export function useWorkbenchJobSearchSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>(WorkbenchJobSearchDocument, options);
+        }
+export type WorkbenchJobSearchQueryHookResult = ReturnType<typeof useWorkbenchJobSearchQuery>;
+export type WorkbenchJobSearchLazyQueryHookResult = ReturnType<typeof useWorkbenchJobSearchLazyQuery>;
+export type WorkbenchJobSearchSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobSearchSuspenseQuery>;
+export type WorkbenchJobSearchQueryResult = Apollo.QueryResult<WorkbenchJobSearchQuery, WorkbenchJobSearchQueryVariables>;
 export const WorkbenchEvalsDocument = gql`
     query WorkbenchEvals($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
@@ -44559,6 +44645,7 @@ export const namedOperations = {
     WorkbenchAccessibleUsers: 'WorkbenchAccessibleUsers',
     WorkbenchEvalSettings: 'WorkbenchEvalSettings',
     WorkbenchJobs: 'WorkbenchJobs',
+    WorkbenchJobSearch: 'WorkbenchJobSearch',
     WorkbenchEvals: 'WorkbenchEvals',
     RecentWorkbenchJobs: 'RecentWorkbenchJobs',
     WorkbenchAlerts: 'WorkbenchAlerts',
@@ -45082,6 +45169,7 @@ export const namedOperations = {
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchEvalResultRow: 'WorkbenchEvalResultRow',
     WorkbenchAccessibleUser: 'WorkbenchAccessibleUser',
+    WorkbenchJobSearchRow: 'WorkbenchJobSearchRow',
     UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny'
   }
 }

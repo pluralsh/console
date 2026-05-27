@@ -190,6 +190,7 @@ defmodule Console.MixProject do
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},
       {:waffle_ecto, "~> 0.0"},
       {:ex_aws_s3, "~> 2.0"},
+      {:pgvector, "~> 0.3.0"},
 
 
       # if using the Mint adapter:

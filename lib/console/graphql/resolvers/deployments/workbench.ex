@@ -83,6 +83,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     end
   end
 
+  def workbench_job_search(%{q: q, workbench_id: workbench_id} = args, ctx) do
+    with {:ok, _} <- Workbenches.get_workbench!(workbench_id) |> allow(actor(ctx), :read) do
+      Workbenches.workbench_job_search(q, actor(ctx),
+        limit: Map.get(args, :limit, 5),
+        workbench_id: workbench_id
+      )
+    end
+  end
+
   def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do
     WorkbenchJob.for_flow(flow_id)
     |> workbench_job_filters(args)
@@ -276,6 +285,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_prompt(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_prompt(id, user)
+
+  def workbench_prompt(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.fetch_workbench_prompt(id, user)
 
   def create_workbench_skill(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_skill(attrs, workbench_id, user)

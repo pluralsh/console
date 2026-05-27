@@ -16518,16 +16518,18 @@ type VectorStore string
 const (
 	VectorStoreElastic    VectorStore = "ELASTIC"
 	VectorStoreOpensearch VectorStore = "OPENSEARCH"
+	VectorStorePostgres   VectorStore = "POSTGRES"
 )
 
 var AllVectorStore = []VectorStore{
 	VectorStoreElastic,
 	VectorStoreOpensearch,
+	VectorStorePostgres,
 }
 
 func (e VectorStore) IsValid() bool {
 	switch e {
-	case VectorStoreElastic, VectorStoreOpensearch:
+	case VectorStoreElastic, VectorStoreOpensearch, VectorStorePostgres:
 		return true
 	}
 	return false

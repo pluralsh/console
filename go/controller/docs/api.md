@@ -54,6 +54,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [UpgradePlanCallout](#upgradeplancallout)
 - [Workbench](#workbench)
 - [WorkbenchCron](#workbenchcron)
+- [WorkbenchPrompt](#workbenchprompt)
 - [WorkbenchTool](#workbenchtool)
 - [WorkbenchWebhook](#workbenchwebhook)
 
@@ -4118,6 +4119,7 @@ _Appears in:_
 - [StackDefinitionSpec](#stackdefinitionspec)
 - [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
 - [WorkbenchCronSpec](#workbenchcronspec)
+- [WorkbenchPromptSpec](#workbenchpromptspec)
 - [WorkbenchSpec](#workbenchspec)
 - [WorkbenchToolSpec](#workbenchtoolspec)
 - [WorkbenchWebhookSpec](#workbenchwebhookspec)
@@ -5317,7 +5319,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled controls whether the vector store is enabled or not.. | false | Optional: \{\} <br /> |
-| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH] <br />Optional: \{\} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH POSTGRES] <br />Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | Elastic configuration for the vector store. |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnectionSettings](#opensearchconnectionsettings)_ | Opensearch configuration for the vector store. |  | Optional: \{\} <br /> |
 
@@ -5471,6 +5473,44 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `logs` _boolean_ | Logs enables the logs capability. |  | Optional: \{\} <br /> |
 | `metrics` _boolean_ | Metrics enables the metrics capability. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchPrompt
+
+
+
+WorkbenchPrompt represents a saved prompt for a Workbench.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `WorkbenchPrompt` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchPromptSpec](#workbenchpromptspec)_ | Spec defines the desired state of the WorkbenchPrompt. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchPromptSpec
+
+
+
+WorkbenchPromptSpec defines the desired state of a WorkbenchPrompt.
+
+
+
+_Appears in:_
+- [WorkbenchPrompt](#workbenchprompt)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench this prompt belongs to. |  | Required: \{\} <br /> |
+| `title` _string_ | Title is the display title for the saved prompt. |  | Optional: \{\} <br />Type: string <br /> |
+| `category` _string_ | Category is the grouping category for the saved prompt. |  | Optional: \{\} <br />Type: string <br /> |
+| `prompt` _string_ | Prompt is the saved prompt text. |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchSkills

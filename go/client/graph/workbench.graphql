@@ -258,6 +258,13 @@ fragment WorkbenchWebhookFragment on WorkbenchWebhook {
     }
 }
 
+fragment WorkbenchPromptFragment on WorkbenchPrompt {
+    id
+    title
+    category
+    prompt
+}
+
 mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
     createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
         ...WorkbenchCronFragment
@@ -279,6 +286,30 @@ mutation DeleteWorkbenchCron($id: ID!) {
 mutation GetWorkbenchCron($id: ID!) {
     workbenchCron(id: $id) {
         ...WorkbenchCronFragment
+    }
+}
+
+mutation CreateWorkbenchPrompt($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
+    createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+        id
+    }
+}
+
+mutation UpdateWorkbenchPrompt($id: ID!, $attributes: WorkbenchPromptAttributes!) {
+    updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+        id
+    }
+}
+
+mutation DeleteWorkbenchPrompt($id: ID!) {
+    deleteWorkbenchPrompt(id: $id) {
+        id
+    }
+}
+
+query GetWorkbenchPrompt($id: ID!) {
+    workbenchPrompt(id: $id) {
+        ...WorkbenchPromptFragment
     }
 }
 

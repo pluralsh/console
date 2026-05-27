@@ -282,7 +282,7 @@ defimpl Console.AI.Vector.Storable, for: Console.Schema.WorkbenchJob.Mini do
 
   def prompt(%@for{}), do: ""
 
-  def content(%@for{} = mini), do: String.trim(content_template(job: mini))
+  def content(%@for{} = mini), do: String.trim(content_template(job: Console.Schema.WorkbenchJob.Mini.prompt_job(mini)))
 
   EEx.function_from_file(:defp, :content_template, Console.priv_filename(["prompts", "vector", "workbench_job.md.eex"]), [:assigns])
 end

@@ -510,6 +510,8 @@ type RootQueryType {
 
   workbenchChatbot(id: ID!): WorkbenchChatbot
 
+  workbenchPrompt(id: ID!): WorkbenchPrompt
+
   workbenches(
     after: String
 
@@ -546,6 +548,17 @@ type RootQueryType {
   recentWorkbenchJobs(
     "the maximum number of jobs to return (defaults to 3, max 20)"
     count: Int
+  ): [WorkbenchJob]
+
+  "Semantic search over vector-indexed workbench jobs"
+  workbenchJobSearch(
+    q: String!
+
+    "scope search to this workbench"
+    workbenchId: ID!
+
+    "max results to return (defaults to 5)"
+    limit: Int
   ): [WorkbenchJob]
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
@@ -5242,6 +5255,7 @@ enum LogDriver {
 enum VectorStore {
   ELASTIC
   OPENSEARCH
+  POSTGRES
 }
 
 enum OpenAiMethod {

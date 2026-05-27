@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:14
+    image: pgvector/pgvector:pg14
     restart: always
     ports:
       - 5432:5432
@@ -8,6 +8,7 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - database_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
   es:
     image: elasticsearch:8.11.4
     restart: always

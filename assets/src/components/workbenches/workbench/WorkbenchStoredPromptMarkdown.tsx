@@ -1,4 +1,5 @@
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import type { SemanticColorKey } from '@pluralsh/design-system'
 import { truncateKeepingChips } from 'components/utils/contentEditableChips'
 import styled, { css } from 'styled-components'
 
@@ -80,12 +81,14 @@ const SidePanelMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
 const jobCardClampStyles = ({
   theme,
   lines = 3,
+  promptColor = 'text-light',
 }: {
   theme: any
   lines?: number
+  promptColor?: SemanticColorKey
 }) => css`
   ${theme.partials.text.body2};
-  color: ${theme.colors['text-light']};
+  color: ${theme.colors[promptColor]};
   min-width: 0;
   overflow: hidden;
 
@@ -94,8 +97,12 @@ const jobCardClampStyles = ({
   }
 `
 
-const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)<{ $lines: number }>`
-  ${({ theme, $lines }) => jobCardClampStyles({ theme, lines: $lines })}
+const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)<{
+  $lines: number
+  $promptColor?: SemanticColorKey
+}>`
+  ${({ theme, $lines, $promptColor = 'text-light' }) =>
+    jobCardClampStyles({ theme, lines: $lines, promptColor: $promptColor })}
 `
 
 /**
@@ -107,6 +114,7 @@ export function WorkbenchStoredPromptMarkdown({
   truncateVisibleChars,
   density = 'default',
   clampLines = 3,
+  promptColor = 'text-light',
 }: {
   text: string
   /** When set, trims by visible length without splitting chips (like job previews). */
@@ -115,6 +123,7 @@ export function WorkbenchStoredPromptMarkdown({
   density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard'
   /** Number of lines before truncation when density is `tableCell`, `sidePanel`, or `jobCard`. Default 3. */
   clampLines?: number
+  promptColor?: SemanticColorKey
 }) {
   const clampedDensity =
     density === 'tableCell' || density === 'sidePanel' || density === 'jobCard'
@@ -146,7 +155,10 @@ export function WorkbenchStoredPromptMarkdown({
   }
   if (density === 'jobCard') {
     return (
-      <JobCardMarkdownWrapSC $lines={clampLines}>
+      <JobCardMarkdownWrapSC
+        $lines={clampLines}
+        $promptColor={promptColor}
+      >
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"

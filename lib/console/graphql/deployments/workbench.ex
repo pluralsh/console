@@ -1070,6 +1070,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.workbench_chatbot/2
     end
 
+    field :workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_prompt/2
+    end
+
     connection field :workbenches, node_type: :workbench do
       middleware Authenticated
       middleware Scope,
@@ -1111,6 +1121,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :count, :integer, description: "the maximum number of jobs to return (defaults to 3, max 20)"
 
       resolve &Deployments.recent_workbench_jobs/2
+    end
+
+    @desc "Semantic search over vector-indexed workbench jobs"
+    field :workbench_job_search, list_of(:workbench_job) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      middleware VectorStoreEnabled
+      arg :q,             non_null(:string)
+      arg :workbench_id,  non_null(:id), description: "scope search to this workbench"
+      arg :limit,         :integer, description: "max results to return (defaults to 5)"
+
+      resolve &Deployments.workbench_job_search/2
     end
 
     field :workbench_job_activity, :workbench_job_activity do

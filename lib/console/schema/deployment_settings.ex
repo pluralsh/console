@@ -5,7 +5,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
   defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
-  defenum VectorStore, elastic: 0, opensearch: 1
+  defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2
   defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
 
   defmodule Connection do
@@ -519,6 +519,8 @@ defmodule Console.Schema.DeploymentSettings do
       {:elastic, e, _} when not is_nil(e) ->
         put_change(changeset, :initialized, false)
       {:opensearch, _, o} when not is_nil(o) ->
+        put_change(changeset, :initialized, false)
+      {:postgres, _, _} ->
         put_change(changeset, :initialized, false)
       _ -> changeset
     end
