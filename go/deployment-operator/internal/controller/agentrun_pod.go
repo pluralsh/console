@@ -26,9 +26,9 @@ const (
 	nonRootUID                    = int64(65532)
 	nonRootGID                    = nonRootUID
 
-	// podmanSocketPath is the DOCKER_HOST URI that points the Docker CLI at the rootless
+	// podmanSocketPath is the DOCKER_HOST URI that points the Docker CLI at the rootful
 	// Podman socket started by the container entrypoint when PLRL_DIND_ENABLED=true.
-	podmanSocketPath = "unix:///run/user/65532/podman/podman.sock"
+	podmanSocketPath = "unix:///run/podman/podman.sock"
 
 	browserContainerName              = "browser"
 	defaultContainerBrowser           = v1alpha1.BrowserChrome
@@ -543,6 +543,10 @@ func enableDind(pod *corev1.Pod) {
 		sc.Privileged = lo.ToPtr(true)
 		sc.RunAsNonRoot = lo.ToPtr(false)
 		sc.AllowPrivilegeEscalation = lo.ToPtr(true)
+		// Run as root so Podman operates in rootful mode, avoiding newuidmap
+		// user-namespace issues with rootless Podman inside a privileged pod.
+		sc.RunAsUser = lo.ToPtr(int64(0))
+		sc.RunAsGroup = lo.ToPtr(int64(0))
 		pod.Spec.Containers[i].SecurityContext = sc
 	}
 }
