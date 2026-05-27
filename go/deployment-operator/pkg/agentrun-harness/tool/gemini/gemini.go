@@ -35,8 +35,8 @@ type Gemini struct {
 	// model used to generate code.
 	model Model
 
-	// sessionIDs are native Gemini session identifiers observed in stream events.
-	sessionIDs []string
+	// sessionID is the latest native Gemini session identifier observed in stream events.
+	sessionID string
 }
 
 func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
@@ -258,11 +258,19 @@ func (in *Gemini) Configure(_, _ string) error {
 }
 
 func (in *Gemini) settingsPath() string {
-	return path.Join(in.Config.WorkDir, ".gemini", SettingsFileName)
+	return path.Join(in.projectPath(), SettingsFileName)
+}
+
+func (in *Gemini) projectPath() string {
+	return path.Join(in.providerPath(), "project")
+}
+
+func (in *Gemini) providerPath() string {
+	return path.Join(in.Config.WorkDir, ".gemini")
 }
 
 func (in *Gemini) homePath() string {
-	return path.Join(in.Config.WorkDir, ".gemini-home")
+	return path.Join(in.providerPath(), "home-root")
 }
 
 func (in *Gemini) env() []string {
@@ -281,12 +289,7 @@ func (in *Gemini) recordSessionID(line []byte, eventType events.EventType) {
 	if err := json.Unmarshal(line, initEvent); err != nil || initEvent.SessionID == "" {
 		return
 	}
-	for _, existing := range in.sessionIDs {
-		if existing == initEvent.SessionID {
-			return
-		}
-	}
-	in.sessionIDs = append(in.sessionIDs, initEvent.SessionID)
+	in.sessionID = initEvent.SessionID
 }
 
 func (in *Gemini) OnMessage(f func(message *console.AgentMessageAttributes)) {

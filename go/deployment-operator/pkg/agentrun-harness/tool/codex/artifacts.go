@@ -9,9 +9,9 @@ import (
 
 func (in *Codex) UploadArtifacts(ctx context.Context) (*v1.UploadArtifacts, error) {
 	return in.BuildUploadArtifacts(ctx, v1.BuildArtifactsOptions{
-		Provider:   "codex",
-		Sources:    []v1.SessionSource{{Path: in.codexHome(), ArchivePath: filepath.Join("provider", "codex")}},
-		SessionIDs: []string{in.threadID},
+		Provider:  "codex",
+		Source:    v1.SessionSource{Path: in.codexHome(), ArchivePath: filepath.Join("provider", "codex")},
+		SessionID: in.threadID,
 		ResumeEnv: map[string]string{
 			"CODEX_HOME": filepath.Join("provider", "codex"),
 		},

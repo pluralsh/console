@@ -269,7 +269,15 @@ func (in *Opencode) agent() string {
 }
 
 func (in *Opencode) configFilePath() string {
-	return path.Join(in.Config.WorkDir, ".opencode", ConfigFileName)
+	return path.Join(in.configPath(), ConfigFileName)
+}
+
+func (in *Opencode) configPath() string {
+	return path.Join(in.providerPath(), "config")
+}
+
+func (in *Opencode) providerPath() string {
+	return filepath.Join(in.Config.WorkDir, ".opencode")
 }
 
 func truncateForLog(value string, limit int) string {
@@ -405,19 +413,14 @@ func (in *Opencode) env(configFilePath string) []string {
 }
 
 func (in *Opencode) dataPath() string {
-	return path.Join(in.Config.WorkDir, ".opencode-data")
+	return path.Join(in.providerPath(), "data")
 }
 
 func (in *Opencode) recordSessionID(sessionID string) {
 	if sessionID == "" {
 		return
 	}
-	for _, existing := range in.sessionIDs {
-		if existing == sessionID {
-			return
-		}
-	}
-	in.sessionIDs = append(in.sessionIDs, sessionID)
+	in.sessionID = sessionID
 }
 
 func New(config v1.Config) v1.Tool {

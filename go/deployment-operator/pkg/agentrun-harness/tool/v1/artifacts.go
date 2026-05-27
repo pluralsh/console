@@ -34,15 +34,14 @@ type SessionSource struct {
 }
 
 type SessionManifest struct {
-	Version            int              `json:"version"`
-	AgentRunID         string           `json:"agentRunId"`
-	Provider           string           `json:"provider"`
-	Repository         string           `json:"repository"`
-	Branch             string           `json:"branch,omitempty"`
-	CreatedAt          time.Time        `json:"createdAt"`
-	ProviderSessionIDs []string         `json:"providerSessionIds,omitempty"`
-	Resume             ResumeManifest   `json:"resume"`
-	Sources            []ManifestSource `json:"sources"`
+	Version    int             `json:"version"`
+	AgentRunID string          `json:"agentRunId"`
+	Provider   string          `json:"provider"`
+	Repository string          `json:"repository"`
+	Branch     string          `json:"branch,omitempty"`
+	CreatedAt  time.Time       `json:"createdAt"`
+	Session    SessionMetadata `json:"session"`
+	Resume     ResumeManifest  `json:"resume"`
 }
 
 type ResumeManifest struct {
@@ -50,17 +49,18 @@ type ResumeManifest struct {
 	Command []string          `json:"command,omitempty"`
 }
 
-type ManifestSource struct {
-	Path        string `json:"path"`
-	ArchivePath string `json:"archivePath"`
+type SessionMetadata struct {
+	ID          string `json:"id,omitempty"`
+	Path        string `json:"path,omitempty"`
+	ArchivePath string `json:"archivePath,omitempty"`
 }
 
 type BuildArtifactsOptions struct {
-	Provider   string
-	Sources    []SessionSource
-	SessionIDs []string
-	ResumeEnv  map[string]string
-	Command    []string
+	Provider  string
+	Source    SessionSource
+	SessionID string
+	ResumeEnv map[string]string
+	Command   []string
 }
 
 func (in DefaultTool) BuildUploadArtifacts(_ context.Context, opts BuildArtifactsOptions) (*UploadArtifacts, error) {
@@ -73,13 +73,13 @@ func (in DefaultTool) BuildUploadArtifacts(_ context.Context, opts BuildArtifact
 		return nil, fmt.Errorf("create uploads dir: %w", err)
 	}
 
-	manifest, existingSources, err := in.sessionManifest(opts)
+	manifest, source, err := in.sessionManifest(opts)
 	if err != nil {
 		return nil, err
 	}
 
 	sessionPath := filepath.Join(uploadsDir, sessionTarName)
-	if err := writeSessionTar(sessionPath, manifest, existingSources); err != nil {
+	if err := writeSessionTar(sessionPath, manifest, source); err != nil {
 		return nil, err
 	}
 
@@ -94,47 +94,46 @@ func (in DefaultTool) BuildUploadArtifacts(_ context.Context, opts BuildArtifact
 	}, nil
 }
 
-func (in DefaultTool) sessionManifest(opts BuildArtifactsOptions) (*SessionManifest, []SessionSource, error) {
+func (in DefaultTool) sessionManifest(opts BuildArtifactsOptions) (*SessionManifest, *SessionSource, error) {
 	if opts.Provider == "" {
 		return nil, nil, fmt.Errorf("provider is required")
 	}
 
-	existingSources := make([]SessionSource, 0, len(opts.Sources))
-	manifestSources := make([]ManifestSource, 0, len(opts.Sources))
-	for _, source := range opts.Sources {
-		if source.Path == "" || source.ArchivePath == "" {
-			continue
-		}
-		if _, err := os.Stat(source.Path); err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				continue
+	var source *SessionSource
+	if opts.Source.Path != "" && opts.Source.ArchivePath != "" {
+		if _, err := os.Stat(opts.Source.Path); err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				return nil, nil, fmt.Errorf("stat session source %q: %w", opts.Source.Path, err)
 			}
-			return nil, nil, fmt.Errorf("stat session source %q: %w", source.Path, err)
+		} else {
+			source = &opts.Source
 		}
-		existingSources = append(existingSources, source)
-		manifestSources = append(manifestSources, ManifestSource{
-			Path:        source.Path,
-			ArchivePath: filepath.ToSlash(source.ArchivePath),
-		})
 	}
 
-	return &SessionManifest{
-		Version:            1,
-		AgentRunID:         in.Config.Run.ID,
-		Provider:           opts.Provider,
-		Repository:         in.Config.Run.Repository,
-		Branch:             stringValue(in.Config.Run.Branch),
-		CreatedAt:          time.Now().UTC(),
-		ProviderSessionIDs: compactStrings(opts.SessionIDs),
+	manifest := &SessionManifest{
+		Version:    1,
+		AgentRunID: in.Config.Run.ID,
+		Provider:   opts.Provider,
+		Repository: in.Config.Run.Repository,
+		Branch:     stringValue(in.Config.Run.Branch),
+		CreatedAt:  time.Now().UTC(),
+		Session: SessionMetadata{
+			ID: opts.SessionID,
+		},
 		Resume: ResumeManifest{
 			Env:     opts.ResumeEnv,
 			Command: opts.Command,
 		},
-		Sources: manifestSources,
-	}, existingSources, nil
+	}
+	if source != nil {
+		manifest.Session.Path = source.Path
+		manifest.Session.ArchivePath = filepath.ToSlash(source.ArchivePath)
+	}
+
+	return manifest, source, nil
 }
 
-func writeSessionTar(path string, manifest *SessionManifest, sources []SessionSource) error {
+func writeSessionTar(path string, manifest *SessionManifest, source *SessionSource) error {
 	file, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("create session archive: %w", err)
@@ -155,7 +154,7 @@ func writeSessionTar(path string, manifest *SessionManifest, sources []SessionSo
 		return err
 	}
 
-	for _, source := range sources {
+	if source != nil {
 		if err := addPathToTar(tarWriter, source.Path, source.ArchivePath); err != nil {
 			return err
 		}
@@ -296,20 +295,4 @@ func stringValue(value *string) string {
 		return ""
 	}
 	return *value
-}
-
-func compactStrings(values []string) []string {
-	seen := map[string]struct{}{}
-	result := make([]string, 0, len(values))
-	for _, value := range values {
-		if value == "" {
-			continue
-		}
-		if _, ok := seen[value]; ok {
-			continue
-		}
-		seen[value] = struct{}{}
-		result = append(result, value)
-	}
-	return result
 }

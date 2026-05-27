@@ -356,12 +356,7 @@ func (in *Claude) recordSessionID(sessionID string) {
 	if sessionID == "" {
 		return
 	}
-	for _, existing := range in.sessionIDs {
-		if existing == sessionID {
-			return
-		}
-	}
-	in.sessionIDs = append(in.sessionIDs, sessionID)
+	in.sessionID = sessionID
 }
 
 func (in *Claude) OnMessage(f func(message *console.AgentMessageAttributes)) {
