@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/samber/lo"
+
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 )
 
@@ -115,7 +117,7 @@ func (in DefaultTool) sessionManifest(opts BuildArtifactsOptions) (*SessionManif
 		AgentRunID: in.Config.Run.ID,
 		Provider:   opts.Provider,
 		Repository: in.Config.Run.Repository,
-		Branch:     stringValue(in.Config.Run.Branch),
+		Branch:     lo.FromPtr(in.Config.Run.Branch),
 		CreatedAt:  time.Now().UTC(),
 		Session: SessionMetadata{
 			ID: opts.SessionID,
@@ -232,17 +234,9 @@ func (in DefaultTool) writePatch(path string) error {
 	}
 
 	var builder strings.Builder
-	if baseCommit := getBaseCommit(); baseCommit != "" {
-		out, err := gitOutput(in.Config.RepositoryDir, "diff", "--binary", baseCommit+"...HEAD")
-		if err != nil {
-			return fmt.Errorf("git diff base commit %q: %w", baseCommit, err)
-		}
-		builder.Write(out)
-	}
-
-	out, err := gitOutput(in.Config.RepositoryDir, "diff", "--binary", "HEAD")
+	out, err := gitTrackedDiff(in.Config.RepositoryDir, getBaseCommit())
 	if err != nil {
-		return fmt.Errorf("git diff worktree: %w", err)
+		return err
 	}
 	builder.Write(out)
 
@@ -264,6 +258,22 @@ func (in DefaultTool) writePatch(path string) error {
 	return os.WriteFile(path, []byte(builder.String()), 0644)
 }
 
+func gitTrackedDiff(dir, baseCommit string) ([]byte, error) {
+	if baseCommit != "" {
+		out, err := gitOutput(dir, "diff", "--binary", baseCommit, "--")
+		if err == nil {
+			return out, nil
+		}
+	}
+
+	out, err := gitOutput(dir, "diff", "--binary", "HEAD", "--")
+	if err != nil {
+		return nil, fmt.Errorf("git diff tracked changes: %w", err)
+	}
+
+	return out, nil
+}
+
 func getBaseCommit() string {
 	config, err := environment.Load()
 	if err != nil {
@@ -283,16 +293,8 @@ func gitDiffNoIndex(dir, oldPath, newPath string) ([]byte, error) {
 	if err == nil {
 		return out, nil
 	}
-	var exitErr *stdexec.ExitError
-	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+	if exitErr, ok := errors.AsType[*stdexec.ExitError](err); ok && exitErr.ExitCode() == 1 {
 		return out, nil
 	}
 	return nil, err
-}
-
-func stringValue(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
 }

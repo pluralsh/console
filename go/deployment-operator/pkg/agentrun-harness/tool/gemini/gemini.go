@@ -258,26 +258,17 @@ func (in *Gemini) Configure(_, _ string) error {
 }
 
 func (in *Gemini) settingsPath() string {
-	return path.Join(in.projectPath(), SettingsFileName)
-}
-
-func (in *Gemini) projectPath() string {
-	return path.Join(in.providerPath(), "project")
+	return path.Join(in.providerPath(), SettingsFileName)
 }
 
 func (in *Gemini) providerPath() string {
 	return path.Join(in.Config.WorkDir, ".gemini")
 }
 
-func (in *Gemini) homePath() string {
-	return path.Join(in.providerPath(), "home-root")
-}
-
 func (in *Gemini) env() []string {
 	return []string{
 		fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey),
 		fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true"),
-		fmt.Sprintf("HOME=%s", in.homePath()),
 	}
 }
 

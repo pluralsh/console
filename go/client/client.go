@@ -5,6 +5,7 @@ package client
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
@@ -25,7 +26,7 @@ type ConsoleClient interface {
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
-	CreateAgentRunUpload(ctx context.Context, runID string, attributes AgentRunUploadAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
+	CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
 	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -40236,8 +40237,8 @@ func (c *Client) CreateAgentMessage(ctx context.Context, runID string, attribute
 	return &res, nil
 }
 
-const CreateAgentRunUploadDocument = `mutation CreateAgentRunUpload ($runId: ID!, $attributes: AgentRunUploadAttributes!) {
-	createAgentRunUpload(runId: $runId, attributes: $attributes) {
+const CreateAgentRunUploadDocument = `mutation CreateAgentRunUpload ($runId: ID!, $session: Upload, $screenRecording: Upload, $patch: Upload) {
+	createAgentRunUpload(runId: $runId, attributes: {session:$session,screenRecording:$screenRecording,patch:$patch}) {
 		... AgentRunUploadFragment
 	}
 }
@@ -40249,10 +40250,12 @@ fragment AgentRunUploadFragment on AgentRunUpload {
 }
 `
 
-func (c *Client) CreateAgentRunUpload(ctx context.Context, runID string, attributes AgentRunUploadAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error) {
+func (c *Client) CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error) {
 	vars := map[string]any{
-		"runId":      runID,
-		"attributes": attributes,
+		"runId":           runID,
+		"session":         session,
+		"screenRecording": screenRecording,
+		"patch":           patch,
 	}
 
 	var res CreateAgentRunUpload

@@ -120,8 +120,8 @@ mutation CreateAgentMessage($runId: ID!, $attributes: AgentMessageAttributes!) {
   }
 }
 
-mutation CreateAgentRunUpload($runId: ID!, $attributes: AgentRunUploadAttributes!) {
-  createAgentRunUpload(runId: $runId, attributes: $attributes) {
+mutation CreateAgentRunUpload($runId: ID!, $session: Upload, $screenRecording: Upload, $patch: Upload) {
+  createAgentRunUpload(runId: $runId, attributes: {session: $session, screenRecording: $screenRecording, patch: $patch}) {
     ...AgentRunUploadFragment
   }
 }

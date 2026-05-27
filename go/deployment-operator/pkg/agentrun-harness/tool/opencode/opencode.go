@@ -269,11 +269,7 @@ func (in *Opencode) agent() string {
 }
 
 func (in *Opencode) configFilePath() string {
-	return path.Join(in.configPath(), ConfigFileName)
-}
-
-func (in *Opencode) configPath() string {
-	return path.Join(in.providerPath(), "config")
+	return path.Join(in.providerPath(), ConfigFileName)
 }
 
 func (in *Opencode) providerPath() string {
@@ -408,12 +404,7 @@ func (in *Opencode) ConfigureBabysitRun() error {
 func (in *Opencode) env(configFilePath string) []string {
 	return []string{
 		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
-		fmt.Sprintf("XDG_DATA_HOME=%s", in.dataPath()),
 	}
-}
-
-func (in *Opencode) dataPath() string {
-	return path.Join(in.providerPath(), "data")
 }
 
 func (in *Opencode) recordSessionID(sessionID string) {

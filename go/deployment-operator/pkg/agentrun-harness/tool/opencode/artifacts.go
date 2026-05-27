@@ -13,8 +13,7 @@ func (in *Opencode) UploadArtifacts(ctx context.Context) (*v1.UploadArtifacts, e
 		Source:    v1.SessionSource{Path: in.providerPath(), ArchivePath: filepath.Join("provider", "opencode")},
 		SessionID: in.sessionID,
 		ResumeEnv: map[string]string{
-			"OPENCODE_CONFIG": filepath.Join("provider", "opencode", "config", ConfigFileName),
-			"XDG_DATA_HOME":   filepath.Join("provider", "opencode", "data"),
+			"OPENCODE_CONFIG": filepath.Join("provider", "opencode", ConfigFileName),
 		},
 		Command: []string{"opencode", "run"},
 	})

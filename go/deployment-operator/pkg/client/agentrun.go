@@ -94,7 +94,7 @@ func (c *client) CreateAgentPullRequest(ctx context.Context, runID string, attrs
 }
 
 func (c *client) CreateAgentRunUpload(ctx context.Context, runID string, attrs console.AgentRunUploadAttributes) (*console.AgentRunUploadFragment, error) {
-	response, err := c.consoleClient.CreateAgentRunUpload(ctx, runID, attrs)
+	response, err := c.consoleClient.CreateAgentRunUpload(ctx, runID, attrs.Session, attrs.ScreenRecording, attrs.Patch)
 	if err != nil {
 		return nil, err
 	}

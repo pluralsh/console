@@ -13,7 +13,7 @@ func (in *Gemini) UploadArtifacts(ctx context.Context) (*v1.UploadArtifacts, err
 		Source:    v1.SessionSource{Path: in.providerPath(), ArchivePath: filepath.Join("provider", "gemini")},
 		SessionID: in.sessionID,
 		ResumeEnv: map[string]string{
-			"HOME": filepath.Join("provider", "gemini", "home-root"),
+			"GEMINI_CONFIG_DIR": filepath.Join("provider", "gemini"),
 		},
 		Command: []string{"gemini"},
 	})
