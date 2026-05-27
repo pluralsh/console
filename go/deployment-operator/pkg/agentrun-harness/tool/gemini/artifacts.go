@@ -10,10 +10,10 @@ import (
 func (in *Gemini) UploadArtifacts(ctx context.Context) (*v1.UploadArtifacts, error) {
 	return in.BuildUploadArtifacts(ctx, v1.BuildArtifactsOptions{
 		Provider:  "gemini",
-		Source:    v1.SessionSource{Path: in.providerPath(), ArchivePath: filepath.Join("provider", "gemini")},
+		Source:    v1.SessionSource{Path: filepath.Join(in.providerPath(), "tmp"), ArchivePath: "tmp"},
 		SessionID: in.sessionID,
 		ResumeEnv: map[string]string{
-			"GEMINI_CONFIG_DIR": filepath.Join("provider", "gemini"),
+			"GEMINI_CLI_HOME": ".",
 		},
 		Command: []string{"gemini"},
 	})

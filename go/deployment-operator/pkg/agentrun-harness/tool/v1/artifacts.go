@@ -31,8 +31,9 @@ type UploadArtifacts struct {
 }
 
 type SessionSource struct {
-	Path        string
-	ArchivePath string
+	Path         string
+	ArchivePath  string
+	ExcludeNames []string
 }
 
 type SessionManifest struct {
@@ -157,7 +158,7 @@ func writeSessionTar(path string, manifest *SessionManifest, source *SessionSour
 	}
 
 	if source != nil {
-		if err := addPathToTar(tarWriter, source.Path, source.ArchivePath); err != nil {
+		if err := addSourceToTar(tarWriter, *source); err != nil {
 			return err
 		}
 	}
@@ -182,6 +183,12 @@ func writeTarBytes(tw *tar.Writer, name string, data []byte, mode int64) error {
 }
 
 func addPathToTar(tw *tar.Writer, sourcePath, archivePath string) error {
+	return addSourceToTar(tw, SessionSource{Path: sourcePath, ArchivePath: archivePath})
+}
+
+func addSourceToTar(tw *tar.Writer, source SessionSource) error {
+	sourcePath := source.Path
+	archivePath := source.ArchivePath
 	cleanArchivePath := filepath.ToSlash(strings.TrimPrefix(filepath.Clean(archivePath), string(filepath.Separator)))
 	return filepath.WalkDir(sourcePath, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -197,12 +204,29 @@ func addPathToTar(tw *tar.Writer, sourcePath, archivePath string) error {
 		if err != nil {
 			return err
 		}
+		if shouldExcludeArchivePath(rel, entry, source.ExcludeNames) {
+			if entry.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
 		name := cleanArchivePath
 		if rel != "." {
 			name = filepath.Join(cleanArchivePath, rel)
 		}
 
+		var link string
+		if info.Mode()&os.ModeSymlink != 0 {
+			var err error
+			link, err = os.Readlink(path)
+			if err != nil {
+				return fmt.Errorf("read symlink %q: %w", path, err)
+			}
+		}
 		header, err := tar.FileInfoHeader(info, "")
+		if link != "" {
+			header, err = tar.FileInfoHeader(info, link)
+		}
 		if err != nil {
 			return err
 		}
@@ -211,7 +235,10 @@ func addPathToTar(tw *tar.Writer, sourcePath, archivePath string) error {
 			return fmt.Errorf("write tar header %q: %w", header.Name, err)
 		}
 
-		if entry.IsDir() {
+		if entry.IsDir() || link != "" {
+			return nil
+		}
+		if !info.Mode().IsRegular() {
 			return nil
 		}
 
@@ -226,6 +253,19 @@ func addPathToTar(tw *tar.Writer, sourcePath, archivePath string) error {
 		}
 		return nil
 	})
+}
+
+func shouldExcludeArchivePath(rel string, entry os.DirEntry, excludeNames []string) bool {
+	if rel == "." {
+		return false
+	}
+	name := entry.Name()
+	for _, excluded := range excludeNames {
+		if name == excluded {
+			return true
+		}
+	}
+	return false
 }
 
 func (in DefaultTool) writePatch(path string) error {

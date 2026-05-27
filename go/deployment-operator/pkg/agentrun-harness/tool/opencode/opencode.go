@@ -404,7 +404,12 @@ func (in *Opencode) ConfigureBabysitRun() error {
 func (in *Opencode) env(configFilePath string) []string {
 	return []string{
 		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
+		fmt.Sprintf("OPENCODE_DATA_DIR=%s", in.dataPath()),
 	}
+}
+
+func (in *Opencode) dataPath() string {
+	return filepath.Join(in.providerPath(), "data")
 }
 
 func (in *Opencode) recordSessionID(sessionID string) {

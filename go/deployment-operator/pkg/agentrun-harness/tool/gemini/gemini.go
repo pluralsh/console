@@ -269,6 +269,7 @@ func (in *Gemini) env() []string {
 	return []string{
 		fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey),
 		fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true"),
+		fmt.Sprintf("GEMINI_CLI_HOME=%s", in.providerPath()),
 	}
 }
 
