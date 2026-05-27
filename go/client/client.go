@@ -626,7 +626,7 @@ type AgentRunFragment struct {
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
 	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
-	Uploads         []*AgentRunUploadFragment  "json:\"uploads,omitempty\" graphql:\"uploads\""
+	Upload          *AgentRunUploadFragment    "json:\"upload,omitempty\" graphql:\"upload\""
 	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
 	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
 }
@@ -739,11 +739,11 @@ func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
 	}
 	return t.PullRequests
 }
-func (t *AgentRunFragment) GetUploads() []*AgentRunUploadFragment {
+func (t *AgentRunFragment) GetUpload() *AgentRunUploadFragment {
 	if t == nil {
 		t = &AgentRunFragment{}
 	}
-	return t.Uploads
+	return t.Upload
 }
 func (t *AgentRunFragment) GetBabysit() *bool {
 	if t == nil {
@@ -39288,7 +39288,7 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
-	uploads {
+	upload {
 		... AgentRunUploadFragment
 	}
 	babysit
@@ -39448,7 +39448,7 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
-	uploads {
+	upload {
 		... AgentRunUploadFragment
 	}
 	babysit
@@ -39617,7 +39617,7 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
-	uploads {
+	upload {
 		... AgentRunUploadFragment
 	}
 	babysit
@@ -39833,7 +39833,7 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
-	uploads {
+	upload {
 		... AgentRunUploadFragment
 	}
 	babysit
@@ -39987,7 +39987,7 @@ fragment AgentRunFragment on AgentRun {
 	pullRequests {
 		... PullRequestFragment
 	}
-	uploads {
+	upload {
 		... AgentRunUploadFragment
 	}
 	babysit

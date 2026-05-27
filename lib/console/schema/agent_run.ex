@@ -58,7 +58,7 @@ defmodule Console.Schema.AgentRun do
     has_many :pull_requests, PullRequest
     has_many :messages, AgentMessage, on_replace: :delete
     has_many :prompts, AgentPrompt, on_replace: :delete
-    has_many :uploads, AgentRunUpload
+    has_one  :upload, AgentRunUpload
 
     timestamps()
   end

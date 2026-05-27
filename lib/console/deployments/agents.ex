@@ -196,9 +196,12 @@ defmodule Console.Deployments.Agents do
     end)
     |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
     |> add_operation(:create, fn %{run: run} ->
-      %AgentRunUpload{agent_run_id: run.id}
+      AgentRunUpload.for_run(run.id)
+      |> AgentRunUpload.with_limit(1)
+      |> Repo.one()
+      |> Kernel.||(%AgentRunUpload{agent_run_id: run.id})
       |> AgentRunUpload.changeset(attrs)
-      |> Repo.insert()
+      |> Repo.insert_or_update()
     end)
     |> execute(extract: :create)
     |> notify(:create)

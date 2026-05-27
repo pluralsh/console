@@ -2140,8 +2140,8 @@ type AgentRun {
   "the messages this agent run has generated during its run"
   messages: [AgentMessage]
 
-  "the upload bundles this agent run has generated"
-  uploads: [AgentRunUpload]
+  "the upload bundle this agent run has generated"
+  upload: AgentRunUpload
 
   "the runtime this agent is using"
   runtime: AgentRuntime

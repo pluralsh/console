@@ -28,7 +28,7 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 		return
 	}
 
-	attrs, closeFiles, err := uploadAttributes(artifacts)
+	attrs, closeFiles, err := in.uploadAttributes(artifacts)
 	if err != nil {
 		klog.ErrorS(err, "failed to prepare agent run upload artifacts", "agentRunID", in.agentRunID)
 		return
@@ -40,7 +40,7 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 	}
 }
 
-func uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUploadAttributes, func(), error) {
+func (in *agentRunController) uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUploadAttributes, func(), error) {
 	var (
 		attrs  gqlclient.AgentRunUploadAttributes
 		files  []*os.File
@@ -54,7 +54,7 @@ func uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUplo
 	)
 
 	if artifacts.SessionPath != "" {
-		upload, file, err := newUpload(artifacts.SessionPath)
+		upload, file, err := in.newUpload(artifacts.SessionPath)
 		if err != nil {
 			closeF()
 			return attrs, func() {}, err
@@ -64,7 +64,7 @@ func uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUplo
 	}
 
 	if artifacts.PatchPath != "" {
-		upload, file, err := newUpload(artifacts.PatchPath)
+		upload, file, err := in.newUpload(artifacts.PatchPath)
 		if err != nil {
 			closeF()
 			return attrs, func() {}, err
@@ -76,7 +76,7 @@ func uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUplo
 	return attrs, closeF, nil
 }
 
-func newUpload(path string) (*graphql.Upload, *os.File, error) {
+func (in *agentRunController) newUpload(path string) (*graphql.Upload, *os.File, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, nil, fmt.Errorf("open upload artifact %q: %w", path, err)
@@ -92,11 +92,11 @@ func newUpload(path string) (*graphql.Upload, *os.File, error) {
 		File:        file,
 		Filename:    filepath.Base(path),
 		Size:        info.Size(),
-		ContentType: contentType(path),
+		ContentType: in.contentType(path),
 	}, file, nil
 }
 
-func contentType(path string) string {
+func (in *agentRunController) contentType(path string) string {
 	if strings.HasSuffix(path, ".tar.gz") {
 		return "application/gzip"
 	}

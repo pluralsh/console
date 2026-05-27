@@ -380,8 +380,8 @@ type AgentRun struct {
 	Prompts []*AgentPrompt `json:"prompts,omitempty"`
 	// the messages this agent run has generated during its run
 	Messages []*AgentMessage `json:"messages,omitempty"`
-	// the upload bundles this agent run has generated
-	Uploads []*AgentRunUpload `json:"uploads,omitempty"`
+	// the upload bundle this agent run has generated
+	Upload *AgentRunUpload `json:"upload,omitempty"`
 	// the runtime this agent is using
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	// the user who initiated this agent run
