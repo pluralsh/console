@@ -12,6 +12,7 @@ import {
   PR_REL_PATH,
   PR_SCM_REL_PATH,
   SELF_SERVICE_ABS_PATH,
+  SELF_SERVICE_SEARCH_PROTOTYPE_REL_PATH,
 } from 'routes/selfServiceRoutesConsts'
 import styled from 'styled-components'
 
@@ -34,6 +35,10 @@ const getDirectory = (prsEnabled: boolean): SubtabDirectory => [
     path: `${PR_REL_PATH}/${PR_SCM_REL_PATH}`,
     label: 'SCM management',
     enabled: prsEnabled,
+  },
+  {
+    path: SELF_SERVICE_SEARCH_PROTOTYPE_REL_PATH,
+    label: 'Search prototype',
   },
 ]
 

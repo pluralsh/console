@@ -6,6 +6,7 @@ import { OutstandingPrs } from 'components/self-service/pr/queue/OutstandingPrs'
 import { ScmManagement } from 'components/self-service/pr/scm/PrScmManagement.tsx.tsx'
 
 import { SelfService } from 'components/self-service/SelfService.tsx'
+import { SelfServiceSearchPrototype } from 'components/self-service/SelfServiceSearchPrototype'
 import { Catalog } from 'components/self-service/catalog/Catalog'
 import { Catalogs } from 'components/self-service/catalog/Catalogs'
 import { RequireCdEnabled } from './cdRoutes'
@@ -17,6 +18,7 @@ import {
   PR_REL_PATH,
   PR_SCM_REL_PATH,
   SELF_SERVICE_ABS_PATH,
+  SELF_SERVICE_SEARCH_PROTOTYPE_REL_PATH,
 } from './selfServiceRoutesConsts'
 
 export const selfServiceRoutes = [
@@ -32,6 +34,11 @@ export const selfServiceRoutes = [
     <Route
       path={CATALOGS_ABS_PATH}
       element={<Catalogs />}
+    />
+    {/* Dual fuzzy search dropdown prototype (PROD-4093) */}
+    <Route
+      path={SELF_SERVICE_SEARCH_PROTOTYPE_REL_PATH}
+      element={<SelfServiceSearchPrototype />}
     />
     {/* PRs */}
     <Route

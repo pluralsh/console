@@ -11,6 +11,12 @@ export function getCatalogAbsPath(id: string | null | undefined) {
   return `${CATALOGS_ABS_PATH}/${id}`
 }
 
+// Prototype: dual fuzzy search dropdown (PROD-4093)
+export const SELF_SERVICE_SEARCH_PROTOTYPE_REL_PATH =
+  'search-prototype' as const
+export const SELF_SERVICE_SEARCH_PROTOTYPE_ABS_PATH =
+  `${SELF_SERVICE_ABS_PATH}/${SELF_SERVICE_SEARCH_PROTOTYPE_REL_PATH}` as const
+
 // PRs
 export const PR_REL_PATH = 'pr' as const
 export const PR_ABS_PATH = `${SELF_SERVICE_ABS_PATH}/${PR_REL_PATH}` as const
