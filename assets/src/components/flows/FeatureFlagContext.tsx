@@ -20,10 +20,17 @@ const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
   Edge: boolean
+  WorkbenchChatbots: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
+  WorkbenchChatbots: false,
+}
+
+const FEATURE_FLAG_LABELS: Record<keyof FeatureFlags, string> = {
+  Edge: 'Edge',
+  WorkbenchChatbots: 'Workbench Chatbots',
 }
 
 export const FeatureFlagContext = createContext<{
@@ -72,6 +79,7 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
         }}
       >
         {curType === 'Edge' && <EdgeBodyContent />}
+        {curType === 'WorkbenchChatbots' && <WorkbenchChatbotsBodyContent />}
       </FeatureFlagConfirmationModal>
       <Toast
         show={showToast}
@@ -82,7 +90,7 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
         onClose={() => setShowToast(false)}
       >
         <Flex gap="small">
-          {`"${curType}" feature enabled`}
+          {`"${featureFlagLabel(curType)}" feature enabled`}
           {curType === 'Edge' && (
             <InlineLink
               as={Link}
@@ -111,14 +119,18 @@ function FeatureFlagConfirmationModal({
   children: ReactNode
 }) {
   const docsUrl = defaultDocsUrl
+  const label = featureFlagLabel(type)
+
   return (
     <Modal
       open={open}
       onClose={onClose}
-      header={`Enable "${type}" Feature`}
+      header={`Enable "${label}" Feature`}
+      size="large"
       actions={
         <Flex
           justify="space-between"
+          gap="medium"
           width="100%"
         >
           <Button
@@ -131,14 +143,17 @@ function FeatureFlagConfirmationModal({
           >
             Read docs
           </Button>
-          <Flex gap="small">
+          <Flex
+            gap="small"
+            shrink={0}
+          >
             <Button
               secondary
               onClick={onClose}
             >
               Cancel
             </Button>
-            <Button onClick={onConfirm}>{`Enable ${type}`}</Button>
+            <Button onClick={onConfirm}>{`Enable ${label}`}</Button>
           </Flex>
         </Flex>
       }
@@ -153,6 +168,19 @@ function EdgeBodyContent() {
     <span>
       <strong>Edge</strong> is an experimental feature that allows you to deploy
       and manage your own edge compute resources on Plural.
+    </span>
+  )
+}
+
+function featureFlagLabel(type: keyof FeatureFlags | null) {
+  return type ? FEATURE_FLAG_LABELS[type] : ''
+}
+
+function WorkbenchChatbotsBodyContent() {
+  return (
+    <span>
+      <strong>Workbench Chatbots</strong> is an experimental feature that lets
+      chat platforms trigger workbench runs.
     </span>
   )
 }

@@ -2,34 +2,32 @@ import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StrongSC } from 'components/utils/typography/Text'
 import {
-  useDeleteWorkbenchToolMutation,
-  WorkbenchToolFragment,
+  useDeleteWorkbenchChatbotMutation,
+  WorkbenchChatbotFragment,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
 
-export function WorkbenchToolDeleteModal({
+export function ChatbotDeleteModal({
   open,
-  tool,
+  chatbot,
   onClose,
-  onDeleted,
 }: {
   open: boolean
-  tool: Nullable<WorkbenchToolFragment>
+  chatbot: Nullable<WorkbenchChatbotFragment>
   onClose: () => void
-  onDeleted?: () => void
 }) {
   const { popToast } = useSimpleToast()
-  const [mutation, { loading, error }] = useDeleteWorkbenchToolMutation({
-    variables: { id: tool?.id ?? '' },
+  const label = chatbot?.chatConnection?.name ?? chatbot?.channel ?? 'chatbot'
+
+  const [mutation, { loading, error }] = useDeleteWorkbenchChatbotMutation({
+    variables: { id: chatbot?.id ?? '' },
     onCompleted: () => {
       popToast({
-        content: `${tool?.name ?? 'tool'} deleted`,
+        content: `${label} deleted`,
         severity: 'success',
       })
       onClose()
-      onDeleted?.()
     },
-    refetchQueries: ['WorkbenchTools'],
+    refetchQueries: ['WorkbenchChatbots', 'WorkbenchTriggersSummary'],
     awaitRefetchQueries: true,
   })
 
@@ -38,18 +36,15 @@ export function WorkbenchToolDeleteModal({
       open={open}
       close={onClose}
       destructive
-      label="Delete tool"
+      label="Delete chatbot"
       loading={loading}
       error={error}
       submit={() => mutation()}
-      title="Delete tool"
+      title="Delete chatbot"
       text={
         <span>
-          Are you sure you want to delete tool{' '}
-          <StrongSC $color="text-danger">
-            {truncate(tool?.name ?? '', { length: 40 })}
-          </StrongSC>
-          ?
+          Are you sure you want to delete chatbot{' '}
+          <StrongSC $color="text-danger">{label}</StrongSC>?
         </span>
       }
     />

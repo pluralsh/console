@@ -22,6 +22,7 @@ defmodule Console.Schema.ChatConnection do
       embeds_one :teams, Teams, on_replace: :update do
         field :client_id,     :string
         field :client_secret, EncryptedString
+        field :tenant_id,     :string
       end
     end
 
@@ -95,6 +96,6 @@ defmodule Console.Schema.ChatConnection do
 
   defp teams_changeset(model, attrs) do
     model
-    |> cast(attrs, [:client_id, :client_secret])
+    |> cast(attrs, [:client_id, :client_secret, :tenant_id])
   end
 end

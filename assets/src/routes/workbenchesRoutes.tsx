@@ -17,6 +17,9 @@ import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-e
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
 import { SavedPrompts } from 'components/workbenches/workbench/prompts/SavedPrompts'
 import { SavedPromptForm } from 'components/workbenches/workbench/prompts/SavedPromptForm'
+import { ChatbotConnectionForm } from 'components/workbenches/workbench/chatbots/ChatbotConnectionForm'
+import { ChatbotForm } from 'components/workbenches/workbench/chatbots/ChatbotForm'
+import { Chatbots } from 'components/workbenches/workbench/chatbots/Chatbots'
 import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/WebhookTriggers'
 import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
 import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
@@ -44,6 +47,9 @@ import {
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
   WORKBENCHES_CRON_PARAM_ID,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_CHATBOT_PARAM_ID,
+  WORKBENCHES_CHATBOTS_CREATE_CHATBOT_REL_PATH,
+  WORKBENCHES_CHATBOTS_REL_PATH,
   WORKBENCHES_SAVED_PROMPTS_REL_PATH,
   WORKBENCHES_SAVED_PROMPT_PARAM_ID,
   WORKBENCHES_WEBHOOK_PARAM_ID,
@@ -158,6 +164,22 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_SAVED_PROMPTS_REL_PATH}/:${WORKBENCHES_SAVED_PROMPT_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<SavedPromptForm mode="edit" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CHATBOTS_REL_PATH}`}
+    element={<Chatbots />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CHATBOTS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
+    element={<ChatbotForm mode="create" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CHATBOTS_REL_PATH}/${WORKBENCHES_CHATBOTS_CREATE_CHATBOT_REL_PATH}`}
+    element={<ChatbotConnectionForm />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CHATBOTS_REL_PATH}/:${WORKBENCHES_CHATBOT_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
+    element={<ChatbotForm mode="edit" />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}/:${WORKBENCHES_CRON_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
