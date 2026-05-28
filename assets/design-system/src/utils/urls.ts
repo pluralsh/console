@@ -39,39 +39,72 @@ export function toHtmlId(str: string) {
 
 /**
  * Validates git clone URLs matching backend validation:
- * - https://host/owner/repo[.git]
+ * - https://host/owner/repo[.git] (nested paths supported, e.g. GitLab groups)
  * - ssh://[user@]host/owner/repo[.git]
  * - git@host:owner/repo[.git]
  */
 export function isValidRepoUrl(url: string): boolean {
   const trimmed = url.trim()
+  if (!trimmed) return false
 
-  // https://host/owner/repo or https://host/owner/repo.git
-  if (/^https:\/\/[^/]+\/[^/]+\/[^/]+(\.git)?$/.test(trimmed)) return true
+  if (trimmed.startsWith('http://') || trimmed.startsWith('ftp://'))
+    return false
 
-  // ssh://[user@]host/owner/repo[.git]
-  if (/^ssh:\/\/([^@]+@)?[^/]+\/[^/]+\/[^/]+(\.git)?$/.test(trimmed))
-    return true
+  const allowedScheme =
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('ssh://') ||
+    trimmed.startsWith('git@')
 
-  // git@host:owner/repo[.git]
-  if (/^git@[^:]+:[^/]+\/[^/]+(\.git)?$/.test(trimmed)) return true
+  if (!allowedScheme) return false
 
-  return false
+  const path = extractRepoProjectPath(trimmed)
+  if (!path) return false
+
+  const segments = path.split('/')
+  return segments.length >= 2 && segments.every((segment) => segment.length > 0)
+}
+
+/**
+ * Extracts the repository project path (namespace/project, including nested GitLab groups)
+ * from a git clone URL, SCP-style URL, or GitLab merge request web URL.
+ */
+export function extractRepoProjectPath(repoUrl: string): string | null {
+  const trimmed = repoUrl.trim()
+  if (!trimmed) return null
+
+  let path: string | null = null
+
+  if (/^git@[^:]+:/.test(trimmed)) {
+    path = trimmed.replace(/^git@[^:]+:/, '')
+  } else if (/^ssh:\/\//.test(trimmed)) {
+    path = trimmed.replace(/^ssh:\/\/(?:[^@]+@)?[^/]+\/?/, '')
+  } else if (/^https?:\/\//.test(trimmed)) {
+    path = trimmed.replace(/^https?:\/\/[^/]+\/?/, '')
+  } else {
+    return null
+  }
+
+  path = path
+    .replace(/^\/+/, '')
+    .replace(/\/-\/.*$/, '')
+    .replace(/\.git$/, '')
+
+  const normalized = path.split('/').filter(Boolean).join('/')
+  return normalized || null
 }
 
 export function prettifyRepoUrl(
   repoUrl: string,
   showFullPath: boolean = false
 ) {
-  const fullPath = repoUrl
-    .trim()
-    .replace(/^git@[^:]+:/, '')
-    .replace(/^ssh:\/\/[^/]+\/?/, '')
-    .replace(/^https?:\/\/[^/]+\/?/, '')
-    .replace(/^\/+/, '')
-    .replace(/\.git$/, '')
+  const fullPath = extractRepoProjectPath(repoUrl)
+  if (!fullPath) return repoUrl
 
-  const [owner, name] = fullPath.split('/')
+  if (showFullPath) return fullPath
 
-  return showFullPath ? fullPath : owner && name ? `${owner}/${name}` : repoUrl
+  const segments = fullPath.split('/')
+  if (segments.length === 2) return `${segments[0]}/${segments[1]}`
+
+  // Nested GitLab groups (or other multi-segment paths): show the full project slug.
+  return fullPath
 }
