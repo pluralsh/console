@@ -22,13 +22,14 @@ defmodule Console.Uploads do
   @formats ~w(.patch .mp4 .jpeg .jsonl .tar.gz)
 
   def validate({file, _}) do
-    file.file_name
-    |> Path.extname()
-    |> String.downcase()
-    |> then(& Enum.member?(@formats, &1))
+    filename = String.downcase(file.file_name)
+
+    @formats
+    |> Enum.any?(&String.ends_with?(filename, &1))
     |> case do
       true -> :ok
-      false -> {:error, "invalid file type, required to be one of: #{Enum.join(@formats, ", ")}"}
+      false ->
+        {:error, "#{file.file_name} invalid file type, required to be one of: #{Enum.join(@formats, ", ")}"}
     end
   end
 
