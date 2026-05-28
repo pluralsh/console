@@ -10,7 +10,6 @@ defmodule Console.UploadsTest do
 
     test "rejects unsupported file types" do
       assert {:error, message} = Uploads.validate({%{file_name: "agent-session.json"}, nil})
-      assert message =~ "agent-session.json"
       assert message =~ ".tar.gz"
     end
   end

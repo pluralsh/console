@@ -195,13 +195,16 @@ defmodule Console.Deployments.Agents do
       end
     end)
     |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
-    |> add_operation(:create, fn %{run: run} ->
-      AgentRunUpload.for_run(run.id)
-      |> AgentRunUpload.with_limit(1)
-      |> Repo.one()
-      |> Kernel.||(%AgentRunUpload{agent_run_id: run.id})
+    |> add_operation(:upload_record, fn %{run: run} ->
+      case AgentRunUpload.for_run(run.id) |> AgentRunUpload.with_limit(1) |> Repo.one() do
+        %AgentRunUpload{} = upload -> {:ok, upload}
+        nil -> Repo.insert(%AgentRunUpload{agent_run_id: run.id})
+      end
+    end)
+    |> add_operation(:create, fn %{upload_record: upload} ->
+      upload
       |> AgentRunUpload.changeset(attrs)
-      |> Repo.insert_or_update()
+      |> Repo.update()
     end)
     |> execute(extract: :create)
     |> notify(:create)
