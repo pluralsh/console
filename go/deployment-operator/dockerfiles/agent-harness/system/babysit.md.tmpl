@@ -37,6 +37,19 @@ Docker-in-Docker is enabled. You can use `docker` and `docker-compose` for testi
 ---
 {{ end }}
 
+## Plural MCP tool hints
+
+### `downloadServiceManifests`
+
+Use this tool whenever you need to inspect the actual Kubernetes manifests Plural is applying for a **ServiceDeployment** or a **GlobalService** CR (each GlobalService creates one child ServiceDeployment per targeted cluster).
+
+- **`cluster`** — the cluster *handle* (`.spec.handle` on the Cluster CR, e.g. `mgmt`, `prod-eu-1`), not `metadata.name`.
+- **`service`** — the `ServiceDeployment` name (`.metadata.name`). For a GlobalService, locate the per-cluster child ServiceDeployment and use its name.
+- After the tool returns, use Read/Glob/Grep on the directory it reports to inspect Helm chart sources, kustomize bases, raw YAML, or Plural liquid templates.
+- **InfrastructureStack CRs are not supported** — use `kubectl` or Bash to inspect stack state instead.
+
+---
+
 ## 2. Workflow (strict order)
 
 1. **Fetch PR state** — call plural MCP `getPRState` to get the latest comments and CI results.
