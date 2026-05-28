@@ -8,6 +8,11 @@ defmodule Console.Deployments.Stacks.Commands do
     |> stitch_hooks(stack, dry)
   end
 
+  def commands(%Stack{type: :terragrunt} = stack, dry) do
+    terragrunt_commands(stack, dry)
+    |> stitch_hooks(stack, dry)
+  end
+
   def commands(%Stack{type: :ansible} = stack, dry) do
     ansible_commands(stack, dry)
     |> stitch_hooks(stack, dry)
@@ -117,6 +122,31 @@ defmodule Console.Deployments.Stacks.Commands do
   defp tf_command(%Stack{configuration: %{terraform: %Stack.Configuration.Terraform{tofu: true}}}),
     do: "tofu"
   defp tf_command(_), do: "terraform"
+
+  defp terragrunt_commands(%Stack{}, true) do
+    indexed([
+      cmd("init", tg_command(), ["init", "-upgrade"], :init),
+      cmd("plan", tg_command(), ["plan"], :plan),
+    ])
+  end
+
+  defp terragrunt_commands(%Stack{deleted_at: d}, _) when not is_nil(d) do
+    indexed([
+      cmd("init", tg_command(), ["init", "-upgrade"], :init),
+      cmd("plan", tg_command(), ["plan", "-destroy"], :plan),
+      cmd("destroy", tg_command(), ["destroy", "-auto-approve"], :destroy)
+    ])
+  end
+
+  defp terragrunt_commands(%Stack{}, _) do
+    indexed([
+      cmd("init", tg_command(), ["init", "-upgrade"], :init),
+      cmd("plan", tg_command(), ["plan"], :plan),
+      cmd("apply", tg_command(), ["apply", "terraform.tfplan"], :apply)
+    ])
+  end
+
+  defp tg_command(), do: "terragrunt"
 
   defp cmd(name, command, args, stage) do
     %{status: :pending, name: name, cmd: command, args: args, stage: stage}
