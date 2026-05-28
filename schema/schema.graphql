@@ -6589,6 +6589,7 @@ enum StackType {
   TERRAFORM
   ANSIBLE
   CUSTOM
+  TERRAGRUNT
 }
 
 enum StepStatus {

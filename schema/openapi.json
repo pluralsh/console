@@ -2971,7 +2971,8 @@
             "enum": [
               "terraform",
               "ansible",
-              "custom"
+              "custom",
+              "terragrunt"
             ],
             "type": "string"
           },
@@ -3026,7 +3027,8 @@
             "enum": [
               "terraform",
               "ansible",
-              "custom"
+              "custom",
+              "terragrunt"
             ],
             "type": "string"
           },
@@ -3097,7 +3099,8 @@
             "enum": [
               "terraform",
               "ansible",
-              "custom"
+              "custom",
+              "terragrunt"
             ],
             "type": "string"
           },

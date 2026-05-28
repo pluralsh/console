@@ -1517,10 +1517,13 @@ type ChatProviderConnectionAttributes struct {
 type ChatProviderConnectionConfiguration struct {
 	// the configuration for the slack connection
 	Slack *SlackConnectionConfiguration `json:"slack,omitempty"`
+	// the configuration for the teams connection
+	Teams *TeamsConnectionConfiguration `json:"teams,omitempty"`
 }
 
 type ChatProviderConnectionConfigurationAttributes struct {
 	Slack *SlackConnectionConfigurationAttributes `json:"slack,omitempty"`
+	Teams *TeamsConnectionConfigurationAttributes `json:"teams,omitempty"`
 }
 
 type ChatProviderConnectionConnection struct {
@@ -9040,6 +9043,19 @@ type TargetRef struct {
 	Name       *string `json:"name,omitempty"`
 }
 
+type TeamsConnectionConfiguration struct {
+	// the client id for the teams connection
+	ClientID *string `json:"clientId,omitempty"`
+	// the tenant id for the teams connection
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type TeamsConnectionConfigurationAttributes struct {
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	TenantID     string `json:"tenantId"`
+}
+
 // Additional context used to template service metadata during global service reconciliation
 type TemplateContext struct {
 	Raw map[string]any `json:"raw,omitempty"`
@@ -16168,20 +16184,22 @@ func (e StackStatus) MarshalJSON() ([]byte, error) {
 type StackType string
 
 const (
-	StackTypeTerraform StackType = "TERRAFORM"
-	StackTypeAnsible   StackType = "ANSIBLE"
-	StackTypeCustom    StackType = "CUSTOM"
+	StackTypeTerraform  StackType = "TERRAFORM"
+	StackTypeAnsible    StackType = "ANSIBLE"
+	StackTypeCustom     StackType = "CUSTOM"
+	StackTypeTerragrunt StackType = "TERRAGRUNT"
 )
 
 var AllStackType = []StackType{
 	StackTypeTerraform,
 	StackTypeAnsible,
 	StackTypeCustom,
+	StackTypeTerragrunt,
 }
 
 func (e StackType) IsValid() bool {
 	switch e {
-	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom:
+	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom, StackTypeTerragrunt:
 		return true
 	}
 	return false

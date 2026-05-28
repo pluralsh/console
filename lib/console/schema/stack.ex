@@ -24,7 +24,7 @@ defmodule Console.Schema.Stack do
     StackInfracostResource
   }
 
-  defenum Type, terraform: 0, ansible: 1, custom: 2
+  defenum Type, terraform: 0, ansible: 1, custom: 2, terragrunt: 3
   defenum Status,
     queued: 0,
     pending: 1,
