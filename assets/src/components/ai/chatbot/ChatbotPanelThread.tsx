@@ -240,6 +240,7 @@ export function ChatbotPanelThread({
                         messages={item}
                         isRunning
                         chatMessageProps={streamingToolMessageProps}
+                        accordionStyles={{ padding: theme.spacing.small }}
                       />
                     ) : (
                       <ChatMessage
@@ -287,12 +288,15 @@ function ChatbotMessageRow({
   session: Parameters<typeof ChatMessage>[0]['session']
   evidence?: Parameters<typeof ChatbotPanelEvidence>[0]['evidence']
 }) {
+  const theme = useTheme()
+
   return (
     <div>
       {Array.isArray(item) ? (
         <ChatToolCallGroup
           messages={item}
           chatMessageProps={groupedToolMessageProps}
+          accordionStyles={{ padding: theme.spacing.small }}
           getChatMessageProps={(message) => ({
             threadId,
             serverName: message.server?.name,

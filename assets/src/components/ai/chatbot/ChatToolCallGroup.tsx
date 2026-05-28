@@ -3,7 +3,7 @@ import { EaseIn } from 'components/utils/EaseIn'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { countBy, sumBy } from 'lodash'
 import pluralize from 'pluralize'
-import { ComponentProps, useMemo, useState } from 'react'
+import { ComponentProps, CSSProperties, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { ChatMessage } from './ChatMessage'
 import { SimpleAccordion } from './multithread/MultiThreadViewerMessage'
@@ -31,6 +31,7 @@ export function ChatToolCallGroup({
   isRunning,
   chatMessageProps,
   getChatMessageProps,
+  accordionStyles,
 }: {
   messages: ChatFragment[]
   isRunning?: boolean
@@ -38,6 +39,7 @@ export function ChatToolCallGroup({
   getChatMessageProps?: (
     message: ChatFragment
   ) => Partial<ComponentProps<typeof ChatMessage>>
+  accordionStyles?: CSSProperties
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -61,6 +63,7 @@ export function ChatToolCallGroup({
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
         caret="right-quarter-mirror"
+        accordionStyles={accordionStyles}
         triggerWrapperStyles={{
           justifyContent: 'flex-start',
           '.icon': { width: 10 },

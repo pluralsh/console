@@ -129,7 +129,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
         : {}),
       userId: base.userId ?? chatbot?.userId ?? me?.id ?? '',
     }
-  }, [routeState?.draftState, selectedChatbotParam, chatbot, me?.id, mode])
+  }, [routeState, selectedChatbotParam, chatbot, me?.id, mode])
 
   const [formDraft, setFormDraft] = useState<Nullable<ChatbotFormState>>(null)
   const formState = formDraft ?? sourceFormState
@@ -376,7 +376,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                 <FormField
                   required
                   label="Attach a channel"
-                  hint="External channel identifier (globally unique)."
+                  hint="Slack channel ID to listen in, such as C..., G..., or D... Use the channel ID, not the #channel name."
                 >
                   <Input2
                     value={formState.channel}
@@ -401,7 +401,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                 />
                 <FormField
                   label="Prompt"
-                  hint="Optional prompt text applied when this chatbot runs."
+                  hint="Custom prompt text applied when this chatbot runs."
                 >
                   <WorkbenchPromptRichInput
                     workbenchId={workbenchId}

@@ -6,6 +6,7 @@ import {
   ListBoxItem,
   ReturnIcon,
   Select,
+  SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -16,7 +17,7 @@ import {
   useUpsertChatProviderConnectionMutation,
   useWorkbenchQuery,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchChatbotsAbsPath,
@@ -28,6 +29,7 @@ import {
   FormCardSC,
   StickyActionsFooterSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import { useWebhookSetupGuidePanel } from '../webhooks/WebhookSetupGuidePanel'
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
@@ -43,7 +45,6 @@ type ChatbotConnectionFormState = {
   name: string
   appToken: string
   botToken: string
-  botId: string
   clientId: string
   clientSecret: string
   tenantId: string
@@ -54,18 +55,24 @@ const SUPPORTED_CHAT_PROVIDER_TYPES = [
   ChatProviderConnectionType.Teams,
 ] as const
 
+const SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH =
+  '/setup-guides/chatbots/slack.md'
+const SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL =
+  'https://api.slack.com/apis/connections/socket'
+
 export function ChatbotConnectionForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const routeState = location.state as Nullable<RouteState>
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const { popToast } = useSimpleToast()
+  const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
+    useWebhookSetupGuidePanel()
   const [formState, setFormState] = useState<ChatbotConnectionFormState>({
     type: ChatProviderConnectionType.Slack,
     name: '',
     appToken: '',
     botToken: '',
-    botId: '',
     clientId: '',
     clientSecret: '',
     tenantId: '',
@@ -85,7 +92,6 @@ export function ChatbotConnectionForm() {
   const name = formState.name.trim()
   const appToken = formState.appToken.trim()
   const botToken = formState.botToken.trim()
-  const botId = formState.botId.trim()
   const clientId = formState.clientId.trim()
   const clientSecret = formState.clientSecret.trim()
   const tenantId = formState.tenantId.trim()
@@ -101,7 +107,6 @@ export function ChatbotConnectionForm() {
           slack: {
             appToken,
             botToken,
-            botId: botId || null,
           },
         }
       : {
@@ -111,6 +116,15 @@ export function ChatbotConnectionForm() {
             tenantId,
           },
         }
+
+  const setupGuideMarkdownPath =
+    formState.type === ChatProviderConnectionType.Slack
+      ? SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH
+      : null
+  const setupGuideDocumentationUrl =
+    formState.type === ChatProviderConnectionType.Slack
+      ? SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL
+      : undefined
 
   const [upsertChatProviderConnection, { loading, error }] =
     useUpsertChatProviderConnectionMutation({
@@ -152,6 +166,25 @@ export function ChatbotConnectionForm() {
     )
   )
 
+  useEffect(() => {
+    if (!isOpen) return
+    if (!setupGuideMarkdownPath) {
+      closeSetupGuidePanel()
+      return
+    }
+
+    openSetupGuidePanel({
+      documentationUrl: setupGuideDocumentationUrl,
+      markdownPath: setupGuideMarkdownPath,
+    })
+  }, [
+    isOpen,
+    setupGuideMarkdownPath,
+    setupGuideDocumentationUrl,
+    openSetupGuidePanel,
+    closeSetupGuidePanel,
+  ])
+
   if (workbenchError) return <GqlError error={workbenchError} />
 
   return (
@@ -167,7 +200,7 @@ export function ChatbotConnectionForm() {
         direction="column"
         gap="large"
         width="100%"
-        css={{ maxWidth: 750, marginInline: 'auto' }}
+        css={{ maxWidth: 950, marginInline: 'auto' }}
       >
         <StackedText
           loading={!workbenchData && workbenchLoading}
@@ -179,175 +212,195 @@ export function ChatbotConnectionForm() {
           secondColor="text-xlight"
           gap="xxsmall"
         />
-        <FormCardSC>
+        <Flex gap="medium">
           <Flex
             direction="column"
-            gap="large"
-            height="100%"
             width="100%"
           >
-            {error && <GqlError error={error} />}
-            <FormField
-              required
-              label="Chat platform"
-            >
-              <Select
-                selectedKey={formState.type}
-                label={chatProviderConnectionLabel(formState.type)}
-                leftContent={chatProviderConnectionIcon(formState.type)}
-                isDisabled={loading}
-                onSelectionChange={(key) => {
-                  if (!key) return
-
-                  setFormState((prev) => ({
-                    ...prev,
-                    type: String(key) as ChatProviderConnectionType,
-                  }))
-                }}
+            <FormCardSC>
+              <Flex
+                direction="column"
+                gap="large"
+                height="100%"
+                width="100%"
               >
-                {SUPPORTED_CHAT_PROVIDER_TYPES.map((type) => (
-                  <ListBoxItem
-                    key={type}
-                    leftContent={chatProviderConnectionIcon(type)}
-                    label={chatProviderConnectionLabel(type)}
-                  />
-                ))}
-              </Select>
-            </FormField>
-            <FormField
-              required
-              label="Name"
-            >
-              <Input2
-                value={formState.name}
-                onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, name: e.target.value }))
-                }
-                disabled={loading}
-              />
-            </FormField>
-            {formState.type === ChatProviderConnectionType.Slack ? (
-              <>
+                {error && <GqlError error={error} />}
                 <FormField
                   required
-                  label="App token"
+                  label="Chat platform"
+                  hint="Slack is fully supported for Workbench chatbots today."
                 >
-                  <Input2
-                    value={formState.appToken}
-                    onChange={(e) =>
+                  <Select
+                    selectedKey={formState.type}
+                    label={chatProviderConnectionLabel(formState.type)}
+                    leftContent={chatProviderConnectionIcon(formState.type)}
+                    isDisabled={loading}
+                    onSelectionChange={(key) => {
+                      if (!key) return
+
                       setFormState((prev) => ({
                         ...prev,
-                        appToken: e.target.value,
+                        type: String(key) as ChatProviderConnectionType,
                       }))
-                    }
-                    inputProps={{ type: 'password' }}
-                    disabled={loading}
-                  />
+                    }}
+                  >
+                    {SUPPORTED_CHAT_PROVIDER_TYPES.map((type) => (
+                      <ListBoxItem
+                        key={type}
+                        leftContent={chatProviderConnectionIcon(type)}
+                        label={chatProviderConnectionLabel(type)}
+                      />
+                    ))}
+                  </Select>
                 </FormField>
                 <FormField
                   required
-                  label="Bot token"
+                  label="Name"
+                  hint="Display name shown when selecting this chatbot connection."
                 >
                   <Input2
-                    value={formState.botToken}
+                    value={formState.name}
                     onChange={(e) =>
                       setFormState((prev) => ({
                         ...prev,
-                        botToken: e.target.value,
-                      }))
-                    }
-                    inputProps={{ type: 'password' }}
-                    disabled={loading}
-                  />
-                </FormField>
-                <FormField label="Bot ID">
-                  <Input2
-                    value={formState.botId}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        botId: e.target.value,
+                        name: e.target.value,
                       }))
                     }
                     disabled={loading}
                   />
                 </FormField>
-              </>
-            ) : (
-              <>
-                <FormField
-                  required
-                  label="Client ID"
-                >
-                  <Input2
-                    value={formState.clientId}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        clientId: e.target.value,
-                      }))
+                {formState.type === ChatProviderConnectionType.Slack ? (
+                  <>
+                    <FormField
+                      required
+                      label="App-level token"
+                      hint="Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here."
+                    >
+                      <Input2
+                        value={formState.appToken}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            appToken: e.target.value,
+                          }))
+                        }
+                        inputProps={{ type: 'password' }}
+                        disabled={loading}
+                      />
+                    </FormField>
+                    <FormField
+                      required
+                      label="Bot user OAuth token"
+                      hint="Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode."
+                    >
+                      <Input2
+                        value={formState.botToken}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            botToken: e.target.value,
+                          }))
+                        }
+                        inputProps={{ type: 'password' }}
+                        disabled={loading}
+                      />
+                    </FormField>
+                  </>
+                ) : (
+                  <>
+                    <FormField
+                      required
+                      label="Client ID"
+                    >
+                      <Input2
+                        value={formState.clientId}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            clientId: e.target.value,
+                          }))
+                        }
+                        disabled={loading}
+                      />
+                    </FormField>
+                    <FormField
+                      required
+                      label="Tenant ID"
+                    >
+                      <Input2
+                        value={formState.tenantId}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            tenantId: e.target.value,
+                          }))
+                        }
+                        disabled={loading}
+                      />
+                    </FormField>
+                    <FormField
+                      required
+                      label="Client secret"
+                    >
+                      <Input2
+                        value={formState.clientSecret}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            clientSecret: e.target.value,
+                          }))
+                        }
+                        inputProps={{ type: 'password' }}
+                        disabled={loading}
+                      />
+                    </FormField>
+                  </>
+                )}
+                <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
+                  <Button
+                    secondary
+                    startIcon={<ReturnIcon />}
+                    onClick={() =>
+                      navigate(
+                        routeState?.returnPath ??
+                          getWorkbenchChatbotsAbsPath(workbenchId),
+                        { state: { draftState: routeState?.draftState } }
+                      )
                     }
                     disabled={loading}
-                  />
-                </FormField>
-                <FormField
-                  required
-                  label="Tenant ID"
-                >
-                  <Input2
-                    value={formState.tenantId}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        tenantId: e.target.value,
-                      }))
-                    }
-                    disabled={loading}
-                  />
-                </FormField>
-                <FormField
-                  required
-                  label="Client secret"
-                >
-                  <Input2
-                    value={formState.clientSecret}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        clientSecret: e.target.value,
-                      }))
-                    }
-                    inputProps={{ type: 'password' }}
-                    disabled={loading}
-                  />
-                </FormField>
-              </>
-            )}
-            <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => upsertChatProviderConnection()}
+                    loading={loading}
+                    disabled={!canSave}
+                  >
+                    Save
+                  </Button>
+                </StickyActionsFooterSC>
+              </Flex>
+            </FormCardSC>
+          </Flex>
+          {!isOpen && !!setupGuideMarkdownPath && (
+            <div css={{ width: 200 }}>
               <Button
                 secondary
-                startIcon={<ReturnIcon />}
+                startIcon={<SidePanelOpenIcon />}
                 onClick={() =>
-                  navigate(
-                    routeState?.returnPath ??
-                      getWorkbenchChatbotsAbsPath(workbenchId),
-                    { state: { draftState: routeState?.draftState } }
-                  )
+                  openSetupGuidePanel({
+                    documentationUrl: setupGuideDocumentationUrl,
+                    markdownPath: setupGuideMarkdownPath,
+                  })
                 }
-                disabled={loading}
+                width="100%"
+                css={{ whiteSpace: 'nowrap' }}
               >
-                Back
+                Setup guide
               </Button>
-              <Button
-                onClick={() => upsertChatProviderConnection()}
-                loading={loading}
-                disabled={!canSave}
-              >
-                Save
-              </Button>
-            </StickyActionsFooterSC>
-          </Flex>
-        </FormCardSC>
+            </div>
+          )}
+        </Flex>
       </Flex>
     </Flex>
   )

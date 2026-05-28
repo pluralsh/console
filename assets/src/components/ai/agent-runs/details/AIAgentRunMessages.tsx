@@ -73,7 +73,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
           Array.isArray(row) ? (row[0]?.id ?? 'tool-group') : (row.id ?? '')
         }
         itemGap="small"
-        style={{ padding: `${spacing.large}px ${spacing.xxxlarge}px` }}
+        style={{ padding: spacing.large }}
         renderer={({ rowData }) =>
           Array.isArray(rowData) ? (
             <ChatToolCallGroup
@@ -86,8 +86,8 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
               {...rowData}
               {...chatMessagePropsShared}
               userMsgWrapperStyle={{
-                background: colors['fill-two'],
-                borderColor: colors['border-fill-two'],
+                background: colors['fill-one'],
+                borderColor: colors['border-fill-one'],
                 '& *': { color: colors.text },
               }}
             />
@@ -103,11 +103,11 @@ const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   flexDirection: 'column',
-  flex: 1,
-  minHeight: 610,
-  border: theme.borders.default,
+  flex: '1 1 0',
+  minHeight: 0,
+  overflow: 'hidden',
   borderRadius: theme.borderRadiuses.large,
-  background: theme.colors['fill-one'],
+  background: theme.colors['fill-zero'],
 }))
 
 const chatMessagePropsShared = {

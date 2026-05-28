@@ -216,7 +216,7 @@ function WorkbenchPanelItem({
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor: theme.colors['fill-zero'],
   borderRight: theme.borders.default,
   display: 'flex',
   flexDirection: 'column',

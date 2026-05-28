@@ -119,15 +119,16 @@ export function AIAgentRun() {
     <WrapperSC>
       <Flex
         direction="column"
-        gap="large"
         flex={1}
         minWidth={0}
+        height="100%"
         paddingRight={spacing.medium}
-        overflow="auto"
+        overflow="hidden"
       >
         <StretchedFlex
           gap="xxxxlarge"
           alignItems="start"
+          css={{ paddingBottom: spacing.large }}
         >
           <StackedText
             truncate
@@ -177,16 +178,6 @@ export function AIAgentRun() {
             analysis={run.analysis}
           />
         ) : null}
-        {!isRunning && (
-          <StackedText
-            first="Agent activity"
-            firstPartialType="body2Bold"
-            firstColor="text"
-            second="Trace agent progress during this run"
-            secondPartialType="body2"
-            secondColor="text-light"
-          />
-        )}
         {!!run ? (
           <AIAgentRunMessages run={run} />
         ) : runLoading ? (

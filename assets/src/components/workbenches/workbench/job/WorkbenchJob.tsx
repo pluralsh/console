@@ -106,7 +106,13 @@ export function WorkbenchJob() {
           />
         )}
 
-        <StretchedFlex gap="xlarge">
+        <StretchedFlex
+          gap="xlarge"
+          css={{
+            borderBottom: theme.borders.default,
+            paddingBottom: theme.spacing.large,
+          }}
+        >
           <StackedText
             truncate
             loading={isLoading}
@@ -203,7 +209,6 @@ const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
   height: '100%',
   width: '100%',
   minWidth: 0,
