@@ -605,6 +605,8 @@ type RootQueryType {
 
   issueWebhooks(after: String, first: Int, before: String, last: Int): IssueWebhookConnection
 
+  searchConversations(chatConnectionId: ID!, query: String): [ChatbotConversation]
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -1802,6 +1804,12 @@ type Issue {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
+type ChatbotConversation {
+  id: ID!
+  name: String!
 }
 
 type IssueConnection {

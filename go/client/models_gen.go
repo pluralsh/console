@@ -1517,10 +1517,13 @@ type ChatProviderConnectionAttributes struct {
 type ChatProviderConnectionConfiguration struct {
 	// the configuration for the slack connection
 	Slack *SlackConnectionConfiguration `json:"slack,omitempty"`
+	// the configuration for the teams connection
+	Teams *TeamsConnectionConfiguration `json:"teams,omitempty"`
 }
 
 type ChatProviderConnectionConfigurationAttributes struct {
 	Slack *SlackConnectionConfigurationAttributes `json:"slack,omitempty"`
+	Teams *TeamsConnectionConfigurationAttributes `json:"teams,omitempty"`
 }
 
 type ChatProviderConnectionConnection struct {
@@ -1609,6 +1612,12 @@ type ChatTypeAttributes struct {
 	File   *ChatFile         `json:"file,omitempty"`
 	Tool   *ChatTool         `json:"tool,omitempty"`
 	PrCall *PrCallAttributes `json:"prCall,omitempty"`
+}
+
+// A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams
+type ChatbotConversation struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type ChatbotMessage struct {
@@ -9038,6 +9047,19 @@ type TargetRef struct {
 	APIVersion *string `json:"apiVersion,omitempty"`
 	Kind       *string `json:"kind,omitempty"`
 	Name       *string `json:"name,omitempty"`
+}
+
+type TeamsConnectionConfiguration struct {
+	// the client id for the teams connection
+	ClientID *string `json:"clientId,omitempty"`
+	// the tenant id for the teams connection
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type TeamsConnectionConfigurationAttributes struct {
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	TenantID     string `json:"tenantId"`
 }
 
 // Additional context used to template service metadata during global service reconciliation
