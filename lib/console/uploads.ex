@@ -46,6 +46,7 @@ defmodule Console.Uploads do
   # Override the storage directory:
   def storage_dir(_version, {_file, %Workbench{id: id}}), do: "#{Console.conf(:object_store_path)}/workbenches/uploads/#{id}"
   def storage_dir(_version, {_file, %AgentRunUpload{id: id}}), do: "#{Console.conf(:object_store_path)}/agents/uploads/#{id}"
+  def __storage, do: Console.Uploads.Storage
 
   # Provide a default URL if there hasn't been a file uploaded
   # def default_url(version, scope) do

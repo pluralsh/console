@@ -10,6 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 type TarSessionArchiveWriter struct{}
@@ -18,6 +22,11 @@ type tarSourceWriter struct {
 	tw          *tar.Writer
 	source      SessionSource
 	archivePath string
+	entries     []string
+	skipped     []string
+	files       int
+	dirs        int
+	links       int
 }
 
 func (in *TarSessionArchiveWriter) Write(path string, manifest *SessionManifest, source *SessionSource) error {
@@ -76,7 +85,22 @@ func (in *TarSessionArchiveWriter) writeSource(tw *tar.Writer, source SessionSou
 		source:      source,
 		archivePath: filepath.ToSlash(strings.TrimPrefix(filepath.Clean(source.ArchivePath), string(filepath.Separator))),
 	}
-	return writer.Write()
+	if err := writer.Write(); err != nil {
+		return err
+	}
+	klog.V(log.LogLevelInfo).InfoS(
+		"agent session source archived",
+		"sourcePath", source.Path,
+		"archivePath", writer.archivePath,
+		"files", writer.files,
+		"dirs", writer.dirs,
+		"links", writer.links,
+		"entries", limitStrings(writer.entries, 50),
+		"entryCount", len(writer.entries),
+		"skipped", limitStrings(writer.skipped, 25),
+		"skippedCount", len(writer.skipped),
+	)
+	return nil
 }
 
 func (in *tarSourceWriter) Write() error {
@@ -94,6 +118,7 @@ func (in *tarSourceWriter) writeEntry(path string, entry os.DirEntry) error {
 		return err
 	}
 	if in.shouldExclude(rel, entry) {
+		in.skipped = append(in.skipped, filepath.ToSlash(rel))
 		if entry.IsDir() {
 			return filepath.SkipDir
 		}
@@ -110,9 +135,11 @@ func (in *tarSourceWriter) writeEntry(path string, entry os.DirEntry) error {
 		return err
 	}
 
-	if err := in.writeHeader(info, link, in.entryName(rel)); err != nil {
+	name := in.entryName(rel)
+	if err := in.writeHeader(info, link, name); err != nil {
 		return err
 	}
+	in.recordEntry(name, entry, link)
 
 	if entry.IsDir() || link != "" || !info.Mode().IsRegular() {
 		return nil
@@ -176,4 +203,23 @@ func (in *tarSourceWriter) writeFile(path string) error {
 		return fmt.Errorf("write tar file %q: %w", path, err)
 	}
 	return nil
+}
+
+func (in *tarSourceWriter) recordEntry(name string, entry os.DirEntry, link string) {
+	in.entries = append(in.entries, filepath.ToSlash(name))
+	switch {
+	case link != "":
+		in.links++
+	case entry.IsDir():
+		in.dirs++
+	default:
+		in.files++
+	}
+}
+
+func limitStrings(values []string, max int) []string {
+	if len(values) <= max {
+		return values
+	}
+	return values[:max]
 }

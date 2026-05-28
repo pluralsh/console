@@ -55,6 +55,19 @@ func (in *ArtifactBuilder) Build(_ context.Context, opts BuildArtifactsOptions) 
 		return nil, fmt.Errorf("agent run is not set")
 	}
 
+	klog.V(log.LogLevelInfo).InfoS(
+		"building agent run upload artifacts",
+		"agentRunID", in.config.Run.ID,
+		"provider", opts.Provider,
+		"sessionID", opts.SessionID,
+		"workDir", in.config.WorkDir,
+		"repositoryDir", in.config.RepositoryDir,
+		"uploadsDir", in.config.UploadsDir(),
+		"sessionSourcePath", opts.Source.Path,
+		"sessionArchivePath", opts.Source.ArchivePath,
+		"sessionExcludeNames", opts.Source.ExcludeNames,
+	)
+
 	if err := in.createUploadsDir(); err != nil {
 		return nil, err
 	}
@@ -73,14 +86,22 @@ func (in *ArtifactBuilder) Build(_ context.Context, opts BuildArtifactsOptions) 
 			"patch was not generated since there were no changes",
 			"agentRunID", in.config.Run.ID,
 			"repositoryDir", in.config.RepositoryDir,
+			"sessionPath", sessionPath,
 		)
 		return &UploadArtifacts{SessionPath: sessionPath}, nil
 	}
 
-	return &UploadArtifacts{
+	result := &UploadArtifacts{
 		SessionPath: sessionPath,
 		PatchPath:   patchPath,
-	}, nil
+	}
+	klog.V(log.LogLevelInfo).InfoS(
+		"agent run upload artifacts built",
+		"agentRunID", in.config.Run.ID,
+		"sessionPath", result.SessionPath,
+		"patchPath", result.PatchPath,
+	)
+	return result, nil
 }
 
 func (in *ArtifactBuilder) createUploadsDir() error {
@@ -99,6 +120,14 @@ func (in *ArtifactBuilder) writeSessionArchive(opts BuildArtifactsOptions) (stri
 	sessionPath := filepath.Join(in.config.UploadsDir(), sessionTarName)
 	if err := in.sessionWriter.Write(sessionPath, manifest, source); err != nil {
 		return "", err
+	}
+	if info, err := os.Stat(sessionPath); err == nil {
+		klog.V(log.LogLevelInfo).InfoS(
+			"agent session archive written",
+			"agentRunID", in.config.Run.ID,
+			"path", sessionPath,
+			"size", info.Size(),
+		)
 	}
 
 	return sessionPath, nil
@@ -145,15 +174,33 @@ func (in *ArtifactBuilder) sessionManifest(opts BuildArtifactsOptions) (*Session
 
 func (in *ArtifactBuilder) sessionSource(source SessionSource) (*SessionSource, error) {
 	if source.Path == "" || source.ArchivePath == "" {
+		klog.V(log.LogLevelInfo).InfoS(
+			"agent session source not configured",
+			"agentRunID", in.config.Run.ID,
+			"sourcePath", source.Path,
+			"archivePath", source.ArchivePath,
+		)
 		return nil, nil
 	}
 
 	if _, err := os.Stat(source.Path); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
+			klog.V(log.LogLevelInfo).InfoS(
+				"agent session source does not exist",
+				"agentRunID", in.config.Run.ID,
+				"sourcePath", source.Path,
+			)
 			return nil, nil
 		}
 		return nil, fmt.Errorf("stat session source %q: %w", source.Path, err)
 	}
 
+	klog.V(log.LogLevelInfo).InfoS(
+		"agent session source found",
+		"agentRunID", in.config.Run.ID,
+		"sourcePath", source.Path,
+		"archivePath", source.ArchivePath,
+		"excludeNames", source.ExcludeNames,
+	)
 	return &source, nil
 }

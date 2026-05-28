@@ -26,8 +26,15 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 		klog.ErrorS(err, "failed to collect agent run upload artifacts", "agentRunID", in.agentRunID)
 	}
 	if artifacts == nil || (artifacts.SessionPath == "" && artifacts.PatchPath == "") {
+		klog.V(log.LogLevelInfo).InfoS("no agent run upload artifacts collected", "agentRunID", in.agentRunID)
 		return
 	}
+	klog.V(log.LogLevelInfo).InfoS(
+		"agent run upload artifacts collected",
+		"agentRunID", in.agentRunID,
+		"sessionPath", artifacts.SessionPath,
+		"patchPath", artifacts.PatchPath,
+	)
 
 	attrs, closeFiles, err := in.uploadAttributes(artifacts)
 	if err != nil {
@@ -36,6 +43,7 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 	}
 	defer closeFiles()
 
+	in.logUploadAttributes(attrs)
 	if _, err := in.consoleClient.CreateAgentRunUpload(ctx, in.agentRunID, attrs); err != nil {
 		klog.ErrorS(err, "failed to upload agent run artifacts", "agentRunID", in.agentRunID)
 		return
@@ -65,6 +73,14 @@ func (in *agentRunController) uploadAttributes(artifacts *artifacts.UploadArtifa
 		}
 		files = append(files, file)
 		attrs.Session = upload
+		klog.V(log.LogLevelInfo).InfoS(
+			"prepared agent run session upload",
+			"agentRunID", in.agentRunID,
+			"path", artifacts.SessionPath,
+			"filename", upload.Filename,
+			"size", upload.Size,
+			"contentType", upload.ContentType,
+		)
 	}
 
 	if artifacts.PatchPath != "" {
@@ -75,6 +91,14 @@ func (in *agentRunController) uploadAttributes(artifacts *artifacts.UploadArtifa
 		}
 		files = append(files, file)
 		attrs.Patch = upload
+		klog.V(log.LogLevelInfo).InfoS(
+			"prepared agent run patch upload",
+			"agentRunID", in.agentRunID,
+			"path", artifacts.PatchPath,
+			"filename", upload.Filename,
+			"size", upload.Size,
+			"contentType", upload.ContentType,
+		)
 	}
 
 	return attrs, closeF, nil
@@ -98,6 +122,37 @@ func (in *agentRunController) newUpload(path string) (*graphql.Upload, *os.File,
 		Size:        info.Size(),
 		ContentType: in.contentType(path),
 	}, file, nil
+}
+
+func (in *agentRunController) logUploadAttributes(attrs gqlclient.AgentRunUploadAttributes) {
+	values := []any{
+		"agentRunID", in.agentRunID,
+		"hasSession", attrs.Session != nil,
+		"hasScreenRecording", attrs.ScreenRecording != nil,
+		"hasPatch", attrs.Patch != nil,
+	}
+	if attrs.Session != nil {
+		values = append(values,
+			"sessionFilename", attrs.Session.Filename,
+			"sessionSize", attrs.Session.Size,
+			"sessionContentType", attrs.Session.ContentType,
+		)
+	}
+	if attrs.ScreenRecording != nil {
+		values = append(values,
+			"screenRecordingFilename", attrs.ScreenRecording.Filename,
+			"screenRecordingSize", attrs.ScreenRecording.Size,
+			"screenRecordingContentType", attrs.ScreenRecording.ContentType,
+		)
+	}
+	if attrs.Patch != nil {
+		values = append(values,
+			"patchFilename", attrs.Patch.Filename,
+			"patchSize", attrs.Patch.Size,
+			"patchContentType", attrs.Patch.ContentType,
+		)
+	}
+	klog.V(log.LogLevelInfo).InfoS("creating agent run upload with attributes", values...)
 }
 
 func (in *agentRunController) contentType(path string) string {
