@@ -31,18 +31,18 @@ func (in *DownloadManifests) Install(s *server.MCPServer) {
 		mcp.NewTool(
 			in.id.String(),
 			mcp.WithDescription(in.description),
-		mcp.WithString("cluster",
-			mcp.Required(),
-			mcp.Description("Handle of the Plural cluster the service is deployed to. "+
-				"This is the `.spec.handle` field on the Cluster CR, not its metadata.name. "+
-				"Examples: 'mgmt', 'prod-eu-1'."),
-		),
-		mcp.WithString("service",
-			mcp.Required(),
-			mcp.Description("Name of the ServiceDeployment whose rendered manifests should be downloaded. "+
-				"Use `.metadata.name` from the ServiceDeployment CR. "+
-				"For a GlobalService, this is the name of the per-cluster child ServiceDeployment it created."),
-		),
+			mcp.WithString("cluster",
+				mcp.Required(),
+				mcp.Description("Handle of the Plural cluster the service is deployed to. "+
+					"This is the `.spec.handle` field on the Cluster CR, not its metadata.name. "+
+					"Examples: 'mgmt', 'prod-eu-1'."),
+			),
+			mcp.WithString("service",
+				mcp.Required(),
+				mcp.Description("Name of the ServiceDeployment whose rendered manifests should be downloaded. "+
+					"Use `.metadata.name` from the ServiceDeployment CR. "+
+					"For a GlobalService, this is the name of the per-cluster child ServiceDeployment it created."),
+			),
 		),
 		in.handler,
 	)
