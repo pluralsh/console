@@ -485,6 +485,7 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   id
   channel
   prompt
+  messageBehavior
   userId
   insertedAt
   updatedAt

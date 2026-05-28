@@ -10,9 +10,9 @@ defmodule Console.Chat.Utils do
     Workbenches.workbench_chatbot(id, channel)
     |> Repo.preload([user: [:groups]])
     |> case do
-      %WorkbenchChatbot{user: %User{}  = user, prompt: prompt} = chatbot ->
+      %WorkbenchChatbot{user: %User{}  = user, prompt: prompt, message_behavior: behavior} = chatbot ->
         Workbenches.create_workbench_job(%{
-          prompt: prompt(chat: conn, msg: msg, channel: chan_ref, custom: prompt),
+          prompt: prompt(chat: conn, msg: msg, channel: chan_ref, custom: prompt, behavior: behavior),
           workbench_id: chatbot.workbench_id,
           chatbot_message: %{message: msg.text, channel: channel, chat_connection_id: id}
         }, chatbot.workbench_id, user)

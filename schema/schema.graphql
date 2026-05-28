@@ -2495,6 +2495,11 @@ enum WorkbenchSkillSubagent {
   SEARCH
 }
 
+enum WorkbenchChatbotMessageBehavior {
+  REPLY
+  MESSAGE
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -2710,6 +2715,9 @@ input WorkbenchChatbotAttributes {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "how the chatbot posts responses in the channel"
+  messageBehavior: WorkbenchChatbotMessageBehavior
 
   "user this chatbot runs as; must have read access to the workbench"
   userId: ID
@@ -3852,6 +3860,9 @@ type WorkbenchChatbot {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "how the chatbot posts responses in the channel"
+  messageBehavior: WorkbenchChatbotMessageBehavior!
 
   "user this chatbot runs as"
   userId: ID

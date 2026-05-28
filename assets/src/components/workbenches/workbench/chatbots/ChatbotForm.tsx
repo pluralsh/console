@@ -23,6 +23,7 @@ import {
   useWorkbenchChatbotQuery,
   useWorkbenchQuery,
   WorkbenchChatbotFragment,
+  WorkbenchChatbotMessageBehavior,
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -51,6 +52,8 @@ import {
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
+  messageBehaviorLabel,
+  messageBehaviorOptions,
 } from './utils'
 import { ChatbotChannelSelect } from './ChatbotChannelSelect'
 
@@ -58,6 +61,7 @@ type ChatbotFormState = {
   chatConnectionId: string
   channel: string
   prompt: string
+  messageBehavior: WorkbenchChatbotMessageBehavior
   userId: string
 }
 
@@ -150,6 +154,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
     chatConnectionId: formState.chatConnectionId,
     channel,
     prompt: prompt || null,
+    messageBehavior: formState.messageBehavior,
     userId: formState.userId,
   }
 
@@ -384,6 +389,30 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                   }
                   disabled={isSaving}
                 />
+                <FormField
+                  label="Message behavior"
+                  hint="How the chatbot posts responses when a job completes."
+                >
+                  <Select
+                    selectedKey={formState.messageBehavior}
+                    isDisabled={isSaving}
+                    label={messageBehaviorLabel(formState.messageBehavior)}
+                    onSelectionChange={(key) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        messageBehavior: key as WorkbenchChatbotMessageBehavior,
+                      }))
+                    }
+                  >
+                    {messageBehaviorOptions.map((option) => (
+                      <ListBoxItem
+                        key={option.value}
+                        label={option.label}
+                        description={option.description}
+                      />
+                    ))}
+                  </Select>
+                </FormField>
                 <WorkbenchAccessibleUserSelect
                   key={workbenchId}
                   workbenchId={workbenchId}
@@ -447,6 +476,8 @@ function getInitialFormState(
     chatConnectionId: chatbot?.chatConnection?.id ?? '',
     channel: chatbot?.channel ?? '',
     prompt: chatbot?.prompt ?? '',
+    messageBehavior:
+      chatbot?.messageBehavior ?? WorkbenchChatbotMessageBehavior.Reply,
     userId: chatbot?.userId ?? defaultUserId ?? '',
   }
 }
@@ -458,6 +489,7 @@ function getAttributesFromState(formState: ChatbotFormState) {
     chatConnectionId: formState.chatConnectionId,
     channel: formState.channel.trim(),
     prompt: prompt || null,
+    messageBehavior: formState.messageBehavior,
     userId: formState.userId,
   }
 }

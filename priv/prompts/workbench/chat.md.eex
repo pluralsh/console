@@ -4,10 +4,15 @@ You've been mentioned in <%= @chat.type %> with the following message (id=<%= @m
 
 Do what you can to help the user with their request.
 
+<%= if @behavior == :message do %>
 You should respond in the channel once you've completed the job, and react to the original message to indicate you're working on it.
+<% else %>
+You should reply to the original message once you've completed the job (you have the message id to use above), and react to the original message to indicate you're working on it.  All text responses should be threaded replies.
+<% end %> Once done, add a final reaction to indicate completion.
+
 
 <%= if is_binary(@custom) && byte_size(@custom) > 0 do %>
-There are also cusom instructions for this job to keep in mind:
+There are also custom instructions for this job to keep in mind:
 
 <%= @custom %>
 <% end %>

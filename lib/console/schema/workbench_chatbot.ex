@@ -3,9 +3,12 @@ defmodule Console.Schema.WorkbenchChatbot do
   alias Console.Schema.{ChatConnection, PolicyBinding, User, Workbench}
   alias Console.Deployments.Policies.Rbac
 
+  defenum MessageBehavior, reply: 0, message: 1
+
   schema "workbench_chatbots" do
     field :channel, :string
     field :prompt,  :string
+    field :message_behavior, MessageBehavior, default: :reply
 
     belongs_to :workbench,       Workbench
     belongs_to :chat_connection, ChatConnection
@@ -51,7 +54,7 @@ defmodule Console.Schema.WorkbenchChatbot do
     end)
   end
 
-  @valid ~w(workbench_id chat_connection_id user_id channel prompt)a
+  @valid ~w(workbench_id message_behavior chat_connection_id user_id channel prompt)a
 
   def changeset(model, attrs \\ %{}) do
     model

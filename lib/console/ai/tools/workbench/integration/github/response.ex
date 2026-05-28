@@ -19,6 +19,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Response do
       {_, %{"items" => items} = res, _}, {more, acc} ->
         {more || Map.get(res, "incomplete_results", false), acc ++ items}
       %{} = item, {more, items} -> {more, [item | items]}
+      _, {_, items} -> {false, items}
     end)
 
     %{

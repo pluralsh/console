@@ -11,6 +11,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_job_result_todo_status, Console.Schema.WorkbenchJobResult.TodoStatus
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
   ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
+  ecto_enum :workbench_chatbot_message_behavior, Console.Schema.WorkbenchChatbot.MessageBehavior
 
   enum :eval_results_period do
     value :day
@@ -127,6 +128,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :chat_connection_id,      :id, description: "chat provider connection id (required for create)"
     field :channel,                 :string, description: "external channel identifier (globally unique)"
     field :prompt,                  :string, description: "optional prompt text applied when this chatbot runs"
+    field :message_behavior,        :workbench_chatbot_message_behavior, description: "how the chatbot posts responses in the channel"
     field :user_id,                 :id, description: "user this chatbot runs as; must have read access to the workbench"
     field :override_chatbot_user,   :boolean, description: "when true on update, sets userId to the authenticated user"
   end
@@ -811,6 +813,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :id,      non_null(:string), description: "the id of this chatbot binding"
     field :channel, non_null(:string), description: "external channel identifier (globally unique)"
     field :prompt,  :string, description: "optional prompt text applied when this chatbot runs"
+    field :message_behavior, non_null(:workbench_chatbot_message_behavior), description: "how the chatbot posts responses in the channel"
     field :user_id, :id, description: "user this chatbot runs as"
 
     field :workbench,       :workbench, resolve: dataloader(Deployments), description: "the workbench this chatbot is bound to"

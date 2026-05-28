@@ -2,6 +2,7 @@ import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
+  Code,
   Flex,
   FlexProps,
   IconFrame,
@@ -518,4 +519,8 @@ const PromptCardSC = styled(Card)(({ theme }) => ({
   marginLeft: 'auto',
   marginTop: theme.spacing.small,
   marginBottom: theme.spacing.small,
+  [`& ${Code}`]: {
+    backgroundColor: theme.colors['fill-two'],
+    borderColor: theme.colors['border-fill-two'],
+  },
 }))

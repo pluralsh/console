@@ -9,6 +9,10 @@
     "text": {
       "type": "string",
       "description": "Plain-text message body for the channel (Slack mrkdwn formatting is supported by Slack when using chat.postMessage).  This should be in Slack mkdwn format, not necessarily CommonMark markdown"
+    },
+    "thread_ts": {
+      "type": "string",
+      "description": "Optional parent message timestamp (`ts`) to post this message as a thread reply. Use the `ts` from slack_list_messages, the original mention message id, or a prior slack_post_message response."
     }
   },
   "required": ["channel_id", "text"],

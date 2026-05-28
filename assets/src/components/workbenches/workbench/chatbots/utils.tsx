@@ -3,15 +3,41 @@ import {
   MsTeamsLogoIcon,
   SlackLogoIcon,
 } from '@pluralsh/design-system'
-import { ChatProviderConnectionType as ChatProviderConnectionTypeGql } from 'generated/graphql'
+import {
+  ChatProviderConnectionType,
+  WorkbenchChatbotMessageBehavior,
+} from 'generated/graphql'
+
+export const messageBehaviorOptions = [
+  {
+    value: WorkbenchChatbotMessageBehavior.Reply,
+    label: 'Threaded reply',
+    description:
+      'Replies to the mention in a thread; all responses stay threaded',
+  },
+  {
+    value: WorkbenchChatbotMessageBehavior.Message,
+    label: 'Channel post',
+    description: 'Posts in the channel when the job completes',
+  },
+] as const
+
+export function messageBehaviorLabel(
+  behavior?: Nullable<WorkbenchChatbotMessageBehavior>
+) {
+  return (
+    messageBehaviorOptions.find((option) => option.value === behavior)?.label ??
+    messageBehaviorOptions[0].label
+  )
+}
 
 export function chatProviderConnectionIcon(
-  type?: Nullable<ChatProviderConnectionTypeGql>
+  type?: Nullable<ChatProviderConnectionType>
 ) {
   switch (type) {
-    case ChatProviderConnectionTypeGql.Slack:
+    case ChatProviderConnectionType.Slack:
       return <SlackLogoIcon fullColor />
-    case ChatProviderConnectionTypeGql.Teams:
+    case ChatProviderConnectionType.Teams:
       return <MsTeamsLogoIcon fullColor />
     default:
       return <BotIcon />
@@ -19,14 +45,24 @@ export function chatProviderConnectionIcon(
 }
 
 export function chatProviderConnectionLabel(
-  type?: Nullable<ChatProviderConnectionTypeGql>
+  type?: Nullable<ChatProviderConnectionType>
 ) {
   switch (type) {
-    case ChatProviderConnectionTypeGql.Slack:
+    case ChatProviderConnectionType.Slack:
       return 'Slack'
-    case ChatProviderConnectionTypeGql.Teams:
+    case ChatProviderConnectionType.Teams:
       return 'Microsoft Teams'
     default:
       return 'Chatbot'
   }
+}
+
+export function formatChatbotChannelLabel({
+  type,
+  channel,
+}: {
+  type?: Nullable<ChatProviderConnectionType>
+  channel: string
+}) {
+  return type === ChatProviderConnectionType.Slack ? `#${channel}` : channel
 }
