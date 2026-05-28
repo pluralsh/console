@@ -314,15 +314,40 @@ if is_set("CONSOLE_AI_DEFAULTS") do
 end
 
 if is_set("CONSOLE_S3_BUCKET") do
+  s3_region = get_env("CONSOLE_S3_REGION") || "us-east-1"
+  s3_endpoint = get_env("CONSOLE_S3_ENDPOINT")
+
+  s3_config =
+    if s3_endpoint do
+      uri =
+        case URI.parse(s3_endpoint) do
+          %URI{host: nil} -> URI.parse("https://#{s3_endpoint}")
+          uri -> uri
+        end
+
+      [
+        scheme: "#{uri.scheme || "https"}://",
+        host: uri.host,
+        port: uri.port || if(uri.scheme == "http", do: 80, else: 443),
+        region: s3_region
+      ]
+    else
+      [region: s3_region]
+    end
+
   config :console,
     object_store: true,
     object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+
+  config :ex_aws,
+    region: s3_region,
+    s3: s3_config
 
   config :waffle,
     storage: Waffle.Storage.S3,
     bucket: get_env("CONSOLE_S3_BUCKET"),
     asset_host: get_env("CONSOLE_S3_ENDPOINT"),
-    region: get_env("CONSOLE_S3_REGION")
+    region: s3_region
 end
 
 if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
