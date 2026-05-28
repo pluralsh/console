@@ -347,7 +347,8 @@ if is_set("CONSOLE_S3_BUCKET") do
     storage: Waffle.Storage.S3,
     bucket: get_env("CONSOLE_S3_BUCKET"),
     asset_host: get_env("CONSOLE_S3_ENDPOINT"),
-    region: s3_region
+    region: s3_region,
+    virtual_host: is_nil(s3_endpoint)
 end
 
 if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do

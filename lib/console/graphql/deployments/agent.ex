@@ -479,7 +479,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   defp upload_url(%AgentRunUpload{} = upload, field) do
     case Map.get(upload, field) do
       nil -> {:ok, nil}
-      file -> {:ok, Uploads.url({file, upload}, :original)}
+      file -> {:ok, Uploads.url({file, upload}, :original, signed: true)}
     end
   end
 
