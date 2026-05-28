@@ -27,8 +27,9 @@ const (
 
 var (
 	stackRunDefaultContainerVersions = map[console.StackType]string{
-		console.StackTypeTerraform: "1.8",
-		console.StackTypeAnsible:   "latest",
+		console.StackTypeTerraform:  "1.8",
+		console.StackTypeAnsible:    "latest",
+		console.StackTypeTerragrunt: "1.0",
 	}
 
 	stackRunDefaultJobVolume = corev1.Volume{
