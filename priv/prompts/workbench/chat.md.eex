@@ -1,0 +1,13 @@
+You've been mentioned in <%= @chat.type %> with the following message (id=<%= @msg.id %>) in the <%= @channel.text %> (id=<%= @channel.id %>) channel:
+
+<%= @msg.text %>
+
+Do what you can to help the user with their request.
+
+You should respond in the channel once you've completed the job, and react to the original message to indicate you're working on it.
+
+<%= if is_binary(@custom) && byte_size(@custom) > 0 do %>
+There are also cusom instructions for this job to keep in mind:
+
+<%= @custom %>
+<% end %>

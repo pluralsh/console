@@ -5,7 +5,9 @@ Workbench chatbots connect to Slack through a Slack app running in **Socket Mode
 | Plural field | Slack token | Prefix | Used for |
 |--------------|-------------|--------|----------|
 | **App-level token** | App-level token | `xapp-` | Opens the Socket Mode WebSocket via [`apps.connections.open`](https://api.slack.com/methods/apps.connections.open). Requires the **`connections:write`** app-level scope. |
-| **Bot user OAuth token** | Bot User OAuth Token | `xoxb-` | Slack Web API calls (for example [`auth.test`](https://api.slack.com/methods/auth.test), posting messages, reading events). Requires **bot token scopes** from install. |
+| **Bot user OAuth token** | Bot User OAuth Token | `xoxb-` | Slack Web API calls in bound channels: read message history, post replies, add emoji reactions, resolve channel names. Requires **bot token scopes** from install (see below). |
+
+The **bot token** must be able to **read and write messages in the channels** where Workbench chatbots run, and to **read and add emoji reactions** on those messages (agents react to the mention to show progress, then post a reply when done). Socket Mode event subscriptions (`message.channels`, `app_mention`, etc.) only deliver events; posting and reacting still go through the Web API and need the scopes in the manifest.
 
 If Socket Mode fails to connect but the bot token seems fine, the problem is almost always the **app-level** token (wrong value, missing `connections:write`, or Socket Mode disabled on the app). Pasting an `xoxb-` token into the app-level field will not work.
 
@@ -20,7 +22,25 @@ Slack app manifests can enable Socket Mode and bot scopes, but they **do not** c
 
 ## 2) Slack app manifest
 
-The manifest below enables **Socket Mode** (`socket_mode_enabled: true`) and the bot event subscriptions Workbench chatbots need. After creation, confirm under **Socket Mode** in the app settings that Socket Mode is **on**.
+The manifest below enables **Socket Mode** (`socket_mode_enabled: true`), the **bot events** needed to receive mentions and channel messages, and the **bot token scopes** needed for agents to read history, post replies, and react in bound channels. After creation, confirm under **Socket Mode** in the app settings that Socket Mode is **on**.
+
+### Bot token scopes (channel messages and reactions)
+
+Slack does not use literal `message.read` / `message.write` scope names. For Workbench chatbots in a channel, grant these **Bot Token Scopes** on the `xoxb-` token:
+
+| What the bot must do | Slack bot token scope | Slack API / behavior |
+|----------------------|----------------------|----------------------|
+| Receive `@mention` and channel message events | `app_mentions:read` + bot events `app_mention`, `message.channels`, `message.groups` (see manifest) | Socket Mode delivers events; scopes alone are not enough without subscribing to events |
+| Read messages in a **public** channel | `channels:history` | [`conversations.history`](https://api.slack.com/methods/conversations.history) |
+| Read messages in a **private** channel | `groups:history` | Same; bot must be invited to the channel |
+| Post and edit messages in a channel | `chat:write` | [`chat.postMessage`](https://api.slack.com/methods/chat.postMessage), [`chat.update`](https://api.slack.com/methods/chat.update) |
+| View emoji reactions on messages | `reactions:read` | Inspect reactions when needed |
+| Add emoji reactions (e.g. 👀 while working) | `reactions:write` | [`reactions.add`](https://api.slack.com/methods/reactions.add) |
+| Resolve channel ID → name | `channels:read`, `groups:read` | [`conversations.info`](https://api.slack.com/methods/conversations.info) |
+
+Direct-message bindings also need `im:history`, `im:read`, and `message.im` (included in the manifest). Multi-party DMs use `mpim:history`, `mpim:read`, and `message.mpim`.
+
+**Minimum for a public or private channel chatbot:** `app_mentions:read`, `channels:read`, `channels:history`, `groups:read`, `groups:history`, `chat:write`, `reactions:read`, `reactions:write`, plus the matching `message.*` bot events.
 
 ```yaml
 display_information:
@@ -43,6 +63,8 @@ oauth_config:
       - im:read
       - mpim:history
       - mpim:read
+      - reactions:read
+      - reactions:write
 settings:
   event_subscriptions:
     bot_events:
@@ -59,12 +81,12 @@ settings:
 ## 3) Install the app and copy the bot token
 
 1. Open **OAuth & Permissions** in the Slack app settings.
-2. Confirm the **Bot Token Scopes** from the manifest are present.
-3. Select **Install to Workspace** or **Reinstall to Workspace**.
+2. Under **Bot Token Scopes**, confirm you have at least: `chat:write`, `channels:history`, `groups:history`, `reactions:read`, and `reactions:write` (plus the other scopes from the manifest if you use DMs or need `channels:read` / `groups:read`).
+3. Select **Install to Workspace** or **Reinstall to Workspace** so new scopes take effect on the token.
 4. Copy the **Bot User OAuth Token**. It starts with `xoxb-`.
 5. Paste it into Plural's **Bot user OAuth token** field when creating the chatbot connection.
 
-This token is **not** used for `apps.connections.open`. It authorizes the bot user for Web API calls after the Socket Mode connection is open.
+This token is **not** used for `apps.connections.open`. It authorizes the bot user for Web API calls after the Socket Mode connection is open. If you add scopes later, **reinstall** the app and update the token in Plural—existing tokens do not pick up new scopes until reinstall.
 
 ## 4) Create the app-level token
 
@@ -107,6 +129,9 @@ For private channels, invite the bot to the channel before expecting it to recei
 | Bot token works in Slack API tester but chatbot never connects | Socket Mode off | In the Slack app, open **Socket Mode** and turn it **on** (the manifest should do this; verify after edits). |
 | Connection saved but bot idle for several minutes | Startup polling | Wait a few minutes after save, or check server logs for the chat connection id. |
 | Bot never sees private channel messages | Bot not in channel | `/invite @YourBot` in that private channel. |
+| Mention works but agent never posts a reply | Missing `chat:write` or stale token | Add **`chat:write`**, reinstall, copy a fresh `xoxb-` token into Plural. |
+| Agent cannot add a 👀 / 👍 reaction on the mention | Missing reaction scopes | Add **`reactions:write`** (and **`reactions:read`** if you rely on reading existing reactions), reinstall, update the bot token. |
+| `missing_scope` / `not_allowed_token_type` on `chat.postMessage` or `reactions.add` | Bot token missing scopes | Compare **OAuth & Permissions → Bot Token Scopes** to the table in section 2; reinstall after changes. |
 
 ## Further reading
 

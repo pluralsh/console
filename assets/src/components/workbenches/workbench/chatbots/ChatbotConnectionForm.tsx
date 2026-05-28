@@ -3,9 +3,7 @@ import {
   Flex,
   FormField,
   Input2,
-  ListBoxItem,
   ReturnIcon,
-  Select,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -41,19 +39,10 @@ type RouteState = {
 }
 
 type ChatbotConnectionFormState = {
-  type: ChatProviderConnectionType
   name: string
   appToken: string
   botToken: string
-  clientId: string
-  clientSecret: string
-  tenantId: string
 }
-
-const SUPPORTED_CHAT_PROVIDER_TYPES = [
-  ChatProviderConnectionType.Slack,
-  ChatProviderConnectionType.Teams,
-] as const
 
 const SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH =
   '/setup-guides/chatbots/slack.md'
@@ -66,16 +55,11 @@ export function ChatbotConnectionForm() {
   const routeState = location.state as Nullable<RouteState>
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const { popToast } = useSimpleToast()
-  const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
-    useWebhookSetupGuidePanel()
+  const { isOpen, openSetupGuidePanel } = useWebhookSetupGuidePanel()
   const [formState, setFormState] = useState<ChatbotConnectionFormState>({
-    type: ChatProviderConnectionType.Slack,
     name: '',
     appToken: '',
     botToken: '',
-    clientId: '',
-    clientSecret: '',
-    tenantId: '',
   })
 
   const {
@@ -92,46 +76,21 @@ export function ChatbotConnectionForm() {
   const name = formState.name.trim()
   const appToken = formState.appToken.trim()
   const botToken = formState.botToken.trim()
-  const clientId = formState.clientId.trim()
-  const clientSecret = formState.clientSecret.trim()
-  const tenantId = formState.tenantId.trim()
-  const canSave =
-    !!name &&
-    (formState.type === ChatProviderConnectionType.Slack
-      ? !!appToken && !!botToken
-      : !!clientId && !!clientSecret && !!tenantId)
+  const canSave = !!name && !!appToken && !!botToken
 
-  const configuration =
-    formState.type === ChatProviderConnectionType.Slack
-      ? {
-          slack: {
-            appToken,
-            botToken,
-          },
-        }
-      : {
-          teams: {
-            clientId,
-            clientSecret,
-            tenantId,
-          },
-        }
-
-  const setupGuideMarkdownPath =
-    formState.type === ChatProviderConnectionType.Slack
-      ? SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH
-      : null
-  const setupGuideDocumentationUrl =
-    formState.type === ChatProviderConnectionType.Slack
-      ? SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL
-      : undefined
+  const configuration = {
+    slack: {
+      appToken,
+      botToken,
+    },
+  }
 
   const [upsertChatProviderConnection, { loading, error }] =
     useUpsertChatProviderConnectionMutation({
       variables: {
         attributes: {
           name,
-          type: formState.type,
+          type: ChatProviderConnectionType.Slack,
           configuration,
         },
       },
@@ -168,22 +127,12 @@ export function ChatbotConnectionForm() {
 
   useEffect(() => {
     if (!isOpen) return
-    if (!setupGuideMarkdownPath) {
-      closeSetupGuidePanel()
-      return
-    }
 
     openSetupGuidePanel({
-      documentationUrl: setupGuideDocumentationUrl,
-      markdownPath: setupGuideMarkdownPath,
+      documentationUrl: SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
+      markdownPath: SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
     })
-  }, [
-    isOpen,
-    setupGuideMarkdownPath,
-    setupGuideDocumentationUrl,
-    openSetupGuidePanel,
-    closeSetupGuidePanel,
-  ])
+  }, [isOpen, openSetupGuidePanel])
 
   if (workbenchError) return <GqlError error={workbenchError} />
 
@@ -228,30 +177,25 @@ export function ChatbotConnectionForm() {
                 <FormField
                   required
                   label="Chat platform"
-                  hint="Slack is fully supported for Workbench chatbots today."
+                  hint="Only Slack is supported for Workbench chatbots currently."
                 >
-                  <Select
-                    selectedKey={formState.type}
-                    label={chatProviderConnectionLabel(formState.type)}
-                    leftContent={chatProviderConnectionIcon(formState.type)}
-                    isDisabled={loading}
-                    onSelectionChange={(key) => {
-                      if (!key) return
-
-                      setFormState((prev) => ({
-                        ...prev,
-                        type: String(key) as ChatProviderConnectionType,
-                      }))
+                  <Flex
+                    align="center"
+                    gap="small"
+                    css={{
+                      border: '1px solid',
+                      borderColor: 'border',
+                      borderRadius: 8,
+                      padding: '10px 12px',
                     }}
                   >
-                    {SUPPORTED_CHAT_PROVIDER_TYPES.map((type) => (
-                      <ListBoxItem
-                        key={type}
-                        leftContent={chatProviderConnectionIcon(type)}
-                        label={chatProviderConnectionLabel(type)}
-                      />
-                    ))}
-                  </Select>
+                    {chatProviderConnectionIcon(
+                      ChatProviderConnectionType.Slack
+                    )}
+                    {chatProviderConnectionLabel(
+                      ChatProviderConnectionType.Slack
+                    )}
+                  </Flex>
                 </FormField>
                 <FormField
                   required
@@ -269,93 +213,40 @@ export function ChatbotConnectionForm() {
                     disabled={loading}
                   />
                 </FormField>
-                {formState.type === ChatProviderConnectionType.Slack ? (
-                  <>
-                    <FormField
-                      required
-                      label="App-level token"
-                      hint="Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here."
-                    >
-                      <Input2
-                        value={formState.appToken}
-                        onChange={(e) =>
-                          setFormState((prev) => ({
-                            ...prev,
-                            appToken: e.target.value,
-                          }))
-                        }
-                        inputProps={{ type: 'password' }}
-                        disabled={loading}
-                      />
-                    </FormField>
-                    <FormField
-                      required
-                      label="Bot user OAuth token"
-                      hint="Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode."
-                    >
-                      <Input2
-                        value={formState.botToken}
-                        onChange={(e) =>
-                          setFormState((prev) => ({
-                            ...prev,
-                            botToken: e.target.value,
-                          }))
-                        }
-                        inputProps={{ type: 'password' }}
-                        disabled={loading}
-                      />
-                    </FormField>
-                  </>
-                ) : (
-                  <>
-                    <FormField
-                      required
-                      label="Client ID"
-                    >
-                      <Input2
-                        value={formState.clientId}
-                        onChange={(e) =>
-                          setFormState((prev) => ({
-                            ...prev,
-                            clientId: e.target.value,
-                          }))
-                        }
-                        disabled={loading}
-                      />
-                    </FormField>
-                    <FormField
-                      required
-                      label="Tenant ID"
-                    >
-                      <Input2
-                        value={formState.tenantId}
-                        onChange={(e) =>
-                          setFormState((prev) => ({
-                            ...prev,
-                            tenantId: e.target.value,
-                          }))
-                        }
-                        disabled={loading}
-                      />
-                    </FormField>
-                    <FormField
-                      required
-                      label="Client secret"
-                    >
-                      <Input2
-                        value={formState.clientSecret}
-                        onChange={(e) =>
-                          setFormState((prev) => ({
-                            ...prev,
-                            clientSecret: e.target.value,
-                          }))
-                        }
-                        inputProps={{ type: 'password' }}
-                        disabled={loading}
-                      />
-                    </FormField>
-                  </>
-                )}
+                <FormField
+                  required
+                  label="App-level token"
+                  hint="Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here."
+                >
+                  <Input2
+                    value={formState.appToken}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        appToken: e.target.value,
+                      }))
+                    }
+                    inputProps={{ type: 'password' }}
+                    disabled={loading}
+                  />
+                </FormField>
+                <FormField
+                  required
+                  label="Bot user OAuth token"
+                  hint="Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode."
+                >
+                  <Input2
+                    value={formState.botToken}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        botToken: e.target.value,
+                      }))
+                    }
+                    inputProps={{ type: 'password' }}
+                    disabled={loading}
+                  />
+                </FormField>
                 <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
                   <Button
                     secondary
@@ -382,15 +273,16 @@ export function ChatbotConnectionForm() {
               </Flex>
             </FormCardSC>
           </Flex>
-          {!isOpen && !!setupGuideMarkdownPath && (
+          {!isOpen && (
             <div css={{ width: 200 }}>
               <Button
                 secondary
                 startIcon={<SidePanelOpenIcon />}
                 onClick={() =>
                   openSetupGuidePanel({
-                    documentationUrl: setupGuideDocumentationUrl,
-                    markdownPath: setupGuideMarkdownPath,
+                    documentationUrl:
+                      SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
+                    markdownPath: SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
                   })
                 }
                 width="100%"

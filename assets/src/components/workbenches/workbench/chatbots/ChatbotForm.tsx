@@ -376,7 +376,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                 <FormField
                   required
                   label="Attach a channel"
-                  hint="Slack channel ID to listen in, such as C..., G..., or D... Use the channel ID, not the #channel name."
+                  hint="Slack channel name to listen in, such as general or my-team-channel. Use the channel name without the # prefix."
                 >
                   <Input2
                     value={formState.channel}

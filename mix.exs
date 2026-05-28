@@ -86,7 +86,7 @@ defmodule Console.MixProject do
       {:configparser_ex, "~> 5.0"},
       {:crontab, "~> 1.1"},
       {:tentacat, "~> 2.0", git: "https://github.com/pluralsh/tentacat.git", ref: "c2c4c30b113c70b2ff2cd674fc04492b87d04100"},
-      {:slack_elixir, git: "https://github.com/pluralsh/slack_elixir.git", ref: "2e266abe13d2a04f6d5b65252f9805f9b8174d7c"},
+      {:slack_elixir, git: "https://github.com/pluralsh/slack_elixir.git", ref: "56a2354f8936392a9f069d2bf271665dde9ec9c7"},
       {:absinthe_client, "~> 0.1.0"},
       {:postgrex, ">= 0.0.0"},
       {:grpc, "~> 0.11"},

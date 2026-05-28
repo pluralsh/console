@@ -14,7 +14,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
@@ -52,7 +52,7 @@ defmodule Console.AI.Workbench.Engine do
     user = Console.Services.Rbac.preload(user)
     with {:ok, _} <- Heartbeat.start_link(job),
          {:ok, skills} <- SkillsUtil.skills(workbench),
-         env = Environment.new(job, workbench.tools, skills),
+         env = Environment.new(job, backfill_chat(workbench.tools, job), skills),
          {:ok, _} <- Supervisor.start_link(env) do
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
@@ -272,7 +272,19 @@ defmodule Console.AI.Workbench.Engine do
   defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
   defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))
 
-  @preloads [:result, user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
+  defp backfill_chat(tools, %WorkbenchJob{chatbot_message: %ChatbotMessage{chat_connection: %{type: t} = conn}}) do
+    Enum.any?(tools, fn
+      %WorkbenchTool{tool: ^t} -> true
+      _ -> false
+    end)
+    |> case do
+      true -> tools
+      false -> [ChatConnection.to_tool(conn) | tools]
+    end
+  end
+  defp backfill_chat(tools, _), do: tools
+
+  @preloads [:result, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
   defp preload_job(%WorkbenchJob{type: :skill} = job),
     do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])
