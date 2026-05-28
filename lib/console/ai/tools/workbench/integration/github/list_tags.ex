@@ -17,7 +17,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListTags do
     field :per_page,  :integer
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/list_tags.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/list_tags.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_list_tags"
 
@@ -32,12 +33,24 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListTags do
     |> validate_required([:owner, :repo])
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+        } = m
+      ) do
     with {:ok, client} <- Client.build(m.tool) do
       m
       |> then(&Query.merge_optional(%{}, &1, [:page, :per_page]))
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&get("repos/#{m.owner}/#{m.repo}/tags#{Query.qp(&1)}", client))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/tags#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end

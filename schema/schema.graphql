@@ -1879,6 +1879,9 @@ input AgentRuntimeAttributes {
 
   "default interval in seconds between babysit checks for runs on this runtime"
   babysitInterval: Int
+
+  "the name of the scm connection to use for this runtime"
+  scmConnection: String
 }
 
 input AgentBindingAttributes {

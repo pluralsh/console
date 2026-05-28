@@ -635,6 +635,8 @@ export type AgentRuntimeAttributes = {
   default?: InputMaybe<Scalars['Boolean']['input']>;
   /** the name of this runtime */
   name: Scalars['String']['input'];
+  /** the name of the scm connection to use for this runtime */
+  scmConnection?: InputMaybe<Scalars['String']['input']>;
   /** the type of this runtime */
   type: AgentRuntimeType;
 };

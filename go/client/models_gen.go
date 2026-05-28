@@ -523,6 +523,8 @@ type AgentRuntimeAttributes struct {
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
 	// default interval in seconds between babysit checks for runs on this runtime
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// the name of the scm connection to use for this runtime
+	ScmConnection *string `json:"scmConnection,omitempty"`
 }
 
 type AgentRuntimeConnection struct {

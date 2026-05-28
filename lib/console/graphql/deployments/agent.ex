@@ -20,6 +20,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :default,              :boolean, description: "whether this is the default runtime for coding agents"
     field :allowed_repositories, list_of(:string), description: "the git repositories allowed to be used with this runtime"
     field :babysit_interval,     :integer, description: "default interval in seconds between babysit checks for runs on this runtime"
+    field :scm_connection,       :string, description: "the name of the scm connection to use for this runtime"
   end
 
   input_object :agent_binding_attributes do

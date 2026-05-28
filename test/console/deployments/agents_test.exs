@@ -59,6 +59,31 @@ defmodule Console.Deployments.AgentsTest do
         default: true
       }, cluster)
     end
+
+    test "it resolves an scm connection name to a connection id" do
+      cluster = insert(:cluster)
+      conn = insert(:scm_connection, name: "github")
+
+      {:ok, runtime} = Agents.upsert_agent_runtime(%{
+        name: "test",
+        type: :claude,
+        scm_connection: conn.name
+      }, cluster)
+
+      assert runtime.connection_id == conn.id
+    end
+
+    test "it rejects unknown scm connection names" do
+      cluster = insert(:cluster)
+
+      {:error, msg} = Agents.upsert_agent_runtime(%{
+        name: "test",
+        type: :claude,
+        scm_connection: "missing"
+      }, cluster)
+
+      assert msg == "could not find scm connection missing"
+    end
   end
 
   describe "delete_agent_runtime/2" do
@@ -384,6 +409,46 @@ defmodule Console.Deployments.AgentsTest do
         base: "main",
         head: "plrl/ai/pr-test"
       }, run.id, user)
+    end
+
+    test "it uses the runtime's bound scm connection" do
+      user = insert(:user)
+      default = insert(:scm_connection, default: true, token: "default-token")
+      runtime_conn = insert(:scm_connection, name: "runtime-github", token: "runtime-token")
+      runtime = insert(:agent_runtime, cluster: insert(:cluster), connection: runtime_conn)
+      run = insert(:agent_run, runtime: runtime, flow: insert(:flow), user: user)
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn conn, "a pr", "a body", _, "main", "plrl/ai/pr-test" ->
+        assert conn.id == runtime_conn.id
+        assert conn.token == "runtime-token"
+        refute conn.id == default.id
+        {:ok, %{url: "https://github.com/pr/url", title: "a pr"}}
+      end)
+
+      {:ok, pr} = Agents.agent_pull_request(%{
+        title: "a pr",
+        body: "a body",
+        repository: "https://github.com/pluralsh/console.git",
+        base: "main",
+        head: "plrl/ai/pr-test"
+      }, run.id, user)
+
+      assert pr.agent_run_id == run.id
+    end
+  end
+
+  describe "scm_creds/2" do
+    test "it uses the runtime's bound scm connection" do
+      cluster = insert(:cluster)
+      default = insert(:scm_connection, default: true, token: "default-token")
+      runtime_conn = insert(:scm_connection, name: "runtime-github", token: "runtime-token")
+      runtime = insert(:agent_runtime, cluster: cluster, connection: runtime_conn)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, creds} = Agents.scm_creds(run, cluster)
+
+      assert creds.token == "runtime-token"
+      refute creds.token == default.token
     end
   end
 

@@ -810,9 +810,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_chatbot do
-    field :id,      non_null(:string), description: "the id of this chatbot binding"
-    field :channel, non_null(:string), description: "external channel identifier (globally unique)"
-    field :prompt,  :string, description: "optional prompt text applied when this chatbot runs"
+    field :id,               non_null(:string), description: "the id of this chatbot binding"
+    field :channel,          non_null(:string), description: "external channel identifier (globally unique)"
+    field :prompt,           :string, description: "optional prompt text applied when this chatbot runs"
     field :message_behavior, non_null(:workbench_chatbot_message_behavior), description: "how the chatbot posts responses in the channel"
     field :user_id, :id, description: "user this chatbot runs as"
 

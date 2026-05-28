@@ -38,7 +38,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   defp fix_babysit(cs, _), do: put_change(cs, :babysit, false)
 
   defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}) do
-    conn = Tool.agent_runtime() |> Agents.scm_conection()
+    conn = Tool.agent_runtime() |> Agents.scm_connection()
     repos = Enum.map(repos, &to_http(conn, &1))
 
     case get_field(cs, :repository) do
