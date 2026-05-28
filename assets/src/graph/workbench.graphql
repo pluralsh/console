@@ -907,6 +907,13 @@ query WorkbenchChatbot($id: ID!) {
   }
 }
 
+query SearchConversations($chatConnectionId: ID!, $query: String) {
+  searchConversations(chatConnectionId: $chatConnectionId, query: $query) {
+    id
+    name
+  }
+}
+
 query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
   chatProviderConnections(first: $first, after: $after, q: $q) {
     pageInfo {

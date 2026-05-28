@@ -10,6 +10,8 @@ type SecretInputWithGenerateProps = {
   defaultRevealed?: boolean
 } & Omit<ComponentProps<typeof Input2>, 'value' | 'onChange'>
 
+const inputGrowStyles = { flex: 1, minWidth: 0, width: '100%' } as const
+
 export function SecretInputWithGenerate({
   value,
   onChange,
@@ -29,31 +31,29 @@ export function SecretInputWithGenerate({
       gap="xsmall"
       width="100%"
     >
-      <Flex
-        flex={1}
-        minWidth={0}
-      >
-        {masked ? (
-          <InputRevealer
-            defaultRevealed={defaultRevealed}
-            value={value}
-            onChange={onChange}
-            {...props}
-          />
-        ) : (
-          <Input2
-            value={value}
-            onChange={onChange}
-            {...props}
-          />
-        )}
-      </Flex>
+      {masked ? (
+        <InputRevealer
+          defaultRevealed={defaultRevealed}
+          value={value}
+          onChange={onChange}
+          css={inputGrowStyles}
+          {...props}
+        />
+      ) : (
+        <Input2
+          value={value}
+          onChange={onChange}
+          css={inputGrowStyles}
+          {...props}
+        />
+      )}
       <IconFrame
         clickable
         type="secondary"
         tooltip="Generate secret"
         icon={<ReloadIcon />}
         onClick={handleGenerate}
+        css={{ flexShrink: 0 }}
       />
     </Flex>
   )

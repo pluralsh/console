@@ -1912,6 +1912,11 @@
          "name": "WorkbenchChatbot",
          "body": "query WorkbenchChatbot($id: ID!) {\n  workbenchChatbot(id: $id) {\n    ...WorkbenchChatbot\n    __typename\n  }\n}\n\nfragment WorkbenchChatbot on WorkbenchChatbot {\n  id\n  channel\n  prompt\n  userId\n  insertedAt\n  updatedAt\n  chatConnection {\n    ...ChatProviderConnection\n    __typename\n  }\n  user {\n    id\n    name\n    email\n    profile\n    __typename\n  }\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    slack {\n      botId\n      __typename\n    }\n    teams {\n      clientId\n      tenantId\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:5ffd312bb8d3a3ca55f7c873cb410af0478ef48c73f0e3bf76a62d202c97ffd3": {
+         "type": "query",
+         "name": "SearchConversations",
+         "body": "query SearchConversations($chatConnectionId: ID!, $query: String) {\n  searchConversations(chatConnectionId: $chatConnectionId, query: $query) {\n    id\n    name\n    __typename\n  }\n}"
+      },
       "sha256:6afaf002048a125ee5535837d88d005500abc78a40e6e7b5fa950c90d055efd6": {
          "type": "query",
          "name": "ChatProviderConnections",

@@ -20559,6 +20559,14 @@ export type WorkbenchChatbotQueryVariables = Exact<{
 
 export type WorkbenchChatbotQuery = { __typename?: 'RootQueryType', workbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
 
+export type SearchConversationsQueryVariables = Exact<{
+  chatConnectionId: Scalars['ID']['input'];
+  query?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SearchConversationsQuery = { __typename?: 'RootQueryType', searchConversations?: Array<{ __typename?: 'ChatbotConversation', id: string, name: string } | null> | null };
+
 export type ChatProviderConnectionsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -43007,6 +43015,51 @@ export type WorkbenchChatbotQueryHookResult = ReturnType<typeof useWorkbenchChat
 export type WorkbenchChatbotLazyQueryHookResult = ReturnType<typeof useWorkbenchChatbotLazyQuery>;
 export type WorkbenchChatbotSuspenseQueryHookResult = ReturnType<typeof useWorkbenchChatbotSuspenseQuery>;
 export type WorkbenchChatbotQueryResult = Apollo.QueryResult<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>;
+export const SearchConversationsDocument = gql`
+    query SearchConversations($chatConnectionId: ID!, $query: String) {
+  searchConversations(chatConnectionId: $chatConnectionId, query: $query) {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useSearchConversationsQuery__
+ *
+ * To run a query within a React component, call `useSearchConversationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchConversationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchConversationsQuery({
+ *   variables: {
+ *      chatConnectionId: // value for 'chatConnectionId'
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchConversationsQuery(baseOptions: Apollo.QueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables> & ({ variables: SearchConversationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchConversationsQuery, SearchConversationsQueryVariables>(SearchConversationsDocument, options);
+      }
+export function useSearchConversationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchConversationsQuery, SearchConversationsQueryVariables>(SearchConversationsDocument, options);
+        }
+// @ts-ignore
+export function useSearchConversationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchConversationsQuery, SearchConversationsQueryVariables>;
+export function useSearchConversationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchConversationsQuery | undefined, SearchConversationsQueryVariables>;
+export function useSearchConversationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchConversationsQuery, SearchConversationsQueryVariables>(SearchConversationsDocument, options);
+        }
+export type SearchConversationsQueryHookResult = ReturnType<typeof useSearchConversationsQuery>;
+export type SearchConversationsLazyQueryHookResult = ReturnType<typeof useSearchConversationsLazyQuery>;
+export type SearchConversationsSuspenseQueryHookResult = ReturnType<typeof useSearchConversationsSuspenseQuery>;
+export type SearchConversationsQueryResult = Apollo.QueryResult<SearchConversationsQuery, SearchConversationsQueryVariables>;
 export const ChatProviderConnectionsDocument = gql`
     query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
   chatProviderConnections(first: $first, after: $after, q: $q) {
@@ -45091,6 +45144,7 @@ export const namedOperations = {
     WorkbenchWebhooks: 'WorkbenchWebhooks',
     WorkbenchChatbots: 'WorkbenchChatbots',
     WorkbenchChatbot: 'WorkbenchChatbot',
+    SearchConversations: 'SearchConversations',
     ChatProviderConnections: 'ChatProviderConnections',
     IssueWebhooks: 'IssueWebhooks',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',

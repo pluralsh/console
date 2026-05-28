@@ -4,7 +4,6 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input2,
   ListBoxFooter,
   ListBoxItem,
   ReturnIcon,
@@ -53,6 +52,7 @@ import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
 } from './utils'
+import { ChatbotChannelSelect } from './ChatbotChannelSelect'
 
 type ChatbotFormState = {
   chatConnectionId: string
@@ -373,22 +373,17 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                     </Select>
                   </FormField>
                 </Flex>
-                <FormField
-                  required
-                  label="Attach a channel"
-                  hint="Slack channel name to listen in, such as general or my-team-channel. Use the channel name without the # prefix."
-                >
-                  <Input2
-                    value={formState.channel}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        channel: e.target.value,
-                      }))
-                    }
-                    disabled={isSaving}
-                  />
-                </FormField>
+                <ChatbotChannelSelect
+                  chatConnectionId={formState.chatConnectionId}
+                  channel={formState.channel}
+                  onChannelChange={(nextChannel) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      channel: nextChannel,
+                    }))
+                  }
+                  disabled={isSaving}
+                />
                 <WorkbenchAccessibleUserSelect
                   key={workbenchId}
                   workbenchId={workbenchId}
