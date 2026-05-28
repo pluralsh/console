@@ -5,6 +5,7 @@ import (
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -68,7 +69,7 @@ type Tool interface {
 	// UploadArtifacts collects provider-native session state and other
 	// best-effort artifacts for createAgentRunUpload. Failures must not be
 	// written to ErrorChan; the controller logs them without failing the run.
-	UploadArtifacts(ctx context.Context) (*UploadArtifacts, error)
+	UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifacts, error)
 }
 
 // DefaultTool is a partial base implementation of the Tool interface.

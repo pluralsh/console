@@ -12,7 +12,7 @@ import (
 	"k8s.io/klog/v2"
 
 	gqlclient "github.com/pluralsh/console/go/client"
-	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -44,7 +44,7 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 	klog.V(log.LogLevelInfo).InfoS("agent run artifacts uploaded", "agentRunID", in.agentRunID)
 }
 
-func (in *agentRunController) uploadAttributes(artifacts *toolv1.UploadArtifacts) (gqlclient.AgentRunUploadAttributes, func(), error) {
+func (in *agentRunController) uploadAttributes(artifacts *artifacts.UploadArtifacts) (gqlclient.AgentRunUploadAttributes, func(), error) {
 	var (
 		attrs  gqlclient.AgentRunUploadAttributes
 		files  []*os.File
