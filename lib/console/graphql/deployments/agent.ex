@@ -468,7 +468,15 @@ defmodule Console.GraphQl.Deployments.Agent do
     end
   end
 
+  defp upload_url(%AgentRunUpload{} = upload, _, %{definition: %{schema_node: %{identifier: field}}}) do
+    upload_url(upload, field)
+  end
+
   defp upload_url(%AgentRunUpload{} = upload, _, %{definition: %{identifier: field}}) do
+    upload_url(upload, field)
+  end
+
+  defp upload_url(%AgentRunUpload{} = upload, field) do
     case Map.get(upload, field) do
       nil -> {:ok, nil}
       file -> {:ok, Uploads.url({file, upload}, :original)}
