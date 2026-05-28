@@ -6,9 +6,15 @@ import (
 )
 
 const (
-	uploadsDirName = "uploads"
-	sessionTarName = "agent-session.tar.gz"
-	patchFileName  = "changes.patch"
+	uploadsDirName  = "uploads"
+	sessionTarName  = "agent-session.tar.gz"
+	sessionJSONName = "agent-session.json"
+	patchFileName   = "changes.patch"
+)
+
+const (
+	SessionJSONName = sessionJSONName
+	PatchFileName   = patchFileName
 )
 
 type UploadArtifacts struct {

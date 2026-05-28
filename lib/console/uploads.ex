@@ -19,7 +19,7 @@ defmodule Console.Uploads do
   #   scope.bucket || bucket()
   # end
 
-  @formats ~w(.patch .mp4 .jpeg .jsonl .tar.gz)
+  @formats ~w(.patch .mp4 .jpeg .json .jsonl .tar.gz)
 
   def validate({file, _}) do
     filename = String.downcase(file.file_name)
@@ -27,9 +27,12 @@ defmodule Console.Uploads do
     @formats
     |> Enum.any?(&String.ends_with?(filename, &1))
     |> case do
-      true -> :ok
+      true ->
+        :ok
+
       false ->
-        {:error, "#{file.file_name} invalid file type, required to be one of: #{Enum.join(@formats, ", ")}"}
+        {:error,
+         "#{file.file_name} invalid file type, required to be one of: #{Enum.join(@formats, ", ")}"}
     end
   end
 
@@ -44,8 +47,12 @@ defmodule Console.Uploads do
   # end
 
   # Override the storage directory:
-  def storage_dir(_version, {_file, %Workbench{id: id}}), do: "#{Console.conf(:object_store_path)}/workbenches/uploads/#{id}"
-  def storage_dir(_version, {_file, %AgentRunUpload{id: id}}), do: "#{Console.conf(:object_store_path)}/agents/uploads/#{id}"
+  def storage_dir(_version, {_file, %Workbench{id: id}}),
+    do: "#{Console.conf(:object_store_path)}/workbenches/uploads/#{id}"
+
+  def storage_dir(_version, {_file, %AgentRunUpload{id: id}}),
+    do: "#{Console.conf(:object_store_path)}/agents/uploads/#{id}"
+
   def __storage, do: Console.Uploads.Storage
 
   # Provide a default URL if there hasn't been a file uploaded

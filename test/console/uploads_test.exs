@@ -8,9 +8,14 @@ defmodule Console.UploadsTest do
       assert :ok = Uploads.validate({%{file_name: "agent-session.tar.gz"}, nil})
     end
 
+    test "accepts json files" do
+      assert :ok = Uploads.validate({%{file_name: "agent-session.json"}, nil})
+    end
+
     test "rejects unsupported file types" do
-      assert {:error, message} = Uploads.validate({%{file_name: "agent-session.json"}, nil})
+      assert {:error, message} = Uploads.validate({%{file_name: "agent-session.txt"}, nil})
       assert message =~ ".tar.gz"
+      assert message =~ ".json"
     end
   end
 end
