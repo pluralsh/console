@@ -1,8 +1,4 @@
-# Terragrunt sample stacks backed by https://github.com/pluralsh/terragrunt-samples
-#
-# Prerequisites:
-#   - Controller CRDs with TERRAGRUNT stack type support
-#   - For terraform-aws-s3: AWS credentials available to the stack run job
+# https://github.com/pluralsh/terragrunt-samples
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
@@ -34,6 +30,9 @@ spec:
   git:
     ref: main
     folder: terraform-aws-s3
+  jobSpec:
+    namespace: plrl-deploy-operator
+    serviceAccount: stacks
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: InfrastructureStack
