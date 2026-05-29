@@ -56,10 +56,7 @@ WORKDIR /opt/app
 
 # This step installs all build tools including a modern Rust toolchain for NIF compilation.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk add git build-base curl ca-certificates \
-        --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-        --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
-        rust cargo; \
+      apk update && apk add --no-cache git build-base curl ca-certificates rust cargo; \
     else \
       apt-get update && apt-get install -y git build-essential curl ca-certificates; \
       rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
