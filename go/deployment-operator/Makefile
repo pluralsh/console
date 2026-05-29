@@ -12,8 +12,9 @@ SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
 # Config variables used for testing
-DEFAULT_PLRL_CONSOLE_URL := "https://console.plrl-dev-aws.onplural.sh"
+DEFAULT_PLRL_CONSOLE_URL := https://console.plrl-dev-aws.onplural.sh
 PLRL_CONSOLE_URL := $(if $(PLRL_CONSOLE_URL),$(PLRL_CONSOLE_URL),$(DEFAULT_PLRL_CONSOLE_URL))
+PLURAL_CONSOLE_URL := $(if $(PLURAL_CONSOLE_URL),$(PLURAL_CONSOLE_URL),$(PLRL_CONSOLE_URL))
 PLRL_CONSOLE_TOKEN := $(if $(PLRL_CONSOLE_TOKEN),$(PLRL_CONSOLE_TOKEN),"")
 PLRL_DEPLOY_TOKEN := $(if $(PLRL_DEPLOY_TOKEN),$(PLRL_DEPLOY_TOKEN),"")
 PLRL_AGENT_RUN_ID := $(if $(PLRL_AGENT_RUN_ID),$(PLRL_AGENT_RUN_ID),"")
