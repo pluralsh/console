@@ -185,7 +185,7 @@ defmodule Console.Deployments.Clusters do
   def control_plane(%Cluster{id: id}, %User{} = user, claims \\ %{}) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, Map.merge(claims, user_claims(user))) do
       %Kazan.Server{
-        url: kas_proxy_url(),
+        url: "http://#{Console.conf(:kas_service)}/k8s-proxy",
         auth: %Kazan.Server.TokenAuth{token: "plrl:#{id}:#{token}"},
       }
     end

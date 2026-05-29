@@ -75,6 +75,8 @@ spec:
         - secretRef:
             name: console-env
         env:
+        - name: KAS_SERVICE
+          value: {{ include "kas.serviceName" . }}.{{ .Release.Namespace }}:{{ .Values.kas.service.kubernetesApiPort }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}
         {{ include "console.env" . | nindent 8 }}

@@ -313,6 +313,12 @@ if is_set("CONSOLE_AI_DEFAULTS") do
   end)
 end
 
+if is_set("KAS_SERVICE") do
+  config :console, :kas_service, get_env("KAS_SERVICE")
+else
+  config :console, :kas_service, "console-kas-service.#{get_env("NAMESPACE")}:8154"
+end
+
 if is_set("CONSOLE_S3_BUCKET") do
   config :console,
     object_store: true,
