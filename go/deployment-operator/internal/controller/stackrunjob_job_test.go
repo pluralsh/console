@@ -55,7 +55,7 @@ func TestGetDefaultContainerImage(t *testing.T) {
 				Type:          console.StackTypeTerragrunt,
 				Configuration: console.StackConfigurationFragment{},
 			},
-			expectedImage: "ghcr.io/pluralsh/harness:0.6.18-terragrunt-1.0",
+			expectedImage: "ghcr.io/pluralsh/harness:0.6.18-terragrunt-1.8",
 		},
 		{
 			name: "custom_tag_provided",
