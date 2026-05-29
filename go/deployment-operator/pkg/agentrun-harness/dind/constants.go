@@ -21,10 +21,7 @@ const (
 	// ClientCertStagingDir is a harness-local copy readable by the agent uid and Codex sandbox.
 	ClientCertStagingDir = "/tmp/plural-docker-certs"
 
-	DockerHostEnv      = "DOCKER_HOST"
-	DockerHostValue    = "tcp://127.0.0.1:2376"
-	DockerTLSVerifyEnv = "DOCKER_TLS_VERIFY"
-	DockerCertPathEnv  = "DOCKER_CERT_PATH"
+	DockerHostEnv = "DOCKER_HOST"
 )
 
 // RepositoryDir returns the absolute path to the cloned repository.

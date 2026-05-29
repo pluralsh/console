@@ -114,7 +114,11 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: []
+    breaking_changes: []
   chart_version: 0.33.1
   images: ['quay.io/argoproj/argocli:v3.4.10', 'quay.io/argoproj/workflow-controller:v3.4.10']
 - version: 3.4.8

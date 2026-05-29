@@ -76,6 +76,14 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
     ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/bin/docker-compose && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Podman
+RUN apt update && \
+    apt install -y \
+      podman \
+      fuse-overlayfs \
+      uidmap && \
+    rm -rf /var/lib/apt/lists/*
+
     # Ensure system paths are explicitly set
     ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
 
@@ -84,9 +92,15 @@ COPY --from=builder /agent-harness /agent-harness
 COPY --from=builder /agent-mcpserver /agent-mcpserver
 COPY --from=builder /agent-bootstrap /agent-bootstrap
 
+# Copy the entrypoint wrapper that starts `podman system service` when DIND_ENABLED=true
+COPY deployment-operator/dockerfiles/agent-harness/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Create the nonroot user with UID 65532
 RUN groupadd -g 65532 nonroot && \
-    useradd -u 65532 -g 65532 -m -s /bin/bash nonroot
+    useradd -u 65532 -g 65532 -m -s /bin/bash nonroot && \
+    echo "nonroot:100000:65536" >> /etc/subuid && \
+    echo "nonroot:100000:65536" >> /etc/subgid
 
 WORKDIR /plural
 
@@ -97,11 +111,19 @@ RUN mkdir -p /plural/.opencode && \
     mkdir -p /plural/.gemini && \
     mkdir -p /plural/.codex
 
-RUN chown -R 65532:65532 /plural
+RUN chown -R 65532:65532 /plural && \
+    mkdir -p /run/user/65532 && \
+    chown 65532:65532 /run/user/65532
+
+# Pre-configure Podman for rootless operation inside a container:
+RUN mkdir -p /home/nonroot/.config/containers && \
+    printf '[containers]\nnetns = "host"\n' \
+      > /home/nonroot/.config/containers/containers.conf && \
+    chown -R 65532:65532 /home/nonroot/.config
 
 # Switch to the nonroot user
 USER 65532:65532
 
 WORKDIR /plural
 
-ENTRYPOINT ["/agent-harness", "--working-dir=/plural"]
+ENTRYPOINT ["/entrypoint.sh", "/agent-harness", "--working-dir=/plural"]
