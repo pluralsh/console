@@ -45,3 +45,11 @@ func TestHasChanges(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, hasChanges)
 }
+
+func TestInitDoesNotCreateEmptyPlanFile(t *testing.T) {
+	dir := t.TempDir()
+	_ = New(toolv1.Config{ExecDir: dir, Run: &stackrunv1.StackRun{}})
+
+	_, err := os.Stat(filepath.Join(dir, "terraform.tfplan"))
+	assert.True(t, os.IsNotExist(err))
+}

@@ -239,7 +239,6 @@ func (in *Terragrunt) init() v1.Tool {
 	}
 
 	in.planFileName = "terraform.tfplan"
-	helpers.EnsureFileOrDie(path.Join(in.dir, in.planFileName), nil)
 
 	if in.variables != nil && len(*in.variables) > 0 {
 		in.variablesFileName = "plural.auto.tfvars.json"
