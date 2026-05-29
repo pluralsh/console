@@ -137,6 +137,23 @@ harness-run-ansible: docker-build-harness-ansible ## run harness
 		--stack-run-id=${PLURAL_STACK_RUN_ID}; \
 	rm -f $$KUBECONFIG_TMP
 
+.PHONY: harness-run-terragrunt
+harness-run-terragrunt: docker-build-harness-terragrunt ## run harness
+	@KUBECONFIG_TMP=$$(mktemp) && \
+	cp $${KUBECONFIG:-$${HOME}/.kube/config} $$KUBECONFIG_TMP && \
+	chmod 644 $$KUBECONFIG_TMP && \
+	docker run --rm \
+		--network=host \
+		-v $$KUBECONFIG_TMP:/home/nonroot/.kube/config \
+		-e KUBECONFIG=/home/nonroot/.kube/config \
+		-e HOME=/home/nonroot \
+		harness:latest \
+		--v=5 \
+		--console-url=${PLURAL_CONSOLE_URL}/ext/gql \
+		--console-token=${PLURAL_DEPLOY_TOKEN} \
+		--stack-run-id=${PLURAL_STACK_RUN_ID}; \
+	rm -f $$KUBECONFIG_TMP
+
 .PHONY: agent-harness-opencode-run
 agent-harness-opencode-run: docker-build-agent-harness-opencode ## run agent harness w/ opencode
 	docker run \
@@ -321,6 +338,14 @@ docker-build-harness-ansible: docker-build-harness-base ## build terraform docke
 		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
     	  	-t harness \
     		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/ansible.Dockerfile \
+    		$(WORKSPACES_DIR)
+
+.PHONY: docker-build-harness-terragrunt
+docker-build-harness-terragrunt: docker-build-harness-base ## build terragrunt docker harness image
+	docker build \
+		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
+    	  	-t harness \
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/terragrunt.Dockerfile \
     		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-base
