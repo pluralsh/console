@@ -12,9 +12,6 @@ func (in *Codex) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifact
 		Provider:  "codex",
 		Source:    artifacts.SessionSource{Path: filepath.Join(in.codexHome(), "sessions"), ArchivePath: "sessions"},
 		SessionID: in.threadID,
-		ResumeEnv: map[string]string{
-			"CODEX_HOME": ".",
-		},
-		Command: []string{"codex", "resume"},
+		Commands:  [][]string{{"codex", "resume"}},
 	})
 }

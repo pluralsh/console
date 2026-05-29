@@ -12,9 +12,6 @@ func (in *Gemini) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifac
 		Provider:  "gemini",
 		Source:    artifacts.SessionSource{Path: filepath.Join(in.providerPath(), "tmp"), ArchivePath: "tmp"},
 		SessionID: in.sessionID,
-		ResumeEnv: map[string]string{
-			"GEMINI_CLI_HOME": ".",
-		},
-		Command: []string{"gemini"},
+		Commands:  [][]string{{"gemini"}},
 	})
 }

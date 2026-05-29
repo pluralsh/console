@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
@@ -55,7 +54,7 @@ func (in *ArtifactBuilder) Build(_ context.Context, opts BuildArtifactsOptions) 
 		return nil, fmt.Errorf("agent run is not set")
 	}
 
-	klog.V(log.LogLevelInfo).InfoS(
+	klog.V(log.LogLevelDebug).InfoS(
 		"building agent run upload artifacts",
 		"agentRunID", in.config.Run.ID,
 		"provider", opts.Provider,
@@ -95,7 +94,7 @@ func (in *ArtifactBuilder) Build(_ context.Context, opts BuildArtifactsOptions) 
 		SessionPath: sessionPath,
 		PatchPath:   patchPath,
 	}
-	klog.V(log.LogLevelInfo).InfoS(
+	klog.V(log.LogLevelDebug).InfoS(
 		"agent run upload artifacts built",
 		"agentRunID", in.config.Run.ID,
 		"sessionPath", result.SessionPath,
@@ -117,12 +116,12 @@ func (in *ArtifactBuilder) writeSessionArchive(opts BuildArtifactsOptions) (stri
 		return "", err
 	}
 
-	sessionPath := filepath.Join(in.config.UploadsDir(), sessionTarName)
+	sessionPath := filepath.Join(in.config.UploadsDir(), SessionTarName)
 	if err := in.sessionWriter.Write(sessionPath, manifest, source); err != nil {
 		return "", err
 	}
 	if info, err := os.Stat(sessionPath); err == nil {
-		klog.V(log.LogLevelInfo).InfoS(
+		klog.V(log.LogLevelDebug).InfoS(
 			"agent session archive written",
 			"agentRunID", in.config.Run.ID,
 			"path", sessionPath,
@@ -134,7 +133,7 @@ func (in *ArtifactBuilder) writeSessionArchive(opts BuildArtifactsOptions) (stri
 }
 
 func (in *ArtifactBuilder) writePatch() (string, bool, error) {
-	patchPath := filepath.Join(in.config.UploadsDir(), patchFileName)
+	patchPath := filepath.Join(in.config.UploadsDir(), PatchFileName)
 	patchGenerated, err := in.patchGenerator.Write(patchPath)
 	return patchPath, patchGenerated, err
 }
@@ -155,13 +154,11 @@ func (in *ArtifactBuilder) sessionManifest(opts BuildArtifactsOptions) (*Session
 		Provider:   opts.Provider,
 		Repository: in.config.Run.Repository,
 		Branch:     lo.FromPtr(in.config.Run.Branch),
-		CreatedAt:  time.Now(),
 		Session: SessionMetadata{
 			ID: opts.SessionID,
 		},
 		Resume: ResumeManifest{
-			Env:     opts.ResumeEnv,
-			Command: opts.Command,
+			Commands: opts.Commands,
 		},
 	}
 	if source != nil {
@@ -195,7 +192,7 @@ func (in *ArtifactBuilder) sessionSource(source SessionSource) (*SessionSource, 
 		return nil, fmt.Errorf("stat session source %q: %w", source.Path, err)
 	}
 
-	klog.V(log.LogLevelInfo).InfoS(
+	klog.V(log.LogLevelDebug).InfoS(
 		"agent session source found",
 		"agentRunID", in.config.Run.ID,
 		"sourcePath", source.Path,

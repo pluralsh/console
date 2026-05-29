@@ -1,7 +1,11 @@
 package opencode
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
+	"encoding/json"
+	"io"
 	"os"
 	stdexec "os/exec"
 	"path/filepath"
@@ -77,10 +81,76 @@ printf '{"id":"%s"}\n' "$2"
 
 	uploads, err := tool.UploadArtifacts(context.Background())
 	require.NoError(t, err)
-	require.Equal(t, filepath.Join((artifacts.Config{WorkDir: workDir}).UploadsDir(), artifacts.SessionJSONName), uploads.SessionPath)
+	require.Equal(t, filepath.Join((artifacts.Config{WorkDir: workDir}).UploadsDir(), artifacts.SessionTarName), uploads.SessionPath)
 	require.Empty(t, uploads.PatchPath)
 
-	content, err := os.ReadFile(uploads.SessionPath)
+	entries := readSessionArchive(t, uploads.SessionPath)
+	require.Contains(t, entries, "manifest.json")
+	require.Contains(t, entries, filepath.ToSlash(filepath.Join("opencode", artifacts.SessionJSONName)))
+	require.JSONEq(t, `{"id":"session-1"}`, entries[filepath.ToSlash(filepath.Join("opencode", artifacts.SessionJSONName))])
+	require.JSONEq(t, `{
+		"version": 1,
+		"agentRunId": "run-id",
+		"provider": "opencode",
+		"repository": "repo",
+		"createdAt": "0001-01-01T00:00:00Z",
+		"session": {
+			"id": "session-1",
+			"path": "",
+			"archivePath": "opencode"
+		},
+		"resume": {
+			"env": {
+				"XDG_DATA_HOME": "."
+			},
+			"commands": [
+				["opencode", "import", "opencode/agent-session.json"],
+				["opencode", "run", "-s", "session-1"]
+			]
+		}
+	}`, normalizeCreatedAt(t, entries["manifest.json"]))
+}
+
+func readSessionArchive(t *testing.T, path string) map[string]string {
+	t.Helper()
+
+	file, err := os.Open(path)
 	require.NoError(t, err)
-	require.JSONEq(t, `{"id":"session-1"}`, string(content))
+	defer file.Close()
+
+	gzipReader, err := gzip.NewReader(file)
+	require.NoError(t, err)
+	defer gzipReader.Close()
+
+	tarReader := tar.NewReader(gzipReader)
+	entries := map[string]string{}
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+		require.NoError(t, err)
+		if header.FileInfo().IsDir() {
+			continue
+		}
+
+		content, err := io.ReadAll(tarReader)
+		require.NoError(t, err)
+		entries[header.Name] = string(content)
+	}
+
+	return entries
+}
+
+func normalizeCreatedAt(t *testing.T, manifest string) string {
+	t.Helper()
+
+	normalized := map[string]any{}
+	require.NoError(t, json.Unmarshal([]byte(manifest), &normalized))
+	normalized["createdAt"] = "0001-01-01T00:00:00Z"
+	normalized["session"].(map[string]any)["path"] = ""
+
+	content, err := json.Marshal(normalized)
+	require.NoError(t, err)
+	return string(content)
 }

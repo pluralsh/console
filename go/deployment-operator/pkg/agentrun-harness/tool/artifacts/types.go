@@ -2,19 +2,13 @@ package artifacts
 
 import (
 	"context"
-	"time"
 )
 
 const (
 	uploadsDirName  = "uploads"
-	sessionTarName  = "agent-session.tar.gz"
-	sessionJSONName = "agent-session.json"
-	patchFileName   = "changes.patch"
-)
-
-const (
-	SessionJSONName = sessionJSONName
-	PatchFileName   = patchFileName
+	SessionTarName  = "agent-session.tar.gz"
+	SessionJSONName = "agent-session.json"
+	PatchFileName   = "changes.patch"
 )
 
 type UploadArtifacts struct {
@@ -34,14 +28,12 @@ type SessionManifest struct {
 	Provider   string          `json:"provider"`
 	Repository string          `json:"repository"`
 	Branch     string          `json:"branch,omitempty"`
-	CreatedAt  time.Time       `json:"createdAt"`
 	Session    SessionMetadata `json:"session"`
 	Resume     ResumeManifest  `json:"resume"`
 }
 
 type ResumeManifest struct {
-	Env     map[string]string `json:"env,omitempty"`
-	Command []string          `json:"command,omitempty"`
+	Commands [][]string `json:"commands,omitempty"`
 }
 
 type SessionMetadata struct {
@@ -54,8 +46,7 @@ type BuildArtifactsOptions struct {
 	Provider  string
 	Source    SessionSource
 	SessionID string
-	ResumeEnv map[string]string
-	Command   []string
+	Commands  [][]string
 }
 
 type UploadArtifactBuilder interface {

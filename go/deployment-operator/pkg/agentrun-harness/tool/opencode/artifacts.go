@@ -15,42 +15,36 @@ import (
 )
 
 func (in *Opencode) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifacts, error) {
-	config := artifacts.Config{
-		WorkDir:       in.Config.WorkDir,
-		RepositoryDir: in.Config.RepositoryDir,
-		Run:           in.Config.Run,
-	}
 	klog.V(log.LogLevelInfo).InfoS(
 		"collecting opencode upload artifacts",
 		"agentRunID", in.Config.Run.ID,
 		"sessionID", in.sessionID,
 		"workDir", in.Config.WorkDir,
 		"repositoryDir", in.Config.RepositoryDir,
-		"uploadsDir", config.UploadsDir(),
 	)
 
-	if err := os.MkdirAll(config.UploadsDir(), 0755); err != nil {
-		return nil, fmt.Errorf("create uploads dir: %w", err)
+	sourcePath, err := os.MkdirTemp(in.Config.WorkDir, "opencode-session-export-*")
+	if err != nil {
+		return nil, fmt.Errorf("create opencode session export dir: %w", err)
 	}
+	defer os.RemoveAll(sourcePath)
 
-	sessionPath := filepath.Join(config.UploadsDir(), artifacts.SessionJSONName)
-	if err := in.exportSession(ctx, sessionPath); err != nil {
+	if err := in.exportSession(ctx, filepath.Join(sourcePath, artifacts.SessionJSONName)); err != nil {
 		return nil, err
 	}
 
-	patchPath := filepath.Join(config.UploadsDir(), artifacts.PatchFileName)
-	patchGenerated, err := artifacts.NewGitPatchGenerator(in.Config.RepositoryDir).Write(patchPath)
-	if err != nil {
-		return &artifacts.UploadArtifacts{SessionPath: sessionPath}, err
-	}
-	if !patchGenerated {
-		return &artifacts.UploadArtifacts{SessionPath: sessionPath}, nil
-	}
-
-	return &artifacts.UploadArtifacts{
-		SessionPath: sessionPath,
-		PatchPath:   patchPath,
-	}, nil
+	return in.BuildUploadArtifacts(ctx, artifacts.BuildArtifactsOptions{
+		Provider: "opencode",
+		Source: artifacts.SessionSource{
+			Path:        sourcePath,
+			ArchivePath: "opencode",
+		},
+		SessionID: in.sessionID,
+		Commands: [][]string{
+			{"opencode", "import", filepath.ToSlash(filepath.Join("opencode", artifacts.SessionJSONName))},
+			{"opencode", "run", "-s", in.sessionID},
+		},
+	})
 }
 
 func (in *Opencode) exportSession(ctx context.Context, path string) error {

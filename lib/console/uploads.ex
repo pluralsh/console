@@ -53,8 +53,6 @@ defmodule Console.Uploads do
   def storage_dir(_version, {_file, %AgentRunUpload{id: id}}),
     do: "#{Console.conf(:object_store_path)}/agents/uploads/#{id}"
 
-  def __storage, do: Console.Uploads.Storage
-
   # Provide a default URL if there hasn't been a file uploaded
   # def default_url(version, scope) do
   #   "/images/avatars/default_#{version}.png"

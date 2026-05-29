@@ -88,7 +88,7 @@ func (in *TarSessionArchiveWriter) writeSource(tw *tar.Writer, source SessionSou
 	if err := writer.Write(); err != nil {
 		return err
 	}
-	klog.V(log.LogLevelInfo).InfoS(
+	klog.V(log.LogLevelDebug).InfoS(
 		"agent session source archived",
 		"sourcePath", source.Path,
 		"archivePath", writer.archivePath,
