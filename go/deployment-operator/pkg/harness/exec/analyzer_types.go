@@ -63,8 +63,7 @@ func WithStderrCheck(check bool) AnalyzerOption {
 
 // stderrCheckProviders is the set of providers for which stderr is treated as an error.
 var stderrCheckProviders = map[console.StackType]bool{
-	console.StackTypeTerraform:  true,
-	console.StackTypeTerragrunt: true,
+	console.StackTypeTerraform: true,
 }
 
 // StderrCheckForProvider returns an AnalyzerOption that enables stderr checking
