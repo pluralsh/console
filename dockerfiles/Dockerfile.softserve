@@ -28,7 +28,13 @@ RUN apk add openssh-client
 # Reason that we manually install soft-serve instead of using the soft-serve docker image is that
 # the soft-serve image starts the server without allowing us to set admin ssh keys, thus preventing
 # us from importing repos
-RUN go install github.com/pluralsh/soft-serve/cmd/soft@v0.1.8
+RUN git clone https://github.com/pluralsh/soft-serve.git /tmp/soft-serve \
+  && cd /tmp/soft-serve \
+  && git checkout v0.1.8 \
+  && sed -i 's/github.com\/go-git\/go-git\/v5 v5.19.0/github.com\/go-git\/go-git\/v5 v5.19.1/' go.mod \
+  && /usr/local/go/bin/go mod download github.com/go-git/go-git/v5@v5.19.1 \
+  && /usr/local/go/bin/go mod tidy \
+  && /usr/local/go/bin/go install ./cmd/soft
 RUN mv /go/bin/soft /usr/bin/
 
 # soft-serve data folder
