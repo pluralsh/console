@@ -1,0 +1,66 @@
+# Terragrunt sample stacks backed by https://github.com/pluralsh/terragrunt-samples
+#
+# Prerequisites:
+#   - Controller CRDs with TERRAGRUNT stack type support
+#   - For terraform-aws-s3: AWS credentials available to the stack run job
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: target-cluster
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: terragrunt-samples
+  namespace: default
+spec:
+  url: https://github.com/pluralsh/terragrunt-samples.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-sample-terraform-aws-s3
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  repositoryRef:
+    name: terragrunt-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: terraform-aws-s3
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-sample-opentofu-local-file
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  repositoryRef:
+    name: terragrunt-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: opentofu-local-file
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-sample-opentofu-random
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  repositoryRef:
+    name: terragrunt-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: opentofu-random
