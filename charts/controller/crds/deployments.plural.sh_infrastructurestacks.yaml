@@ -10046,9 +10046,10 @@ spec:
               type:
                 description: |-
                   Type specifies the IaC tool to use for executing the stack.
-                  One of TERRAFORM, ANSIBLE, CUSTOM.
+                  One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM.
                 enum:
                 - TERRAFORM
+                - TERRAGRUNT
                 - ANSIBLE
                 - CUSTOM
                 type: string

@@ -64,8 +64,8 @@ type InfrastructureStackSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Type specifies the IaC tool to use for executing the stack.
-	// One of TERRAFORM, ANSIBLE, CUSTOM.
-	// +kubebuilder:validation:Enum=TERRAFORM;ANSIBLE;CUSTOM
+	// One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM.
+	// +kubebuilder:validation:Enum=TERRAFORM;TERRAGRUNT;ANSIBLE;CUSTOM
 	// +kubebuilder:validation:Required
 	Type console.StackType `json:"type"`
 
