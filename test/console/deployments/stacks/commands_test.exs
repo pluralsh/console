@@ -10,7 +10,6 @@ defmodule Console.Deployments.Stacks.CommandsTest do
         |> Commands.commands()
 
       assert Enum.map(commands, &Map.take(&1, [:name, :cmd, :args, :stage])) == [
-        %{name: "init", cmd: "terragrunt", args: ["init", "-upgrade"], stage: :init},
         %{name: "plan", cmd: "terragrunt", args: ["plan"], stage: :plan},
         %{name: "apply", cmd: "terragrunt", args: ["apply", "terraform.tfplan"], stage: :apply}
       ]
@@ -22,7 +21,6 @@ defmodule Console.Deployments.Stacks.CommandsTest do
         |> Commands.commands()
 
       assert Enum.map(commands, &Map.take(&1, [:name, :cmd, :args, :stage])) == [
-        %{name: "init", cmd: "terragrunt", args: ["init", "-upgrade"], stage: :init},
         %{name: "plan", cmd: "terragrunt", args: ["plan", "-destroy"], stage: :plan},
         %{name: "destroy", cmd: "terragrunt", args: ["destroy", "-auto-approve"], stage: :destroy}
       ]

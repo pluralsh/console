@@ -125,14 +125,12 @@ defmodule Console.Deployments.Stacks.Commands do
 
   defp terragrunt_commands(%Stack{}, true) do
     indexed([
-      cmd("init", tg_command(), ["init", "-upgrade"], :init),
       cmd("plan", tg_command(), ["plan"], :plan),
     ])
   end
 
   defp terragrunt_commands(%Stack{deleted_at: d}, _) when not is_nil(d) do
     indexed([
-      cmd("init", tg_command(), ["init", "-upgrade"], :init),
       cmd("plan", tg_command(), ["plan", "-destroy"], :plan),
       cmd("destroy", tg_command(), ["destroy", "-auto-approve"], :destroy)
     ])
@@ -140,7 +138,6 @@ defmodule Console.Deployments.Stacks.Commands do
 
   defp terragrunt_commands(%Stack{}, _) do
     indexed([
-      cmd("init", tg_command(), ["init", "-upgrade"], :init),
       cmd("plan", tg_command(), ["plan"], :plan),
       cmd("apply", tg_command(), ["apply", "terraform.tfplan"], :apply)
     ])
