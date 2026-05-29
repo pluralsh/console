@@ -88,6 +88,7 @@ func (s *ConfigurationManager) SetValue(config v1alpha1.AgentConfigurationSpec) 
 	s.baseRegistryURL = config.BaseRegistryURL
 	s.maxSentinelRunJobs = config.MaxSentinelRunJobs
 	s.maxStackRunJobs = config.MaxStackRunJobs
+	s.maxAgentRunPods = config.MaxAgentRunPods
 	s.disableWebsocket = config.DisableWebsocket
 
 	return nil
