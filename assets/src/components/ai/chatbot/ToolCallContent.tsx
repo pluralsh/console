@@ -5,6 +5,12 @@ import isJson from 'is-json'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
+const scrollableCodeStyle = {
+  maxHeight: 324,
+  overflow: 'auto',
+  minHeight: 0,
+} as const
+
 export function ToolCallContent({
   content,
   attributes,
@@ -29,7 +35,7 @@ export function ToolCallContent({
           <Code
             language="json"
             showHeader={false}
-            css={{ maxHeight: 324 }}
+            css={scrollableCodeStyle}
           >
             {JSON.stringify(attributes.tool.arguments, null, 2)}
           </Code>
@@ -42,14 +48,17 @@ export function ToolCallContent({
             fillLevel={2}
             language={content.length < 25_000 ? 'json' : undefined}
             showHeader={false}
-            css={{ maxHeight: 324 }}
+            css={scrollableCodeStyle}
           >
             {prettifyJsonStr(content)}
           </Code>
         ) : (
           <Card
             fillLevel={2}
-            css={{ padding: spacing.medium, overflow: 'auto', maxHeight: 324 }}
+            css={{
+              padding: spacing.medium,
+              ...scrollableCodeStyle,
+            }}
           >
             <Markdown
               text={content}

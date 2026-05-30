@@ -233,7 +233,10 @@ export function WorkbenchSetupStep({
             />
           </Flex>
         </FormField>
-        <FormField label="Enable Observability">
+        <FormField
+          label="Enable Observability"
+          hint="These tools integrate directly with Plural's global Prometheus metrics and log aggregation. To provide an external observability provider, add a tool from the integrations page instead."
+        >
           <Flex css={capabilityCheckboxGridCss}>
             <CapabilityCheckbox
               label="Metrics"

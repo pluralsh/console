@@ -635,6 +635,8 @@ export type AgentRuntimeAttributes = {
   default?: InputMaybe<Scalars['Boolean']['input']>;
   /** the name of this runtime */
   name: Scalars['String']['input'];
+  /** the name of the scm connection to use for this runtime */
+  scmConnection?: InputMaybe<Scalars['String']['input']>;
   /** the type of this runtime */
   type: AgentRuntimeType;
 };
@@ -1970,6 +1972,13 @@ export type ChatTypeAttributes = {
   file?: Maybe<ChatFile>;
   prCall?: Maybe<PrCallAttributes>;
   tool?: Maybe<ChatTool>;
+};
+
+/** A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams */
+export type ChatbotConversation = {
+  __typename?: 'ChatbotConversation';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type ChatbotMessage = {
@@ -10708,6 +10717,7 @@ export type RootQueryType = {
   scmConnections?: Maybe<ScmConnectionConnection>;
   scmWebhook?: Maybe<ScmWebhook>;
   scmWebhooks?: Maybe<ScmWebhookConnection>;
+  searchConversations?: Maybe<Array<Maybe<ChatbotConversation>>>;
   secret?: Maybe<Secret>;
   sentinel?: Maybe<Sentinel>;
   sentinelRun?: Maybe<SentinelRun>;
@@ -11900,6 +11910,12 @@ export type RootQueryTypeScmWebhooksArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeSearchConversationsArgs = {
+  chatConnectionId: Scalars['ID']['input'];
+  query?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -15305,6 +15321,8 @@ export type WorkbenchChatbot = {
   /** the id of this chatbot binding */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** how the chatbot posts responses in the channel */
+  messageBehavior: WorkbenchChatbotMessageBehavior;
   /** optional prompt text applied when this chatbot runs */
   prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -15321,6 +15339,8 @@ export type WorkbenchChatbotAttributes = {
   channel?: InputMaybe<Scalars['String']['input']>;
   /** chat provider connection id (required for create) */
   chatConnectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** how the chatbot posts responses in the channel */
+  messageBehavior?: InputMaybe<WorkbenchChatbotMessageBehavior>;
   /** when true on update, sets userId to the authenticated user */
   overrideChatbotUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** optional prompt text applied when this chatbot runs */
@@ -15340,6 +15360,11 @@ export type WorkbenchChatbotEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchChatbot>;
 };
+
+export enum WorkbenchChatbotMessageBehavior {
+  Message = 'MESSAGE',
+  Reply = 'REPLY'
+}
 
 export type WorkbenchCoding = {
   __typename?: 'WorkbenchCoding';
@@ -20347,7 +20372,7 @@ export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: st
 
 export type ChatProviderConnectionFragment = { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } };
 
-export type WorkbenchChatbotFragment = { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null };
+export type WorkbenchChatbotFragment = { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null };
 
 export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
@@ -20536,14 +20561,22 @@ export type WorkbenchChatbotsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchChatbotsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, chatbots?: { __typename?: 'WorkbenchChatbotConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchChatbotsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, chatbots?: { __typename?: 'WorkbenchChatbotConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchChatbotQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchChatbotQuery = { __typename?: 'RootQueryType', workbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+export type WorkbenchChatbotQuery = { __typename?: 'RootQueryType', workbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+
+export type SearchConversationsQueryVariables = Exact<{
+  chatConnectionId: Scalars['ID']['input'];
+  query?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SearchConversationsQuery = { __typename?: 'RootQueryType', searchConversations?: Array<{ __typename?: 'ChatbotConversation', id: string, name: string } | null> | null };
 
 export type ChatProviderConnectionsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20828,7 +20861,7 @@ export type CreateWorkbenchChatbotMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', createWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+export type CreateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', createWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
 
 export type UpdateWorkbenchChatbotMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20836,7 +20869,7 @@ export type UpdateWorkbenchChatbotMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', updateWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+export type UpdateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', updateWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
 
 export type DeleteWorkbenchChatbotMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20873,7 +20906,7 @@ export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null, workingTheory?: string | null, criticism?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null } | null };
+export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null, workingTheory?: string | null, criticism?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null };
 
 export type WorkbenchJobActivityDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -26146,6 +26179,7 @@ export const WorkbenchChatbotFragmentDoc = gql`
   id
   channel
   prompt
+  messageBehavior
   userId
   insertedAt
   updatedAt
@@ -42993,6 +43027,51 @@ export type WorkbenchChatbotQueryHookResult = ReturnType<typeof useWorkbenchChat
 export type WorkbenchChatbotLazyQueryHookResult = ReturnType<typeof useWorkbenchChatbotLazyQuery>;
 export type WorkbenchChatbotSuspenseQueryHookResult = ReturnType<typeof useWorkbenchChatbotSuspenseQuery>;
 export type WorkbenchChatbotQueryResult = Apollo.QueryResult<WorkbenchChatbotQuery, WorkbenchChatbotQueryVariables>;
+export const SearchConversationsDocument = gql`
+    query SearchConversations($chatConnectionId: ID!, $query: String) {
+  searchConversations(chatConnectionId: $chatConnectionId, query: $query) {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useSearchConversationsQuery__
+ *
+ * To run a query within a React component, call `useSearchConversationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchConversationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchConversationsQuery({
+ *   variables: {
+ *      chatConnectionId: // value for 'chatConnectionId'
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchConversationsQuery(baseOptions: Apollo.QueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables> & ({ variables: SearchConversationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchConversationsQuery, SearchConversationsQueryVariables>(SearchConversationsDocument, options);
+      }
+export function useSearchConversationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchConversationsQuery, SearchConversationsQueryVariables>(SearchConversationsDocument, options);
+        }
+// @ts-ignore
+export function useSearchConversationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchConversationsQuery, SearchConversationsQueryVariables>;
+export function useSearchConversationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>): Apollo.UseSuspenseQueryResult<SearchConversationsQuery | undefined, SearchConversationsQueryVariables>;
+export function useSearchConversationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchConversationsQuery, SearchConversationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchConversationsQuery, SearchConversationsQueryVariables>(SearchConversationsDocument, options);
+        }
+export type SearchConversationsQueryHookResult = ReturnType<typeof useSearchConversationsQuery>;
+export type SearchConversationsLazyQueryHookResult = ReturnType<typeof useSearchConversationsLazyQuery>;
+export type SearchConversationsSuspenseQueryHookResult = ReturnType<typeof useSearchConversationsSuspenseQuery>;
+export type SearchConversationsQueryResult = Apollo.QueryResult<SearchConversationsQuery, SearchConversationsQueryVariables>;
 export const ChatProviderConnectionsDocument = gql`
     query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
   chatProviderConnections(first: $first, after: $after, q: $q) {
@@ -45077,6 +45156,7 @@ export const namedOperations = {
     WorkbenchWebhooks: 'WorkbenchWebhooks',
     WorkbenchChatbots: 'WorkbenchChatbots',
     WorkbenchChatbot: 'WorkbenchChatbot',
+    SearchConversations: 'SearchConversations',
     ChatProviderConnections: 'ChatProviderConnections',
     IssueWebhooks: 'IssueWebhooks',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',

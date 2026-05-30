@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "Lists recent messages in a Teams channel (Graph GET .../messages). Responses include @odata.nextLink when paginated—pass it back as odata_next_link. On continuation requests, team_id and channel_id are optional (they are already in odata_next_link).",
+  "properties": {
+    "team_id": {
+      "type": "string",
+      "description": "Team (group) id from teams_list_teams or teams_search_teams. Required on the first page unless odata_next_link is set."
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Channel id from teams_list_channels. Required on the first page unless odata_next_link is set."
+    },
+    "odata_next_link": {
+      "type": "string",
+      "description": "Pagination: copy the full @odata.nextLink value from the previous response body (verbatim)."
+    },
+    "top": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "description": "First-page page size ($top). Ignored when odata_next_link is provided. Graph default is 20; max 50 per page."
+    }
+  },
+  "additionalProperties": false
+}

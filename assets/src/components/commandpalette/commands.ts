@@ -179,7 +179,15 @@ export function useCommands({
                   deps: [setFeatureFlag],
                 },
               ]
-            : []),
+            : [
+                {
+                  id: 'disable-edge',
+                  label: 'Disable Edge',
+                  icon: EdgeComputeIcon,
+                  callback: () => setFeatureFlag('Edge', false),
+                  deps: [setFeatureFlag],
+                },
+              ]),
           ...(!featureFlags.WorkbenchChatbots
             ? [
                 {
@@ -187,6 +195,17 @@ export function useCommands({
                   label: 'Enable Workbench Chatbots',
                   icon: BotIcon,
                   callback: () => setFeatureFlag('WorkbenchChatbots', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : []),
+          ...(featureFlags.WorkbenchChatbots
+            ? [
+                {
+                  id: 'disable-workbench-chatbots',
+                  label: 'Disable Workbench Chatbots',
+                  icon: BotIcon,
+                  callback: () => setFeatureFlag('WorkbenchChatbots', false),
                   deps: [setFeatureFlag],
                 },
               ]

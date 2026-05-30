@@ -8,6 +8,7 @@ import {
   Code,
   FileIcon,
   Flex,
+  FillLevelProvider,
   IconFrame,
   Markdown,
   PrQueueIcon,
@@ -33,7 +34,7 @@ import { ReactElement, useState } from 'react'
 
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
-import styled, { StyledObject, useTheme } from 'styled-components'
+import styled, { DefaultTheme, StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
 import { AgentRunInfoCard } from '../agent-runs/AgentRunInfoDisplays.tsx'
 import { ChatMessageActions } from './ChatMessage'
@@ -144,10 +145,19 @@ export function ChatMessageContent({
           $role={role ?? AiRole.User}
           css={role === AiRole.User ? userMsgWrapperStyle : undefined}
         >
-          <Markdown
-            text={content ?? ''}
-            isStreaming={isStreaming}
-          />
+          {role === AiRole.User ? (
+            <FillLevelProvider value={1}>
+              <Markdown
+                text={content ?? ''}
+                isStreaming={isStreaming}
+              />
+            </FillLevelProvider>
+          ) : (
+            <Markdown
+              text={content ?? ''}
+              isStreaming={isStreaming}
+            />
+          )}
         </DefaultWrapperSC>
       )
   }
@@ -582,6 +592,13 @@ function getToolMessageDetailsBody(
   }
 }
 
+const userMessageNestedCodeStyles = (theme: DefaultTheme) => ({
+  [`& ${Code}`]: {
+    backgroundColor: theme.colors['fill-two'],
+    borderColor: theme.colors['border-fill-two'],
+  },
+})
+
 const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   maxWidth: '100%',
   ...($role === AiRole.User && {
@@ -589,5 +606,6 @@ const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
     border: theme.borders.default,
     borderRadius: theme.borderRadiuses.large,
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    ...userMessageNestedCodeStyles(theme),
   }),
 }))

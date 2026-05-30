@@ -67,15 +67,16 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   def pr(_), do: :ignore
 
   def review(conn, %PullRequest{url: url} = pr, body) do
-    with {:ok, owner, repo, number} <- get_pull_id(url),
+    with {:ok, project, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
+      encoded = uri_encode(project)
       case pr do
         %PullRequest{comment_id: id} when is_binary(id) ->
-          put(conn, Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "notes", id]), %{
+          put(conn, Path.join(["/api/v4/projects", encoded, "merge_requests", number, "notes", id]), %{
             body: filter_ansi(body)
           })
         _ ->
-          post(conn, Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "notes"]), %{
+          post(conn, Path.join(["/api/v4/projects", encoded, "merge_requests", number, "notes"]), %{
             body: filter_ansi(body)
           })
       end
@@ -87,13 +88,13 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   end
 
   def files(conn, url) do
-    with {:ok, group, repo, number} <- get_pull_id(url),
+    with {:ok, project, number} <- get_pull_id(url),
          {:ok, pr_conn} <- connection(conn),
-         {:ok, mr_info} <- get_mr_info(pr_conn, group, repo, number) do
+         {:ok, mr_info} <- get_mr_info(pr_conn, project, number) do
 
       res_list = Enum.map(mr_info["changes"], fn change ->
         sha = mr_info["sha"]
-        file_contents = get_file_contents_from_commit(pr_conn, group, repo, change["new_path"], sha)
+        file_contents = get_file_contents_from_commit(pr_conn, project, change["new_path"], sha)
 
         %File{
           url: url,                              # MR URL
@@ -117,9 +118,9 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   end
 
   def approve(conn, %PullRequest{url: url}, _) do
-    with {:ok, owner, repo, number} <- get_pull_id(url),
+    with {:ok, project, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "approve"])
+      Path.join(["/api/v4/projects", uri_encode(project), "merge_requests", number, "approve"])
       |> then(&post(conn, &1, %{}))
       |> case do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
@@ -131,24 +132,23 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   def commit_status(_, _, _, _, _), do: :ok
 
   def pr_info(url) do
-    with {:ok, group, repo, number} <- get_pull_id(url) do
-      {:ok, %{group: group, repo: repo, number: number}}
+    with {:ok, project, number} <- get_pull_id(url) do
+      case String.split(project, "/", trim: true) do
+        [group, repo] ->
+          {:ok, %{group: group, repo: repo, project: project, number: number}}
+
+        [group | rest] ->
+          {:ok, %{group: group, repo: List.last(rest), project: project, number: number}}
+      end
     end
   end
 
-  def slug(url) do
-    with %URI{path: "/" <> path} <- URI.parse(url),
-        [group, repo | _] <- String.split(path, "/", trim: true) do
-      {:ok, "#{group}/#{String.trim_trailing(repo, ".git")}"}
-    else
-      _ -> {:error, "could not parse gitlab url"}
-    end
-  end
+  def slug(url), do: project_path(url)
 
   def merge(conn, %PullRequest{url: url}) do
-    with {:ok, owner, repo, number} <- get_pull_id(url),
+    with {:ok, project, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "merge"])
+      Path.join(["/api/v4/projects", uri_encode(project), "merge_requests", number, "merge"])
       |> then(&put(conn, &1, %{squash: true, auto_merge: true}))
       |> case do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
@@ -204,18 +204,17 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp get_pull_id(url) do
     with %URI{path: "/" <> path} <- URI.parse(url),
          [project_path, mr_path] <- String.split(path, "/-/"),
-         [group, repo] <- String.split(project_path, "/", trim: true),
-         ["merge_requests", number] <- String.split(mr_path, "/", trim: true) do
-      {:ok, group, repo, number}
+         ["merge_requests", number] <- String.split(mr_path, "/", trim: true),
+         {:ok, project} <- normalize_project_path(project_path) do
+      {:ok, project, number}
     else
       %URI{} -> {:error, "Invalid GitLab merge request URL: missing or invalid path"}
       _ -> {:error, "Invalid GitLab merge request URL: invalid format"}
     end
   end
 
-  def get_mr_info(conn, group, repo, mr_iid) do
-    encoded_project_id = URI.encode_www_form("#{group}/#{repo}")
-    get(conn, "/api/v4/projects/#{encoded_project_id}/merge_requests/#{mr_iid}/changes")
+  def get_mr_info(conn, project, mr_iid) do
+    get(conn, "/api/v4/projects/#{uri_encode(project)}/merge_requests/#{mr_iid}/changes")
   end
 
   # Add this helper function to get repo URL (similar to GitHub's to_repo_url)
@@ -226,15 +225,38 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  defp get_file_contents_from_commit(conn, group, repo, file_path, sha) do
-    encoded_project_id = URI.encode_www_form("#{group}/#{repo}")
+  defp get_file_contents_from_commit(conn, project, file_path, sha) do
     encoded_file_path = URI.encode_www_form(file_path)
-    case get(conn, "/api/v4/projects/#{encoded_project_id}/repository/files/#{encoded_file_path}?ref=#{sha}") do
+    case get(conn, "/api/v4/projects/#{uri_encode(project)}/repository/files/#{encoded_file_path}?ref=#{sha}") do
       {:ok, %{"content" => content}} ->
         content
       _err -> nil
     end
   end
+
+  defp project_path(url) when is_binary(url) do
+    with %URI{path: path} when is_binary(path) <- URI.parse(url) do
+      path
+      |> String.trim_leading("/")
+      |> String.split("/-/", parts: 2)
+      |> List.first()
+      |> normalize_project_path()
+    else
+      _ -> {:error, "could not parse gitlab url"}
+    end
+  end
+
+  defp normalize_project_path(path) when is_binary(path) do
+    path
+    |> String.split("/", trim: true)
+    |> Enum.join("/")
+    |> String.trim_trailing(".git")
+    |> case do
+      "" -> {:error, "could not parse gitlab url"}
+      project -> {:ok, project}
+    end
+  end
+  defp normalize_project_path(_), do: {:error, "could not parse gitlab url"}
 
   defp api_url(%Connection{host: host}, url) do
     String.trim_trailing(host, "/api/v4")

@@ -55,6 +55,12 @@ Some rules you should communicate to the coding agent to help it make high quali
 * It is not abnormal for pull requests you've created to not yet be merged.  If you need to create multiple PRs to accomplish a task, assume the user will merge them in their own flow, and your job is simply to generate the appropriate PRs for them.
 * you are also given a workbench_history tool which can be used to search past work outside of this subagent.  Use this to grab additional context that might not be present in your prompt, but don't rely on it if the prompt is sufficient.
 
+## Scope Guidance
+
+This subagent is specifically scoped towards managing coding agent tasks and only supports the tools provided within it.
+
+Do not expect to do investigation that would be better suited for another subagent, like infrastructure, observability, or miscellaneous integrations, within this agentic loop.
+
 The overarching task is as follows:
 
 <%= @prompt %>

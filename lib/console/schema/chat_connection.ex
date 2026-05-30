@@ -2,7 +2,8 @@ defmodule Console.Schema.ChatConnection do
   use Console.Schema.Base
   alias Piazza.Ecto.EncryptedString
   alias Console.Deployments.Policies.Rbac
-  alias Console.Schema.{PolicyBinding, User}
+  alias Console.Schema.{PolicyBinding, User, WorkbenchTool}
+  alias Console.Schema.WorkbenchTool.{Configuration, Configuration.SlackConnection, Configuration.TeamsConnection}
 
   defenum Type,
     slack: 0,
@@ -40,6 +41,31 @@ defmodule Console.Schema.ChatConnection do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  @spec to_tool(t()) :: WorkbenchTool.t()
+  def to_tool(%__MODULE__{type: :slack, name: name, configuration: %{slack: %{bot_token: bot_token}}}) do
+    %WorkbenchTool{
+      tool: :slack,
+      name: name,
+      categories: [:chat],
+      configuration: %Configuration{slack: %SlackConnection{bot_token: bot_token}}
+    }
+  end
+
+  def to_tool(%__MODULE__{type: :teams, name: name, configuration: %{teams: teams}}) do
+    %WorkbenchTool{
+      tool: :teams,
+      name: name,
+      categories: [:chat],
+      configuration: %Configuration{
+        teams: %TeamsConnection{
+          client_id: teams.client_id,
+          client_secret: teams.client_secret,
+          tenant_id: teams.tenant_id
+        }
+      }
+    }
   end
 
   def ignore_ids(query \\ __MODULE__, ids) do

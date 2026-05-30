@@ -14,6 +14,7 @@ type SystemPromptTemplateInput struct {
 	DindEnabled    bool
 	WorkDir        string
 	RepositoryDir  string
+	Prompt         string
 }
 
 func systemPromptTemplate(templateFilePath string, input *SystemPromptTemplateInput) (content string, err error) {

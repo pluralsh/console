@@ -1,7 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
   use Console.DataCase, async: true
 
-  alias Console.AI.Tools.Workbench.Integration.Github.Response
+  alias Console.AI.Tools.Workbench.Integration.Github.{Query, Response}
 
   describe "json/1" do
     test "merges multi-page Tentacat search bodies before encoding" do
@@ -24,6 +24,42 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
 
       assert {:ok, json} = Response.json({200, body, fake})
       assert Jason.decode!(json) == body
+    end
+
+    test "includes manual pagination metadata" do
+      body = [%{"id" => 1}]
+      next = "https://api.github.com/repos/pluralsh/console/pulls?page=2&per_page=30"
+      fake = %HTTPoison.Response{headers: [{"Link", "<#{next}>; rel=\"next\""}]}
+
+      assert {:ok, json} = Response.json({{200, body, fake}, next, nil})
+
+      assert Jason.decode!(json) == %{
+               "items" => [%{"id" => 1}],
+               "pagination" => %{
+                 "has_next_page" => true,
+                 "link" => "<#{next}>; rel=\"next\"",
+                 "next_page" => "2",
+                 "next_url" => next,
+                 "per_page" => "30"
+               }
+             }
+    end
+  end
+
+  describe "github query helpers" do
+    test "adds bounded pagination defaults" do
+      assert Query.paginated(%{}) == %{page: 1, per_page: 30}
+      assert Query.paginated(%{page: 3, per_page: 5}) == %{page: 3, per_page: 5}
+    end
+
+    test "normalizes bare pull request head branches to the current owner" do
+      assert Query.normalize_head(%{owner: "pluralsh", head: "feature/foo"}) ==
+               "pluralsh:feature/foo"
+
+      assert Query.normalize_head(%{owner: "pluralsh", head: "fork:feature/foo"}) ==
+               "fork:feature/foo"
+
+      assert Query.normalize_head(%{owner: "pluralsh", head: " "}) == nil
     end
   end
 end

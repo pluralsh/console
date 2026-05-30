@@ -523,6 +523,8 @@ type AgentRuntimeAttributes struct {
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
 	// default interval in seconds between babysit checks for runs on this runtime
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// the name of the scm connection to use for this runtime
+	ScmConnection *string `json:"scmConnection,omitempty"`
 }
 
 type AgentRuntimeConnection struct {
@@ -1517,10 +1519,13 @@ type ChatProviderConnectionAttributes struct {
 type ChatProviderConnectionConfiguration struct {
 	// the configuration for the slack connection
 	Slack *SlackConnectionConfiguration `json:"slack,omitempty"`
+	// the configuration for the teams connection
+	Teams *TeamsConnectionConfiguration `json:"teams,omitempty"`
 }
 
 type ChatProviderConnectionConfigurationAttributes struct {
 	Slack *SlackConnectionConfigurationAttributes `json:"slack,omitempty"`
+	Teams *TeamsConnectionConfigurationAttributes `json:"teams,omitempty"`
 }
 
 type ChatProviderConnectionConnection struct {
@@ -1609,6 +1614,12 @@ type ChatTypeAttributes struct {
 	File   *ChatFile         `json:"file,omitempty"`
 	Tool   *ChatTool         `json:"tool,omitempty"`
 	PrCall *PrCallAttributes `json:"prCall,omitempty"`
+}
+
+// A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams
+type ChatbotConversation struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type ChatbotMessage struct {
@@ -9040,6 +9051,19 @@ type TargetRef struct {
 	Name       *string `json:"name,omitempty"`
 }
 
+type TeamsConnectionConfiguration struct {
+	// the client id for the teams connection
+	ClientID *string `json:"clientId,omitempty"`
+	// the tenant id for the teams connection
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type TeamsConnectionConfigurationAttributes struct {
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	TenantID     string `json:"tenantId"`
+}
+
 // Additional context used to template service metadata during global service reconciliation
 type TemplateContext struct {
 	Raw map[string]any `json:"raw,omitempty"`
@@ -9721,6 +9745,8 @@ type WorkbenchChatbot struct {
 	Channel string `json:"channel"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// how the chatbot posts responses in the channel
+	MessageBehavior WorkbenchChatbotMessageBehavior `json:"messageBehavior"`
 	// user this chatbot runs as
 	UserID *string `json:"userId,omitempty"`
 	// the workbench this chatbot is bound to
@@ -9740,6 +9766,8 @@ type WorkbenchChatbotAttributes struct {
 	Channel *string `json:"channel,omitempty"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// how the chatbot posts responses in the channel
+	MessageBehavior *WorkbenchChatbotMessageBehavior `json:"messageBehavior,omitempty"`
 	// user this chatbot runs as; must have read access to the workbench
 	UserID *string `json:"userId,omitempty"`
 	// when true on update, sets userId to the authenticated user
@@ -16921,6 +16949,61 @@ func (e *WorkbenchCanvasBlockType) UnmarshalJSON(b []byte) error {
 }
 
 func (e WorkbenchCanvasBlockType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchChatbotMessageBehavior string
+
+const (
+	WorkbenchChatbotMessageBehaviorReply   WorkbenchChatbotMessageBehavior = "REPLY"
+	WorkbenchChatbotMessageBehaviorMessage WorkbenchChatbotMessageBehavior = "MESSAGE"
+)
+
+var AllWorkbenchChatbotMessageBehavior = []WorkbenchChatbotMessageBehavior{
+	WorkbenchChatbotMessageBehaviorReply,
+	WorkbenchChatbotMessageBehaviorMessage,
+}
+
+func (e WorkbenchChatbotMessageBehavior) IsValid() bool {
+	switch e {
+	case WorkbenchChatbotMessageBehaviorReply, WorkbenchChatbotMessageBehaviorMessage:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchChatbotMessageBehavior) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchChatbotMessageBehavior) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchChatbotMessageBehavior(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchChatbotMessageBehavior", str)
+	}
+	return nil
+}
+
+func (e WorkbenchChatbotMessageBehavior) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchChatbotMessageBehavior) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchChatbotMessageBehavior) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

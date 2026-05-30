@@ -2,6 +2,7 @@ package controller
 
 import (
 	"testing"
+	"time"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
@@ -284,4 +285,95 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Equal(t, []string{"/agent-bootstrap"}, bootstrap.Command)
 	assert.Contains(t, bootstrap.Args, "--working-dir")
 	assert.Contains(t, bootstrap.Args, common.AgentRunSharedWorkDir)
+}
+
+func TestGetAgentRunPodCompletion(t *testing.T) {
+	tests := []struct {
+		name       string
+		pod        *corev1.Pod
+		wantStatus console.AgentRunStatus
+		wantPhase  v1alpha1.AgentRunPhase
+		wantReason string
+		wantOK     bool
+	}{
+		{
+			name: "completes failed init container",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					InitContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: agentBootstrapContainerName,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 1,
+									Message:  "bootstrap failed",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "init container \"agent-bootstrap\" failed with exit code 1: bootstrap failed",
+			wantOK:     true,
+		},
+		{
+			name: "completes timed out pod",
+			pod: &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					CreationTimestamp: metav1.Time{Time: time.Now().Add(-13 * time.Hour)},
+				},
+				Status: corev1.PodStatus{
+					StartTime: &metav1.Time{Time: time.Now().Add(-13 * time.Hour)},
+				},
+			},
+			wantStatus: console.AgentRunStatusCancelled,
+			wantPhase:  v1alpha1.AgentRunPhaseCancelled,
+			wantOK:     true,
+		},
+		{
+			name: "ignores successful init container",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					InitContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: agentBootstrapContainerName,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 0,
+								},
+							},
+						},
+					},
+				},
+			},
+			wantOK: false,
+		},
+		{
+			name:   "ignores nil pod",
+			pod:    nil,
+			wantOK: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			completion, ok := getAgentRunPodCompletion(tt.pod)
+			assert.Equal(t, tt.wantOK, ok)
+			if !tt.wantOK {
+				assert.Nil(t, completion)
+				return
+			}
+
+			assert.Equal(t, tt.wantStatus, completion.status)
+			assert.Equal(t, tt.wantPhase, completion.phase)
+			if tt.wantReason == "" {
+				assert.Nil(t, completion.reason)
+			} else {
+				assert.NotNil(t, completion.reason)
+				assert.Equal(t, tt.wantReason, *completion.reason)
+			}
+		})
+	}
 }

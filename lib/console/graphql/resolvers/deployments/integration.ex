@@ -52,6 +52,19 @@ defmodule Console.GraphQl.Resolvers.Deployments.Integration do
   def delete_issue_webhook(%{id: id}, %{context: %{current_user: user}}),
     do: Integrations.delete_issue_webhook(id, user)
 
+  def search_chatbot_conversations(%{chat_connection_id: id} = args, %{context: %{current_user: user}}) do
+    query = Map.get(args, :query)
+
+    with %ChatConnection{} = conn <- Integrations.get_chat_connection(id),
+         {:ok, _} <- allow(conn, user, :read),
+         {:ok, channels} <- Console.Chat.Impl.search_channels(conn, query) do
+      {:ok, channels}
+    else
+      nil -> {:error, "chat connection not found"}
+      err -> err
+    end
+  end
+
   defp chat_filters(query, args) do
     Enum.reduce(args, query, fn
       {:type, t}, q when not is_nil(t) -> ChatConnection.for_type(q, t)

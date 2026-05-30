@@ -120,6 +120,12 @@ defmodule Console.GraphQl.Deployments.Integration do
     timestamps()
   end
 
+  @desc "A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
+  object :chatbot_conversation do
+    field :id, non_null(:id)
+    field :name, non_null(:string)
+  end
+
   connection node_type: :issue
 
   object :integration_queries do
@@ -163,6 +169,18 @@ defmodule Console.GraphQl.Deployments.Integration do
         action: :read
 
       resolve &Deployments.issue_webhooks/2
+    end
+
+    field :search_conversations, list_of(:chatbot_conversation) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :integrations,
+        action: :read
+
+      arg :chat_connection_id, non_null(:id)
+      arg :query, :string
+
+      resolve &Deployments.search_chatbot_conversations/2
     end
   end
 
