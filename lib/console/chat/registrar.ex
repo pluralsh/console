@@ -40,6 +40,7 @@ defmodule Console.Chat.Registrar do
       case DynamicSupervisor.start_child(chat) do
         {:ok, pid} -> Map.put(acc, chat.id, pid)
         {:error, {:already_started, pid}} -> Map.put(acc, chat.id, pid)
+        {:error, {:shutdown, {:failed_to_start_child, _, {:already_started, _}}}} -> acc
         err ->
           Logger.warning "failed to start chat #{chat.id}: #{inspect(err)}"
           acc
