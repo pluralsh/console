@@ -45,7 +45,8 @@ defmodule Console.Chat.Impl.Slack do
       bot: __MODULE__,
       bot_assigns: %{conn: conn},
       app_token: app_token,
-      channels: [types: ~w(public_channel private_channel)]
+      channels: [types: ~w(public_channel private_channel)],
+      supervisor_args: [name: {:via, Registry, {Console.AI.Agents, {:slack_bot, conn.id}}}]
     ]
   end
 
