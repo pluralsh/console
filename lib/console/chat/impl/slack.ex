@@ -2,10 +2,16 @@ defmodule Console.Chat.Impl.Slack do
   use Slack.Bot
   use Console.Chat.Impl
   alias Console.Chat.{Channel, Utils, Reference}
+  use Nebulex.Caching
+  require Logger
+
+  @cache_adapter Console.conf(:cache_adapter)
+  @ttl :timer.hours(1)
 
   @limit 1000
 
-  def handle_event(_, %{"ts" => ts, "text" => text, "channel" => channel}, %Slack.Bot{user_id: id} = bot) do
+  def handle_event(event, %{"ts" => ts, "text" => text, "channel" => channel}, %Slack.Bot{user_id: id} = bot) do
+    Logger.info("incoming slack #{event}: #{text}")
     case String.contains?(text, "<@#{id}>") do
       true -> spawn_job(ts, text, channel, bot)
       false -> :ok
@@ -61,8 +67,9 @@ defmodule Console.Chat.Impl.Slack do
   end
   defp spawn_job(_, _, _, _), do: :ok
 
+  @decorate cacheable(cache: @cache_adapter, key: {:slack_channel, id}, opts: [ttl: @ttl])
   defp fetch_channel(id, token) do
-    case Slack.API.get("conversations.info", token, channel: id) |> IO.inspect(label: "slack conversation") do
+    case Slack.API.get("conversations.info", token, channel: id) do
       {:ok, %{"ok" => true, "channel" => %{"name" => name}}} -> {:ok, name}
       result -> {:error, "Failed to fetch channel: #{inspect(result)}"}
     end

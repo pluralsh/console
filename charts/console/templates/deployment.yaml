@@ -76,7 +76,11 @@ spec:
             name: console-env
         env:
         - name: KAS_SERVICE
+        {{ if .Values.console.config.kasHost }}
+          value: {{ .Values.console.config.kasHost }}
+        {{ else }}
           value: {{ include "kas.serviceName" . }}.{{ .Release.Namespace }}:{{ .Values.kas.service.kubernetesApiPort }}
+        {{ end }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}
         {{ include "console.env" . | nindent 8 }}
