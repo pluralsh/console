@@ -100,7 +100,16 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided for v3.5.3 and v3.5.0 contain no itemized feature/fix
+        details beyond links to the blog/changelog and installation instructions.
+        From the provided text alone, there are no explicit new features listed between
+        3.5.0 and 3.5.3.']
+    breaking_changes: [No breaking changes are explicitly listed in the provided release
+        notes; they direct readers to the upgrading guide and GitHub issues for breaking
+        changes/known issues.]
   chart_version: 0.40.5
   images: ['quay.io/argoproj/argocli:v3.5.3', 'quay.io/argoproj/workflow-controller:v3.5.3']
 - version: 3.5.0

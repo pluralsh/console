@@ -5,7 +5,7 @@ helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
 - version: 3.4.3
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -18,11 +18,11 @@ versions:
         switch from `argocd.argoproj.io/kubernetes-version` in `Major.Minor` to `vMajor.Minor.Patch`
         format. This can affect cluster selection and therefore what apps get generated/synced
         if not updated.']
-  chart_version: 9.5.16
+  chart_version: 9.5.17
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.4.3']
 - version: 3.4.1
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -49,34 +49,8 @@ versions:
   chart_version: 9.5.13
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.4.1']
-- version: 3.3.8
-  kube: ['1.36', '1.35', '1.34']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Server-Side Apply (SSA) becomes a central part of the 3.3 line, including
-        SSA diffs and automatic migration away from the legacy kubectl client-side
-        apply field manager.', 'ApplicationSet improvements include new pprof endpoints,
-        Progressive Sync maturity, status/resource count controls, and multiple reconciliation/finalizer
-        fixes.', 'New/expanded custom actions and health checks (e.g., CloudNativePG
-        actions, PR merge action, more KEDA/Ceph/Crossplane/GatewayAPI-related health
-        logic) improve operational workflows and UI feedback.', Repository integration
-        enhancements such as GitHub App auth without installation ID and optional
-        shallow clones reduce friction and improve performance.]
-    breaking_changes: ['If Argo CD is managing its own installation (app-of-apps/self-managed),
-        the upgrade may fail unless the managing Application uses `ServerSideApply=true`;
-        some environments may also need the temporary workaround `ClientSideApplyMigration=false`
-        to avoid a client-side apply migration error.', 'Behavior changes around apply/diff
-        (SSA, server-side dry-run, apply-out-of-sync-only, replace/force options)
-        can alter sync outcomes; validate sync options and test against critical apps
-        before rolling out broadly.']
-  chart_version: 9.5.10
-  images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-    'quay.io/argoproj/argocd:v3.3.8']
 - version: 3.3.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -115,24 +89,8 @@ versions:
   chart_version: 9.4.2
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.3.0']
-- version: 3.2.1
-  kube: ['1.35', '1.34', '1.33']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Repo Server: fixes a concurrency issue when processing detached git
-        states, reducing chance of stuck/failed refreshes in busy repos.', 'UI: multiple
-        small fixes (null-safe status panel rendering, prevent overlapping elements,
-        add resource units in tooltips, avoid rendering ApplicationSelector when panel
-        hidden).']
-    breaking_changes: []
-  chart_version: 9.1.8
-  images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.2.1']
 - version: 3.2.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -162,28 +120,8 @@ versions:
   chart_version: 9.1.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.0']
-- version: 3.1.1
-  kube: ['1.34', '1.33', '1.32']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [No Helm chart-specific changelog was provided in the notes you
-        pasted; the v3.1.1 notes are application release notes only., "If you are\
-        \ upgrading via Helm, verify the argo-cd Helm chart version that corresponds\
-        \ to app v3.1.1 and review that chart\u2019s CHANGELOG for values/schema changes,\
-        \ hook/job changes, and CRD handling."]
-    features: [No new user-facing features called out for v3.1.1; this is a patch
-        release focused on fixes and small manifest tweaks., Manifests add OCI-related
-        environment variables (helps OCI/registry integrations when using upstream
-        install manifests).]
-    breaking_changes: []
-  chart_version: 8.3.3
-  images: ['ecr-public.aws.com/docker/library/redis:7.2.8-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.1.1']
-  eolAt: '2026-05-05'
 - version: 3.1.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -215,7 +153,7 @@ versions:
     'quay.io/argoproj/argocd:v3.1.0']
   eolAt: '2026-05-05'
 - version: 3.0.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -262,22 +200,8 @@ versions:
   images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
     'quay.io/argoproj/argocd:v3.0.0']
   eolAt: '2026-02-02'
-- version: 2.14.11
-  kube: ['1.33', '1.32', '1.31']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Hydrator: webhook handling now understands `sourceHydrator` fields,
-        improving support for hydration workflows triggered via webhooks.']
-    breaking_changes: []
-  chart_version: 7.9.1
-  images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
-    'quay.io/argoproj/argocd:v2.14.11']
-  eolAt: '2025-11-04'
 - version: 2.14.1
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -297,25 +221,8 @@ versions:
   images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
     'quay.io/argoproj/argocd:v2.14.1']
   eolAt: '2025-11-04'
-- version: 2.13.2
-  kube: ['1.32', '1.31', '1.30']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['(v2.13.0) UI extensions: Argo CD now supports configuring extensions
-        individually, allowing per-extension settings rather than a single shared
-        config.', '(v2.13.0) Self-heal exponential backoff: self-heal retries can
-        use an exponential backoff between attempts to reduce thrash during repeated
-        drift.']
-    breaking_changes: []
-  chart_version: 7.7.12
-  images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
-    'quay.io/argoproj/argocd:v2.13.2']
-  eolAt: '2025-08-13'
 - version: 2.13.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -333,7 +240,7 @@ versions:
     'quay.io/argoproj/argocd:v2.13.0']
   eolAt: '2025-08-13'
 - version: 2.12.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -350,7 +257,7 @@ versions:
     'quay.io/argoproj/argocd:v2.12.0']
   eolAt: '2025-05-06'
 - version: 2.11.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary: null
@@ -359,7 +266,7 @@ versions:
     'quay.io/argoproj/argocd:v2.11.0']
   eolAt: '2025-02-03'
 - version: 2.10.7
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
