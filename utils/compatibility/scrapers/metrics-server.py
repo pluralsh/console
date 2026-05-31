@@ -55,7 +55,10 @@ def parse_compatibility_matrix(content):
         if set(stripped.replace("|", "").strip()) <= {"-"}:
             continue
 
-        columns = [_clean_cell(column) for column in stripped.split("|")]
+        columns = [
+            _clean_cell(column)
+            for column in stripped.strip("|").split("|")
+        ]
         if len(columns) != 3 or columns[0] == "Metrics Server":
             continue
 
@@ -109,6 +112,9 @@ def scrape():
     compatibility_matrix = parse_compatibility_matrix(page_content)
     chart_versions = get_chart_versions(APP_NAME)
     rows = extract_table_data(compatibility_matrix, chart_versions)
+    if not rows:
+        print_error("No metrics-server versions extracted from compatibility matrix.")
+        return
     update_compatibility_info(
         f"../../static/compatibilities/{APP_NAME}.yaml", rows
     )
