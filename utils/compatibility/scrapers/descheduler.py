@@ -102,19 +102,32 @@ def get_chart_releases(index_content):
 
 def read_chart_yaml(archive, filename):
     for member in archive.getmembers():
-        if member.name.endswith(f"/{filename}"):
-            return yaml.safe_load(archive.extractfile(member))
+        if member.isfile() and member.name.split("/")[-1] == filename:
+            extracted = archive.extractfile(member)
+            if extracted:
+                return yaml.safe_load(extracted) or {}
     return {}
 
 
+def fallback_image(app_version):
+    return f"{IMAGE_REPOSITORY}:v{app_version}"
+
+
 def get_default_image(chart_url, app_version):
+    if not chart_url:
+        return fallback_image(app_version)
+
     content = fetch_page(chart_url)
     if not content:
-        return f"{IMAGE_REPOSITORY}:v{app_version}"
+        return fallback_image(app_version)
 
-    with tarfile.open(fileobj=io.BytesIO(content), mode="r:gz") as archive:
-        chart = read_chart_yaml(archive, "Chart.yaml")
-        values = read_chart_yaml(archive, "values.yaml")
+    try:
+        with tarfile.open(fileobj=io.BytesIO(content), mode="r:gz") as archive:
+            chart = read_chart_yaml(archive, "Chart.yaml")
+            values = read_chart_yaml(archive, "values.yaml")
+    except (tarfile.TarError, yaml.YAMLError, OSError) as error:
+        print_error(f"Failed to read Descheduler chart defaults: {error}")
+        return fallback_image(app_version)
 
     image = values.get("image", {})
     repository = image.get("repository") or IMAGE_REPOSITORY
