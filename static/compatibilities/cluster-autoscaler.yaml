@@ -1,0 +1,111 @@
+icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
+git_url: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
+release_url: https://github.com/kubernetes/autoscaler/releases/tag/cluster-autoscaler-{vsn}
+helm_repository_url: https://kubernetes.github.io/autoscaler
+chart_name: cluster-autoscaler
+versions:
+- version: 1.35.0
+  kube: ['1.35']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.57.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.0']
+- version: 1.34.2
+  kube: ['1.34']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.53.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.34.2']
+- version: 1.33.0
+  kube: ['1.33']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.51.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.33.0']
+- version: 1.32.0
+  kube: ['1.32']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.46.6
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.32.0']
+- version: 1.31.0
+  kube: ['1.31']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.44.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.31.0']
+- version: 1.30.0
+  kube: ['1.30']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.37.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.0']
+- version: 1.29.0
+  kube: ['1.29']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.36.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0']
+- version: 1.28.2
+  kube: ['1.28']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.34.1
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.28.2']
+- version: 1.27.2
+  kube: ['1.27']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.33.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.27.2']
+- version: 1.26.2
+  kube: ['1.26']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.28.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.26.2']
+- version: 1.24.0
+  kube: ['1.24']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.27.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.24.0']
+- version: 1.23.0
+  kube: ['1.23']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.24.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.23.0']
+- version: 1.21.1
+  kube: ['1.21']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.13.1
+  images: ['k8s.gcr.io/autoscaling/cluster-autoscaler:v1.21.1']
+- version: 1.20.0
+  kube: ['1.20']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.9.2
+  images: ['k8s.gcr.io/autoscaling/cluster-autoscaler:v1.20.0']
+- version: 1.18.1
+  kube: ['1.18']
+  requirements: [Use the Cluster Autoscaler release that corresponds to the Kubernetes
+      control-plane minor version.]
+  incompatibilities: []
+  chart_version: 9.4.0
+  images: ['us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v1.18.1']
