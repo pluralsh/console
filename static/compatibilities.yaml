@@ -10370,6 +10370,44 @@ addons:
     chart_version: 1.0.0
     images: ['longhornio/longhorn-manager:v1.0.0', 'longhornio/longhorn-ui:v1.0.0']
   name: longhorn
+- icon: https://avatars.githubusercontent.com/u/36015203?s=400&v=4
+  git_url: https://github.com/kubernetes-sigs/metrics-server
+  release_url: https://github.com/kubernetes-sigs/metrics-server/releases/tag/v{vsn}
+  helm_repository_url: https://kubernetes-sigs.github.io/metrics-server
+  versions:
+  - version: 0.8.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.13.0
+    images: ['registry.k8s.io/metrics-server/metrics-server:v0.8.0']
+  - version: 0.7.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.12.0
+    images: ['registry.k8s.io/metrics-server/metrics-server:v0.7.0']
+  - version: 0.6.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.8.0
+    images: ['k8s.gcr.io/metrics-server/metrics-server:v0.6.0']
+  - version: 0.5.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9',
+      '1.8']
+    requirements: ['Kubernetes versions lower than v1.16 require --authorization-always-allow-paths=/livez,/readyz.']
+    incompatibilities: []
+    summary: null
+    chart_version: 3.5.0
+    images: ['k8s.gcr.io/metrics-server/metrics-server:v0.5.0']
+  name: metrics-server
 - icon: https://avatars.githubusercontent.com/u/49998002?s=48&v=4
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
