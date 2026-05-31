@@ -105,7 +105,8 @@ def read_chart_yaml(archive, filename):
         if member.isfile() and member.name.split("/")[-1] == filename:
             extracted = archive.extractfile(member)
             if extracted:
-                return yaml.safe_load(extracted) or {}
+                parsed = yaml.safe_load(extracted)
+                return parsed if isinstance(parsed, dict) else {}
     return {}
 
 
@@ -178,6 +179,7 @@ def scrape():
 
     chart_index = fetch_page(f"{HELM_REPO_URL}/index.yaml")
     if not chart_index:
+        print_error("No Descheduler Helm index found.")
         return
     chart_releases = get_chart_releases(chart_index)
     rows = extract_table_data(compatibility_by_minor, chart_releases)
