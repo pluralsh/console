@@ -2,6 +2,7 @@ import re
 import io
 import tarfile
 from collections import OrderedDict
+from urllib.parse import urljoin
 
 import yaml
 from packaging.version import Version
@@ -96,11 +97,15 @@ def get_chart_releases(index_content):
         except ValueError:
             continue
 
+        chart_url = chart_urls[0] if chart_urls else ""
+        if chart_url and not chart_url.startswith("http"):
+            chart_url = urljoin(f"{HELM_REPO_URL}/", chart_url)
+
         current = chart_releases.get(app_version)
         if not current or Version(chart_version) > Version(current["chart_version"]):
             chart_releases[app_version] = {
                 "chart_version": chart_version,
-                "url": chart_urls[0] if chart_urls else "",
+                "url": chart_url,
             }
 
     return chart_releases
@@ -124,7 +129,12 @@ def get_default_image(chart_url, app_version):
     if not chart_url:
         return fallback_image(app_version)
 
-    content = fetch_page(chart_url)
+    try:
+        content = fetch_page(chart_url)
+    except Exception as error:
+        print_error(f"Failed to fetch Cluster Autoscaler chart defaults: {error}")
+        return fallback_image(app_version)
+
     if not content:
         return fallback_image(app_version)
 
