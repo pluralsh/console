@@ -77,7 +77,11 @@ def get_chart_releases(index_content):
         print_error("Invalid Descheduler Helm index.")
         return {}
 
-    entries = index_yaml.get("entries", {}).get(CHART_NAME, [])
+    entries = index_yaml.get("entries", {}).get(CHART_NAME) or []
+    if not isinstance(entries, list):
+        print_error("Invalid Descheduler chart entries.")
+        return {}
+
     chart_releases = {}
 
     for entry in entries:
