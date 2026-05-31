@@ -73,6 +73,10 @@ def parse_compatibility_table(content):
 
 def get_chart_releases(index_content):
     index_yaml = yaml.safe_load(index_content)
+    if not isinstance(index_yaml, dict):
+        print_error("Invalid Descheduler Helm index.")
+        return {}
+
     entries = index_yaml.get("entries", {}).get(CHART_NAME, [])
     chart_releases = {}
 
