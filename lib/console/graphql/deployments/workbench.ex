@@ -21,6 +21,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_job_attributes do
     field :prompt, :string, description: "the prompt for this job"
+    field :modes,  :workbench_job_modes_attributes, description: "mode-specific options for this job"
+  end
+
+  input_object :workbench_job_modes_attributes do
+    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+  end
+
+  input_object :workbench_job_coding_modes_attributes do
+    field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
+    field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
   end
 
   input_object :workbench_job_update_attributes do
@@ -435,6 +446,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+    field :modes,        :workbench_job_modes, description: "mode-specific options for this job"
 
     field :chatbot_message, :chatbot_message,
       resolve: dataloader(Deployments),
@@ -478,6 +490,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     timestamps()
+  end
+
+  object :workbench_job_modes do
+    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+  end
+
+  object :workbench_job_coding_modes do
+    field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
+    field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
   end
 
   object :workbench_job_activity do

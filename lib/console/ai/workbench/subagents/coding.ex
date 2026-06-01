@@ -59,7 +59,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   defp tools(activity, %Environment{skills: skills, job: job, activities: activities}) do
     [
-      %CodingAgent{activity: activity, workbench: job.workbench},
+      %CodingAgent{activity: activity, workbench: job.workbench, job: job},
       %PullRequests{job: job},
       %Skills{skills: Environment.subagent_skills(skills, :coding)},
       %Skill{skills: Environment.subagent_skills(skills, :coding)},

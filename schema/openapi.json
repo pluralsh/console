@@ -73,6 +73,15 @@
         "title": "AgentRun",
         "description": "An execution of an AI coding agent processing a prompt against a repository",
         "properties": {
+          "approval": {
+            "description": "Whether this agent run requires approval before continuing",
+            "type": "boolean"
+          },
+          "approved_at": {
+            "description": "When this agent run was approved",
+            "format": "date-time",
+            "type": "string"
+          },
           "branch": {
             "description": "The git branch the agent is operating on (uses default branch if not set)",
             "type": "string"
@@ -144,7 +153,8 @@
               "successful",
               "failed",
               "cancelled",
-              "babysitting"
+              "babysitting",
+              "pending_approval"
             ],
             "type": "string"
           },
@@ -163,6 +173,10 @@
         "title": "AgentRunInput",
         "description": "Input for creating a new agent run to execute an AI coding agent",
         "properties": {
+          "approval": {
+            "description": "Whether this agent run requires approval before continuing",
+            "type": "boolean"
+          },
           "flow_id": {
             "description": "Optional flow ID to associate this agent run with",
             "type": "string"
@@ -3266,6 +3280,9 @@
             "format": "date-time",
             "type": "string"
           },
+          "modes": {
+            "$ref": "#/components/schemas/WorkbenchJobModes"
+          },
           "prompt": {
             "description": "The prompt for this run",
             "type": "string"
@@ -3305,10 +3322,28 @@
         },
         "type": "object"
       },
+      "WorkbenchJobCodingModes": {
+        "title": "WorkbenchJobCodingModes",
+        "description": "Coding mode options for a workbench job",
+        "properties": {
+          "approval": {
+            "description": "Whether coding agent runs require approval before continuing",
+            "type": "boolean"
+          },
+          "babysit": {
+            "description": "Whether babysit mode is enabled for coding agent runs",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "WorkbenchJobInput": {
         "title": "WorkbenchJobInput",
         "description": "Input for creating a new workbench job",
         "properties": {
+          "modes": {
+            "$ref": "#/components/schemas/WorkbenchJobModes"
+          },
           "prompt": {
             "description": "The prompt for this job",
             "type": "string"
@@ -3317,6 +3352,20 @@
         "required": [
           "prompt"
         ],
+        "type": "object"
+      },
+      "WorkbenchJobModes": {
+        "title": "WorkbenchJobModes",
+        "description": "Mode-specific options for a workbench job",
+        "properties": {
+          "coding": {
+            "$ref": "#/components/schemas/WorkbenchJobCodingModes"
+          },
+          "plan": {
+            "description": "Whether planning mode is enabled for this job",
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "WorkbenchJobResult": {

@@ -28,7 +28,7 @@ defmodule Console.Chat.Bot do
   def handle_info(:ping, %State{conn: conn} = state) do
     case Registrar.local?(conn) do
       true -> {:noreply, state}
-      false -> {:stop, :normal, state}
+      false -> {:stop, {:shutdown, :normal}, state}
     end
   end
   def handle_info(_, state), do: {:noreply, state}

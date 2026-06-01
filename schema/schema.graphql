@@ -1832,6 +1832,7 @@ enum AgentRunStatus {
   FAILED
   CANCELLED
   BABYSITTING
+  PENDING_APPROVAL
 }
 
 enum AgentRunMode {
@@ -1916,6 +1917,9 @@ input AgentRunAttributes {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
 }
 
 input AgentRunStatusAttributes {
@@ -1936,6 +1940,12 @@ input AgentRunStatusAttributes {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
+
+  "when this run was approved"
+  approvedAt: DateTime
 }
 
 input AgentPullRequestAttributes {
@@ -2143,6 +2153,12 @@ type AgentRun {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
+
+  "when this run was approved"
+  approvedAt: DateTime
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -2512,6 +2528,25 @@ enum EvalResultsPeriod {
 input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
+
+  "mode-specific options for this job"
+  modes: WorkbenchJobModesAttributes
+}
+
+input WorkbenchJobModesAttributes {
+  "whether planning mode is enabled for this job"
+  plan: Boolean
+
+  "coding mode options for this job"
+  coding: WorkbenchJobCodingModesAttributes
+}
+
+input WorkbenchJobCodingModesAttributes {
+  "whether babysit mode is enabled for coding agent runs"
+  babysit: Boolean
+
+  "whether coding agent runs require approval before continuing"
+  approval: Boolean
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -3250,6 +3285,9 @@ type WorkbenchJob {
   "error message when the job failed"
   error: String
 
+  "mode-specific options for this job"
+  modes: WorkbenchJobModes
+
   "chatbot integration metadata for this job, when present"
   chatbotMessage: ChatbotMessage
 
@@ -3309,6 +3347,22 @@ type WorkbenchJob {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobModes {
+  "whether planning mode is enabled for this job"
+  plan: Boolean
+
+  "coding mode options for this job"
+  coding: WorkbenchJobCodingModes
+}
+
+type WorkbenchJobCodingModes {
+  "whether babysit mode is enabled for coding agent runs"
+  babysit: Boolean
+
+  "whether coding agent runs require approval before continuing"
+  approval: Boolean
 }
 
 type WorkbenchJobActivity {

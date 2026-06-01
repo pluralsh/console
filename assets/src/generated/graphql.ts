@@ -417,6 +417,10 @@ export type AgentRun = {
   __typename?: 'AgentRun';
   /** the analysis of the agent run */
   analysis?: Maybe<AgentAnalysis>;
+  /** whether this run requires approval before continuing */
+  approval?: Maybe<Scalars['Boolean']['output']>;
+  /** when this run was approved */
+  approvedAt?: Maybe<Scalars['DateTime']['output']>;
   /** whether babysit mode is enabled for this run */
   babysit?: Maybe<Scalars['Boolean']['output']>;
   /** interval in seconds between babysit checks for this run */
@@ -465,6 +469,8 @@ export type AgentRun = {
 };
 
 export type AgentRunAttributes = {
+  /** whether this run requires approval before continuing */
+  approval?: InputMaybe<Scalars['Boolean']['input']>;
   /** whether babysit mode is enabled for this run */
   babysit?: InputMaybe<Scalars['Boolean']['input']>;
   /** interval in seconds between babysit checks for this run */
@@ -547,11 +553,16 @@ export enum AgentRunStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
   Pending = 'PENDING',
+  PendingApproval = 'PENDING_APPROVAL',
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
 }
 
 export type AgentRunStatusAttributes = {
+  /** whether this run requires approval before continuing */
+  approval?: InputMaybe<Scalars['Boolean']['input']>;
+  /** when this run was approved */
+  approvedAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** whether babysit mode is enabled for this run */
   babysit?: InputMaybe<Scalars['Boolean']['input']>;
   /** interval in seconds between babysit checks for this run */
@@ -15583,6 +15594,8 @@ export type WorkbenchJob = {
   issue?: Maybe<Issue>;
   logsTool?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   metricsTool?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+  /** mode-specific options for this job */
+  modes?: Maybe<WorkbenchJobModes>;
   /** the prompt for this run */
   prompt?: Maybe<Scalars['String']['output']>;
   /** pull requests associated with this workbench job */
@@ -15768,8 +15781,25 @@ export enum WorkbenchJobActivityType {
 }
 
 export type WorkbenchJobAttributes = {
+  /** mode-specific options for this job */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** the prompt for this job */
   prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchJobCodingModes = {
+  __typename?: 'WorkbenchJobCodingModes';
+  /** whether coding agent runs require approval before continuing */
+  approval?: Maybe<Scalars['Boolean']['output']>;
+  /** whether babysit mode is enabled for coding agent runs */
+  babysit?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type WorkbenchJobCodingModesAttributes = {
+  /** whether coding agent runs require approval before continuing */
+  approval?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether babysit mode is enabled for coding agent runs */
+  babysit?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type WorkbenchJobConnection = {
@@ -15788,6 +15818,21 @@ export type WorkbenchJobEdge = {
   __typename?: 'WorkbenchJobEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchJob>;
+};
+
+export type WorkbenchJobModes = {
+  __typename?: 'WorkbenchJobModes';
+  /** coding mode options for this job */
+  coding?: Maybe<WorkbenchJobCodingModes>;
+  /** whether planning mode is enabled for this job */
+  plan?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type WorkbenchJobModesAttributes = {
+  /** coding mode options for this job */
+  coding?: InputMaybe<WorkbenchJobCodingModesAttributes>;
+  /** whether planning mode is enabled for this job */
+  plan?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type WorkbenchJobProgress = {
