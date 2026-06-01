@@ -5331,134 +5331,115 @@ addons:
   versions:
   - version: 0.36.0
     kube: ['1.36', '1.35', '1.34']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.36.0
     images: ['registry.k8s.io/descheduler/descheduler:v0.36.0']
   - version: 0.35.1
     kube: ['1.35', '1.34', '1.33']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.35.1
     images: ['registry.k8s.io/descheduler/descheduler:v0.35.1']
   - version: 0.34.0
     kube: ['1.34', '1.33', '1.32']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.34.0
     images: ['registry.k8s.io/descheduler/descheduler:v0.34.0']
   - version: 0.33.0
     kube: ['1.33', '1.32', '1.31']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.33.0
     images: ['registry.k8s.io/descheduler/descheduler:v0.33.0']
   - version: 0.32.2
     kube: ['1.32', '1.31', '1.30']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.32.2
     images: ['registry.k8s.io/descheduler/descheduler:v0.32.2']
   - version: 0.31.0
     kube: ['1.31', '1.30', '1.29']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.31.0
     images: ['registry.k8s.io/descheduler/descheduler:v0.31.0']
   - version: 0.30.2
     kube: ['1.30', '1.29', '1.28']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.30.2
     images: ['registry.k8s.io/descheduler/descheduler:v0.30.2']
   - version: 0.29.0
     kube: ['1.29', '1.28', '1.27']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.29.0
     images: ['registry.k8s.io/descheduler/descheduler:v0.29.0']
   - version: 0.28.1
     kube: ['1.28', '1.27', '1.26']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.28.1
     images: ['registry.k8s.io/descheduler/descheduler:v0.28.1']
   - version: 0.27.1
     kube: ['1.27', '1.26', '1.25']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.27.1
     images: ['registry.k8s.io/descheduler/descheduler:v0.27.1']
   - version: 0.26.1
     kube: ['1.26', '1.25', '1.24']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.26.1
     images: ['registry.k8s.io/descheduler/descheduler:v0.26.1']
   - version: 0.25.1
     kube: ['1.25', '1.24', '1.23']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.25.2
     images: ['k8s.gcr.io/descheduler/descheduler:v0.25.1']
   - version: 0.24.1
     kube: ['1.24', '1.23', '1.22']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.24.1
     images: ['k8s.gcr.io/descheduler/descheduler:v0.24.1']
   - version: 0.23.1
     kube: ['1.23', '1.22', '1.21']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.23.2
     images: ['k8s.gcr.io/descheduler/descheduler:v0.23.1']
   - version: 0.22.1
     kube: ['1.22', '1.21', '1.20']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.22.1
     images: ['k8s.gcr.io/descheduler/descheduler:v0.22.1']
   - version: 0.21.0
     kube: ['1.21', '1.20', '1.19']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.21.0
     images: ['k8s.gcr.io/descheduler/descheduler:v0.21.0']
   - version: 0.20.0
     kube: ['1.20', '1.19', '1.18']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.20.0
     images: ['k8s.gcr.io/descheduler/descheduler:v0.20.0']
   - version: 0.19.0
     kube: ['1.19', '1.18', '1.17']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.19.2
     images: ['k8s.gcr.io/descheduler/descheduler:v0.19.0']
   - version: 0.18.0
     kube: ['1.18', '1.17', '1.16']
-    requirements: [Descheduler releases are tested against the three latest Kubernetes
-        minor versions for that release.]
+    requirements: []
     incompatibilities: []
     chart_version: 0.18.2
     images: ['us.gcr.io/k8s-artifacts-prod/descheduler/descheduler:v0.18.0']
@@ -10542,7 +10523,7 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
       '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9',
       '1.8']
-    requirements: ['Kubernetes versions lower than v1.16 require --authorization-always-allow-paths=/livez,/readyz.']
+    requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.5.0
