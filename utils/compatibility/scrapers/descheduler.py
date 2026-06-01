@@ -1,5 +1,5 @@
-import re
 import io
+import re
 import tarfile
 from collections import OrderedDict
 from urllib.parse import urljoin
@@ -14,12 +14,18 @@ from utils import (
 )
 
 
-APP_NAME = "cluster-autoscaler"
-COMPATIBILITY_URL = "https://raw.githubusercontent.com/kubernetes/autoscaler/master/cluster-autoscaler/README.md"
-HELM_REPO_URL = "https://kubernetes.github.io/autoscaler"
-CHART_NAME = "cluster-autoscaler"
-IMAGE_REPOSITORY = "registry.k8s.io/autoscaling/cluster-autoscaler"
-MIN_EXACT_MINOR = Version("1.12.0")
+APP_NAME = "descheduler"
+COMPATIBILITY_URL = "https://raw.githubusercontent.com/kubernetes-sigs/descheduler/master/README.md"
+HELM_REPO_URL = "https://kubernetes-sigs.github.io/descheduler"
+CHART_NAME = "descheduler"
+IMAGE_REPOSITORY = "registry.k8s.io/descheduler/descheduler"
+MIN_SUPPORTED_VERSION = Version("0.18.0")
+REQUIREMENT = (
+    "Descheduler releases are tested against the three latest Kubernetes minor "
+    "versions for that release."
+)
+
+
 def _decode(content):
     return content.decode("utf-8") if isinstance(content, bytes) else content
 
@@ -29,13 +35,18 @@ def _minor_key(version):
     return f"{parsed.major}.{parsed.minor}"
 
 
+def expand_three_latest(kube_version):
+    major, minor = [int(part) for part in kube_version.split(".")]
+    return [f"{major}.{minor - offset}" for offset in range(3)]
+
+
 def parse_compatibility_table(content):
     rows = {}
     in_table = False
 
     for line in _decode(content).splitlines():
         stripped = line.strip()
-        if stripped.startswith("| Kubernetes Version | CA Version"):
+        if stripped.startswith("| Descheduler | Supported Kubernetes Version"):
             in_table = True
             continue
         if not in_table:
@@ -51,12 +62,12 @@ def parse_compatibility_table(content):
         if len(columns) < 2:
             continue
 
-        kube_match = re.search(r"(\d+\.\d+)", columns[0])
-        autoscaler_match = re.search(r"(\d+\.\d+)", columns[1])
-        if not kube_match or not autoscaler_match:
+        descheduler_match = re.search(r"v?(\d+\.\d+)", columns[0])
+        kube_match = re.search(r"v?(\d+\.\d+)", columns[1])
+        if not descheduler_match or not kube_match:
             continue
 
-        rows[autoscaler_match.group(1)] = kube_match.group(1)
+        rows[descheduler_match.group(1)] = kube_match.group(1)
 
     return rows
 
@@ -64,17 +75,17 @@ def parse_compatibility_table(content):
 def get_chart_releases(index_content):
     index_yaml = yaml.safe_load(index_content)
     if not isinstance(index_yaml, dict):
-        print_error("Invalid Cluster Autoscaler Helm index.")
+        print_error("Invalid Descheduler Helm index.")
         return {}
 
     chart_entries = index_yaml.get("entries") or {}
     if not isinstance(chart_entries, dict):
-        print_error("Invalid Cluster Autoscaler Helm index entries.")
+        print_error("Invalid Descheduler Helm index entries.")
         return {}
 
     entries = chart_entries.get(CHART_NAME) or []
     if not isinstance(entries, list):
-        print_error("Invalid Cluster Autoscaler chart entries.")
+        print_error("Invalid Descheduler chart entries.")
         return {}
 
     chart_releases = {}
@@ -91,13 +102,15 @@ def get_chart_releases(index_content):
         except ValueError:
             continue
 
+        minor = _minor_key(app_version)
         chart_url = chart_urls[0] if chart_urls else ""
         if chart_url and not chart_url.startswith("http"):
             chart_url = urljoin(f"{HELM_REPO_URL}/", chart_url)
 
-        current = chart_releases.get(app_version)
+        current = chart_releases.get(minor)
         if not current or Version(chart_version) > Version(current["chart_version"]):
-            chart_releases[app_version] = {
+            chart_releases[minor] = {
+                "app_version": app_version,
                 "chart_version": chart_version,
                 "url": chart_url,
             }
@@ -126,7 +139,7 @@ def get_default_image(chart_url, app_version):
     try:
         content = fetch_page(chart_url)
     except Exception as error:
-        print_error(f"Failed to fetch Cluster Autoscaler chart defaults: {error}")
+        print_error(f"Failed to fetch Descheduler chart defaults: {error}")
         return fallback_image(app_version)
 
     if not content:
@@ -137,7 +150,7 @@ def get_default_image(chart_url, app_version):
             chart = read_chart_yaml(archive, "Chart.yaml")
             values = read_chart_yaml(archive, "values.yaml")
     except (tarfile.TarError, yaml.YAMLError, OSError) as error:
-        print_error(f"Failed to read Cluster Autoscaler chart defaults: {error}")
+        print_error(f"Failed to read Descheduler chart defaults: {error}")
         return fallback_image(app_version)
 
     image = values.get("image", {})
@@ -150,36 +163,32 @@ def get_default_image(chart_url, app_version):
 
 
 def extract_table_data(compatibility_by_minor, chart_releases):
-    latest_by_minor = {}
+    rows = []
 
-    for app_version, chart in chart_releases.items():
+    for minor, chart in chart_releases.items():
+        app_version = chart["app_version"]
         parsed = Version(app_version)
-        if parsed.major != 1:
+        if parsed < MIN_SUPPORTED_VERSION:
             continue
 
-        minor = _minor_key(app_version)
         kube_version = compatibility_by_minor.get(minor)
-        if not kube_version and parsed >= MIN_EXACT_MINOR:
-            kube_version = minor
         if not kube_version:
             continue
 
-        existing = latest_by_minor.get(minor)
-        if existing and Version(existing["version"]) > parsed:
-            continue
-
-        latest_by_minor[minor] = OrderedDict(
-            [
-                ("version", app_version),
-                ("kube", [kube_version]),
-                ("requirements", []),
-                ("incompatibilities", []),
-                ("chart_version", chart["chart_version"]),
-                ("images", [get_default_image(chart["url"], app_version)]),
-            ]
+        rows.append(
+            OrderedDict(
+                [
+                    ("version", app_version),
+                    ("kube", expand_three_latest(kube_version)),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                    ("chart_version", chart["chart_version"]),
+                    ("images", [get_default_image(chart["url"], app_version)]),
+                ]
+            )
         )
 
-    return list(latest_by_minor.values())
+    return sorted(rows, key=lambda row: Version(row["version"]), reverse=True)
 
 
 def scrape():
@@ -188,17 +197,17 @@ def scrape():
         return
     compatibility_by_minor = parse_compatibility_table(compatibility_content)
     if not compatibility_by_minor:
-        print_error("No Cluster Autoscaler compatibility table found.")
+        print_error("No Descheduler compatibility table found.")
         return
 
     chart_index = fetch_page(f"{HELM_REPO_URL}/index.yaml")
     if not chart_index:
-        print_error("No Cluster Autoscaler Helm index found.")
+        print_error("No Descheduler Helm index found.")
         return
     chart_releases = get_chart_releases(chart_index)
     rows = extract_table_data(compatibility_by_minor, chart_releases)
     if not rows:
-        print_error("No Cluster Autoscaler versions extracted.")
+        print_error("No Descheduler versions extracted.")
         return
 
     update_compatibility_info(
