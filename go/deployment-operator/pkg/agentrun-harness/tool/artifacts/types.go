@@ -29,11 +29,6 @@ type SessionManifest struct {
 	Repository string          `json:"repository"`
 	Branch     string          `json:"branch,omitempty"`
 	Session    SessionMetadata `json:"session"`
-	Resume     ResumeManifest  `json:"resume"`
-}
-
-type ResumeManifest struct {
-	Commands [][]string `json:"commands,omitempty"`
 }
 
 type SessionMetadata struct {
@@ -46,7 +41,6 @@ type BuildArtifactsOptions struct {
 	Provider  string
 	Source    SessionSource
 	SessionID string
-	Commands  [][]string
 }
 
 type UploadArtifactBuilder interface {

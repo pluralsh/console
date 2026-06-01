@@ -157,9 +157,6 @@ func (in *ArtifactBuilder) sessionManifest(opts BuildArtifactsOptions) (*Session
 		Session: SessionMetadata{
 			ID: opts.SessionID,
 		},
-		Resume: ResumeManifest{
-			Commands: opts.Commands,
-		},
 	}
 	if source != nil {
 		manifest.Session.Path = source.Path

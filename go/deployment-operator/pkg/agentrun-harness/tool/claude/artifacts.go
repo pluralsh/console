@@ -12,6 +12,5 @@ func (in *Claude) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifac
 		Provider:  "claude",
 		Source:    artifacts.SessionSource{Path: filepath.Join(in.configPath(), "projects"), ArchivePath: "projects"},
 		SessionID: in.sessionID,
-		Commands:  [][]string{{"claude", "--resume", in.sessionID}},
 	})
 }

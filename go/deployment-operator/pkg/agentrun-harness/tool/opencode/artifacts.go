@@ -40,10 +40,6 @@ func (in *Opencode) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtif
 			ArchivePath: "opencode",
 		},
 		SessionID: in.sessionID,
-		Commands: [][]string{
-			{"opencode", "import", filepath.ToSlash(filepath.Join("opencode", artifacts.SessionJSONName))},
-			{"opencode", "run", "-s", in.sessionID},
-		},
 	})
 }
 

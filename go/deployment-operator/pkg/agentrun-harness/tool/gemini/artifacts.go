@@ -12,6 +12,5 @@ func (in *Gemini) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifac
 		Provider:  "gemini",
 		Source:    artifacts.SessionSource{Path: filepath.Join(in.providerPath(), "tmp"), ArchivePath: "tmp"},
 		SessionID: in.sessionID,
-		Commands:  [][]string{{"gemini"}},
 	})
 }
