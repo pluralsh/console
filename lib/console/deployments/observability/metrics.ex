@@ -5,55 +5,55 @@ defmodule Console.Deployments.Observability.Metrics do
   import Console.Deployments.Observability.Utils
 
   @cluster post_process([
-    cpu: ~s|1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="$cluster"}[5m]))|,
+    cpu: ~s|1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="$cluster"}[$rate]))|,
     memory: ~s|(sum(node_memory_MemTotal_bytes{cluster="$cluster"}) - sum(node_memory_MemAvailable_bytes{cluster="$cluster"})) / sum(node_memory_MemTotal_bytes{cluster="$cluster"})|,
     cpu_requests: ~s|sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster"})|,
     memory_requests: ~s|sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster"})|,
     cpu_limits: ~s|sum(kube_pod_container_resource_limits{unit="core",cluster="$cluster"})|,
     memory_limits: ~s|sum(kube_pod_container_resource_limits{unit="byte",cluster="$cluster"})|,
     pods: ~s|count(kube_pod_info{cluster="$cluster"})|,
-    cpu_usage: ~s|sum(rate (container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[5m]))|,
+    cpu_usage: ~s|sum(rate (container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[$rate]))|,
     memory_usage: ~s|sum(container_memory_working_set_bytes{image!="",cluster="$cluster",container!=""})|
   ])
 
   @node post_process([
-    cpu: ~s|sum (rate (container_cpu_usage_seconds_total{container!="",cluster="$cluster",node="$instance"}[5m])) / sum (machine_cpu_cores{node="$instance",cluster="$cluster"})|,
+    cpu: ~s|sum (rate (container_cpu_usage_seconds_total{container!="",cluster="$cluster",node="$instance"}[$rate])) / sum (machine_cpu_cores{node="$instance",cluster="$cluster"})|,
     memory: ~s|sum (container_memory_working_set_bytes{image!="",container!="",node="$instance",cluster="$cluster"}) / sum (machine_memory_bytes{node="$instance",cluster="$cluster"})|,
-    cpu_usage: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",node="$instance",cluster="$cluster"}[5m]))|,
+    cpu_usage: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",node="$instance",cluster="$cluster"}[$rate]))|,
     memory_usage: ~s|sum(container_memory_working_set_bytes{image!="",container!="",node="$instance"})|
   ])
 
   @component post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}[5m]))|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}[$rate]))|,
     mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",pod=~"$name$regex",image!="",container!=""})|,
-    pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}[5m])) by (pod)|,
+    pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}[$rate])) by (pod)|,
     pod_mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",pod=~"$name$regex",image!="",container!=""}) by (pod)|
   ])
 
   @service post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[5m]))|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[$rate]))|,
     mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",image!="",container!=""})|,
-    pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[5m])) by (pod)|,
+    pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[$rate])) by (pod)|,
     pod_mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",image!="",container!=""}) by (pod)|
   ])
 
   @heat post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (pod)|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[$rate])) by (pod)|,
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""}) by (pod)|
   ])
 
   @heat_ns post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (namespace)|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[$rate])) by (namespace)|,
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""}) by (namespace)|
   ])
 
   @heat_node post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[5m])) by (node)|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"$filter}[$rate])) by (node)|,
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster"$filter,image!="",container!=""$filter}) by (node)|
   ])
 
   @noisy post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[5m])) / sum(kube_pod_container_resource_requests_cpu_cores{cluster="$cluster") by (pod)|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[$rate])) / sum(kube_pod_container_resource_requests_cpu_cores{cluster="$cluster") by (pod)|,
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",image!="",container!=""}) / sum(kube_pod_container_resource_requests_memory_bytes{cluster="$cluster"}) by (pod)|
   ])
 

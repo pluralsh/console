@@ -72,6 +72,11 @@ spec:
                   babysitting actions (e.g. restarting unhealthy runtimes). When not
                   provided, a default interval of 1 minute will be used.
                 type: string
+              scmConnection:
+                description: |-
+                  ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.
+                  This should match the name of an existing ScmConnection resource or connection created in the Plural UI.
+                type: string
               bindings:
                 description: Bindings define the creation permissions for this agent
                   runtime.

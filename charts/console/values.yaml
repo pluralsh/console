@@ -86,6 +86,8 @@ console:
 
     qovePublicKey: ~
 
+    kasHost: ~
+
     objectStore:
       # path is used to configure the path within object storage for storing large files, useful for multi-tenant bucket usage.
       path: ~
@@ -489,7 +491,7 @@ gitServer:
   tag: ~
 
 cloudQuery:
-  enabled: false
+  enabled: true
   replicaCount: 1
 
   image:

@@ -10,6 +10,7 @@ names:
 - contour
 - coredns
 - cloudnative-pg
+- descheduler
 - external-dns
 - external-secrets
 - flux
@@ -22,6 +23,7 @@ names:
 - kyverno
 - linkerd
 - longhorn
+- metrics-server
 - opentelemetry-operator
 - rook
 - strimzi-kafka

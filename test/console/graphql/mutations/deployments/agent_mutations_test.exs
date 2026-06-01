@@ -1,6 +1,7 @@
 defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.Schema.AgentRuntime
 
   describe "upsertAgentRuntime" do
     test "a cluster can upsert an agent runtime" do
@@ -26,6 +27,45 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert runtime["name"] == "test"
       assert runtime["type"] == "CLAUDE"
       assert hd(runtime["createBindings"])["user"]["id"] == user.id
+    end
+
+    test "a cluster can upsert an agent runtime with an scm connection" do
+      cluster = insert(:cluster)
+      conn = insert(:scm_connection, name: "github")
+
+      {:ok, %{data: %{"upsertAgentRuntime" => runtime}}} = run_query("""
+        mutation Upsert($attrs: AgentRuntimeAttributes!) {
+          upsertAgentRuntime(attributes: $attrs) {
+            id
+            name
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "test",
+        "type" => "CLAUDE",
+        "scmConnection" => conn.name
+      }}, %{cluster: cluster})
+
+      assert runtime["name"] == "test"
+      assert refetch(%AgentRuntime{id: runtime["id"]}).connection_id == conn.id
+    end
+
+    test "upserting an agent runtime rejects unknown scm connections" do
+      cluster = insert(:cluster)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation Upsert($attrs: AgentRuntimeAttributes!) {
+          upsertAgentRuntime(attributes: $attrs) {
+            id
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "test",
+        "type" => "CLAUDE",
+        "scmConnection" => "missing"
+      }}, %{cluster: cluster})
+
+      assert error.message =~ "could not find scm connection missing"
     end
   end
 

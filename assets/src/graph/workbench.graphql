@@ -485,6 +485,7 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   id
   channel
   prompt
+  messageBehavior
   userId
   insertedAt
   updatedAt
@@ -904,6 +905,13 @@ query WorkbenchChatbots($id: ID!, $first: Int = 100, $after: String) {
 query WorkbenchChatbot($id: ID!) {
   workbenchChatbot(id: $id) {
     ...WorkbenchChatbot
+  }
+}
+
+query SearchConversations($chatConnectionId: ID!, $query: String) {
+  searchConversations(chatConnectionId: $chatConnectionId, query: $query) {
+    id
+    name
   }
 }
 

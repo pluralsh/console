@@ -595,6 +595,102 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			}
 		})
 
+		It("should fail the run and delete pod when an init container fails", func() {
+			By("Creating a new AgentRun for failed init container test")
+			failedInitRunName := "agent-test-run-failed-init"
+			failedInitRunID := "test-run-failed-init-321"
+			failedInitNamespacedName := types.NamespacedName{Name: failedInitRunName, Namespace: namespace}
+
+			resource := &v1alpha1.AgentRun{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:       failedInitRunName,
+					Namespace:  namespace,
+					Finalizers: []string{AgentRunFinalizer},
+				},
+				Spec: v1alpha1.AgentRunSpec{
+					RuntimeRef: v1alpha1.AgentRuntimeReference{
+						Name: runtimeName,
+					},
+					Prompt:     agentRunPrompt,
+					Repository: repository,
+					Mode:       console.AgentRunModeAnalyze,
+				},
+			}
+			Expect(kClient.Create(ctx, resource)).To(Succeed())
+
+			resource.Status.ID = lo.ToPtr(failedInitRunID)
+			Expect(kClient.Status().Update(ctx, resource)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetAgentRun", mock.Anything, failedInitRunID).Return(&console.AgentRunFragment{
+				ID:     failedInitRunID,
+				Status: console.AgentRunStatusPending,
+			}, nil).Twice()
+			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, failedInitRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
+				return attrs.Status == console.AgentRunStatusPending
+			})).Return(&console.AgentRunFragment{
+				ID:     failedInitRunID,
+				Status: console.AgentRunStatusPending,
+			}, nil).Once()
+			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, failedInitRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
+				return attrs.Status == console.AgentRunStatusFailed &&
+					attrs.Error != nil &&
+					*attrs.Error == "init container \"agent-bootstrap\" failed with exit code 1: bootstrap failed"
+			})).Return(&console.AgentRunFragment{
+				ID:     failedInitRunID,
+				Status: console.AgentRunStatusFailed,
+			}, nil).Once()
+
+			reconciler := &AgentRunReconciler{
+				Client:        kClient,
+				ConsoleClient: fakeConsoleClient,
+				Scheme:        kClient.Scheme(),
+				ConsoleURL:    consoleURL,
+				DeployToken:   deployToken,
+			}
+
+			// First reconcile creates pod and secret.
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: failedInitNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			pod := &corev1.Pod{}
+			Expect(kClient.Get(ctx, failedInitNamespacedName, pod)).NotTo(HaveOccurred())
+			pod.Status.InitContainerStatuses = []corev1.ContainerStatus{
+				{
+					Name: agentBootstrapContainerName,
+					State: corev1.ContainerState{
+						Terminated: &corev1.ContainerStateTerminated{
+							ExitCode: 1,
+							Message:  "bootstrap failed",
+						},
+					},
+				},
+			}
+			Expect(kClient.Status().Update(ctx, pod)).To(Succeed())
+
+			// Second reconcile should mark the run failed and remove the failed pod.
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: failedInitNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			err = kClient.Get(ctx, failedInitNamespacedName, &corev1.Pod{})
+			Expect(errors.IsNotFound(err)).To(BeTrue())
+
+			agentRun := &v1alpha1.AgentRun{}
+			Expect(kClient.Get(ctx, failedInitNamespacedName, agentRun)).To(Succeed())
+			Expect(agentRun.Status.Phase).To(Equal(v1alpha1.AgentRunPhaseFailed))
+			Expect(agentRun.Status.Error).NotTo(BeNil())
+			Expect(*agentRun.Status.Error).To(Equal("init container \"agent-bootstrap\" failed with exit code 1: bootstrap failed"))
+
+			// Cleanup.
+			if err := kClient.Get(ctx, failedInitNamespacedName, agentRun); err == nil {
+				_ = kClient.Delete(ctx, agentRun)
+			}
+			secret := &corev1.Secret{}
+			if err := kClient.Get(ctx, failedInitNamespacedName, secret); err == nil {
+				_ = kClient.Delete(ctx, secret)
+			}
+		})
+
 	})
 
 	Context("Secret reconciliation", func() {

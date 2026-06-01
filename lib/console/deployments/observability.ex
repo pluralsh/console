@@ -259,7 +259,7 @@ defmodule Console.Deployments.Observability do
   def heat_map(resource, flavor \\ :pod)
   def heat_map(%Cluster{handle: cluster}, flavor) do
     queries(:heat, flavor)
-    |> bulk_query(%{cluster: cluster, filter: ""})
+    |> bulk_query(%{cluster: cluster, filter: "", rate: "2h"})
   end
 
   def heat_map(%Service{namespace: ns} = service, flavor) when flavor in [:pod, :node] do
@@ -267,7 +267,7 @@ defmodule Console.Deployments.Observability do
       Repo.preload(service, [:cluster])
 
     queries(:heat, flavor)
-    |> bulk_query(%{cluster: cluster, filter: ",namespace=\"#{ns}\""})
+    |> bulk_query(%{cluster: cluster, filter: ",namespace=\"#{ns}\"", rate: "2h"})
   end
 
   def heat_map(_, flavor), do: {:error, "cannot aggregate utilization by #{flavor} for that resource"}
@@ -278,7 +278,7 @@ defmodule Console.Deployments.Observability do
   @spec noisy_neighbors(Cluster.t) :: {:ok, map} | error
   def noisy_neighbors(%Cluster{handle: cluster}) do
     queries(:noisy)
-    |> bulk_query(%{cluster: cluster})
+    |> bulk_query(%{cluster: cluster, rate: "2h"})
     |> case do
       {:ok, %{cpu: %Prometheus.Data{result: cpu} = cpu_res, memory: %Prometheus.Data{result: memory} = mem_res}} ->
         cpu    = Enum.filter(cpu, & &1.value > @noisy_threshold)
@@ -294,19 +294,19 @@ defmodule Console.Deployments.Observability do
   @spec query(Cluster.t | {Cluster.t, binary} | ServiceComponent.t, binary, binary, binary) :: {:ok, map} | error
   def query(%Cluster{handle: cluster}, start, stop, step) do
     queries(:cluster)
-    |> bulk_range_query(%{cluster: cluster}, start, stop, step)
+    |> bulk_range_query(%{cluster: cluster, rate: step}, start, stop, step)
   end
 
   def query({%Cluster{handle: cluster}, node}, start, stop, step) do
     queries(:node)
-    |> bulk_range_query(%{cluster: cluster, instance: node}, start, stop, step)
+    |> bulk_range_query(%{cluster: cluster, instance: node, rate: step}, start, stop, step)
   end
 
   def query(%Service{namespace: ns} = service, start, stop, step) do
     service = Repo.preload(service, [:cluster])
     bulk_range_query(
       queries(:service),
-      [cluster: service.cluster.handle, namespace: ns],
+      [cluster: service.cluster.handle, namespace: ns, rate: step],
       start,
       stop,
       step
@@ -317,7 +317,7 @@ defmodule Console.Deployments.Observability do
     component = Repo.preload(component, [service: :cluster])
     with {:ok, args} <- component_args(component) do
       queries(:component)
-      |> bulk_range_query(args, start, stop, step)
+      |> bulk_range_query(Keyword.put(args, :rate, step), start, stop, step)
     end
   end
 

@@ -54,15 +54,17 @@ ARG RUST_TOOLCHAIN=stable
 # By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
-# This step installs all build tools including a modern Rust toolchain for NIF compilation.
+# This step installs build tools for C NIFs (e.g. argon2_elixir). Rust-based deps use
+# precompiled NIFs and do not require a Rust toolchain in the Alpine builder image.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk add --no-cache git build-base curl ca-certificates rust cargo; \
+      apk update && apk upgrade --no-cache && \
+      apk add --no-cache git build-base curl ca-certificates; \
     else \
       apt-get update && apt-get install -y git build-essential curl ca-certificates; \
       rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
     fi && \
-  rustc --version && cargo --version && \
+  if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \
   mix local.rebar --force && \
   mix local.hex --force
 

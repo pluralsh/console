@@ -447,6 +447,11 @@ defmodule Console.Deployments.Workbenches do
     |> Repo.all()
   end
 
+  @decorate cacheable(cache: @cache_adapter, key: {:wb_chatbot, chat_conn_id, channel}, opts: [ttl: @ttl])
+  def workbench_chatbot(chat_conn_id, channel) do
+    Repo.get_by(WorkbenchChatbot, chat_connection_id: chat_conn_id, channel: channel)
+  end
+
   @doc """
   Creates or updates a workbench webhook. If attrs contain an id for an existing
   webhook on the workbench, that record is updated. Otherwise if attrs contain

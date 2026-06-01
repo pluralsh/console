@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Add an emoji reaction to a Slack message via reactions.add. Requires the channel id and message timestamp (`ts`), typically from slack_list_messages or slack_post_message.",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Slack channel ID containing the message, not the human-readable name."
+    },
+    "message_ts": {
+      "type": "string",
+      "description": "Message timestamp identifying the message to react to (Slack `ts` field)."
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Emoji name without colons (e.g. thumbsup, eyes, white_check_mark)."
+    }
+  },
+  "required": ["channel_id", "message_ts", "emoji"],
+  "additionalProperties": false
+}

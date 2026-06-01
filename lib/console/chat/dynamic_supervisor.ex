@@ -18,15 +18,13 @@ defmodule Console.Chat.DynamicSupervisor do
   def terminate_child(pid), do: DynamicSupervisor.terminate_child(__MODULE__, pid)
 
   @impl true
-  def init(init_arg) do
+  def init(_init_arg) do
     DynamicSupervisor.init(
       strategy: :one_for_one,
       restart: :transient,
-      max_children: 30,
-      extra_arguments: [init_arg]
+      max_children: 30
     )
   end
 
-  defp worker_spec(%ChatConnection{type: :slack} = conn),
-    do: Slack.child_spec(conn)
+  defp worker_spec(%ChatConnection{type: :slack} = conn), do: Slack.child_spec(conn)
 end

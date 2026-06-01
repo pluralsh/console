@@ -271,6 +271,7 @@ _Appears in:_
 | `bootstrapScript` _string_ | BootstrapScript is a bash script that will be executed inside the cloned repository<br />directory before the coding agent starts. It can be used to install dependencies,<br />configure tooling, or perform any other setup required by the agent. |  | Optional: \{\} <br /> |
 | `git` _[GitSpec](#gitspec)_ | Git configure commit signing on agent run. When provided, the runtime will be configured to sign git commits using the provided key reference. |  |  |
 | `babysitInterval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | BabysitInterval configures the interval for the operator to check on the health of the agent runtime and perform necessary babysitting actions (e.g. restarting unhealthy runtimes). When not provided, a default interval of 1 minute will be used. |  |  |
+| `scmConnection` _string_ | ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.<br />This should match the name of an existing ScmConnection resource or connection created in the Plural UI. |  | Optional: \{\} <br /> |
 | `exaConnection` _[ExaConnection](#exaconnection)_ | ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server. |  |  |
 
 

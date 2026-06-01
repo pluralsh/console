@@ -163,7 +163,6 @@ const ActivitiesAccordionSC = styled(Accordion)({
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
-  border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
   background: theme.colors['fill-zero'],
   flex: 1,

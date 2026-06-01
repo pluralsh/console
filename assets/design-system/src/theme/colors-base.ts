@@ -3,6 +3,7 @@ import { type CSSProperties } from 'styled-components'
 
 export const grey = {
   950: '#0E1015',
+  925: '#12151B',
   900: '#171A21',
   875: '#1B1F27',
   850: '#21242C',

@@ -37,6 +37,7 @@ import { ChatbotDeleteModal } from './ChatbotDeleteModal'
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
+  formatChatbotChannelLabel,
 } from './utils'
 
 export function Chatbots() {
@@ -266,7 +267,10 @@ function getColumns({
           <StackedText
             truncate
             first={chatbot.chatConnection?.name ?? 'Chatbot'}
-            second={`#${chatbot.channel}`}
+            second={formatChatbotChannelLabel({
+              type: chatbot.chatConnection?.type,
+              channel: chatbot.channel,
+            })}
           />
         )
       },

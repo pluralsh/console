@@ -4,7 +4,6 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input2,
   ListBoxFooter,
   ListBoxItem,
   ReturnIcon,
@@ -24,6 +23,7 @@ import {
   useWorkbenchChatbotQuery,
   useWorkbenchQuery,
   WorkbenchChatbotFragment,
+  WorkbenchChatbotMessageBehavior,
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -52,12 +52,16 @@ import {
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
+  messageBehaviorLabel,
+  messageBehaviorOptions,
 } from './utils'
+import { ChatbotChannelSelect } from './ChatbotChannelSelect'
 
 type ChatbotFormState = {
   chatConnectionId: string
   channel: string
   prompt: string
+  messageBehavior: WorkbenchChatbotMessageBehavior
   userId: string
 }
 
@@ -129,7 +133,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
         : {}),
       userId: base.userId ?? chatbot?.userId ?? me?.id ?? '',
     }
-  }, [routeState?.draftState, selectedChatbotParam, chatbot, me?.id, mode])
+  }, [routeState, selectedChatbotParam, chatbot, me?.id, mode])
 
   const [formDraft, setFormDraft] = useState<Nullable<ChatbotFormState>>(null)
   const formState = formDraft ?? sourceFormState
@@ -150,6 +154,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
     chatConnectionId: formState.chatConnectionId,
     channel,
     prompt: prompt || null,
+    messageBehavior: formState.messageBehavior,
     userId: formState.userId,
   }
 
@@ -373,21 +378,40 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                     </Select>
                   </FormField>
                 </Flex>
+                <ChatbotChannelSelect
+                  chatConnectionId={formState.chatConnectionId}
+                  channel={formState.channel}
+                  onChannelChange={(nextChannel) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      channel: nextChannel,
+                    }))
+                  }
+                  disabled={isSaving}
+                />
                 <FormField
-                  required
-                  label="Attach a channel"
-                  hint="External channel identifier (globally unique)."
+                  label="Message behavior"
+                  hint="How the chatbot posts responses when a job completes."
                 >
-                  <Input2
-                    value={formState.channel}
-                    onChange={(e) =>
+                  <Select
+                    selectedKey={formState.messageBehavior}
+                    isDisabled={isSaving}
+                    label={messageBehaviorLabel(formState.messageBehavior)}
+                    onSelectionChange={(key) =>
                       setFormState((prev) => ({
                         ...prev,
-                        channel: e.target.value,
+                        messageBehavior: key as WorkbenchChatbotMessageBehavior,
                       }))
                     }
-                    disabled={isSaving}
-                  />
+                  >
+                    {messageBehaviorOptions.map((option) => (
+                      <ListBoxItem
+                        key={option.value}
+                        label={option.label}
+                        description={option.description}
+                      />
+                    ))}
+                  </Select>
                 </FormField>
                 <WorkbenchAccessibleUserSelect
                   key={workbenchId}
@@ -401,7 +425,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                 />
                 <FormField
                   label="Prompt"
-                  hint="Optional prompt text applied when this chatbot runs."
+                  hint="Custom prompt text applied when this chatbot runs."
                 >
                   <WorkbenchPromptRichInput
                     workbenchId={workbenchId}
@@ -452,6 +476,8 @@ function getInitialFormState(
     chatConnectionId: chatbot?.chatConnection?.id ?? '',
     channel: chatbot?.channel ?? '',
     prompt: chatbot?.prompt ?? '',
+    messageBehavior:
+      chatbot?.messageBehavior ?? WorkbenchChatbotMessageBehavior.Reply,
     userId: chatbot?.userId ?? defaultUserId ?? '',
   }
 }
@@ -463,6 +489,7 @@ function getAttributesFromState(formState: ChatbotFormState) {
     chatConnectionId: formState.chatConnectionId,
     channel: formState.channel.trim(),
     prompt: prompt || null,
+    messageBehavior: formState.messageBehavior,
     userId: formState.userId,
   }
 }

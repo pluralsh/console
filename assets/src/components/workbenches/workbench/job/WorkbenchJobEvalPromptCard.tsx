@@ -1,4 +1,10 @@
-import { ArrowTopRightIcon, Card, Chip, Flex } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Card,
+  Chip,
+  Code,
+  Flex,
+} from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
@@ -126,6 +132,10 @@ const PromptCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  [`& ${Code}`]: {
+    backgroundColor: theme.colors['fill-two'],
+    borderColor: theme.colors['border-fill-two'],
+  },
 }))
 
 const SectionSC = styled.div(({ theme }) => ({

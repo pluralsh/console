@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "description": "List recent messages in a Slack channel via conversations.history. Use channel_id from slack_list_channels or slack_find_channel_by_name. Pagination: pass cursor from response_metadata.next_cursor.",
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "description": "Slack channel ID (e.g. C12345 or G123 for private channels), not the human-readable name."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from response_metadata.next_cursor on the prior response."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Maximum number of messages to return (subject to Slack’s API limits)."
+    }
+  },
+  "required": ["channel_id"],
+  "additionalProperties": false
+}

@@ -33,7 +33,6 @@ export function ProfileMenu() {
         tertiary
         onClick={() => setIsMenuOpen((open) => !open)}
         css={{
-          borderRadius: '50%',
           padding: 0,
           transition: 'filter 0.1s ease',
           '&:hover': { filter: 'brightness(1.1)' },
@@ -47,7 +46,6 @@ export function ProfileMenu() {
           src={me?.profile}
           size={32}
           css={{
-            borderRadius: '50%',
             ...(me?.profile
               ? {}
               : {

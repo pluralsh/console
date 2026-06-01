@@ -17,7 +17,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListReleases do
     field :per_page,  :integer
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/list_releases.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/list_releases.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_list_releases"
 
@@ -26,14 +27,27 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListReleases do
 
   def json_schema(%__MODULE__{}), do: @json_schema
 
-  def changeset(m, attrs), do: m |> cast(attrs, [:owner, :repo, :page, :per_page]) |> validate_required([:owner, :repo])
+  def changeset(m, attrs),
+    do: m |> cast(attrs, [:owner, :repo, :page, :per_page]) |> validate_required([:owner, :repo])
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+        } = m
+      ) do
     with {:ok, client} <- Client.build(m.tool) do
       m
       |> then(&Query.merge_optional(%{}, &1, [:page, :per_page]))
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&get("repos/#{m.owner}/#{m.repo}/releases#{Query.qp(&1)}", client))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/releases#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end

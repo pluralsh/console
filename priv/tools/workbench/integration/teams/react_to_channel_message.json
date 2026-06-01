@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "Adds an emoji reaction to a Teams channel message (Graph POST .../setReaction). Requires a Unicode emoji in reaction.",
+  "properties": {
+    "team_id": {
+      "type": "string",
+      "description": "Team (group) id."
+    },
+    "channel_id": {
+      "type": "string",
+      "description": "Channel id."
+    },
+    "message_id": {
+      "type": "string",
+      "description": "Message id from teams_list_channel_messages or teams_post_channel_message."
+    },
+    "reaction": {
+      "type": "string",
+      "description": "Unicode emoji for the reaction (e.g. 👍, 👀, ✅). Not a shortcode like :thumbsup:."
+    }
+  },
+  "required": ["team_id", "channel_id", "message_id", "reaction"],
+  "additionalProperties": false
+}

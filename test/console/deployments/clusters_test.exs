@@ -830,7 +830,7 @@ defmodule Console.Deployments.ClustersTest do
       cluster = insert(:cluster, name: "cluster", provider: build(:cluster_provider, namespace: "test-provider"))
 
       server = Clusters.control_plane(cluster)
-      assert server.url == "#{Console.conf(:kas_dns)}/k8s-proxy"
+      assert server.url == "http://#{Console.conf(:kas_service)}/k8s-proxy"
       ["plrl", id, token] = String.split(server.auth.token, ":")
       assert id == cluster.id
       {:ok, _} = Console.Guardian.decode_and_verify(token)

@@ -51,6 +51,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.Client do
 
   defp bearer(%OAuthClient{token: %OAuth2.AccessToken{access_token: t}}) when is_binary(t), do: t
 
+  defp decode({:ok, %Req.Response{status: 204}}), do: {:ok, %{}}
+
   defp decode({:ok, %Req.Response{status: s, body: body}}) when s in 200..299 and is_map(body),
     do: {:ok, body}
 

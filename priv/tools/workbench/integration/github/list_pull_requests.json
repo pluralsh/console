@@ -16,7 +16,7 @@
     },
     "head": {
       "type": "string",
-      "description": "Filter by head user:branch or branch name."
+      "description": "Filter by head user:branch. Bare branch names default to owner:branch for this repository."
     },
     "base": {
       "type": "string",
@@ -32,10 +32,15 @@
     },
     "page": {
       "type": "integer",
-      "description": "Page number (legacy pagination)."
+      "default": 1,
+      "minimum": 1,
+      "description": "Page number for pagination."
     },
     "per_page": {
       "type": "integer",
+      "default": 30,
+      "minimum": 1,
+      "maximum": 100,
       "description": "Results per page."
     }
   },

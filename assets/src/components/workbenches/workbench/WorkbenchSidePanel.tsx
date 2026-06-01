@@ -23,7 +23,10 @@ import {
 import { getWebhookIcon } from './webhooks/utils'
 import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
 import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
-import { chatProviderConnectionIcon } from './chatbots/utils'
+import {
+  chatProviderConnectionIcon,
+  formatChatbotChannelLabel,
+} from './chatbots/utils'
 
 export function WorkbenchSidePanel({
   workbenchId,
@@ -210,7 +213,10 @@ export function WorkbenchSidePanel({
                       />
                     </ItemIconContainerSC>
                     <ItemNameSC>
-                      {chatbot.chatConnection?.name ?? chatbot.channel}
+                      {formatChatbotChannelLabel({
+                        type: chatbot.chatConnection?.type,
+                        channel: chatbot.channel,
+                      })}
                     </ItemNameSC>
                   </WorkbenchSidePanelEditRow>
                 ))}
@@ -279,7 +285,7 @@ export function WorkbenchSidePanel({
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders['fill-one'],
   display: 'flex',
   flexDirection: 'column',

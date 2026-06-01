@@ -8,7 +8,6 @@ import {
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { AgentRuntimeType, useAgentRuntimesQuery } from 'generated/graphql'
-import { capitalize } from 'lodash'
 import { useEffectEvent, useLayoutEffect, useState } from 'react'
 import { StyledObject } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -91,7 +90,7 @@ export function AIAgentRuntimesSelector({
                   $width={75}
                 />
               ) : (
-                <span>{capitalize(selectedRuntime?.name ?? 'Runtime')}</span>
+                <span>{selectedRuntime?.name ?? 'Select Runtime'}</span>
               )}
             </ChatOptionPill>
           ) : type === 'minimal' ? (
@@ -122,7 +121,7 @@ export function AIAgentRuntimesSelector({
           return (
             <ListBoxItem
               key={id}
-              label={capitalize(name)}
+              label={name}
               leftContent={<Icon fullColor />}
             />
           )
