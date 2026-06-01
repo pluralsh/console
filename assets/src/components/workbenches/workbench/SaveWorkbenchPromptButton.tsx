@@ -81,7 +81,7 @@ function SaveWorkbenchPromptButtonInner({
       refetchQueries: ['WorkbenchPrompts'],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        popToast({ content: 'prompt removed', severity: 'danger' })
+        popToast({ content: 'prompt removed', severity: 'success' })
       },
       onError: () => {
         popToast({

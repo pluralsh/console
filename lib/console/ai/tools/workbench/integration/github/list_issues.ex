@@ -19,10 +19,12 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListIssues do
     field :direction,  :string
     field :sort,       :string
     field :after,      :string
+    field :page,       :integer
     field :per_page,   :integer
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/list_issues.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/list_issues.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_list_issues"
 
@@ -33,16 +35,50 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListIssues do
 
   def changeset(m, attrs) do
     m
-    |> cast(attrs, [:owner, :repo, :state, :since, :labels, :direction, :sort, :after, :per_page])
+    |> cast(attrs, [
+      :owner,
+      :repo,
+      :state,
+      :since,
+      :labels,
+      :direction,
+      :sort,
+      :after,
+      :page,
+      :per_page
+    ])
     |> validate_required([:owner, :repo])
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+        } = m
+      ) do
     with {:ok, client} <- Client.build(m.tool) do
       m
-      |> then(&Query.merge_optional(%{}, &1, [:state, :since, :labels, :direction, :sort, :after, :per_page]))
+      |> then(
+        &Query.merge_optional(%{}, &1, [
+          :state,
+          :since,
+          :labels,
+          :direction,
+          :sort,
+          :after,
+          :page,
+          :per_page
+        ])
+      )
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&get("repos/#{m.owner}/#{m.repo}/issues#{Query.qp(&1)}", client))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/issues#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end

@@ -33,11 +33,11 @@ defmodule Console.Schema.WorkbenchJob do
     belongs_to :issue,          Issue
     belongs_to :referenced_job, __MODULE__
 
-    has_one  :result,        WorkbenchJobResult, on_replace: :update
-    has_one  :eval_result,   WorkbenchEvalResult, on_replace: :update
+    has_one  :result,          WorkbenchJobResult, on_replace: :update
+    has_one  :eval_result,     WorkbenchEvalResult, on_replace: :update
     has_one  :chatbot_message, ChatbotMessage, on_replace: :update
-    has_many :activities,    WorkbenchJobActivity, on_replace: :delete
-    has_many :pull_requests, PullRequest, on_replace: :delete
+    has_many :activities,      WorkbenchJobActivity, on_replace: :delete
+    has_many :pull_requests,   PullRequest, on_replace: :delete
 
     timestamps()
   end

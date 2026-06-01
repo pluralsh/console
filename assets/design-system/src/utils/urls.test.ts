@@ -1,4 +1,5 @@
 import {
+  extractRepoProjectPath,
   getBarePathFromPath,
   isExternalUrl,
   isRelativeUrl,
@@ -139,6 +140,26 @@ describe('URL utils', () => {
     )
   })
 
+  it('should extract repo project paths', () => {
+    expect(
+      extractRepoProjectPath('https://github.com/pluralsh/plural.git')
+    ).toBe('pluralsh/plural')
+    expect(
+      extractRepoProjectPath('git@gitlab.com:org/subgroup/project.git')
+    ).toBe('org/subgroup/project')
+    expect(
+      extractRepoProjectPath(
+        'https://gitlab.acme.corp/itsystems/kubernetes/plural-mgmt.git'
+      )
+    ).toBe('itsystems/kubernetes/plural-mgmt')
+    expect(
+      extractRepoProjectPath(
+        'https://gitlab.acme.corp/itsystems/kubernetes/plural-mgmt/-/merge_requests/42'
+      )
+    ).toBe('itsystems/kubernetes/plural-mgmt')
+    expect(extractRepoProjectPath('not-a-url')).toBeNull()
+  })
+
   it('should prettify repo urls', () => {
     expect(prettifyRepoUrl('https://github.com/pluralsh/plural.git')).toBe(
       'pluralsh/plural'
@@ -149,6 +170,14 @@ describe('URL utils', () => {
     expect(prettifyRepoUrl('ssh://github.com/pluralsh/plural')).toBe(
       'pluralsh/plural'
     )
+    expect(
+      prettifyRepoUrl(
+        'https://gitlab.acme.corp/itsystems/kubernetes/plural-mgmt.git'
+      )
+    ).toBe('itsystems/kubernetes/plural-mgmt')
+    expect(
+      prettifyRepoUrl('https://gitlab.com/org/subgroup/project.git', true)
+    ).toBe('org/subgroup/project')
     expect(prettifyRepoUrl('not-a-url')).toBe('not-a-url')
   })
 
@@ -158,16 +187,28 @@ describe('URL utils', () => {
     expect(isValidRepoUrl('https://gitlab.com/org/repo')).toBe(true)
     expect(isValidRepoUrl('  https://github.com/org/repo  ')).toBe(true)
 
+    // valid https with nested GitLab group paths
+    expect(isValidRepoUrl('https://gitlab.com/org/subgroup/project.git')).toBe(
+      true
+    )
+    expect(
+      isValidRepoUrl('https://gitlab.com/org/subgroup/nested/project')
+    ).toBe(true)
+
     // valid git@
     expect(isValidRepoUrl('git@github.com:pluralsh/plural.git')).toBe(true)
     expect(isValidRepoUrl('git@gitlab.com:org/repo.git')).toBe(true)
     expect(isValidRepoUrl('git@gitlab.com:org/repo')).toBe(true)
+    expect(isValidRepoUrl('git@gitlab.com:org/subgroup/project.git')).toBe(true)
 
     // valid ssh://
     expect(isValidRepoUrl('ssh://git@github.com/pluralsh/plural.git')).toBe(
       true
     )
     expect(isValidRepoUrl('ssh://github.com/org/repo')).toBe(true)
+    expect(
+      isValidRepoUrl('ssh://git@gitlab.com/org/subgroup/project.git')
+    ).toBe(true)
 
     // invalid - wrong protocol
     expect(isValidRepoUrl('http://github.com/org/repo')).toBe(false)

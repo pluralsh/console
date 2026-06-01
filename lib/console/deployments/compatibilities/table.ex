@@ -65,7 +65,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   end
 
   def handle_info(:poll, %State{table: table, url: url} = state) do
-    with [_ | _] = addons <- fetch_addons(url) do
+    with [_ | _] = addons <- Console.safely(fn -> fetch_addons(url) end, fn err -> {:error, err} end) do
       Enum.reduce(addons, table, fn addon, table ->
         case decode_addon(addon) do
           {:ok, addon} -> KeyValueSet.put!(table, addon.name, addon)

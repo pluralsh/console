@@ -18,12 +18,19 @@ defmodule Console.GraphQl.Deployments.Integration do
 
   input_object :chat_provider_connection_configuration_attributes do
     field :slack, :slack_connection_configuration_attributes
+    field :teams, :teams_connection_configuration_attributes
   end
 
   input_object :slack_connection_configuration_attributes do
     field :app_token, non_null(:string)
     field :bot_token, non_null(:string)
     field :bot_id,    :string
+  end
+
+  input_object :teams_connection_configuration_attributes do
+    field :client_id,     non_null(:string)
+    field :client_secret, non_null(:string)
+    field :tenant_id,     non_null(:string)
   end
 
   @desc "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
@@ -40,10 +47,16 @@ defmodule Console.GraphQl.Deployments.Integration do
 
   object :chat_provider_connection_configuration do
     field :slack, :slack_connection_configuration, description: "the configuration for the slack connection"
+    field :teams, :teams_connection_configuration, description: "the configuration for the teams connection"
   end
 
   object :slack_connection_configuration do
     field :bot_id, :string, description: "the bot id for the slack connection"
+  end
+
+  object :teams_connection_configuration do
+    field :client_id, :string, description: "the client id for the teams connection"
+    field :tenant_id, :string, description: "the tenant id for the teams connection"
   end
 
   connection node_type: :chat_provider_connection
@@ -107,6 +120,12 @@ defmodule Console.GraphQl.Deployments.Integration do
     timestamps()
   end
 
+  @desc "A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
+  object :chatbot_conversation do
+    field :id, non_null(:id)
+    field :name, non_null(:string)
+  end
+
   connection node_type: :issue
 
   object :integration_queries do
@@ -150,6 +169,18 @@ defmodule Console.GraphQl.Deployments.Integration do
         action: :read
 
       resolve &Deployments.issue_webhooks/2
+    end
+
+    field :search_conversations, list_of(:chatbot_conversation) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :integrations,
+        action: :read
+
+      arg :chat_connection_id, non_null(:id)
+      arg :query, :string
+
+      resolve &Deployments.search_chatbot_conversations/2
     end
   end
 

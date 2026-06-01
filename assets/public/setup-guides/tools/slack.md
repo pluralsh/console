@@ -2,7 +2,7 @@
 
 Workbench’s Slack integration calls the **Slack Web API** (`https://slack.com/api`) with your app’s **bot user OAuth token** (`xoxb-…`). The backend sends that token as `Authorization: Bearer <token>`.
 
-Use this guide to create a Slack app, install it to your workspace, and grant **bot token scopes** that match the built-in Workbench Slack tools (list/find channels, post and edit messages, create channels, invite members, list user groups).
+Use this guide to create a Slack app, install it to your workspace, and grant **bot token scopes** that match the built-in Workbench Slack tools (list/find channels, list messages, post and edit messages, react to messages, create channels, invite members, list user groups).
 
 ## 1) Create or choose a Slack app
 
@@ -25,8 +25,10 @@ These tools are implemented against the Slack Web API. Add the scopes for each t
 | Built-in tool (name suffix) | Slack API method | Bot token scopes |
 |-----------------------------|------------------|------------------|
 | `slack_list_channels_*`, `slack_find_channel_by_name_*` | [`conversations.list`](https://api.slack.com/methods/conversations.list) | `channels:read`, `groups:read` |
+| `slack_list_messages_*` | [`conversations.history`](https://api.slack.com/methods/conversations.history) | `channels:history`, `groups:history` |
 | `slack_post_message_*` | [`chat.postMessage`](https://api.slack.com/methods/chat.postMessage) | `chat:write` |
 | `slack_edit_message_*` | [`chat.update`](https://api.slack.com/methods/chat.update) | `chat:write` |
+| `slack_react_to_message_*` | [`reactions.add`](https://api.slack.com/methods/reactions.add) | `reactions:write` (add **`reactions:read`** if agents need to inspect existing reactions on a message) |
 | `slack_create_channel_*` | [`conversations.create`](https://api.slack.com/methods/conversations.create) | `channels:manage` (public channels), `groups:write` (private channels) |
 | `slack_invite_to_channel_*` | [`conversations.invite`](https://api.slack.com/methods/conversations.invite) | `channels:write.invites` (public channels), `groups:write.invites` (private channels). If you pass `usergroup_id`, [`usergroups.users.list`](https://api.slack.com/methods/usergroups.users.list) also runs—use `usergroups:read` (below). |
 | `slack_list_user_groups_*` | [`usergroups.list`](https://api.slack.com/methods/usergroups.list) | `usergroups:read` |
@@ -35,7 +37,7 @@ These tools are implemented against the Slack Web API. Add the scopes for each t
 
 If you want every built-in Slack tool to work (public and private channels, including invites and user groups), add **all** of these **Bot Token Scopes**:
 
-`chat:write`, `channels:read`, `groups:read`, `channels:manage`, `groups:write`, `channels:write.invites`, `groups:write.invites`, `usergroups:read`
+`chat:write`, `channels:read`, `groups:read`, `channels:history`, `groups:history`, `reactions:read`, `reactions:write`, `channels:manage`, `groups:write`, `channels:write.invites`, `groups:write.invites`, `usergroups:read`
 
 You can omit scopes for features you do not need (for example, skip `usergroups:read` if you never use `slack_list_user_groups_*` or `usergroup_id` on invites).
 

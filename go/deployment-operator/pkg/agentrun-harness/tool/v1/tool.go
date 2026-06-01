@@ -103,6 +103,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		DindEnabled:    in.Config.Run.DindEnabled,
 		WorkDir:        in.Config.WorkDir,
 		RepositoryDir:  in.Config.RepositoryDir,
+		Prompt:         in.Config.Run.Prompt,
 	}
 }
 

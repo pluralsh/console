@@ -18,7 +18,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.SearchPullRequests do
     field :per_page,  :integer
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/search_pull_requests.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/search_pull_requests.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_search_pull_requests"
 
@@ -33,13 +34,18 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.SearchPullRequests do
     |> validate_required([:query])
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+        } = m
+      ) do
     with {:ok, client} <- Client.build(m.tool) do
       %{q: scoped_query(m)}
       |> Query.merge_optional(m, [:sort, :order, :page, :per_page])
+      |> Query.paginated()
       |> Enum.reject(fn {_, v} -> is_nil(v) end)
       |> Map.new()
-      |> then(&Tentacat.Search.issues(client, &1))
+      |> then(&Tentacat.Search.issues(client, &1, Query.manual_pagination()))
       |> Response.json()
     end
   end

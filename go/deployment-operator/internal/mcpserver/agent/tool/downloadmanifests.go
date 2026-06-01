@@ -33,11 +33,15 @@ func (in *DownloadManifests) Install(s *server.MCPServer) {
 			mcp.WithDescription(in.description),
 			mcp.WithString("cluster",
 				mcp.Required(),
-				mcp.Description("Handle of the Plural cluster the service is deployed to (e.g. 'mgmt' or 'prod-eu-1')"),
+				mcp.Description("Handle of the Plural cluster the service is deployed to. "+
+					"This is the `.spec.handle` field on the Cluster CR, not its metadata.name. "+
+					"Examples: 'mgmt', 'prod-eu-1'."),
 			),
 			mcp.WithString("service",
 				mcp.Required(),
-				mcp.Description("Name of the Plural service whose rendered manifests should be downloaded"),
+				mcp.Description("Name of the ServiceDeployment whose rendered manifests should be downloaded. "+
+					"Use `.metadata.name` from the ServiceDeployment CR. "+
+					"For a GlobalService, this is the name of the per-cluster child ServiceDeployment it created."),
 			),
 		),
 		in.handler,
@@ -182,13 +186,18 @@ func NewDownloadManifests(client console.Client) Tool {
 	return &DownloadManifests{
 		ConsoleTool: ConsoleTool{
 			id: DownloadManifestsTool,
-			description: "Downloads a Plural service's gitops bundle - the exact set of files " +
-				"Plural ships to the cluster-side agent before apply (Helm chart sources, kustomize " +
-				"bases, raw YAML, or Plural liquid templates, depending on how the service is " +
-				"configured). Files are written to a dedicated '<handle>-<name>' subdirectory under " +
-				"'" + manifestsSubdir + "/' next to the cloned repository. Use this to inspect " +
-				"Plural's gitops layout - including external Helm charts - instead of guessing via " +
-				"web searches. After it returns, inspect the listed directory with Read/Glob/Grep.",
+			description: "Downloads the rendered Kubernetes manifests for a Plural ServiceDeployment " +
+				"(or a per-cluster instance created by a GlobalService). " +
+				"Pass the cluster *handle* (the value of `.spec.handle` on the Cluster CR, " +
+				"e.g. 'mgmt', 'prod-eu-1') as 'cluster', " +
+				"and the ServiceDeployment name (`.metadata.name` on the ServiceDeployment CR) as 'service'. " +
+				"For a GlobalService CR, first identify which per-cluster child ServiceDeployment you want to inspect " +
+				"(the GlobalService creates one per targeted cluster), then pass that cluster's handle and the child service name. " +
+				"NOTE: InfrastructureStack CRs are not supported by this tool — use kubectl or Bash to inspect stack state instead. " +
+				"Files are written to a '<handle>-<name>/' subdirectory under '" + manifestsSubdir + "/' next to the cloned repository " +
+				"(Helm chart sources, kustomize bases, raw YAML, or Plural liquid templates, depending on how the service is configured). " +
+				"Use this to inspect Plural's gitops layout — including external Helm charts — instead of guessing via web searches. " +
+				"After it returns, inspect the listed directory with Read/Glob/Grep.",
 			client: client,
 		},
 	}

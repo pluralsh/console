@@ -1,5 +1,6 @@
 import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
+import styled from 'styled-components'
 
 import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -119,7 +120,7 @@ function ConsoleContent() {
           flexGrow={1}
           alignItems="stretch"
         >
-          <Flex
+          <ConsoleRoutesSC
             direction="column"
             flexGrow={1}
             overflowX="hidden"
@@ -130,10 +131,17 @@ function ConsoleContent() {
             <Suspense fallback={<LoadingIndicator />}>
               <Outlet />
             </Suspense>
-          </Flex>
+          </ConsoleRoutesSC>
         </Flex>
       </Flex>
       <TopLevelSidePanel />
     </Flex>
   )
 }
+
+const ConsoleRoutesSC = styled(Flex)(({ theme }) => ({
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-two']
+      : theme.colors['fill-zero'],
+}))

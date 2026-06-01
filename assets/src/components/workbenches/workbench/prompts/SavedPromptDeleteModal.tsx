@@ -23,7 +23,7 @@ export function SavedPromptDeleteModal({
     onCompleted: () => {
       popToast({
         content: `${prettifyPrompt(savedPrompt?.prompt ?? '') || 'saved prompt'} deleted`,
-        severity: 'danger',
+        severity: 'success',
       })
       onClose()
     },

@@ -32,7 +32,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
     field :after,         :string
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/pull_request_read.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/pull_request_read.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_pull_request_read"
 
@@ -47,14 +48,24 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
     |> validate_required([:owner, :repo, :pull_number, :method])
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       Tentacat.Pulls.find(client, m.owner, m.repo, m.pull_number)
       |> Response.json()
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_diff} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_diff
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       path = "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}"
 
@@ -68,7 +79,12 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_status} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_status
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       case Tentacat.Pulls.find(client, m.owner, m.repo, m.pull_number) do
         {_, %{"head" => %{"sha" => sha}}, _} ->
@@ -81,51 +97,119 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_files} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_files
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       m
       |> then(&Query.merge_optional(%{}, &1, [:page, :per_page]))
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&get("repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/files#{Query.qp(&1)}", client))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/files#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_review_comments} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_review_comments
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       m
       |> then(&Query.merge_optional(%{}, &1, [:page, :per_page, :after]))
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&get("repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/comments#{Query.qp(&1)}", client))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/comments#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_reviews} = m) do
-    with {:ok, client} <- GhClient.build(m.tool) do
-      Tentacat.Pulls.Reviews.list(client, m.owner, m.repo, m.pull_number)
-      |> Response.json()
-    end
-  end
-
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_comments} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_reviews
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       m
       |> then(&Query.merge_optional(%{}, &1, [:page, :per_page]))
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&get("repos/#{m.owner}/#{m.repo}/issues/#{m.pull_number}/comments#{Query.qp(&1)}", client))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/reviews#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}, method: :get_check_runs} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_comments
+        } = m
+      ) do
+    with {:ok, client} <- GhClient.build(m.tool) do
+      m
+      |> then(&Query.merge_optional(%{}, &1, [:page, :per_page]))
+      |> Query.paginated()
+      |> Query.stringify_params()
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/issues/#{m.pull_number}/comments#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
+      |> Response.json()
+    end
+  end
+
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}},
+          method: :get_check_runs
+        } = m
+      ) do
     with {:ok, client} <- GhClient.build(m.tool) do
       case Tentacat.Pulls.find(client, m.owner, m.repo, m.pull_number) do
         {_, %{"head" => %{"sha" => sha}}, _} ->
           m
           |> then(&Query.merge_optional(%{}, &1, [:page, :per_page]))
+          |> Query.paginated()
           |> Query.stringify_params()
-          |> then(&get("repos/#{m.owner}/#{m.repo}/commits/#{sha}/check-runs#{Query.qp(&1)}", client))
+          |> then(
+            &get(
+              "repos/#{m.owner}/#{m.repo}/commits/#{sha}/check-runs#{Query.qp(&1)}",
+              client,
+              [],
+              Query.manual_pagination()
+            )
+          )
           |> Response.json()
 
         other ->
@@ -134,7 +218,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
     end
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}}) do
+  def implement(%__MODULE__{
+        tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+      }) do
     {:error, "pull_request_read: unsupported method or missing fields"}
   end
 

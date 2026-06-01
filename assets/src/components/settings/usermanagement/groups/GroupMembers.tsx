@@ -95,7 +95,7 @@ const cols = [
         onCompleted: ({ deleteGroupMember }) =>
           popToast?.({
             content: `${deleteGroupMember?.user?.name ?? 'Group member'} removed`,
-            severity: 'danger',
+            severity: 'success',
           }),
       })
 

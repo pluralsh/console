@@ -37,10 +37,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
-import {
-  displaySavedPromptCategory,
-  displaySavedPromptTitle,
-} from './prompts/savedPromptDisplay'
+import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { CaptionP } from 'components/utils/typography/Text'
 
@@ -422,9 +419,7 @@ function SavedPromptCategoryHeader({ category }: { category: string }) {
 }
 
 function groupSavedPromptsByCategory(prompts: WorkbenchPromptFragment[]) {
-  const grouped = groupBy(prompts, (prompt) =>
-    displaySavedPromptCategory(prompt.category)
-  )
+  const grouped = groupBy(prompts, (prompt) => prompt.category)
 
   return Object.entries(grouped)
     .sort(([leftCategory], [rightCategory]) =>

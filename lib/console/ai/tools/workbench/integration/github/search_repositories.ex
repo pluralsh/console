@@ -17,7 +17,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.SearchRepositories do
     field :minimal_output,  :boolean
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/search_repositories.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/search_repositories.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_search_repositories"
 
@@ -32,13 +33,18 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.SearchRepositories do
     |> validate_required([:query])
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+        } = m
+      ) do
     with {:ok, client} <- Client.build(m.tool) do
       %{q: m.query}
       |> Query.merge_optional(m, [:sort, :order, :page, :per_page, :minimal_output])
+      |> Query.paginated()
       |> Enum.reject(fn {_, v} -> is_nil(v) end)
       |> Map.new()
-      |> then(&Tentacat.Search.repositories(client, &1))
+      |> then(&Tentacat.Search.repositories(client, &1, Query.manual_pagination()))
       |> Response.json()
     end
   end

@@ -87,6 +87,27 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert found["pluralCreds"]["url"]
     end
 
+    test "a cluster receives scm creds from the runtime's bound connection" do
+      cluster = insert(:cluster)
+      insert(:scm_connection, default: true, token: "default-token")
+      runtime_conn = insert(:scm_connection, name: "runtime-github", token: "runtime-token")
+      runtime = insert(:agent_runtime, cluster: cluster, connection: runtime_conn)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, %{data: %{"agentRun" => found}}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) {
+            id
+            scmCreds {
+              token
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: cluster})
+
+      assert found["scmCreds"]["token"] == "runtime-token"
+    end
+
     test "a cluster cannot fetch a run if its not the runner cluster" do
       cluster = insert(:cluster)
       run = insert(:agent_run)

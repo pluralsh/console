@@ -18,6 +18,7 @@ import {
 } from 'react'
 import { matchPath, useLocation } from 'react-router-dom'
 import {
+  WORKBENCH_CHATBOTS_PATH_MATCHER_ABS,
   WORKBENCH_JOBS_PATH_MATCHER_ABS,
   WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
   WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
@@ -38,6 +39,7 @@ export const DEFAULT_MAX_WIDTH_VW = 40
 const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
   'webhook-setup-guide': [
     WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
+    WORKBENCH_CHATBOTS_PATH_MATCHER_ABS,
     WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
     WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
   ],

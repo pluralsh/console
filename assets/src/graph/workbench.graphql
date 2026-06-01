@@ -466,6 +466,40 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   }
 }
 
+fragment ChatProviderConnection on ChatProviderConnection {
+  id
+  name
+  type
+  configuration {
+    slack {
+      botId
+    }
+    teams {
+      clientId
+      tenantId
+    }
+  }
+}
+
+fragment WorkbenchChatbot on WorkbenchChatbot {
+  id
+  channel
+  prompt
+  messageBehavior
+  userId
+  insertedAt
+  updatedAt
+  chatConnection {
+    ...ChatProviderConnection
+  }
+  user {
+    id
+    name
+    email
+    profile
+  }
+}
+
 fragment WorkbenchIssue on Issue {
   id
   title
@@ -518,6 +552,16 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   evalResult {
     id
     grade
+  }
+  chatbotMessage {
+    id
+    channel
+    message
+    chatConnection {
+      id
+      name
+      type
+    }
   }
 }
 
@@ -842,6 +886,48 @@ query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query WorkbenchChatbots($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    chatbots(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchChatbot
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchChatbot($id: ID!) {
+  workbenchChatbot(id: $id) {
+    ...WorkbenchChatbot
+  }
+}
+
+query SearchConversations($chatConnectionId: ID!, $query: String) {
+  searchConversations(chatConnectionId: $chatConnectionId, query: $query) {
+    id
+    name
+  }
+}
+
+query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
+  chatProviderConnections(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ChatProviderConnection
+      }
+    }
+  }
+}
+
 mutation GetWorkbenchWebhook($id: ID!) {
   getWorkbenchWebhook(id: $id) {
     ...WorkbenchWebhook
@@ -893,6 +979,17 @@ query WorkbenchTriggersSummary($id: ID!) {
           }
           issueWebhook {
             ...IssueWebhook
+          }
+        }
+      }
+    }
+    chatbots(first: 30) {
+      edges {
+        node {
+          id
+          channel
+          chatConnection {
+            ...ChatProviderConnection
           }
         }
       }
@@ -1163,6 +1260,39 @@ mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
     id
     name
+  }
+}
+
+mutation CreateWorkbenchChatbot(
+  $workbenchId: ID!
+  $attributes: WorkbenchChatbotAttributes!
+) {
+  createWorkbenchChatbot(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchChatbot
+  }
+}
+
+mutation UpdateWorkbenchChatbot(
+  $id: ID!
+  $attributes: WorkbenchChatbotAttributes!
+) {
+  updateWorkbenchChatbot(id: $id, attributes: $attributes) {
+    ...WorkbenchChatbot
+  }
+}
+
+mutation DeleteWorkbenchChatbot($id: ID!) {
+  deleteWorkbenchChatbot(id: $id) {
+    id
+    channel
+  }
+}
+
+mutation UpsertChatProviderConnection(
+  $attributes: ChatProviderConnectionAttributes!
+) {
+  upsertChatProviderConnection(attributes: $attributes) {
+    ...ChatProviderConnection
   }
 }
 

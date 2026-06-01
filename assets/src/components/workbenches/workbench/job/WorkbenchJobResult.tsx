@@ -25,6 +25,7 @@ import styled, { useTheme } from 'styled-components'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
+import { WorkbenchJobTriggerChatbot } from './WorkbenchJobTriggerChatbot'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
 
 export function WorkbenchJobResult({
@@ -57,6 +58,7 @@ export function WorkbenchJobResult({
     >
       <WorkbenchJobTriggerAlert alert={job?.alert} />
       <WorkbenchJobTriggerIssue issue={job?.issue} />
+      <WorkbenchJobTriggerChatbot job={job} />
       <Flex
         direction="column"
         overflow="auto"

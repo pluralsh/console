@@ -3,6 +3,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListPullRequests do
 
   use Console.AI.Tools.Workbench.Base
 
+  import Tentacat
+
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.GithubConnection}
   alias Console.AI.Tools.Workbench.Integration.Github.{Client, Response, Query}
@@ -20,7 +22,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListPullRequests do
     field :per_page,   :integer
   end
 
-  @json_schema Console.priv_file!("tools/workbench/integration/github/list_pull_requests.json") |> Jason.decode!()
+  @json_schema Console.priv_file!("tools/workbench/integration/github/list_pull_requests.json")
+               |> Jason.decode!()
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "github_#{n}_list_pull_requests"
 
@@ -35,12 +38,27 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListPullRequests do
     |> validate_required([:owner, :repo])
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}} = m) do
+  def implement(
+        %__MODULE__{
+          tool: %WorkbenchTool{configuration: %Configuration{github: %GithubConnection{}}}
+        } = m
+      ) do
     with {:ok, client} <- Client.build(m.tool) do
       m
-      |> then(&Query.merge_optional(%{}, &1, [:state, :head, :base, :sort, :direction, :page, :per_page]))
+      |> then(
+        &Query.merge_optional(%{}, &1, [:state, :head, :base, :sort, :direction, :page, :per_page])
+      )
+      |> Map.update(:head, nil, fn _ -> Query.normalize_head(m) end)
+      |> Query.paginated()
       |> Query.stringify_params()
-      |> then(&Tentacat.Pulls.filter(client, m.owner, m.repo, &1))
+      |> then(
+        &get(
+          "repos/#{m.owner}/#{m.repo}/pulls#{Query.qp(&1)}",
+          client,
+          [],
+          Query.manual_pagination()
+        )
+      )
       |> Response.json()
     end
   end

@@ -605,6 +605,8 @@ type RootQueryType {
 
   issueWebhooks(after: String, first: Int, before: String, last: Int): IssueWebhookConnection
 
+  searchConversations(chatConnectionId: ID!, query: String): [ChatbotConversation]
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -1663,12 +1665,19 @@ input ChatProviderConnectionAttributes {
 
 input ChatProviderConnectionConfigurationAttributes {
   slack: SlackConnectionConfigurationAttributes
+  teams: TeamsConnectionConfigurationAttributes
 }
 
 input SlackConnectionConfigurationAttributes {
   appToken: String!
   botToken: String!
   botId: String
+}
+
+input TeamsConnectionConfigurationAttributes {
+  clientId: String!
+  clientSecret: String!
+  tenantId: String!
 }
 
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
@@ -1698,11 +1707,22 @@ type ChatProviderConnection {
 type ChatProviderConnectionConfiguration {
   "the configuration for the slack connection"
   slack: SlackConnectionConfiguration
+
+  "the configuration for the teams connection"
+  teams: TeamsConnectionConfiguration
 }
 
 type SlackConnectionConfiguration {
   "the bot id for the slack connection"
   botId: String
+}
+
+type TeamsConnectionConfiguration {
+  "the client id for the teams connection"
+  clientId: String
+
+  "the tenant id for the teams connection"
+  tenantId: String
 }
 
 type ChatProviderConnectionConnection {
@@ -1786,6 +1806,12 @@ type Issue {
   updatedAt: DateTime
 }
 
+"A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
+type ChatbotConversation {
+  id: ID!
+  name: String!
+}
+
 type IssueConnection {
   pageInfo: PageInfo!
   edges: [IssueEdge]
@@ -1853,6 +1879,9 @@ input AgentRuntimeAttributes {
 
   "default interval in seconds between babysit checks for runs on this runtime"
   babysitInterval: Int
+
+  "the name of the scm connection to use for this runtime"
+  scmConnection: String
 }
 
 input AgentBindingAttributes {
@@ -2472,6 +2501,11 @@ enum WorkbenchSkillSubagent {
   SEARCH
 }
 
+enum WorkbenchChatbotMessageBehavior {
+  REPLY
+  MESSAGE
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -2687,6 +2721,9 @@ input WorkbenchChatbotAttributes {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "how the chatbot posts responses in the channel"
+  messageBehavior: WorkbenchChatbotMessageBehavior
 
   "user this chatbot runs as; must have read access to the workbench"
   userId: ID
@@ -3829,6 +3866,9 @@ type WorkbenchChatbot {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "how the chatbot posts responses in the channel"
+  messageBehavior: WorkbenchChatbotMessageBehavior!
 
   "user this chatbot runs as"
   userId: ID

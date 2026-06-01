@@ -5,24 +5,25 @@ defmodule Console.Chat.Registrar do
   alias Console.Chat.DynamicSupervisor
   require Logger
 
-  # @poll :timer.minutes(5)
+  @poll :timer.minutes(5)
+  @limit 20
 
   def start_link(arg \\ :ok) do
     GenServer.start_link(__MODULE__, arg, name: __MODULE__)
   end
 
   def init(_arg) do
-    # if Console.conf(:initialize) do
-    #   :timer.send_interval(@poll, :poll)
-    #   send self(), :poll
-    # end
+    if Console.conf(:initialize) do
+      :timer.send_interval(@poll, :poll)
+      send self(), :poll
+    end
 
     {:ok, %{}}
   end
 
   def handle_info(:poll, state) do
     Logger.info "polling for chat connections to start"
-    chats = Repo.all(ChatConnection)
+    chats = Repo.all(ChatConnection.with_limit(@limit))
 
     Map.merge(state, start_chats(chats))
     |> prune_chats(chats)
@@ -39,6 +40,7 @@ defmodule Console.Chat.Registrar do
       case DynamicSupervisor.start_child(chat) do
         {:ok, pid} -> Map.put(acc, chat.id, pid)
         {:error, {:already_started, pid}} -> Map.put(acc, chat.id, pid)
+        {:error, {:shutdown, {:failed_to_start_child, _, {:already_started, _}}}} -> acc
         err ->
           Logger.warning "failed to start chat #{chat.id}: #{inspect(err)}"
           acc

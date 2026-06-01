@@ -192,6 +192,7 @@ function IconFrame<E extends ElementType = 'div'>({
         tabIndex: 0,
         role: 'button',
         type: 'button',
+        'data-clickable': 'true',
       })}
       {...props}
     >

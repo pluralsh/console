@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http, Scratchpad}
-  alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListUserGroups, PostMessage}
+  alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListMessages, ListUserGroups, PostMessage, ReactToMessage}
   alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
   alias Console.AI.Tools.Workbench.Integration.Gitlab.Tools, as: GitlabTools
   alias Console.AI.Tools.Workbench.Integration.Bitbucket.Tools, as: BitbucketTools
@@ -66,12 +66,14 @@ defmodule Console.AI.Workbench.Subagents.Integration do
       %WorkbenchTool{tool: :slack} = tool ->
         [
           %ListChannels{tool: tool},
+          %ListMessages{tool: tool},
           %ListUserGroups{tool: tool},
           %FindChannelByName{tool: tool},
           %InviteToChannel{tool: tool},
           %CreateChannel{tool: tool},
           %PostMessage{tool: tool},
-          %EditMessage{tool: tool}
+          %EditMessage{tool: tool},
+          %ReactToMessage{tool: tool}
         ]
       %WorkbenchTool{tool: :github} = tool -> GithubTools.expand(tool)
       %WorkbenchTool{tool: :gitlab} = tool -> GitlabTools.expand(tool)

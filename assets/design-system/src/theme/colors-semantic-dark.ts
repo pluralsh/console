@@ -8,21 +8,21 @@ export const semanticColorsDark = {
   // Fill
   //
   // fill-zero
-  'fill-zero': grey[900],
-  'fill-zero-hover': grey[850],
-  'fill-zero-selected': grey[875],
+  'fill-zero': grey[925],
+  'fill-zero-hover': grey[875],
+  'fill-zero-selected': grey[900],
   // fill-one
-  'fill-one': grey[850],
-  'fill-one-hover': grey[800],
-  'fill-one-selected': grey[825],
+  'fill-one': grey[875],
+  'fill-one-hover': grey[825],
+  'fill-one-selected': grey[850],
   // fill-two
-  'fill-two': grey[800],
-  'fill-two-hover': grey[750],
-  'fill-two-selected': grey[775],
+  'fill-two': grey[825],
+  'fill-two-hover': grey[775],
+  'fill-two-selected': grey[800],
   // fill-three
-  'fill-three': grey[750],
-  'fill-three-hover': grey[700],
-  'fill-three-selected': grey[725],
+  'fill-three': grey[775],
+  'fill-three-hover': grey[725],
+  'fill-three-selected': grey[750],
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
@@ -55,10 +55,10 @@ export const semanticColorsDark = {
 
   // Border
   //
-  border: grey[800],
-  'border-fill-one': grey[775],
-  'border-fill-two': grey[725],
-  'border-fill-three': grey[700],
+  border: grey[825],
+  'border-fill-one': grey[800],
+  'border-fill-two': grey[750],
+  'border-fill-three': grey[725],
   'border-selected': grey[100],
   'border-input': grey[700],
   'border-disabled': grey[700],

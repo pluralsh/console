@@ -16,10 +16,11 @@ defmodule Console.Kubernetes.PodExec do
     "/api/v1/namespaces/#{Console.namespace(ns)}/pods/#{name}/exec?#{args}"
   end
 
-  def start_link(path, pid, %{url: "https://" <> url, ca_cert: cert, auth: auth}) do
-    WebSockex.start_link("wss://#{url}#{path}", __MODULE__, %State{pid: pid}, [
+  def start_link(path, pid, %{url: url, ca_cert: cert, auth: auth}) do
+    Path.join(to_ws(url), path)
+    |> WebSockex.start_link(__MODULE__, %State{pid: pid}, [
       extra_headers: [{"Authorization", "Bearer #{auth.token}"}],
-      cacerts: (if cert, do: [cert], else: nil)
+      cacerts: certs(cert)
     ])
   end
   def start_link(path, pid), do: start_link(path, pid, Kazan.Server.in_cluster())
@@ -51,4 +52,11 @@ defmodule Console.Kubernetes.PodExec do
   defp deliver_frame(frame, pid), do: send_frame(pid, frame)
 
   defp send_frame(pid, frame), do: send(pid, {:stdo, frame})
+
+  defp to_ws("https://" <> url), do: "wss://#{url}"
+  defp to_ws("http://" <> url), do: "ws://#{url}"
+
+  defp certs([_ | _] = certs), do: certs
+  defp certs(nil), do: nil
+  defp certs(cert), do: [cert]
 end

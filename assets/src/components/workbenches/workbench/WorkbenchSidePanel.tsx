@@ -6,13 +6,16 @@ import {
   PencilIcon,
 } from '@pluralsh/design-system'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { isEmpty } from 'lodash'
-import { PropsWithChildren, useMemo } from 'react'
+import { PropsWithChildren, use, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
+  getWorkbenchChatbotCreateAbsPath,
+  getWorkbenchChatbotEditAbsPath,
   getWorkbenchCronScheduleCreateAbsPath,
   getWorkbenchWebhookTriggerCreateAbsPath,
   getWorkbenchWebhookTriggerEditAbsPath,
@@ -20,6 +23,10 @@ import {
 import { getWebhookIcon } from './webhooks/utils'
 import { WorkbenchToolIcon } from '../tools/workbenchToolsUtils'
 import { WorkbenchSidePanelCron } from './WorkbenchSidePanelCron'
+import {
+  chatProviderConnectionIcon,
+  formatChatbotChannelLabel,
+} from './chatbots/utils'
 
 export function WorkbenchSidePanel({
   workbenchId,
@@ -29,6 +36,7 @@ export function WorkbenchSidePanel({
   onOpenToolsEdit: () => void
 }) {
   const navigate = useNavigate()
+  const { featureFlags } = use(FeatureFlagContext)
 
   const { data } = useWorkbenchTriggersSummaryQuery({
     variables: { id: workbenchId },
@@ -47,10 +55,15 @@ export function WorkbenchSidePanel({
     () => mapExistingNodes(workbench?.webhooks),
     [workbench]
   )
+  const chatbots = useMemo(
+    () => mapExistingNodes(workbench?.chatbots),
+    [workbench]
+  )
 
   const hasTools = !isEmpty(tools)
   const hasCrons = !isEmpty(crons)
   const hasWebhooks = !isEmpty(webhooks)
+  const hasChatbots = !isEmpty(chatbots)
 
   return (
     <WrapperSC>
@@ -158,6 +171,70 @@ export function WorkbenchSidePanel({
             </ButtonSC>
           )}
         </SectionSC>
+        {featureFlags.WorkbenchChatbots && (
+          <SectionSC>
+            <HeaderSC>
+              <span>Chatbots</span>
+              {hasChatbots && (
+                <IconFrame
+                  clickable
+                  size="small"
+                  icon={<AddIcon size={12} />}
+                  tooltip="Add chatbot"
+                  onClick={() =>
+                    navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
+                  }
+                />
+              )}
+            </HeaderSC>
+            {hasChatbots ? (
+              <Flex
+                gap="xxsmall"
+                direction="column"
+              >
+                {chatbots.map((chatbot) => (
+                  <WorkbenchSidePanelEditRow
+                    key={chatbot.id}
+                    onClick={() =>
+                      navigate(
+                        getWorkbenchChatbotEditAbsPath({
+                          workbenchId,
+                          chatbotId: chatbot.id,
+                        })
+                      )
+                    }
+                  >
+                    <ItemIconContainerSC>
+                      <IconFrame
+                        icon={chatProviderConnectionIcon(
+                          chatbot.chatConnection?.type
+                        )}
+                        size="xsmall"
+                      />
+                    </ItemIconContainerSC>
+                    <ItemNameSC>
+                      {formatChatbotChannelLabel({
+                        type: chatbot.chatConnection?.type,
+                        channel: chatbot.channel,
+                      })}
+                    </ItemNameSC>
+                  </WorkbenchSidePanelEditRow>
+                ))}
+              </Flex>
+            ) : (
+              <ButtonSC
+                small
+                startIcon={<AddIcon size={12} />}
+                tertiary
+                onClick={() =>
+                  navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
+                }
+              >
+                Add chatbot
+              </ButtonSC>
+            )}
+          </SectionSC>
+        )}
         <SectionSC>
           <HeaderSC>
             <span>Cron schedules</span>
@@ -208,7 +285,7 @@ export function WorkbenchSidePanel({
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders['fill-one'],
   display: 'flex',
   flexDirection: 'column',

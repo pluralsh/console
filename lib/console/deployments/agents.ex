@@ -81,14 +81,29 @@ defmodule Console.Deployments.Agents do
   @spec upsert_agent_runtime(map, Cluster.t) :: agent_runtime_resp
   def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cluster_id}) do
     runtime = get_agent_runtime(cluster_id, name) |> Repo.preload([:create_bindings])
-    case runtime do
-      %AgentRuntime{} = runtime -> runtime
-      nil -> %AgentRuntime{cluster_id: cluster_id}
+
+    with {:ok, attrs} <- resolve_scm_connection(attrs) do
+      case runtime do
+        %AgentRuntime{} = runtime -> runtime
+        nil -> %AgentRuntime{cluster_id: cluster_id}
+      end
+      |> AgentRuntime.changeset(stabilize(attrs, runtime || %AgentRuntime{create_bindings: []}))
+      |> Repo.insert_or_update()
     end
-    |> AgentRuntime.changeset(stabilize(attrs, runtime || %AgentRuntime{create_bindings: []}))
-    |> Repo.insert_or_update()
   end
   def upsert_agent_runtime(_, _), do: {:error, "name is required"}
+
+  defp resolve_scm_connection(%{scm_connection: name} = attrs) when is_binary(name) do
+    case Git.get_scm_connection_by_name(name) do
+      %ScmConnection{id: id} ->
+        {:ok, attrs |> Map.put(:connection_id, id) |> Map.delete(:scm_connection)}
+
+      nil ->
+        {:error, "could not find scm connection #{name}"}
+    end
+  end
+
+  defp resolve_scm_connection(attrs), do: {:ok, attrs}
 
   defp stabilize(%{create_bindings: [_ | _] = bindings} = attrs, %AgentRuntime{create_bindings: old_bindings}) do
     by_name = Map.new(old_bindings || [], & {&1.group_id || &1.user_id, &1.id})
@@ -293,10 +308,10 @@ defmodule Console.Deployments.Agents do
   @spec agent_pull_request(map, binary, User.t) :: Git.pr_resp
   def agent_pull_request(%{title: t, body: b, base: ba, head: he} = attrs, run_id, %User{} = user) do
     run = get_agent_run!(run_id)
-          |> Repo.preload([:runtime, workbench_job_activity_agent_run: :workbench_job_activity])
+          |> Repo.preload([runtime: :connection, workbench_job_activity_agent_run: :workbench_job_activity])
     shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
     with {:ok, run} <- allow(run, user, :creds),
-         %ScmConnection{} = conn <- Tool.scm_connection(),
+         %ScmConnection{} = conn <- scm_connection(run),
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
@@ -387,14 +402,29 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Fetches the scm connection for an agent runtime
+  Resolves the SCM connection for an agent runtime or run, preferring the runtime's
+  bound connection before falling back to deployment settings / default.
   """
-  @spec scm_conection(AgentRuntime.t) :: ScmConnection.t
-  def scm_conection(%AgentRuntime{}), do: Tool.scm_connection()
+  @spec scm_connection(AgentRuntime.t() | AgentRun.t() | nil) :: ScmConnection.t() | nil
+  def scm_connection(%AgentRun{} = run) do
+    run
+    |> Repo.preload([runtime: :connection])
+    |> Map.fetch!(:runtime)
+    |> scm_connection()
+  end
+  def scm_connection(%AgentRuntime{connection: %ScmConnection{} = conn}), do: conn
+  def scm_connection(%AgentRuntime{connection_id: id}) when is_binary(id) do
+    case Git.get_scm_connection(id) do
+      %ScmConnection{} = conn -> conn
+      _ -> Tool.scm_connection()
+    end
+  end
+  def scm_connection(%AgentRuntime{}), do: Tool.scm_connection()
+  def scm_connection(nil), do: Tool.scm_connection()
 
   def scm_creds(%AgentRun{} = run, actor) do
     with {:ok, _} <- allow(run, actor, :creds),
-         %ScmConnection{username: username, type: provider} = conn <- Tool.scm_connection(),
+         %ScmConnection{username: username, type: provider} = conn <- scm_connection(run),
          {:ok, conn} <- backfill_token(conn) do
       ok(%{
         type: provider,
@@ -411,21 +441,21 @@ defmodule Console.Deployments.Agents do
   @doc """
   Converts the repository URL to a http URL
   """
-  @spec repository_url(AgentRun.t) :: binary
-  def repository_url(%AgentRun{repository: repo_url}) do
-    case Tool.scm_connection() do
-      %ScmConnection{} = conn -> to_http(conn, repo_url)
-      _ -> repo_url
+  @spec repository_url(AgentRun.t()) :: binary
+  def repository_url(%AgentRun{} = run) do
+    case scm_connection(run) do
+      %ScmConnection{} = conn -> to_http(conn, run.repository)
+      _ -> run.repository
     end
   end
 
   @doc """
   Creates a review for a given pull request explaining the ai's thought process for a given agent run pr.
   """
-  @spec pr_review(PullRequest.t) :: {:ok, binary} | Console.error
+  @spec pr_review(PullRequest.t()) :: {:ok, binary} | Console.error
   def pr_review(%PullRequest{agent_run_id: run_id} = pr) when is_binary(run_id) do
-    run = get_agent_run!(run_id) |> Repo.preload([:runtime])
-    with %ScmConnection{} = conn <- Tool.scm_connection(),
+    run = get_agent_run!(run_id) |> Repo.preload([runtime: :connection])
+    with %ScmConnection{} = conn <- scm_connection(run),
          {:ok, conn} <- backfill_token(conn) do
       Dispatcher.review(conn, pr, String.trim(pr_blob(pr: pr, run: run)))
     end

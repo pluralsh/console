@@ -18,6 +18,30 @@ defmodule Console.Deployments.IntegrationsTest do
       assert connection.configuration.slack.bot_id == "id"
     end
 
+    test "it enforces the chat connection limit on create" do
+      insert_list(20, :chat_connection)
+
+      {:error, msg} = Integrations.upsert_chat_connection(%{
+        name: "limit-exceeded",
+        type: :slack,
+        configuration: %{slack: %{app_token: "token", bot_token: "token", bot_id: "id"}}
+      }, admin_user())
+
+      assert msg =~ "chat connection limit"
+    end
+
+    test "it allows updating an existing chat connection at the limit" do
+      [conn | _] = insert_list(20, :chat_connection)
+
+      {:ok, updated} = Integrations.upsert_chat_connection(%{
+        name: conn.name,
+        type: :slack,
+        configuration: %{slack: %{app_token: "new-token", bot_token: "token", bot_id: "id"}}
+      }, admin_user())
+
+      assert updated.configuration.slack.app_token == "new-token"
+    end
+
     test "it can upsert read and write policy bindings" do
       reader = insert(:user)
       writer = insert(:user)

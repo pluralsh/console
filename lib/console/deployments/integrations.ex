@@ -7,6 +7,7 @@ defmodule Console.Deployments.Integrations do
 
   @ttl :timer.minutes(120)
   @cache Console.conf(:cache_adapter)
+  @chat_connection_limit 20
 
   @type chat_connection_resp :: {:ok, ChatConnection.t} | Console.error
   @type issue_webhook_resp :: {:ok, IssueWebhook.t} | Console.error
@@ -37,16 +38,26 @@ defmodule Console.Deployments.Integrations do
   """
   @spec upsert_chat_connection(map, User.t) :: chat_connection_resp
   def upsert_chat_connection(%{name: name} = attrs, %User{} = user) do
-    case Repo.get_by(ChatConnection, name: name) do
-      %ChatConnection{} = conn ->
-        Repo.preload(conn, [:read_bindings, :write_bindings])
-
-      nil ->
-        %ChatConnection{name: name}
-    end
-    |> ChatConnection.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(&Repo.insert_or_update/1)
+    start_transaction()
+    |> add_operation(:existing, fn _ ->
+      Repo.get_by(ChatConnection, name: name)
+      |> Repo.preload([:read_bindings, :write_bindings])
+      |> ok()
+    end)
+    |> add_operation(:limit, fn
+      %{existing: %ChatConnection{}} -> {:ok, :existing}
+      %{existing: nil} -> check_chat_connection_limit()
+    end)
+    |> add_operation(:connection, fn %{existing: existing} ->
+      case existing do
+        %ChatConnection{} = conn -> conn
+        nil -> %ChatConnection{name: name}
+      end
+      |> ChatConnection.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(&Repo.insert_or_update/1)
+    end)
+    |> execute(extract: :connection)
   end
 
   @doc """
@@ -93,6 +104,13 @@ defmodule Console.Deployments.Integrations do
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete)
+  end
+
+  defp check_chat_connection_limit do
+    case Repo.aggregate(ChatConnection, :count) do
+      count when count >= @chat_connection_limit -> {:error, "this instance is at the chat connection limit"}
+      _ -> {:ok, :create}
+    end
   end
 
   defp notify({:ok, %IssueWebhook{} = webhook}, :create),

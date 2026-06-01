@@ -158,7 +158,7 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{RequeueAfter: requeueAfterAgentRun}, nil
 	}
 
-	if activePods >= maxAgentPods && apiAgentRun.Status == console.AgentRunStatusPending {
+	if activePods >= maxAgentPods && apiAgentRun.Status == console.AgentRunStatusPending && run.Status.PodRef == nil {
 		logger.V(2).Info("maximum number of active pods reached", "activePods", activePods, "maxAgentPods", maxAgentPods)
 		return jitterRequeue(requeueAfter, jitter), nil
 	}
@@ -195,12 +195,15 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	if isAgentRunPodTimedOut(pod) {
+	if completion, ok := getAgentRunPodCompletion(pod); ok {
 		if err := r.Delete(ctx, pod); err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
-		run.Status.Phase = v1alpha1.AgentRunPhaseCancelled
-		if _, err := r.ConsoleClient.UpdateAgentRun(ctx, run.GetAgentRunID(), run.StatusAttributes(console.AgentRunStatusCancelled)); err != nil {
+		run.Status.Phase = completion.phase
+		run.Status.Error = completion.reason
+		attrs := run.StatusAttributes(completion.status)
+		attrs.Error = completion.reason
+		if _, err := r.ConsoleClient.UpdateAgentRun(ctx, run.GetAgentRunID(), attrs); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -268,6 +271,31 @@ func getAgentRunPhase(status console.AgentRunStatus) v1alpha1.AgentRunPhase {
 	}
 }
 
+type agentRunPodCompletion struct {
+	status console.AgentRunStatus
+	phase  v1alpha1.AgentRunPhase
+	reason *string
+}
+
+func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool) {
+	if isAgentRunPodTimedOut(pod) {
+		return &agentRunPodCompletion{
+			status: console.AgentRunStatusCancelled,
+			phase:  v1alpha1.AgentRunPhaseCancelled,
+		}, true
+	}
+
+	if failed, reason := isAgentRunPodFailed(pod); failed {
+		return &agentRunPodCompletion{
+			status: console.AgentRunStatusFailed,
+			phase:  v1alpha1.AgentRunPhaseFailed,
+			reason: &reason,
+		}, true
+	}
+
+	return nil, false
+}
+
 func isAgentRunPodTimedOut(pod *corev1.Pod) bool {
 	if pod == nil {
 		return false
@@ -283,6 +311,33 @@ func isAgentRunPodTimedOut(pod *corev1.Pod) bool {
 		return time.Now().After(pod.CreationTimestamp.Add(agentRunMaxLifetime))
 	}
 	return false
+}
+
+func isAgentRunPodFailed(pod *corev1.Pod) (bool, string) {
+	if pod == nil {
+		return false, ""
+	}
+	for _, status := range pod.Status.InitContainerStatuses {
+		if status.State.Terminated != nil && status.State.Terminated.ExitCode != 0 {
+			reason := fmt.Sprintf("init container %q failed with exit code %d", status.Name, status.State.Terminated.ExitCode)
+			if status.State.Terminated.Message != "" {
+				reason = fmt.Sprintf("%s: %s", reason, status.State.Terminated.Message)
+			} else if status.State.Terminated.Reason != "" {
+				reason = fmt.Sprintf("%s: %s", reason, status.State.Terminated.Reason)
+			}
+			return true, reason
+		}
+	}
+	if pod.Status.Phase == corev1.PodFailed {
+		if pod.Status.Message != "" {
+			return true, pod.Status.Message
+		}
+		if pod.Status.Reason != "" {
+			return true, pod.Status.Reason
+		}
+		return true, "agent run pod failed"
+	}
+	return false, ""
 }
 
 // reconcilePod ensures the pod for the agent run exists and is in the desired state.

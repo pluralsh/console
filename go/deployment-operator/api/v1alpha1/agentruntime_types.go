@@ -90,6 +90,11 @@ type AgentRuntimeSpec struct {
 	// BabysitInterval configures the interval for the operator to check on the health of the agent runtime and perform necessary babysitting actions (e.g. restarting unhealthy runtimes). When not provided, a default interval of 1 minute will be used.
 	BabysitInterval *metav1.Duration `json:"babysitInterval,omitempty"`
 
+	// ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.
+	// This should match the name of an existing ScmConnection resource or connection created in the Plural UI.
+	// +kubebuilder:validation:Optional
+	ScmConnection *string `json:"scmConnection,omitempty"`
+
 	// ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server.
 	ExaConnection *ExaConnection `json:"exaConnection,omitempty"`
 }
@@ -763,6 +768,9 @@ func (in *AgentRuntime) Attributes() console.AgentRuntimeAttributes {
 	}
 	if in.Spec.BabysitInterval != nil {
 		attrs.BabysitInterval = lo.ToPtr(int64(in.Spec.BabysitInterval.Seconds()))
+	}
+	if in.Spec.ScmConnection != nil && len(*in.Spec.ScmConnection) > 0 {
+		attrs.ScmConnection = in.Spec.ScmConnection
 	}
 
 	return attrs

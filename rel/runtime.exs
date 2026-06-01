@@ -313,6 +313,12 @@ if is_set("CONSOLE_AI_DEFAULTS") do
   end)
 end
 
+if is_set("KAS_SERVICE") do
+  config :console, :kas_service, get_env("KAS_SERVICE")
+else
+  config :console, :kas_service, "console-kas-service.#{get_env("NAMESPACE")}:8154"
+end
+
 if is_set("CONSOLE_S3_BUCKET") do
   s3_region = get_env("CONSOLE_S3_REGION") || "us-east-1"
   s3_endpoint = get_env("CONSOLE_S3_ENDPOINT")

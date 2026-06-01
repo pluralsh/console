@@ -1,5 +1,56 @@
 defmodule Console.GraphQl.Deployments.IntegrationQueriesTest do
   use Console.DataCase, async: true
+  use Mimic
+
+  describe "searchConversations" do
+    setup do
+      Mimic.copy(Slack.API)
+      :ok
+    end
+
+    test "it searches conversations for an accessible chat connection" do
+      user = admin_user()
+      conn = insert(:chat_connection, read_bindings: [%{user_id: user.id}])
+
+      expect(Slack.API, :get, fn "conversations.list", _token, _opts ->
+        {:ok, %{
+          "ok" => true,
+          "channels" => [
+            %{"id" => "C1", "name" => "general"},
+            %{"id" => "C2", "name" => "random"}
+          ]
+        }}
+      end)
+
+      {:ok, %{data: %{"searchConversations" => found}}} = run_query("""
+        query SearchConversations($chatConnectionId: ID!, $query: String) {
+          searchConversations(chatConnectionId: $chatConnectionId, query: $query) {
+            id
+            name
+          }
+        }
+      """, %{"chatConnectionId" => conn.id, "query" => "gen"}, %{current_user: user})
+
+      assert length(found) == 1
+      assert hd(found)["id"] == "C1"
+      assert hd(found)["name"] == "general"
+    end
+
+    test "it denies access when the user cannot read the chat connection" do
+      user = insert(:user)
+      other = insert(:user)
+      conn = insert(:chat_connection, read_bindings: [%{user_id: other.id}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query SearchConversations($chatConnectionId: ID!) {
+          searchConversations(chatConnectionId: $chatConnectionId) {
+            id
+            name
+          }
+        }
+      """, %{"chatConnectionId" => conn.id}, %{current_user: user})
+    end
+  end
 
   describe "chatProviderConnections" do
     test "it can list chat provider connections" do

@@ -26,14 +26,9 @@ const (
 	nonRootUID                    = int64(65532)
 	nonRootGID                    = nonRootUID
 
-	dindContainerName            = "dind"
-	defaultContainerDinDImage    = "docker"
-	defaultContainerDinDImageTag = "29.4.1-dind"
-	dockerCertsVolumeName        = "docker-certs"
-	dockerGraphVolumeName        = "docker-graph"
-	dockerCertsPath              = dind.CertsVolumePath
-	dockerDaemonPort             = 2376 // TLS port used by the entrypoint when DOCKER_TLS_CERTDIR is set
-	dindTLSCertDirEnvName        = "DOCKER_TLS_CERTDIR"
+	// podmanSocketPath is the DOCKER_HOST URI that points the Docker CLI at the rootful
+	// Podman socket started by the container entrypoint when PLRL_DIND_ENABLED=true.
+	podmanSocketPath = "unix:///run/podman/podman.sock"
 
 	browserContainerName              = "browser"
 	defaultContainerBrowser           = v1alpha1.BrowserChrome
@@ -56,9 +51,7 @@ const (
 )
 
 var dindClientEnvs = []corev1.EnvVar{
-	{Name: dind.DockerHostEnv, Value: dind.DockerHostValue},
-	{Name: dind.DockerTLSVerifyEnv, Value: "1"},
-	{Name: dind.DockerCertPathEnv, Value: dind.ClientCertsPath},
+	{Name: dind.DockerHostEnv, Value: podmanSocketPath},
 }
 
 func runtimeDindEnabled(runtime *v1alpha1.AgentRuntime) bool {
@@ -82,26 +75,12 @@ func ensureDindClientEnvs(envs []corev1.EnvVar) []corev1.EnvVar {
 	return envs
 }
 
-func ensureDindClientVolumeMount(mounts []corev1.VolumeMount) []corev1.VolumeMount {
-	for _, mount := range mounts {
-		if mount.Name == dockerCertsVolumeName && mount.MountPath == dockerCertsPath {
-			return mounts
-		}
-	}
-	return append(mounts, corev1.VolumeMount{
-		Name:      dockerCertsVolumeName,
-		MountPath: dockerCertsPath,
-		ReadOnly:  true,
-	})
-}
-
 func wireDindClientContainer(pod *corev1.Pod) {
 	for i := range pod.Spec.Containers {
 		if pod.Spec.Containers[i].Name != defaultContainer {
 			continue
 		}
 		pod.Spec.Containers[i].Env = ensureDindClientEnvs(pod.Spec.Containers[i].Env)
-		pod.Spec.Containers[i].VolumeMounts = ensureDindClientVolumeMount(pod.Spec.Containers[i].VolumeMounts)
 	}
 }
 
@@ -548,55 +527,28 @@ func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.
 }
 
 func enableDind(pod *corev1.Pod) {
-	pod.Spec.Volumes = append(pod.Spec.Volumes,
-		corev1.Volume{
-			Name: dockerGraphVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
-		corev1.Volume{
-			Name: dockerCertsVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
-	)
-
-	// Rootless DinD (docker:dind-rootless) runs dockerd in a rootlesskit mount namespace,
-	// which breaks bind mounts from pod volumes like /plural/shared (empty targets with no error).
-	// Use root docker:dind inside the already-privileged sidecar instead.
-	// Run as a regular pod container (not an init container) so dockerd stays up for the full harness lifetime.
-	pod.Spec.Containers = append(pod.Spec.Containers, corev1.Container{
-		Name:  dindContainerName,
-		Image: fmt.Sprintf("%s:%s", common.GetConfigurationManager().SwapBaseRegistry(defaultContainerDinDImage), defaultContainerDinDImageTag),
-		// Pod-level RunAsNonRoot/65532 would otherwise make dockerd-entrypoint.sh
-		// attempt rootless dockerd (missing rootlesskit in docker:dind).
-		SecurityContext: &corev1.SecurityContext{
-			Privileged:               lo.ToPtr(true),
-			RunAsUser:                lo.ToPtr(int64(0)),
-			RunAsGroup:               lo.ToPtr(int64(0)),
-			RunAsNonRoot:             lo.ToPtr(false),
-			AllowPrivilegeEscalation: lo.ToPtr(true),
-		},
-		Env: []corev1.EnvVar{
-			{Name: dindTLSCertDirEnvName, Value: dockerCertsPath},
-		},
-		Ports: []corev1.ContainerPort{
-			{
-				Name:          "docker",
-				ContainerPort: dockerDaemonPort,
-			},
-		},
-		VolumeMounts: []corev1.VolumeMount{
-			{Name: dockerGraphVolumeName, MountPath: "/var/lib/docker"},
-			{Name: dockerCertsVolumeName, MountPath: dockerCertsPath},
-			{Name: defaultTmpVolumeName, MountPath: defaultTmpVolumePath},
-			{Name: sharedContextVolumeName, MountPath: sharedContextVolumePath},
-		},
-	})
-
+	// Inject DOCKER_HOST so the Docker CLI finds the Podman socket.
 	wireDindClientContainer(pod)
+
+	// Running `podman system service` + nested containers inside the main container requires
+	// privileged mode.
+	for i := range pod.Spec.Containers {
+		if pod.Spec.Containers[i].Name != defaultContainer {
+			continue
+		}
+		sc := pod.Spec.Containers[i].SecurityContext
+		if sc == nil {
+			sc = ensureDefaultContainerSecurityContext(nil)
+		}
+		sc.Privileged = lo.ToPtr(true)
+		sc.RunAsNonRoot = lo.ToPtr(false)
+		sc.AllowPrivilegeEscalation = lo.ToPtr(true)
+		// Run as root so Podman operates in rootful mode, avoiding newuidmap
+		// user-namespace issues with rootless Podman inside a privileged pod.
+		sc.RunAsUser = lo.ToPtr(int64(0))
+		sc.RunAsGroup = lo.ToPtr(int64(0))
+		pod.Spec.Containers[i].SecurityContext = sc
+	}
 }
 
 func enableBrowser(browserConfig *v1alpha1.BrowserConfig, pod *corev1.Pod) {

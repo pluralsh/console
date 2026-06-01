@@ -95,7 +95,7 @@ func shellEnvPolicy(dindEnabled bool) *ShellEnvPolicy {
 	}
 
 	policy.Set = map[string]string{}
-	for _, key := range []string{dind.DockerHostEnv, dind.DockerTLSVerifyEnv, dind.DockerCertPathEnv} {
+	for _, key := range []string{dind.DockerHostEnv} {
 		if val := os.Getenv(key); val != "" {
 			policy.Set[key] = val
 		}
