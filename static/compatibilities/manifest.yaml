@@ -23,6 +23,7 @@ names:
 - kyverno
 - linkerd
 - longhorn
+- metrics-server
 - opentelemetry-operator
 - rook
 - strimzi-kafka
