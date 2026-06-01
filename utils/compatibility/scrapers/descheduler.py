@@ -180,7 +180,7 @@ def extract_table_data(compatibility_by_minor, chart_releases):
                 [
                     ("version", app_version),
                     ("kube", expand_three_latest(kube_version)),
-                    ("requirements", [REQUIREMENT]),
+                    ("requirements", []),
                     ("incompatibilities", []),
                     ("chart_version", chart["chart_version"]),
                     ("images", [get_default_image(chart["url"], app_version)]),

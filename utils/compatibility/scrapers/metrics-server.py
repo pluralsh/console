@@ -95,7 +95,7 @@ def extract_table_data(compatibility_matrix, chart_versions):
                     ("kube", kube_versions),
                     ("chart_version", chart_version),
                     ("images", []),
-                    ("requirements", _requirements_for(kube_versions)),
+                    ("requirements", []),
                     ("incompatibilities", []),
                 ]
             )
