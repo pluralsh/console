@@ -13296,6 +13296,8 @@ type PullRequest {
 
   creator: String
 
+  ref: String
+
   labels: [String]
 
   "the patch for this pr, if it is a patch.  This is in place of generating a full pr"

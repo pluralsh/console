@@ -3540,6 +3540,7 @@ type PullRequestFragment struct {
 	URL     string    "json:\"url\" graphql:\"url\""
 	Title   *string   "json:\"title,omitempty\" graphql:\"title\""
 	Creator *string   "json:\"creator,omitempty\" graphql:\"creator\""
+	Ref     *string   "json:\"ref,omitempty\" graphql:\"ref\""
 }
 
 func (t *PullRequestFragment) GetID() string {
@@ -3571,6 +3572,12 @@ func (t *PullRequestFragment) GetCreator() *string {
 		t = &PullRequestFragment{}
 	}
 	return t.Creator
+}
+func (t *PullRequestFragment) GetRef() *string {
+	if t == nil {
+		t = &PullRequestFragment{}
+	}
+	return t.Ref
 }
 
 type SyncConfigFragment struct {
@@ -39371,6 +39378,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 fragment AgentRunUploadFragment on AgentRunUpload {
 	id
@@ -39531,6 +39539,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 fragment AgentRunUploadFragment on AgentRunUpload {
 	id
@@ -39700,6 +39709,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 fragment AgentRunUploadFragment on AgentRunUpload {
 	id
@@ -39916,6 +39926,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 fragment AgentRunUploadFragment on AgentRunUpload {
 	id
@@ -40070,6 +40081,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 fragment AgentRunUploadFragment on AgentRunUpload {
 	id
@@ -40190,6 +40202,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 `
 
@@ -50431,6 +50444,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 `
 

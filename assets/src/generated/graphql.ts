@@ -460,6 +460,8 @@ export type AgentRun = {
   /** the todos of the agent run */
   todos?: Maybe<Array<Maybe<AgentTodo>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the upload bundle this agent run has generated */
+  upload?: Maybe<AgentRunUpload>;
   /** the user who initiated this agent run */
   user?: Maybe<User>;
 };
@@ -8411,6 +8413,7 @@ export type PullRequest = {
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the patch for this pr, if it is a patch.  This is in place of generating a full pr */
   patch?: Maybe<Scalars['String']['output']>;
+  ref?: Maybe<Scalars['String']['output']>;
   /** the service this pr is meant to modify */
   service?: Maybe<ServiceDeployment>;
   status?: Maybe<PrStatus>;

@@ -6977,6 +6977,7 @@ type PullRequest struct {
 	URL     string    `json:"url"`
 	Title   *string   `json:"title,omitempty"`
 	Creator *string   `json:"creator,omitempty"`
+	Ref     *string   `json:"ref,omitempty"`
 	Labels  []*string `json:"labels,omitempty"`
 	// the patch for this pr, if it is a patch.  This is in place of generating a full pr
 	Patch *string `json:"patch,omitempty"`
