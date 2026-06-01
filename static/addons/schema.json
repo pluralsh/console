@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://console.plural.sh/schemas/cloud-addons.schema.json",
+  "title": "Cloud Add-on Compatibility Tables",
+  "description": "Schema for static/addons/*.yaml cloud add-on compatibility files.",
+  "definitions": {
+    "stringOrNumber": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "integer" }
+      ]
+    },
+    "cloudAddOnVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": { "$ref": "#/definitions/stringOrNumber" },
+        "compatibilities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/stringOrNumber" }
+        }
+      },
+      "required": ["version", "compatibilities"]
+    },
+    "cloudAddOn": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "versions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/cloudAddOnVersion" }
+        },
+        "publisher": { "type": "string" },
+        "distro": { "type": "string" }
+      },
+      "required": ["name", "versions"]
+    },
+    "cloudAddOnTable": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/cloudAddOn" }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "platforms": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["platforms"]
+    }
+  },
+  "anyOf": [
+    { "$ref": "#/definitions/cloudAddOnTable" },
+    { "$ref": "#/definitions/manifest" }
+  ]
+}

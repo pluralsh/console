@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://console.plural.sh/schemas/compatibilities.schema.json",
+  "title": "Add-on Compatibility Tables",
+  "description": "Schema for static/compatibilities.yaml and static/compatibilities/*.yaml.",
+  "definitions": {
+    "stringOrNumber": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "integer" }
+      ]
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "$ref": "#/definitions/stringOrNumber" }
+      },
+      "required": ["name", "version"]
+    },
+    "versionSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "helm_changes": { "type": "string" },
+        "features": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "breaking_changes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "chart_updates": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "version": { "$ref": "#/definitions/stringOrNumber" },
+        "kube": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/stringOrNumber" }
+        },
+        "chart_version": { "$ref": "#/definitions/stringOrNumber" },
+        "requirements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/reference" }
+        },
+        "incompatibilities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/reference" }
+        },
+        "images": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "summary": {
+          "anyOf": [
+            { "$ref": "#/definitions/versionSummary" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["version"]
+    },
+    "addOn": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string" },
+        "versions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/version" }
+        },
+        "icon": { "type": "string" },
+        "git_url": { "type": "string" },
+        "release_url": { "type": "string" },
+        "readme_url": { "type": "string" }
+      },
+      "required": ["versions"]
+    },
+    "namedAddOn": {
+      "allOf": [
+        { "$ref": "#/definitions/addOn" },
+        { "required": ["name", "versions"] }
+      ]
+    },
+    "compatibilityTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "addons": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/namedAddOn" }
+        }
+      },
+      "required": ["addons"]
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["names"]
+    }
+  },
+  "anyOf": [
+    { "$ref": "#/definitions/compatibilityTable" },
+    { "$ref": "#/definitions/addOn" },
+    { "$ref": "#/definitions/manifest" }
+  ]
+}
