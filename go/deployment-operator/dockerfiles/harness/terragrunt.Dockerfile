@@ -21,7 +21,12 @@ RUN set -eux; \
       arm64) terragrunt_arch="arm64" ;; \
       *) echo "unsupported architecture: $TARGETARCH" >&2; exit 1 ;; \
     esac; \
-    wget -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_${terragrunt_arch}"; \
+    release_url="https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}"; \
+    binary_name="terragrunt_linux_${terragrunt_arch}"; \
+    wget -O SHA256SUMS "${release_url}/SHA256SUMS"; \
+    wget -O "${binary_name}" "${release_url}/${binary_name}"; \
+    grep "  ${binary_name}$" SHA256SUMS | sha256sum -c -; \
+    mv "${binary_name}" /bin/terragrunt; \
     chmod +x /bin/terragrunt
 
 FROM $HARNESS_BASE_IMAGE AS final
