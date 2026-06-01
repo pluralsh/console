@@ -695,12 +695,12 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(ctx context.Context, 
 
 		// If the service is already being deleted from Console API, requeue.
 		if r.ConsoleClient.IsServiceDeleting(serviceID) {
-			return new(common.Wait())
+			return lo.ToPtr(common.Wait())
 		}
 
 		exists, err := r.ConsoleClient.IsServiceExisting(serviceID)
 		if err != nil {
-			return new(common.WaitForResources())
+			return lo.ToPtr(common.WaitForResources())
 		}
 
 		// Remove service from Console API if it exists.
@@ -709,12 +709,12 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(ctx context.Context, 
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return new(common.WaitForResources())
+				return lo.ToPtr(common.WaitForResources())
 			}
 
 			// If the deletion process started requeue so that we can make sure the service
 			// has been deleted from Console API before removing the finalizer.
-			return new(common.WaitForResources())
+			return lo.ToPtr(common.WaitForResources())
 		}
 
 		// If our finalizer is present, remove it.
