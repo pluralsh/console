@@ -16,6 +16,8 @@ defmodule Console.Chat.Impl do
   @callback search_channels(ChatConnection.t(), binary) :: {:ok, [Channel.t()]} | Console.error()
   @callback child_spec(ChatConnection.t) :: DynamicSupervisor.child_spec()
 
+  def child_spec(%ChatConnection{type: :slack} = conn), do: Slack.child_spec(conn)
+
   @spec search_channels(ChatConnection.t(), binary | nil) :: {:ok, [Channel.t()]} | Console.error()
   def search_channels(%ChatConnection{} = conn, query) do
     with {:ok, impl} <- provider(conn),

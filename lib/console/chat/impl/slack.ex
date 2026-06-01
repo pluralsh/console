@@ -21,17 +21,15 @@ defmodule Console.Chat.Impl.Slack do
 
   def child_spec(%ChatConnection{} = conn), do: {Slack.Supervisor, :start_link, [slack_args(conn)]}
 
+  @list_opts [types: "public_channel,private_channel", exclude_archived: true, limit: @limit]
+
   def search_channels(%ChatConnection{type: :slack, configuration: %{slack: %{bot_token: token}}}, query)
       when is_binary(token) do
-    case Slack.API.get("conversations.list", token,
-           types: "public_channel,private_channel",
-           exclude_archived: true,
-           limit: @limit
-         ) do
+    case Slack.API.get("conversations.list", token, @list_opts) do
       {:ok, %{"ok" => true, "channels" => channels}} ->
         channels
         |> filter(query)
-        |> Enum.map(&%Channel{id: &1["id"], name: &1["name"]})
+        |> Enum.map(& %Channel{id: &1["id"], name: &1["name"]})
         |> then(& {:ok, &1})
 
       result ->
@@ -51,8 +49,7 @@ defmodule Console.Chat.Impl.Slack do
       bot: __MODULE__,
       bot_assigns: %{conn: conn},
       app_token: app_token,
-      channels: [types: ~w(public_channel private_channel)],
-      supervisor_args: [name: {:via, Registry, {Console.AI.Agents, {:slack_bot, conn.id}}}]
+      channels: [types: ~w(public_channel private_channel)]
     ]
   end
 
