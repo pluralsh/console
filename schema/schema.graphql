@@ -6728,6 +6728,9 @@ input StackConfigurationAttributes {
   "the terraform configuration for this stack"
   terraform: TerraformConfigurationAttributes
 
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfigurationAttributes
+
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
 
@@ -6738,6 +6741,9 @@ input StackConfigurationAttributes {
 input StackOverridesAttributes {
   "the terraform configuration for this stack"
   terraform: TerraformConfigurationAttributes
+
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfigurationAttributes
 }
 
 input StackHookAttributes {
@@ -6766,6 +6772,17 @@ input TerraformConfigurationAttributes {
 
   "whether to use the OpenTofu registry for provider and module sources"
   tofuRegistry: Boolean
+}
+
+input TerragruntConfigurationAttributes {
+  "equivalent to the -parallelism flag passed through to the underlying terraform\/tofu invocation"
+  parallelism: Int
+
+  "equivalent to the -refresh flag passed through to the underlying terraform\/tofu invocation"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -7125,6 +7142,9 @@ type StateUrls {
 type StackOverrides {
   "the terraform configuration for this stack"
   terraform: TerraformConfiguration
+
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfiguration
 }
 
 "Urls for configuring terraform HTTP remote state"
@@ -7163,6 +7183,9 @@ type StackConfiguration {
 
   "the terraform configuration for this stack"
   terraform: TerraformConfiguration
+
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfiguration
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfiguration
@@ -7224,6 +7247,17 @@ type TerraformConfiguration {
 
   "whether to use the OpenTofu registry for provider and module sources"
   tofuRegistry: Boolean
+}
+
+type TerragruntConfiguration {
+  "equivalent to the -parallelism flag passed through to the underlying terraform\/tofu invocation"
+  parallelism: Int
+
+  "equivalent to the -refresh flag passed through to the underlying terraform\/tofu invocation"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 type AnsibleConfiguration {

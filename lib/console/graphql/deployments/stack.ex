@@ -48,12 +48,14 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :tag,         :string, description: "the docker image tag you wish to use if you're customizing the version"
     field :hooks,       list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
     field :terraform,   :terraform_configuration_attributes, description: "the terraform configuration for this stack"
+    field :terragrunt,  :terragrunt_configuration_attributes, description: "the terragrunt configuration for this stack"
     field :ansible,     :ansible_configuration_attributes, description: "the ansible configuration for this stack"
     field :ai_approval, :ai_approval_attributes, description: "the ai approval configuration for this stack"
   end
 
   input_object :stack_overrides_attributes do
-    field :terraform, :terraform_configuration_attributes, description: "the terraform configuration for this stack"
+    field :terraform,  :terraform_configuration_attributes, description: "the terraform configuration for this stack"
+    field :terragrunt, :terragrunt_configuration_attributes, description: "the terragrunt configuration for this stack"
   end
 
   input_object :stack_hook_attributes do
@@ -68,6 +70,12 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
     field :tofu, :boolean, description: "whether to use OpenTofu instead of Terraform for this stack"
     field :tofu_registry, :boolean, description: "whether to use the OpenTofu registry for provider and module sources"
+  end
+
+  input_object :terragrunt_configuration_attributes do
+    field :parallelism,   :integer, description: "equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation"
+    field :refresh,       :boolean, description: "equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation"
+    field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   end
 
   input_object :ansible_configuration_attributes do
@@ -308,7 +316,8 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   @desc "Configuration overrides for a stack cron run"
   object :stack_overrides do
-    field :terraform, :terraform_configuration, description: "the terraform configuration for this stack"
+    field :terraform,  :terraform_configuration, description: "the terraform configuration for this stack"
+    field :terragrunt, :terragrunt_configuration, description: "the terragrunt configuration for this stack"
   end
 
   @desc "Urls for configuring terraform HTTP remote state"
@@ -330,6 +339,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :tag,         :string, description: "the docker image tag you wish to use if you're customizing the version"
     field :hooks,       list_of(:stack_hook), description: "the hooks to customize execution for this stack"
     field :terraform,   :terraform_configuration, description: "the terraform configuration for this stack"
+    field :terragrunt,  :terragrunt_configuration, description: "the terragrunt configuration for this stack"
     field :ansible,     :ansible_configuration, description: "the ansible configuration for this stack"
     field :ai_approval, :ai_approval_configuration, description: "the ai approval configuration for this stack"
   end
@@ -361,6 +371,12 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
     field :tofu,          :boolean, description: "whether to use OpenTofu instead of Terraform for this stack"
     field :tofu_registry, :boolean, description: "whether to use the OpenTofu registry for provider and module sources"
+  end
+
+  object :terragrunt_configuration do
+    field :parallelism,   :integer, description: "equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation"
+    field :refresh,       :boolean, description: "equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation"
+    field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   end
 
   object :ansible_configuration do

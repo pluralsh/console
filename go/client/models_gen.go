@@ -8536,6 +8536,8 @@ type StackConfiguration struct {
 	Hooks []*StackHook `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8553,6 +8555,8 @@ type StackConfigurationAttributes struct {
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8696,11 +8700,15 @@ type StackOutputAttributes struct {
 type StackOverrides struct {
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
 }
 
 type StackOverridesAttributes struct {
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -9116,6 +9124,24 @@ type TerraformStateUrls struct {
 	Lock *string `json:"lock,omitempty"`
 	// POST url to unlock state
 	Unlock *string `json:"unlock,omitempty"`
+}
+
+type TerragruntConfiguration struct {
+	// equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+}
+
+type TerragruntConfigurationAttributes struct {
+	// equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 type ToolConfigAttributes struct {

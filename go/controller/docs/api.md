@@ -2135,7 +2135,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM TERRAGRUNT ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Optional: \{\} <br /> |
@@ -4985,6 +4985,7 @@ _Appears in:_
 | `tag` _string_ | Tag of the IaC tool Docker image to use. |  | Optional: \{\} <br /> |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
+| `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt configuration for this stack. |  | Optional: \{\} <br /> |
 | `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
 | `aiApproval` _[AiApprovalConfiguration](#aiapprovalconfiguration)_ | AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git. |  | Optional: \{\} <br /> |
 
@@ -5118,6 +5119,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: \{\} <br /> |
+| `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt is the terragrunt configuration for this stack |  | Optional: \{\} <br /> |
 
 
 #### StackSettings
@@ -5250,6 +5252,25 @@ _Appears in:_
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 | `tofu` _boolean_ | Tofu is whether to use OpenTofu instead of Terraform for this stack. |  | Optional: \{\} <br /> |
 | `tofuRegistry` _boolean_ | TofuRegistry is whether to use the OpenTofu registry for provider and module sources. |  | Optional: \{\} <br /> |
+
+
+#### TerragruntConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+- [StackOverrides](#stackoverrides)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
+| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
+| `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 
 
 #### Tools
