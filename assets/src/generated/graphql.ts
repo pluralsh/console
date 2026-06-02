@@ -1724,9 +1724,13 @@ export type CatalogEdge = {
 
 export type CatalogSearchItem = {
   __typename?: 'CatalogSearchItem';
+  /** short category name used for browsing catalogs */
+  category?: Maybe<Scalars['String']['output']>;
   /** a darkmode icon url to use for this catalog */
   darkIcon?: Maybe<Scalars['String']['output']>;
-  /** the documentation for this pr automation */
+  /** longform description for the purpose of this catalog */
+  description?: Maybe<Scalars['String']['output']>;
+  /** longform description for the purpose of this catalog */
   documentation?: Maybe<Scalars['String']['output']>;
   /** an icon url to use for this catalog */
   icon?: Maybe<Scalars['String']['output']>;
@@ -17703,7 +17707,7 @@ export type CatalogSearchQueryVariables = Exact<{
 }>;
 
 
-export type CatalogSearchQuery = { __typename?: 'RootQueryType', catalogSearch?: Array<{ __typename?: 'CatalogSearchResult', catalog?: { __typename?: 'CatalogSearchItem', id: string, name: string, documentation?: string | null, icon?: string | null, darkIcon?: string | null } | null, prAutomation?: { __typename?: 'PrAutomationSearchItem', id: string, name: string, description?: string | null, icon?: string | null, darkIcon?: string | null } | null } | null> | null };
+export type CatalogSearchQuery = { __typename?: 'RootQueryType', catalogSearch?: Array<{ __typename?: 'CatalogSearchResult', catalog?: { __typename?: 'CatalogSearchItem', id: string, name: string, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null, prAutomation?: { __typename?: 'PrAutomationSearchItem', id: string, name: string, description?: string | null, icon?: string | null, darkIcon?: string | null } | null } | null> | null };
 
 export type UpsertCatalogMutationVariables = Exact<{
   attributes?: InputMaybe<CatalogAttributes>;
@@ -30370,7 +30374,8 @@ export const CatalogSearchDocument = gql`
     catalog {
       id
       name
-      documentation
+      description
+      category
       icon
       darkIcon
     }

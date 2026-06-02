@@ -41,7 +41,8 @@ query CatalogSearch($q: String!) {
     catalog {
       id
       name
-      documentation
+      description
+      category
       icon
       darkIcon
     }

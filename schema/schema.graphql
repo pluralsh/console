@@ -13583,8 +13583,14 @@ type CatalogSearchItem {
 
   name: String!
 
-  "the documentation for this pr automation"
+  "longform description for the purpose of this catalog"
+  description: String
+
+  "longform description for the purpose of this catalog"
   documentation: String
+
+  "short category name used for browsing catalogs"
+  category: String
 
   "an icon url to use for this catalog"
   icon: String

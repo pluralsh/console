@@ -30,6 +30,7 @@ export type SearchDropdownItem = {
   id: string
   name: string
   description?: Nullable<string>
+  category?: Nullable<string>
   icon?: Nullable<string>
   darkIcon?: Nullable<string>
 }
@@ -112,7 +113,8 @@ export function SelfServiceSearchBar({
       return {
         id: item.id,
         name: item.name,
-        description: item.documentation,
+        description: item.description,
+        category: item.category,
         icon: item.icon,
         darkIcon: item.darkIcon,
       }

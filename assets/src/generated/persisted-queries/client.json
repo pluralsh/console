@@ -472,10 +472,10 @@
          "name": "Catalog",
          "body": "query Catalog($id: ID, $name: String) {\n  catalog(id: $id, name: $name) {\n    ...Catalog\n    __typename\n  }\n}\n\nfragment Catalog on Catalog {\n  id\n  name\n  author\n  description\n  category\n  icon\n  darkIcon\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:d539bbfb326c8c99e0680361399bac6d59203ca3f3464e55f611af9cbb585750": {
+      "sha256:90408e1230c24196dadc8c47c95cf83f63fd7c39d61ef5ab70e1073d9b22e228": {
          "type": "query",
          "name": "CatalogSearch",
-         "body": "query CatalogSearch($q: String!) {\n  catalogSearch(q: $q) {\n    catalog {\n      id\n      name\n      documentation\n      icon\n      darkIcon\n      __typename\n    }\n    prAutomation {\n      id\n      name\n      description\n      icon\n      darkIcon\n      __typename\n    }\n    __typename\n  }\n}"
+         "body": "query CatalogSearch($q: String!) {\n  catalogSearch(q: $q) {\n    catalog {\n      id\n      name\n      description\n      category\n      icon\n      darkIcon\n      __typename\n    }\n    prAutomation {\n      id\n      name\n      description\n      icon\n      darkIcon\n      __typename\n    }\n    __typename\n  }\n}"
       },
       "sha256:179b6c0063b1265e1b74e32d5bdbdb9f8d377eaa2848ab83447b1226f0babbca": {
          "type": "mutation",
