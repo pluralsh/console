@@ -12,6 +12,11 @@ OUTPUT_PATH = "../../static/compatibilities/bigbang.yaml"
 GITLAB_PROJECT_ID = "2872"
 GITLAB_API_URL = "https://repo1.dso.mil/api/v4"
 
+IMAGE_REF_PATTERN = re.compile(
+    r"(?:registry1\.dso\.mil|registry-1\.docker\.io|docker\.io|ghcr\.io|quay\.io|gcr\.io|registry\.k8s\.io)/[A-Za-z0-9._/-]+:[A-Za-z0-9._-]+",
+    re.IGNORECASE,
+)
+MARKDOWN_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^\)]+)\)")
 
 
 def _fetch_release_page(page):
@@ -79,6 +84,67 @@ def _extract_kube_versions(description):
     return []
 
 
+def _extract_images(description):
+    """Extract Docker image references from release descriptions."""
+    if not description:
+        return []
+
+    found = []
+    seen = set()
+    for raw in IMAGE_REF_PATTERN.findall(description):
+        image = raw.strip("`*()[]<>,;.").lstrip("/")
+        if image and image not in seen:
+            seen.add(image)
+            found.append(image)
+    return found
+
+
+def _clean_markdown_cell(value):
+    value = re.sub(r"<[^>]+>", "", value)
+    value = value.replace("`", "")
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _extract_package_name(value):
+    match = MARKDOWN_LINK_PATTERN.search(value)
+    if match:
+        return match.group(1).strip()
+    return _clean_markdown_cell(value)
+
+
+def _extract_charts(description):
+    """Extract package chart references from the release Packages markdown table."""
+    if not description:
+        return []
+
+    charts = []
+    seen = set()
+    for line in description.splitlines():
+        striped = line.strip()
+        if not striped.startswith("|"):
+            continue
+        if "Package Version" in striped or "-------" in striped:
+            continue
+
+        cols = [c.strip() for c in striped.strip("|").split("|")]
+        if len(cols) < 4:
+            continue
+
+        name = _extract_package_name(cols[0])
+        bb_version = _clean_markdown_cell(cols[3]).split(" ")[0]
+
+        if not name or not bb_version:
+            continue
+
+        key = (name, bb_version)
+        if key in seen:
+            continue
+        seen.add(key)
+        charts.append({"name": name, "version": bb_version})
+
+    return charts
+
+
 def _collect_releases():
     """Collect all Big Bang releases with validated semantic versions."""
     releases = []
@@ -91,12 +157,15 @@ def _collect_releases():
             tag = release.get("tag_name", "")
             version = _release_version(tag)
             if version:
-                kube_versions = _extract_kube_versions(release.get("description", ""))
+                description = release.get("description", "")
+                kube_versions = _extract_kube_versions(description)
                 if kube_versions:
                     releases.append(
                         {
                             "version": version,
                             "kube": kube_versions,
+                            "images": _extract_images(description),
+                            "requirements": _extract_charts(description),
                             "tag": tag,
                         }
                     )
@@ -116,12 +185,11 @@ def scrape():
                 ("version", release["version"]),
                 ("kube", release["kube"]),
                 ("chart_version", release["version"]),
-                ("images", []),
-                ("requirements", []),
+                ("images", release.get("images", [])),
+                ("requirements", release.get("requirements", [])),
                 ("incompatibilities", []),
             ]
         )
         versions.append(version_info)
 
     update_compatibility_info(OUTPUT_PATH, versions)
-
