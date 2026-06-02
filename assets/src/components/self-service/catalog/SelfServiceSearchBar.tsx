@@ -17,7 +17,7 @@ import {
   usePrAutomationLazyQuery,
 } from 'generated/graphql'
 import { chain } from 'lodash'
-import { ReactNode, useCallback, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -61,6 +61,7 @@ export function SelfServiceSearchBar({
     useState<Nullable<PrAutomationFragment>>(null)
   const [openingPrAutomationId, setOpeningPrAutomationId] =
     useState<Nullable<string>>(null)
+  const openingPrAutomationIdRef = useRef<Nullable<string>>(null)
   const [fetchPrAutomation] = usePrAutomationLazyQuery()
 
   const {
@@ -137,15 +138,20 @@ export function SelfServiceSearchBar({
 
   const openPrAutomation = useCallback(
     async (id: string) => {
+      openingPrAutomationIdRef.current = id
       setOpeningPrAutomationId(id)
 
       try {
         const result = await fetchPrAutomation({ variables: { id } })
-        const prAutomation = result.data?.prAutomation
+        if (openingPrAutomationIdRef.current !== id) return
 
+        const prAutomation = result.data?.prAutomation
         if (prAutomation) setCreatePrAutomation(prAutomation)
       } finally {
-        setOpeningPrAutomationId(null)
+        if (openingPrAutomationIdRef.current === id) {
+          openingPrAutomationIdRef.current = null
+          setOpeningPrAutomationId(null)
+        }
       }
     },
     [fetchPrAutomation]
