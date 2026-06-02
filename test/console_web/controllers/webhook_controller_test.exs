@@ -316,6 +316,36 @@ defmodule ConsoleWeb.WebhookControllerTest do
       [] = Console.Repo.all(Console.Schema.Alert)
     end
 
+    test "it will ignore if no associated plural resource is found (alertops)", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :alertops)
+
+      payload = String.trim(Console.conf(:alertops_webhook_payload))
+                |> Jason.decode!()
+                |> Map.drop(["plrl_project", "plrl_cluster", "plrl_service"])
+                |> Jason.encode!()
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/alertops/#{hook.external_id}", payload)
+      |> response(200)
+
+      [] = Console.Repo.all(Console.Schema.Alert)
+    end
+
+    test "it rejects alertops payloads with the wrong basic auth secret", %{conn: conn} do
+      hook = insert(:observability_webhook, type: :alertops)
+      payload = String.trim(Console.conf(:alertops_webhook_payload))
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", "wrong-secret"))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/alertops/#{hook.external_id}", payload)
+      |> response(403)
+
+      [] = Console.Repo.all(Console.Schema.Alert)
+    end
+
     test "it can handle payloads with text in body (grafana)", %{conn: conn} do
       hook = insert(:observability_webhook, type: :grafana)
       svc = insert(:service)
@@ -416,6 +446,58 @@ defmodule ConsoleWeb.WebhookControllerTest do
     assert alert.project_id == proj.id
 
     assert_receive {:event, %Console.PubSub.AlertCreated{}}
+  end
+
+  test "it can handle payloads with text in body (alertops)", %{conn: conn} do
+    hook = insert(:observability_webhook, type: :alertops)
+    proj = insert(:project, name: "test-project")
+    cluster = insert(:cluster, handle: "test-cluster")
+    svc = insert(:service, name: "test-service", cluster: cluster)
+
+    payload = String.trim(Console.conf(:alertops_webhook_payload))
+
+    conn
+    |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+    |> put_req_header("content-type", "application/json")
+    |> post("/ext/v1/webhooks/observability/alertops/#{hook.external_id}", payload)
+    |> response(200)
+
+    [alert] = Console.Repo.all(Console.Schema.Alert)
+              |> Enum.map(&Console.Repo.preload(&1, :tags))
+
+    assert alert.type == :alertops
+    assert alert.state == :firing
+    assert alert.severity == :critical
+    assert alert.fingerprint == "1527895AF1235DE"
+    assert alert.title == "Server CPU Alert"
+    assert alert.url == "http://myaccount.alertops.com/incidents"
+    assert alert.service_id == svc.id
+    assert alert.cluster_id == cluster.id
+    assert alert.project_id == proj.id
+
+    assert_receive {:event, %Console.PubSub.AlertCreated{}}
+  end
+
+  test "it resolves alertops payloads with an OK IncidentStatus", %{conn: conn} do
+    hook = insert(:observability_webhook, type: :alertops)
+    _proj = insert(:project, name: "test-project")
+    cluster = insert(:cluster, handle: "test-cluster")
+    _svc = insert(:service, name: "test-service", cluster: cluster)
+
+    payload = String.trim(Console.conf(:alertops_webhook_payload))
+              |> Jason.decode!()
+              |> Map.put("IncidentStatus", "OK")
+              |> Jason.encode!()
+
+    conn
+    |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+    |> put_req_header("content-type", "application/json")
+    |> post("/ext/v1/webhooks/observability/alertops/#{hook.external_id}", payload)
+    |> response(200)
+
+    [alert] = Console.Repo.all(Console.Schema.Alert)
+
+    assert alert.state == :resolved
   end
 
   test "it can handle sentry webhooks", %{conn: conn} do

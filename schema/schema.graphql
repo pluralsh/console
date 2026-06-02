@@ -6142,6 +6142,7 @@ enum ObservabilityWebhookType {
   NEWRELIC
   SENTRY
   PLURAL
+  ALERTOPS
 }
 
 enum AlertSeverity {

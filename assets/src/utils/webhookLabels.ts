@@ -7,6 +7,7 @@ const OBSERVABILITY_WEBHOOK_TYPE_LABELS: Record<
   ObservabilityWebhookType,
   string
 > = {
+  [ObservabilityWebhookType.Alertops]: 'AlertOps',
   [ObservabilityWebhookType.Datadog]: 'Datadog',
   [ObservabilityWebhookType.Grafana]: 'Grafana',
   [ObservabilityWebhookType.Newrelic]: 'New Relic',

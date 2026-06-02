@@ -87,6 +87,7 @@ const OBSERVABILITY_SETUP_GUIDE_PATHS: Record<
   ObservabilityWebhookType,
   string
 > = {
+  [ObservabilityWebhookType.Alertops]: '/setup-guides/webhooks/alertops.md',
   [ObservabilityWebhookType.Datadog]: '/setup-guides/webhooks/datadog.md',
   [ObservabilityWebhookType.Grafana]: '/setup-guides/webhooks/grafana.md',
   [ObservabilityWebhookType.Newrelic]: '/setup-guides/webhooks/newrelic.md',

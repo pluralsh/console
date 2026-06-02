@@ -184,6 +184,54 @@ defmodule Console.Deployments.ObservabilityTest do
       assert alert_data[:title] == "High CPU"
       assert alert_data[:state] == :firing
     end
+
+    test "alertops payload parses standard alert fields and resolves plural associations" do
+      obs_webhook = insert(:observability_webhook, type: :alertops)
+      project = insert(:project, name: "test-project")
+      cluster = insert(:cluster, handle: "test-cluster")
+      service = insert(:service, name: "test-service", cluster: cluster)
+
+      alertops_payload = %{
+        "IncidentId" => "AO-123",
+        "IncidentSubject" => "Server CPU Alert",
+        "IncidentStatus" => "PROBLEM",
+        "IncidentSeverity" => "CRITICAL",
+        "IncidentURL" => "http://acme.alertops.com/incidents/AO-123",
+        "IncidentShortText" => "CPU > 90%",
+        "IncidentLongText" => "CPU has been above 90% for 5 minutes",
+        "plrl_project" => project.name,
+        "plrl_cluster" => cluster.handle,
+        "plrl_service" => service.name
+      }
+
+      {:ok, [alert_data]} = Webhook.payload(obs_webhook, alertops_payload)
+
+      assert alert_data[:type] == :alertops
+      assert alert_data[:fingerprint] == "AO-123"
+      assert alert_data[:title] == "Server CPU Alert"
+      assert alert_data[:state] == :firing
+      assert alert_data[:severity] == :critical
+      assert alert_data[:url] == "http://acme.alertops.com/incidents/AO-123"
+      assert alert_data[:message] =~ "CPU has been above 90% for 5 minutes"
+      assert alert_data[:project_id] == project.id
+      assert alert_data[:cluster_id] == cluster.id
+      assert alert_data[:service_id] == service.id
+    end
+
+    test "alertops payload with OK IncidentStatus resolves the alert" do
+      obs_webhook = insert(:observability_webhook, type: :alertops)
+
+      {:ok, [alert_data]} =
+        Webhook.payload(obs_webhook, %{
+          "IncidentId" => "AO-9",
+          "IncidentSubject" => "Recovered",
+          "IncidentStatus" => "OK",
+          "IncidentSeverity" => "CRITICAL"
+        })
+
+      assert alert_data[:state] == :resolved
+      assert alert_data[:severity] == :critical
+    end
   end
 
   describe "#create_monitor/3" do
