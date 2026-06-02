@@ -9412,6 +9412,7 @@
     - '1.33'
     - '1.32'
     - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.6
     compatibilities:
     - '1.35'
