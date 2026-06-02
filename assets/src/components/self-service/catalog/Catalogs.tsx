@@ -135,7 +135,6 @@ export function Catalogs() {
         gap="medium"
       >
         <SelfServiceSearchBar
-          catalogs={catalogs}
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
           aside={

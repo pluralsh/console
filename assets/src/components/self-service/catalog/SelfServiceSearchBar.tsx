@@ -12,19 +12,17 @@ import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
-  CatalogFragment,
   PrAutomationFragment,
   useCatalogSearchQuery,
   usePrAutomationLazyQuery,
 } from 'generated/graphql'
-import { chain, keyBy } from 'lodash'
+import { chain } from 'lodash'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
 import { CatalogsSearchDropdownGroup } from './CatalogsSearchDropdownGroup'
 
-const emptyCatalogs: CatalogFragment[] = []
 const selfServiceSearchPlaceholder =
   'Ask anything across service catalog and PR automations. Try "I want to create clusters."'
 
@@ -40,23 +38,19 @@ function hasSearchValue<T>(value: Nullable<T> | undefined): value is T {
   return !!value
 }
 
-type SelfServiceSearchBarProps = {
-  catalogs?: CatalogFragment[]
-  aside?: ReactNode
-  searchQuery: string
-  onSearchQueryChange: (query: string) => void
-  showCatalogGroup?: boolean
-  showPrGroup?: boolean
-}
-
 export function SelfServiceSearchBar({
-  catalogs = emptyCatalogs,
   aside,
   searchQuery,
   onSearchQueryChange,
   showCatalogGroup = true,
   showPrGroup = true,
-}: SelfServiceSearchBarProps) {
+}: {
+  aside?: ReactNode
+  searchQuery: string
+  onSearchQueryChange: (query: string) => void
+  showCatalogGroup?: boolean
+  showPrGroup?: boolean
+}) {
   const theme = useTheme()
   const navigate = useNavigate()
   const trimmedSearchQuery = searchQuery.trim()
@@ -77,7 +71,6 @@ export function SelfServiceSearchBar({
     skip: !debouncedSearchQuery,
   })
 
-  const catalogsById = useMemo(() => keyBy(catalogs, 'id'), [catalogs])
   const hasActiveSearch = !!trimmedSearchQuery
   const isPanelSearchPending =
     hasActiveSearch &&
@@ -116,17 +109,15 @@ export function SelfServiceSearchBar({
     if (isPanelSearchPending || panelSearchError) return []
 
     return catalogSearchItems.map((item) => {
-      const catalog = catalogsById[item.id]
-
       return {
         id: item.id,
         name: item.name,
-        description: catalog?.description ?? item.documentation,
-        icon: catalog?.icon ?? item.icon,
-        darkIcon: catalog?.darkIcon ?? item.darkIcon,
+        description: item.documentation,
+        icon: item.icon,
+        darkIcon: item.darkIcon,
       }
     })
-  }, [catalogSearchItems, catalogsById, isPanelSearchPending, panelSearchError])
+  }, [catalogSearchItems, isPanelSearchPending, panelSearchError])
 
   const panelPrAutomationDropdownItems = useMemo(() => {
     if (isPanelSearchPending || panelSearchError) return []
@@ -222,8 +213,11 @@ export function SelfServiceSearchBar({
                         navigate(getCatalogAbsPath(item.id))
                       }}
                       renderRightContent={(item) => {
-                        const category = catalogsById[item.id]?.category
-                        return category && <Chip size="small">{category}</Chip>
+                        return (
+                          item.category && (
+                            <Chip size="small">{item.category}</Chip>
+                          )
+                        )
                       }}
                     />
                   )}
