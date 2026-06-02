@@ -69,6 +69,7 @@ services:
         AGENT_HARNESS_BASE_IMAGE_REPO: agent-harness-base
         AGENT_HARNESS_BASE_IMAGE_TAG: local
     image: agent-harness-${PLRL_AGENT_PROVIDER:-opencode}:local
+    command: ["--v=3"]
     depends_on:
       shared-permissions:
         condition: service_completed_successfully
