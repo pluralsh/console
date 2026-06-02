@@ -1,6 +1,6 @@
 import { AppIcon, Flex } from '@pluralsh/design-system'
 import type { SearchDropdownItem } from './SelfServiceSearchBar'
-import { ReactElement, ReactNode } from 'react'
+import { KeyboardEvent, ReactElement, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 import { iconUrl } from 'utils/icon'
@@ -49,6 +49,16 @@ export function CatalogsSearchDropdownGroup({
           role={clickable ? 'button' : undefined}
           tabIndex={clickable ? 0 : undefined}
           onClick={clickable && onClick ? () => onClick(item) : undefined}
+          onKeyDown={
+            clickable && onClick
+              ? (e: KeyboardEvent<HTMLDivElement>) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onClick(item)
+                  }
+                }
+              : undefined
+          }
           css={{
             alignItems: 'center',
             borderRadius: theme.borderRadiuses.medium,
