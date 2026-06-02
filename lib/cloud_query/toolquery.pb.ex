@@ -12,6 +12,28 @@ defmodule Toolquery.ElasticConnection do
   field :index, 4, type: :string
 end
 
+defmodule Toolquery.OpensearchConnection do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.OpensearchConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :host, 1, type: :string
+  field :index, 2, type: :string
+  field :aws_access_key_id, 3, proto3_optional: true, type: :string, json_name: "awsAccessKeyId"
+
+  field :aws_secret_access_key, 4,
+    proto3_optional: true,
+    type: :string,
+    json_name: "awsSecretAccessKey"
+
+  field :aws_region, 5, proto3_optional: true, type: :string, json_name: "awsRegion"
+  field :use_pod_identity, 6, proto3_optional: true, type: :bool, json_name: "usePodIdentity"
+  field :assume_role_arn, 7, proto3_optional: true, type: :string, json_name: "assumeRoleArn"
+end
+
 defmodule Toolquery.DatadogConnection do
   @moduledoc false
 
@@ -170,6 +192,7 @@ defmodule Toolquery.ToolConnection do
   field :cloudwatch, 8, type: Toolquery.CloudwatchConnection, oneof: 0
   field :azure, 9, type: Toolquery.AzureConnection, oneof: 0
   field :jaeger, 10, type: Toolquery.JaegerConnection, oneof: 0
+  field :opensearch, 11, type: Toolquery.OpensearchConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do

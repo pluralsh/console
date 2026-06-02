@@ -45,6 +45,10 @@ linters:
       - path: .*\.pb\.validate\.go$
         linters:
           - goconst
+      # AgentRun reconciliation intentionally centralizes a large state machine.
+      - path: (^|/)deployment-operator/internal/controller/agentrun_controller\.go$
+        linters:
+          - gocyclo
 formatters:
   enable:
     - gofmt

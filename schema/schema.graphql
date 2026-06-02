@@ -2436,6 +2436,7 @@ enum WorkbenchToolType {
   BITBUCKET_DATACENTER
   AZURE_DEVOPS
   PAGERDUTY
+  OPENSEARCH
 }
 
 enum WorkbenchToolCategory {
@@ -2803,6 +2804,9 @@ input WorkbenchToolConfigurationAttributes {
   "elasticsearch connection (logs)"
   elastic: WorkbenchToolElasticConnectionAttributes
 
+  "aws opensearch connection (logs)"
+  opensearch: WorkbenchToolOpensearchConnectionAttributes
+
   "prometheus connection (metrics)"
   prometheus: WorkbenchToolPrometheusConnectionAttributes
 
@@ -2879,6 +2883,29 @@ input WorkbenchToolElasticConnectionAttributes {
 
   "elasticsearch index"
   index: String!
+}
+
+input WorkbenchToolOpensearchConnectionAttributes {
+  "aws opensearch endpoint"
+  host: String!
+
+  "opensearch index"
+  index: String!
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS secret access key for SigV4 authentication"
+  awsSecretAccessKey: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
+
+  "optional IAM role ARN to assume before signing OpenSearch requests"
+  assumeRoleArn: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication instead of static credentials"
+  usePodIdentity: Boolean
 }
 
 input WorkbenchToolPrometheusConnectionAttributes {
@@ -3984,6 +4011,9 @@ type WorkbenchToolConfiguration {
   "elasticsearch connection (no secrets)"
   elastic: WorkbenchToolElasticConnection
 
+  "aws opensearch connection (no secrets)"
+  opensearch: WorkbenchToolOpensearchConnection
+
   "prometheus connection (no secrets)"
   prometheus: WorkbenchToolPrometheusConnection
 
@@ -4057,6 +4087,26 @@ type WorkbenchToolElasticConnection {
 
   "basic auth username"
   username: String!
+}
+
+type WorkbenchToolOpensearchConnection {
+  "aws opensearch endpoint"
+  host: String!
+
+  "opensearch index"
+  index: String!
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
+
+  "assumed role ARN when configured"
+  assumeRoleArn: String
+
+  "whether pod identity (IRSA\/Workload Identity) is used for AWS authentication"
+  usePodIdentity: Boolean
 }
 
 type WorkbenchToolPrometheusConnection {

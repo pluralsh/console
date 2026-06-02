@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Conversion do
     TempoConnection,
     JaegerConnection,
     ElasticConnection,
+    OpensearchConnection,
     DynatraceConnection,
     CloudwatchConnection,
     AzureConnection,
@@ -94,6 +95,20 @@ defmodule Console.AI.Workbench.Conversion do
         username: elastic.username,
         password: elastic.password,
         index:    elastic.index,
+      }}
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :opensearch, configuration: %{opensearch: %{} = opensearch}}) do
+    {:ok, %ToolConnection{
+      connection: {:opensearch, %OpensearchConnection{
+        host:                  Map.get(opensearch, :host),
+        index:                 Map.get(opensearch, :index),
+        aws_access_key_id:     Map.get(opensearch, :aws_access_key_id),
+        aws_secret_access_key: Map.get(opensearch, :aws_secret_access_key),
+        aws_region:            Map.get(opensearch, :aws_region),
+        assume_role_arn:       Map.get(opensearch, :assume_role_arn),
+        use_pod_identity:      Map.get(opensearch, :use_pod_identity),
       }}
     }}
   end

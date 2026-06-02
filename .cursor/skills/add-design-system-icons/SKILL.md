@@ -13,6 +13,7 @@ Target files:
 
 ## Quick Rules
 
+- `mix format` SHOULD NEVER BE RUN in this repository.
 - Follow the existing icon pattern in `assets/design-system/src/components/icons/createIcon.tsx`.
 - Default to `export default createIcon(...)` because that is the established icon system pattern in this repo.
 - Keep icon components minimal: imports, blank line, `export default createIcon(...)`.

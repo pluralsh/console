@@ -196,16 +196,13 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	if completion, ok := getAgentRunPodCompletion(pod); ok {
+	if completion, ok, delay := getAgentRunPodCompletion(pod); ok {
 		run.Status.Phase = completion.phase
 		run.Status.Error = completion.reason
 
-		if completion.initContainerFailureFinishedAt != nil {
-			requeueAfter, delayed := delayInitContainerFailurePodDeletion(*completion.initContainerFailureFinishedAt)
-			if delayed {
-				logger.V(2).Info("delaying deletion of agent run pod after init container failure", "pod", pod.Name, "requeueAfter", requeueAfter)
-				return ctrl.Result{RequeueAfter: requeueAfter}, nil
-			}
+		if delay {
+			logger.V(2).Info("delaying deletion of agent run pod after init container failure", "pod", pod.Name)
+			return ctrl.Result{RequeueAfter: requeueAfterAgentRun}, nil
 		}
 
 		if err := r.Delete(ctx, pod); err != nil && !errors.IsNotFound(err) {
@@ -282,42 +279,35 @@ func getAgentRunPhase(status console.AgentRunStatus) v1alpha1.AgentRunPhase {
 }
 
 type agentRunPodCompletion struct {
-	status                         console.AgentRunStatus
-	phase                          v1alpha1.AgentRunPhase
-	reason                         *string
-	initContainerFailureFinishedAt *metav1.Time
+	status console.AgentRunStatus
+	phase  v1alpha1.AgentRunPhase
+	reason *string
 }
 
-func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool) {
+func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool, bool) {
 	if isAgentRunPodTimedOut(pod) {
 		return &agentRunPodCompletion{
 			status: console.AgentRunStatusCancelled,
 			phase:  v1alpha1.AgentRunPhaseCancelled,
-		}, true
+		}, true, false
 	}
 
 	if failed, reason := isAgentRunPodFailed(pod); failed {
 		return &agentRunPodCompletion{
-			status:                         console.AgentRunStatusFailed,
-			phase:                          v1alpha1.AgentRunPhaseFailed,
-			reason:                         &reason,
-			initContainerFailureFinishedAt: getAgentRunPodInitContainerFailureFinishedAt(pod),
-		}, true
+			status: console.AgentRunStatusFailed,
+			phase:  v1alpha1.AgentRunPhaseFailed,
+			reason: &reason,
+		}, true, delayInitContainerFailurePodDeletion(getAgentRunPodInitContainerFailureFinishedAt(pod))
 	}
 
-	return nil, false
+	return nil, false, false
 }
 
-func delayInitContainerFailurePodDeletion(finishedAt metav1.Time) (time.Duration, bool) {
-	if finishedAt.IsZero() {
-		return 0, false
+func delayInitContainerFailurePodDeletion(finishedAt *metav1.Time) bool {
+	if finishedAt == nil || finishedAt.IsZero() {
+		return false
 	}
-	remaining := initContainerFailurePodDeletionDelay - time.Since(finishedAt.Time)
-	if remaining > 0 {
-		return remaining, true
-	}
-
-	return 0, false
+	return time.Since(finishedAt.Time) < initContainerFailurePodDeletionDelay
 }
 
 func isAgentRunPodTimedOut(pod *corev1.Pod) bool {
