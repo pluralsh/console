@@ -36,6 +36,25 @@ query Catalog($id: ID, $name: String) {
   }
 }
 
+query CatalogSearch($q: String!) {
+  catalogSearch(q: $q) {
+    catalog {
+      id
+      name
+      documentation
+      icon
+      darkIcon
+    }
+    prAutomation {
+      id
+      name
+      description
+      icon
+      darkIcon
+    }
+  }
+}
+
 mutation UpsertCatalog($attributes: CatalogAttributes) {
   upsertCatalog(attributes: $attributes) {
     ...Catalog

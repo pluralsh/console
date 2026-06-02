@@ -17448,6 +17448,14 @@ export type PrAutomationsQueryVariables = Exact<{
 
 export type PrAutomationsQuery = { __typename?: 'RootQueryType', prAutomations?: { __typename?: 'PrAutomationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PrAutomationEdge', node?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null } | null> | null } | null };
 
+export type PrAutomationQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PrAutomationQuery = { __typename?: 'RootQueryType', prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null };
+
 export type CreatePrAutomationMutationVariables = Exact<{
   attributes: PrAutomationAttributes;
 }>;
@@ -17689,6 +17697,13 @@ export type CatalogQueryVariables = Exact<{
 
 
 export type CatalogQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type CatalogSearchQueryVariables = Exact<{
+  q: Scalars['String']['input'];
+}>;
+
+
+export type CatalogSearchQuery = { __typename?: 'RootQueryType', catalogSearch?: Array<{ __typename?: 'CatalogSearchResult', catalog?: { __typename?: 'CatalogSearchItem', id: string, name: string, documentation?: string | null, icon?: string | null, darkIcon?: string | null } | null, prAutomation?: { __typename?: 'PrAutomationSearchItem', id: string, name: string, description?: string | null, icon?: string | null, darkIcon?: string | null } | null } | null> | null };
 
 export type UpsertCatalogMutationVariables = Exact<{
   attributes?: InputMaybe<CatalogAttributes>;
@@ -29193,6 +29208,50 @@ export type PrAutomationsQueryHookResult = ReturnType<typeof usePrAutomationsQue
 export type PrAutomationsLazyQueryHookResult = ReturnType<typeof usePrAutomationsLazyQuery>;
 export type PrAutomationsSuspenseQueryHookResult = ReturnType<typeof usePrAutomationsSuspenseQuery>;
 export type PrAutomationsQueryResult = Apollo.QueryResult<PrAutomationsQuery, PrAutomationsQueryVariables>;
+export const PrAutomationDocument = gql`
+    query PrAutomation($id: ID, $name: String) {
+  prAutomation(id: $id, name: $name) {
+    ...PrAutomation
+  }
+}
+    ${PrAutomationFragmentDoc}`;
+
+/**
+ * __usePrAutomationQuery__
+ *
+ * To run a query within a React component, call `usePrAutomationQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePrAutomationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePrAutomationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function usePrAutomationQuery(baseOptions?: Apollo.QueryHookOptions<PrAutomationQuery, PrAutomationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PrAutomationQuery, PrAutomationQueryVariables>(PrAutomationDocument, options);
+      }
+export function usePrAutomationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PrAutomationQuery, PrAutomationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PrAutomationQuery, PrAutomationQueryVariables>(PrAutomationDocument, options);
+        }
+// @ts-ignore
+export function usePrAutomationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PrAutomationQuery, PrAutomationQueryVariables>): Apollo.UseSuspenseQueryResult<PrAutomationQuery, PrAutomationQueryVariables>;
+export function usePrAutomationSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PrAutomationQuery, PrAutomationQueryVariables>): Apollo.UseSuspenseQueryResult<PrAutomationQuery | undefined, PrAutomationQueryVariables>;
+export function usePrAutomationSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PrAutomationQuery, PrAutomationQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PrAutomationQuery, PrAutomationQueryVariables>(PrAutomationDocument, options);
+        }
+export type PrAutomationQueryHookResult = ReturnType<typeof usePrAutomationQuery>;
+export type PrAutomationLazyQueryHookResult = ReturnType<typeof usePrAutomationLazyQuery>;
+export type PrAutomationSuspenseQueryHookResult = ReturnType<typeof usePrAutomationSuspenseQuery>;
+export type PrAutomationQueryResult = Apollo.QueryResult<PrAutomationQuery, PrAutomationQueryVariables>;
 export const CreatePrAutomationDocument = gql`
     mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
   createPrAutomation(attributes: $attributes) {
@@ -30305,6 +30364,62 @@ export type CatalogQueryHookResult = ReturnType<typeof useCatalogQuery>;
 export type CatalogLazyQueryHookResult = ReturnType<typeof useCatalogLazyQuery>;
 export type CatalogSuspenseQueryHookResult = ReturnType<typeof useCatalogSuspenseQuery>;
 export type CatalogQueryResult = Apollo.QueryResult<CatalogQuery, CatalogQueryVariables>;
+export const CatalogSearchDocument = gql`
+    query CatalogSearch($q: String!) {
+  catalogSearch(q: $q) {
+    catalog {
+      id
+      name
+      documentation
+      icon
+      darkIcon
+    }
+    prAutomation {
+      id
+      name
+      description
+      icon
+      darkIcon
+    }
+  }
+}
+    `;
+
+/**
+ * __useCatalogSearchQuery__
+ *
+ * To run a query within a React component, call `useCatalogSearchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCatalogSearchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCatalogSearchQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useCatalogSearchQuery(baseOptions: Apollo.QueryHookOptions<CatalogSearchQuery, CatalogSearchQueryVariables> & ({ variables: CatalogSearchQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CatalogSearchQuery, CatalogSearchQueryVariables>(CatalogSearchDocument, options);
+      }
+export function useCatalogSearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CatalogSearchQuery, CatalogSearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CatalogSearchQuery, CatalogSearchQueryVariables>(CatalogSearchDocument, options);
+        }
+// @ts-ignore
+export function useCatalogSearchSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CatalogSearchQuery, CatalogSearchQueryVariables>): Apollo.UseSuspenseQueryResult<CatalogSearchQuery, CatalogSearchQueryVariables>;
+export function useCatalogSearchSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CatalogSearchQuery, CatalogSearchQueryVariables>): Apollo.UseSuspenseQueryResult<CatalogSearchQuery | undefined, CatalogSearchQueryVariables>;
+export function useCatalogSearchSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CatalogSearchQuery, CatalogSearchQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CatalogSearchQuery, CatalogSearchQueryVariables>(CatalogSearchDocument, options);
+        }
+export type CatalogSearchQueryHookResult = ReturnType<typeof useCatalogSearchQuery>;
+export type CatalogSearchLazyQueryHookResult = ReturnType<typeof useCatalogSearchLazyQuery>;
+export type CatalogSearchSuspenseQueryHookResult = ReturnType<typeof useCatalogSearchSuspenseQuery>;
+export type CatalogSearchQueryResult = Apollo.QueryResult<CatalogSearchQuery, CatalogSearchQueryVariables>;
 export const UpsertCatalogDocument = gql`
     mutation UpsertCatalog($attributes: CatalogAttributes) {
   upsertCatalog(attributes: $attributes) {
@@ -44966,6 +45081,7 @@ export const namedOperations = {
     Audits: 'Audits',
     AuditMetrics: 'AuditMetrics',
     PrAutomations: 'PrAutomations',
+    PrAutomation: 'PrAutomation',
     ScmConnections: 'ScmConnections',
     ScmConnection: 'ScmConnection',
     ScmWebhooks: 'ScmWebhooks',
@@ -44976,6 +45092,7 @@ export const namedOperations = {
     ClusterRestores: 'ClusterRestores',
     Catalogs: 'Catalogs',
     Catalog: 'Catalog',
+    CatalogSearch: 'CatalogSearch',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     VClusters: 'VClusters',
