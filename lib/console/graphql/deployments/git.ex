@@ -970,8 +970,10 @@ defmodule Console.GraphQl.Deployments.Git do
   object :catalog_search_item do
     field :id,            non_null(:id)
     field :name,          non_null(:string)
-    field :description,   :string, description: "longform description for the purpose of this catalog"
-    field :documentation, :string, description: "longform description for the purpose of this catalog"
+    field :description,   :string,
+      description: "longform description for the purpose of this catalog"
+    field :documentation, :string,
+      description: "deprecated alias of description"
     field :category,      :string, description: "short category name used for browsing catalogs"
     field :icon,          :string, description: "an icon url to use for this catalog"
     field :dark_icon,     :string, description: "a darkmode icon url to use for this catalog"

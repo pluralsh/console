@@ -13586,7 +13586,7 @@ type CatalogSearchItem {
   "longform description for the purpose of this catalog"
   description: String
 
-  "longform description for the purpose of this catalog"
+  "deprecated alias of description"
   documentation: String
 
   "short category name used for browsing catalogs"

@@ -1730,7 +1730,7 @@ export type CatalogSearchItem = {
   darkIcon?: Maybe<Scalars['String']['output']>;
   /** longform description for the purpose of this catalog */
   description?: Maybe<Scalars['String']['output']>;
-  /** longform description for the purpose of this catalog */
+  /** deprecated alias of description */
   documentation?: Maybe<Scalars['String']['output']>;
   /** an icon url to use for this catalog */
   icon?: Maybe<Scalars['String']['output']>;
