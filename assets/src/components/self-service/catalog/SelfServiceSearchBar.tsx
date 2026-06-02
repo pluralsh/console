@@ -8,6 +8,7 @@ import {
   PrQueueIcon,
 } from '@pluralsh/design-system'
 import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import { Body2P } from 'components/utils/typography/Text'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -16,7 +17,7 @@ import {
   useCatalogSearchQuery,
   usePrAutomationLazyQuery,
 } from 'generated/graphql'
-import { chain } from 'lodash'
+import { chain, isEmpty } from 'lodash'
 import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
@@ -135,6 +136,9 @@ export function SelfServiceSearchBar({
   }, [isPanelSearchPending, panelSearchError, prAutomationSearchItems])
 
   const showSearchDropdown = searchFocused && hasActiveSearch
+  const panelHasResults =
+    (showCatalogGroup && !isEmpty(panelCatalogDropdownItems)) ||
+    (showPrGroup && !isEmpty(panelPrAutomationDropdownItems))
 
   const openPrAutomation = useCallback(
     async (id: string) => {
@@ -208,6 +212,16 @@ export function SelfServiceSearchBar({
                 />
               ) : panelSearchError ? (
                 <GqlError error={panelSearchError} />
+              ) : !panelHasResults ? (
+                <Body2P
+                  $color="text-xlight"
+                  css={{
+                    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+                    textAlign: 'center',
+                  }}
+                >
+                  No results found.
+                </Body2P>
               ) : (
                 <>
                   {showCatalogGroup && (
