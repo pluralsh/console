@@ -1,4 +1,5 @@
 import {
+  AlertopsLogoIcon,
   Button,
   DatadogLogoIcon,
   Flex,
@@ -312,6 +313,8 @@ export function getObservabilityWebhookTypeIcon(
   type: Nullable<ObservabilityWebhookType>
 ) {
   switch (type) {
+    case ObservabilityWebhookType.Alertops:
+      return <AlertopsLogoIcon fullColor />
     case ObservabilityWebhookType.Grafana:
       return <GrafanaLogoIcon fullColor />
     case ObservabilityWebhookType.Datadog:

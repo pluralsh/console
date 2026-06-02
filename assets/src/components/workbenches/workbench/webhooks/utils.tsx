@@ -1,4 +1,5 @@
 import {
+  AlertopsLogoIcon,
   AsanaLogoIcon,
   AzureDevopsLogoIcon,
   BitBucketIcon,
@@ -45,6 +46,8 @@ export function webhookTypeLabel(webhook: WorkbenchWebhookFragment) {
 
 export function getObservabilityWebhookTypeIcon(type: Nullable<string>) {
   switch (type) {
+    case ObservabilityWebhookType.Alertops:
+      return <AlertopsLogoIcon fullColor />
     case ObservabilityWebhookType.Grafana:
       return <GrafanaLogoIcon fullColor />
     case ObservabilityWebhookType.Datadog:
