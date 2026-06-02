@@ -58,9 +58,11 @@ export function CatalogsSearchDropdownGroup({
             gridTemplateColumns: 'auto minmax(0, 1fr) auto',
             padding: theme.spacing.xsmall,
 
-            '&:hover': {
-              background: theme.colors['fill-one'],
-            },
+            ...(clickable && {
+              '&:hover': {
+                background: theme.colors['fill-one-hover'],
+              },
+            }),
           }}
         >
           <AppIcon
