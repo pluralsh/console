@@ -1,5 +1,5 @@
 import { AppIcon, Flex } from '@pluralsh/design-system'
-import { SearchDropdownItem } from './Catalogs'
+import { SearchDropdownItem } from './selfServiceSearch'
 import { ReactElement, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
@@ -57,7 +57,6 @@ export function CatalogsSearchDropdownGroup({
             gap: theme.spacing.small,
             gridTemplateColumns: 'auto minmax(0, 1fr) auto',
             padding: theme.spacing.xsmall,
-
             ...(clickable && {
               '&:hover': {
                 background: theme.colors['fill-one-hover'],
