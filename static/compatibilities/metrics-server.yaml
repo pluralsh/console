@@ -7,14 +7,53 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Flags are now wired through to server run options, exposing Kubernetes
+        SecureServingOptions flags (notably `--disable-http2-serving`) via metrics-server
+        CLI configuration.', 'Dependency bumps: Go toolchain updated to 1.24.4 and
+        Kubernetes client libraries to v0.33.2, plus Prometheus module bumped to v0.304.2.',
+      Tooling can now target alternate container engines when building/testing (useful
+        for non-Docker environments).]
+    breaking_changes: ['If you still pass any deprecated klog logging flags removed
+        in v0.7.0 (e.g., `--logtostderr`, `--log-file`, `--log-dir`, etc.), metrics-server
+        will fail to start; ensure your deployment/helm values no longer include them.',
+      'Newly exposed secure serving flags may change defaults/behavior in some clusters;
+        if you need HTTP/2 disabled for compliance/interoperability, explicitly set
+        `--disable-http2-serving` after upgrading.']
   chart_version: 3.13.0
   images: ['registry.k8s.io/metrics-server/metrics-server:v0.8.0']
 - version: 0.7.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **Remove deprecated klog logging flags**: any values that set\
+      \ klog-specific flags (deprecated in v0.6.1) must be removed because they are\
+      \ **no longer recognized** in v0.7.0 (`--log-dir`, `--log-file`, `--logtostderr`,\
+      \ `--alsologtostderr`, `--one-output`, `--stderrthreshold`, `--log-file-max-size`,\
+      \ `--skip-log-headers`, `--add-dir-header`, `--skip-headers`, `--log-backtrace-at`).\n\
+      - Optional new configuration knobs you can add to `extraArgs` (or equivalent\
+      \ chart values):\n  - `--logging-format=json` (JSON logs)\n  - `--kubelet-request-timeout=<duration>`\n\
+      \  - `--node-selector=<label-selector>` (exclude nodes by label selector)"
+    chart_updates: [Metrics-server manifests were restructured (base-components-overlays)
+        upstream; the chart may reflect this via updated templates/paths but functional
+        intent is the same., PodDisruptionBudget API updated to `policy/v1`., Version-specific
+        high-availability manifests were added upstream; ensure your deployment/replica/PDB
+        settings align with your cluster version guidance., Manifests were adjusted
+        to permit running under PodSecurity `restricted` (securityContext/permissions
+        tightening)., Autoscaling/addon-resizer manifests and securityContext were
+        updated (notably `containerSecurityContext` for addonResizer).]
+    features: [Supports JSON-formatted logging., New `--kubelet-request-timeout` flag
+        allows tuning kubelet scrape timeouts., New `--node-selector` flag can exclude
+        nodes by label selector., Metric collection path can be overridden per-node
+        via the `metrics.k8s.io/resource-metrics-path` node annotation., Binaries
+        are now attached to GitHub release artifacts (useful for airgapped/off-cluster
+        debugging).]
+    breaking_changes: ['Deprecated klog-specific logging flags were removed; if your
+        Helm values or manifests still set them, metrics-server will fail to start
+        or ignore flags depending on arg handling.']
   chart_version: 3.12.0
   images: ['registry.k8s.io/metrics-server/metrics-server:v0.7.0']
 - version: 0.6.0
@@ -22,7 +61,28 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- **New in v0.6.0:** an official **Helm chart** was added. If you
+      previously applied `components.yaml` directly, decide whether to keep using
+      manifests or migrate to Helm.
+
+      - If you migrate to Helm, ensure you **port any custom flags/args**, resource
+      requests/limits, tolerations, nodeSelectors, and RBAC customizations from your
+      existing manifests into Helm values.
+
+      '
+    chart_updates: [Added official Helm chart and chart metadata., Added high-availability
+        manifests/configuration options., RBAC permissions were minimized and updated;
+        Metrics Server now needs `nodes/metrics` instead of `nodes/stats`., Switched
+        to the Kubelet resource metrics endpoint for collection.]
+    features: ['High availability configuration was added, enabling running multiple
+        replicas with the appropriate setup.', 'An official Helm chart is now available,
+        making installation/upgrade via Helm supported.', 'Metrics collection migrated
+        to the Kubelet resource metrics endpoint, improving alignment with current
+        kubelet endpoints and behavior.']
+    breaking_changes: ['RBAC requirement changed: Metrics Server now needs access
+        to the `nodes/metrics` resource instead of `nodes/stats`. Custom manifests/RBAC
+        must be updated or metrics collection will fail/403.']
   chart_version: 3.8.0
   images: ['k8s.gcr.io/metrics-server/metrics-server:v0.6.0']
 - version: 0.5.0

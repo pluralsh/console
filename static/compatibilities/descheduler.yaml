@@ -8,113 +8,422 @@ versions:
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes\n- **New:** Helm chart\
+      \ now supports **initContainers**. If you need pre-start tasks (e.g., copying\
+      \ config, waiting for dependencies), you can now define them via values and\
+      \ they\u2019ll be rendered into the descheduler Pod.\n- **New/Improved:** **ServiceMonitor\
+      \ `apiVersion` can be overridden** via values. This helps clusters running different\
+      \ Prometheus Operator versions.\n- **RBAC update:** Helm RBAC/ClusterRole was\
+      \ updated to account for **PVC-related failures** observed around 0.35.x; ensure\
+      \ you apply the new RBAC on upgrade (don\u2019t reuse old rendered manifests).\n"
+    chart_updates: ['Helm chart: add initContainers support.', 'Helm chart: allow
+        overriding ServiceMonitor apiVersion.', 'Helm chart: update RBAC/ClusterRole
+        to sync with base manifests and fix PVC-related permission issues.', 'Chart
+        metadata: icon URL updated.', "CI/security plumbing changes (pinned actions/plugins,\
+        \ updated scanners) that don\u2019t affect runtime behavior."]
+    features: ["PodLifeTime strategy gained additional filters: condition, container\
+        \ exit code, owner kind, and transition time\u2014enabling more precise eviction\
+        \ targeting.", Helm chart can now inject init containers into the descheduler
+        Pod for pre-start workflows., ServiceMonitor apiVersion is now configurable
+        to improve compatibility with different Prometheus Operator versions.]
+    breaking_changes: []
   chart_version: 0.36.0
   images: ['registry.k8s.io/descheduler/descheduler:v0.36.0']
 - version: 0.35.1
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.35.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.35.1']
 - version: 0.34.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Chart values cleanup:** v0.34.0 removes references to **obsolete\
+      \ `deschedulerPolicy` fields** from the chart values. If you previously set\
+      \ any of those old fields in `values.yaml`, they may now be ignored or cause\
+      \ template/render issues\u2014reconcile your values with the current chart schema.\n\
+      - **`deschedulerPolicy` is now templated:** the chart runs `deschedulerPolicy`\
+      \ through Helm\u2019s `tpl` function, enabling you to use Helm templating inside\
+      \ the policy content. This can change behavior if you had `{{ ... }}` sequences\
+      \ that were meant to be literal\u2014escape them if needed.\n- **Default evictor\
+      \ behavior changed in chart:** the chart stops shipping **no-op default evictor\
+      \ settings** and now supports/uses **`podProtections` args**. If you relied\
+      \ on the chart\u2019s prior default evictor block being present, you may need\
+      \ to explicitly set `defaultEvictor` / `DefaultEvictorArgs` in your policy.\n\
+      - **Deployment token setting:** the Deployment now hard-sets `automountServiceAccountToken:\
+      \ true`. If you intentionally disabled token mounting, you\u2019ll need to revisit\
+      \ whether the chart still allows overriding this.\n- **Chart knobs/metadata:**\n\
+      \  - Adds `activeDeadlineSeconds` for the CronJob.\n  - Adds labels/annotations\
+      \ support for CronJob/Job.\n  - Adds support for **custom annotations on the\
+      \ Deployment**.\n  - Fixes the chart\u2019s **liveness probe timeout**.\n- **RBAC/permissions\
+      \ note:** if you use the built-in metrics collector / Prometheus integration,\
+      \ re-check RBAC after upgrade (v0.33.0 added perms when metricsCollector enabled;\
+      \ v0.34.0 expands Prometheus options)."
+    chart_updates: [Removes references to deprecated/obsolete `deschedulerPolicy`
+        fields from chart values., Renders `deschedulerPolicy` via Helm `tpl` for
+        more flexible templating., Updates default evictor configuration approach
+        (removes no-op defaults; aligns with `podProtections`)., 'Sets `automountServiceAccountToken:
+        true` on the Deployment.', Adds `activeDeadlineSeconds` to CronJob spec in
+        the chart., Adds labels/annotations propagation to CronJob/Job; adds customizable
+        Deployment annotations., Fixes liveness probe timeout in the chart.]
+    features: [RemovePodsHavingTooManyRestarts can now sort candidate pods by restart
+        count to evict the worst offenders first., 'Prometheus metrics source supports
+        different URL schemes (e.g., http/https) for more flexible configuration.',
+      Eviction requests can include annotations to improve observability/auditing.,
+      'DefaultEvictorArgs gains PodProtections (including an option for pods with
+        resource claims), improving safety controls on what can be evicted.', 'PodLifeTime
+        plugin can now allow Succeeded/Failed pod phases when configured, broadening
+        what it can act on.']
+    breaking_changes: [The chart removed obsolete `deschedulerPolicy` value fields;
+        existing `values.yaml` that still set them must be updated to the new structure
+        or they will no longer take effect., '`deschedulerPolicy` is processed with
+        `tpl`; unescaped `{{ ... }}` sequences inside the policy may now be evaluated
+        as templates, changing rendered output compared to previous versions.', Default
+        evictor defaults changed (no more no-op defaults); if you relied on implicit/default
+        evictor settings you may need to explicitly configure `DefaultEvictorArgs`/`podProtections`
+        to preserve prior behavior.]
   chart_version: 0.34.0
   images: ['registry.k8s.io/descheduler/descheduler:v0.34.0']
 - version: 0.33.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- No explicit Helm *values* key changes are called out in the provided
+      notes. Expect chart/image version bumps as part of the upgrade.
+
+      - `cmdOptions.dry-run` is now mentioned in the chart README (documentation-only);
+      if you want a non-disruptive test run, you can enable dry-run via `cmdOptions.dry-run`.
+
+      - RBAC: chart adds missing permissions for policy resources, and adds extra
+      permissions when `metricsCollector` is enabled. If you have custom RBAC overrides,
+      re-validate them against the new chart.
+
+      '
+    chart_updates: [Chart/image version bumps to align with descheduler v0.33.0.,
+      'RBAC fixes: add missing permission for policy at ClusterRole.', RBAC additions
+        when `metricsCollector` is enabled., 'Docs/NOTES changes in chart: move values.yaml
+        comment about custom configmap into NOTES.txt output; README updated to mention
+        `cmdOptions.dry-run`.', Manifests/docs updated for v0.33.0.]
+    features: ['Adds `grace_period_seconds` to `DeschedulerPolicy`, allowing a configurable
+        grace period for pod eviction.', LowNodeUtilization gains per-plugin `evictionLimits`
+        to cap evictions., "Low/NodeUtilization can integrate with Prometheus for\
+        \ \u201Cactual utilization\u201D and allows selecting a metrics source via\
+        \ a string for extensibility.", "Introduces a \u201Cstrict eviction policy\u201D\
+        \ mode to tighten eviction behavior.", 'Node utilization computation becomes
+        more generic, can report utilization for selected resources, and skips nodes
+        lacking required extended resources when averaging.']
+    breaking_changes: [Potential behavior changes in Low/NodeUtilization plugins due
+        to refactoring of thresholds/usage assessment and more generic node classification;
+        validate outcomes in a staging cluster before production rollout., "If you\
+        \ rely on custom/minimal RBAC, the chart\u2019s new/changed permissions (especially\
+        \ for policy resources and `metricsCollector`) may require updating your security\
+        \ review/overrides to avoid install/upgrade failures."]
   chart_version: 0.33.0
   images: ['registry.k8s.io/descheduler/descheduler:v0.33.0']
 - version: 0.32.2
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.32.2
   images: ['registry.k8s.io/descheduler/descheduler:v0.32.2']
 - version: 0.31.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / behavior changes to review\n- **`replicas` type\
+      \ fixed**: `replicas` is now treated as a numeric value (int). If you previously\
+      \ set it as a quoted string (e.g. `\"1\"`), update to an integer.\n- **`cmdOption`\
+      \ now accepts \u201Cfalsey\u201D values**: Chart templates were adjusted so\
+      \ values like `false`, `0`, or empty strings can be passed through intentionally\
+      \ (previously they might have been skipped by Helm template logic). Re-check\
+      \ any `cmdOptions` overrides to ensure the rendered args are what you expect.\n\
+      - **Default `deschedulerPolicy` fixed**: The chart\u2019s built-in/default policy\
+      \ rendering was corrected. If you relied on chart defaults, validate that the\
+      \ generated policy is still what you want.\n- **Namespace override added**:\
+      \ New Helm settings allow overriding the namespace used by chart resources (useful\
+      \ for multi-namespace installs or restricting where certain resources land).\
+      \ Review and adopt only if needed.\n- **Leader election value typo fixed**:\
+      \ Helm value key for leader election namespace corrected to **`resourceNamespace`**.\
+      \ If you set the old/typo key, it will be ignored now\u2014rename it.\n- **`securityContext`\
+      \ can be conditional**: Chart can now omit `securityContext` for Deployment/CronJob\
+      \ based on values. If you depend on a specific `securityContext`, ensure it\
+      \ remains enabled/configured after upgrade."
+    chart_updates: [Chart templates updated to correctly type `replicas` and handle
+        `cmdOption` falsey values., Default deschedulerPolicy templating corrected;
+        behavior may differ if you depended on defaults., Added namespace override
+        support in the Helm chart., Fixed leader election configuration key to `resourceNamespace`
+        in chart values/templates., Made `securityContext` conditional for Deployment
+        and CronJob; improved Helm unit tests.]
+    features: [Pod evictor enhancements and new options; groundwork for eviction request
+        handling and thread-safety improvements., Support for limiting the **total**
+        number of pods evicted per rescheduling cycle (`maxNoOfPodsToEvictTotal`).,
+      PodLifeTime plugin gained checks for init containers and ephemeral containers.,
+      'Integration work for KEP-1397: optional evacuation API flow as an alternative
+        to the eviction API (foundational work in this release).']
+    breaking_changes: [Removed the `descheduler/v1alpha1` API type. Any manifests/policies
+        still referencing v1alpha1 must be updated to the supported policy API version
+        used by your deployment., Helm leader election namespace value key corrected
+        to `resourceNamespace`; configurations using the old key will stop applying
+        after upgrade.]
   chart_version: 0.31.0
   images: ['registry.k8s.io/descheduler/descheduler:v0.31.0']
 - version: 0.30.2
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.30.2
   images: ['registry.k8s.io/descheduler/descheduler:v0.30.2']
 - version: 0.29.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- CronJob args handling was adjusted to avoid Helm unmarshal errors
+      (if you set `cronJob.args`, re-check the type/format expected by the chart).
+
+      - New CronJob option: `timeZone` support.
+
+      - New pod-level option: configurable `dnsConfig`.
+
+      - New pod-level option: ability to set Pod `securityContext`.
+
+      - New option: configure `ipFamilyPolicy` (relevant for dual-stack/IPv6 clusters).
+
+
+      **Action for upgrade:** diff your current `values.yaml` against the new chart
+      defaults and specifically validate any custom `cronJob.*`, `dnsConfig`, `securityContext`,
+      and networking-related settings (`ipFamilyPolicy`).'
+    chart_updates: ["Helm chart version was bumped alongside image updates as part\
+        \ of the v0.28.1\u2192v0.29.0 release train.", 'Chart gained additional configurability
+        for CronJob (`timeZone`), Pod spec (`dnsConfig`, `securityContext`), and networking
+        (`ipFamilyPolicy`).', CronJob args templating/values handling was changed
+        to prevent unmarshal errors (can impact existing values).]
+    features: ['TopologySpreadConstraints support was expanded (nodeTaintsPolicy,
+        nodeAffinityPolicy, and matchLabelKeys handling).', '`PodLifeTime` plugin
+        now considers pods in `ImagePullBackOff` container status, which can increase
+        the set of pods eligible for eviction under that policy.', 'Logging improvements:
+        more structured error logs during eviction and more accurate/human-readable
+        node utilization and topologySpreadConstraint fields.']
+    breaking_changes: ["Potential Helm values behavior change for CronJob args: prior\
+        \ `cronJob.args` values may fail to render or may need to be reformatted due\
+        \ to the unmarshal fix\u2014verify during `helm template`/dry-run.", 'Kubernetes
+        1.29 dependency/go-version bump: if you run older Kubernetes versions or have
+        strict version-skew constraints, validate descheduler compatibility against
+        your managed provider/K8s version before upgrading.']
   chart_version: 0.29.0
   images: ['registry.k8s.io/descheduler/descheduler:v0.29.0']
 - version: 0.28.1
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **CronJob args value type changed/fixed**: The chart updated\
+      \ the `cronJob.args`/args handling to avoid YAML\u2192Go unmarshal errors. If\
+      \ you previously set args as a string (or in a shape that relied on permissive\
+      \ unmarshalling), update to the chart\u2019s expected format (typically a YAML\
+      \ list of strings).\n- **New optional CronJob `timeZone` support**: You can\
+      \ now set a timezone on the CronJob via a new Helm value (only applies if you\
+      \ deploy descheduler as a CronJob and your cluster supports `spec.timeZone`).\n\
+      - **New optional `dnsConfig` support**: You can now provide `dnsConfig` via\
+      \ values to customize pod DNS settings (nameservers/searches/options)."
+    chart_updates: ['Helm chart: fixed CronJob args rendering to prevent unmarshal
+        errors (PRs #1229, #1231).', 'Helm chart: added CronJob `timeZone` value support
+        (PR #1245).', 'Helm chart: added ability to set `dnsConfig` for the workload
+        (PR #1260).']
+    features: ['TopologySpreadConstraints handling improved: respects `nodeTaintsPolicy`
+        and `nodeAffinityPolicy` and adds support for `matchLabelKeys`.', 'Improved
+        logging/observability: structured eviction errors, corrected ownerKey display,
+        fixed JSON logging, and more readable node utilization percentages.', Better
+        compatibility with managed Kubernetes providers via version-skew fixes., 'Security
+        hardening: dependency bumps for CVE-2023-44487, CVE-2023-25151, and CVE-2023-47108.']
+    breaking_changes: []
   chart_version: 0.28.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.28.1']
 - version: 0.27.1
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.27.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.27.1']
 - version: 0.26.1
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.26.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.26.1']
 - version: 0.25.1
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.25.2
   images: ['k8s.gcr.io/descheduler/descheduler:v0.25.1']
 - version: 0.24.1
   kube: ['1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **Helm chart version bump:** the release notes explicitly mention
+      updating the Helm chart version to `v0.24`.
+
+      - **Helm chart fixes:** additional chart fixes landed in the `release-1.24`
+      branch (no specific values changes called out in the notes provided).
+
+      - **If you pin image tags manually:** update the Descheduler image tag from
+      `v0.23.1` to `v0.24.1` (`k8s.gcr.io/descheduler/descheduler:v0.24.1`).'
+    chart_updates: ['Helm chart updated to v0.24 (PR #796).', 'Helm chart fixes in
+        release-1.24 branch (PR #817).', 'Version command fixed to parse Helm chart
+        tags correctly (PR #824).']
+    features: []
+    breaking_changes: []
   chart_version: 0.24.1
-  images: ['k8s.gcr.io/descheduler/descheduler:v0.24.1']
+  images: ['alpine:latest', 'k8s.gcr.io/descheduler/descheduler:v0.24.1']
 - version: 0.23.1
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [v0.23.1 includes a fix for a panic when running descheduler v0.23 as
+        a Kubernetes CronJob., v0.23.1 bumps the Go toolchain to 1.17.7 to address
+        CVE-2021-44716.]
+    breaking_changes: []
   chart_version: 0.23.2
-  images: ['k8s.gcr.io/descheduler/descheduler:v0.23.1']
+  images: ['alpine:latest', 'k8s.gcr.io/descheduler/descheduler:v0.23.1']
 - version: 0.22.1
   kube: ['1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.22.1
-  images: ['k8s.gcr.io/descheduler/descheduler:v0.22.1']
+  images: ['alpine:latest', 'k8s.gcr.io/descheduler/descheduler:v0.22.1']
 - version: 0.21.0
   kube: ['1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart changes (descheduler-helm-chart 0.20.0 \u2192 0.21.0)\n\
+      - **SecurityContext defaults changed to run as non-root**:\n  - Chart updates\
+      \ to run the container as **UID 1000** and support `runAsNonRoot` (#496), matching\
+      \ the upstream manifest changes (#495/#468).\n  - **Action**: if you currently\
+      \ override `securityContext` / `podSecurityContext`, verify your overrides don\u2019\
+      t force root (e.g., `runAsUser: 0`) and that any PSP/OPA/PodSecurity admission\
+      \ allows UID 1000.\n- **CronJob scheduling placement**:\n  - Added **`nodeSelector`\
+      \ support for the CronJob** (#480).\n  - **Action**: optional\u2014set `nodeSelector`\
+      \ if you need to pin the descheduler job to specific nodes.\n- **Docs/values\
+      \ fixes**:\n  - Fixed `values.yaml` indentation (#498).\n  - Corrected chart\
+      \ docs for container requests/limits (#526).\n- **Helm chart testing**:\n  -\
+      \ Added a **helm test** hook (#527).\n"
+    chart_updates: [Workload manifests updated to run as non-root (UID 1000) and support
+        `runAsNonRoot` (aligns with upstream security changes)., CronJob template
+        enhanced with `nodeSelector` support., 'Chart hygiene updates: `values.yaml`
+        indentation fix and documentation corrections for resources.', Added Helm
+        test hook for basic install validation.]
+    features: ['Runs descheduler as non-root by default (UID 1000), improving security
+        posture and compatibility with restricted PodSecurity policies.', 'Adds metrics
+        collection support, enabling scraping/observability of descheduler behavior.',
+      'New/expanded eviction filtering: labelSelector-based filtering, option to ignore
+        pods with PVCs, and optional eviction of system-critical pods (configurable).',
+      'TopologySpreadConstraint strategy enhancements, including support for soft
+        constraints and labelSelector filtering during eviction.', 'New/updated strategies
+        and behavior: HighNodeUtilization strategy, improved NodeFit feature, and
+        LowNodeUtilization extended resource support.', Updated Kubernetes dependency
+        compatibility to 1.21 and expanded multi-arch images (adds ARM32v7).]
+    breaking_changes: ['Descheduler now defaults to **running as non-root (UID 1000)**;
+        clusters/environments that assume root (custom securityContext, PSP, file
+        permissions on mounted volumes, or restrictive policies) may require adjustments.',
+      Kubernetes library/dependency bump to **1.21.0** may effectively drop compatibility
+        with older Kubernetes versions; validate your cluster version and API availability
+        before upgrading.]
   chart_version: 0.21.0
-  images: ['k8s.gcr.io/descheduler/descheduler:v0.21.0']
+  images: ['alpine:latest', 'k8s.gcr.io/descheduler/descheduler:v0.21.0']
 - version: 0.20.0
   kube: ['1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart / values changes to plan for (0.19.0 \u2192 0.20.0)\n\
+      - **Chart renamed** (PR #436). Expect the chart name/release name/repo reference\
+      \ to change; verify your `helm upgrade` target and any GitOps references (e.g.,\
+      \ `chart:` field, dependency name).\n- **PodSecurityPolicy support added** (PR\
+      \ #418). New values/templates may appear for PSP creation/usage; if your cluster\
+      \ has PSP enabled (or you manage PSP objects), decide whether to enable/disable\
+      \ and ensure RBAC aligns.\n- **CronJob options exposed:** `successfulJobsHistoryLimit`\
+      \ and `failedJobsHistoryLimit` are now configurable (PR #453).\n- **CronJob\
+      \ startingDeadlineSeconds configurable** (PR #444).\n- **Container resources\
+      \ values added** (PR #443). If you previously patched manifests to set resources,\
+      \ move those settings into values.\n- **TopologySpreadConstraint strategy namespaces**\
+      \ can be configured via Helm (PR #455) \u2014 check your values if you use that\
+      \ strategy.\n"
+    chart_updates: ["Chart renamed (PR #436) \u2014 update chart reference in Helm/GitOps.",
+      'Add PodSecurityPolicy support to the chart templates (PR #418).', 'Expose CronJob
+        scheduling/history settings in values: startingDeadlineSeconds, successfulJobsHistoryLimit,
+        failedJobsHistoryLimit (PRs #444, #453).', 'Add container resource configuration
+        in chart (PR #443).', 'Helm support for listing namespaces for topologySpreadConstraint
+        strategy (PR #455).']
+    features: [New **PodTopologySpread** strategy to rebalance pods across topology
+        domains (#413)., RemoveDuplicates and TopologySpread-related strategies gain
+        **namespace filtering** (#406) and improved namespace handling (#455)., PodLifeTime
+        strategy can now customize which **podStatusPhases** count (#393)., 'New logging-format
+        flag and broader structured logging improvements (#412, #376/#394).', 'Helm/chart
+        improvements: PSP support, CronJob timing and history limits, configurable
+        resources (#418, #444, #453, #443).', 'Descheduler updated for Kubernetes
+        1.20 dependencies and multi-arch images (#464, #449).']
+    breaking_changes: [Helm **chart rename** may break automated upgrades or GitOps
+        references until you update the chart name/repo/path (#436)., "If you relied\
+        \ on old CLI flags previously deprecated in 0.19.0 (node-selector, max-pods-to-evict-per-node,\
+        \ evict-local-storage-pods), 0.20.0 continues the move toward policy fields;\
+        \ validate your deployment isn\u2019t still depending on removed/ignored flags."]
   chart_version: 0.20.0
   images: ['k8s.gcr.io/descheduler/descheduler:v0.20.0']
 - version: 0.19.0
   kube: ['1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- The v0.19.0 release publishes an accompanying Helm chart tag:
+      `descheduler-helm-chart-0.19.0`. Use this chart version alongside the app image
+      `k8s.gcr.io/descheduler/descheduler:v0.19.0`.
+
+      - Container image registry changed to `k8s.gcr.io` (from `*.gcr.io/k8s-artifacts-prod`
+      in v0.18.0). Ensure your values override (if any) points at the new image repository.
+
+      - Some CLI flags are deprecated and promoted into the policy API (`v1alpha1`):
+      `node-selector`, `max-pods-to-evict-per-node`, and `evict-local-storage-pods`.
+      Prefer configuring these via the policy config that the chart renders/mounts
+      rather than extraArgs/command flags.
+
+      '
+    chart_updates: [Helm chart is now a first-class release artifact (added around
+        this cycle) and v0.19.0 has a dedicated chart release tag `descheduler-helm-chart-0.19.0`.,
+      'Chart maintainer metadata updated (#375) and Helm release process/documentation
+        improved (#351, #356, #359).']
+    features: [Namespace-based pod filtering support was added (you can scope strategies
+        to specific namespaces)., Custom priority threshold support was added for
+        priority-based decisions/evictions., Kubernetes dependencies were bumped for
+        Kubernetes 1.19 compatibility and the project moved to Go 1.15.]
+    breaking_changes: [Image registry/repository location changed to `k8s.gcr.io/descheduler/descheduler`;
+        environments with allowlists/mirrors must be updated., 'Several command-line
+        flags were deprecated (`node-selector`, `max-pods-to-evict-per-node`, `evict-local-storage-pods`)
+        in favor of policy `v1alpha1` fields; upgrades relying on those flags should
+        migrate to policy-based configuration to avoid future removal.']
   chart_version: 0.19.2
   images: ['k8s.gcr.io/descheduler/descheduler:v0.19.0']
 - version: 0.18.0
   kube: ['1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 0.18.2
   images: ['us.gcr.io/k8s-artifacts-prod/descheduler/descheduler:v0.18.0']
