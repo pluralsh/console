@@ -152,6 +152,15 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  defp verify(conn, %ObservabilityWebhook{type: :alertops, secret: secret}) do
+    with {_, password} <- Plug.BasicAuth.parse_basic_auth(conn),
+         true <- Plug.Crypto.secure_compare(secret, password) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
   defp verify(conn, %IssueWebhook{provider: :linear, secret: secret}) do
     with [signature] <- get_req_header(conn, "linear-signature"),
           mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),

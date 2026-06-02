@@ -5323,6 +5323,103 @@ addons:
     chart_version: 0.13.0
     images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.15.0']
   name: cloudnative-pg
+- icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
+  git_url: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
+  release_url: https://github.com/kubernetes/autoscaler/releases/tag/cluster-autoscaler-{vsn}
+  helm_repository_url: https://kubernetes.github.io/autoscaler
+  chart_name: cluster-autoscaler
+  versions:
+  - version: 1.35.0
+    kube: ['1.35']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.57.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.0']
+  - version: 1.34.2
+    kube: ['1.34']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.53.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.34.2']
+  - version: 1.33.0
+    kube: ['1.33']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.51.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.33.0']
+  - version: 1.32.0
+    kube: ['1.32']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.46.6
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.32.0']
+  - version: 1.31.0
+    kube: ['1.31']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.44.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.31.0']
+  - version: 1.30.0
+    kube: ['1.30']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.37.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.0']
+  - version: 1.29.0
+    kube: ['1.29']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.36.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0']
+  - version: 1.28.2
+    kube: ['1.28']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.34.1
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.28.2']
+  - version: 1.27.2
+    kube: ['1.27']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.33.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.27.2']
+  - version: 1.26.2
+    kube: ['1.26']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.28.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.26.2']
+  - version: 1.24.0
+    kube: ['1.24']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.27.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.24.0']
+  - version: 1.23.0
+    kube: ['1.23']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.24.0
+    images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.23.0']
+  - version: 1.21.1
+    kube: ['1.21']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.13.1
+    images: ['k8s.gcr.io/autoscaling/cluster-autoscaler:v1.21.1']
+  - version: 1.20.0
+    kube: ['1.20']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.9.2
+    images: ['k8s.gcr.io/autoscaling/cluster-autoscaler:v1.20.0']
+  - version: 1.18.1
+    kube: ['1.18']
+    requirements: []
+    incompatibilities: []
+    chart_version: 9.4.0
+    images: ['us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v1.18.1']
+  name: cluster-autoscaler
 - icon: https://raw.githubusercontent.com/kubernetes-sigs/descheduler/master/assets/logo/descheduler-stacked-color.png
   git_url: https://github.com/kubernetes-sigs/descheduler
   release_url: https://github.com/kubernetes-sigs/descheduler/releases/tag/v{vsn}
@@ -10520,9 +10617,8 @@ addons:
     images: ['k8s.gcr.io/metrics-server/metrics-server:v0.6.0']
   - version: 0.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
-      '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9',
-      '1.8']
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9', '1.8']
     requirements: []
     incompatibilities: []
     summary: null

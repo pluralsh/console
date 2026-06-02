@@ -6514,6 +6514,7 @@ export type ObservabilityWebhookEdge = {
 };
 
 export enum ObservabilityWebhookType {
+  Alertops = 'ALERTOPS',
   Datadog = 'DATADOG',
   Grafana = 'GRAFANA',
   Newrelic = 'NEWRELIC',

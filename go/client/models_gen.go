@@ -14168,6 +14168,7 @@ const (
 	ObservabilityWebhookTypeNewrelic  ObservabilityWebhookType = "NEWRELIC"
 	ObservabilityWebhookTypeSentry    ObservabilityWebhookType = "SENTRY"
 	ObservabilityWebhookTypePlural    ObservabilityWebhookType = "PLURAL"
+	ObservabilityWebhookTypeAlertops  ObservabilityWebhookType = "ALERTOPS"
 )
 
 var AllObservabilityWebhookType = []ObservabilityWebhookType{
@@ -14177,11 +14178,12 @@ var AllObservabilityWebhookType = []ObservabilityWebhookType{
 	ObservabilityWebhookTypeNewrelic,
 	ObservabilityWebhookTypeSentry,
 	ObservabilityWebhookTypePlural,
+	ObservabilityWebhookTypeAlertops,
 }
 
 func (e ObservabilityWebhookType) IsValid() bool {
 	switch e {
-	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic, ObservabilityWebhookTypeSentry, ObservabilityWebhookTypePlural:
+	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic, ObservabilityWebhookTypeSentry, ObservabilityWebhookTypePlural, ObservabilityWebhookTypeAlertops:
 		return true
 	}
 	return false

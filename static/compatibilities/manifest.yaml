@@ -10,6 +10,7 @@ names:
 - contour
 - coredns
 - cloudnative-pg
+- cluster-autoscaler
 - descheduler
 - external-dns
 - external-secrets

@@ -3,7 +3,7 @@ defmodule Console.Schema.ObservabilityWebhook do
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{PolicyBinding, User}
 
-  defenum Type, grafana: 0, datadog: 1, pagerduty: 2, newrelic: 3, sentry: 4, plural: 5
+  defenum Type, grafana: 0, datadog: 1, pagerduty: 2, newrelic: 3, sentry: 4, plural: 5, alertops: 6
 
   schema "observability_webhooks" do
     field :type,        Type
