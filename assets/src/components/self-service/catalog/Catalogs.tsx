@@ -9,6 +9,7 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useCatalogsQuery } from 'generated/graphql'
+import Fuse from 'fuse.js'
 import { chain, countBy, isEmpty } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -16,9 +17,13 @@ import { mapExistingNodes } from 'utils/graphql'
 import { CatalogsFilters } from './CatalogsFilters'
 import { CatalogsGrid } from './CatalogsGrid'
 import { SelfServiceSearchBar } from './SelfServiceSearchBar'
-import { catalogFuseSearchOptions, fuseSearch } from './selfServiceSearch'
 
 type CatalogFilterKey = 'author' | 'category'
+
+const catalogFuseSearchOptions = {
+  keys: ['name', 'description', 'category'],
+  threshold: 0.25,
+}
 
 function getCatalogFilters(
   catalogs: ReturnType<typeof mapExistingNodes>,
@@ -83,13 +88,13 @@ export function Catalogs() {
   const hasActiveFilters = !isEmpty(authorFilters) || !isEmpty(categoryFilters)
   const trimmedSearchQuery = searchQuery.trim()
   const hasActiveSearch = !!trimmedSearchQuery
-  const filterCatalogs = useMemo(
-    () =>
-      hasActiveSearch
-        ? fuseSearch(catalogs, trimmedSearchQuery, catalogFuseSearchOptions)
-        : catalogs,
-    [catalogs, hasActiveSearch, trimmedSearchQuery]
-  )
+  const filterCatalogs = useMemo(() => {
+    if (!hasActiveSearch) return catalogs
+
+    return new Fuse(catalogs, catalogFuseSearchOptions)
+      .search(trimmedSearchQuery)
+      .map(({ item }) => item)
+  }, [catalogs, hasActiveSearch, trimmedSearchQuery])
   const authors = useMemo(
     () => getCatalogFilters(filterCatalogs, 'author'),
     [filterCatalogs]

@@ -8,20 +8,37 @@ import {
   PrQueueIcon,
 } from '@pluralsh/design-system'
 import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   CatalogFragment,
   PrAutomationFragment,
+  useCatalogSearchQuery,
   usePrAutomationLazyQuery,
 } from 'generated/graphql'
-import { ReactNode, useCallback, useState } from 'react'
+import { chain, keyBy } from 'lodash'
+import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
 import { CatalogsSearchDropdownGroup } from './CatalogsSearchDropdownGroup'
-import { SELF_SERVICE_SEARCH_PLACEHOLDER } from './selfServiceSearch'
-import { useSelfServiceSearch } from './useSelfServiceSearch'
+
+const emptyCatalogs: CatalogFragment[] = []
+const selfServiceSearchPlaceholder =
+  'Ask anything across service catalog and PR automations. Try "I want to create clusters."'
+
+export type SearchDropdownItem = {
+  id: string
+  name: string
+  description?: Nullable<string>
+  icon?: Nullable<string>
+  darkIcon?: Nullable<string>
+}
+
+function hasSearchValue<T>(value: Nullable<T> | undefined): value is T {
+  return !!value
+}
 
 type SelfServiceSearchBarProps = {
   catalogs?: CatalogFragment[]
@@ -33,7 +50,7 @@ type SelfServiceSearchBarProps = {
 }
 
 export function SelfServiceSearchBar({
-  catalogs,
+  catalogs = emptyCatalogs,
   aside,
   searchQuery,
   onSearchQueryChange,
@@ -43,24 +60,85 @@ export function SelfServiceSearchBar({
   const theme = useTheme()
   const navigate = useNavigate()
   const trimmedSearchQuery = searchQuery.trim()
+  const debouncedSearchQuery = useThrottle(trimmedSearchQuery, 300)
   const [searchFocused, setSearchFocused] = useState(false)
   const [createPrAutomation, setCreatePrAutomation] =
     useState<Nullable<PrAutomationFragment>>(null)
   const [openingPrAutomationId, setOpeningPrAutomationId] =
     useState<Nullable<string>>(null)
   const [fetchPrAutomation] = usePrAutomationLazyQuery()
-  const search = useSelfServiceSearch({
-    searchQuery: trimmedSearchQuery,
-    catalogs,
-  })
+
   const {
-    hasActiveSearch,
-    isPanelSearchPending,
-    panelSearchError,
-    panelCatalogDropdownItems,
-    panelPrAutomationDropdownItems,
-    catalogsById,
-  } = search
+    data: catalogSearchData,
+    error: catalogSearchError,
+    loading: catalogSearchLoading,
+  } = useCatalogSearchQuery({
+    variables: { q: debouncedSearchQuery },
+    skip: !debouncedSearchQuery,
+  })
+
+  const catalogsById = useMemo(() => keyBy(catalogs, 'id'), [catalogs])
+  const hasActiveSearch = !!trimmedSearchQuery
+  const isPanelSearchPending =
+    hasActiveSearch &&
+    (trimmedSearchQuery !== debouncedSearchQuery || catalogSearchLoading)
+  const panelSearchError =
+    hasActiveSearch && catalogSearchError && !isPanelSearchPending
+      ? catalogSearchError
+      : undefined
+
+  const searchResults = useMemo(
+    () => catalogSearchData?.catalogSearch?.filter(hasSearchValue) ?? [],
+    [catalogSearchData?.catalogSearch]
+  )
+
+  const catalogSearchItems = useMemo(
+    () =>
+      chain(searchResults)
+        .map(({ catalog }) => catalog)
+        .filter(hasSearchValue)
+        .uniqBy('id')
+        .value(),
+    [searchResults]
+  )
+
+  const prAutomationSearchItems = useMemo(
+    () =>
+      chain(searchResults)
+        .map(({ prAutomation }) => prAutomation)
+        .filter(hasSearchValue)
+        .uniqBy('id')
+        .value(),
+    [searchResults]
+  )
+
+  const panelCatalogDropdownItems = useMemo(() => {
+    if (isPanelSearchPending || panelSearchError) return []
+
+    return catalogSearchItems.map((item) => {
+      const catalog = catalogsById[item.id]
+
+      return {
+        id: item.id,
+        name: item.name,
+        description: catalog?.description ?? item.documentation,
+        icon: catalog?.icon ?? item.icon,
+        darkIcon: catalog?.darkIcon ?? item.darkIcon,
+      }
+    })
+  }, [catalogSearchItems, catalogsById, isPanelSearchPending, panelSearchError])
+
+  const panelPrAutomationDropdownItems = useMemo(() => {
+    if (isPanelSearchPending || panelSearchError) return []
+
+    return prAutomationSearchItems.map((item) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      icon: item.icon,
+      darkIcon: item.darkIcon,
+    }))
+  }, [isPanelSearchPending, panelSearchError, prAutomationSearchItems])
 
   const showSearchDropdown = searchFocused && hasActiveSearch
 
@@ -99,7 +177,7 @@ export function SelfServiceSearchBar({
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             showClearButton
-            placeholder={SELF_SERVICE_SEARCH_PLACEHOLDER}
+            placeholder={selfServiceSearchPlaceholder}
             startIcon={<MagnifyingGlassIcon color="icon-light" />}
             width="100%"
           />
