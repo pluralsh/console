@@ -88,20 +88,12 @@ export function Catalogs() {
   } = search
 
   const filterCatalogs = useMemo(() => {
-    if (!hasActiveSearch) return catalogs
-    if (isSearchPending) return []
     if (useFallbackSearch)
       return new Fuse(catalogs, catalogFuseSearchOptions)
         .search(debouncedSearchQuery)
         .map(({ item }) => item)
     return catalogs
-  }, [
-    catalogs,
-    debouncedSearchQuery,
-    hasActiveSearch,
-    isSearchPending,
-    useFallbackSearch,
-  ])
+  }, [catalogs, debouncedSearchQuery, useFallbackSearch])
 
   const authors = useMemo(
     () => getCatalogFilters(filterCatalogs, 'author'),
@@ -172,7 +164,7 @@ export function Catalogs() {
               fetchNextPage()
             }
           }}
-          loading={loading && !hasActiveSearch}
+          loading={loading}
           emptyState={
             <Card
               css={{

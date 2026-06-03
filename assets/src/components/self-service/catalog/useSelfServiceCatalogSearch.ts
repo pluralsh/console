@@ -149,7 +149,6 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
     }),
     [
       debouncedSearchQuery,
-      error,
       hasActiveSearch,
       isSearchPending,
       panelCatalogItems,

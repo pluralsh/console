@@ -61,10 +61,10 @@ export function PrAutomations() {
     { q: useFallbackSearch ? debouncedSearchQuery : '' }
   )
 
-  const prAutomations = useMemo(() => {
-    if (isSearchPending) return []
-    return mapExistingNodes(pagedData?.prAutomations)
-  }, [isSearchPending, pagedData?.prAutomations])
+  const prAutomations = useMemo(
+    () => mapExistingNodes(pagedData?.prAutomations),
+    [pagedData?.prAutomations]
+  )
 
   const allowPagination = !isSearchPending
 
@@ -76,9 +76,7 @@ export function PrAutomations() {
       <Table
         fullHeightWrap
         columns={columns}
-        loading={
-          (!pagedData && pagedLoading) || (hasActiveSearch && isSearchPending)
-        }
+        loading={!pagedData && pagedLoading}
         reactTableOptions={{ meta: { refetch } }}
         data={prAutomations}
         virtualizeRows
