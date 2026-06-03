@@ -45,6 +45,7 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
   const { data, error, loading } = useCatalogSearchQuery({
     variables: { q: debouncedSearchQuery },
     skip: !debouncedSearchQuery || !semanticSearchEnabled,
+    fetchPolicy: 'no-cache',
   })
 
   const hasActiveSearch = !!trimmedSearchQuery
