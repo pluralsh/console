@@ -1,10 +1,4 @@
-import {
-  ComponentProps,
-  ReactElement,
-  useCallback,
-  useRef,
-  useState,
-} from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import {
   AppIcon,
   ArrowRightIcon,
@@ -16,7 +10,6 @@ import {
   ListBoxItem,
   PeopleIcon,
   PipelineIcon,
-  PrOpenIcon,
   PrQueueIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -38,11 +31,10 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { Link } from 'react-router-dom'
 
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { PrAutomationPermissionsModal } from 'components/self-service/pr/automations/PrAutomationPermissionsModal'
-
-import { CreatePrModal } from './CreatePrModal'
+import { CreatePrAutomationModal } from './CreatePrAutomationModal'
 import { iconUrl } from 'utils/icon'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { PrAutomationPermissionsModal } from './PrAutomationPermissionsModal'
 
 enum MenuItemKey {
   Permissions = 'permissions',
@@ -236,25 +228,7 @@ const ColActions = columnHelper.accessor((node) => node, {
     const theme = useTheme()
     const { id, name } = getValue()
     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
-    const [fullPrAutomation, setFullPrAutomation] =
-      useState<Nullable<PrAutomationFragment>>(null)
-    const pendingMenuKeyRef = useRef<MenuItemKey | null>(null)
-    const [fetchPrAutomation, { loading: fetchingFullData }] =
-      usePrAutomationLazyQuery()
     const { refetch } = table.options.meta as { refetch?: () => void }
-
-    const openWithFullData = useCallback(
-      async (key: MenuItemKey) => {
-        pendingMenuKeyRef.current = key
-        const result = await fetchPrAutomation({ variables: { id } })
-        if (pendingMenuKeyRef.current !== key) return
-        if (result.data?.prAutomation) {
-          setFullPrAutomation(result.data.prAutomation)
-          setMenuKey(key)
-        }
-      },
-      [id, fetchPrAutomation]
-    )
 
     return (
       <div
@@ -266,21 +240,11 @@ const ColActions = columnHelper.accessor((node) => node, {
           columnGap: theme.spacing.medium,
         }}
       >
-        <Button
-          secondary
-          startIcon={<PrOpenIcon />}
-          loading={
-            fetchingFullData &&
-            pendingMenuKeyRef.current === MenuItemKey.CreatePr
-          }
-          onClick={() => openWithFullData(MenuItemKey.CreatePr)}
-        >
-          Create PR
-        </Button>
+        <CreatePrAutomationModal id={id} />
         <MoreMenu
           onSelectionChange={(newKey) => {
             if (newKey === MenuItemKey.Delete) setMenuKey(MenuItemKey.Delete)
-            else openWithFullData(newKey as MenuItemKey)
+            else setMenuKey(MenuItemKey.Permissions)
           }}
         >
           <ListBoxItem
@@ -296,6 +260,7 @@ const ColActions = columnHelper.accessor((node) => node, {
             }
             label="Delete automation"
             textValue="Delete automation"
+            destructive
           />
         </MoreMenu>
         {/* Modals */}
@@ -306,37 +271,42 @@ const ColActions = columnHelper.accessor((node) => node, {
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        {fullPrAutomation && (
-          <>
-            <AutomationPermissionsModal
-              prAutomation={fullPrAutomation}
-              open={menuKey === MenuItemKey.Permissions}
-              onClose={() => {
-                setMenuKey('')
-                pendingMenuKeyRef.current = null
-              }}
-            />
-            <CreatePrModal
-              prAutomation={fullPrAutomation}
-              open={menuKey === MenuItemKey.CreatePr}
-              onClose={() => {
-                setMenuKey('')
-                pendingMenuKeyRef.current = null
-              }}
-            />
-          </>
-        )}
+        <AutomationPermissionsModal
+          id={id}
+          open={menuKey === MenuItemKey.Permissions}
+          onClose={() => setMenuKey('')}
+        />
       </div>
     )
   },
 })
 
-export function AutomationPermissionsModal(
-  props: ComponentProps<typeof PrAutomationPermissionsModal>
-) {
+function AutomationPermissionsModal({
+  id,
+  open,
+  onClose,
+}: {
+  id: string
+  open: boolean
+  onClose: () => void
+}) {
+  const [fetchPrAutomation, { data }] = usePrAutomationLazyQuery()
+
+  useEffect(() => {
+    if (open && !data?.prAutomation) {
+      fetchPrAutomation({ variables: { id } })
+    }
+  }, [open, data?.prAutomation, fetchPrAutomation, id])
+
+  const prAutomation = data?.prAutomation
+
   return (
-    <ModalMountTransition open={props.open}>
-      <PrAutomationPermissionsModal {...props} />
+    <ModalMountTransition open={open && !!prAutomation}>
+      <PrAutomationPermissionsModal
+        prAutomation={prAutomation!}
+        open={open}
+        onClose={onClose}
+      />
     </ModalMountTransition>
   )
 }

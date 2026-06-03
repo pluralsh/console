@@ -1,5 +1,4 @@
 import {
-  Button,
   CatalogIcon,
   Chip,
   Flex,
@@ -7,16 +6,12 @@ import {
   MagnifyingGlassIcon,
   PrQueueIcon,
 } from '@pluralsh/design-system'
-import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
+import { CreatePrAutomationModal } from 'components/self-service/pr/automations/CreatePrAutomationModal'
 import { Body2P } from 'components/utils/typography/Text'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  PrAutomationFragment,
-  usePrAutomationLazyQuery,
-} from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ReactNode, useCallback, useRef, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -42,12 +37,6 @@ export function SelfServiceSearchBar({
   const theme = useTheme()
   const navigate = useNavigate()
   const [searchFocused, setSearchFocused] = useState(false)
-  const [createPrAutomation, setCreatePrAutomation] =
-    useState<Nullable<PrAutomationFragment>>(null)
-  const [openingPrAutomationId, setOpeningPrAutomationId] =
-    useState<Nullable<string>>(null)
-  const openingPrAutomationIdRef = useRef<Nullable<string>>(null)
-  const [fetchPrAutomation] = usePrAutomationLazyQuery()
 
   const {
     searchQuery,
@@ -64,27 +53,6 @@ export function SelfServiceSearchBar({
   const panelHasResults =
     !isEmpty(panelCatalogItems) || !isEmpty(panelPrAutomationItems)
   const showSearchDropdown = searchFocused && hasActiveSearch && showDropdown
-
-  const openPrAutomation = useCallback(
-    async (id: string) => {
-      openingPrAutomationIdRef.current = id
-      setOpeningPrAutomationId(id)
-
-      try {
-        const result = await fetchPrAutomation({ variables: { id } })
-        if (openingPrAutomationIdRef.current !== id) return
-
-        const prAutomation = result.data?.prAutomation
-        if (prAutomation) setCreatePrAutomation(prAutomation)
-      } finally {
-        if (openingPrAutomationIdRef.current === id) {
-          openingPrAutomationIdRef.current = null
-          setOpeningPrAutomationId(null)
-        }
-      }
-    },
-    [fetchPrAutomation]
-  )
 
   return (
     <>
@@ -178,17 +146,11 @@ export function SelfServiceSearchBar({
                       items={panelPrAutomationItems}
                       icon={<PrQueueIcon />}
                       renderRightContent={(item) => (
-                        <Button
-                          secondary
-                          small
-                          loading={openingPrAutomationId === item.id}
-                          onClick={() => {
-                            setSearchFocused(false)
-                            openPrAutomation(item.id)
-                          }}
-                        >
-                          Create PR
-                        </Button>
+                        <CreatePrAutomationModal
+                          id={item.id}
+                          buttonProps={{ small: true }}
+                          onOpen={() => setSearchFocused(false)}
+                        />
                       )}
                     />
                   )}
@@ -199,13 +161,6 @@ export function SelfServiceSearchBar({
         </div>
         {aside}
       </Flex>
-      {createPrAutomation && (
-        <CreatePrModal
-          prAutomation={createPrAutomation}
-          open
-          onClose={() => setCreatePrAutomation(null)}
-        />
-      )}
     </>
   )
 }
