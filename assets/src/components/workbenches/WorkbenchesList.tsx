@@ -92,7 +92,7 @@ export function WorkbenchesList() {
         />
       ) : showSearchEmptyState ? (
         <Card css={{ padding: theme.spacing.large }}>
-          <EmptyState message={`No workbenches found`} />
+          <EmptyState message="No workbenches found" />
         </Card>
       ) : (
         <CardGrid
