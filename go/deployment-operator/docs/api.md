@@ -558,6 +558,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `script` _string_ |  |  |  |
+| `group` _string_ |  |  |  |
+| `version` _string_ |  |  |  |
+| `kind` _string_ |  |  |  |
 
 
 

@@ -31,9 +31,10 @@ func IsLuaScriptValueForGVK(gvk schema.GroupVersionKind) bool {
 	return ok
 }
 
-// ClearLuaScripts clears all Lua scripts from the store. Useful for testing.
+// ClearLuaScripts clears all Lua scripts from the store in a thread-safe manner.
+// Useful for testing to avoid cross-test contamination.
 func ClearLuaScripts() {
-	luaScripts = cmap.NewStringer[schema.GroupVersionKind, string]()
+	luaScripts.Clear()
 }
 
 func GetLuaHealthConvert(obj *unstructured.Unstructured, luaScript string) (*HealthStatus, error) {
