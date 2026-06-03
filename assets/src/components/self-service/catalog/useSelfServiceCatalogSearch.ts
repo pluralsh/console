@@ -25,7 +25,6 @@ export type SelfServiceSearchState = {
   hasActiveSearch: boolean
   semanticSearchEnabled: boolean
   isSearchPending: boolean
-  useSemanticSearch: boolean
   useFallbackSearch: boolean
   showDropdown: boolean // Show it only when AI is active and hasn't failed
   panelCatalogItems: SearchDropdownItem[]
@@ -141,7 +140,6 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
       hasActiveSearch,
       semanticSearchEnabled,
       isSearchPending,
-      useSemanticSearch,
       useFallbackSearch,
       showDropdown: semanticSearchEnabled && !semanticSearchFailed,
       panelCatalogItems,
@@ -157,7 +155,6 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
       semanticSearchEnabled,
       semanticSearchFailed,
       useFallbackSearch,
-      useSemanticSearch,
     ]
   )
 }
