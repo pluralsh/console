@@ -1,9 +1,18 @@
-import { ArrowRightIcon, Card, Flex, AddIcon } from '@pluralsh/design-system'
+import {
+  AddIcon,
+  ArrowRightIcon,
+  Card,
+  EmptyState,
+  Flex,
+  Input2,
+  SearchIcon,
+} from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
 import {
   CardGrid,
   CardGridSkeleton,
 } from 'components/self-service/catalog/CatalogsGrid'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
@@ -26,6 +35,7 @@ import {
   ComponentType,
   isValidElement,
   ReactElement,
+  useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -46,13 +56,19 @@ const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
 
 export function WorkbenchesList() {
+  const theme = useTheme()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useThrottle(searchString, 200)
+
   const { data, error, loading, pageInfo, fetchNextPage } =
-    useFetchPaginatedData({
-      queryHook: useWorkbenchesQuery,
-      keyPath: ['workbenches'],
-    })
+    useFetchPaginatedData(
+      { queryHook: useWorkbenchesQuery, keyPath: ['workbenches'] },
+      { q: debouncedSearchString }
+    )
 
   const workbenches = mapExistingNodes(data?.workbenches)
+  const hasActiveSearch = !!debouncedSearchString
+  const showSearchEmptyState = hasActiveSearch && workbenches.length === 0
 
   return (
     <WrapperSC>
@@ -61,12 +77,23 @@ export function WorkbenchesList() {
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
         description="Build-your-own agents for common DevOps tasks. Each workbench bundles tools and skills, and orchestrates subagents tailored to observability, infra analysis, and coding tasks."
       />
+      <Input2
+        showClearButton
+        placeholder="Search workbenches"
+        startIcon={<SearchIcon />}
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+      />
       {error && <GqlError error={error} />}
       {!data && loading ? (
         <CardGridSkeleton
           count={6}
           styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
         />
+      ) : showSearchEmptyState ? (
+        <Card css={{ padding: theme.spacing.large }}>
+          <EmptyState message={`No workbenches found`} />
+        </Card>
       ) : (
         <CardGrid
           onBottomReached={() =>

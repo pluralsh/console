@@ -4,9 +4,14 @@ import {
   Button,
   Flex,
   FlowIcon,
+  Input2,
+  SearchIcon,
   useSetBreadcrumbs,
+  Card,
+  EmptyState,
 } from '@pluralsh/design-system'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -14,10 +19,11 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFlowsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { FlowCard } from './FlowCard'
 
@@ -26,14 +32,19 @@ export const FLOW_DOCS_URL = 'https://docs.plural.sh/plural-features/flows'
 
 export function Flows() {
   useSetBreadcrumbs(breadcrumbs)
+  const theme = useTheme()
   const navigate = useNavigate()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useThrottle(searchString, 200)
+
   const { data, error, loading, pageInfo, refetch, fetchNextPage } =
-    useFetchPaginatedData({
-      queryHook: useFlowsQuery,
-      keyPath: ['flows'],
-    })
+    useFetchPaginatedData(
+      { queryHook: useFlowsQuery, keyPath: ['flows'] },
+      { q: debouncedSearchString }
+    )
 
   const flows = mapExistingNodes(data?.flows)
+  const hasActiveSearch = !!debouncedSearchString
 
   if (!data && loading) return <LoadingIndicator />
 
@@ -55,9 +66,22 @@ export function Flows() {
           Manage MCP Servers
         </Button>
       </HeaderSC>
+      <Input2
+        showClearButton
+        placeholder="Search flows"
+        startIcon={<SearchIcon />}
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+      />
       {error && <GqlError error={error} />}
       {isEmpty(flows) ? (
-        <FlowEmptyState />
+        hasActiveSearch ? (
+          <Card css={{ padding: theme.spacing.large }}>
+            <EmptyState message={`No flows found`} />
+          </Card>
+        ) : (
+          <FlowEmptyState />
+        )
       ) : (
         <CardGrid
           styles={{
