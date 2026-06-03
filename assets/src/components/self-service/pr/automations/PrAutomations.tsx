@@ -17,14 +17,15 @@ import { columns } from './PrAutomationsColumns'
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
+  const search = useSelfServiceCatalogSearch()
   const {
     hasActiveSearch,
     useSemanticSearch,
-    useExactSearch,
+    useFallbackSearch,
     prAutomationIds,
     isSearchPending,
     debouncedSearchQuery,
-  } = useSelfServiceCatalogSearch()
+  } = search
 
   useSetPageHeaderContent(
     useMemo(
@@ -59,7 +60,7 @@ export function PrAutomations() {
       keyPath: ['prAutomations'],
     },
     {
-      q: useExactSearch ? debouncedSearchQuery : '',
+      q: useFallbackSearch ? debouncedSearchQuery : '',
     }
   )
 
@@ -82,13 +83,13 @@ export function PrAutomations() {
     useSemanticSearch,
   ])
 
-  const allowPagination = !hasActiveSearch || useExactSearch
+  const allowPagination = !hasActiveSearch || useFallbackSearch
 
   if (error) return <GqlError error={error} />
 
   return (
     <>
-      <SelfServiceSearchBar search={search.searchBar} />
+      <SelfServiceSearchBar search={search} />
       <Table
         fullHeightWrap
         columns={columns}

@@ -1,7 +1,7 @@
 import { useThrottle } from 'components/hooks/useThrottle'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { useCatalogSearchQuery } from 'generated/graphql'
-import { chain, isEmpty } from 'lodash'
+import { chain } from 'lodash'
 import { useMemo, useState } from 'react'
 import type { GqlErrorType } from 'components/utils/Alert'
 
@@ -14,35 +14,35 @@ export type SearchDropdownItem = {
   darkIcon?: Nullable<string>
 }
 
-export type SelfServiceSearchBarState = {
+export type SelfServiceSearchState = {
   searchQuery: string
   setSearchQuery: (query: string) => void
+  debouncedSearchQuery: string
   hasActiveSearch: boolean
-  showSemanticPanel: boolean
-  isPanelSearchPending: boolean
   semanticSearchEnabled: boolean
+  isSearchPending: boolean
+  useSemanticSearch: boolean
+  useFallbackSearch: boolean
+  showDropdown: boolean // Show it only when AI is active and hasn't failed
   panelSearchError?: GqlErrorType
-  panelCatalogDropdownItems: SearchDropdownItem[]
-  panelPrAutomationDropdownItems: SearchDropdownItem[]
-  panelHasResults: boolean
+  panelCatalogItems: SearchDropdownItem[]
+  panelPrAutomationItems: SearchDropdownItem[]
+  catalogIds: string[]
+  prAutomationIds: string[]
 }
 
-function hasSearchValue<T>(value: Nullable<T> | undefined): value is T {
+function hasValue<T>(value: Nullable<T> | undefined): value is T {
   return !!value
 }
 
-export function useSelfServiceCatalogSearch() {
+export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
   const aiEnabled = useAIEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const trimmedSearchQuery = searchQuery.trim()
   const debouncedSearchQuery = useThrottle(trimmedSearchQuery, 300)
   const semanticSearchEnabled = aiEnabled === true
 
-  const {
-    data: catalogSearchData,
-    error: catalogSearchError,
-    loading: catalogSearchLoading,
-  } = useCatalogSearchQuery({
+  const { data, error, loading } = useCatalogSearchQuery({
     variables: { q: debouncedSearchQuery },
     skip: !debouncedSearchQuery || !semanticSearchEnabled,
   })
@@ -51,130 +51,101 @@ export function useSelfServiceCatalogSearch() {
   const isSearchPending =
     semanticSearchEnabled &&
     hasActiveSearch &&
-    (trimmedSearchQuery !== debouncedSearchQuery || catalogSearchLoading)
+    (trimmedSearchQuery !== debouncedSearchQuery || loading)
   const semanticSearchFailed =
-    semanticSearchEnabled &&
-    hasActiveSearch &&
-    !isSearchPending &&
-    !!catalogSearchError
+    semanticSearchEnabled && hasActiveSearch && !isSearchPending && !!error
   const useSemanticSearch =
-    semanticSearchEnabled &&
-    hasActiveSearch &&
-    !isSearchPending &&
-    !catalogSearchError
-  const useExactSearch =
+    semanticSearchEnabled && hasActiveSearch && !isSearchPending && !error
+  const useFallbackSearch =
     hasActiveSearch &&
     !isSearchPending &&
     (!semanticSearchEnabled || semanticSearchFailed)
 
   const searchResults = useMemo(
-    () => catalogSearchData?.catalogSearch?.filter(hasSearchValue) ?? [],
-    [catalogSearchData?.catalogSearch]
+    () => data?.catalogSearch?.filter(hasValue) ?? [],
+    [data?.catalogSearch]
+  )
+
+  const panelCatalogItems = useMemo(
+    (): SearchDropdownItem[] =>
+      !useSemanticSearch
+        ? []
+        : chain(searchResults)
+            .map(({ catalog }) => catalog)
+            .filter(hasValue)
+            .uniqBy('id')
+            .map(({ id, name, description, category, icon, darkIcon }) => ({
+              id,
+              name,
+              description,
+              category,
+              icon,
+              darkIcon,
+            }))
+            .value(),
+    [searchResults, useSemanticSearch]
+  )
+
+  const panelPrAutomationItems = useMemo(
+    (): SearchDropdownItem[] =>
+      !useSemanticSearch
+        ? []
+        : chain(searchResults)
+            .map(({ prAutomation }) => prAutomation)
+            .filter(hasValue)
+            .uniqBy('id')
+            .map(({ id, name, description, icon, darkIcon }) => ({
+              id,
+              name,
+              description,
+              icon,
+              darkIcon,
+            }))
+            .value(),
+    [searchResults, useSemanticSearch]
   )
 
   const catalogIds = useMemo(
-    () =>
-      useSemanticSearch
-        ? chain(searchResults)
-            .map(({ catalog }) => catalog)
-            .filter(hasSearchValue)
-            .uniqBy('id')
-            .map('id')
-            .value()
-        : [],
-    [searchResults, useSemanticSearch]
+    () => panelCatalogItems.map(({ id }) => id),
+    [panelCatalogItems]
   )
 
   const prAutomationIds = useMemo(
-    () =>
-      useSemanticSearch
-        ? chain(searchResults)
-            .map(({ prAutomation }) => prAutomation)
-            .filter(hasSearchValue)
-            .uniqBy('id')
-            .map('id')
-            .value()
-        : [],
-    [searchResults, useSemanticSearch]
+    () => panelPrAutomationItems.map(({ id }) => id),
+    [panelPrAutomationItems]
   )
 
-  const panelCatalogDropdownItems = useMemo((): SearchDropdownItem[] => {
-    if (!useSemanticSearch) return []
-
-    return chain(searchResults)
-      .map(({ catalog }) => catalog)
-      .filter(hasSearchValue)
-      .uniqBy('id')
-      .map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        category: item.category,
-        icon: item.icon,
-        darkIcon: item.darkIcon,
-      }))
-      .value()
-  }, [searchResults, useSemanticSearch])
-
-  const panelPrAutomationDropdownItems = useMemo((): SearchDropdownItem[] => {
-    if (!useSemanticSearch) return []
-
-    return chain(searchResults)
-      .map(({ prAutomation }) => prAutomation)
-      .filter(hasSearchValue)
-      .uniqBy('id')
-      .map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        icon: item.icon,
-        darkIcon: item.darkIcon,
-      }))
-      .value()
-  }, [searchResults, useSemanticSearch])
-
-  const panelHasResults =
-    !isEmpty(panelCatalogDropdownItems) ||
-    !isEmpty(panelPrAutomationDropdownItems)
-  const panelSearchError = semanticSearchFailed ? catalogSearchError : undefined
-  const searchBar = useMemo(
-    (): SelfServiceSearchBarState => ({
+  return useMemo(
+    () => ({
       searchQuery,
       setSearchQuery,
+      debouncedSearchQuery,
       hasActiveSearch,
-      showSemanticPanel: semanticSearchEnabled,
-      panelSearchError,
-      isPanelSearchPending: isSearchPending,
-      panelCatalogDropdownItems,
-      panelPrAutomationDropdownItems,
-      panelHasResults,
       semanticSearchEnabled,
+      isSearchPending,
+      useSemanticSearch,
+      useFallbackSearch,
+      showDropdown: semanticSearchEnabled && !semanticSearchFailed,
+      panelSearchError: semanticSearchFailed ? error : undefined,
+      panelCatalogItems,
+      panelPrAutomationItems,
+      catalogIds,
+      prAutomationIds,
     }),
     [
+      catalogIds,
+      debouncedSearchQuery,
+      error,
       hasActiveSearch,
       isSearchPending,
-      panelCatalogDropdownItems,
-      panelHasResults,
-      panelPrAutomationDropdownItems,
-      panelSearchError,
+      panelCatalogItems,
+      panelPrAutomationItems,
+      prAutomationIds,
       searchQuery,
       semanticSearchEnabled,
+      semanticSearchFailed,
+      useFallbackSearch,
+      useSemanticSearch,
     ]
   )
-
-  return {
-    searchQuery,
-    setSearchQuery,
-    trimmedSearchQuery,
-    debouncedSearchQuery,
-    hasActiveSearch,
-    semanticSearchEnabled,
-    isSearchPending,
-    semanticSearchFailed,
-    useSemanticSearch,
-    useExactSearch,
-    catalogIds,
-    prAutomationIds,
-    searchBar,
-  }
 }

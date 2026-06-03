@@ -91,9 +91,10 @@ export function Catalogs() {
   const {
     hasActiveSearch,
     useSemanticSearch,
-    useExactSearch,
+    useFallbackSearch,
     catalogIds,
     isSearchPending,
+    debouncedSearchQuery,
   } = search
 
   const filterCatalogs = useMemo(() => {
@@ -106,14 +107,14 @@ export function Catalogs() {
     }
 
     return new Fuse(catalogs, catalogFuseSearchOptions)
-      .search(search.trimmedSearchQuery)
+      .search(debouncedSearchQuery)
       .map(({ item }) => item)
   }, [
     catalogIds,
     catalogs,
+    debouncedSearchQuery,
     hasActiveSearch,
     isSearchPending,
-    search.trimmedSearchQuery,
     useSemanticSearch,
   ])
 
@@ -157,7 +158,7 @@ export function Catalogs() {
         gap="medium"
       >
         <SelfServiceSearchBar
-          search={search.searchBar}
+          search={search}
           aside={
             <Button
               onClick={() =>
@@ -181,7 +182,7 @@ export function Catalogs() {
           catalogs={displayCatalogs}
           onBottomReached={() => {
             if (
-              (!hasActiveSearch || useExactSearch) &&
+              (!hasActiveSearch || useFallbackSearch) &&
               !loading &&
               pageInfo?.hasNextPage
             ) {

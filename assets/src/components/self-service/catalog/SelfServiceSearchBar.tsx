@@ -15,6 +15,7 @@ import {
   PrAutomationFragment,
   usePrAutomationLazyQuery,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { ReactNode, useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
@@ -22,7 +23,7 @@ import { useTheme } from 'styled-components'
 import { CatalogsSearchDropdownGroup } from './CatalogsSearchDropdownGroup'
 import type {
   SearchDropdownItem,
-  SelfServiceSearchBarState,
+  SelfServiceSearchState,
 } from './useSelfServiceCatalogSearch'
 
 export type { SearchDropdownItem }
@@ -34,7 +35,7 @@ export function SelfServiceSearchBar({
   showPrGroup = true,
 }: {
   aside?: ReactNode
-  search: SelfServiceSearchBarState
+  search: SelfServiceSearchState
   showCatalogGroup?: boolean
   showPrGroup?: boolean
 }) {
@@ -52,17 +53,17 @@ export function SelfServiceSearchBar({
     searchQuery,
     setSearchQuery,
     hasActiveSearch,
-    showSemanticPanel,
-    isPanelSearchPending,
+    showDropdown,
+    isSearchPending,
     panelSearchError,
-    panelCatalogDropdownItems,
-    panelPrAutomationDropdownItems,
-    panelHasResults,
+    panelCatalogItems,
+    panelPrAutomationItems,
     semanticSearchEnabled,
   } = search
 
-  const showSearchDropdown =
-    searchFocused && hasActiveSearch && showSemanticPanel
+  const panelHasResults =
+    !isEmpty(panelCatalogItems) || !isEmpty(panelPrAutomationItems)
+  const showSearchDropdown = searchFocused && hasActiveSearch && showDropdown
 
   const openPrAutomation = useCallback(
     async (id: string) => {
@@ -133,7 +134,7 @@ export function SelfServiceSearchBar({
                 zIndex: theme.zIndexes.selectPopover,
               }}
             >
-              {isPanelSearchPending ? (
+              {isSearchPending ? (
                 <RectangleSkeleton
                   $height={56}
                   $width="100%"
@@ -155,7 +156,7 @@ export function SelfServiceSearchBar({
                   {showCatalogGroup && (
                     <CatalogsSearchDropdownGroup
                       label="Service catalog"
-                      items={panelCatalogDropdownItems}
+                      items={panelCatalogItems}
                       icon={<CatalogIcon />}
                       clickable
                       onClick={(item) => {
@@ -174,7 +175,7 @@ export function SelfServiceSearchBar({
                   {showPrGroup && (
                     <CatalogsSearchDropdownGroup
                       label="PR automations"
-                      items={panelPrAutomationDropdownItems}
+                      items={panelPrAutomationItems}
                       icon={<PrQueueIcon />}
                       renderRightContent={(item) => (
                         <Button
