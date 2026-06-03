@@ -427,6 +427,8 @@ export type AgentRun = {
   babysitInterval?: Maybe<Scalars['Int']['output']>;
   /** the branch this agent run is operating on (if not set, use default branch on clone) */
   branch?: Maybe<Scalars['String']['output']>;
+  /** the agent run this run consumed */
+  consumed?: Maybe<Scalars['ID']['output']>;
   /** the error reason of the agent run */
   error?: Maybe<Scalars['String']['output']>;
   /** the flow this agent is associated with */
@@ -567,6 +569,8 @@ export type AgentRunStatusAttributes = {
   babysit?: InputMaybe<Scalars['Boolean']['input']>;
   /** interval in seconds between babysit checks for this run */
   babysitInterval?: InputMaybe<Scalars['Int']['input']>;
+  /** the agent run this run consumed */
+  consumed?: InputMaybe<Scalars['ID']['input']>;
   /** the error reason of the agent run */
   error?: InputMaybe<Scalars['String']['input']>;
   /** the messages this agent run has generated during its run */

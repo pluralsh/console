@@ -368,6 +368,8 @@ type AgentRun struct {
 	Approval *bool `json:"approval,omitempty"`
 	// when this run was approved
 	ApprovedAt *string `json:"approvedAt,omitempty"`
+	// the agent run this run consumed
+	Consumed *string `json:"consumed,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -470,6 +472,8 @@ type AgentRunStatusAttributes struct {
 	Approval *bool `json:"approval,omitempty"`
 	// when this run was approved
 	ApprovedAt *string `json:"approvedAt,omitempty"`
+	// the agent run this run consumed
+	Consumed *string `json:"consumed,omitempty"`
 }
 
 type AgentRunUpload struct {
@@ -10552,6 +10556,8 @@ type WorkbenchToolConfiguration struct {
 	HTTP *WorkbenchToolHTTPConfiguration `json:"http,omitempty"`
 	// elasticsearch connection (no secrets)
 	Elastic *WorkbenchToolElasticConnection `json:"elastic,omitempty"`
+	// aws opensearch connection (no secrets)
+	Opensearch *WorkbenchToolOpensearchConnection `json:"opensearch,omitempty"`
 	// prometheus connection (no secrets)
 	Prometheus *WorkbenchToolPrometheusConnection `json:"prometheus,omitempty"`
 	// loki connection (no secrets)
@@ -10601,6 +10607,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	HTTP *WorkbenchToolHTTPConfigurationAttributes `json:"http,omitempty"`
 	// elasticsearch connection (logs)
 	Elastic *WorkbenchToolElasticConnectionAttributes `json:"elastic,omitempty"`
+	// aws opensearch connection (logs)
+	Opensearch *WorkbenchToolOpensearchConnectionAttributes `json:"opensearch,omitempty"`
 	// prometheus connection (metrics)
 	Prometheus *WorkbenchToolPrometheusConnectionAttributes `json:"prometheus,omitempty"`
 	// loki connection (logs)
@@ -10833,6 +10841,38 @@ type WorkbenchToolLokiConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolOpensearchConnection struct {
+	// aws opensearch endpoint
+	Host string `json:"host"`
+	// opensearch index
+	Index string `json:"index"`
+	// AWS access key id for SigV4 authentication
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS region for SigV4 authentication
+	AWSRegion *string `json:"awsRegion,omitempty"`
+	// assumed role ARN when configured
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+	// whether pod identity (IRSA/Workload Identity) is used for AWS authentication
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
+}
+
+type WorkbenchToolOpensearchConnectionAttributes struct {
+	// aws opensearch endpoint
+	Host string `json:"host"`
+	// opensearch index
+	Index string `json:"index"`
+	// AWS access key id for SigV4 authentication
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS secret access key for SigV4 authentication
+	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
+	// AWS region for SigV4 authentication
+	AWSRegion *string `json:"awsRegion,omitempty"`
+	// optional IAM role ARN to assume before signing OpenSearch requests
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+	// whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
 }
 
 type WorkbenchToolPagerdutyConnection struct {
@@ -17487,6 +17527,7 @@ const (
 	WorkbenchToolTypeBitbucketDatacenter WorkbenchToolType = "BITBUCKET_DATACENTER"
 	WorkbenchToolTypeAzureDevops         WorkbenchToolType = "AZURE_DEVOPS"
 	WorkbenchToolTypePagerduty           WorkbenchToolType = "PAGERDUTY"
+	WorkbenchToolTypeOpensearch          WorkbenchToolType = "OPENSEARCH"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17515,11 +17556,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeBitbucketDatacenter,
 	WorkbenchToolTypeAzureDevops,
 	WorkbenchToolTypePagerduty,
+	WorkbenchToolTypeOpensearch,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch:
 		return true
 	}
 	return false
