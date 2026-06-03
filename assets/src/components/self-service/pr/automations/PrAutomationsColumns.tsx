@@ -35,6 +35,7 @@ import { CreatePrAutomation } from './CreatePrAutomation'
 import { iconUrl } from 'utils/icon'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { PrAutomationPermissionsModal } from './PrAutomationPermissionsModal'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 
 enum MenuItemKey {
   Permissions = 'permissions',
@@ -290,13 +291,17 @@ function AutomationPermissionsModal({
   open: boolean
   onClose: () => void
 }) {
+  const { popToast } = useSimpleToast()
   const [fetchPrAutomation, { data }] = usePrAutomationLazyQuery()
 
   useEffect(() => {
     if (open && !data?.prAutomation) {
-      fetchPrAutomation({ variables: { id } })
+      fetchPrAutomation({ variables: { id } }).then((result) => {
+        if (result.error)
+          popToast({ content: result.error.message, severity: 'danger' })
+      })
     }
-  }, [open, data?.prAutomation, fetchPrAutomation, id])
+  }, [open, data?.prAutomation, fetchPrAutomation, id, popToast])
 
   const prAutomation = data?.prAutomation
 
