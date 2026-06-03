@@ -20,9 +20,7 @@ export function PrAutomations() {
   const search = useSelfServiceCatalogSearch()
   const {
     hasActiveSearch,
-    useSemanticSearch,
     useFallbackSearch,
-    semanticPrAutomations,
     isSearchPending,
     debouncedSearchQuery,
   } = search
@@ -58,25 +56,17 @@ export function PrAutomations() {
     {
       queryHook: usePrAutomationsQuery,
       keyPath: ['prAutomations'],
-      skip: isSearchPending || useSemanticSearch,
+      skip: isSearchPending,
     },
     { q: useFallbackSearch ? debouncedSearchQuery : '' }
   )
 
   const prAutomations = useMemo(() => {
-    if (!hasActiveSearch) return mapExistingNodes(pagedData?.prAutomations)
     if (isSearchPending) return []
-    if (useSemanticSearch) return semanticPrAutomations
     return mapExistingNodes(pagedData?.prAutomations)
-  }, [
-    hasActiveSearch,
-    isSearchPending,
-    pagedData?.prAutomations,
-    semanticPrAutomations,
-    useSemanticSearch,
-  ])
+  }, [isSearchPending, pagedData?.prAutomations])
 
-  const allowPagination = !hasActiveSearch || useFallbackSearch
+  const allowPagination = !isSearchPending
 
   if (error) return <GqlError error={error} />
 

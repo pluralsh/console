@@ -31,8 +31,6 @@ export type SelfServiceSearchState = {
   panelSearchError?: GqlErrorType
   panelCatalogItems: SearchDropdownItem[]
   panelPrAutomationItems: SearchDropdownItem[]
-  semanticCatalogs: CatalogSearchItemFragment[]
-  semanticPrAutomations: PrAutomationSearchItemFragment[]
 }
 
 function hasValue<T>(value: Nullable<T> | undefined): value is T {
@@ -138,8 +136,6 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
       panelSearchError: semanticSearchFailed ? error : undefined,
       panelCatalogItems,
       panelPrAutomationItems,
-      semanticCatalogs,
-      semanticPrAutomations,
     }),
     [
       debouncedSearchQuery,
@@ -149,8 +145,6 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
       panelCatalogItems,
       panelPrAutomationItems,
       searchQuery,
-      semanticCatalogs,
-      semanticPrAutomations,
       semanticSearchEnabled,
       semanticSearchFailed,
       useFallbackSearch,

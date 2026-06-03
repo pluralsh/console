@@ -90,9 +90,7 @@ export function Catalogs() {
 
   const {
     hasActiveSearch,
-    useSemanticSearch,
     useFallbackSearch,
-    semanticCatalogs,
     isSearchPending,
     debouncedSearchQuery,
   } = search
@@ -100,18 +98,17 @@ export function Catalogs() {
   const filterCatalogs = useMemo(() => {
     if (!hasActiveSearch) return catalogs
     if (isSearchPending) return []
-    if (useSemanticSearch) return semanticCatalogs
-
-    return new Fuse(catalogs, catalogFuseSearchOptions)
-      .search(debouncedSearchQuery)
-      .map(({ item }) => item)
+    if (useFallbackSearch)
+      return new Fuse(catalogs, catalogFuseSearchOptions)
+        .search(debouncedSearchQuery)
+        .map(({ item }) => item)
+    return catalogs
   }, [
     catalogs,
     debouncedSearchQuery,
     hasActiveSearch,
     isSearchPending,
-    semanticCatalogs,
-    useSemanticSearch,
+    useFallbackSearch,
   ])
 
   const authors = useMemo(
@@ -177,18 +174,11 @@ export function Catalogs() {
         <CatalogsGrid
           catalogs={displayCatalogs}
           onBottomReached={() => {
-            if (
-              (!hasActiveSearch || useFallbackSearch) &&
-              !loading &&
-              pageInfo?.hasNextPage
-            ) {
+            if (!isSearchPending && !loading && pageInfo?.hasNextPage) {
               fetchNextPage()
             }
           }}
-          loading={
-            (!hasActiveSearch && loading) ||
-            (hasActiveSearch && isSearchPending)
-          }
+          loading={loading && !hasActiveSearch}
           emptyState={
             <Card
               css={{
