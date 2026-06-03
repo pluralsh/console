@@ -1,5 +1,5 @@
 import { ArrowTopRightIcon, Button, Table } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
 
@@ -7,20 +7,24 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import { useThrottle } from 'components/hooks/useThrottle'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { mapExistingNodes } from 'utils/graphql'
 import { SelfServiceSearchBar } from 'components/self-service/catalog/SelfServiceSearchBar'
+import { useSelfServiceCatalogSearch } from 'components/self-service/catalog/useSelfServiceCatalogSearch'
 import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const trimmedSearchQuery = searchQuery.trim()
-  const debouncedSearchQuery = useThrottle(trimmedSearchQuery, 300)
-  const hasActiveSearch = !!trimmedSearchQuery
+  const {
+    hasActiveSearch,
+    useSemanticSearch,
+    useExactSearch,
+    prAutomationIds,
+    isSearchPending,
+    debouncedSearchQuery,
+  } = useSelfServiceCatalogSearch()
 
   useSetPageHeaderContent(
     useMemo(
@@ -55,32 +59,45 @@ export function PrAutomations() {
       keyPath: ['prAutomations'],
     },
     {
-      q: debouncedSearchQuery,
+      q: useExactSearch ? debouncedSearchQuery : '',
     }
   )
 
-  const prAutomations = useMemo(
-    () => mapExistingNodes(data?.prAutomations),
-    [data?.prAutomations]
-  )
+  const prAutomations = useMemo(() => {
+    const nodes = mapExistingNodes(data?.prAutomations)
+
+    if (!hasActiveSearch) return nodes
+
+    if (isSearchPending) return []
+
+    if (!useSemanticSearch) return nodes
+
+    const ids = new Set(prAutomationIds)
+    return nodes.filter((prAutomation) => ids.has(prAutomation.id))
+  }, [
+    data?.prAutomations,
+    hasActiveSearch,
+    isSearchPending,
+    prAutomationIds,
+    useSemanticSearch,
+  ])
+
+  const allowPagination = !hasActiveSearch || useExactSearch
 
   if (error) return <GqlError error={error} />
 
   return (
     <>
-      <SelfServiceSearchBar
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-      />
+      <SelfServiceSearchBar search={search.searchBar} />
       <Table
         fullHeightWrap
         columns={columns}
-        loading={!data && loading}
+        loading={(!data && loading) || (hasActiveSearch && isSearchPending)}
         reactTableOptions={{ meta: { refetch } }}
         data={prAutomations}
         virtualizeRows
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
+        hasNextPage={allowPagination && pageInfo?.hasNextPage}
+        fetchNextPage={allowPagination ? fetchNextPage : undefined}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{

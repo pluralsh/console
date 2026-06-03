@@ -17,6 +17,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { CatalogsFilters } from './CatalogsFilters'
 import { CatalogsGrid } from './CatalogsGrid'
 import { SelfServiceSearchBar } from './SelfServiceSearchBar'
+import { useSelfServiceCatalogSearch } from './useSelfServiceCatalogSearch'
 
 type CatalogFilterKey = 'author' | 'category'
 
@@ -67,7 +68,7 @@ export function Catalogs() {
   const [filtersVisible, setFiltersVisible] = useState(false)
   const [authorFilters, setAuthorFilters] = useState<string[]>([])
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
+  const search = useSelfServiceCatalogSearch()
 
   const { data, error, loading, pageInfo, fetchNextPage } =
     useFetchPaginatedData({
@@ -86,15 +87,36 @@ export function Catalogs() {
   }, [])
 
   const hasActiveFilters = !isEmpty(authorFilters) || !isEmpty(categoryFilters)
-  const trimmedSearchQuery = searchQuery.trim()
-  const hasActiveSearch = !!trimmedSearchQuery
+
+  const {
+    hasActiveSearch,
+    useSemanticSearch,
+    useExactSearch,
+    catalogIds,
+    isSearchPending,
+  } = search
+
   const filterCatalogs = useMemo(() => {
     if (!hasActiveSearch) return catalogs
+    if (isSearchPending) return []
+
+    if (useSemanticSearch) {
+      const ids = new Set(catalogIds)
+      return catalogs.filter((catalog) => ids.has(catalog.id))
+    }
 
     return new Fuse(catalogs, catalogFuseSearchOptions)
-      .search(trimmedSearchQuery)
+      .search(search.trimmedSearchQuery)
       .map(({ item }) => item)
-  }, [catalogs, hasActiveSearch, trimmedSearchQuery])
+  }, [
+    catalogIds,
+    catalogs,
+    hasActiveSearch,
+    isSearchPending,
+    search.trimmedSearchQuery,
+    useSemanticSearch,
+  ])
+
   const authors = useMemo(
     () => getCatalogFilters(filterCatalogs, 'author'),
     [filterCatalogs]
@@ -135,8 +157,7 @@ export function Catalogs() {
         gap="medium"
       >
         <SelfServiceSearchBar
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
+          search={search.searchBar}
           aside={
             <Button
               onClick={() =>
@@ -159,11 +180,18 @@ export function Catalogs() {
         <CatalogsGrid
           catalogs={displayCatalogs}
           onBottomReached={() => {
-            if (!hasActiveSearch && !loading && pageInfo?.hasNextPage) {
+            if (
+              (!hasActiveSearch || useExactSearch) &&
+              !loading &&
+              pageInfo?.hasNextPage
+            ) {
               fetchNextPage()
             }
           }}
-          loading={!hasActiveSearch && loading}
+          loading={
+            (!hasActiveSearch && loading) ||
+            (hasActiveSearch && isSearchPending)
+          }
           emptyState={
             <Card
               css={{
@@ -186,7 +214,7 @@ export function Catalogs() {
                     secondary
                     onClick={() => {
                       resetFilters()
-                      setSearchQuery('')
+                      search.setSearchQuery('')
                     }}
                   >
                     Reset filters

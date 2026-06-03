@@ -1,5 +1,5 @@
 import { AppIcon, Flex } from '@pluralsh/design-system'
-import type { SearchDropdownItem } from './SelfServiceSearchBar'
+import type { SearchDropdownItem } from './useSelfServiceCatalogSearch'
 import { KeyboardEvent, ReactElement, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'

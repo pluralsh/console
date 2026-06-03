@@ -9,54 +9,37 @@ import {
 } from '@pluralsh/design-system'
 import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 import { Body2P } from 'components/utils/typography/Text'
-import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   PrAutomationFragment,
-  useCatalogSearchQuery,
   usePrAutomationLazyQuery,
 } from 'generated/graphql'
-import { chain, isEmpty } from 'lodash'
-import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { ReactNode, useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
 import { CatalogsSearchDropdownGroup } from './CatalogsSearchDropdownGroup'
+import type {
+  SearchDropdownItem,
+  SelfServiceSearchBarState,
+} from './useSelfServiceCatalogSearch'
 
-const selfServiceSearchPlaceholder =
-  'Ask anything across service catalog and PR automations. Try "I want to create clusters."'
-
-export type SearchDropdownItem = {
-  id: string
-  name: string
-  description?: Nullable<string>
-  category?: Nullable<string>
-  icon?: Nullable<string>
-  darkIcon?: Nullable<string>
-}
-
-function hasSearchValue<T>(value: Nullable<T> | undefined): value is T {
-  return !!value
-}
+export type { SearchDropdownItem }
 
 export function SelfServiceSearchBar({
   aside,
-  searchQuery,
-  onSearchQueryChange,
+  search,
   showCatalogGroup = true,
   showPrGroup = true,
 }: {
   aside?: ReactNode
-  searchQuery: string
-  onSearchQueryChange: (query: string) => void
+  search: SelfServiceSearchBarState
   showCatalogGroup?: boolean
   showPrGroup?: boolean
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const trimmedSearchQuery = searchQuery.trim()
-  const debouncedSearchQuery = useThrottle(trimmedSearchQuery, 300)
   const [searchFocused, setSearchFocused] = useState(false)
   const [createPrAutomation, setCreatePrAutomation] =
     useState<Nullable<PrAutomationFragment>>(null)
@@ -66,79 +49,20 @@ export function SelfServiceSearchBar({
   const [fetchPrAutomation] = usePrAutomationLazyQuery()
 
   const {
-    data: catalogSearchData,
-    error: catalogSearchError,
-    loading: catalogSearchLoading,
-  } = useCatalogSearchQuery({
-    variables: { q: debouncedSearchQuery },
-    skip: !debouncedSearchQuery,
-  })
+    searchQuery,
+    setSearchQuery,
+    hasActiveSearch,
+    showSemanticPanel,
+    isPanelSearchPending,
+    panelSearchError,
+    panelCatalogDropdownItems,
+    panelPrAutomationDropdownItems,
+    panelHasResults,
+    semanticSearchEnabled,
+  } = search
 
-  const hasActiveSearch = !!trimmedSearchQuery
-  const isPanelSearchPending =
-    hasActiveSearch &&
-    (trimmedSearchQuery !== debouncedSearchQuery || catalogSearchLoading)
-  const panelSearchError =
-    hasActiveSearch && catalogSearchError && !isPanelSearchPending
-      ? catalogSearchError
-      : undefined
-
-  const searchResults = useMemo(
-    () => catalogSearchData?.catalogSearch?.filter(hasSearchValue) ?? [],
-    [catalogSearchData?.catalogSearch]
-  )
-
-  const catalogSearchItems = useMemo(
-    () =>
-      chain(searchResults)
-        .map(({ catalog }) => catalog)
-        .filter(hasSearchValue)
-        .uniqBy('id')
-        .value(),
-    [searchResults]
-  )
-
-  const prAutomationSearchItems = useMemo(
-    () =>
-      chain(searchResults)
-        .map(({ prAutomation }) => prAutomation)
-        .filter(hasSearchValue)
-        .uniqBy('id')
-        .value(),
-    [searchResults]
-  )
-
-  const panelCatalogDropdownItems = useMemo(() => {
-    if (isPanelSearchPending || panelSearchError) return []
-
-    return catalogSearchItems.map((item) => {
-      return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        category: item.category,
-        icon: item.icon,
-        darkIcon: item.darkIcon,
-      }
-    })
-  }, [catalogSearchItems, isPanelSearchPending, panelSearchError])
-
-  const panelPrAutomationDropdownItems = useMemo(() => {
-    if (isPanelSearchPending || panelSearchError) return []
-
-    return prAutomationSearchItems.map((item) => ({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      icon: item.icon,
-      darkIcon: item.darkIcon,
-    }))
-  }, [isPanelSearchPending, panelSearchError, prAutomationSearchItems])
-
-  const showSearchDropdown = searchFocused && hasActiveSearch
-  const panelHasResults =
-    (showCatalogGroup && !isEmpty(panelCatalogDropdownItems)) ||
-    (showPrGroup && !isEmpty(panelPrAutomationDropdownItems))
+  const showSearchDropdown =
+    searchFocused && hasActiveSearch && showSemanticPanel
 
   const openPrAutomation = useCallback(
     async (id: string) => {
@@ -176,11 +100,15 @@ export function SelfServiceSearchBar({
         >
           <Input
             value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.currentTarget.value)}
+            onChange={(e) => setSearchQuery(e.currentTarget.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             showClearButton
-            placeholder={selfServiceSearchPlaceholder}
+            placeholder={
+              semanticSearchEnabled
+                ? 'Ask anything across service catalog and PR automations. Try "I want to create clusters."'
+                : 'Search'
+            }
             startIcon={<MagnifyingGlassIcon color="icon-light" />}
             width="100%"
           />
