@@ -145,7 +145,6 @@ export function SelfServiceSearchBar({
                         <CreatePrAutomation
                           id={item.id}
                           buttonProps={{ small: true }}
-                          onOpen={() => setSearchFocused(false)}
                         />
                       )}
                     />
