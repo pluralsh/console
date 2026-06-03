@@ -92,7 +92,7 @@ export function Catalogs() {
     hasActiveSearch,
     useSemanticSearch,
     useFallbackSearch,
-    catalogIds,
+    semanticCatalogs,
     isSearchPending,
     debouncedSearchQuery,
   } = search
@@ -100,21 +100,17 @@ export function Catalogs() {
   const filterCatalogs = useMemo(() => {
     if (!hasActiveSearch) return catalogs
     if (isSearchPending) return []
-
-    if (useSemanticSearch) {
-      const ids = new Set(catalogIds)
-      return catalogs.filter((catalog) => ids.has(catalog.id))
-    }
+    if (useSemanticSearch) return semanticCatalogs
 
     return new Fuse(catalogs, catalogFuseSearchOptions)
       .search(debouncedSearchQuery)
       .map(({ item }) => item)
   }, [
-    catalogIds,
     catalogs,
     debouncedSearchQuery,
     hasActiveSearch,
     isSearchPending,
+    semanticCatalogs,
     useSemanticSearch,
   ])
 

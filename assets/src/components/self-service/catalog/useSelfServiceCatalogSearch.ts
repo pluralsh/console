@@ -1,6 +1,10 @@
 import { useThrottle } from 'components/hooks/useThrottle'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext'
-import { useCatalogSearchQuery } from 'generated/graphql'
+import {
+  CatalogSearchItemFragment,
+  PrAutomationSearchItemFragment,
+  useCatalogSearchQuery,
+} from 'generated/graphql'
 import { chain } from 'lodash'
 import { useMemo, useState } from 'react'
 import type { GqlErrorType } from 'components/utils/Alert'
@@ -27,8 +31,8 @@ export type SelfServiceSearchState = {
   panelSearchError?: GqlErrorType
   panelCatalogItems: SearchDropdownItem[]
   panelPrAutomationItems: SearchDropdownItem[]
-  catalogIds: string[]
-  prAutomationIds: string[]
+  semanticCatalogs: CatalogSearchItemFragment[]
+  semanticPrAutomations: PrAutomationSearchItemFragment[]
 }
 
 function hasValue<T>(value: Nullable<T> | undefined): value is T {
@@ -67,53 +71,57 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
     [data?.catalogSearch]
   )
 
-  const panelCatalogItems = useMemo(
-    (): SearchDropdownItem[] =>
+  const semanticCatalogs = useMemo(
+    (): CatalogSearchItemFragment[] =>
       !useSemanticSearch
         ? []
         : chain(searchResults)
             .map(({ catalog }) => catalog)
             .filter(hasValue)
             .uniqBy('id')
-            .map(({ id, name, description, category, icon, darkIcon }) => ({
-              id,
-              name,
-              description,
-              category,
-              icon,
-              darkIcon,
-            }))
             .value(),
     [searchResults, useSemanticSearch]
   )
 
-  const panelPrAutomationItems = useMemo(
-    (): SearchDropdownItem[] =>
+  const semanticPrAutomations = useMemo(
+    (): PrAutomationSearchItemFragment[] =>
       !useSemanticSearch
         ? []
         : chain(searchResults)
             .map(({ prAutomation }) => prAutomation)
             .filter(hasValue)
             .uniqBy('id')
-            .map(({ id, name, description, icon, darkIcon }) => ({
-              id,
-              name,
-              description,
-              icon,
-              darkIcon,
-            }))
             .value(),
     [searchResults, useSemanticSearch]
   )
 
-  const catalogIds = useMemo(
-    () => panelCatalogItems.map(({ id }) => id),
-    [panelCatalogItems]
+  const panelCatalogItems = useMemo(
+    (): SearchDropdownItem[] =>
+      semanticCatalogs.map(
+        ({ id, name, description, category, icon, darkIcon }) => ({
+          id,
+          name,
+          description,
+          category,
+          icon,
+          darkIcon,
+        })
+      ),
+    [semanticCatalogs]
   )
 
-  const prAutomationIds = useMemo(
-    () => panelPrAutomationItems.map(({ id }) => id),
-    [panelPrAutomationItems]
+  const panelPrAutomationItems = useMemo(
+    (): SearchDropdownItem[] =>
+      semanticPrAutomations.map(
+        ({ id, name, documentation, icon, darkIcon }) => ({
+          id,
+          name,
+          description: documentation,
+          icon,
+          darkIcon,
+        })
+      ),
+    [semanticPrAutomations]
   )
 
   return useMemo(
@@ -130,19 +138,19 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
       panelSearchError: semanticSearchFailed ? error : undefined,
       panelCatalogItems,
       panelPrAutomationItems,
-      catalogIds,
-      prAutomationIds,
+      semanticCatalogs,
+      semanticPrAutomations,
     }),
     [
-      catalogIds,
       debouncedSearchQuery,
       error,
       hasActiveSearch,
       isSearchPending,
       panelCatalogItems,
       panelPrAutomationItems,
-      prAutomationIds,
       searchQuery,
+      semanticCatalogs,
+      semanticPrAutomations,
       semanticSearchEnabled,
       semanticSearchFailed,
       useFallbackSearch,

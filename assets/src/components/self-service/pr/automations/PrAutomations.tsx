@@ -22,7 +22,7 @@ export function PrAutomations() {
     hasActiveSearch,
     useSemanticSearch,
     useFallbackSearch,
-    prAutomationIds,
+    semanticPrAutomations,
     isSearchPending,
     debouncedSearchQuery,
   } = search
@@ -47,8 +47,8 @@ export function PrAutomations() {
   )
 
   const {
-    data,
-    loading,
+    data: pagedData,
+    loading: pagedLoading,
     error,
     refetch,
     pageInfo,
@@ -58,28 +58,21 @@ export function PrAutomations() {
     {
       queryHook: usePrAutomationsQuery,
       keyPath: ['prAutomations'],
+      skip: isSearchPending || useSemanticSearch,
     },
-    {
-      q: useFallbackSearch ? debouncedSearchQuery : '',
-    }
+    { q: useFallbackSearch ? debouncedSearchQuery : '' }
   )
 
   const prAutomations = useMemo(() => {
-    const nodes = mapExistingNodes(data?.prAutomations)
-
-    if (!hasActiveSearch) return nodes
-
+    if (!hasActiveSearch) return mapExistingNodes(pagedData?.prAutomations)
     if (isSearchPending) return []
-
-    if (!useSemanticSearch) return nodes
-
-    const ids = new Set(prAutomationIds)
-    return nodes.filter((prAutomation) => ids.has(prAutomation.id))
+    if (useSemanticSearch) return semanticPrAutomations
+    return mapExistingNodes(pagedData?.prAutomations)
   }, [
-    data?.prAutomations,
     hasActiveSearch,
     isSearchPending,
-    prAutomationIds,
+    pagedData?.prAutomations,
+    semanticPrAutomations,
     useSemanticSearch,
   ])
 
@@ -93,13 +86,15 @@ export function PrAutomations() {
       <Table
         fullHeightWrap
         columns={columns}
-        loading={(!data && loading) || (hasActiveSearch && isSearchPending)}
+        loading={
+          (!pagedData && pagedLoading) || (hasActiveSearch && isSearchPending)
+        }
         reactTableOptions={{ meta: { refetch } }}
         data={prAutomations}
         virtualizeRows
         hasNextPage={allowPagination && pageInfo?.hasNextPage}
         fetchNextPage={allowPagination ? fetchNextPage : undefined}
-        isFetchingNextPage={loading}
+        isFetchingNextPage={pagedLoading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{
           message: hasActiveSearch

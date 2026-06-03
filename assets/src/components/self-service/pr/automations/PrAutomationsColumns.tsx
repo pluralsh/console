@@ -1,4 +1,10 @@
-import { ComponentProps, ReactElement, useState } from 'react'
+import {
+  ComponentProps,
+  ReactElement,
+  useCallback,
+  useRef,
+  useState,
+} from 'react'
 import {
   AppIcon,
   ArrowRightIcon,
@@ -19,8 +25,10 @@ import styled, { useTheme } from 'styled-components'
 
 import {
   PrAutomationFragment,
+  PrAutomationSearchItem,
   PrRole,
   useDeletePrAutomationMutation,
+  usePrAutomationLazyQuery,
 } from 'generated/graphql'
 
 import { Confirm } from 'components/utils/Confirm'
@@ -42,7 +50,9 @@ enum MenuItemKey {
   CreatePr = 'create-pr',
 }
 
-const columnHelper = createColumnHelper<PrAutomationFragment>()
+const columnHelper = createColumnHelper<
+  PrAutomationFragment | PrAutomationSearchItem
+>()
 
 export const ColName = columnHelper.accessor(() => null, {
   id: 'name',
@@ -160,19 +170,21 @@ export const ColRole = columnHelper.accessor(({ cluster }) => cluster?.name, {
 })
 
 function DeletePrAutomationModal({
-  prAutomation,
+  id,
+  name,
   refetch,
   open,
   onClose,
 }: {
-  prAutomation: PrAutomationFragment
+  id: string
+  name: string
   refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [mutation, { loading, error }] = useDeletePrAutomationMutation({
-    variables: { id: prAutomation.id },
+    variables: { id },
     onCompleted: () => {
       onClose?.()
       refetch?.()
@@ -192,9 +204,7 @@ function DeletePrAutomationModal({
       text={
         <>
           Are you sure you want to delete the{' '}
-          <span css={{ color: theme.colors['text-danger'] }}>
-            “{prAutomation.name}”
-          </span>{' '}
+          <span css={{ color: theme.colors['text-danger'] }}>"{name}"</span>{' '}
           automation?
         </>
       }
@@ -222,13 +232,27 @@ const ColActions = columnHelper.accessor((node) => node, {
   header: '',
   cell: function Cell({ table, getValue }) {
     const theme = useTheme()
-    const prAutomation = getValue()
+    const { id, name } = getValue()
     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
+    const [fullPrAutomation, setFullPrAutomation] =
+      useState<Nullable<PrAutomationFragment>>(null)
+    const pendingMenuKeyRef = useRef<MenuItemKey | null>(null)
+    const [fetchPrAutomation, { loading: fetchingFullData }] =
+      usePrAutomationLazyQuery()
     const { refetch } = table.options.meta as { refetch?: () => void }
 
-    if (!prAutomation) {
-      return null
-    }
+    const openWithFullData = useCallback(
+      async (key: MenuItemKey) => {
+        pendingMenuKeyRef.current = key
+        const result = await fetchPrAutomation({ variables: { id } })
+        if (pendingMenuKeyRef.current !== key) return
+        if (result.data?.prAutomation) {
+          setFullPrAutomation(result.data.prAutomation)
+          setMenuKey(key)
+        }
+      },
+      [id, fetchPrAutomation]
+    )
 
     return (
       <div
@@ -243,13 +267,20 @@ const ColActions = columnHelper.accessor((node) => node, {
         <Button
           secondary
           startIcon={<PrOpenIcon />}
-          onClick={() => {
-            setMenuKey(MenuItemKey.CreatePr)
-          }}
+          loading={
+            fetchingFullData &&
+            pendingMenuKeyRef.current === MenuItemKey.CreatePr
+          }
+          onClick={() => openWithFullData(MenuItemKey.CreatePr)}
         >
           Create PR
         </Button>
-        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+        <MoreMenu
+          onSelectionChange={(newKey) => {
+            if (newKey === MenuItemKey.Delete) setMenuKey(MenuItemKey.Delete)
+            else openWithFullData(newKey as MenuItemKey)
+          }}
+        >
           <ListBoxItem
             key={MenuItemKey.Permissions}
             leftContent={<PeopleIcon />}
@@ -267,21 +298,32 @@ const ColActions = columnHelper.accessor((node) => node, {
         </MoreMenu>
         {/* Modals */}
         <DeletePrAutomationModal
-          prAutomation={prAutomation}
+          id={id}
+          name={name}
           refetch={refetch}
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        <AutomationPermissionsModal
-          prAutomation={prAutomation}
-          open={menuKey === MenuItemKey.Permissions}
-          onClose={() => setMenuKey('')}
-        />
-        <CreatePrModal
-          prAutomation={prAutomation}
-          open={menuKey === MenuItemKey.CreatePr}
-          onClose={() => setMenuKey('')}
-        />
+        {fullPrAutomation && (
+          <>
+            <AutomationPermissionsModal
+              prAutomation={fullPrAutomation}
+              open={menuKey === MenuItemKey.Permissions}
+              onClose={() => {
+                setMenuKey('')
+                pendingMenuKeyRef.current = null
+              }}
+            />
+            <CreatePrModal
+              prAutomation={fullPrAutomation}
+              open={menuKey === MenuItemKey.CreatePr}
+              onClose={() => {
+                setMenuKey('')
+                pendingMenuKeyRef.current = null
+              }}
+            />
+          </>
+        )}
       </div>
     )
   },
