@@ -40,27 +40,19 @@ function getCatalogFilters(
 
 function matchesCatalogFilters({
   author,
-  authorFilters,
+  authorFilters: af,
   category,
-  categoryFilters,
+  categoryFilters: cf,
 }: {
   author?: Nullable<string>
   authorFilters: string[]
   category?: Nullable<string>
   categoryFilters: string[]
 }) {
-  if (!isEmpty(authorFilters) && (!author || !authorFilters.includes(author))) {
-    return false
-  }
-
-  if (
-    !isEmpty(categoryFilters) &&
-    (!category || !categoryFilters.includes(category))
-  ) {
-    return false
-  }
-
-  return true
+  return (
+    (isEmpty(af) || (!!author && af.includes(author))) &&
+    (isEmpty(cf) || (!!category && cf.includes(category)))
+  )
 }
 
 export function Catalogs() {
@@ -115,10 +107,12 @@ export function Catalogs() {
     () => getCatalogFilters(filterCatalogs, 'author'),
     [filterCatalogs]
   )
+
   const categories = useMemo(
     () => getCatalogFilters(filterCatalogs, 'category'),
     [filterCatalogs]
   )
+
   const displayCatalogs = useMemo(
     () =>
       filterCatalogs.filter(({ author, category }) =>

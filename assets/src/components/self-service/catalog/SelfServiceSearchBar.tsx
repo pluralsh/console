@@ -8,7 +8,6 @@ import {
 } from '@pluralsh/design-system'
 import { CreatePrAutomation } from 'components/self-service/pr/automations/CreatePrAutomation'
 import { Body2P } from 'components/utils/typography/Text'
-import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isEmpty } from 'lodash'
 import { ReactNode, useState } from 'react'
@@ -44,7 +43,6 @@ export function SelfServiceSearchBar({
     hasActiveSearch,
     showDropdown,
     isSearchPending,
-    panelSearchError,
     panelCatalogItems,
     panelPrAutomationItems,
     semanticSearchEnabled,
@@ -107,8 +105,6 @@ export function SelfServiceSearchBar({
                   $height={56}
                   $width="100%"
                 />
-              ) : panelSearchError ? (
-                <GqlError error={panelSearchError} />
               ) : !panelHasResults ? (
                 <Body2P
                   $color="text-xlight"

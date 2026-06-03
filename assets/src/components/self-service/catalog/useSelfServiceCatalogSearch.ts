@@ -6,8 +6,8 @@ import {
   useCatalogSearchQuery,
 } from 'generated/graphql'
 import { chain } from 'lodash'
-import { useMemo, useState } from 'react'
-import type { GqlErrorType } from 'components/utils/Alert'
+import { useEffect, useMemo, useState } from 'react'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 
 export type SearchDropdownItem = {
   id: string
@@ -28,7 +28,6 @@ export type SelfServiceSearchState = {
   useSemanticSearch: boolean
   useFallbackSearch: boolean
   showDropdown: boolean // Show it only when AI is active and hasn't failed
-  panelSearchError?: GqlErrorType
   panelCatalogItems: SearchDropdownItem[]
   panelPrAutomationItems: SearchDropdownItem[]
 }
@@ -63,6 +62,18 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
     hasActiveSearch &&
     !isSearchPending &&
     (!semanticSearchEnabled || semanticSearchFailed)
+
+  const { popToast } = useSimpleToast()
+
+  useEffect(() => {
+    if (semanticSearchFailed)
+      popToast({
+        heading: 'Search failed, falling back to text search',
+        content: error?.message,
+        severity: 'danger',
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [semanticSearchFailed])
 
   const searchResults = useMemo(
     () => data?.catalogSearch?.filter(hasValue) ?? [],
@@ -133,7 +144,6 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
       useSemanticSearch,
       useFallbackSearch,
       showDropdown: semanticSearchEnabled && !semanticSearchFailed,
-      panelSearchError: semanticSearchFailed ? error : undefined,
       panelCatalogItems,
       panelPrAutomationItems,
     }),
