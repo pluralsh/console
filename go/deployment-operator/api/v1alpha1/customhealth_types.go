@@ -23,7 +23,10 @@ import (
 
 // CustomHealthSpec defines the desired state of CustomHealth
 type CustomHealthSpec struct {
-	Script string `json:"script,omitempty"`
+	Script  string `json:"script,omitempty"`
+	Group   string `json:"group,omitempty"`
+	Version string `json:"version,omitempty"`
+	Kind    string `json:"kind,omitempty"`
 }
 
 // CustomHealthStatus defines the observed state of CustomHealth

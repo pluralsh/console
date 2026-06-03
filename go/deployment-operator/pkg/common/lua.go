@@ -1,48 +1,39 @@
 package common
 
 import (
-	"sync"
-
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/lua"
 )
 
-func init() {
-	luaScript = &LuaScript{}
+var luaScripts = cmap.NewStringer[schema.GroupVersionKind, string]()
+
+// SetLuaScriptForGVK sets the Lua script for a specific GVK in a thread-safe manner.
+func SetLuaScriptForGVK(gvk schema.GroupVersionKind, val string) {
+	luaScripts.Set(gvk, val)
 }
 
-var luaScript *LuaScript
+// GetLuaScriptForGVK retrieves the Lua script for a given GVK.
+// If there is no exact match, it falls back to the default (zero-value) GVK script.
+func GetLuaScriptForGVK(gvk schema.GroupVersionKind) string {
+	if val, ok := luaScripts.Get(gvk); ok {
+		return val
+	}
 
-// LuaScript is a thread-safe structure for string manipulation
-type LuaScript struct {
-	mu    sync.RWMutex
-	value string
+	return ""
 }
 
-func GetLuaScript() *LuaScript {
-	return luaScript
+func IsLuaScriptValueForGVK(gvk schema.GroupVersionKind) bool {
+	_, ok := luaScripts.Get(gvk)
+	return ok
 }
 
-// SetValue sets the value of the string in a thread-safe manner
-func (s *LuaScript) SetValue(val string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.value = val
-}
-
-// GetValue retrieves the value of the string in a thread-safe manner
-func (s *LuaScript) GetValue() string {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.value
-}
-
-func (s *LuaScript) IsLuaScriptValue() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.value != ""
+// ClearLuaScripts clears all Lua scripts from the store. Useful for testing.
+func ClearLuaScripts() {
+	luaScripts = cmap.NewStringer[schema.GroupVersionKind, string]()
 }
 
 func GetLuaHealthConvert(obj *unstructured.Unstructured, luaScript string) (*HealthStatus, error) {

@@ -158,7 +158,7 @@ func GetHealthCheckFunc(gvk schema.GroupVersionKind) func(obj *unstructured.Unst
 		return healthFunc
 	}
 
-	if GetLuaScript().IsLuaScriptValue() {
+	if IsLuaScriptValueForGVK(gvk) {
 		return getLuaHealthConvert
 	}
 
@@ -166,5 +166,5 @@ func GetHealthCheckFunc(gvk schema.GroupVersionKind) func(obj *unstructured.Unst
 }
 
 func getLuaHealthConvert(obj *unstructured.Unstructured) (*HealthStatus, error) {
-	return GetLuaHealthConvert(obj, GetLuaScript().GetValue())
+	return GetLuaHealthConvert(obj, GetLuaScriptForGVK(obj.GroupVersionKind()))
 }
