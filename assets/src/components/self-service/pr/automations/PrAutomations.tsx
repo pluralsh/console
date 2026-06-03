@@ -40,8 +40,8 @@ export function PrAutomations() {
   )
 
   const {
-    data: pagedData,
-    loading: pagedLoading,
+    data,
+    loading,
     error,
     refetch,
     pageInfo,
@@ -56,8 +56,8 @@ export function PrAutomations() {
   )
 
   const prAutomations = useMemo(
-    () => mapExistingNodes(pagedData?.prAutomations),
-    [pagedData?.prAutomations]
+    () => mapExistingNodes(data?.prAutomations),
+    [data?.prAutomations]
   )
 
   if (error) return <GqlError error={error} />
@@ -68,13 +68,13 @@ export function PrAutomations() {
       <Table
         fullHeightWrap
         columns={columns}
-        loading={!pagedData && pagedLoading}
+        loading={!data && loading}
         reactTableOptions={{ meta: { refetch } }}
         data={prAutomations}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
-        isFetchingNextPage={pagedLoading}
+        isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{
           message: hasActiveSearch
