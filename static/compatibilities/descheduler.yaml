@@ -34,7 +34,28 @@ versions:
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **Helm chart updated in v0.35.0 (consumed by v0.35.1)**: expect\
+      \ chart template/value surface changes as part of the 0.35.0 chart bump.\n-\
+      \ **Init containers supported in the chart** (PR #1826): you can now define\
+      \ `initContainers` via values for the descheduler workload (verify exact values\
+      \ keys in the chart\u2019s `values.yaml`).\n- **RBAC alignment** (cherry-pick\
+      \ of #1836): the Helm-rendered `ClusterRole`/RBAC is synchronized with the upstream/base\
+      \ manifests; review any custom RBAC overlays/extra rules you add via values.\n\
+      - **Minor chart metadata change**: icon URL updated in `Chart.yaml` (no functional\
+      \ impact).\n\n**Upgrade action**: run `helm diff upgrade` and specifically review\
+      \ rendered RBAC and workload spec for any drift (serviceAccount, clusterrole\
+      \ rules, probes, securityContext, and any new initContainer blocks)."
+    chart_updates: [Chart bump for descheduler v0.35.0 (included in v0.35.1)., 'Helm
+        chart: add initContainers support (PR #1826).', 'Helm chart: synchronize ClusterRole/RBAC
+        with upstream base manifests (cherry-picked #1836).', 'Helm chart: update
+        icon URL in Chart.yaml (PR #1838).', 'CI/testing related: pin helm-unittest
+        plugin version; bump chart-testing-action (PR #1834).']
+    features: ['Helm chart can now configure init containers for the descheduler workload,
+        enabling pre-start tasks like config generation or fetching artifacts.', 'PodLifeTime
+        plugin extended with additional selectors/criteria such as condition, exit
+        code, and owner kind (helps target evictions more precisely if you use PodLifeTime).']
+    breaking_changes: []
   chart_version: 0.35.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.35.1']
 - version: 0.34.0
@@ -305,7 +326,19 @@ versions:
   kube: ['1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Patch upgrade from descheduler v0.21.0 to v0.22.1; ensure the
+        deployed container image tag is updated to `k8s.gcr.io/descheduler/descheduler:v0.22.1`.',
+      The v0.22.1 application release is a crash fix for the `RemoveFailedPods` strategy;
+        validate whether this strategy is enabled in your policy/config and prioritize
+        this upgrade if it is.]
+    features: [v0.22.1 is a patch release that fixes a crash in the new `RemoveFailedPods`
+        strategy., 'v0.21.0 introduced multiple operational and scheduling-related
+        enhancements: running as non-root (UID 1000), metrics collection, new/updated
+        strategies (e.g., HighNodeUtilization), and additional filtering knobs (labelSelector,
+        ignore pods with PVCs, soft topology spread constraints).']
+    breaking_changes: []
   chart_version: 0.22.1
   images: ['alpine:latest', 'k8s.gcr.io/descheduler/descheduler:v0.22.1']
 - version: 0.21.0
