@@ -295,7 +295,7 @@ function AutomationPermissionsModal({
   const [fetchPrAutomation, { data }] = usePrAutomationLazyQuery()
 
   useEffect(() => {
-    if (open && !data?.prAutomation) {
+    if (open && (!data?.prAutomation || data.prAutomation.id !== id)) {
       fetchPrAutomation({ variables: { id } }).then((result) => {
         if (result.error)
           popToast({ content: result.error.message, severity: 'danger' })
