@@ -36,22 +36,37 @@ query Catalog($id: ID, $name: String) {
   }
 }
 
+fragment CatalogSearchItem on CatalogSearchItem {
+  id
+  name
+  author
+  description
+  category
+  icon
+  darkIcon
+}
+
+fragment PrAutomationSearchItem on PrAutomationSearchItem {
+  id
+  name
+  documentation
+  identifier
+  role
+  icon
+  darkIcon
+  cluster {
+    id
+    name
+  }
+}
+
 query CatalogSearch($q: String!) {
   catalogSearch(q: $q) {
     catalog {
-      id
-      name
-      description
-      category
-      icon
-      darkIcon
+      ...CatalogSearchItem
     }
     prAutomation {
-      id
-      name
-      description
-      icon
-      darkIcon
+      ...PrAutomationSearchItem
     }
   }
 }

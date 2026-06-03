@@ -13568,14 +13568,19 @@ type PrAutomationSearchItem {
 
   name: String!
 
-  "the description for this pr automation"
-  description: String
+  documentation: String
+
+  identifier: String
+
+  role: PrRole
 
   "an icon url to use for this pr automation"
   icon: String
 
   "a darkmode icon url to use for this pr automation"
   darkIcon: String
+
+  cluster: Cluster
 }
 
 type CatalogSearchItem {
@@ -13583,11 +13588,11 @@ type CatalogSearchItem {
 
   name: String!
 
+  "the name of the author of this catalog"
+  author: String
+
   "longform description for the purpose of this catalog"
   description: String
-
-  "deprecated alias of description"
-  documentation: String
 
   "short category name used for browsing catalogs"
   category: String

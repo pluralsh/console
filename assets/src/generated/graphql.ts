@@ -1724,14 +1724,14 @@ export type CatalogEdge = {
 
 export type CatalogSearchItem = {
   __typename?: 'CatalogSearchItem';
+  /** the name of the author of this catalog */
+  author?: Maybe<Scalars['String']['output']>;
   /** short category name used for browsing catalogs */
   category?: Maybe<Scalars['String']['output']>;
   /** a darkmode icon url to use for this catalog */
   darkIcon?: Maybe<Scalars['String']['output']>;
   /** longform description for the purpose of this catalog */
   description?: Maybe<Scalars['String']['output']>;
-  /** deprecated alias of description */
-  documentation?: Maybe<Scalars['String']['output']>;
   /** an icon url to use for this catalog */
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -7898,14 +7898,16 @@ export type PrAutomationEdge = {
 
 export type PrAutomationSearchItem = {
   __typename?: 'PrAutomationSearchItem';
+  cluster?: Maybe<Cluster>;
   /** a darkmode icon url to use for this pr automation */
   darkIcon?: Maybe<Scalars['String']['output']>;
-  /** the description for this pr automation */
-  description?: Maybe<Scalars['String']['output']>;
+  documentation?: Maybe<Scalars['String']['output']>;
   /** an icon url to use for this pr automation */
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  identifier?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  role?: Maybe<PrRole>;
 };
 
 /** templates to apply in this pr */
@@ -17702,12 +17704,16 @@ export type CatalogQueryVariables = Exact<{
 
 export type CatalogQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
+export type CatalogSearchItemFragment = { __typename?: 'CatalogSearchItem', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null };
+
+export type PrAutomationSearchItemFragment = { __typename?: 'PrAutomationSearchItem', id: string, name: string, documentation?: string | null, identifier?: string | null, role?: PrRole | null, icon?: string | null, darkIcon?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
+
 export type CatalogSearchQueryVariables = Exact<{
   q: Scalars['String']['input'];
 }>;
 
 
-export type CatalogSearchQuery = { __typename?: 'RootQueryType', catalogSearch?: Array<{ __typename?: 'CatalogSearchResult', catalog?: { __typename?: 'CatalogSearchItem', id: string, name: string, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null, prAutomation?: { __typename?: 'PrAutomationSearchItem', id: string, name: string, description?: string | null, icon?: string | null, darkIcon?: string | null } | null } | null> | null };
+export type CatalogSearchQuery = { __typename?: 'RootQueryType', catalogSearch?: Array<{ __typename?: 'CatalogSearchResult', catalog?: { __typename?: 'CatalogSearchItem', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null, prAutomation?: { __typename?: 'PrAutomationSearchItem', id: string, name: string, documentation?: string | null, identifier?: string | null, role?: PrRole | null, icon?: string | null, darkIcon?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null };
 
 export type UpsertCatalogMutationVariables = Exact<{
   attributes?: InputMaybe<CatalogAttributes>;
@@ -22185,6 +22191,32 @@ export const CatalogFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
+export const CatalogSearchItemFragmentDoc = gql`
+    fragment CatalogSearchItem on CatalogSearchItem {
+  id
+  name
+  author
+  description
+  category
+  icon
+  darkIcon
+}
+    `;
+export const PrAutomationSearchItemFragmentDoc = gql`
+    fragment PrAutomationSearchItem on PrAutomationSearchItem {
+  id
+  name
+  documentation
+  identifier
+  role
+  icon
+  darkIcon
+  cluster {
+    id
+    name
+  }
+}
+    `;
 export const ClusterConditionFragmentDoc = gql`
     fragment ClusterCondition on ClusterCondition {
   lastTransitionTime
@@ -30372,23 +30404,15 @@ export const CatalogSearchDocument = gql`
     query CatalogSearch($q: String!) {
   catalogSearch(q: $q) {
     catalog {
-      id
-      name
-      description
-      category
-      icon
-      darkIcon
+      ...CatalogSearchItem
     }
     prAutomation {
-      id
-      name
-      description
-      icon
-      darkIcon
+      ...PrAutomationSearchItem
     }
   }
 }
-    `;
+    ${CatalogSearchItemFragmentDoc}
+${PrAutomationSearchItemFragmentDoc}`;
 
 /**
  * __useCatalogSearchQuery__
@@ -45552,6 +45576,8 @@ export const namedOperations = {
     ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',
     Catalog: 'Catalog',
+    CatalogSearchItem: 'CatalogSearchItem',
+    PrAutomationSearchItem: 'PrAutomationSearchItem',
     ClusterNode: 'ClusterNode',
     ClusterCondition: 'ClusterCondition',
     Taint: 'Taint',

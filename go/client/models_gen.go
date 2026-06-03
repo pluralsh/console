@@ -1408,19 +1408,8 @@ type CatalogEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
-type CatalogSearchItem struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	// the documentation for this pr automation
-	Documentation *string `json:"documentation,omitempty"`
-	// an icon url to use for this catalog
-	Icon *string `json:"icon,omitempty"`
-	// a darkmode icon url to use for this catalog
-	DarkIcon *string `json:"darkIcon,omitempty"`
-}
-
 type CatalogSearchResult struct {
-	Catalog      *CatalogSearchItem      `json:"catalog,omitempty"`
+	Catalog      *Catalog                `json:"catalog,omitempty"`
 	PrAutomation *PrAutomationSearchItem `json:"prAutomation,omitempty"`
 }
 
@@ -6531,14 +6520,14 @@ type PrAutomationEdge struct {
 }
 
 type PrAutomationSearchItem struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	// the description for this pr automation
-	Description *string `json:"description,omitempty"`
-	// an icon url to use for this pr automation
-	Icon *string `json:"icon,omitempty"`
-	// a darkmode icon url to use for this pr automation
-	DarkIcon *string `json:"darkIcon,omitempty"`
+	ID            string   `json:"id"`
+	Name          string   `json:"name"`
+	Documentation *string  `json:"documentation,omitempty"`
+	Identifier    *string  `json:"identifier,omitempty"`
+	Role          *PrRole  `json:"role,omitempty"`
+	Icon          *string  `json:"icon,omitempty"`
+	DarkIcon      *string  `json:"darkIcon,omitempty"`
+	Cluster       *Cluster `json:"cluster,omitempty"`
 }
 
 // templates to apply in this pr
