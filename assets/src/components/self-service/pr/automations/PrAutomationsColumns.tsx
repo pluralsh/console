@@ -18,7 +18,7 @@ import styled, { useTheme } from 'styled-components'
 
 import {
   PrAutomationFragment,
-  PrAutomationSearchItem,
+  PrAutomationSearchItemFragment,
   PrRole,
   useDeletePrAutomationMutation,
   usePrAutomationLazyQuery,
@@ -43,7 +43,7 @@ enum MenuItemKey {
 }
 
 const columnHelper = createColumnHelper<
-  PrAutomationFragment | PrAutomationSearchItem
+  PrAutomationFragment | PrAutomationSearchItemFragment
 >()
 
 export const ColName = columnHelper.accessor(() => null, {
