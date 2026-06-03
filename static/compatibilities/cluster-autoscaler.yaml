@@ -223,7 +223,13 @@ versions:
   kube: ['1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Updates Cluster Autoscaler to v1.28.2, which includes a fix for a
+        startup crash when using the `--leader-elect` flag.', Adds an official s390x
+        image variant for v1.28.2 (in addition to amd64/arm64).]
+    breaking_changes: []
   chart_version: 9.34.1
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.28.2']
 - version: 1.27.2
