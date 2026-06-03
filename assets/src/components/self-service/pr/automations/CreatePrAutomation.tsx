@@ -19,7 +19,7 @@ export function CreatePrAutomation({
 
   const handleOpen = useCallback(async () => {
     onOpen?.()
-    if (data?.prAutomation) {
+    if (data?.prAutomation?.id === id) {
       setOpen(true)
       return
     }
