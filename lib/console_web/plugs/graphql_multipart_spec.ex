@@ -22,40 +22,33 @@ defmodule ConsoleWeb.Plugs.GraphQLMultipartSpec do
   @impl Plug
   def call(%Plug.Conn{params: %{"operations" => operations, "map" => upload_map}} = conn, _opts)
       when is_binary(operations) and is_binary(upload_map) do
-    case Jason.decode(operations) do
-      {:ok, %{} = operation} ->
+    with {:ok, %{} = operation} <- Jason.decode(operations),
+         {:ok, %{} = mapping} <- Jason.decode(upload_map) do
         params =
           conn.params
           |> Map.delete("operations")
           |> Map.delete("map")
-          |> Map.merge(apply_upload_map(operation, upload_map))
+          |> Map.merge(apply_upload_map(operation, mapping))
 
         %{conn | params: params}
-
-      _ ->
-        conn
+    else
+      _ -> conn
     end
   end
 
   def call(conn, _opts), do: conn
 
-  defp apply_upload_map(%{"variables" => variables} = operation, upload_map)
-       when is_map(variables) and is_binary(upload_map) do
-    case Jason.decode(upload_map) do
-      {:ok, %{} = mapping} ->
-        variables =
-          Enum.reduce(mapping, variables, fn {file_key, paths}, vars ->
-            Enum.reduce(List.wrap(paths), vars, &put_upload_variable(&2, &1, file_key))
-          end)
+  defp apply_upload_map(%{"variables" => variables} = operation, mapping)
+       when is_map(variables) do
+    variables =
+      Enum.reduce(mapping, variables, fn {file_key, paths}, vars ->
+        Enum.reduce(List.wrap(paths), vars, &put_upload_variable(&2, &1, file_key))
+      end)
 
-        Map.put(operation, "variables", variables)
-
-      _ ->
-        operation
-    end
+    Map.put(operation, "variables", variables)
   end
 
-  defp apply_upload_map(operation, _upload_map), do: operation
+  defp apply_upload_map(operation, _mapping), do: operation
 
   defp put_upload_variable(variables, "variables." <> path, file_key) do
     put_upload_variable_path(variables, String.split(path, "."), file_key)

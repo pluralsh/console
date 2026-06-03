@@ -47,4 +47,17 @@ defmodule ConsoleWeb.Plugs.GraphQLMultipartSpecTest do
 
     assert conn.params == %{"operations" => operations, "0" => :upload}
   end
+
+  test "does not change params when the map is not json" do
+    operations = Jason.encode!(%{query: "{ ping }", variables: %{}})
+    params = %{"operations" => operations, "map" => "{", "0" => :upload}
+
+    conn =
+      :post
+      |> conn("/gql")
+      |> Map.put(:params, params)
+      |> GraphQLMultipartSpec.call([])
+
+    assert conn.params == params
+  end
 end
