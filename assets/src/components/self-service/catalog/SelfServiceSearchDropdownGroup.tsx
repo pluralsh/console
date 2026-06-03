@@ -6,7 +6,7 @@ import { isEmpty } from 'lodash'
 import { iconUrl } from 'utils/icon'
 import { StackedText } from 'components/utils/table/StackedText'
 
-export function CatalogsSearchDropdownGroup({
+export function SelfServiceSearchDropdownGroup({
   label,
   items,
   icon,

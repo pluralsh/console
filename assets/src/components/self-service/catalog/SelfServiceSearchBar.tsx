@@ -14,7 +14,7 @@ import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
-import { CatalogsSearchDropdownGroup } from './CatalogsSearchDropdownGroup'
+import { SelfServiceSearchDropdownGroup } from './SelfServiceSearchDropdownGroup'
 import type {
   SearchDropdownItem,
   SelfServiceSearchState,
@@ -118,7 +118,7 @@ export function SelfServiceSearchBar({
               ) : (
                 <>
                   {showCatalogGroup && (
-                    <CatalogsSearchDropdownGroup
+                    <SelfServiceSearchDropdownGroup
                       label="Service catalog"
                       items={panelCatalogItems}
                       icon={<CatalogIcon />}
@@ -137,7 +137,7 @@ export function SelfServiceSearchBar({
                     />
                   )}
                   {showPrGroup && (
-                    <CatalogsSearchDropdownGroup
+                    <SelfServiceSearchDropdownGroup
                       label="PR automations"
                       items={panelPrAutomationItems}
                       icon={<PrQueueIcon />}
