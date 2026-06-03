@@ -1,7 +1,7 @@
-import { Button } from '@pluralsh/design-system'
-import { PrOpenIcon } from '@pluralsh/design-system'
+import { Button, PrOpenIcon } from '@pluralsh/design-system'
 import { usePrAutomationLazyQuery } from 'generated/graphql'
-import { ComponentProps, useCallback, useRef, useState } from 'react'
+import { ComponentProps, useCallback, useState } from 'react'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CreatePrModal } from './CreatePrModal'
 
 export function CreatePrAutomationModal({
@@ -14,7 +14,7 @@ export function CreatePrAutomationModal({
   onOpen?: () => void
 }) {
   const [open, setOpen] = useState(false)
-  const pendingRef = useRef(false)
+  const { popToast } = useSimpleToast()
   const [fetchPrAutomation, { data, loading }] = usePrAutomationLazyQuery()
 
   const handleOpen = useCallback(async () => {
@@ -23,17 +23,14 @@ export function CreatePrAutomationModal({
       setOpen(true)
       return
     }
-    pendingRef.current = true
-    const result = await fetchPrAutomation({ variables: { id } })
-    if (!pendingRef.current) return
-    pendingRef.current = false
-    if (result.data?.prAutomation) setOpen(true)
-  }, [data?.prAutomation, fetchPrAutomation, id, onOpen])
 
-  const handleClose = useCallback(() => {
-    setOpen(false)
-    pendingRef.current = false
-  }, [])
+    const result = await fetchPrAutomation({ variables: { id } })
+    if (result.error) {
+      popToast({ content: result.error.message, severity: 'danger' })
+      return
+    }
+    if (result.data?.prAutomation) setOpen(true)
+  }, [data?.prAutomation, fetchPrAutomation, id, onOpen, popToast])
 
   return (
     <>
@@ -50,7 +47,7 @@ export function CreatePrAutomationModal({
         <CreatePrModal
           prAutomation={data.prAutomation}
           open={open}
-          onClose={handleClose}
+          onClose={() => setOpen(false)}
         />
       )}
     </>
