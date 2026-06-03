@@ -204,7 +204,9 @@ function DeletePrAutomationModal({
       text={
         <>
           Are you sure you want to delete the{' '}
-          <span css={{ color: theme.colors['text-danger'] }}>"{name}"</span>{' '}
+          <span css={{ color: theme.colors['text-danger'] }}>
+            &quot;{name}&quot;
+          </span>{' '}
           automation?
         </>
       }
