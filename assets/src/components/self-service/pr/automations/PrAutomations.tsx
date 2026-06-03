@@ -18,12 +18,7 @@ export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
   const search = useSelfServiceCatalogSearch()
-  const {
-    hasActiveSearch,
-    useFallbackSearch,
-    isSearchPending,
-    debouncedSearchQuery,
-  } = search
+  const { hasActiveSearch, useFallbackSearch, debouncedSearchQuery } = search
 
   useSetPageHeaderContent(
     useMemo(
@@ -56,7 +51,6 @@ export function PrAutomations() {
     {
       queryHook: usePrAutomationsQuery,
       keyPath: ['prAutomations'],
-      skip: isSearchPending,
     },
     { q: useFallbackSearch ? debouncedSearchQuery : '' }
   )
@@ -65,8 +59,6 @@ export function PrAutomations() {
     () => mapExistingNodes(pagedData?.prAutomations),
     [pagedData?.prAutomations]
   )
-
-  const allowPagination = !isSearchPending
 
   if (error) return <GqlError error={error} />
 
@@ -80,8 +72,8 @@ export function PrAutomations() {
         reactTableOptions={{ meta: { refetch } }}
         data={prAutomations}
         virtualizeRows
-        hasNextPage={allowPagination && pageInfo?.hasNextPage}
-        fetchNextPage={allowPagination ? fetchNextPage : undefined}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
         isFetchingNextPage={pagedLoading}
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{
