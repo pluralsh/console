@@ -77,7 +77,7 @@ export function Flows() {
       {isEmpty(flows) ? (
         hasActiveSearch ? (
           <Card css={{ padding: theme.spacing.large }}>
-            <EmptyState message={`No flows found`} />
+            <EmptyState message="No flows found" />
           </Card>
         ) : (
           <FlowEmptyState />
