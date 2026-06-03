@@ -31,7 +31,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { Link } from 'react-router-dom'
 
-import { CreatePrAutomationModal } from './CreatePrAutomationModal'
+import { CreatePrAutomation } from './CreatePrAutomation'
 import { iconUrl } from 'utils/icon'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { PrAutomationPermissionsModal } from './PrAutomationPermissionsModal'
@@ -240,7 +240,7 @@ const ColActions = columnHelper.accessor((node) => node, {
           columnGap: theme.spacing.medium,
         }}
       >
-        <CreatePrAutomationModal id={id} />
+        <CreatePrAutomation id={id} />
         <MoreMenu
           onSelectionChange={(newKey) => {
             if (newKey === MenuItemKey.Delete) setMenuKey(MenuItemKey.Delete)

@@ -6,7 +6,7 @@ import {
   MagnifyingGlassIcon,
   PrQueueIcon,
 } from '@pluralsh/design-system'
-import { CreatePrAutomationModal } from 'components/self-service/pr/automations/CreatePrAutomationModal'
+import { CreatePrAutomation } from 'components/self-service/pr/automations/CreatePrAutomation'
 import { Body2P } from 'components/utils/typography/Text'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -146,7 +146,7 @@ export function SelfServiceSearchBar({
                       items={panelPrAutomationItems}
                       icon={<PrQueueIcon />}
                       renderRightContent={(item) => (
-                        <CreatePrAutomationModal
+                        <CreatePrAutomation
                           id={item.id}
                           buttonProps={{ small: true }}
                           onOpen={() => setSearchFocused(false)}

@@ -4,7 +4,7 @@ import { ComponentProps, useCallback, useState } from 'react'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CreatePrModal } from './CreatePrModal'
 
-export function CreatePrAutomationModal({
+export function CreatePrAutomation({
   id,
   buttonProps,
   onOpen,
