@@ -3,7 +3,7 @@
     "properties": {
         "output": {
             "type": "string",
-            "description": "The output of this investigation.  Should be an informative summary of the investigation in markdown."
+            "description": "The output of this investigation.  Should be an informative summary of the investigation in markdown.  You *must* provide this to record a result."
         }
     },
     "required": ["output"]

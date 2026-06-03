@@ -1832,6 +1832,7 @@ enum AgentRunStatus {
   FAILED
   CANCELLED
   BABYSITTING
+  PENDING_APPROVAL
 }
 
 enum AgentRunMode {
@@ -1916,6 +1917,9 @@ input AgentRunAttributes {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
 }
 
 input AgentRunStatusAttributes {
@@ -1936,6 +1940,12 @@ input AgentRunStatusAttributes {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
+
+  "when this run was approved"
+  approvedAt: DateTime
 }
 
 input AgentPullRequestAttributes {
@@ -2143,6 +2153,12 @@ type AgentRun {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
+
+  "when this run was approved"
+  approvedAt: DateTime
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -2420,6 +2436,7 @@ enum WorkbenchToolType {
   BITBUCKET_DATACENTER
   AZURE_DEVOPS
   PAGERDUTY
+  OPENSEARCH
 }
 
 enum WorkbenchToolCategory {
@@ -2512,6 +2529,25 @@ enum EvalResultsPeriod {
 input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
+
+  "mode-specific options for this job"
+  modes: WorkbenchJobModesAttributes
+}
+
+input WorkbenchJobModesAttributes {
+  "whether planning mode is enabled for this job"
+  plan: Boolean
+
+  "coding mode options for this job"
+  coding: WorkbenchJobCodingModesAttributes
+}
+
+input WorkbenchJobCodingModesAttributes {
+  "whether babysit mode is enabled for coding agent runs"
+  babysit: Boolean
+
+  "whether coding agent runs require approval before continuing"
+  approval: Boolean
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -2768,6 +2804,9 @@ input WorkbenchToolConfigurationAttributes {
   "elasticsearch connection (logs)"
   elastic: WorkbenchToolElasticConnectionAttributes
 
+  "aws opensearch connection (logs)"
+  opensearch: WorkbenchToolOpensearchConnectionAttributes
+
   "prometheus connection (metrics)"
   prometheus: WorkbenchToolPrometheusConnectionAttributes
 
@@ -2844,6 +2883,29 @@ input WorkbenchToolElasticConnectionAttributes {
 
   "elasticsearch index"
   index: String!
+}
+
+input WorkbenchToolOpensearchConnectionAttributes {
+  "aws opensearch endpoint"
+  host: String!
+
+  "opensearch index"
+  index: String!
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS secret access key for SigV4 authentication"
+  awsSecretAccessKey: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
+
+  "optional IAM role ARN to assume before signing OpenSearch requests"
+  assumeRoleArn: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication instead of static credentials"
+  usePodIdentity: Boolean
 }
 
 input WorkbenchToolPrometheusConnectionAttributes {
@@ -3250,6 +3312,9 @@ type WorkbenchJob {
   "error message when the job failed"
   error: String
 
+  "mode-specific options for this job"
+  modes: WorkbenchJobModes
+
   "chatbot integration metadata for this job, when present"
   chatbotMessage: ChatbotMessage
 
@@ -3309,6 +3374,22 @@ type WorkbenchJob {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobModes {
+  "whether planning mode is enabled for this job"
+  plan: Boolean
+
+  "coding mode options for this job"
+  coding: WorkbenchJobCodingModes
+}
+
+type WorkbenchJobCodingModes {
+  "whether babysit mode is enabled for coding agent runs"
+  babysit: Boolean
+
+  "whether coding agent runs require approval before continuing"
+  approval: Boolean
 }
 
 type WorkbenchJobActivity {
@@ -3930,6 +4011,9 @@ type WorkbenchToolConfiguration {
   "elasticsearch connection (no secrets)"
   elastic: WorkbenchToolElasticConnection
 
+  "aws opensearch connection (no secrets)"
+  opensearch: WorkbenchToolOpensearchConnection
+
   "prometheus connection (no secrets)"
   prometheus: WorkbenchToolPrometheusConnection
 
@@ -4003,6 +4087,26 @@ type WorkbenchToolElasticConnection {
 
   "basic auth username"
   username: String!
+}
+
+type WorkbenchToolOpensearchConnection {
+  "aws opensearch endpoint"
+  host: String!
+
+  "opensearch index"
+  index: String!
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
+
+  "assumed role ARN when configured"
+  assumeRoleArn: String
+
+  "whether pod identity (IRSA\/Workload Identity) is used for AWS authentication"
+  usePodIdentity: Boolean
 }
 
 type WorkbenchToolPrometheusConnection {

@@ -364,6 +364,10 @@ type AgentRun struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// whether this run requires approval before continuing
+	Approval *bool `json:"approval,omitempty"`
+	// when this run was approved
+	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -409,6 +413,8 @@ type AgentRunAttributes struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// whether this run requires approval before continuing
+	Approval *bool `json:"approval,omitempty"`
 }
 
 type AgentRunConnection struct {
@@ -460,6 +466,10 @@ type AgentRunStatusAttributes struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// whether this run requires approval before continuing
+	Approval *bool `json:"approval,omitempty"`
+	// when this run was approved
+	ApprovedAt *string `json:"approvedAt,omitempty"`
 }
 
 type AgentRunUpload struct {
@@ -9978,6 +9988,8 @@ type WorkbenchJob struct {
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// error message when the job failed
 	Error *string `json:"error,omitempty"`
+	// mode-specific options for this job
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// chatbot integration metadata for this job, when present
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
@@ -10111,6 +10123,22 @@ type WorkbenchJobActivityTrace struct {
 type WorkbenchJobAttributes struct {
 	// the prompt for this job
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for this job
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
+}
+
+type WorkbenchJobCodingModes struct {
+	// whether babysit mode is enabled for coding agent runs
+	Babysit *bool `json:"babysit,omitempty"`
+	// whether coding agent runs require approval before continuing
+	Approval *bool `json:"approval,omitempty"`
+}
+
+type WorkbenchJobCodingModesAttributes struct {
+	// whether babysit mode is enabled for coding agent runs
+	Babysit *bool `json:"babysit,omitempty"`
+	// whether coding agent runs require approval before continuing
+	Approval *bool `json:"approval,omitempty"`
 }
 
 type WorkbenchJobConnection struct {
@@ -10126,6 +10154,20 @@ type WorkbenchJobDelta struct {
 type WorkbenchJobEdge struct {
 	Node   *WorkbenchJob `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type WorkbenchJobModes struct {
+	// whether planning mode is enabled for this job
+	Plan *bool `json:"plan,omitempty"`
+	// coding mode options for this job
+	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
+}
+
+type WorkbenchJobModesAttributes struct {
+	// whether planning mode is enabled for this job
+	Plan *bool `json:"plan,omitempty"`
+	// coding mode options for this job
+	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
 }
 
 type WorkbenchJobProgress struct {
@@ -11206,12 +11248,13 @@ func (e AgentRunMode) MarshalJSON() ([]byte, error) {
 type AgentRunStatus string
 
 const (
-	AgentRunStatusPending     AgentRunStatus = "PENDING"
-	AgentRunStatusRunning     AgentRunStatus = "RUNNING"
-	AgentRunStatusSuccessful  AgentRunStatus = "SUCCESSFUL"
-	AgentRunStatusFailed      AgentRunStatus = "FAILED"
-	AgentRunStatusCancelled   AgentRunStatus = "CANCELLED"
-	AgentRunStatusBabysitting AgentRunStatus = "BABYSITTING"
+	AgentRunStatusPending         AgentRunStatus = "PENDING"
+	AgentRunStatusRunning         AgentRunStatus = "RUNNING"
+	AgentRunStatusSuccessful      AgentRunStatus = "SUCCESSFUL"
+	AgentRunStatusFailed          AgentRunStatus = "FAILED"
+	AgentRunStatusCancelled       AgentRunStatus = "CANCELLED"
+	AgentRunStatusBabysitting     AgentRunStatus = "BABYSITTING"
+	AgentRunStatusPendingApproval AgentRunStatus = "PENDING_APPROVAL"
 )
 
 var AllAgentRunStatus = []AgentRunStatus{
@@ -11221,11 +11264,12 @@ var AllAgentRunStatus = []AgentRunStatus{
 	AgentRunStatusFailed,
 	AgentRunStatusCancelled,
 	AgentRunStatusBabysitting,
+	AgentRunStatusPendingApproval,
 }
 
 func (e AgentRunStatus) IsValid() bool {
 	switch e {
-	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled, AgentRunStatusBabysitting:
+	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled, AgentRunStatusBabysitting, AgentRunStatusPendingApproval:
 		return true
 	}
 	return false

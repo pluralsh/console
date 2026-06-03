@@ -595,7 +595,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			}
 		})
 
-		It("should fail the run and delete pod when an init container fails", func() {
+		It("should fail the run and delay pod deletion when an init container fails", func() {
 			By("Creating a new AgentRun for failed init container test")
 			failedInitRunName := "agent-test-run-failed-init"
 			failedInitRunID := "test-run-failed-init-321"
@@ -625,7 +625,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			fakeConsoleClient.On("GetAgentRun", mock.Anything, failedInitRunID).Return(&console.AgentRunFragment{
 				ID:     failedInitRunID,
 				Status: console.AgentRunStatusPending,
-			}, nil).Twice()
+			}, nil).Times(3)
 			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, failedInitRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
 				return attrs.Status == console.AgentRunStatusPending
 			})).Return(&console.AgentRunFragment{
@@ -662,24 +662,40 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 						Terminated: &corev1.ContainerStateTerminated{
 							ExitCode: 1,
 							Message:  "bootstrap failed",
+							FinishedAt: metav1.Time{
+								Time: time.Now(),
+							},
 						},
 					},
 				},
 			}
 			Expect(kClient.Status().Update(ctx, pod)).To(Succeed())
 
-			// Second reconcile should mark the run failed and remove the failed pod.
-			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: failedInitNamespacedName})
+			// Second reconcile should mark the run failed locally, but keep the failed pod for troubleshooting.
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: failedInitNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).To(BeNumerically(">", 0))
 
-			err = kClient.Get(ctx, failedInitNamespacedName, &corev1.Pod{})
-			Expect(errors.IsNotFound(err)).To(BeTrue())
+			pod = &corev1.Pod{}
+			Expect(kClient.Get(ctx, failedInitNamespacedName, pod)).To(Succeed())
 
 			agentRun := &v1alpha1.AgentRun{}
 			Expect(kClient.Get(ctx, failedInitNamespacedName, agentRun)).To(Succeed())
 			Expect(agentRun.Status.Phase).To(Equal(v1alpha1.AgentRunPhaseFailed))
 			Expect(agentRun.Status.Error).NotTo(BeNil())
 			Expect(*agentRun.Status.Error).To(Equal("init container \"agent-bootstrap\" failed with exit code 1: bootstrap failed"))
+
+			pod.Status.InitContainerStatuses[0].State.Terminated.FinishedAt = metav1.Time{
+				Time: time.Now().Add(-initContainerFailurePodDeletionDelay),
+			}
+			Expect(kClient.Status().Update(ctx, pod)).To(Succeed())
+
+			// Follow-up reconcile after the delay should report failure to Console and remove the pod.
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: failedInitNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			err = kClient.Get(ctx, failedInitNamespacedName, &corev1.Pod{})
+			Expect(errors.IsNotFound(err)).To(BeTrue())
 
 			// Cleanup.
 			if err := kClient.Get(ctx, failedInitNamespacedName, agentRun); err == nil {

@@ -41,25 +41,25 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   defp stop_msg(%Result{}), do: true
   defp stop_msg(_), do: false
 
-  defp persist_and_poll_run(%AgentRun{id: id} = run) do
+  defp persist_and_poll_run(%AgentRun{id: id, tool: tool} = run) do
     case poll_run(run) do
       {:timeout, _} -> {:user, "agent run #{id} timed out"}
-      {:failed, %AgentRun{error: error}} -> {:user, "Agent run failed: #{error}"}
+      {:failed, %AgentRun{error: error}} -> tool_msg("Agent run failed: #{error}", tool)
       {:success, %AgentRun{mode: :write, pull_requests: prs, analysis: analysis}} when is_list(prs) ->
-        tool_msg(String.trim(analysis_prompt(analysis: analysis, pull_requests: prs)), run)
+        tool_msg(String.trim(analysis_prompt(analysis: analysis, pull_requests: prs)), tool)
       {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
-        tool_msg(String.trim(analysis_prompt(pull_requests: nil, analysis: analysis)), run)
+        tool_msg(String.trim(analysis_prompt(pull_requests: nil, analysis: analysis)), tool)
       {:success, _} -> {:user, "Agent run completed successfully, but no output was generated"}
     end
   end
 
-  defp tool_msg(content, %AgentRun{tool: %Console.AI.Tool{id: id, name: name, arguments: args}}),
+  defp tool_msg(content, %Console.AI.Tool{id: id, name: name, arguments: args}),
     do: {:tool, content, %{call_id: id, name: name, arguments: args}}
   defp tool_msg(content, _), do: {:user, content}
 
   defp tools(activity, %Environment{skills: skills, job: job, activities: activities}) do
     [
-      %CodingAgent{activity: activity, workbench: job.workbench},
+      %CodingAgent{activity: activity, workbench: job.workbench, job: job},
       %PullRequests{job: job},
       %Skills{skills: Environment.subagent_skills(skills, :coding)},
       %Skill{skills: Environment.subagent_skills(skills, :coding)},
