@@ -55,15 +55,14 @@ yarn start:cd # or any other yarn target, we often test on different Console ins
 ```
 
 ### Developing Server
-To make changes to the server codebase, you'll want to install elixir on your machine.  For Mac desktops, we do this via asdf, which can be done simply at the root of the repo like so:
+To make changes to the server codebase, you'll want to install elixir and rust (for nif compilation) on your machine.  For Mac desktops, we do this via mise, which can be done simply at the root of the repo like so:
 
 ```sh
-asdf install
-brew install rustup-init
-rustup toolchain install stable
+brew install mise
+mise install
 ```
 
-Once elixir is available, all server dependencies are managed via docker-compose, and tests can be run via `mix`, like so:
+Once elixir/rust is available, all server dependencies are managed via docker-compose, and tests can be run via `mix`, like so:
 
 ```sh
 make testup
@@ -74,17 +73,20 @@ mix test
 
 ### Git Hooks
 Custom Git hooks are stored in `.githooks` directory. They ensure that when controller or client files are changed, automated code generation targets are executed. In order to enable git hooks for this repo run:
+
 ```sh
 make install-git-hooks
 ```
 
 ### Troubleshooting
 #### Installing Erlang 
-If `asdf install` fails with `cannot find required auxiliary files: install-sh config.guess config.sub` then run:
+If `mise install` fails with `cannot find required auxiliary files: install-sh config.guess config.sub` then run:
 
 ```sh
 brew install autoconf
 autoconf -V
 ```
+
+(this was more of an issue with asdf but possibly an issue with mise installs of erlang/elixir as well, keeping around for posterity)
 
 You can read more here: https://github.com/asdf-vm/asdf-erlang?tab=readme-ov-file#osx# Registry cache test - run 1

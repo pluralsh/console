@@ -1946,6 +1946,9 @@ input AgentRunStatusAttributes {
 
   "when this run was approved"
   approvedAt: DateTime
+
+  "the agent run this run consumed"
+  consumed: ID
 }
 
 input AgentPullRequestAttributes {
@@ -2159,6 +2162,9 @@ type AgentRun {
 
   "when this run was approved"
   approvedAt: DateTime
+
+  "the agent run this run consumed"
+  consumed: ID
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
