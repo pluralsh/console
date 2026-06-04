@@ -112,6 +112,11 @@ func (in *AISettings) DeepCopyInto(out *AISettings) {
 		*out = new(OpenAISettings)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.OpenAICompatible != nil {
+		in, out := &in.OpenAICompatible, &out.OpenAICompatible
+		*out = new(OpenAISettings)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Anthropic != nil {
 		in, out := &in.Anthropic, &out.Anthropic
 		*out = new(AIProviderSettings)

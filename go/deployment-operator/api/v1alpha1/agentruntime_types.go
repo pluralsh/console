@@ -321,6 +321,13 @@ type CodexConfigRaw struct {
 	// Model to use.
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API Codex should use.
+	// AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.
+	// RESPONSES forces /responses.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints).
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
@@ -339,6 +346,13 @@ type CodexConfig struct {
 	// Model to use.
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API Codex should use.
+	// AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.
+	// RESPONSES forces /responses.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints).
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
@@ -355,6 +369,7 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 
 	result := &CodexConfigRaw{
 		Model:    in.Model,
+		Method:   in.Method,
 		Endpoint: in.Endpoint,
 		Timeout:  in.Timeout,
 	}

@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"testing"
 
+	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -28,8 +29,10 @@ func TestSecretKeySelectorSet(t *testing.T) {
 }
 
 func TestCodexConfig_ToCodexConfigRawWithoutSecret(t *testing.T) {
+	method := console.OpenAiMethodChat
 	cfg := &CodexConfig{
-		Model: strPtr("gpt-5.4"),
+		Model:  strPtr("gpt-5.4"),
+		Method: &method,
 	}
 
 	raw, err := cfg.ToCodexConfigRaw(func(corev1.SecretKeySelector) (*corev1.Secret, error) {
@@ -41,6 +44,9 @@ func TestCodexConfig_ToCodexConfigRawWithoutSecret(t *testing.T) {
 	}
 	if raw.ApiKey != "" {
 		t.Fatalf("expected empty api key, got %q", raw.ApiKey)
+	}
+	if raw.Method == nil || *raw.Method != console.OpenAiMethodChat {
+		t.Fatalf("method = %v, want %s", raw.Method, console.OpenAiMethodChat)
 	}
 }
 

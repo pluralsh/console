@@ -848,6 +848,31 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			Expect(data[EnvGeminiModel]).Should(Equal("gemini-pro"))
 			Expect(data[EnvGeminiAPIKey]).Should(Equal("gemini-api-key"))
 		})
+
+		It("should include Codex config in secret data", func() {
+			reconciler := &AgentRunReconciler{
+				ConsoleURL:  "https://console.test.com",
+				DeployToken: "test-token-123",
+			}
+			run := &v1alpha1.AgentRun{}
+			run.Status.ID = lo.ToPtr("run-123")
+			method := console.OpenAiMethodChat
+
+			config := &v1alpha1.AgentRuntimeConfigRaw{
+				Codex: &v1alpha1.CodexConfigRaw{
+					Model:    lo.ToPtr("gpt-5.4"),
+					ApiKey:   "codex-api-key",
+					Method:   &method,
+					Endpoint: lo.ToPtr("https://litellm.example/v1"),
+				},
+			}
+
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeCodex, nil, nil)
+			Expect(data[EnvCodexModel]).Should(Equal("gpt-5.4"))
+			Expect(data[EnvCodexAPIKey]).Should(Equal("codex-api-key"))
+			Expect(data[EnvCodexMethod]).Should(Equal("CHAT"))
+			Expect(data[EnvCodexEndpoint]).Should(Equal("https://litellm.example/v1"))
+		})
 	})
 
 	Context("Timeout helpers", func() {

@@ -306,6 +306,7 @@ spec:
                       model providers do not have embeddings models, and it's better to simply use OpenAI.
                     enum:
                     - OPENAI
+                    - OPENAI_COMPATIBLE
                     - ANTHROPIC
                     - OLLAMA
                     - AZURE
@@ -572,12 +573,118 @@ spec:
                     required:
                     - tokenSecretRef
                     type: object
+                  openAICompatible:
+                    description: OpenAICompatible holds the OpenAI-compatible provider
+                      configuration.
+                    properties:
+                      baseUrl:
+                        description: BaseUrl is a custom base url to use, for reimplementations
+                          of the same API scheme (for instance Together.ai uses the
+                          OpenAI API spec).  Should be similar to https://api.openai.com/v1
+                        type: string
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
+                        type: string
+                      method:
+                        description: Method to use for openai api calls (defaults
+                          to auto, but can be used to restrict to only responses or
+                          chart completions apis, useful for configuring against common
+                          AI proxies)
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
+                        type: string
+                      model:
+                        description: Model is the LLM model name to use.
+                        type: string
+                      proxyModels:
+                        description: ProxyModels are additional models to support
+                          within our integrated ai proxy.
+                        items:
+                          type: string
+                        type: array
+                      tokenExchange:
+                        description: TokenExchange configures OAuth2 client credentials
+                          against a token endpoint to obtain access tokens for OpenAI-compatible
+                          APIs.
+                        properties:
+                          clientId:
+                            description: ClientID is the OAuth2 client identifier.
+                            type: string
+                          clientSecretSecretRef:
+                            description: ClientSecretSecretRef is a reference to a
+                              Kubernetes secret key holding the OAuth2 client secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          enabled:
+                            description: Enabled turns token exchange on for obtaining
+                              access tokens via the configured token endpoint.
+                            type: boolean
+                          tokenUrl:
+                            description: TokenURL is the OAuth2 token endpoint URL.
+                            type: string
+                        type: object
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the token to access
+                          the configured AI provider.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: ToolModel to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
+                    required:
+                    - tokenSecretRef
+                    type: object
                   provider:
                     default: OPENAI
                     description: Provider defines which of the supported LLM providers
                       should be used.
                     enum:
                     - OPENAI
+                    - OPENAI_COMPATIBLE
                     - ANTHROPIC
                     - OLLAMA
                     - AZURE
@@ -589,6 +696,7 @@ spec:
                       want to use a different LLM more optimized to those tasks
                     enum:
                     - OPENAI
+                    - OPENAI_COMPATIBLE
                     - ANTHROPIC
                     - OLLAMA
                     - AZURE

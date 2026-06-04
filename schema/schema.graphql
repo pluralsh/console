@@ -5391,6 +5391,7 @@ enum AiProvider {
   AZURE
   BEDROCK
   VERTEX
+  OPENAI_COMPATIBLE
 }
 
 enum LogDriver {
@@ -5553,6 +5554,8 @@ input AiSettingsAttributes {
   logAnalysis: Boolean
 
   openai: OpenaiSettingsAttributes
+
+  openaiCompatible: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
 
@@ -5965,6 +5968,8 @@ type AiSettings {
   logAnalysis: Boolean
 
   openai: OpenaiSettings
+
+  openaiCompatible: OpenaiSettings
 
   anthropic: AnthropicSettings
 

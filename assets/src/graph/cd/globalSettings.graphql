@@ -21,6 +21,14 @@ fragment AiSettings on AiSettings {
     model
     toolModel
     embeddingModel
+    method
+  }
+  openaiCompatible {
+    baseUrl
+    model
+    toolModel
+    embeddingModel
+    method
   }
   azure {
     apiVersion

@@ -755,13 +755,14 @@ type AiSettings struct {
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis *bool                `json:"logAnalysis,omitempty"`
-	Openai      *OpenaiSettings      `json:"openai,omitempty"`
-	Anthropic   *AnthropicSettings   `json:"anthropic,omitempty"`
-	Ollama      *OllamaSettings      `json:"ollama,omitempty"`
-	Azure       *AzureOpenaiSettings `json:"azure,omitempty"`
-	Bedrock     *BedrockAiSettings   `json:"bedrock,omitempty"`
-	Vertex      *VertexAiSettings    `json:"vertex,omitempty"`
+	LogAnalysis      *bool                `json:"logAnalysis,omitempty"`
+	Openai           *OpenaiSettings      `json:"openai,omitempty"`
+	OpenaiCompatible *OpenaiSettings      `json:"openaiCompatible,omitempty"`
+	Anthropic        *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama           *OllamaSettings      `json:"ollama,omitempty"`
+	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock          *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex           *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -774,15 +775,16 @@ type AiSettingsAttributes struct {
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis *bool                        `json:"logAnalysis,omitempty"`
-	Openai      *OpenaiSettingsAttributes    `json:"openai,omitempty"`
-	Anthropic   *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
-	Ollama      *OllamaAttributes            `json:"ollama,omitempty"`
-	Azure       *AzureOpenaiAttributes       `json:"azure,omitempty"`
-	Bedrock     *BedrockAiAttributes         `json:"bedrock,omitempty"`
-	Vertex      *VertexAiAttributes          `json:"vertex,omitempty"`
-	VectorStore *VectorStoreAttributes       `json:"vectorStore,omitempty"`
-	Graph       *GraphStoreAttributes        `json:"graph,omitempty"`
+	LogAnalysis      *bool                        `json:"logAnalysis,omitempty"`
+	Openai           *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	OpenaiCompatible *OpenaiSettingsAttributes    `json:"openaiCompatible,omitempty"`
+	Anthropic        *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama           *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure            *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock          *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex           *VertexAiAttributes          `json:"vertex,omitempty"`
+	VectorStore      *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph            *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 // An individual alert raised from an observability provider or monitor
@@ -11496,12 +11498,13 @@ func (e AgentSessionType) MarshalJSON() ([]byte, error) {
 type AiProvider string
 
 const (
-	AiProviderOpenai    AiProvider = "OPENAI"
-	AiProviderAnthropic AiProvider = "ANTHROPIC"
-	AiProviderOllama    AiProvider = "OLLAMA"
-	AiProviderAzure     AiProvider = "AZURE"
-	AiProviderBedrock   AiProvider = "BEDROCK"
-	AiProviderVertex    AiProvider = "VERTEX"
+	AiProviderOpenai           AiProvider = "OPENAI"
+	AiProviderAnthropic        AiProvider = "ANTHROPIC"
+	AiProviderOllama           AiProvider = "OLLAMA"
+	AiProviderAzure            AiProvider = "AZURE"
+	AiProviderBedrock          AiProvider = "BEDROCK"
+	AiProviderVertex           AiProvider = "VERTEX"
+	AiProviderOpenaiCompatible AiProvider = "OPENAI_COMPATIBLE"
 )
 
 var AllAiProvider = []AiProvider{
@@ -11511,11 +11514,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderAzure,
 	AiProviderBedrock,
 	AiProviderVertex,
+	AiProviderOpenaiCompatible,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible:
 		return true
 	}
 	return false

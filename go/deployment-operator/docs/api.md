@@ -497,6 +497,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef references a Secret containing the Codex API key.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model to use. |  |  |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API Codex should use.<br />AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.<br />RESPONSES forces /responses. |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints). |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single codex run invocation. |  | Optional: \{\} <br /> |
 
@@ -516,6 +517,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `apiKey` _string_ | ApiKey is the raw API key to use. |  |  |
 | `model` _string_ | Model to use. |  |  |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API Codex should use.<br />AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.<br />RESPONSES forces /responses. |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints). |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single codex run invocation. |  | Optional: \{\} <br /> |
 
