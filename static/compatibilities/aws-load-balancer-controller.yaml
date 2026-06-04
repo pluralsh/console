@@ -5,6 +5,31 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
+- version: 3.4.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No Helm chart-specific change notes were provided in the supplied\
+        \ release notes for v3.4.0; treat this as an application/controller upgrade\
+        \ (image tag bump) unless the chart changelog you\u2019re using says otherwise.",
+      'v3.3.0 noted CRD update steps via the eks-charts CRD kustomize path and additional
+        Gateway API CRDs; for 3.4.0, assume those prerequisites still apply if you
+        use those features and re-apply CRDs as part of the upgrade runbook.']
+    features: ["Ingress\u2192Gateway Migration Tooling: new `lbc-migrate` CLI to translate\
+        \ Ingress manifests (including annotations and IngressGroups) into equivalent\
+        \ Gateway API YAML, with cluster/file/dir inputs and optional per-namespace\
+        \ output splitting.", 'Migration Console: an in-cluster web UI to compare
+        AWS resources produced by Ingress vs Gateway controllers field-by-field to
+        validate parity before cutover.']
+    breaking_changes: ["Gateway API (NLB Gateway) behavior change: only one L4 route\
+        \ (TCP/UDP/TLS) per listener will receive traffic; if multiple routes attach\
+        \ to the same listener, only the oldest route will be served after upgrade\u2014\
+        consolidate to a single route per listener."]
+  chart_version: 3.4.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.0']
 - version: 3.3.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

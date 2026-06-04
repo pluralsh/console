@@ -150,7 +150,33 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **Fix type of `replicas` value** in the Helm chart (was incorrectly\
+      \ typed; ensure your `values.yaml` uses the expected type).\n- Helm chart now\
+      \ **allows \u201Cfalsey\u201D values** (e.g., `0`, `false`, empty string) in\
+      \ `cmdOption` without being dropped.\n- **Default `deschedulerPolicy` fixed**\
+      \ in chart; if you relied on the old default rendering, re-verify the generated\
+      \ ConfigMap.\n- **Leader election value typo fix**: `resourceNamespace` is the\
+      \ correct field name (verify your values if you set leader election namespace).\n\
+      - **New Helm feature: namespace override settings** added; review if you deploy\
+      \ into a non-default namespace or want to override release namespace behavior.\n\
+      - **`securityContext` can be made conditional** in Deployment/CronJob templates;\
+      \ if you had to patch the chart to remove securityContext, this may now be configurable.\n\
+      - v0.32.2 chart RBAC fixes:\n  - Adds **missing ClusterRole permission for policy**.\n\
+      \  - Adds **additional permissions when `metricsCollector` is enabled** (compare\
+      \ your custom RBAC to upstream)."
+    chart_updates: ["Chart bumped/updated as part of v0.31 line (notably an automated\
+        \ upgrade mentioned as \u201Chelm: upgrade to v0.30.1\u201D in the notes).",
+      Added Helm unit tests (helps detect template/value regressions)., RBAC/ClusterRole
+        permissions corrected in v0.32.2 (policy + metricsCollector).]
+    features: ['PodEvictor enhancements: new options, made thread-safe, and supports
+        limiting total pods evicted per rescheduling cycle (`maxNoOfPodsToEvictTotal`).',
+      'KEP-1397 work: integration with the evacuation API as an alternative to the
+        eviction API (forward-looking; may be gated/optional depending on your config).',
+      PodLifeTime plugin now checks init and ephemeral containers., 'Helm: namespace
+        override settings added for more flexible deployments.']
+    breaking_changes: [Removal of `descheduler/v1alpha1` type; policies/manifests
+        referring to v1alpha1 must be updated to the supported API version(s).]
   chart_version: 0.32.2
   images: ['registry.k8s.io/descheduler/descheduler:v0.32.2']
 - version: 0.31.0
@@ -286,7 +312,25 @@ versions:
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- The **Helm chart version** changes from the 0.24.x line (release
+      notes mention chart version **v0.24**) to **chart v1.25.0** in Descheduler **v0.25.1**.
+
+      - Expect potential **values/schema differences** when moving from the 0.x chart
+      series to the 1.x chart series; validate your current `values.yaml` against
+      the new chart defaults and documentation.
+
+      '
+    chart_updates: [Helm chart bumped to **v1.25.0** (per v0.25.1 release notes).,
+      v0.24.1 included "helm chart fixes" and a fix to the version command to parse
+        helm chart tags (already in your starting version).]
+    features: [No new end-user features are called out in the provided notes; v0.25.1
+        appears to be primarily a chart bump plus a backported fix (issue 960) and
+        documentation updates.]
+    breaking_changes: ["No explicit breaking changes are mentioned in the provided\
+        \ release notes. The main risk is **Helm chart major-version jump (0.x \u2192\
+        \ 1.x)** which can imply breaking changes in values/templating even if not\
+        \ called out."]
   chart_version: 0.25.2
   images: ['k8s.gcr.io/descheduler/descheduler:v0.25.1']
 - version: 0.24.1
