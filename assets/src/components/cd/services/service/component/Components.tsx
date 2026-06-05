@@ -14,11 +14,18 @@ import {
   ComponentState,
   ServiceDeploymentComponentFragment,
 } from 'generated/graphql'
-import { ComponentIcon, ComponentStateChip } from './misc'
+import { ComponentIcon, stateToDisplay } from './misc'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
+
+const FILTER_SELECT_WIDTH = 205
+
+const FilterSelectSC = styled.div({
+  width: FILTER_SELECT_WIDTH,
+  flexShrink: 0,
+})
 
 export function FilterFooter({ allSelected = true, ...props }) {
   return (
@@ -32,10 +39,10 @@ export function FilterFooter({ allSelected = true, ...props }) {
 }
 
 export const FilterTrigger = styled(SelectButton)<{
-  $width?: number
+  $width?: number | string
   $border?: boolean
 }>(({ $width, $border = false }) => ({
-  width: $width || 220,
+  width: $width ?? '100%',
   '&, *': {
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -144,56 +151,44 @@ function ComponentKindSelect({
   selectedKinds,
   setSelectedKinds,
   kinds,
-  width,
 }: {
   selectedKinds: Set<string>
   setSelectedKinds: (kinds: Set<string>) => void
   kinds: string[]
-  width?: number
 }) {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
   const allSelected = sortedSelectedKinds.length >= kinds.length
 
   return (
-    <Select
-      width={360}
-      label="All components"
-      triggerButton={
-        <FilterTrigger
-          $width={width}
-          showArrow={false}
-        >
-          {allSelected
-            ? 'All components'
-            : sortedSelectedKinds.length === 0
-              ? 'Select types'
-              : sortedSelectedKinds.join(', ')}
-        </FilterTrigger>
-      }
-      selectionMode="multiple"
-      selectedKeys={selectedKinds}
-      onSelectionChange={(keys) => {
-        setSelectedKinds(keys as Set<string>)
-      }}
-      placement="right"
-      dropdownFooterFixed={
-        <FilterFooter
-          allSelected={allSelected}
-          onClick={() =>
-            setSelectedKinds(new Set(allSelected ? undefined : kinds))
-          }
-        />
-      }
-      maxHeight={300}
-    >
-      {kinds.map((kind) => (
-        <ListBoxItem
-          key={kind}
-          leftContent={<ComponentIcon kind={kind} />}
-          label={kind}
-        />
-      ))}
-    </Select>
+    <FilterSelectSC>
+      <Select
+        selectionMode="multiple"
+        selectedKeys={selectedKinds}
+        onSelectionChange={(keys: Set<Key>) => {
+          setSelectedKinds(keys as Set<string>)
+        }}
+        label="Type"
+        placement="bottom-start"
+        maxHeight={300}
+        width={FILTER_SELECT_WIDTH}
+        dropdownFooterFixed={
+          <FilterFooter
+            allSelected={allSelected}
+            onClick={() =>
+              setSelectedKinds(new Set(allSelected ? undefined : kinds))
+            }
+          />
+        }
+      >
+        {kinds.map((kind) => (
+          <ListBoxItem
+            key={kind}
+            leftContent={<ComponentIcon kind={kind} />}
+            label={kind}
+          />
+        ))}
+      </Select>
+    </FilterSelectSC>
   )
 }
 
@@ -205,34 +200,27 @@ export function ComponentStateFilter({
   setSelectedState: (state: Key | null) => void
 }) {
   return (
-    <Select
-      selectionMode="single"
-      selectedKey={selectedState}
-      onSelectionChange={setSelectedState}
-      triggerButton={
-        <FilterTrigger showArrow={false}>
-          {selectedState ? (
-            <ComponentStateChip state={selectedState as ComponentState} />
-          ) : (
-            'Select state'
-          )}
-        </FilterTrigger>
-      }
-      dropdownFooterFixed={
-        <FilterFooterInner
-          leftContent={<ComponentsIcon />}
-          onClick={() => setSelectedState(null)}
-        >
-          Clear selection
-        </FilterFooterInner>
-      }
-    >
-      {Object.values(ComponentState).map((state) => (
-        <ListBoxItem
-          key={state}
-          label={<ComponentStateChip state={state} />}
-        />
-      ))}
-    </Select>
+    <FilterSelectSC>
+      <Select
+        selectionMode="single"
+        selectedKey={selectedState}
+        onSelectionChange={setSelectedState}
+        placement="bottom-start"
+        label="State"
+        width={FILTER_SELECT_WIDTH}
+        dropdownFooterFixed={
+          <FilterFooterInner onClick={() => setSelectedState(null)}>
+            Clear selection
+          </FilterFooterInner>
+        }
+      >
+        {Object.values(ComponentState).map((state) => (
+          <ListBoxItem
+            key={state}
+            label={stateToDisplay[state]}
+          />
+        ))}
+      </Select>
+    </FilterSelectSC>
   )
 }

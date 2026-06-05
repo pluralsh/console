@@ -3,20 +3,18 @@ import {
   ArrowScroll,
   Button,
   Callout,
-  ComponentsIcon,
   FillLevelProvider,
   Flex,
+  Input,
   ListIcon,
   NetworkInterfaceIcon,
   SearchIcon,
   TreeViewIcon,
-  UpdatesIcon,
 } from '@pluralsh/design-system'
 import { type Key } from '@react-types/shared'
 
 import { useThrottle } from 'components/hooks/useThrottle.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
-import { ExpandedInput, IconExpander } from 'components/utils/IconExpander.tsx'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
@@ -77,10 +75,7 @@ export function ServiceComponents() {
     [searchParams]
   )
 
-  const { kindSelector, selectedKinds, setSelectedKinds } =
-    useComponentKindSelect(components, {
-      width: 320,
-    })
+  const { kindSelector, selectedKinds } = useComponentKindSelect(components)
 
   const contextValue = useMemo(
     () => ({
@@ -101,42 +96,6 @@ export function ServiceComponents() {
         headingContent={
           <ArrowScroll css={{ width: 'fit-content' }}>
             <Flex gap="medium">
-              {!filtersHidden && (
-                <>
-                  <IconExpander
-                    tooltip="Search components"
-                    icon={<SearchIcon />}
-                    active={!!searchQuery}
-                    onClear={() => setSearchQuery('')}
-                  >
-                    <ExpandedInput
-                      width={320}
-                      inputValue={searchQuery}
-                      onChange={setSearchQuery}
-                      placeholder="Search components"
-                    />
-                  </IconExpander>
-                  <IconExpander
-                    tooltip="Filter by component kind"
-                    icon={<ComponentsIcon />}
-                    active={!!selectedKinds.size}
-                    onClear={() => setSelectedKinds(new Set())}
-                  >
-                    {kindSelector}
-                  </IconExpander>
-                  <IconExpander
-                    tooltip="Filter by component state"
-                    icon={<UpdatesIcon />}
-                    active={!!selectedState}
-                    onClear={() => setSelectedState(null)}
-                  >
-                    <ComponentStateFilter
-                      selectedState={selectedState}
-                      setSelectedState={setSelectedState}
-                    />
-                  </IconExpander>
-                </>
-              )}
               <ComponentsViewSwitch
                 tab={view}
                 setTab={(view: string) => setSearchParams({ view })}
@@ -160,6 +119,25 @@ export function ServiceComponents() {
         }
       >
         <>
+          {!filtersHidden && (
+            <Flex
+              gap="xsmall"
+              css={{ marginBottom: theme.spacing.medium, width: '100%' }}
+            >
+              <Input
+                placeholder="Search components"
+                startIcon={<SearchIcon />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                css={{ flex: 2, minWidth: 0 }}
+              />
+              {kindSelector}
+              <ComponentStateFilter
+                selectedState={selectedState}
+                setSelectedState={setSelectedState}
+              />
+            </Flex>
+          )}
           {view === 'list' && (
             <ComponentsListView
               setComponents={setComponents}
