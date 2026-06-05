@@ -357,6 +357,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :provider,          :ai_provider
     field :tool_provider,     :ai_provider, description: "ai provider to use with tool calls"
     field :log_analysis,      :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
+    field :vector_store,      :vector_store_settings, description: "settings for vector-backed search"
     field :openai,            :openai_settings
     field :openai_compatible, :openai_settings
     field :anthropic,         :anthropic_settings
@@ -364,6 +365,11 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :azure,             :azure_openai_settings
     field :bedrock,           :bedrock_ai_settings
     field :vertex,            :vertex_ai_settings
+  end
+
+  object :vector_store_settings do
+    field :enabled, :boolean
+    field :store,   :vector_store
   end
 
   object :ai_analysis_rates do

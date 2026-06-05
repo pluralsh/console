@@ -1,17 +1,23 @@
 defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Http
   alias Console.Schema.{ScmConnection, WorkbenchTool}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketDatacenterConnection}
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}}),
-    do: {:ok, %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
-  def build(%WorkbenchTool{configuration: %Configuration{
-    bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}}
-  }) do
-      api_base = api_base(url)
-      {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
+    do:
+      {:ok,
+       %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
+
+  def build(%WorkbenchTool{
+        configuration: %Configuration{
+          bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}
+        }
+      }) do
+    api_base = api_base(url)
+    {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
   end
 
   def build(%WorkbenchTool{}),
@@ -59,7 +65,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
         {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Data Center", reason)
     end
   end
 
@@ -77,7 +83,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
         {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Data Center", reason)
     end
   end
 
@@ -93,7 +99,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
         {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Data Center", reason)
     end
   end
 

@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Http
   alias Console.Schema.{ScmConnection, WorkbenchTool}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.GitlabConnection}
 
@@ -9,13 +10,18 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}}),
     do: {:ok, %{base_url: api_root(url), token: token}}
-  def build(%WorkbenchTool{configuration: %Configuration{gitlab: %GitlabConnection{token: token, url: url}}}),
-    do: {:ok, %{base_url: api_root(url), token: token}}
+
+  def build(%WorkbenchTool{
+        configuration: %Configuration{gitlab: %GitlabConnection{token: token, url: url}}
+      }),
+      do: {:ok, %{base_url: api_root(url), token: token}}
+
   def build(%WorkbenchTool{}),
     do: {:error, "GitLab connection is not configured for this workbench tool."}
 
   @doc false
   def api_root(url) when url in [nil, ""], do: @default_api_root
+
   def api_root(url) when is_binary(url) do
     url
     |> String.trim()
@@ -48,7 +54,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
         {:error, "GitLab API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("GitLab", reason)
     end
   end
 
@@ -74,7 +80,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
         {:error, "GitLab API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("GitLab", reason)
     end
   end
 
@@ -93,7 +99,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
         {:error, "GitLab API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("GitLab", reason)
     end
   end
 

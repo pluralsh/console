@@ -60,6 +60,10 @@ fragment AiSettings on AiSettings {
   enabled
   toolsEnabled
   provider
+  vectorStore {
+    enabled
+    store
+  }
 }
 
 fragment DeploymentSettings on DeploymentSettings {

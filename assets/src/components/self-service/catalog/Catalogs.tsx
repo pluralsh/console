@@ -85,6 +85,7 @@ export function Catalogs() {
     useFallbackSearch,
     isSearchPending,
     debouncedSearchQuery,
+    semanticSearchEnabled,
   } = search
 
   const filterCatalogs = useMemo(() => {
@@ -120,6 +121,23 @@ export function Catalogs() {
 
   if (error) return <GqlError error={error} />
 
+  const filtersButton = (
+    <Button
+      onClick={() =>
+        hasActiveFilters ? resetFilters() : setFiltersVisible(!filtersVisible)
+      }
+      secondary
+      startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
+      style={{
+        borderColor: hasActiveFilters
+          ? theme.colors['border-primary']
+          : undefined,
+      }}
+    >
+      {hasActiveFilters ? 'Reset filters' : 'Filters'}
+    </Button>
+  )
+
   return (
     <Flex
       css={{
@@ -136,27 +154,14 @@ export function Catalogs() {
         overflow="hidden"
         gap="medium"
       >
-        <SelfServiceSearchBar
-          search={search}
-          aside={
-            <Button
-              onClick={() =>
-                hasActiveFilters
-                  ? resetFilters()
-                  : setFiltersVisible(!filtersVisible)
-              }
-              secondary
-              startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
-              style={{
-                borderColor: hasActiveFilters
-                  ? theme.colors['border-primary']
-                  : undefined,
-              }}
-            >
-              {hasActiveFilters ? 'Reset filters' : 'Filters'}
-            </Button>
-          }
-        />
+        {semanticSearchEnabled ? (
+          <SelfServiceSearchBar
+            search={search}
+            aside={filtersButton}
+          />
+        ) : (
+          <Flex justify="flex-end">{filtersButton}</Flex>
+        )}
         <CatalogsGrid
           catalogs={displayCatalogs}
           onBottomReached={() => {

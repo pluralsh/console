@@ -1,5 +1,5 @@
 import { useThrottle } from 'components/hooks/useThrottle'
-import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext'
+import { useVectorStoreEnabled } from 'components/contexts/DeploymentSettingsContext'
 import {
   CatalogSearchItemFragment,
   PrAutomationSearchItemFragment,
@@ -26,7 +26,7 @@ export type SelfServiceSearchState = {
   semanticSearchEnabled: boolean
   isSearchPending: boolean
   useFallbackSearch: boolean
-  showDropdown: boolean // Show it only when AI is active and hasn't failed
+  showDropdown: boolean // Show it only when vector search is active and hasn't failed
   panelCatalogItems: SearchDropdownItem[]
   panelPrAutomationItems: SearchDropdownItem[]
 }
@@ -36,11 +36,11 @@ function hasValue<T>(value: Nullable<T> | undefined): value is T {
 }
 
 export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
-  const aiEnabled = useAIEnabled()
+  const vectorStoreEnabled = useVectorStoreEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const trimmedSearchQuery = searchQuery.trim()
   const debouncedSearchQuery = useThrottle(trimmedSearchQuery, 300)
-  const semanticSearchEnabled = aiEnabled === true
+  const semanticSearchEnabled = vectorStoreEnabled === true
 
   const { data, error, loading } = useCatalogSearchQuery({
     variables: { q: debouncedSearchQuery },

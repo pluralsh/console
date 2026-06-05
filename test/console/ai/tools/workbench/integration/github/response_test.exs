@@ -44,6 +44,17 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
                }
              }
     end
+
+    test "bubbles Tentacat transport failures as tool errors" do
+      error = %HTTPoison.Error{
+        reason: {:tls_alert, {:unknown_ca, ~c"TLS client: certificate verify failed"}}
+      }
+
+      assert {:error, message} = Response.json({:error, error})
+      assert message =~ "GitHub request failed: TLS unknown_ca:"
+      assert message =~ "certificate verify failed"
+      refute message =~ "%HTTPoison.Error"
+    end
   end
 
   describe "github query helpers" do
