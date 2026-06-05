@@ -202,6 +202,6 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         build-args: |
-          GO_VERSION=1.26.3
+          GO_VERSION=1.26.4
           SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base
           SENTINEL_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}

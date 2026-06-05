@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/datastore
 
-go 1.26.3
+go 1.26.4
 
 replace (
 	github.com/pluralsh/console/go/client => ../client

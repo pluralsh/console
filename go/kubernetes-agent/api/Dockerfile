@@ -27,7 +27,7 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-FROM golang:1.26.3-alpine3.22 AS builder
+FROM golang:1.26.4-alpine3.22 AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
