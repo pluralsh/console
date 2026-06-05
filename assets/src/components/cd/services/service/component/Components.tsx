@@ -15,6 +15,7 @@ import {
   ServiceDeploymentComponentFragment,
 } from 'generated/graphql'
 import { ComponentIcon, stateToDisplay } from './misc'
+import { TRUNCATE } from 'components/utils/truncate'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
@@ -25,6 +26,8 @@ const FILTER_SELECT_WIDTH = 205
 const FilterSelectSC = styled.div({
   width: FILTER_SELECT_WIDTH,
   flexShrink: 0,
+  minWidth: 0,
+  overflow: 'hidden',
 })
 
 export function FilterFooter({ allSelected = true, ...props }) {
@@ -43,13 +46,15 @@ export const FilterTrigger = styled(SelectButton)<{
   $border?: boolean
 }>(({ $width, $border = false }) => ({
   width: $width ?? '100%',
-  '&, *': {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    flexShrink: 1,
-    border: $border ? undefined : 'none',
-    height: '100%',
+  minWidth: 0,
+  border: $border ? undefined : 'none',
+  height: '100%',
+  '.content': {
+    minWidth: 0,
+  },
+  '.children': {
+    ...TRUNCATE,
+    minWidth: 0,
   },
 }))
 
@@ -158,6 +163,8 @@ function ComponentKindSelect({
 }) {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
   const allSelected = sortedSelectedKinds.length >= kinds.length
+  const typeTriggerLabel =
+    sortedSelectedKinds.length === 0 ? 'Type' : sortedSelectedKinds.join(', ')
 
   return (
     <FilterSelectSC>
@@ -171,6 +178,15 @@ function ComponentKindSelect({
         placement="bottom-start"
         maxHeight={300}
         width={FILTER_SELECT_WIDTH}
+        triggerButton={
+          <FilterTrigger
+            $border
+            showArrow
+            title={typeTriggerLabel}
+          >
+            {typeTriggerLabel}
+          </FilterTrigger>
+        }
         dropdownFooterFixed={
           <FilterFooter
             allSelected={allSelected}
@@ -199,6 +215,10 @@ export function ComponentStateFilter({
   selectedState: Key | null
   setSelectedState: (state: Key | null) => void
 }) {
+  const stateTriggerLabel = selectedState
+    ? stateToDisplay[selectedState as ComponentState]
+    : 'State'
+
   return (
     <FilterSelectSC>
       <Select
@@ -208,6 +228,15 @@ export function ComponentStateFilter({
         placement="bottom-start"
         label="State"
         width={FILTER_SELECT_WIDTH}
+        triggerButton={
+          <FilterTrigger
+            $border
+            showArrow
+            title={stateTriggerLabel}
+          >
+            {stateTriggerLabel}
+          </FilterTrigger>
+        }
         dropdownFooterFixed={
           <FilterFooterInner onClick={() => setSelectedState(null)}>
             Clear selection

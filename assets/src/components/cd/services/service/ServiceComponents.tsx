@@ -99,6 +99,7 @@ export function ServiceComponents() {
             direction="column"
             gap="small"
             flex={1}
+            css={{ minWidth: 0 }}
           >
             <Flex
               gap="small"
@@ -130,14 +131,20 @@ export function ServiceComponents() {
               {!filtersHidden && (
                 <Flex
                   gap="xsmall"
-                  css={{ marginBottom: theme.spacing.medium, width: '100%' }}
+                  css={{
+                    marginBottom: theme.spacing.medium,
+                    width: '100%',
+                    flexWrap: 'nowrap',
+                    minWidth: 0,
+                    overflow: 'hidden',
+                  }}
                 >
                   <Input
                     placeholder="Search components"
                     startIcon={<SearchIcon />}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                    css={{ flex: 2, minWidth: 0 }}
+                    css={{ flex: 1, minWidth: 0 }}
                   />
                   {kindSelector}
                   <ComponentStateFilter
