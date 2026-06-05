@@ -298,7 +298,16 @@ versions:
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['v0.26.1: Reverted Dockerfile ENTRYPOINT/CMD split (no user-facing
+        chart values change).', 'v0.26.1: Helm chart updated to v0.26.0 (aligns chart/app;
+        review chart version bump in your repo).', 'v0.27.1: Fixes plugin argument
+        conversion when using multiple profiles with the same plugin (behavioral bugfix;
+        no values change noted).']
+    features: [v0.27.1 improves stability when configuring multiple descheduler profiles
+        that reuse the same plugin by correctly converting plugin arguments.]
+    breaking_changes: []
   chart_version: 0.27.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.27.1']
 - version: 0.26.1

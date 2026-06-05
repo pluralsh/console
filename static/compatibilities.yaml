@@ -147,17 +147,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
-  - version: 1.60.1
+  - version: 1.61.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 2.60.1
-    images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.6', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.6',
-      'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.6',
-      'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.6', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.60.1',
-      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260512-1f34ef0df3-master']
+    chart_version: 2.61.1
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.2',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.7', 'public.ecr.aws/csi-components/csi-resizer:v2.2.0-eksbuild.2',
+      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.61.1',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260601-2cbf4bdb47-master']
   - version: 1.60.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -6047,7 +6047,16 @@ addons:
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['v0.26.1: Reverted Dockerfile ENTRYPOINT/CMD split (no user-facing
+          chart values change).', 'v0.26.1: Helm chart updated to v0.26.0 (aligns
+          chart/app; review chart version bump in your repo).', 'v0.27.1: Fixes plugin
+          argument conversion when using multiple profiles with the same plugin (behavioral
+          bugfix; no values change noted).']
+      features: [v0.27.1 improves stability when configuring multiple descheduler
+          profiles that reuse the same plugin by correctly converting plugin arguments.]
+      breaking_changes: []
     chart_version: 0.27.1
     images: ['registry.k8s.io/descheduler/descheduler:v0.27.1']
   - version: 0.26.1
@@ -12379,27 +12388,68 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.6.7
+  - version: 3.7.1
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['v3.6.0 adds multiple new capabilities: TCP health checks plus passive
-          health checks, a new least-time load-balancing strategy, a new HighestRandomWeight
-          algorithm (including CRD support), and multi-layer routing improvements.',
-        'Kubernetes-related enhancements in v3.6.0 include a new Knative provider,
-          allowing Ingress to publish ExternalName services, and a Gateway API bump
-          to v1.4.0.', 'v3.6.7 includes ACME improvements (renew options, handshake
-          timeout, updated lego library) and several Kubernetes provider fixes, plus
-          dashboard hardening around X-Forwarded-Prefix.', 'v3.6.7 fixes a security
-          issue (CVE-2026-22045) and includes multiple bug fixes across ACME, k8s
-          ingress/ingress-nginx, and server behavior. ']
-      breaking_changes: ['v3.6.7 is a breaking change relative to v3.6.4+ hotfix behavior:
-          the encoded character handling change is now opt-in, restoring the pre-hotfix
-          default behavior unless you enable the feature per the migration guide.']
-    chart_version: 39.0.0
+      features: ['v3.7.1 adds a Kubernetes cross-namespace capability via a new CrossProviderNamespaces
+          option across the Ingress, CRD, and Gateway API providers.', 'v3.7.0 introduces
+          many new capabilities, primarily around the ingress-nginx compatibility
+          provider (more supported annotations, generated dynamic config via a metamodel,
+          rate limiting annotations, auth-related annotations, canary features, buffering,
+          and more).', 'v3.7.0 expands Kubernetes/Gateway API features (multiple certificateRefs
+          on listeners, BackendTLSPolicy CA secret refs) and CRD features (ingressClassName
+          in CRDs, TraefikService failover, ServersTransport cipher suites).', 'v3.7.0
+          adds general proxy features like providers routing precedence, ACME CertificateTimeout,
+          retry improvements, encodedCharacters middleware, and dashboard TLS certificate
+          views and UX improvements.']
+      breaking_changes: [v3.7.1 includes a security fix for CVE-2026-44774; upgrading
+          may change behavior compared to vulnerable versions and should be validated
+          against your traffic patterns., 'v3.7.0 deprecates ForwardAuth.TrustForwardHeader,
+          so configs relying on it should be reviewed and migrated per the v3.7 migration
+          guide.', 'v3.7.0 contains behavioral/security hardening around encoded characters
+          handling (now more strict/opt-in in places), which can affect requests with
+          unusual URL encodings and should be regression-tested.']
+    chart_version: 40.2.0
+    images: []
+  - version: 3.7.0
+    kube: ['1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Kubernetes ingress-nginx provider gained broad compatibility with
+          many NGINX annotations (rate limiting, auth snippets, rewrites, timeouts,
+          buffering, canary, custom headers, allow/whitelist ranges, etc.), making
+          Traefik a more drop-in replacement for NGINX Ingress setups.', 'Gateway
+          API improvements include support for multiple certificateRefs per listener
+          and secret support for BackendTLSPolicy caCertificateRefs, plus a bump to
+          gateway-api v1.5.1.', 'Kubernetes CRDs gained new capabilities: ingressClassName
+          in CRD specs, TraefikService failover support, and ServersTransport cipherSuites
+          configuration.', 'New routing control: configurable provider routing precedence,
+          and wildcard host support in Host/HostSNI matchers (Ingress/Gateway/ingress-nginx
+          contexts).', Observability and logging enhancements include additional Kubernetes
+          Ingress access-log fields and the ability to emit stdio access logs alongside
+          OTLP logging., 'Security/HTTP handling additions include a new encodedCharacters
+          middleware, improved retry logic based on status codes/timeouts/non-idempotent
+          methods, and options around handling/sanitizing encoded characters.', 'Dashboard/UI
+          improvements add a certificates overview/menu, server weight display, and
+          configurable dashboard name.']
+      breaking_changes: [ForwardAuth.TrustForwardHeader is deprecated; configurations
+          relying on it should be reviewed and updated per the v3.7 migration guide.,
+        Traefik is stricter about suspicious/encoded characters (now rejected by default/with
+          new opt-in controls); applications depending on unusual encoded URLs may
+          see new 4xx responses unless configured appropriately., 'Access logs may
+          now be produced for rejected requests, which can change log volume/alerting
+          expectations.', 'Ingress NGINX provider: the experimental flag is deprecated
+          and the provider underwent refactors; some behaviors (e.g., SSL redirect,
+          rewrite-target handling) changed/fixed and should be validated against your
+          current annotations/config.']
+    chart_version: 40.0.1
     images: []
   - version: 3.6.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -14245,7 +14295,7 @@ addons:
           switch from `argocd.argoproj.io/kubernetes-version` in `Major.Minor` to
           `vMajor.Minor.Patch` format. This can affect cluster selection and therefore
           what apps get generated/synced if not updated.']
-    chart_version: 9.5.17
+    chart_version: 9.5.19
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.3']
   - version: 3.4.1
