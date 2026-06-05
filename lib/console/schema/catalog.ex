@@ -1,5 +1,5 @@
 defmodule Console.Schema.Catalog do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Project, PolicyBinding, Tag}
   alias Console.Deployments.Policies.Rbac
 
