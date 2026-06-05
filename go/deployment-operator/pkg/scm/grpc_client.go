@@ -15,6 +15,7 @@ const envGitAccessToken = "GIT_ACCESS_TOKEN"
 
 type GRPCClient interface {
 	GetPRDetails(ctx context.Context, prURL string) (*PRDetails, error)
+	GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error)
 	Close() error
 }
 
@@ -53,6 +54,10 @@ func (in *grpcClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetail
 	}
 
 	return in.fromGrpcPrDetails(resp)
+}
+
+func (in *grpcClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	return in.GetPRDetails(ctx, prURL)
 }
 
 func (in *grpcClient) fromGrpcPrDetails(resp *pb.GetPRDetailsResponse) (*PRDetails, error) {

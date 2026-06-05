@@ -95,6 +95,8 @@ const (
 // Client fetches live PR state directly from the SCM provider.
 type Client interface {
 	GetPRDetails(ctx context.Context, prURL string) (*PRDetails, error)
+	// GetPRSummary fetches only PR metadata without sideloading comments or CI checks.
+	GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error)
 	// GetCILogs fetches the log output for a single failed check run.
 	// prURL is used to resolve owner/repo; checkRunID is from CICheck.CheckRunID.
 	GetCILogs(ctx context.Context, prURL string, checkRunID int64) (string, error)
@@ -119,6 +121,14 @@ func (d *dispatchClient) GetPRDetails(ctx context.Context, prURL string) (*PRDet
 		return nil, err
 	}
 	return c.GetPRDetails(ctx, prURL)
+}
+
+func (d *dispatchClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	c, err := d.clientFor(prURL)
+	if err != nil {
+		return nil, err
+	}
+	return c.GetPRSummary(ctx, prURL)
 }
 
 func (d *dispatchClient) GetCILogs(ctx context.Context, prURL string, checkRunID int64) (string, error) {

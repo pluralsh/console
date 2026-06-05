@@ -76,6 +76,33 @@ func (c *gitLabClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetai
 	}, nil
 }
 
+func (c *gitLabClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	projectPath, mrIID, err := parseGitLabMRURL(prURL)
+	if err != nil {
+		return nil, err
+	}
+
+	mr, _, err := c.gl.MergeRequests.GetMergeRequest(projectPath, mrIID, nil, gogitlab.WithContext(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("get MR: %w", err)
+	}
+
+	state := PRStateOpen
+	switch mr.State {
+	case gitlabMRStateMerged:
+		state = PRStateMerged
+	case gitlabMRStateClosed:
+		state = PRStateClosed
+	}
+
+	return &PRDetails{
+		Title:   mr.Title,
+		Body:    mr.Description,
+		HeadRef: mr.SourceBranch,
+		State:   state,
+	}, nil
+}
+
 func (c *gitLabClient) allComments(ctx context.Context, projectPath string, mrIID int64) ([]PRComment, error) {
 	var all []PRComment
 	noteOpts := &gogitlab.ListMergeRequestNotesOptions{ListOptions: gogitlab.ListOptions{PerPage: 100}}
