@@ -888,7 +888,11 @@ kas:
         values: [ ]
       affinity: { }
       nodeSelector: { }
-      tolerations: [ ]
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: data
+          effect: NoSchedule
       topologySpreadConstraints: [ ]
       dnsPolicy: ""
       dnsConfig: { }
