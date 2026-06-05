@@ -728,6 +728,31 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
+  - version: 3.4.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["No Helm chart-specific change notes were provided in the supplied\
+          \ release notes for v3.4.0; treat this as an application/controller upgrade\
+          \ (image tag bump) unless the chart changelog you\u2019re using says otherwise.",
+        'v3.3.0 noted CRD update steps via the eks-charts CRD kustomize path and additional
+          Gateway API CRDs; for 3.4.0, assume those prerequisites still apply if you
+          use those features and re-apply CRDs as part of the upgrade runbook.']
+      features: ["Ingress\u2192Gateway Migration Tooling: new `lbc-migrate` CLI to\
+          \ translate Ingress manifests (including annotations and IngressGroups)\
+          \ into equivalent Gateway API YAML, with cluster/file/dir inputs and optional\
+          \ per-namespace output splitting.", 'Migration Console: an in-cluster web
+          UI to compare AWS resources produced by Ingress vs Gateway controllers field-by-field
+          to validate parity before cutover.']
+      breaking_changes: ["Gateway API (NLB Gateway) behavior change: only one L4 route\
+          \ (TCP/UDP/TLS) per listener will receive traffic; if multiple routes attach\
+          \ to the same listener, only the oldest route will be served after upgrade\u2014\
+          consolidate to a single route per listener."]
+    chart_version: 3.4.0
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.0']
   - version: 3.3.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -5871,7 +5896,33 @@ addons:
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- **Fix type of `replicas` value** in the Helm chart (was incorrectly\
+        \ typed; ensure your `values.yaml` uses the expected type).\n- Helm chart\
+        \ now **allows \u201Cfalsey\u201D values** (e.g., `0`, `false`, empty string)\
+        \ in `cmdOption` without being dropped.\n- **Default `deschedulerPolicy` fixed**\
+        \ in chart; if you relied on the old default rendering, re-verify the generated\
+        \ ConfigMap.\n- **Leader election value typo fix**: `resourceNamespace` is\
+        \ the correct field name (verify your values if you set leader election namespace).\n\
+        - **New Helm feature: namespace override settings** added; review if you deploy\
+        \ into a non-default namespace or want to override release namespace behavior.\n\
+        - **`securityContext` can be made conditional** in Deployment/CronJob templates;\
+        \ if you had to patch the chart to remove securityContext, this may now be\
+        \ configurable.\n- v0.32.2 chart RBAC fixes:\n  - Adds **missing ClusterRole\
+        \ permission for policy**.\n  - Adds **additional permissions when `metricsCollector`\
+        \ is enabled** (compare your custom RBAC to upstream)."
+      chart_updates: ["Chart bumped/updated as part of v0.31 line (notably an automated\
+          \ upgrade mentioned as \u201Chelm: upgrade to v0.30.1\u201D in the notes).",
+        Added Helm unit tests (helps detect template/value regressions)., RBAC/ClusterRole
+          permissions corrected in v0.32.2 (policy + metricsCollector).]
+      features: ['PodEvictor enhancements: new options, made thread-safe, and supports
+          limiting total pods evicted per rescheduling cycle (`maxNoOfPodsToEvictTotal`).',
+        'KEP-1397 work: integration with the evacuation API as an alternative to the
+          eviction API (forward-looking; may be gated/optional depending on your config).',
+        PodLifeTime plugin now checks init and ephemeral containers., 'Helm: namespace
+          override settings added for more flexible deployments.']
+      breaking_changes: [Removal of `descheduler/v1alpha1` type; policies/manifests
+          referring to v1alpha1 must be updated to the supported API version(s).]
     chart_version: 0.32.2
     images: ['registry.k8s.io/descheduler/descheduler:v0.32.2']
   - version: 0.31.0
@@ -6010,7 +6061,26 @@ addons:
     kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- The **Helm chart version** changes from the 0.24.x line (release
+        notes mention chart version **v0.24**) to **chart v1.25.0** in Descheduler
+        **v0.25.1**.
+
+        - Expect potential **values/schema differences** when moving from the 0.x
+        chart series to the 1.x chart series; validate your current `values.yaml`
+        against the new chart defaults and documentation.
+
+        '
+      chart_updates: [Helm chart bumped to **v1.25.0** (per v0.25.1 release notes).,
+        v0.24.1 included "helm chart fixes" and a fix to the version command to parse
+          helm chart tags (already in your starting version).]
+      features: [No new end-user features are called out in the provided notes; v0.25.1
+          appears to be primarily a chart bump plus a backported fix (issue 960) and
+          documentation updates.]
+      breaking_changes: ["No explicit breaking changes are mentioned in the provided\
+          \ release notes. The main risk is **Helm chart major-version jump (0.x \u2192\
+          \ 1.x)** which can imply breaking changes in values/templating even if not\
+          \ called out."]
     chart_version: 0.25.2
     images: ['k8s.gcr.io/descheduler/descheduler:v0.25.1']
   - version: 0.24.1
@@ -8695,6 +8765,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 86.1.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [CI workflow dependency bumps to github-workflow v6.0.3 (no runtime
+          impact)., Bumped kube-prometheus-stack chart dependencies with non-major
+          updates (likely patch/minor bumps of subcharts such as Grafana/Prometheus
+          Operator components).]
+      features: []
+      breaking_changes: []
+    chart_version: 86.1.1
+    images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+      'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.91.0',
+      'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
   - version: 86.1.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -14846,6 +14934,34 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.56.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['New `databricks_zerobus` sink for streaming logs into Databricks
+          Unity Catalog via Zerobus, including OAuth2 auth, schema fetching, and protobuf
+          batching.', New `delay` transform to hold events for a fixed duration or
+          conditionally (including VRL-based conditions)., HTTP-based sinks using
+          shared retry helpers now support a `retry_strategy` option to choose which
+          HTTP status codes should be retried (with an updated `http` sink example).,
+        '`vector` sink adds `zstd` compression alongside `gzip` for improved Vector-to-Vector
+          throughput and efficiency.', 'Major enhancements to `tag_cardinality_limit`:
+          per-tag limits, per-metric tracking isolation, global tracked-key cap, and
+          ability to opt metrics out of tracking.', '`aws_s3` sink Parquet encoding
+          now ships enabled in official binaries by default (no special build required).',
+        'Fixes a CPU regression affecting sinks that use metric normalization (e.g.,
+          `prometheus_remote_write`, `aws_cloudwatch_metrics`, `statsd`).', Restores
+          install support for RHEL/Rocky/Alma/CentOS Stream 8 that was broken in 0.55.0
+          due to a glibc requirement bump., Unit tests gain optional `expected_event_count`
+          on outputs to assert how many events a transform emits.]
+      breaking_changes: ['`greptimedb_metrics` and `greptimedb_logs` sinks now require
+          GreptimeDB v1.x; GreptimeDB v0.x users must upgrade GreptimeDB before upgrading
+          Vector.']
+    chart_version: 0.56.0
+    images: ['docker.io/timberio/vector:0.56.0-distroless-libc']
   - version: 0.55.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
