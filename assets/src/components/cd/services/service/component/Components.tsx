@@ -176,7 +176,7 @@ function ComponentKindSelect({
         label="Type"
         placement="bottom-start"
         maxHeight={300}
-        width={FILTER_SELECT_WIDTH}
+        width={300}
         triggerButton={
           <FilterTrigger
             $border
