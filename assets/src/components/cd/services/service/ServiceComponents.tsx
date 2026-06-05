@@ -8,6 +8,7 @@ import {
   Input,
   ListIcon,
   NetworkInterfaceIcon,
+  PageTitle,
   SearchIcon,
   TreeViewIcon,
 } from '@pluralsh/design-system'
@@ -43,6 +44,7 @@ import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import { useServiceContext } from './ServiceDetailsContext'
+import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle.tsx'
 
 const directory = [
   { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
@@ -92,52 +94,63 @@ export function ServiceComponents() {
         noPadding
         contentStyles={{ paddingTop: theme.spacing.medium }}
         scrollable
-        heading={headingContent ?? 'Components'}
         headingContent={
-          <ArrowScroll css={{ width: 'fit-content' }}>
-            <Flex gap="medium">
-              <ComponentsViewSwitch
-                tab={view}
-                setTab={(view: string) => setSearchParams({ view })}
-              />
-              {showChatButton && service && (
-                <Button
-                  startIcon={<AiSparkleFilledIcon />}
-                  loading={mutationLoading}
-                  onClick={() =>
-                    createNewThread({
-                      serviceId: service.id,
-                      summary: `Chat with ${service.name}`,
-                    })
-                  }
-                >
-                  Chat with {service.name}
-                </Button>
-              )}
+          <Flex
+            direction="column"
+            gap="small"
+            flex={1}
+          >
+            <Flex
+              gap="small"
+              justifyContent="space-between"
+            >
+              <ConsolePageTitle heading={headingContent ?? 'Components'} />
+              <Flex gap="small">
+                <ComponentsViewSwitch
+                  tab={view}
+                  setTab={(view: string) => setSearchParams({ view })}
+                />
+                {showChatButton && service && (
+                  <Button
+                    startIcon={<AiSparkleFilledIcon />}
+                    loading={mutationLoading}
+                    onClick={() =>
+                      createNewThread({
+                        serviceId: service.id,
+                        summary: `Chat with ${service.name}`,
+                      })
+                    }
+                  >
+                    Chat with {service.name}
+                  </Button>
+                )}
+              </Flex>
             </Flex>
-          </ArrowScroll>
+            <>
+              {!filtersHidden && (
+                <Flex
+                  gap="xsmall"
+                  css={{ marginBottom: theme.spacing.medium, width: '100%' }}
+                >
+                  <Input
+                    placeholder="Search components"
+                    startIcon={<SearchIcon />}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                    css={{ flex: 2, minWidth: 0 }}
+                  />
+                  {kindSelector}
+                  <ComponentStateFilter
+                    selectedState={selectedState}
+                    setSelectedState={setSelectedState}
+                  />
+                </Flex>
+              )}
+            </>
+          </Flex>
         }
       >
         <>
-          {!filtersHidden && (
-            <Flex
-              gap="xsmall"
-              css={{ marginBottom: theme.spacing.medium, width: '100%' }}
-            >
-              <Input
-                placeholder="Search components"
-                startIcon={<SearchIcon />}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                css={{ flex: 2, minWidth: 0 }}
-              />
-              {kindSelector}
-              <ComponentStateFilter
-                selectedState={selectedState}
-                setSelectedState={setSelectedState}
-              />
-            </Flex>
-          )}
           {view === 'list' && (
             <ComponentsListView
               setComponents={setComponents}
