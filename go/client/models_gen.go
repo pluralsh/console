@@ -755,7 +755,9 @@ type AiSettings struct {
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis      *bool                `json:"logAnalysis,omitempty"`
+	LogAnalysis *bool `json:"logAnalysis,omitempty"`
+	// settings for vector-backed search
+	VectorStore      *VectorStoreSettings `json:"vectorStore,omitempty"`
 	Openai           *OpenaiSettings      `json:"openai,omitempty"`
 	OpenaiCompatible *OpenaiSettings      `json:"openaiCompatible,omitempty"`
 	Anthropic        *AnthropicSettings   `json:"anthropic,omitempty"`
@@ -1424,8 +1426,23 @@ type CatalogEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
+type CatalogSearchItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the name of the author of this catalog
+	Author *string `json:"author,omitempty"`
+	// longform description for the purpose of this catalog
+	Description *string `json:"description,omitempty"`
+	// short category name used for browsing catalogs
+	Category *string `json:"category,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon *string `json:"darkIcon,omitempty"`
+}
+
 type CatalogSearchResult struct {
-	Catalog      *Catalog                `json:"catalog,omitempty"`
+	Catalog      *CatalogSearchItem      `json:"catalog,omitempty"`
 	PrAutomation *PrAutomationSearchItem `json:"prAutomation,omitempty"`
 }
 
@@ -6536,14 +6553,16 @@ type PrAutomationEdge struct {
 }
 
 type PrAutomationSearchItem struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Documentation *string  `json:"documentation,omitempty"`
-	Identifier    *string  `json:"identifier,omitempty"`
-	Role          *PrRole  `json:"role,omitempty"`
-	Icon          *string  `json:"icon,omitempty"`
-	DarkIcon      *string  `json:"darkIcon,omitempty"`
-	Cluster       *Cluster `json:"cluster,omitempty"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	Documentation *string `json:"documentation,omitempty"`
+	Identifier    *string `json:"identifier,omitempty"`
+	Role          *PrRole `json:"role,omitempty"`
+	// an icon url to use for this pr automation
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this pr automation
+	DarkIcon *string  `json:"darkIcon,omitempty"`
+	Cluster  *Cluster `json:"cluster,omitempty"`
 }
 
 // templates to apply in this pr
@@ -9395,6 +9414,11 @@ type VectorStoreAttributes struct {
 	Store      *VectorStore                       `json:"store,omitempty"`
 	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
+}
+
+type VectorStoreSettings struct {
+	Enabled *bool        `json:"enabled,omitempty"`
+	Store   *VectorStore `json:"store,omitempty"`
 }
 
 // a shortform reference to an addon by version

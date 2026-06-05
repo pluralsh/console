@@ -154,7 +154,7 @@ defmodule Console.MixProject do
       {:nimble_parsec, "~> 1.4", override: true},
       {:guardian, "~> 2.4"},
       {:accessible, "~> 0.3.0"},
-      {:httpoison, "~> 1.7", override: true},
+      {:httpoison, "~> 2.3", github: "pluralsh/httpoison", branch: "fix-certs", override: true},
       {:nebulex, "~> 2.6"},
       {:shards, "~> 1.0"},      #=> For using :shards as backend
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
@@ -181,7 +181,7 @@ defmodule Console.MixProject do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
       {:tesla, "~> 1.13"},
       {:oidcc, "~> 3.3"},
-      {:hackney, "== 1.20.1"},
+      {:hackney, "~> 1.21"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
       {:req_llm, "~> 1.14"},
