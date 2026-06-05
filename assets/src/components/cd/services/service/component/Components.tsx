@@ -5,7 +5,7 @@ import {
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
-import { ReactElement, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { type Key } from '@react-types/shared'
 import styled from 'styled-components'
@@ -109,35 +109,14 @@ type ComponentKindSelectArray = Pick<
 >[]
 
 export function useComponentKindSelect(
-  components: Nullable<ComponentKindSelectArray>,
-  config?: { width?: number }
-): {
-  selectedKinds: Set<string>
-  setSelectedKinds: (kinds: Set<string>) => void
-  kindSelector: ReactElement<any>
-} {
+  components: Nullable<ComponentKindSelectArray>
+) {
   const kinds = useMemo(() => getUniqueKinds(components || []), [components])
   const [selectedKinds, setSelectedKinds] = useState<Set<string>>(
     new Set<string>()
   )
 
-  return useMemo(
-    () => ({
-      selectedKinds,
-      setSelectedKinds,
-      kindSelector: (
-        <ComponentKindSelect
-          {...config}
-          {...{
-            selectedKinds,
-            setSelectedKinds,
-            kinds,
-          }}
-        />
-      ),
-    }),
-    [config, kinds, selectedKinds]
-  )
+  return { selectedKinds, setSelectedKinds, kinds }
 }
 
 function getUniqueKinds(components: Nullable<ComponentKindSelectArray>) {
@@ -152,7 +131,7 @@ function getUniqueKinds(components: Nullable<ComponentKindSelectArray>) {
   ).sort(compareComponentKinds)
 }
 
-function ComponentKindSelect({
+export function ComponentKindSelect({
   selectedKinds,
   setSelectedKinds,
   kinds,
@@ -176,7 +155,7 @@ function ComponentKindSelect({
         label="Type"
         placement="bottom-start"
         maxHeight={300}
-        width={300}
+        width={FILTER_SELECT_WIDTH}
         triggerButton={
           <FilterTrigger
             $border

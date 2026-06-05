@@ -1,6 +1,5 @@
 import {
   AiSparkleFilledIcon,
-  ArrowScroll,
   Button,
   Callout,
   FillLevelProvider,
@@ -8,7 +7,6 @@ import {
   Input,
   ListIcon,
   NetworkInterfaceIcon,
-  PageTitle,
   SearchIcon,
   TreeViewIcon,
 } from '@pluralsh/design-system'
@@ -35,6 +33,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { ButtonGroup } from '../../../utils/ButtonGroup.tsx'
 import { ComponentList } from './component/ComponentList.tsx'
 import {
+  ComponentKindSelect,
   ComponentStateFilter,
   useComponentKindSelect,
 } from './component/Components.tsx'
@@ -77,7 +76,8 @@ export function ServiceComponents() {
     [searchParams]
   )
 
-  const { kindSelector, selectedKinds } = useComponentKindSelect(components)
+  const { selectedKinds, setSelectedKinds, kinds } =
+    useComponentKindSelect(components)
 
   const contextValue = useMemo(
     () => ({
@@ -127,34 +127,36 @@ export function ServiceComponents() {
                 )}
               </Flex>
             </Flex>
-            <>
-              {!filtersHidden && (
-                <Flex
-                  gap="xsmall"
-                  css={{
-                    marginBottom: theme.spacing.medium,
-                    width: '100%',
-                    flexWrap: 'nowrap',
-                    minWidth: 0,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <Input
-                    raised
-                    placeholder="Search components"
-                    startIcon={<SearchIcon />}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                    css={{ flex: 1, minWidth: 0 }}
-                  />
-                  {kindSelector}
-                  <ComponentStateFilter
-                    selectedState={selectedState}
-                    setSelectedState={setSelectedState}
-                  />
-                </Flex>
-              )}
-            </>
+            {!filtersHidden && (
+              <Flex
+                gap="xsmall"
+                css={{
+                  marginBottom: theme.spacing.medium,
+                  width: '100%',
+                  flexWrap: 'nowrap',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                }}
+              >
+                <Input
+                  raised
+                  placeholder="Search components"
+                  startIcon={<SearchIcon />}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                  css={{ flex: 1, minWidth: 0 }}
+                />
+                <ComponentKindSelect
+                  selectedKinds={selectedKinds}
+                  setSelectedKinds={setSelectedKinds}
+                  kinds={kinds}
+                />
+                <ComponentStateFilter
+                  selectedState={selectedState}
+                  setSelectedState={setSelectedState}
+                />
+              </Flex>
+            )}
           </Flex>
         }
       >
