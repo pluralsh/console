@@ -18,7 +18,7 @@ versions:
         switch from `argocd.argoproj.io/kubernetes-version` in `Major.Minor` to `vMajor.Minor.Patch`
         format. This can affect cluster selection and therefore what apps get generated/synced
         if not updated.']
-  chart_version: 9.5.17
+  chart_version: 9.5.19
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.4.3']
 - version: 3.4.1
