@@ -90,13 +90,14 @@ defmodule Console.Schema.Catalog.Mini do
 
   @derive Jason.Encoder
   @derive JSON.Encoder
-  defstruct [:id, :name, :description, :category, :icon, :dark_icon]
+  defstruct [:id, :name, :description, :documentation, :category, :icon, :dark_icon]
 
   def new(%Catalog{} = catalog) do
     %__MODULE__{
       id: catalog.id,
       name: catalog.name,
       description: catalog.description,
+      documentation: catalog.description,
       category: catalog.category,
       icon: catalog.icon,
       dark_icon: catalog.dark_icon
@@ -108,6 +109,7 @@ defmodule Console.Schema.Catalog.Mini do
       id: attrs["id"],
       name: attrs["name"],
       description: attrs["description"],
+      documentation: attrs["documentation"] || attrs["description"],
       category: attrs["category"],
       icon: attrs["icon"],
       dark_icon: attrs["dark_icon"]

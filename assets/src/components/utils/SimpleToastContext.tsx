@@ -12,6 +12,7 @@ import {
 type ToastSeverity = ComponentProps<typeof Toast>['severity']
 
 export type SimpleToastPayload = {
+  heading?: ReactNode
   content: ReactNode
   severity?: ToastSeverity
   delayTimeout?: number | 'none'
@@ -52,6 +53,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
 
   const show = !!toast
   const {
+    heading,
     content,
     severity,
     delayTimeout = DEFAULT_DELAY_TIMEOUT,
@@ -68,6 +70,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
         position="bottom-right"
         margin="large"
         severity={severity}
+        heading={heading}
       >
         {content}
       </Toast>

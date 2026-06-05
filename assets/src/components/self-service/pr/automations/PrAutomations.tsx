@@ -1,12 +1,5 @@
-import {
-  ArrowTopRightIcon,
-  Button,
-  Flex,
-  Input2,
-  SearchIcon,
-  Table,
-} from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { ArrowTopRightIcon, Button, Table } from '@pluralsh/design-system'
+import { useMemo } from 'react'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
 
@@ -16,33 +9,16 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
-import { useThrottle } from 'components/hooks/useThrottle'
 import { mapExistingNodes } from 'utils/graphql'
+import { SelfServiceSearchBar } from 'components/self-service/catalog/SelfServiceSearchBar'
+import { useSelfServiceCatalogSearch } from 'components/self-service/catalog/useSelfServiceCatalogSearch'
 import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
-  const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useThrottle(searchString, 300)
-
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: usePrAutomationsQuery, keyPath: ['prAutomations'] },
-    { q: debouncedSearchString }
-  )
-
-  const prAutomations = useMemo(
-    () => mapExistingNodes(data?.prAutomations),
-    [data?.prAutomations]
-  )
+  const search = useSelfServiceCatalogSearch()
+  const { hasActiveSearch, useFallbackSearch, debouncedSearchQuery } = search
 
   useSetPageHeaderContent(
     useMemo(
@@ -63,21 +39,32 @@ export function PrAutomations() {
     )
   )
 
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: usePrAutomationsQuery,
+      keyPath: ['prAutomations'],
+    },
+    { q: useFallbackSearch ? debouncedSearchQuery : '' }
+  )
+
+  const prAutomations = useMemo(
+    () => mapExistingNodes(data?.prAutomations),
+    [data?.prAutomations]
+  )
+
   if (error) return <GqlError error={error} />
 
   return (
-    <Flex
-      overflow="hidden"
-      direction="column"
-      gap="small"
-    >
-      <Input2
-        showClearButton
-        placeholder="Search PR automations"
-        startIcon={<SearchIcon />}
-        value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
-      />
+    <>
+      <SelfServiceSearchBar search={search} />
       <Table
         fullHeightWrap
         columns={columns}
@@ -89,7 +76,12 @@ export function PrAutomations() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{
+          message: hasActiveSearch
+            ? 'There are no PR automations matching your search.'
+            : 'No PR automations found.',
+        }}
       />
-    </Flex>
+    </>
   )
 }

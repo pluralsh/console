@@ -21,13 +21,13 @@ const getDirectory = (prsEnabled: boolean): SubtabDirectory => [
     label: 'Service catalog',
   },
   {
-    path: `${PR_REL_PATH}/${PR_OUTSTANDING_REL_PATH}`,
-    label: 'Outstanding PRs',
+    path: `${PR_REL_PATH}/${PR_AUTOMATIONS_REL_PATH}`,
+    label: 'PR automations',
     enabled: prsEnabled,
   },
   {
-    path: `${PR_REL_PATH}/${PR_AUTOMATIONS_REL_PATH}`,
-    label: 'PR automations',
+    path: `${PR_REL_PATH}/${PR_OUTSTANDING_REL_PATH}`,
+    label: 'Outstanding PRs',
     enabled: prsEnabled,
   },
   {
