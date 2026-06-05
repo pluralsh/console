@@ -162,7 +162,6 @@ function ComponentKindSelect({
   kinds: string[]
 }) {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
-  const allSelected = sortedSelectedKinds.length >= kinds.length
   const typeTriggerLabel =
     sortedSelectedKinds.length === 0 ? 'Type' : sortedSelectedKinds.join(', ')
 
@@ -188,12 +187,11 @@ function ComponentKindSelect({
           </FilterTrigger>
         }
         dropdownFooterFixed={
-          <FilterFooter
-            allSelected={allSelected}
-            onClick={() =>
-              setSelectedKinds(new Set(allSelected ? undefined : kinds))
-            }
-          />
+          selectedKinds.size > 0 ? (
+            <FilterFooterInner onClick={() => setSelectedKinds(new Set())}>
+              Clear selection
+            </FilterFooterInner>
+          ) : undefined
         }
       >
         {kinds.map((kind) => (
@@ -238,9 +236,11 @@ export function ComponentStateFilter({
           </FilterTrigger>
         }
         dropdownFooterFixed={
-          <FilterFooterInner onClick={() => setSelectedState(null)}>
-            Clear selection
-          </FilterFooterInner>
+          selectedState ? (
+            <FilterFooterInner onClick={() => setSelectedState(null)}>
+              Clear selection
+            </FilterFooterInner>
+          ) : undefined
         }
       >
         {Object.values(ComponentState).map((state) => (
