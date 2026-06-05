@@ -140,6 +140,7 @@ export function ServiceComponents() {
                   }}
                 >
                   <Input
+                    raised
                     placeholder="Search components"
                     startIcon={<SearchIcon />}
                     value={searchQuery}
