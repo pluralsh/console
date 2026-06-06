@@ -353,7 +353,15 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Argo CD 2.11.0 is a new minor release over 2.10.7; release notes provided\
+        \ here don\u2019t enumerate specific feature highlights beyond standard installation,\
+        \ signing, and upgrade pointers."]
+    breaking_changes: [No breaking changes are listed in the provided release-note
+        excerpts; consult the full changelog diff and the official upgrading guide
+        for any minor-version upgrade considerations.]
   chart_version: 6.9.3
   images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
     'quay.io/argoproj/argocd:v2.11.0']
