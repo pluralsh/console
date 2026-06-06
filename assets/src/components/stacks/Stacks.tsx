@@ -47,7 +47,6 @@ import {
   Conjunction,
   StackFragment,
   StackTinyFragment,
-  StackType,
   TagType,
   useStackQuery,
   useStacksQuery,
@@ -66,6 +65,7 @@ import {
   STACK_VARS_REL_PATH,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
+import { isTerraformFamilyStackType } from './common/stackTypeUtils'
 
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { useProjectId } from '../contexts/ProjectsContext'
@@ -111,12 +111,12 @@ const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   {
     path: STACK_STATE_REL_PATH,
     label: 'State',
-    enabled: stack?.type === StackType.Terraform,
+    enabled: isTerraformFamilyStackType(stack?.type),
   },
   {
     path: STACK_OUTPUT_REL_PATH,
     label: 'Output',
-    enabled: stack?.type === StackType.Terraform,
+    enabled: isTerraformFamilyStackType(stack?.type),
   },
   { path: STACK_VARS_REL_PATH, label: 'Variables', enabled: true },
   {

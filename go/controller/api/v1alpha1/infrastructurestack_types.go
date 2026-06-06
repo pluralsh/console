@@ -64,8 +64,8 @@ type InfrastructureStackSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Type specifies the IaC tool to use for executing the stack.
-	// One of TERRAFORM, ANSIBLE, CUSTOM.
-	// +kubebuilder:validation:Enum=TERRAFORM;ANSIBLE;CUSTOM
+	// One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM.
+	// +kubebuilder:validation:Enum=TERRAFORM;TERRAGRUNT;ANSIBLE;CUSTOM
 	// +kubebuilder:validation:Required
 	Type console.StackType `json:"type"`
 
@@ -207,6 +207,10 @@ type StackConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 
+	// Terragrunt configuration for this stack.
+	// +kubebuilder:validation:Optional
+	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+
 	// Ansible configuration for this stack.
 	// +kubebuilder:validation:Optional
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
@@ -238,6 +242,22 @@ type TerraformConfiguration struct {
 	// TofuRegistry is whether to use the OpenTofu registry for provider and module sources.
 	// +kubebuilder:validation:Optional
 	TofuRegistry *bool `json:"tofuRegistry,omitempty"`
+}
+
+type TerragruntConfiguration struct {
+	// Parallelism is the number of concurrent operations to run,
+	// equivalent to the -parallelism flag passed through to the underlying Terraform/OpenTofu invocation.
+	// +kubebuilder:validation:Optional
+	Parallelism *int64 `json:"parallelism,omitempty"`
+
+	// Refresh is whether to refresh the state of the stack,
+	// equivalent to the -refresh flag passed through to the underlying Terraform/OpenTofu invocation.
+	// +kubebuilder:validation:Optional
+	Refresh *bool `json:"refresh,omitempty"`
+
+	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
+	// +kubebuilder:validation:Optional
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 }
 
 type AnsibleConfiguration struct {
@@ -327,6 +347,10 @@ type StackOverrides struct {
 	// Terraform is the terraform configuration for this stack
 	// +kubebuilder:validation:Optional
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+
+	// Terragrunt is the terragrunt configuration for this stack
+	// +kubebuilder:validation:Optional
+	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
 }
 
 type StackHook struct {

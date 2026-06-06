@@ -12,8 +12,9 @@ SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
 # Config variables used for testing
-DEFAULT_PLRL_CONSOLE_URL := "https://console.plrl-dev-aws.onplural.sh"
+DEFAULT_PLRL_CONSOLE_URL := https://console.plrl-dev-aws.onplural.sh
 PLRL_CONSOLE_URL := $(if $(PLRL_CONSOLE_URL),$(PLRL_CONSOLE_URL),$(DEFAULT_PLRL_CONSOLE_URL))
+PLURAL_CONSOLE_URL := $(if $(PLURAL_CONSOLE_URL),$(PLURAL_CONSOLE_URL),$(PLRL_CONSOLE_URL))
 PLRL_CONSOLE_TOKEN := $(if $(PLRL_CONSOLE_TOKEN),$(PLRL_CONSOLE_TOKEN),"")
 PLRL_DEPLOY_TOKEN := $(if $(PLRL_DEPLOY_TOKEN),$(PLRL_DEPLOY_TOKEN),"")
 PLRL_AGENT_RUN_ID := $(if $(PLRL_AGENT_RUN_ID),$(PLRL_AGENT_RUN_ID),"")
@@ -122,6 +123,23 @@ harness-run-terraform: docker-build-harness-terraform ## run harness
 
 .PHONY: harness-run-ansible
 harness-run-ansible: docker-build-harness-ansible ## run harness
+	@KUBECONFIG_TMP=$$(mktemp) && \
+	cp $${KUBECONFIG:-$${HOME}/.kube/config} $$KUBECONFIG_TMP && \
+	chmod 644 $$KUBECONFIG_TMP && \
+	docker run --rm \
+		--network=host \
+		-v $$KUBECONFIG_TMP:/home/nonroot/.kube/config \
+		-e KUBECONFIG=/home/nonroot/.kube/config \
+		-e HOME=/home/nonroot \
+		harness:latest \
+		--v=5 \
+		--console-url=${PLURAL_CONSOLE_URL}/ext/gql \
+		--console-token=${PLURAL_DEPLOY_TOKEN} \
+		--stack-run-id=${PLURAL_STACK_RUN_ID}; \
+	rm -f $$KUBECONFIG_TMP
+
+.PHONY: harness-run-terragrunt
+harness-run-terragrunt: docker-build-harness-terragrunt ## run harness
 	@KUBECONFIG_TMP=$$(mktemp) && \
 	cp $${KUBECONFIG:-$${HOME}/.kube/config} $$KUBECONFIG_TMP && \
 	chmod 644 $$KUBECONFIG_TMP && \
@@ -321,6 +339,14 @@ docker-build-harness-ansible: docker-build-harness-base ## build terraform docke
 		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
     	  	-t harness \
     		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/ansible.Dockerfile \
+    		$(WORKSPACES_DIR)
+
+.PHONY: docker-build-harness-terragrunt
+docker-build-harness-terragrunt: docker-build-harness-base ## build terragrunt docker harness image
+	docker build \
+		  	--build-arg=HARNESS_IMAGE_TAG="latest" \
+    	  	-t harness \
+    		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/harness/terragrunt.Dockerfile \
     		$(WORKSPACES_DIR)
 
 .PHONY: docker-build-agent-harness-base

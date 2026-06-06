@@ -105,6 +105,13 @@ func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 				TofuRegistry: conf.Terraform.TofuRegistry,
 			}
 		}
+		if conf.Terragrunt != nil {
+			result.Configuration.Terragrunt = &console.TerragruntConfigurationAttributes{
+				Parallelism:  conf.Terragrunt.Parallelism,
+				Refresh:      conf.Terragrunt.Refresh,
+				ApproveEmpty: conf.Terragrunt.ApproveEmpty,
+			}
+		}
 	}
 
 	return result

@@ -5,6 +5,7 @@ import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { StackType, useUpdateStackMutation } from '../../../generated/graphql'
+import { isTerraformFamilyStackType } from '../common/stackTypeUtils'
 import { GqlError } from '../../utils/Alert'
 import { OverlineH1 } from '../../utils/typography/Text'
 
@@ -14,18 +15,21 @@ export default function StackConfiguration() {
   const theme = useTheme()
   const { stackId = '' } = useParams()
   const { stack, refetch } = useOutletContext() as StackOutletContextT
+  const isTerragrunt = stack.type === StackType.Terragrunt
+  // Terragrunt has its own configuration block; Terraform uses the terraform one.
+  const toolConfig = isTerragrunt
+    ? stack.configuration.terragrunt
+    : stack.configuration.terraform
   const [image, setImage] = useState(stack.configuration.image)
   const [version, setVersion] = useState(stack.configuration.version)
-  const [parallelism, setParallelism] = useState(
-    stack.configuration.terraform?.parallelism
-  )
-  const [refresh, setRefresh] = useState(stack.configuration.terraform?.refresh)
+  const [parallelism, setParallelism] = useState(toolConfig?.parallelism)
+  const [refresh, setRefresh] = useState(toolConfig?.refresh)
 
   const changed =
     image !== stack.configuration.image ||
     version !== stack.configuration.version ||
-    parallelism !== stack.configuration.terraform?.parallelism ||
-    refresh !== stack.configuration.terraform?.refresh
+    parallelism !== toolConfig?.parallelism ||
+    refresh !== toolConfig?.refresh
 
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
@@ -39,9 +43,11 @@ export default function StackConfiguration() {
         configuration: {
           image,
           version,
-          ...(stack.type === StackType.Terraform
-            ? { terraform: { refresh, parallelism } }
-            : {}),
+          ...(isTerragrunt
+            ? { terragrunt: { refresh, parallelism } }
+            : isTerraformFamilyStackType(stack.type)
+              ? { terraform: { refresh, parallelism } }
+              : {}),
         },
       },
     },
@@ -89,7 +95,7 @@ export default function StackConfiguration() {
             onChange={(e) => setVersion(e.currentTarget.value)}
           />
         </FormField>
-        {stack.type === StackType.Terraform && (
+        {isTerraformFamilyStackType(stack.type) && (
           <>
             <FormField label="Parallelism">
               <Input

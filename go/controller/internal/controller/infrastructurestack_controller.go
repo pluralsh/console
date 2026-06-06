@@ -500,6 +500,14 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 		}
 	}
 
+	if overrides.Terragrunt != nil {
+		result.Terragrunt = &console.TerragruntConfigurationAttributes{
+			Parallelism:  overrides.Terragrunt.Parallelism,
+			Refresh:      overrides.Terragrunt.Refresh,
+			ApproveEmpty: overrides.Terragrunt.ApproveEmpty,
+		}
+	}
+
 	return result
 }
 
@@ -522,6 +530,14 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			ApproveEmpty: conf.Terraform.ApproveEmpty,
 			Tofu:         conf.Terraform.Tofu,
 			TofuRegistry: conf.Terraform.TofuRegistry,
+		}
+	}
+
+	if conf.Terragrunt != nil {
+		attrs.Terragrunt = &console.TerragruntConfigurationAttributes{
+			Parallelism:  conf.Terragrunt.Parallelism,
+			Refresh:      conf.Terragrunt.Refresh,
+			ApproveEmpty: conf.Terragrunt.ApproveEmpty,
 		}
 	}
 

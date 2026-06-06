@@ -83,6 +83,11 @@ func (in *StackRun) FromStackRunBaseFragment(fragment *gqlclient.StackRunBaseFra
 		run.Refresh = tf.Refresh
 		run.ApproveEmpty = tf.ApproveEmpty
 	}
+	if tg := fragment.Configuration.Terragrunt; tg != nil {
+		run.Parallelism = tg.Parallelism
+		run.Refresh = tg.Refresh
+		run.ApproveEmpty = tg.ApproveEmpty
+	}
 	if ans := fragment.Configuration.Ansible; ans != nil {
 		run.InventoryFile = ans.Inventory
 		run.PlaybookFile = ans.Playbook
