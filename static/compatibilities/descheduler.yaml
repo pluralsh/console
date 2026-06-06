@@ -225,7 +225,21 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Descheduler v0.29.0 includes several Helm-related improvements
+        and one breaking-ish template/values adjustment to avoid a CronJob args unmarshal
+        error., 'Helm chart adds support for CronJob `timeZone`, `dnsConfig`, Pod
+        `securityContext`, and `ipFamilyPolicy` configuration.']
+    features: ['Improved TopologySpreadConstraint handling, adding support for `nodeTaintsPolicy`,
+        `nodeAffinityPolicy`, and `matchLabelKeys`.', PodLifeTime strategy now considers
+        pods in `ImagePullBackOff`., 'Logging improvements (structured errors, JSON
+        logging fixes, more readable node utilization percentages, correct ownerKey).',
+      'Compatibility and security updates: dependency bumps for multiple CVEs and
+        updated Kubernetes/Go dependencies, including Kubernetes 1.29 support.']
+    breaking_changes: [Helm CronJob args values format changed to avoid an unmarshal
+        error; existing custom `cronJob.args`/args configuration may need adjustment
+        when upgrading.]
   chart_version: 0.30.2
   images: ['registry.k8s.io/descheduler/descheduler:v0.30.2']
 - version: 0.29.0
@@ -314,7 +328,20 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- Chart updated from **v1.25.0** (descheduler app **v0.25.1**)\
+      \ to **v0.26.0** (descheduler app **v0.26.1**). Review your Helm repo chart\
+      \ versions and update the chart reference accordingly.\n- No explicit values\
+      \ schema changes are called out in the provided notes; validate by diffing your\
+      \ current `values.yaml` against the new chart\u2019s `values.yaml` and running\
+      \ a `helm template`/`helm diff`.\n"
+    chart_updates: [Helm chart version bump to **v0.26.0** (as referenced in the v0.26.1
+        release notes).]
+    features: ['Fixes default value assignment for the `EvictLocalStoragePods` option,
+        making behavior more consistent when the value is omitted.']
+    breaking_changes: [None explicitly mentioned in the provided v0.25.1 and v0.26.1
+        notes; still validate against intermediate releases (v0.26.0) for any API/config
+        deprecations.]
   chart_version: 0.26.1
   images: ['registry.k8s.io/descheduler/descheduler:v0.26.1']
 - version: 0.25.1

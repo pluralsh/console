@@ -163,7 +163,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include any itemized changes;\
+          \ v1.60.0 points to the upstream CHANGELOG for details."]
+      breaking_changes: [No breaking changes are stated in the provided release notes;
+          need the upstream CHANGELOG diff between v1.59.0 and v1.60.0 to confirm.]
     chart_version: 2.60.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.5',
@@ -196,7 +202,15 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include itemized changes between\
+          \ v1.56.0 and v1.57.1; they only point to the upstream CHANGELOG. No concrete\
+          \ new features can be derived from the supplied text."]
+      breaking_changes: ['No breaking changes are listed in the provided release notes;
+          they only reference the upstream CHANGELOG, so breaking changes (if any)
+          cannot be confirmed from the supplied data.']
     chart_version: 2.57.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.3',
@@ -207,7 +221,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific v1.56.0 features provided in the supplied notes; release
+          notes only link to the upstream CHANGELOG.]
+      breaking_changes: [No breaking changes identified from the provided notes; must
+          review the upstream CHANGELOG for v1.56.0 to confirm.]
     chart_version: 2.56.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.1', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.1',
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.1-eksbuild.1', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.1',
@@ -218,7 +238,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t list specific changes; both versions\
+          \ point to the upstream CHANGELOG for details."]
+      breaking_changes: ["Cannot determine breaking changes from the provided notes\
+          \ because the detailed CHANGELOG content wasn\u2019t included."]
     chart_version: 2.55.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v2.0.0-eksbuild.4',
@@ -229,7 +255,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not include detailed changes; both versions
+          point to the upstream CHANGELOG for the full list of changes.]
+      breaking_changes: [Potential breaking changes cannot be determined from the
+          provided notes because no detailed changelog entries were included. Review
+          the upstream CHANGELOG between v1.53.0 and v1.54.0 before upgrading.]
     chart_version: 2.54.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.0.0-eksbuild.3',
@@ -240,7 +273,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature details provided in the supplied release notes
+          for v1.53.0; consult the project CHANGELOG.md between v1.52.0 and v1.53.0
+          for the actual set of enhancements.]
+      breaking_changes: [No breaking changes were listed in the supplied release notes;
+          verify in CHANGELOG.md and the Helm chart changelog before upgrading.]
     chart_version: 2.53.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.10.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.5',
@@ -251,7 +291,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature notes were included in the provided release notes;
+          they only reference the upstream CHANGELOG for details.]
+      breaking_changes: ["No breaking-change information was included in the provided\
+          \ release notes; you\u2019ll need to review the upstream CHANGELOG for v1.52.0\
+          \ to confirm."]
     chart_version: 2.52.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
@@ -262,7 +309,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not enumerate changes; both versions only
+          link to the upstream CHANGELOG without details.]
+      breaking_changes: [Unknown from provided notes; no breaking changes listed in
+          the release notes excerpt (must consult upstream CHANGELOG for confirmation).]
     chart_version: 2.51.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
@@ -273,7 +326,15 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include itemized changes; only\
+          \ point to the upstream CHANGELOG.md. No new features can be reliably extracted\
+          \ from the provided text."]
+      breaking_changes: [No breaking changes are stated in the provided release notes;
+          need the linked CHANGELOG.md or Helm chart changelog to assess potential
+          breaking changes.]
     chart_version: 2.50.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
@@ -284,7 +345,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were provided in the supplied release notes; both
+          v1.48.0 and v1.49.0 entries only link to the project CHANGELOG.]
+      breaking_changes: [No breaking-change details were provided in the supplied
+          release notes; review the upstream CHANGELOG for v1.49.0 and any intervening
+          commits.]
     chart_version: 2.49.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
@@ -328,7 +396,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No concrete feature details provided in the pasted release notes;
+          both v1.44.0 and v1.45.0 notes only point to the upstream CHANGELOG.]
+      breaking_changes: [No breaking changes can be identified from the provided notes;
+          the release notes contain no change details beyond a link to CHANGELOG.]
     chart_version: 2.45.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.2',
@@ -352,7 +426,14 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided only link to the upstream CHANGELOG; no specific
+          v1.43.0 changes are included here, so features cannot be reliably summarized
+          from the supplied text.']
+      breaking_changes: [No breaking changes are mentioned in the provided release
+          notes; need to consult the linked CHANGELOG for v1.43.0 vs v1.42.0 details.]
     chart_version: 2.43.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.43.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
@@ -365,7 +446,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include itemized changes; v1.42.0\
+          \ points to the upstream CHANGELOG for details."]
+      breaking_changes: [No breaking changes are listed in the provided notes; need
+          the linked CHANGELOG (or Helm chart changelog) to verify.]
     chart_version: 2.42.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.42.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-1',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-1',
@@ -391,7 +478,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided contain no itemized changes between v1.39.0
+          and v1.40.0 (they only link to the upstream CHANGELOG).]
+      breaking_changes: [No breaking changes are stated in the provided release notes;
+          consult the upstream CHANGELOG for v1.40.0 details before upgrading.]
     chart_version: 2.40.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.40.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-32-6',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-6',
@@ -404,7 +497,14 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include itemized changes for v1.39.0\u2014\
+          only a pointer to the upstream CHANGELOG, so no concrete new features can\
+          \ be confirmed from the supplied text."]
+      breaking_changes: [No breaking changes are listed in the provided notes; need
+          the actual v1.39.0 CHANGELOG diff to verify.]
     chart_version: 2.39.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.39.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.0-eks-1-31-12',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-12',
@@ -456,7 +556,14 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include detailed change items\
+          \ beyond a pointer to the upstream CHANGELOG; no specific features can be\
+          \ derived from the text shared."]
+      breaking_changes: ["Release notes provided don\u2019t list any breaking changes;\
+          \ need to review the linked CHANGELOG between v1.34.0 and v1.35.0 to confirm."]
     chart_version: 2.35.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240903-6a352c5344-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.35.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-3',
@@ -482,7 +589,15 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided only link to the full CHANGELOG; no specific
+          feature items were included in the notes you shared, so features for 1.33.0
+          vs 1.32.0 cannot be determined from this input.']
+      breaking_changes: ['No breaking changes are mentioned in the provided release
+          notes; the notes only point to the upstream CHANGELOG, so breaking changes
+          (if any) cannot be confirmed from this input.']
     chart_version: 2.33.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240705-131cd74733-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.33.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
@@ -495,7 +610,13 @@ addons:
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided only link to the upstream CHANGELOG; no concrete
+          feature list included in the supplied notes.]
+      breaking_changes: [No breaking changes were described in the supplied release
+          notes; need to consult the upstream CHANGELOG for v1.32.0 details.]
     chart_version: 2.32.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240611-597c402033-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.32.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-8',
@@ -557,7 +678,13 @@ addons:
       '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific changes listed in the provided release notes; both v1.29.0
+          and v1.29.1 entries only link to the main CHANGELOG without details.]
+      breaking_changes: [No breaking changes identified from the provided release
+          notes (no details included).]
     chart_version: 2.29.1
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
@@ -583,7 +710,15 @@ addons:
       '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include specific changes; both\
+          \ versions only link to the upstream CHANGELOG. No concrete feature list\
+          \ can be derived from the text provided."]
+      breaking_changes: [Unknown from the provided release notes; need to review the
+          upstream CHANGELOG entries between v1.26.1 and v1.28.0 to confirm any breaking
+          changes.]
     chart_version: 2.28.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.28.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-5',
@@ -596,7 +731,15 @@ addons:
       '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided only include links to the upstream CHANGELOG
+          for both v1.23.1 and v1.26.1; no specific features are listed in the provided
+          text.]
+      breaking_changes: [No breaking changes are called out in the provided release
+          notes; you must review the upstream CHANGELOG between v1.23.1 and v1.26.1
+          to confirm.]
     chart_version: 2.26.1
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20231206-f7b83ffbe6-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.26.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.4.3-eks-1-29-2',
@@ -628,7 +771,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature details were included in the provided release
+          notes; both versions only point to the upstream CHANGELOG-3.x.md.]
+      breaking_changes: [No breaking changes were listed in the provided release notes;
+          need to review CHANGELOG-3.x.md and the Helm chart changelog for v3.2.0
+          to confirm.]
     chart_version: 4.2.0
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
@@ -655,7 +805,14 @@ addons:
     kube: []
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include itemized changes for v2.3.0;\
+          \ they only point to the upstream CHANGELOG-2.x.md. No specific new features\
+          \ were listed in the notes you shared."]
+      breaking_changes: [No breaking changes were listed in the provided release notes;
+          need to consult CHANGELOG-2.x.md between v2.2.0 and v2.3.0 to confirm.]
     chart_version: 3.4.0
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
@@ -665,7 +822,15 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include the actual v2.2.0 changelog\
+          \ items; only a pointer to CHANGELOG-2.x.md. No concrete new features can\
+          \ be derived from the pasted text."]
+      breaking_changes: [No breaking changes are listed in the provided notes; need
+          the actual entries from CHANGELOG-2.x.md (between v2.1.2 and v2.2.0) or
+          the Helm chart changelog to confirm.]
     chart_version: 3.3.0
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
@@ -685,7 +850,15 @@ addons:
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include change details; both versions\
+          \ defer to the upstream CHANGELOG-2.x.md. No concrete features can be confirmed\
+          \ from the supplied text."]
+      breaking_changes: [No breaking changes are listed in the provided release notes;
+          both versions only link to the full changelog. Treat breaking-change status
+          as unknown until reviewing CHANGELOG-2.x.md between v2.0.2 and v2.1.1.]
     chart_version: 3.1.2
     images: ['public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
@@ -695,7 +868,15 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include detailed changes between\
+          \ 2.0.0 and 2.0.2; v2.0.2 points to the 2.x changelog for the actual list\
+          \ of fixes/features."]
+      breaking_changes: [No breaking changes are stated in the provided notes; you
+          must review CHANGELOG-2.x.md and the Helm chart changelog/values for any
+          breaking changes before upgrading.]
     chart_version: 3.0.3
     images: ['public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.0.2', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
@@ -705,7 +886,14 @@ addons:
       '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not include any detailed change items;
+          both versions only link to the 1.x changelog.]
+      breaking_changes: ['Potential breaking changes may exist between 1.7.4 and 2.0.0,
+          but none are listed in the provided notes; you must consult the v2.0.0 changelog/release
+          documentation before upgrading.']
     chart_version: 3.0.0
     images: ['amazon/aws-efs-csi-driver:v2.0.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7',
@@ -10058,21 +10246,45 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Calico v3.32.0 release artifacts include updated tigera-operator
+          Helm chart (v3.32.0) and separate CRD Helm charts for `crd.projectcalico.org/v1`
+          (v3.32.0) and a tech-preview `projectcalico.org/v3` CRD chart., v3.32.0
+          continues to publish the standard Calico release bundle (images/binaries/manifests)
+          plus Windows and OpenShift (ocp.tgz) assets for this version.]
+      breaking_changes: []
     chart_version: 3.32.0
     images: ['quay.io/tigera/operator:v1.42.0']
   - version: 3.31.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['New release artifacts packaging includes per-arch image tarballs
+          (including FIPS for linux/amd64), making air-gapped installs/upgrades easier
+          by importing images directly from provided tar files.', Updated tigera-operator
+          Helm chart package version to v3.31.0 (chart content likely updated to reference
+          Calico v3.31.0 images/manifests).]
+      breaking_changes: []
     chart_version: 3.31.0
     images: ['quay.io/tigera/operator:v1.40.0']
   - version: 3.30.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v3.30.0 ships updated Calico component images/binaries and updated
+          install bundles (including tigera-operator Helm v3 chart) compared to v3.29.0.
+          (No feature-level details were provided in the notes you shared.)]
+      breaking_changes: [No breaking changes were listed in the notes you shared;
+          confirm by reviewing the v3.30.0 release notes and the tigera-operator Helm
+          chart changelog before upgrading.]
     chart_version: 3.30.0
     images: ['quay.io/tigera/operator:v1.38.0']
     eolAt: '2026-04-30'
@@ -10080,7 +10292,12 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release artifacts updated to v3.29.0 (new container images/binaries/manifests,
+          Windows bundle, and tigera-operator Helm v3 chart).']
+      breaking_changes: []
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
     eolAt: '2025-10-21'
@@ -10088,7 +10305,14 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release v3.28.0 is available with updated container images/binaries/manifests
+          and an updated tigera-operator Helm v3 chart artifact., Updated Calico for
+          Windows bundle is provided for v3.28.0., Updated OpenShift manifest bundle
+          (ocp.tgz) is provided for v3.28.0.]
+      breaking_changes: []
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
     eolAt: '2025-05-05'
@@ -10096,7 +10320,13 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes content for v3.27.0 vs v3.26.0 not provided beyond
+          artifact lists; cannot extract specific new features from supplied text.]
+      breaking_changes: [No breaking changes described in the provided excerpts; full
+          v3.27.0 release notes link would be needed to confirm.]
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
     eolAt: '2024-10-29'
@@ -10104,7 +10334,12 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Calico v3.26.0 release available with updated artifacts (including
+          tigera-operator-v3.26.0.tgz).]
+      breaking_changes: []
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
     eolAt: '2024-05-11'
@@ -10112,7 +10347,13 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Upgrade Calico application and bundled artifacts from v3.24.1 to
+          v3.25.0 (new release tarball, updated Windows zip, updated tigera-operator
+          Helm chart bundle).']
+      breaking_changes: []
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
     eolAt: '2023-12-15'
@@ -10120,21 +10361,48 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided are high-level metadata only (assets, links)
+          for v3.23.4 and v3.24.1; no functional changes are included in the excerpt,
+          so no specific new features can be confirmed from the supplied text.']
+      breaking_changes: [No breaking changes are stated in the supplied release metadata;
+          must review the linked v3.24.x and v3.23.x release notes/changelog for actual
+          upgrade-impacting changes.]
     chart_version: 3.24.1
     images: ['quay.io/tigera/operator:v1.28.1']
   - version: 3.23.4
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Tigera operator Helm chart artifact updated from v3.22.5 to
+          v3.23.4 (chart bundle size 47KB -> 49KB); no explicit chart changelog details
+          provided in supplied notes.]
+      features: [No specific feature list provided in the supplied release note excerpts;
+          refer to the Calico v3.23 release notes page for details.]
+      breaking_changes: [No breaking changes described in the supplied excerpts; review
+          the Calico v3.23 release notes for any upgrade-impacting changes between
+          3.22 and 3.23.]
     chart_version: 3.23.4
     images: ['quay.io/tigera/operator:v1.27.14']
   - version: 3.22.5
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Upgrade Calico application from v3.20.6 to v3.22.5 (includes updated
+          container images, binaries, and Kubernetes manifests).', Updated bundled
+          Tigera Operator Helm v3 chart artifact to tigera-operator-v3.22.5.tgz.,
+        Release includes updated calicoctl binaries across multiple platforms and
+          updated Windows packaging (calico-windows-v3.22.5.zip).]
+      breaking_changes: ['Not provided in the notes shared; review the Calico v3.21
+          and v3.22 archived release notes for any breaking changes impacting CNI,
+          Felix, BGP, IPAM, or CRDs before upgrading.']
     chart_version: 3.22.5
     images: ['quay.io/tigera/operator:v1.25.13']
   - version: 3.20.6
@@ -14610,7 +14878,21 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Descheduler v0.29.0 includes several Helm-related improvements
+          and one breaking-ish template/values adjustment to avoid a CronJob args
+          unmarshal error., 'Helm chart adds support for CronJob `timeZone`, `dnsConfig`,
+          Pod `securityContext`, and `ipFamilyPolicy` configuration.']
+      features: ['Improved TopologySpreadConstraint handling, adding support for `nodeTaintsPolicy`,
+          `nodeAffinityPolicy`, and `matchLabelKeys`.', PodLifeTime strategy now considers
+          pods in `ImagePullBackOff`., 'Logging improvements (structured errors, JSON
+          logging fixes, more readable node utilization percentages, correct ownerKey).',
+        'Compatibility and security updates: dependency bumps for multiple CVEs and
+          updated Kubernetes/Go dependencies, including Kubernetes 1.29 support.']
+      breaking_changes: [Helm CronJob args values format changed to avoid an unmarshal
+          error; existing custom `cronJob.args`/args configuration may need adjustment
+          when upgrading.]
     chart_version: 0.30.2
     images: ['registry.k8s.io/descheduler/descheduler:v0.30.2']
   - version: 0.29.0
@@ -14701,7 +14983,20 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- Chart updated from **v1.25.0** (descheduler app **v0.25.1**)\
+        \ to **v0.26.0** (descheduler app **v0.26.1**). Review your Helm repo chart\
+        \ versions and update the chart reference accordingly.\n- No explicit values\
+        \ schema changes are called out in the provided notes; validate by diffing\
+        \ your current `values.yaml` against the new chart\u2019s `values.yaml` and\
+        \ running a `helm template`/`helm diff`.\n"
+      chart_updates: [Helm chart version bump to **v0.26.0** (as referenced in the
+          v0.26.1 release notes).]
+      features: ['Fixes default value assignment for the `EvictLocalStoragePods` option,
+          making behavior more consistent when the value is omitted.']
+      breaking_changes: [None explicitly mentioned in the provided v0.25.1 and v0.26.1
+          notes; still validate against intermediate releases (v0.26.0) for any API/config
+          deprecations.]
     chart_version: 0.26.1
     images: ['registry.k8s.io/descheduler/descheduler:v0.26.1']
   - version: 0.25.1
@@ -15767,7 +16062,16 @@ addons:
     kube: ['1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v0.14.4 introduced a Prometheus status metric for PushSecret objects.,
+        v0.14.4 added support for tagging secrets when pushing to Azure Key Vault.,
+        v0.14.4 enabled pushing an entire secret to AWS Secrets Manager (PushSecret
+          use case)., v0.14.4 made Vault auth an optional entry in its configuration/secret
+          reference., v0.14.4 updated AWS identity documentation to include the EKS
+          pod identity flow., v0.14.4 updated the project to build with Go 1.24.]
+      breaking_changes: []
     chart_version: 0.15.1
     images: ['oci.external-secrets.io/external-secrets/external-secrets:v0.15.1']
   - version: 0.14.4
@@ -15922,7 +16226,17 @@ addons:
       '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['From the provided notes, v0.7.2 introduced new capabilities like
+          referent auth for AWS/GCP/Azure, AWS role chaining, KeyVault PushSecret
+          support, and HashiCorp Vault deletion policy handling.', The provided v0.8.7
+          entry includes image tags and release assets only; no feature list was included
+          in the notes you supplied.]
+      breaking_changes: ['No breaking changes are mentioned in the provided release
+          notes for either v0.7.2 or v0.8.7; however, this does not guarantee there
+          were none across intermediate 0.8.x releases.']
     chart_version: 0.8.7
     images: ['ghcr.io/external-secrets/external-secrets:v0.8.7']
   - version: 0.7.2
@@ -16707,7 +17021,17 @@ addons:
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided are mostly metadata (assets, dates, links)
+          for Istio 1.30.0 vs 1.29.0; no functional change list is included in the
+          text shared. As a result, specific new features cannot be extracted from
+          the provided notes.']
+      breaking_changes: [No breaking changes are listed in the provided release note
+          text; you need the 'Announcing 1.30' page content or detailed changelog
+          to identify any. Treat this as 'unknown' until validated from the official
+          release notes/migration guide.]
     chart_version: 1.30.0
     images: ['registry.istio.io/release/pilot:1.30.0']
     eolAt: '2026-11-30'
@@ -16715,7 +17039,18 @@ addons:
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['No Helm chart changelog was provided in the notes shared (only
+          upstream Istio application release metadata and asset lists), so no chart
+          template/value changes can be identified from this input.']
+      features: [No concrete 1.29.0 feature items were included in the provided notes
+          (only links to the full release notes). Review the linked 1.29.0 announcement
+          page for user-facing features and improvements before upgrading.]
+      breaking_changes: ['No breaking changes were included in the provided notes.
+          You must review the linked 1.29.0 release notes and any ''Upgrade Notes''
+          section to identify removals, behavior changes, or config deprecations that
+          could affect your cluster.']
     chart_version: 1.29.0
     images: ['docker.io/istio/pilot:1.29.0']
     eolAt: '2026-08-31'
@@ -16723,7 +17058,16 @@ addons:
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [New Istio release 1.28.0 published (see official release notes link
+          provided)., 'Updated istioctl and platform bundles are available for all
+          supported OS/architectures (linux/amd64, linux/arm64, linux/armv7, macOS,
+          Windows).']
+      breaking_changes: [No breaking changes were included in the provided notes;
+          review the official 1.28.0 announcement for any upgrade-impacting changes
+          not captured here.]
     chart_version: 1.28.0
     images: ['docker.io/istio/pilot:1.28.0']
     eolAt: '2026-06-28'
@@ -16731,7 +17075,16 @@ addons:
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes links moved from 1.26.x to 1.27.x (new minor release),
+          with updated istioctl/istio artifacts for multiple platforms.', Updated
+          Istio and istioctl binaries/images to version 1.27.0 (new tarballs/zips
+          and SPDX files published).]
+      breaking_changes: [No breaking changes were included in the provided notes;
+          verify the official 1.27 upgrade notes for deprecations/removals before
+          upgrading.]
     chart_version: 1.27.0
     images: ['docker.io/istio/pilot:1.27.0']
     eolAt: '2026-04-07'
@@ -16739,7 +17092,16 @@ addons:
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Upgrade target is Istio 1.26.0 (published 2025-05-08); new istioctl/istio
+          binaries and artifacts are available for multiple platforms., No functional
+          changes are described in the provided notes; only release metadata and artifact
+          listings are included.]
+      breaking_changes: ['No breaking changes are listed in the provided release notes
+          snippet; you should review the official Istio 1.26.x announcement/changelog
+          for deprecations, API changes, and upgrade notes before proceeding.']
     chart_version: 1.26.0
     images: ['docker.io/istio/pilot:1.26.0']
     eolAt: '2025-12-22'
@@ -16747,7 +17109,15 @@ addons:
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No actionable feature details were included in the provided notes
+          beyond links and artifact lists; refer to the official 1.25 release notes
+          page for the actual feature list before upgrading.]
+      breaking_changes: [No breaking-change details were included in the provided
+          notes beyond links and artifact lists; review the official 1.25 release
+          notes and upgrade notes for any behavior/config/API changes before proceeding.]
     chart_version: 1.25.0
     images: ['docker.io/istio/pilot:1.25.0']
     eolAt: '2025-09-30'
@@ -16755,7 +17125,15 @@ addons:
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided are just release metadata/assets links; no
+          actual 1.24.0 vs 1.23.0 feature list was included, so specific new features
+          cannot be summarized from the supplied text.']
+      breaking_changes: ['No breaking-change details were included in the supplied
+          notes (only release metadata and artifact lists), so breaking changes cannot
+          be identified from this input.']
     chart_version: 1.24.0
     images: ['docker.io/istio/pilot:1.24.0']
     eolAt: '2025-06-24'
@@ -16763,7 +17141,15 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [1.23.0 is a new Istio minor release compared to 1.22.0; use the matching
+          1.23.0 artifacts/istioctl and upgrade control plane + data plane in a coordinated
+          rollout.]
+      breaking_changes: [No specific breaking changes were provided in the pasted
+          release notes (only metadata and asset lists). Review the official 1.23.0
+          release notes link for deprecations/behavior changes before upgrading.]
     chart_version: 1.23.0
     images: ['docker.io/istio/pilot:1.23.0']
     eolAt: '2025-04-16'
@@ -16771,7 +17157,19 @@ addons:
     kube: ['1.30', '1.29', 1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release note excerpt provided contains primarily metadata (dates,
+          links, artifacts) for Istio 1.21.0 and 1.22.0; no functional changes, new
+          features, or upgrade-impacting behavior changes are listed in the text you
+          pasted.', Both versions publish new istioctl and istio distribution artifacts
+          for multiple OS/arch combinations; your upgrade should use the matching
+          1.22.0 istioctl to install/validate 1.22 control plane changes.]
+      breaking_changes: [No breaking changes are described in the provided text; to
+          assess real breaking/behavior changes you must review the linked Istio 1.22
+          release notes page (and especially the 'Upgrade Notes' / 'Deprecations'
+          sections).]
     chart_version: 1.22.0
     images: ['docker.io/istio/pilot:1.22.0']
     eolAt: '2025-01-22'
@@ -16779,7 +17177,15 @@ addons:
     kube: ['1.29', 1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided only include metadata and artifact lists
+          for 1.20.0 and 1.21.0, without the actual change log content; no concrete
+          feature deltas can be extracted from the text shared.']
+      breaking_changes: [No breaking changes can be determined from the provided release
+          note excerpts because they do not include the detailed changelog/upgrade
+          notes.]
     chart_version: 1.21.0
     images: ['docker.io/istio/pilot:1.21.0']
     eolAt: '2024-09-27'
@@ -16787,7 +17193,16 @@ addons:
     kube: ['1.28', '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided include artifact listings and links but do
+          not include the actual 1.20 feature list; review the official 1.20 announcement
+          for specifics (telemetry, ambient, gateway, security, and UX improvements
+          are typical areas).']
+      breaking_changes: [No breaking changes were included in the provided excerpts;
+          you must check the 1.19 and 1.20 upgrade notes/Deprecations pages before
+          upgrading from 1.18 to 1.20.]
     chart_version: 1.20.0
     images: ['docker.io/istio/pilot:1.20.0']
     eolAt: '2024-06-25'
@@ -16795,7 +17210,17 @@ addons:
     kube: ['1.27', '1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided here mostly list artifacts and metadata;
+          no concrete feature list for 1.18.0 vs 1.17.0 is included in the pasted
+          content. See the linked Istio 1.18 announcement/release notes for the actual
+          new features and improvements (traffic management, security, telemetry,
+          platform support).']
+      breaking_changes: [No breaking-change details are included in the pasted content;
+          breaking changes (if any) must be taken from the Istio 1.18 release notes
+          / upgrade notes page linked in the announcement.]
     chart_version: 1.18.0
     images: ['docker.io/istio/pilot:1.18.0']
     eolAt: '2024-01-04'
@@ -16803,7 +17228,19 @@ addons:
     kube: ['1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['This note set you provided is mostly metadata (artifact links, file
+          sizes, download counts) for 1.16.0 and 1.17.0; it does not include the actual
+          1.17 feature list.', 'From the official 1.17 announcement page (linked),
+          you should extract the specific new features/fixes relevant to your cluster
+          (ambient/sidecar behavior, gateway changes, telemetry, security, etc.).']
+      breaking_changes: [No breaking changes can be reliably identified from the pasted
+          content because it doesn't include the 'upgrade notes'/deprecations section
+          from the 1.17 release notes., 'Check the 1.17 release notes for removals/deprecations
+          and any required API/version bumps (Kubernetes version support, Envoy, gateway
+          APIs) before upgrading.']
     chart_version: 1.17.0
     images: ['docker.io/istio/pilot:1.17.0']
     eolAt: '2023-10-27'
@@ -16811,7 +17248,17 @@ addons:
     kube: ['1.25', '1.24', '1.23', '1.22']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Istio 1.16.0 is a new minor release over 1.14.0; expect updated
+          control plane and sidecar images, plus fixes and enhancements across traffic
+          management, security, and observability (details not included in provided
+          notes).']
+      breaking_changes: ['The provided release snippets do not include upgrade notes,
+          deprecations, or breaking changes; you must review the official 1.15.x and
+          1.16.x upgrade notes before proceeding to catch any incompatible API/behavior
+          changes.']
     chart_version: 1.16.0
     images: ['docker.io/istio/pilot:1.16.0']
     eolAt: '2023-07-25'
@@ -16819,7 +17266,17 @@ addons:
     kube: ['1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided are metadata (dates, assets, links) for Istio
+          1.14.0 vs 1.13.0; no functional changes are listed in the excerpt.', 'Upgrade
+          involves moving Istio control plane and istioctl binaries to 1.14.0 artifacts
+          for your platform (amd64/arm64/armv7, etc.).']
+      breaking_changes: [No breaking changes can be determined from the provided notes
+          because they do not include feature/behavior/deprecation details. Review
+          the linked Istio 1.14.0 announcement and full release notes for breaking
+          changes and upgrade notes before proceeding.]
     chart_version: 1.14.0
     images: ['docker.io/istio/pilot:1.14.0']
     eolAt: '2022-12-27'
@@ -16827,7 +17284,17 @@ addons:
     kube: ['1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Istio 1.13.0 is the target version for the upgrade from 1.12.0;
+          the notes provided here only include release metadata and artifact lists,
+          not functional changes.', 'New build artifacts are published for Istio 1.13.0
+          across linux/osx/windows and amd64/arm64/armv7, including separate istioctl
+          bundles.']
+      breaking_changes: ['No breaking changes were included in the provided release
+          notes excerpt; consult the official Istio 1.13.0 announcement/changelog
+          and the 1.13 upgrade notes for any removals, deprecations, or behavior changes.']
     chart_version: 1.13.0
     images: ['docker.io/istio/pilot:1.13.0']
     eolAt: '2022-10-12'
@@ -17412,23 +17879,25 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 86.1.1
+  - version: 86.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [CI workflow dependency bumps to github-workflow v6.0.3 (no runtime
-          impact)., Bumped kube-prometheus-stack chart dependencies with non-major
-          updates (likely patch/minor bumps of subcharts such as Grafana/Prometheus
-          Operator components).]
-      features: []
-      breaking_changes: []
-    chart_version: 86.1.1
+      chart_updates: [Bumped kube-prometheus-stack chart dependencies with non-major
+          updates (Renovate automation). No explicit template/value changes called
+          out in the provided release notes.]
+      features: [Dependency refresh (non-major) for the kube-prometheus-stack chart
+          and/or its subcharts/components; expect minor fixes and small improvements
+          coming from upstream dependencies.]
+      breaking_changes: [None mentioned in the provided 86.2.0/86.1.0 release notes;
+          still review subchart/component release notes for hidden breaking changes.]
+    chart_version: 86.2.0
     images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
       'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.91.0',
-      'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/alertmanager:v0.32.2', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
   - version: 86.1.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
@@ -22826,21 +23295,44 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release artifacts now explicitly include separate CRD Helm charts
+          (`crd.projectcalico.org/v1` and a tech-preview `projectcalico.org/v3`) alongside
+          the tigera-operator chart, which may change how you manage CRDs during upgrades.',
+        'Calico v3.32.0 introduces a new set of images/binaries/manifests packaged
+          in `release-v3.32.0.tgz` and updated `tigera-operator-v3.32.0.tgz`, indicating
+          component image/tag updates across the stack.']
+      breaking_changes: ['No breaking changes were included in the provided notes
+          excerpt; review the linked v3.32.0 release-notes markdown for any upgrade-impacting
+          changes (API/CRD, configuration defaults, deprecations).']
     chart_version: 3.32.0
     images: ['quay.io/tigera/operator:v1.42.0']
   - version: 3.31.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Upgrade Calico/tigera-operator bundle from v3.30.0 to v3.31.0 (new
+          release artifacts for Linux/Windows, OpenShift bundle, and updated calicoctl
+          binaries).']
+      breaking_changes: []
     chart_version: 3.31.0
     images: ['quay.io/tigera/operator:v1.40.0']
   - version: 3.30.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release artifact updates for Calico v3.30.0 including updated tigera-operator
+          Helm chart bundle and associated images/manifests., Updated calicoctl and
+          Windows artifacts published as part of the v3.30.0 release bundle.]
+      breaking_changes: []
     chart_version: 3.30.0
     images: ['quay.io/tigera/operator:v1.38.0']
     eolAt: '2026-04-30'
@@ -22848,7 +23340,14 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Bumped Calico and tigera-operator chart artifacts from v3.28.0 to
+          v3.29.0 (new release bundles and Helm chart tarball).]
+      breaking_changes: [No breaking changes were provided in the supplied notes;
+          review the v3.29.0 release notes document and tigera-operator chart changelog
+          for any API/values deprecations before upgrading.]
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
     eolAt: '2025-10-21'
@@ -22856,7 +23355,12 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Bumps Calico release from v3.27.0 to v3.28.0 (new images/binaries/manifests
+          and tigera-operator Helm chart tarball).]
+      breaking_changes: []
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
     eolAt: '2025-05-05'
@@ -22864,7 +23368,15 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Calico release v3.27.0 (includes tigera-operator-v3.27.0 Helm chart)
+          published 2023-12-15; upgrade from v3.26.0 changes the Calico components
+          to 3.27.0 images/manifests bundled in the release artifact.]
+      breaking_changes: [No breaking changes or feature details were provided in the
+          supplied notes beyond artifact listings; review the full v3.27.0 release
+          notes markdown to identify any required config or API changes before upgrading.]
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
     eolAt: '2024-10-29'
@@ -22872,7 +23384,14 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release artifacts updated to Calico v3.26.0, including tigera-operator
+          Helm v3 chart package and updated binaries/images/manifests bundle.', Added
+          an OpenShift manifest bundle (ocp.tgz) to the v3.26.0 release assets list
+          (in addition to the standard release tarball and Helm chart).]
+      breaking_changes: []
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
     eolAt: '2024-05-11'
@@ -22880,7 +23399,13 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ["Bumps Tigera Operator / Calico Helm chart artifact from `tigera-operator-v3.24.1.tgz`\
+          \ to `tigera-operator-v3.25.0.tgz` (chart package size ~106KB \u2192 ~107KB)."]
+      features: ['New Calico release v3.25.0 available with updated container images,
+          binaries, manifests, and Helm chart artifact (`release-v3.25.0.tgz`, `tigera-operator-v3.25.0.tgz`).']
+      breaking_changes: []
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
     eolAt: '2023-12-15'
@@ -22888,21 +23413,41 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release artifacts updated to Calico v3.24.1 including updated container
+          images, binaries, manifests, and the tigera-operator Helm v3 chart package.']
+      breaking_changes: []
     chart_version: 3.24.1
     images: ['quay.io/tigera/operator:v1.28.1']
   - version: 3.23.4
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Version bump of the tigera-operator Helm chart packaged with
+          Calico from v3.22.5 to v3.23.4 (chart artifact `tigera-operator-v3.23.4.tgz`).]
+      features: [Upgrade Calico/Tigera components from the v3.22 series to the v3.23
+          series (operator/chart version bump).]
+      breaking_changes: [No breaking changes are stated in the provided release-note
+          excerpts; review the full v3.23 release notes for any required manual steps
+          before upgrading.]
     chart_version: 3.23.4
     images: ['quay.io/tigera/operator:v1.27.14']
   - version: 3.22.5
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Calico v3.22.5 release package provides updated container images/binaries/manifests
+          and a tigera-operator Helm chart bundle (`tigera-operator-v3.22.5.tgz`).]
+      breaking_changes: [No breaking changes were provided in the supplied release
+          note excerpts; consult the full v3.21/v3.22 release notes to identify any
+          upgrade-impacting changes between 3.20.6 and 3.22.5.]
     chart_version: 3.22.5
     images: ['quay.io/tigera/operator:v1.25.13']
   - version: 3.20.6
@@ -23272,7 +23817,15 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Argo CD 2.11.0 is a new minor release over 2.10.7; release notes\
+          \ provided here don\u2019t enumerate specific feature highlights beyond\
+          \ standard installation, signing, and upgrade pointers."]
+      breaking_changes: [No breaking changes are listed in the provided release-note
+          excerpts; consult the full changelog diff and the official upgrading guide
+          for any minor-version upgrade considerations.]
     chart_version: 6.9.3
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.11.0']
@@ -23440,7 +23993,16 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional changes are described in the provided release notes;
+          both versions point to the main changelog/upgrading guide for details.,
+        Installation artifacts (CLI binaries and install.yaml) are updated to v4.0.5;
+          treat this as a patch upgrade with refreshed images/manifests.]
+      breaking_changes: [No breaking changes are listed in the provided notes; verify
+          via the Argo Workflows upgrading guide and CHANGELOG between v4.0.2 and
+          v4.0.5 before upgrading.]
     chart_version: 1.0.14
     images: ['quay.io/argoproj/argocli:v4.0.5', 'quay.io/argoproj/workflow-controller:v4.0.5',
       'registry.k8s.io/kubectl:v1.36.1']
@@ -23448,7 +24010,16 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v4.0.2 release notes provided here are a generic template (install
+          instructions/assets) and do not list specific new features; consult the
+          upstream changelog/blog for actual feature highlights between v3.7.0 and
+          v4.0.x.]
+      breaking_changes: [Breaking changes for the v4 major upgrade are not enumerated
+          in the provided notes; you must review the Argo Workflows upgrading guide
+          and CHANGELOG for v4.0.0+ before upgrading from v3.7.0.]
     chart_version: 1.0.4
     images: ['quay.io/argoproj/argocli:v4.0.2', 'quay.io/argoproj/workflow-controller:v4.0.2',
       'registry.k8s.io/kubectl:v1.35.3']
@@ -23456,7 +24027,16 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided are generic and mostly cover installation/asset
+          links; no explicit new features listed for v3.7.0 vs v3.6.5 in the provided
+          text., 'CLI and controller/server install artifacts are updated to v3.7.0
+          (new binaries, install.yaml).']
+      breaking_changes: [No breaking changes are listed in the provided release notes;
+          you must consult the upstream changelog and the official upgrading guide
+          for v3.7.0 to identify any required manifest/CRD/API changes.]
     chart_version: 0.45.21
     images: ['quay.io/argoproj/argocli:v3.7.0', 'quay.io/argoproj/workflow-controller:v3.7.0']
   - version: 3.6.5
@@ -23504,7 +24084,15 @@ addons:
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['The provided release notes for v3.6.0 vs v3.5.11 do not include
+          a detailed changelog; they mainly cover installation and assets, so no concrete
+          feature list can be derived from this text alone.']
+      breaking_changes: [No explicit breaking changes are listed in the provided notes;
+          the release notes only point to the upgrading guide and main changelog for
+          details.]
     chart_version: 0.45.0
     images: ['quay.io/argoproj/argocli:v3.6.0', 'quay.io/argoproj/workflow-controller:v3.6.0']
   - version: 3.5.11
@@ -23526,21 +24114,51 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided are generic (installation instructions, links)\
+          \ and do not enumerate specific v3.5.4\u2013v3.5.6 features/fixes; treat\
+          \ this as a patch-level upgrade within 3.5.x with expected bugfixes/security\
+          \ updates.", Newer CLI/server/controller artifacts are available at v3.5.6;
+          ensure any pinned CLI downloads and image tags are updated accordingly.]
+      breaking_changes: ["No breaking changes are called out in the provided release\
+          \ notes; however, you should still review the Argo Workflows 3.5 upgrading\
+          \ guide and the upstream CHANGELOG for 3.5.4\u20133.5.6 to confirm there\
+          \ are no behavior changes affecting your workflows."]
     chart_version: 0.41.6
     images: ['quay.io/argoproj/argocli:v3.5.6', 'quay.io/argoproj/workflow-controller:v3.5.6']
   - version: 3.5.3
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No clear feature list provided in the pasted notes; v3.5.3 notes
+          shown are generic pointers to blog/changelog/upgrading guide and install
+          instructions., "Upgrade primarily appears to be a patch release (3.5.0 \u2192\
+          \ 3.5.3) with unspecified fixes; consult upstream CHANGELOG for concrete\
+          \ items."]
+      breaking_changes: [None called out in the provided v3.5.3 release snippet; treat
+          as low-risk but still verify against the 3.5 upgrading guide and CHANGELOG
+          for any late-breaking notes.]
     chart_version: 0.40.5
     images: ['quay.io/argoproj/argocli:v3.5.3', 'quay.io/argoproj/workflow-controller:v3.5.3']
   - version: 3.5.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v3.5.0 release notes provided here mostly link out to a 'What's New'
+          blog and changelog; no concrete feature list is included in the snippet
+          you provided.]
+      breaking_changes: ['No breaking changes are listed in the provided release-note
+          snippets; they point to the upgrading guide/installation guide for details,
+          so you must review that guide for 3.5.0-specific breaking changes before
+          upgrading.']
     chart_version: 0.37.1
     images: ['quay.io/argoproj/argocli:v3.5.0', 'quay.io/argoproj/workflow-controller:v3.5.0']
   - version: 3.4.10
@@ -23558,21 +24176,49 @@ addons:
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Within the provided notes, both v3.4.0 and v3.4.8 entries are primarily
+          Quick Start/installation instructions and asset lists; no concrete feature
+          list is included.']
+      breaking_changes: [No breaking changes are enumerated in the provided release-note
+          excerpts; they only point to the installation guide for breaking changes/known
+          issues.]
     chart_version: 0.31.0
     images: ['quay.io/argoproj/argocli:v3.4.8', 'quay.io/argoproj/workflow-controller:v3.4.8']
   - version: 3.4.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v3.4.0 is a minor version bump over v3.3.2; the provided release
+          notes do not include a detailed feature list beyond pointing to the upstream
+          changelog/blog., 'New platform binaries/assets are published for v3.4.0
+          (including darwin arm64), but this is primarily operational packaging info
+          rather than a runtime feature.']
+      breaking_changes: ['No breaking changes are enumerated in the provided notes;
+          they are referenced as being documented in the installation guide/upgrading
+          docs, so you should review those before upgrading.']
     chart_version: 0.20.0
     images: ['quay.io/argoproj/argocli:v3.4.0', 'quay.io/argoproj/workflow-controller:v3.4.0']
   - version: 3.3.2
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided are primarily quick-start/installation instructions
+          for v3.2.0 and v3.3.2; no concrete feature list is included in the pasted
+          notes. Consult the Argo Workflows CHANGELOG.md between v3.2.0 and v3.3.2
+          for actual feature additions., 'v3.3.2 adds an SBOM asset (sbom.tar.gz)
+          to release artifacts, which may help with supply-chain/security auditing.']
+      breaking_changes: [No breaking changes are listed in the pasted release notes.
+          You must review docs/upgrading.md and the CHANGELOG.md between v3.2.0 and
+          v3.3.2 for any behavioral or API changes before upgrading.]
     chart_version: 0.15.1
     images: ['quay.io/argoproj/argocli:v3.3.2', 'quay.io/argoproj/workflow-controller:v3.3.2']
   - version: 3.2.0
@@ -23810,28 +24456,60 @@ addons:
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided only include metadata and asset lists; no\
+          \ feature list was included for v0.48.0 beyond what\u2019s on the linked\
+          \ page.", 'Based on the provided text, there are no described new features
+          between v0.47.0 and v0.48.0 (features likely exist in the linked release
+          notes).']
+      breaking_changes: [No breaking changes are mentioned in the provided release-note
+          excerpts; check the full v0.48.0 release notes link for any config/behavior
+          changes before upgrading.]
     chart_version: 0.44.0
     images: ['timberio/vector:0.48.0-distroless-libc']
   - version: 0.47.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were included in the provided 0.47.0 notes beyond
+          the existence of new build artifacts., Release primarily indicates a version
+          bump from 0.46.0 to 0.47.0 with updated binaries/packages for multiple platforms.]
+      breaking_changes: [No breaking-change information was included in the provided
+          release notes excerpt (only metadata and asset lists).]
     chart_version: 0.43.0
     images: ['timberio/vector:0.47.0-distroless-libc']
   - version: 0.46.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were included in the provided release notes excerpt
+          beyond the fact this is v0.46.0 (the excerpt only lists assets/metadata).]
+      breaking_changes: [No breaking changes were listed in the provided release notes
+          excerpt; must review the actual v0.46.0 and v0.45.0 release pages/changelog
+          for breaking/config changes before upgrading.]
     chart_version: 0.42.0
     images: ['timberio/vector:0.46.0-distroless-libc']
   - version: 0.45.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided are metadata-only (assets list, dates, download
+          counts) for Vector 0.44.0 and 0.45.0; no functional changes, new features,
+          fixes, or config changes are included in the text you shared.']
+      breaking_changes: ['Unknown from provided notes: the actual 0.45.0 release notes
+          content (features/fixes/breaking changes) is not included, so breaking changes
+          cannot be assessed.']
     chart_version: 0.41.0
     images: ['timberio/vector:0.45.0-distroless-libc']
   - version: 0.44.0
@@ -23869,14 +24547,31 @@ addons:
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided are limited to metadata and build artifacts;
+          no feature list was included, so no new features can be reliably summarized
+          from the supplied text.']
+      breaking_changes: [No breaking changes were listed in the provided notes; cannot
+          confirm whether any exist without the full 0.42.0 release notes content
+          (changelog section).]
     chart_version: 0.37.0
     images: ['timberio/vector:0.42.0-distroless-libc']
   - version: 0.41.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional changes were included in the notes you provided; the
+          v0.41.0 entry only lists build artifacts/packaging outputs., The release
+          primarily appears to be a version bump from 0.40.1 to 0.41.0 with updated
+          binaries for multiple platforms.]
+      breaking_changes: [No breaking changes were documented in the notes you provided;
+          treat as 'unknown' until you review the full v0.41.0 changelog on vector.dev
+          (link included).]
     chart_version: 0.36.0
     images: ['timberio/vector:0.41.0-distroless-libc']
   - version: 0.40.1
@@ -23896,42 +24591,84 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided contain only metadata and build artifacts
+          for v0.40.0 vs v0.39.0; no functional changes are listed, so features cannot
+          be derived from the pasted content.']
+      breaking_changes: [No breaking changes are mentioned in the provided notes;
+          verify the full v0.40.0 release page/changelog for config schema or component
+          changes before upgrading.]
     chart_version: 0.35.0
     images: ['timberio/vector:0.40.0-distroless-libc']
   - version: 0.39.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were provided in the pasted release notes beyond
+          the fact that v0.39.0 is a newer release with updated build artifacts.]
+      breaking_changes: [No breaking-change details were provided in the pasted release
+          notes; only asset lists and metadata were included.]
     chart_version: 0.34.0
     images: ['timberio/vector:0.39.0-distroless-libc']
   - version: 0.38.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['The provided notes are metadata and asset lists for v0.37.0 and
+          v0.38.0; they do not include the actual v0.38.0 change details, so no concrete
+          feature summary can be derived from this content alone.']
+      breaking_changes: [No breaking changes are listed in the provided text; actual
+          breaking changes (if any) would be in the linked Vector 0.38.0 release notes
+          page.]
     chart_version: 0.33.0
     images: ['timberio/vector:0.38.0-distroless-libc']
   - version: 0.37.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Vector upgraded from v0.36.0 to v0.37.0 (new upstream release artifacts
+          published March 26, 2024).']
+      breaking_changes: [No breaking changes were provided in the supplied release
+          notes; verify on the official v0.37.0 release page/changelog before upgrading.]
     chart_version: 0.32.0
     images: ['timberio/vector:0.37.0-distroless-libc']
   - version: 0.36.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were provided in the pasted notes; only metadata
+          and build artifacts for 0.35.0 and 0.36.0., The 0.36.0 release appears to
+          include updated binaries across platforms (rpm/deb/tar/msi) compared to
+          0.35.0.]
+      breaking_changes: [No breaking-change information was included in the provided
+          release notes excerpt.]
     chart_version: 0.31.0
     images: ['timberio/vector:0.36.0-distroless-libc']
   - version: 0.35.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details provided in the notes you shared; only release
+          metadata and downloadable artifacts are listed.]
+      breaking_changes: [No breaking-change details provided in the notes you shared;
+          only release metadata and downloadable artifacts are listed.]
     chart_version: 0.30.0
     images: ['timberio/vector:0.35.0-distroless-libc']
   - version: 0.34.2
@@ -23945,84 +24682,175 @@ addons:
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific features were included in the notes you provided (only
+          release metadata and asset lists). Please share the 0.34.0 release page
+          details (highlights/changes) to extract new features.]
+      breaking_changes: [No breaking changes were listed in the notes you provided.
+          Confirm by reviewing the 0.34.0 release notes 'Breaking changes' or 'Upgrade
+          notes' section on vector.dev.]
     chart_version: 0.28.0
     images: ['timberio/vector:0.34.0-distroless-libc']
   - version: 0.33.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['No feature details were included in the provided release notes text
+          beyond links to the full 0.32.0 and 0.33.0 release pages. Based on what
+          you pasted, the only observable change is the bump from Vector 0.32.0 to
+          0.33.0 and updated build artifacts for multiple platforms.']
+      breaking_changes: ["No breaking changes were listed in the provided text; you\u2019\
+          ll need to review the full 0.33.0 release notes link for any config/component\
+          \ deprecations or behavior changes before upgrading."]
     chart_version: 0.26.0
     images: ['timberio/vector:0.33.0-distroless-libc']
   - version: 0.32.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Vector v0.32.0 release notes link provided, but no detailed changelog
+          items included in the text you pasted (only metadata and build assets).']
+      breaking_changes: [No breaking changes can be identified from the pasted notes;
+          the actual 0.32.0 release notes content is referenced by link but not included
+          here.]
     chart_version: 0.24.0
     images: ['timberio/vector:0.32.0-distroless-libc']
   - version: 0.31.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['No feature details were included in the provided v0.30.0/v0.31.0
+          notes beyond links and build artifacts; review https://vector.dev/releases/0.31.0
+          for the actual change list before upgrading.']
+      breaking_changes: [No breaking-change information was included in the provided
+          notes; validate by reading the v0.31.0 release notes and checking deprecations/removals
+          that could affect your current sources/sinks/transforms.]
     chart_version: 0.23.0
     images: ['timberio/vector:0.31.0-distroless-libc']
   - version: 0.30.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['No functional changes were provided in the notes shared (only metadata
+          and asset lists). Please share the v0.30.0 release highlights/changes from
+          https://vector.dev/releases/0.30.0 (or paste the changelog sections) so
+          we can extract new features, fixes, and any deprecations/breaking changes.']
+      breaking_changes: ['Unknown from the provided excerpt; the pasted content contains
+          only release metadata and build artifacts, not the change log details.']
     chart_version: 0.22.1
     images: ['timberio/vector:0.30.0-distroless-libc']
   - version: 0.29.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Application bumped from Vector 0.28.0 to 0.29.0 (per release headers).]
+      breaking_changes: []
     chart_version: 0.21.0
     images: ['timberio/vector:0.29.0-distroless-libc']
   - version: 0.28.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Vector updated from v0.27.0 to v0.28.0 (new release available with
+          updated build artifacts across Linux/macOS/Windows and package formats).]
+      breaking_changes: [No breaking changes were provided in the supplied release
+          notes excerpt; review the full v0.28.0 release notes link for any config/behavior
+          changes before upgrading.]
     chart_version: 0.20.0
     images: ['timberio/vector:0.28.0-distroless-libc']
   - version: 0.27.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Bumped Vector application version from v0.26.0 to v0.27.0.]
+      breaking_changes: ["Release note content for v0.27.0 (features/breaking changes)\
+          \ was not included here\u2014only metadata and asset lists\u2014so potential\
+          \ breaking changes need to be reviewed at https://vector.dev/releases/0.27.0/."]
     chart_version: 0.19.0
     images: ['timberio/vector:0.27.0-distroless-libc']
   - version: 0.26.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional changes identified from the provided notes; the pasted
+          release entries only list metadata and build artifacts for v0.25.1 and v0.26.0.,
+        'Expect general bug fixes/performance improvements may exist in the full 0.26.0
+          release notes at vector.dev, but they are not included in the text provided.']
+      breaking_changes: ['No breaking changes are shown in the provided content; verify
+          in the full v0.26.0 release notes before upgrading (config, transforms/sinks/sources,
+          deprecated options).']
     chart_version: 0.18.0
     images: ['timberio/vector:0.26.0-distroless-libc']
   - version: 0.25.1
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes content for v0.24.0 and v0.25.1 wasn\u2019t included\
+          \ beyond metadata/assets, so no feature-level deltas can be extracted from\
+          \ what was provided."]
+      breaking_changes: ["Release notes content for v0.24.0 and v0.25.1 wasn\u2019\
+          t included beyond metadata/assets, so no breaking changes can be identified\
+          \ from what was provided."]
     chart_version: 0.17.0
     images: ['timberio/vector:0.25.1-distroless-libc']
   - version: 0.24.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No application feature details were provided in the pasted notes
+          (only links to full release notes and build artifacts). Review the Vector
+          0.24.0 release page for actual feature list before upgrading.]
+      breaking_changes: ['No breaking-change details were provided in the pasted notes.
+          Check the Vector 0.24.0 release page and any upgrade/breaking-changes section,
+          and scan for config/schema changes that could affect existing Vector configs.']
     chart_version: 0.16.0
     images: ['timberio/vector:0.24.0-distroless-libc']
   - version: 0.23.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["The provided notes don\u2019t include the actual v0.23.0 changelog\
+          \ items (features/fixes/breaking changes); only metadata and build artifacts\
+          \ are shown. No feature changes can be extracted from the text you shared."]
+      breaking_changes: ["The provided notes don\u2019t list any breaking changes\
+          \ between v0.22.0 and v0.23.0; none can be confirmed from the text shared.\
+          \ Review the linked Vector 0.23.0 release page for any config schema changes,\
+          \ component deprecations/removals, or default-behavior changes before upgrading."]
     chart_version: 0.15.0
     images: ['timberio/vector:0.23.0-distroless-libc']
   - version: 0.22.0
@@ -24036,35 +24864,75 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['No feature details were included in the provided v0.20.0/v0.21.0
+          notes beyond asset/package listings, so features for 0.21.0 vs 0.20.0 cannot
+          be summarized from this input.']
+      breaking_changes: ['No breaking-change information was included in the provided
+          notes (only asset lists), so breaking changes between 0.20.0 and 0.21.0
+          cannot be determined from this input.']
     chart_version: 0.10.0
     images: ['timberio/vector:0.21.0-distroless-libc']
   - version: 0.20.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional feature details were provided in the supplied release
+          notes excerpt (only metadata and asset lists).]
+      breaking_changes: [No breaking-change information was provided in the supplied
+          release notes excerpt (only metadata and asset lists).]
     chart_version: 0.7.0
     images: ['timberio/vector:0.20.0-distroless-libc']
   - version: 0.19.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided here only include asset lists; no feature
+          details were included in the pasted notes., 'Vector v0.19.0 is a minor-version
+          bump over v0.18.0; expect incremental improvements, but consult the full
+          v0.19.0 release notes link for specifics (new sources/sinks/transforms,
+          performance, and bug fixes).']
+      breaking_changes: [No breaking changes were listed in the provided excerpt;
+          you must review the full v0.19.0 release notes for any config or behavior
+          changes that could affect pipelines.]
     chart_version: 0.4.0
     images: ['timberio/vector:0.19.0-distroless-libc']
   - version: 0.18.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Application updated from Vector v0.17.3 to v0.18.0 (new release published
+          2021-11-18).]
+      breaking_changes: [No breaking changes were included in the provided release
+          notes excerpt (only assets/metadata). Review the full 0.18.0 release notes
+          page for config/component deprecations or behavioral changes before upgrading.]
     chart_version: 0.2.1
     images: ['timberio/vector:0.18.0-distroless-libc']
   - version: 0.17.3
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were provided in the supplied notes; only links
+          to the full release pages and build artifacts., "Upgrade spans multiple\
+          \ Vector versions (0.16.1 \u2192 0.17.3); review intermediate release notes\
+          \ on vector.dev for component-specific changes (sources, transforms, sinks)."]
+      breaking_changes: [No breaking-change information was included in the provided
+          notes; you must review the 0.17.x release notes (and any 0.17.0/0.17.1/0.17.2
+          notes) for config/behavior changes before upgrading.]
     chart_version: 0.1.1
     images: ['timberio/vector:0.17.3-distroless-libc']
   - version: 0.16.1
@@ -27577,7 +28445,12 @@ addons:
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [No chart template/values changes were provided in the notes
+          shared (release entry only lists the packaged chart asset).]
+      features: []
+      breaking_changes: []
     chart_version: 1.0.11181
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999
