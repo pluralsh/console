@@ -5,8 +5,8 @@ defmodule Console.AI.MemoizerTest do
   alias Console.AI.Memoizer
   alias Console.AI.Tools.Insight
 
-  @base_model "insight-base-model"
-  @tool_model "insight-tool-model"
+  @base_model "gpt-5.4"
+  @tool_model "gpt-5.5"
 
   setup :set_mimic_global
 

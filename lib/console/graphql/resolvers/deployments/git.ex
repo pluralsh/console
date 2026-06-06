@@ -214,24 +214,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def delete_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_observer(id, user)
 
-  def catalog_search(%{q: q}, _) do
-    with {:ok, results} <- Git.catalog_search(q) do
-      items = Enum.flat_map(results, fn
-        %{type: :catalog, catalog: %{id: id}} ->
-          case Git.get_catalog(id) do
-            nil -> []
-            catalog -> [%{catalog: catalog, pr_automation: nil}]
-          end
-        %{type: :pr_automation, pr_automation: %{id: id}} ->
-          case Git.get_pr_automation(id) do
-            nil -> []
-            pr_automation -> [%{catalog: nil, pr_automation: pr_automation}]
-          end
-        _ -> []
-      end)
-      {:ok, items}
-    end
-  end
+  def catalog_search(%{q: q}, _), do: Git.catalog_search(q)
 
   def upsert_catalog(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.upsert_catalog(attrs, user)

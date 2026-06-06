@@ -157,7 +157,14 @@ function ExpanderCodeBlock({
       fillLevel={0}
       showHeader
       title={title}
-      css={{ border: borders['fill-two'] }}
+      css={{
+        border: borders['fill-two'],
+        pre: {
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          overflowWrap: 'anywhere',
+        },
+      }}
     >
       {content}
     </Code>

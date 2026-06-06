@@ -7,6 +7,13 @@ defmodule Console.AI.Provider.Base do
   def select_model(%{model_id: model}, _) when is_binary(model), do: model
   def select_model(%{model: model}, _), do: model
 
+  def chunk_size(model) do
+    case ReqLLM.model(model) do
+      {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
+      _ -> 8000
+    end
+  end
+
   def tools(opts) do
     plural = Keyword.get(opts, :plural)
     tools  = Keyword.get(opts, :tools)

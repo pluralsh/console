@@ -557,6 +557,11 @@ func (in *AgentRuntimeSpec) DeepCopyInto(out *AgentRuntimeSpec) {
 		*out = new(metav1.Duration)
 		**out = **in
 	}
+	if in.ScmConnection != nil {
+		in, out := &in.ScmConnection, &out.ScmConnection
+		*out = new(string)
+		**out = **in
+	}
 	if in.ExaConnection != nil {
 		in, out := &in.ExaConnection, &out.ExaConnection
 		*out = new(ExaConnection)
@@ -949,6 +954,11 @@ func (in *CodexConfig) DeepCopyInto(out *CodexConfig) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Method != nil {
+		in, out := &in.Method, &out.Method
+		*out = new(client.OpenAiMethod)
+		**out = **in
+	}
 	if in.Endpoint != nil {
 		in, out := &in.Endpoint, &out.Endpoint
 		*out = new(string)
@@ -977,6 +987,11 @@ func (in *CodexConfigRaw) DeepCopyInto(out *CodexConfigRaw) {
 	if in.Model != nil {
 		in, out := &in.Model, &out.Model
 		*out = new(string)
+		**out = **in
+	}
+	if in.Method != nil {
+		in, out := &in.Method, &out.Method
+		*out = new(client.OpenAiMethod)
 		**out = **in
 	}
 	if in.Endpoint != nil {

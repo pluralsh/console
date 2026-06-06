@@ -6,7 +6,7 @@
 FROM busybox:uclibc AS busybox
 
 # Builder stage for all binaries with debug support
-FROM golang:1.25-alpine3.22 AS builder
+FROM golang:1.26.4-alpine3.22 AS builder
 
 ARG TARGETARCH
 ARG TARGETOS

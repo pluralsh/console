@@ -755,13 +755,16 @@ type AiSettings struct {
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis *bool                `json:"logAnalysis,omitempty"`
-	Openai      *OpenaiSettings      `json:"openai,omitempty"`
-	Anthropic   *AnthropicSettings   `json:"anthropic,omitempty"`
-	Ollama      *OllamaSettings      `json:"ollama,omitempty"`
-	Azure       *AzureOpenaiSettings `json:"azure,omitempty"`
-	Bedrock     *BedrockAiSettings   `json:"bedrock,omitempty"`
-	Vertex      *VertexAiSettings    `json:"vertex,omitempty"`
+	LogAnalysis *bool `json:"logAnalysis,omitempty"`
+	// settings for vector-backed search
+	VectorStore      *VectorStoreSettings `json:"vectorStore,omitempty"`
+	Openai           *OpenaiSettings      `json:"openai,omitempty"`
+	OpenaiCompatible *OpenaiSettings      `json:"openaiCompatible,omitempty"`
+	Anthropic        *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama           *OllamaSettings      `json:"ollama,omitempty"`
+	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock          *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex           *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -774,15 +777,16 @@ type AiSettingsAttributes struct {
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis *bool                        `json:"logAnalysis,omitempty"`
-	Openai      *OpenaiSettingsAttributes    `json:"openai,omitempty"`
-	Anthropic   *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
-	Ollama      *OllamaAttributes            `json:"ollama,omitempty"`
-	Azure       *AzureOpenaiAttributes       `json:"azure,omitempty"`
-	Bedrock     *BedrockAiAttributes         `json:"bedrock,omitempty"`
-	Vertex      *VertexAiAttributes          `json:"vertex,omitempty"`
-	VectorStore *VectorStoreAttributes       `json:"vectorStore,omitempty"`
-	Graph       *GraphStoreAttributes        `json:"graph,omitempty"`
+	LogAnalysis      *bool                        `json:"logAnalysis,omitempty"`
+	Openai           *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	OpenaiCompatible *OpenaiSettingsAttributes    `json:"openaiCompatible,omitempty"`
+	Anthropic        *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama           *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure            *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock          *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex           *VertexAiAttributes          `json:"vertex,omitempty"`
+	VectorStore      *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph            *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 // An individual alert raised from an observability provider or monitor
@@ -1422,8 +1426,23 @@ type CatalogEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
+type CatalogSearchItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the name of the author of this catalog
+	Author *string `json:"author,omitempty"`
+	// longform description for the purpose of this catalog
+	Description *string `json:"description,omitempty"`
+	// short category name used for browsing catalogs
+	Category *string `json:"category,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon *string `json:"darkIcon,omitempty"`
+}
+
 type CatalogSearchResult struct {
-	Catalog      *Catalog                `json:"catalog,omitempty"`
+	Catalog      *CatalogSearchItem      `json:"catalog,omitempty"`
 	PrAutomation *PrAutomationSearchItem `json:"prAutomation,omitempty"`
 }
 
@@ -6534,14 +6553,16 @@ type PrAutomationEdge struct {
 }
 
 type PrAutomationSearchItem struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Documentation *string  `json:"documentation,omitempty"`
-	Identifier    *string  `json:"identifier,omitempty"`
-	Role          *PrRole  `json:"role,omitempty"`
-	Icon          *string  `json:"icon,omitempty"`
-	DarkIcon      *string  `json:"darkIcon,omitempty"`
-	Cluster       *Cluster `json:"cluster,omitempty"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	Documentation *string `json:"documentation,omitempty"`
+	Identifier    *string `json:"identifier,omitempty"`
+	Role          *PrRole `json:"role,omitempty"`
+	// an icon url to use for this pr automation
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this pr automation
+	DarkIcon *string  `json:"darkIcon,omitempty"`
+	Cluster  *Cluster `json:"cluster,omitempty"`
 }
 
 // templates to apply in this pr
@@ -9395,6 +9416,11 @@ type VectorStoreAttributes struct {
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
 }
 
+type VectorStoreSettings struct {
+	Enabled *bool        `json:"enabled,omitempty"`
+	Store   *VectorStore `json:"store,omitempty"`
+}
+
 // a shortform reference to an addon by version
 type VersionReference struct {
 	Name    string `json:"name"`
@@ -11496,12 +11522,13 @@ func (e AgentSessionType) MarshalJSON() ([]byte, error) {
 type AiProvider string
 
 const (
-	AiProviderOpenai    AiProvider = "OPENAI"
-	AiProviderAnthropic AiProvider = "ANTHROPIC"
-	AiProviderOllama    AiProvider = "OLLAMA"
-	AiProviderAzure     AiProvider = "AZURE"
-	AiProviderBedrock   AiProvider = "BEDROCK"
-	AiProviderVertex    AiProvider = "VERTEX"
+	AiProviderOpenai           AiProvider = "OPENAI"
+	AiProviderAnthropic        AiProvider = "ANTHROPIC"
+	AiProviderOllama           AiProvider = "OLLAMA"
+	AiProviderAzure            AiProvider = "AZURE"
+	AiProviderBedrock          AiProvider = "BEDROCK"
+	AiProviderVertex           AiProvider = "VERTEX"
+	AiProviderOpenaiCompatible AiProvider = "OPENAI_COMPATIBLE"
 )
 
 var AllAiProvider = []AiProvider{
@@ -11511,11 +11538,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderAzure,
 	AiProviderBedrock,
 	AiProviderVertex,
+	AiProviderOpenaiCompatible,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible:
 		return true
 	}
 	return false

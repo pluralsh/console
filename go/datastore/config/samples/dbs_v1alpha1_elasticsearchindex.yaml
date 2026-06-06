@@ -1,0 +1,17 @@
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchIndex
+metadata:
+  labels:
+    app.kubernetes.io/name: datastore
+    app.kubernetes.io/managed-by: kustomize
+  name: elasticsearchindex-sample
+spec:
+  credentialsRef:
+    name: elasticsearchcredentials-sample
+  definition:
+    settings:
+      number_of_shards: 1
+    mappings:
+      properties:
+        message:
+          type: text

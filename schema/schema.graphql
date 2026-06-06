@@ -5391,6 +5391,7 @@ enum AiProvider {
   AZURE
   BEDROCK
   VERTEX
+  OPENAI_COMPATIBLE
 }
 
 enum LogDriver {
@@ -5553,6 +5554,8 @@ input AiSettingsAttributes {
   logAnalysis: Boolean
 
   openai: OpenaiSettingsAttributes
+
+  openaiCompatible: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
 
@@ -5964,7 +5967,12 @@ type AiSettings {
   "whether to enable log analysis in AI insights (turn off to save on log query costs)"
   logAnalysis: Boolean
 
+  "settings for vector-backed search"
+  vectorStore: VectorStoreSettings
+
   openai: OpenaiSettings
+
+  openaiCompatible: OpenaiSettings
 
   anthropic: AnthropicSettings
 
@@ -5975,6 +5983,11 @@ type AiSettings {
   bedrock: BedrockAiSettings
 
   vertex: VertexAiSettings
+}
+
+type VectorStoreSettings {
+  enabled: Boolean
+  store: VectorStore
 }
 
 type AiAnalysisRates {

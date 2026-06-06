@@ -95,6 +95,7 @@ type GeminiConfig struct {
 type CodexConfig struct {
 	ApiKey   string        `json:"apiKey"`
 	Model    string        `json:"model,omitempty"`
+	Method   string        `json:"method,omitempty"`
 	Timeout  time.Duration `json:"timeout"`
 	Endpoint *string       `json:"endpoint,omitempty"`
 }
@@ -188,6 +189,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 		config.Codex = &CodexConfig{
 			ApiKey:  helpers.GetPluralEnv(controller.EnvCodexAPIKey, ""),
 			Model:   helpers.GetPluralEnv(controller.EnvCodexModel, ""),
+			Method:  helpers.GetPluralEnv(controller.EnvCodexMethod, ""),
 			Timeout: helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvCodexEndpoint, ""); endpoint != "" {

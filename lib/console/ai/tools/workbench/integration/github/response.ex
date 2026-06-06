@@ -1,7 +1,12 @@
 defmodule Console.AI.Tools.Workbench.Integration.Github.Response do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Http
+
   @spec json(Tentacat.response()) :: {:ok, term} | {:error, term}
+  def json({:error, reason}),
+    do: Http.error("GitHub", reason)
+
   def json({{status, body, resp}, next, _}) when status >= 200 and status < 300 do
     body
     |> add_pagination(next, resp)

@@ -5,9 +5,8 @@ package mocks
 import (
 	context "context"
 
-	client "sigs.k8s.io/controller-runtime/pkg/client"
-
 	mock "github.com/stretchr/testify/mock"
+	client "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1alpha1 "github.com/pluralsh/console/go/datastore/api/v1alpha1"
 )

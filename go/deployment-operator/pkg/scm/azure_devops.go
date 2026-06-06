@@ -133,6 +133,35 @@ func (c *azureDevOpsClient) GetPRDetails(ctx context.Context, prURL string) (*PR
 	}, nil
 }
 
+func (c *azureDevOpsClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	parsed, err := parseADOPRURL(prURL)
+	if err != nil {
+		return nil, err
+	}
+
+	gc, err := c.gitClient(ctx, parsed.orgURL())
+	if err != nil {
+		return nil, fmt.Errorf("create git client: %w", err)
+	}
+
+	pr, err := gc.GetPullRequest(ctx, adogit.GetPullRequestArgs{
+		RepositoryId:  &parsed.repo,
+		PullRequestId: &parsed.prID,
+		Project:       &parsed.project,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get PR: %w", err)
+	}
+
+	sourceRef := lo.FromPtr(pr.SourceRefName)
+	return &PRDetails{
+		Title:   lo.FromPtr(pr.Title),
+		Body:    lo.FromPtr(pr.Description),
+		HeadRef: adoBranchName(sourceRef),
+		State:   adoPRState(pr.Status),
+	}, nil
+}
+
 func (c *azureDevOpsClient) allComments(ctx context.Context, gc adogit.Client, parsed adoParsedURL) ([]PRComment, error) {
 	threads, err := gc.GetThreads(ctx, adogit.GetThreadsArgs{
 		RepositoryId:  &parsed.repo,

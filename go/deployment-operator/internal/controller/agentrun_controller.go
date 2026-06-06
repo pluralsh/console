@@ -61,6 +61,7 @@ const (
 	EnvCodexModel    = "PLRL_CODEX_MODEL"
 	EnvCodexAPIKey   = "PLRL_CODEX_API_KEY"
 	EnvCodexEndpoint = "PLRL_CODEX_ENDPOINT"
+	EnvCodexMethod   = "PLRL_CODEX_METHOD"
 
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
@@ -629,6 +630,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		}
 		result[EnvCodexModel] = lo.FromPtr(config.Codex.Model)
 		result[EnvCodexAPIKey] = config.Codex.ApiKey
+		if config.Codex.Method != nil {
+			result[EnvCodexMethod] = config.Codex.Method.String()
+		}
 		if config.Codex.Timeout != nil {
 			result[EnvExecTimeout] = config.Codex.Timeout.Duration.String()
 		}

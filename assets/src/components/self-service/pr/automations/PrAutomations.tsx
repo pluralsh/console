@@ -1,5 +1,12 @@
-import { ArrowTopRightIcon, Button, Table } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import {
+  ArrowTopRightIcon,
+  Button,
+  Flex,
+  Input2,
+  SearchIcon,
+  Table,
+} from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
 
@@ -7,18 +14,18 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
+import { useThrottle } from 'components/hooks/useThrottle'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { mapExistingNodes } from 'utils/graphql'
-import { SelfServiceSearchBar } from 'components/self-service/catalog/SelfServiceSearchBar'
-import { useSelfServiceCatalogSearch } from 'components/self-service/catalog/useSelfServiceCatalogSearch'
 import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
-  const search = useSelfServiceCatalogSearch()
-  const { hasActiveSearch, useFallbackSearch, debouncedSearchQuery } = search
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useThrottle(searchString.trim(), 200)
+  const hasActiveSearch = !!searchString.trim()
 
   useSetPageHeaderContent(
     useMemo(
@@ -52,7 +59,7 @@ export function PrAutomations() {
       queryHook: usePrAutomationsQuery,
       keyPath: ['prAutomations'],
     },
-    { q: useFallbackSearch ? debouncedSearchQuery : '' }
+    { q: debouncedSearchString }
   )
 
   const prAutomations = useMemo(
@@ -63,8 +70,20 @@ export function PrAutomations() {
   if (error) return <GqlError error={error} />
 
   return (
-    <>
-      <SelfServiceSearchBar search={search} />
+    <Flex
+      direction="column"
+      gap="small"
+      height="100%"
+      overflow="hidden"
+    >
+      <Input2
+        placeholder="Search PR automations"
+        startIcon={<SearchIcon />}
+        showClearButton
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+        css={{ flexGrow: 1 }}
+      />
       <Table
         fullHeightWrap
         columns={columns}
@@ -82,6 +101,6 @@ export function PrAutomations() {
             : 'No PR automations found.',
         }}
       />
-    </>
+    </Flex>
   )
 }

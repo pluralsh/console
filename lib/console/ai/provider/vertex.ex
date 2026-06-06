@@ -57,7 +57,7 @@ defmodule Console.AI.Vertex do
   end
 
   def embeddings(%__MODULE__{} = vtx, text) do
-    chunked = Utils.chunk(text, 8000)
+    chunked = Utils.chunk(text, chunk_size("google-vertex:#{normalize(vtx.embedding_model)}"))
     with {:ok, provider_options} <- provider_options(vtx),
          opts = Keyword.put(provider_options, :dimensions, Utils.embedding_dims()),
          {:ok, embeddings} <- ReqLLM.embed("google-vertex:#{normalize(vtx.embedding_model)}", chunked, opts) do

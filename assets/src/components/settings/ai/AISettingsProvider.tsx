@@ -57,6 +57,19 @@ const updateSettings = produce(
   }
 )
 
+const providerSettingsKey: Record<
+  AiProvider,
+  keyof Omit<AiSettingsAttributes, 'enabled' | 'provider'>
+> = {
+  [AiProvider.Openai]: 'openai',
+  [AiProvider.OpenaiCompatible]: 'openaiCompatible',
+  [AiProvider.Anthropic]: 'anthropic',
+  [AiProvider.Bedrock]: 'bedrock',
+  [AiProvider.Ollama]: 'ollama',
+  [AiProvider.Azure]: 'azure',
+  [AiProvider.Vertex]: 'vertex',
+}
+
 export function AISettingsProvider() {
   const theme = useTheme()
   const { data: deploymentSettings, error: deploymentSettingsError } =
@@ -83,6 +96,17 @@ export function AISettingsProvider() {
           settings={providerSettings.openai}
           updateSettings={(settings) =>
             updateProviderSettings({ openai: settings })
+          }
+        />
+      )
+      break
+    case AiProvider.OpenaiCompatible:
+      settings = (
+        <OpenAISettings
+          enabled={enabled}
+          settings={providerSettings.openaiCompatible}
+          updateSettings={(settings) =>
+            updateProviderSettings({ openaiCompatible: settings })
           }
         />
       )
@@ -155,7 +179,10 @@ export function AISettingsProvider() {
         ai: {
           enabled,
           ...(enabled
-            ? { provider, ...pick(providerSettings, provider.toLowerCase()) }
+            ? {
+                provider,
+                ...pick(providerSettings, providerSettingsKey[provider]),
+              }
             : {}),
         } satisfies AiSettingsAttributes,
       },
@@ -205,6 +232,10 @@ export function AISettingsProvider() {
               <ListBoxItem
                 key={AiProvider.Openai}
                 label="OpenAI"
+              />
+              <ListBoxItem
+                key={AiProvider.OpenaiCompatible}
+                label="OpenAI-compatible"
               />
               <ListBoxItem
                 key={AiProvider.Anthropic}
