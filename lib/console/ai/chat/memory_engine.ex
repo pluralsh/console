@@ -18,12 +18,14 @@ defmodule Console.AI.Chat.MemoryEngine do
     :reducer,
     :enabled_tools,
     :callback,
+    :provider,
+    :model,
     continue_msg: "looks like we aren't done let's continue",
     messages: [],
     pre_enable: [],
     acc: [],
     tool_fmt: &Console.identity/1,
-    tool_search: false
+    tool_search: false,
   ]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
@@ -73,7 +75,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> append_continue(engine)
     |> Enum.map(&msg(&1, :tool))
     |> fit_context_window(preface)
-    |> Provider.completion(preface: preface, plural: tools, client: :tool)
+    |> Provider.completion(preface: preface, plural: tools, model: engine.model, client: engine.provider || :tool)
     |> case do
       {:ok, content} -> {[callback(engine, {:assistant, content})], engine}
       {:ok, content, calls} ->

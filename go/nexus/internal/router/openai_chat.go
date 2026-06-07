@@ -34,7 +34,7 @@ func (in *OpenAIRouter) chatCompletionsRequestConverter(ctx *schemas.BifrostCont
 		return nil, errors.New("invalid request type")
 	}
 
-	provider, model, err := in.validateModelFormat(openaiReq.Model)
+	provider, model, _, err := in.resolveModel(ctx, openaiReq.Model)
 	if err != nil {
 		return nil, err
 	}

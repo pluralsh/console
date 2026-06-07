@@ -15,6 +15,7 @@ message AiConfig {
   VertexAiConfig vertexAi = 4;
   BedrockConfig bedrock = 5;
   AzureOpenAiConfig azure = 6;
+  OpenAiConfig openaiCompatible = 7;
 }
 
 message OpenAiTokenExchange {

@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   require Logger
 
   @table :addon_compatibilities
-  @poll :timer.minutes(30)
+  @poll :timer.hours(6)
   @url "/matrices/compatability/static/compatibilities.yaml"
 
   defmodule State do

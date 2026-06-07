@@ -579,7 +579,7 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:delete, user)
   end
 
-  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words"
+  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words.  If there are no activities, just base it off the original job prompt."
 
   def whimsey_text(%WorkbenchJob{} = job) do
     job = Repo.preload(job, [:activities])
@@ -736,16 +736,16 @@ defmodule Console.Deployments.Workbenches do
   @spec create_message(map, binary, User.t()) :: activity_resp
   def create_message(attrs, %WorkbenchJob{} = job, %User{} = user) do
     start_transaction()
-    |> add_operation(:job, fn _ ->
-      allow(job, user, :edit)
-      |> error("you can only create messages for your own jobs")
-    end)
     |> add_operation(:idle, fn _ ->
       case WorkbenchJob.idle?(job) do
-        true ->
-          WorkbenchJob.changeset(job, %{status: :pending, error: nil})
-          |> Repo.update()
+        true -> {:ok, job}
         false -> {:error, "job is currently active, please wait for it to complete before prompting"}
+      end
+    end)
+    |> add_operation(:job, fn %{idle: job} ->
+      with {:ok, job} <- allow(job, user, :prompt) do
+        WorkbenchJob.changeset(job, %{status: :pending, error: nil, user_id: user.id})
+        |> Repo.update()
       end
     end)
     |> add_operation(:activity, fn %{job: job} ->

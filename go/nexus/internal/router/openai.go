@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/console"
 	"github.com/pluralsh/console/go/nexus/internal/log"
+	pb "github.com/pluralsh/console/go/nexus/internal/proto"
 	"go.uber.org/zap"
 )
 
@@ -20,6 +22,8 @@ const (
 	RouteChatCompletions Route = "/v1/chat/completions"
 	RouteResponses       Route = "/v1/responses"
 	RouteModels          Route = "/v1/models"
+
+	openAICompatibleProvider schemas.ModelProvider = "openai-compatible"
 )
 
 // OpenAIRouter is a generic router that expects a model to be in a format "provider/model" and
@@ -31,17 +35,66 @@ type OpenAIRouter struct {
 	consoleClient console.Client
 }
 
-func (in *OpenAIRouter) validateModelFormat(model string) (schemas.ModelProvider, string, error) {
+func (in *OpenAIRouter) resolveModel(ctx context.Context, model string) (schemas.ModelProvider, string, *pb.OpenAiConfig, error) {
 	parts := strings.SplitN(strings.TrimSpace(model), "/", 2)
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return "", "", errors.New("model must be in 'provider/model' format")
+		return "", "", nil, errors.New("model must be in 'provider/model' format")
+	}
+
+	provider := schemas.ModelProvider(parts[0])
+	switch provider {
+	case schemas.OpenAI:
+		aiConfig, err := in.consoleClient.GetAiConfig(ctx)
+		if err != nil {
+			return "", "", nil, fmt.Errorf("failed to load AI config: %w", err)
+		}
+		provider, cfg := resolveOpenAIProviderForModel(aiConfig, parts[1])
+		return provider, parts[1], cfg, nil
+	case openAICompatibleProvider:
+		aiConfig, err := in.consoleClient.GetAiConfig(ctx)
+		if err != nil {
+			return "", "", nil, fmt.Errorf("failed to load AI config: %w", err)
+		}
+		if aiConfig.GetOpenaiCompatible() == nil {
+			return "", "", nil, fmt.Errorf("provider not configured: %s", provider)
+		}
+		return provider, parts[1], aiConfig.GetOpenaiCompatible(), nil
 	}
 
 	if !schemas.IsKnownProvider(parts[0]) {
-		return "", "", fmt.Errorf("unknown provider: %s", parts[0])
+		return "", "", nil, fmt.Errorf("unknown provider: %s", parts[0])
 	}
 
-	return schemas.ModelProvider(parts[0]), parts[1], nil
+	return provider, parts[1], nil, nil
+}
+
+func resolveOpenAIProviderForModel(aiConfig *pb.AiConfig, model string) (schemas.ModelProvider, *pb.OpenAiConfig) {
+	openAIConfig := aiConfig.GetOpenai()
+	compatibleConfig := aiConfig.GetOpenaiCompatible()
+	if compatibleConfig == nil {
+		return schemas.OpenAI, openAIConfig
+	}
+	if openAIConfig == nil {
+		return openAICompatibleProvider, compatibleConfig
+	}
+	if openAIConfigHasModel(compatibleConfig, model) && !openAIConfigHasModel(openAIConfig, model) {
+		return openAICompatibleProvider, compatibleConfig
+	}
+
+	return schemas.OpenAI, openAIConfig
+}
+
+func openAIConfigHasModel(cfg *pb.OpenAiConfig, model string) bool {
+	if cfg == nil || model == "" {
+		return false
+	}
+	models := append([]string{cfg.GetModel(), cfg.GetToolModel(), cfg.GetEmbeddingModel()}, cfg.GetProxyModels()...)
+	for _, configured := range models {
+		if configured == model {
+			return true
+		}
+	}
+	return false
 }
 
 func (in *OpenAIRouter) errorConverter(_ *schemas.BifrostContext, err *schemas.BifrostError) interface{} {

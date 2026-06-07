@@ -51,7 +51,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_opts ++ [tools: tools(opts)])
+      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, provider_opts ++ [tools: tools(opts)])
       |> reqllm_result()
     end
   end
@@ -67,7 +67,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
+      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
       |> reqllm_result()
       |> tool_calls()
     end
@@ -78,7 +78,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       provider_opts
       |> Keyword.put(:dimensions, Utils.embedding_dims())
-      |> then(&ReqLLM.embed(openai_model(openai, :embedding_model), chunked, &1))
+      |> then(&ReqLLM.embed(openai_model(openai, nil, :embedding_model), chunked, &1))
       |> case do
         {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
         error -> error
@@ -107,15 +107,16 @@ defmodule Console.AI.OpenAI do
   defp api_key(%__MODULE__{access_key: key}) when is_binary(key), do: {:ok, key}
   defp api_key(_), do: {:ok, "ignore"}
 
-  defp openai_model(%__MODULE__{base_url: base_url, method: method} = openai, model) when is_binary(base_url) do
-    model_name = Map.get(openai, model)
+  defp openai_model(%__MODULE__{base_url: base_url, method: method} = openai, model, model_type) when is_binary(base_url) do
+    model_name = if is_binary(model), do: model, else: Map.get(openai, model_type)
     ReqLLM.model!(%{
       provider: :openai,
       extra: %{wire: %{protocol: guess_protocol(model_name, method)}},
       model: model_name,
     })
   end
-  defp openai_model(%__MODULE__{} = openai, model), do: ReqLLM.model!({:openai, id: Map.get(openai, model)})
+  defp openai_model(_, model, _) when is_binary(model), do: ReqLLM.model!({:openai, id: model})
+  defp openai_model(%__MODULE__{} = openai, _, model_type), do: ReqLLM.model!({:openai, id: Map.get(openai, model_type)})
 
   defp guess_protocol(_, :chat), do: "openai_chat"
   defp guess_protocol(_, :responses), do: "openai_responses"

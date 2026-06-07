@@ -1076,6 +1076,11 @@ type AvailableFeatures struct {
 	DatabaseManagement *bool `json:"databaseManagement,omitempty"`
 }
 
+type AvailableModel struct {
+	Provider AiProvider `json:"provider"`
+	Model    string     `json:"model"`
+}
+
 // aws node customizations
 type AWSCloud struct {
 	// custom launch template for your nodes, useful for Golden AMI setups
@@ -10204,9 +10209,25 @@ type WorkbenchJobEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobModel struct {
+	// the ai provider for this job
+	Provider *AiProvider `json:"provider,omitempty"`
+	// the model name for this job
+	Model *string `json:"model,omitempty"`
+}
+
+type WorkbenchJobModelAttributes struct {
+	// the ai provider for this job
+	Provider AiProvider `json:"provider"`
+	// the model name for this job
+	Model string `json:"model"`
+}
+
 type WorkbenchJobModes struct {
 	// whether planning mode is enabled for this job
 	Plan *bool `json:"plan,omitempty"`
+	// model override for this job
+	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
 }
@@ -10214,6 +10235,8 @@ type WorkbenchJobModes struct {
 type WorkbenchJobModesAttributes struct {
 	// whether planning mode is enabled for this job
 	Plan *bool `json:"plan,omitempty"`
+	// model override for this job
+	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
 }

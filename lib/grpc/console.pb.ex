@@ -33,6 +33,7 @@ defmodule Plrl.AiConfig do
   field :vertexAi, 4, type: Plrl.VertexAiConfig
   field :bedrock, 5, type: Plrl.BedrockConfig
   field :azure, 6, type: Plrl.AzureOpenAiConfig
+  field :openaiCompatible, 7, type: Plrl.OpenAiConfig
 end
 
 defmodule Plrl.OpenAiTokenExchange do

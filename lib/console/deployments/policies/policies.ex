@@ -53,6 +53,7 @@ defmodule Console.Deployments.Policies do
 
   def can?(%User{id: id}, %WorkbenchJob{user_id: id}, :edit), do: :pass
   def can?(%User{} = user, %WorkbenchJob{} = job, :edit), do: can?(user, job, :write)
+  def can?(%User{} = user, %WorkbenchJob{} = job, :prompt), do: can?(user, job, :read)
   def can?(%Cluster{id: id}, %SentinelRunJob{cluster_id: id}, _), do: :pass
   def can?(%Cluster{id: id}, %AgentRuntime{cluster_id: id}, _), do: :pass
 

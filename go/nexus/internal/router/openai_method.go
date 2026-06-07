@@ -3,7 +3,9 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/maximhq/bifrost/core/providers/openai"
 	"github.com/maximhq/bifrost/core/schemas"
 	pb "github.com/pluralsh/console/go/nexus/internal/proto"
 )
@@ -101,13 +103,48 @@ func releaseChatToResponsesStreamState(ctx *schemas.BifrostContext) {
 }
 
 func (in *OpenAIRouter) openAIRoutePreCallback(path string) PreRequestCallback {
-	return func(request *http.Request, bifrostCtx *schemas.BifrostContext, _ interface{}) error {
+	return func(request *http.Request, bifrostCtx *schemas.BifrostContext, req interface{}) error {
 		aiConfig, err := in.consoleClient.GetAiConfig(request.Context())
 		if err != nil {
 			return fmt.Errorf("failed to load AI config: %w", err)
 		}
 
-		applyOpenAIRoutingContext(bifrostCtx, path, openAIHTTPPolicyFromConfig(aiConfig.GetOpenai()))
+		cfg := aiConfig.GetOpenai()
+		if model := openAIRequestModel(req); model != "" {
+			cfg = openAIConfigForRequestModel(aiConfig, model)
+		}
+
+		applyOpenAIRoutingContext(bifrostCtx, path, openAIHTTPPolicyFromConfig(cfg))
 		return nil
+	}
+}
+
+func openAIConfigForRequestModel(aiConfig *pb.AiConfig, model string) *pb.OpenAiConfig {
+	parts := strings.SplitN(strings.TrimSpace(model), "/", 2)
+	if len(parts) != 2 || parts[1] == "" {
+		return aiConfig.GetOpenai()
+	}
+
+	switch schemas.ModelProvider(parts[0]) {
+	case openAICompatibleProvider:
+		return aiConfig.GetOpenaiCompatible()
+	case schemas.OpenAI:
+		_, cfg := resolveOpenAIProviderForModel(aiConfig, parts[1])
+		return cfg
+	default:
+		return aiConfig.GetOpenai()
+	}
+}
+
+func openAIRequestModel(req interface{}) string {
+	switch r := req.(type) {
+	case *openai.OpenAIChatRequest:
+		return r.Model
+	case *openai.OpenAIResponsesRequest:
+		return r.Model
+	case *openai.OpenAIEmbeddingRequest:
+		return r.Model
+	default:
+		return ""
 	}
 }

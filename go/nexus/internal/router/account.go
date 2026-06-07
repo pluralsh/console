@@ -59,6 +59,10 @@ func (in *Account) EmbeddingModelByProvider(ctx context.Context, provider schema
 		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetEmbeddingModel() != "" {
 			return cfg.GetEmbeddingModel(), nil
 		}
+	case openAICompatibleProvider:
+		if cfg := aiConfig.GetOpenaiCompatible(); cfg != nil && cfg.GetEmbeddingModel() != "" {
+			return cfg.GetEmbeddingModel(), nil
+		}
 	case schemas.Vertex:
 		if cfg := aiConfig.GetVertexAi(); cfg != nil && cfg.GetEmbeddingModel() != "" {
 			return cfg.GetEmbeddingModel(), nil
@@ -91,6 +95,10 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 
 	if cfg := aiConfig.GetOpenai(); cfg != nil {
 		providers = append(providers, schemas.OpenAI)
+	}
+
+	if cfg := aiConfig.GetOpenaiCompatible(); cfg != nil {
+		providers = append(providers, openAICompatibleProvider)
 	}
 
 	if cfg := aiConfig.GetAnthropic(); cfg != nil {
@@ -141,6 +149,17 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 					BaseProviderType: schemas.OpenAI,
 					AllowedRequests:  allowed,
 				}
+			}
+		}
+
+	case openAICompatibleProvider:
+		if cfg := aiConfig.GetOpenaiCompatible(); cfg != nil {
+			if cfg.GetBaseUrl() != "" {
+				config.NetworkConfig.BaseURL = bifrostNetworkBaseURL(cfg.GetBaseUrl())
+			}
+			config.CustomProviderConfig = &schemas.CustomProviderConfig{
+				BaseProviderType: schemas.OpenAI,
+				AllowedRequests:  openAIAllowedRequests(cfg),
 			}
 		}
 

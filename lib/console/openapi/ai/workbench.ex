@@ -113,6 +113,22 @@ defmodule Console.OpenAPI.AI.WorkbenchJobCodingModes do
   }
 end
 
+defmodule Console.OpenAPI.AI.WorkbenchJobModel do
+  @moduledoc "OpenAPI schema for workbench job model override."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchJobModel",
+    description: "Model override for a workbench job",
+    properties: %{
+      provider: ecto_enum(Console.Schema.DeploymentSettings.AIProvider, description: "The AI provider for this job"),
+      model: string(description: "The model name for this job")
+    },
+    required: [:provider, :model]
+  }
+end
+
 defmodule Console.OpenAPI.AI.WorkbenchJobModes do
   @moduledoc "OpenAPI schema for workbench job mode-specific options."
   use Console.OpenAPI.Base
@@ -123,6 +139,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJobModes do
     description: "Mode-specific options for a workbench job",
     properties: %{
       plan: boolean(description: "Whether planning mode is enabled for this job"),
+      model: Console.OpenAPI.AI.WorkbenchJobModel,
       coding: Console.OpenAPI.AI.WorkbenchJobCodingModes
     }
   }
