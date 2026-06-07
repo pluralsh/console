@@ -191,7 +191,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature details provided in the supplied release notes
+          for v1.58.0 (only a link to the upstream CHANGELOG).]
+      breaking_changes: [No breaking change details provided in the supplied release
+          notes for v1.58.0 (only a link to the upstream CHANGELOG).]
     chart_version: 2.58.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.3',
@@ -374,7 +380,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature details were provided in the supplied release
+          notes for v1.47.0 (they only link to the main CHANGELOG).]
+      breaking_changes: [No breaking-change details were provided in the supplied
+          release notes for v1.47.0 (they only link to the main CHANGELOG).]
     chart_version: 2.47.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
@@ -413,7 +425,15 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific features are listed in the provided release notes for
+          v1.44.0; both v1.43.0 and v1.44.0 entries only point to the upstream CHANGELOG
+          for details.]
+      breaking_changes: [No breaking changes are called out in the provided release
+          notes; you must review the linked upstream CHANGELOG between v1.43.0 and
+          v1.44.0 to confirm.]
     chart_version: 2.44.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.44.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-33-3',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-33-3',
@@ -465,7 +485,14 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature details were included in the provided release
+          notes; both v1.40.0 and v1.41.0 notes only reference the repository CHANGELOG
+          link.]
+      breaking_changes: [No breaking changes were listed in the provided release notes;
+          need to consult the upstream CHANGELOG between v1.40.0 and v1.41.0 to confirm.]
     chart_version: 2.41.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.41.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.8.1-eks-1-32-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.2.0-eks-1-32-7',
@@ -517,7 +544,14 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include itemized changes between\
+          \ v1.37.0 and v1.38.1 (they only point to the upstream CHANGELOG)."]
+      breaking_changes: [Unknown from the provided notes; must review the upstream
+          CHANGELOG entries for v1.38.1 (and intermediate tags) to identify any breaking
+          changes.]
     chart_version: 2.38.1
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.38.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-32-1',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-32-1',
@@ -796,7 +830,15 @@ addons:
     kube: []
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided only link to external CHANGELOG files for
+          v3.x and v2.x; no specific feature items were included in the supplied text,
+          so features cannot be enumerated from the given data.']
+      breaking_changes: ['Upgrade to major version v3.0.0 likely implies breaking
+          changes, but none are specified in the provided release-note excerpts; consult
+          CHANGELOG-3.x.md for explicit breaking changes before upgrading.']
     chart_version: 4.0.0
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
@@ -24857,7 +24899,12 @@ addons:
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Vector upgraded from v0.21.0 to v0.22.0 (new Vector binary/images
+          available for the same set of target platforms).]
+      breaking_changes: []
     chart_version: 0.13.0
     images: ['timberio/vector:0.22.0-distroless-libc']
   - version: 0.21.0
@@ -28361,7 +28408,15 @@ addons:
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Release notes provided are only the GitHub release metadata
+          (no changelog entries for values, templates, CRDs, RBAC, or defaults). Cannot
+          infer chart changes between 0.29.6 and 1.15.0 from this data alone.']
+      features: [Not specified in the provided notes (no feature list or commit/changelog
+          details included).]
+      breaking_changes: [Not specified in the provided notes (no breaking-change section
+          or migration guidance included).]
     chart_version: 1.15.0
     images: []
   - version: 0.29.6

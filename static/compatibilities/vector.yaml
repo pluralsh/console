@@ -586,7 +586,12 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Vector upgraded from v0.21.0 to v0.22.0 (new Vector binary/images available
+        for the same set of target platforms).]
+    breaking_changes: []
   chart_version: 0.13.0
   images: ['timberio/vector:0.22.0-distroless-libc']
 - version: 0.21.0
