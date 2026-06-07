@@ -10091,9 +10091,11 @@ type WorkbenchJobActivity struct {
 	// the agent run that executed this activity
 	AgentRun *AgentRun `json:"agentRun,omitempty"`
 	// all agent runs associated with this activity (sideloadable)
-	AgentRuns  []*AgentRun `json:"agentRuns,omitempty"`
-	InsertedAt *string     `json:"insertedAt,omitempty"`
-	UpdatedAt  *string     `json:"updatedAt,omitempty"`
+	AgentRuns []*AgentRun `json:"agentRuns,omitempty"`
+	// the user who created this activity
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobActivityConnection struct {

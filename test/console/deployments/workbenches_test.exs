@@ -559,6 +559,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "follow-up from user"
       assert activity.type == :user
       assert activity.status == :successful
+      assert activity.user_id == user.id
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
 
       assert refetch(job).status == :pending
@@ -592,6 +593,7 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert activity.workbench_job_id == job.id
       assert activity.prompt == "reader follow-up"
+      assert activity.user_id == reader.id
       assert refetch(job).user_id == reader.id
     end
 

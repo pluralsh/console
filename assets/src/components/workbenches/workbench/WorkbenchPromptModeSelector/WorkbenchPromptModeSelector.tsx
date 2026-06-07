@@ -2,7 +2,6 @@ import {
   AnimatedDiv,
   Card,
   CheckRoundedIcon,
-  ContainerRuntimeIcon,
   DiscoverIcon,
   Flex,
   ListIcon,
@@ -11,7 +10,6 @@ import {
   Popover,
   PopoverWrapper,
   useFloatingDropdown,
-  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
@@ -105,9 +103,6 @@ export function WorkbenchPromptModeSelector({
 
   const previewMode = hoveredMode ?? selectedMode ?? 'agent'
   const previewConfig = PROMPT_MODES.find((m) => m.mode === previewMode)!
-  const selectedModeConfig = selectedMode
-    ? PROMPT_MODES.find((m) => m.mode === selectedMode)
-    : null
 
   const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
     onChange(
@@ -119,47 +114,13 @@ export function WorkbenchPromptModeSelector({
       )
     )
 
-  const selectedIconColor = selectedModeConfig
-    ? workbenchPromptModeIconColor(selectedModeConfig, theme)
-    : undefined
-
   const trigger = (
     <ChatOptionPill
       isOpen={isOpen}
       css={{ height: '100%' }}
     >
-      {selectedModeConfig ? (
-        <>
-          <selectedModeConfig.Icon
-            size={12}
-            color={selectedIconColor!}
-          />
-          <span
-            css={
-              selectedMode === 'plan' ? { color: selectedIconColor } : undefined
-            }
-          >
-            {selectedModeConfig.label}
-          </span>
-          {selectedMode === 'agent' && value?.coding?.approval && (
-            <WarningShieldIcon
-              size={12}
-              color="icon-light"
-            />
-          )}
-          {selectedMode === 'agent' && value?.coding?.babysit && (
-            <ContainerRuntimeIcon
-              size={12}
-              color="icon-light"
-            />
-          )}
-        </>
-      ) : (
-        <>
-          <LogsIcon size={12} />
-          <span>Select mode</span>
-        </>
-      )}
+      <LogsIcon size={12} />
+      <span>Modes</span>
     </ChatOptionPill>
   )
 

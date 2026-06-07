@@ -749,7 +749,7 @@ defmodule Console.Deployments.Workbenches do
       end
     end)
     |> add_operation(:activity, fn %{job: job} ->
-      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, status: :successful}
+      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, user_id: user.id, status: :successful}
       |> WorkbenchJobActivity.changeset(attrs)
       |> Repo.insert()
     end)

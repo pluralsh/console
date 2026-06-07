@@ -3456,6 +3456,9 @@ type WorkbenchJobActivity {
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
 
+  "the user who created this activity"
+  user: User
+
   insertedAt: DateTime
 
   updatedAt: DateTime

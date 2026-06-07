@@ -15723,6 +15723,8 @@ export type WorkbenchJobActivity = {
   /** the type of the activity */
   type?: Maybe<WorkbenchJobActivityType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who created this activity */
+  user?: Maybe<User>;
   /** whimsically describes current progress for you */
   whimsey?: Maybe<Scalars['String']['output']>;
   /** the job this activity belongs to */
