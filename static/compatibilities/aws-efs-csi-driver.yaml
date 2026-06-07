@@ -33,7 +33,15 @@ versions:
   kube: []
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided only link to external CHANGELOG files for v3.x
+        and v2.x; no specific feature items were included in the supplied text, so
+        features cannot be enumerated from the given data.']
+    breaking_changes: ['Upgrade to major version v3.0.0 likely implies breaking changes,
+        but none are specified in the provided release-note excerpts; consult CHANGELOG-3.x.md
+        for explicit breaking changes before upgrading.']
   chart_version: 4.0.0
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
     'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
