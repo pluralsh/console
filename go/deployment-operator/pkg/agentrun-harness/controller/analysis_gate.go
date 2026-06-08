@@ -103,7 +103,9 @@ func (in *agentRunController) ensureAnalysisPersistedAfterInitialRun(ctx context
 		}
 
 		klog.V(log.LogLevelInfo).InfoS("analysis missing after initial or follow-up run; reprompting", "followUp", i+1)
-		if err := in.tool.AnalysisFollowUpRun(ctx, buildAnalysisFollowUpPrompt(i+1)); err != nil {
+		err = in.tool.AnalysisFollowUpRun(ctx, buildAnalysisFollowUpPrompt(i+1))
+		in.uploadAgentRunArtifacts(context.Background())
+		if err != nil {
 			in.errChan <- err
 			return
 		}

@@ -14,6 +14,10 @@ defmodule Console.Schema.AgentRunUpload do
     timestamps()
   end
 
+  def for_run(query \\ __MODULE__, run_id) do
+    from(aru in query, where: aru.agent_run_id == ^run_id)
+  end
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [:agent_run_id])

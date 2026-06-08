@@ -386,6 +386,8 @@ type AgentRun struct {
 	Prompts []*AgentPrompt `json:"prompts,omitempty"`
 	// the messages this agent run has generated during its run
 	Messages []*AgentMessage `json:"messages,omitempty"`
+	// the upload bundle this agent run has generated
+	Upload *AgentRunUpload `json:"upload,omitempty"`
 	// the runtime this agent is using
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	// the user who initiated this agent run
@@ -7010,6 +7012,7 @@ type PullRequest struct {
 	URL     string    `json:"url"`
 	Title   *string   `json:"title,omitempty"`
 	Creator *string   `json:"creator,omitempty"`
+	Ref     *string   `json:"ref,omitempty"`
 	Labels  []*string `json:"labels,omitempty"`
 	// the patch for this pr, if it is a patch.  This is in place of generating a full pr
 	Patch *string `json:"patch,omitempty"`

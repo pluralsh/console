@@ -133,10 +133,18 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 	if err != nil {
 		return err
 	}
+	baseBranch := strings.TrimSpace(string(output))
+
+	cmd = exec.NewExecutable("git", exec.WithArgs([]string{"rev-parse", "HEAD"}), exec.WithDir(repoDirPath))
+	output, err = cmd.RunWithOutput(context.Background())
+	if err != nil {
+		return err
+	}
 
 	config := &Config{
 		Dir:        repoDirPath,
-		BaseBranch: strings.TrimSpace(string(output)),
+		BaseBranch: baseBranch,
+		BaseCommit: strings.TrimSpace(string(output)),
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("repository ready", "url", in.agentRun.Repository, "dir", repoDirPath)

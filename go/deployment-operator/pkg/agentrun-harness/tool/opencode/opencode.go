@@ -80,7 +80,7 @@ func (in *Opencode) start(ctx context.Context, options ...exec.Option) {
 		"opencode",
 		append(
 			options,
-			exec.WithEnv([]string{fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath)}),
+			exec.WithEnv(in.env(configFilePath)),
 			exec.WithArgs(in.args("")),
 			exec.WithDir(in.Config.RepositoryDir),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
@@ -156,6 +156,7 @@ func (in *Opencode) handleStreamLine(line []byte, state *streamState) error {
 		return fmt.Errorf("opencode error: %s: %s", event.Error.Name, message)
 	}
 
+	in.recordSessionID(event.SessionID)
 	in.processEvent(state, *event)
 	return nil
 }
@@ -268,7 +269,11 @@ func (in *Opencode) agent() string {
 }
 
 func (in *Opencode) configFilePath() string {
-	return path.Join(in.Config.WorkDir, ".opencode", ConfigFileName)
+	return path.Join(in.providerPath(), ConfigFileName)
+}
+
+func (in *Opencode) providerPath() string {
+	return filepath.Join(in.Config.WorkDir, ".opencode")
 }
 
 func truncateForLog(value string, limit int) string {
@@ -318,7 +323,7 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 
 	in.executable = exec.NewExecutable(
 		"opencode",
-		exec.WithEnv([]string{fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath)}),
+		exec.WithEnv(in.env(configFilePath)),
 		exec.WithArgs(in.args(bCtx.Prompt)),
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
@@ -367,7 +372,7 @@ func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt stri
 
 	in.executable = exec.NewExecutable(
 		"opencode",
-		exec.WithEnv([]string{fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath)}),
+		exec.WithEnv(in.env(configFilePath)),
 		exec.WithArgs(in.args(followUpPrompt)),
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
@@ -394,6 +399,28 @@ func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt stri
 
 func (in *Opencode) ConfigureBabysitRun() error {
 	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeOpencode)
+}
+
+func (in *Opencode) env(configFilePath string) []string {
+	return []string{
+		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
+		fmt.Sprintf("XDG_DATA_HOME=%s", in.dataHome()),
+	}
+}
+
+func (in *Opencode) dataPath() string {
+	return filepath.Join(in.dataHome(), "opencode")
+}
+
+func (in *Opencode) dataHome() string {
+	return filepath.Join(in.Config.WorkDir, ".local", "share")
+}
+
+func (in *Opencode) recordSessionID(sessionID string) {
+	if sessionID == "" {
+		return
+	}
+	in.sessionID = sessionID
 }
 
 func New(config v1.Config) v1.Tool {

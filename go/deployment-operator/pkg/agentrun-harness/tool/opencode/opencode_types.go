@@ -116,6 +116,9 @@ type Opencode struct {
 
 	// onMessage is a callback called when a new message is received.
 	onMessage func(message *console.AgentMessageAttributes)
+
+	// sessionID is the latest native OpenCode session identifier observed in stream events.
+	sessionID string
 }
 
 type StreamPartType string

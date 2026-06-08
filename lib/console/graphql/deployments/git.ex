@@ -776,6 +776,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :url,     non_null(:string)
     field :title,   :string
     field :creator, :string
+    field :ref,     :string
     field :labels,  list_of(:string)
     field :patch,   :string, description: "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
 

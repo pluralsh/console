@@ -63,7 +63,7 @@
   "username": "plural",
   "provider": {
     "{{ .Provider }}": {
-      {{ if or (eq .Provider "plural") .OpenAICompatible }}"npm": "@ai-sdk/openai-compatible",
+      {{ if or (eq .Provider "plural") .OpenAICompatible }}"npm": "@ai-sdk/openai",
       {{ end }}"name": "{{ .Provider }}",
       "options": {
         {{- if eq .Provider "plural" }}

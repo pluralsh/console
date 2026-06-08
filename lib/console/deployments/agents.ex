@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Agents do
   use Console.Services.Base
+  require Logger
   import Console.Deployments.Policies
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
   alias Console.Services.Users
@@ -210,13 +211,43 @@ defmodule Console.Deployments.Agents do
       end
     end)
     |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
-    |> add_operation(:create, fn %{run: run} ->
-      %AgentRunUpload{agent_run_id: run.id}
-      |> AgentRunUpload.changeset(attrs)
-      |> Repo.insert()
+    |> add_operation(:upload_record, fn %{run: run} ->
+      case AgentRunUpload.for_run(run.id) |> AgentRunUpload.with_limit(1) |> Repo.one() do
+        %AgentRunUpload{} = upload -> {:ok, upload}
+        nil -> Repo.insert(%AgentRunUpload{agent_run_id: run.id})
+      end
+    end)
+    |> add_operation(:create, fn %{upload_record: upload} ->
+      changeset = AgentRunUpload.changeset(upload, attrs)
+
+      case Repo.update(changeset) do
+        {:ok, upload} -> {:ok, upload}
+        {:error, changeset} = error ->
+          Logger.error("failed to create agent run upload",
+            agent_run_id: run_id,
+            upload_id: upload.id,
+            attrs: inspect_upload_attrs(attrs),
+            errors: inspect(changeset.errors)
+          )
+
+          error
+      end
     end)
     |> execute(extract: :create)
     |> notify(:create)
+  end
+
+  defp inspect_upload_attrs(attrs) do
+    attrs
+    |> Enum.map(fn
+      {field, %Plug.Upload{} = upload} ->
+        {field, %{filename: upload.filename, content_type: upload.content_type, path: upload.path}}
+
+      {field, value} ->
+        {field, value}
+    end)
+    |> Enum.into(%{})
+    |> inspect()
   end
 
   @spec create_agent_message(map, binary, Cluster.t) :: agent_msg_resp

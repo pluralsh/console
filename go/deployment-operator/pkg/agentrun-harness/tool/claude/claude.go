@@ -72,16 +72,16 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 
 	var envOpt exec.Option
 	if in.Config.Run.IsProxyEnabled() {
-		envOpt = exec.WithEnv([]string{
+		envOpt = exec.WithEnv(in.withConfigEnv([]string{
 			fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", in.consoleToken),
 			fmt.Sprintf("ANTHROPIC_BASE_URL=%s", fmt.Sprintf("%s/ext/ai/anthropic", in.consoleURL)),
-		})
+		}))
 	} else {
 		env := []string{fmt.Sprintf("ANTHROPIC_API_KEY=%s", in.token)}
 		if in.Config.Run.Runtime.Config.Claude.Endpoint != nil {
 			env = append(env, fmt.Sprintf("ANTHROPIC_BASE_URL=%s", *in.Config.Run.Runtime.Config.Claude.Endpoint))
 		}
-		envOpt = exec.WithEnv(env)
+		envOpt = exec.WithEnv(in.withConfigEnv(env))
 	}
 
 	in.executable = exec.NewExecutable(
@@ -98,6 +98,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 			klog.ErrorS(err, "failed to unmarshal claude babysit stream event", "line", string(line))
 			return
 		}
+		in.recordSessionID(event.SessionID)
 		if event.Message != nil {
 			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
 			if in.onMessage != nil && msg != nil {
@@ -145,16 +146,16 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 
 	var opts []exec.Option
 	if in.Config.Run.IsProxyEnabled() {
-		opts = append(opts, exec.WithEnv([]string{
+		opts = append(opts, exec.WithEnv(in.withConfigEnv([]string{
 			fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", in.consoleToken),
 			fmt.Sprintf("ANTHROPIC_BASE_URL=%s", fmt.Sprintf("%s/ext/ai/anthropic", in.consoleURL)),
-		}))
+		})))
 	} else {
 		env := []string{fmt.Sprintf("ANTHROPIC_API_KEY=%s", in.token)}
 		if in.Config.Run.Runtime.Config.Claude.Endpoint != nil {
 			env = append(env, fmt.Sprintf("ANTHROPIC_BASE_URL=%s", *in.Config.Run.Runtime.Config.Claude.Endpoint))
 		}
-		opts = append(opts, exec.WithEnv(env))
+		opts = append(opts, exec.WithEnv(in.withConfigEnv(env)))
 	}
 
 	in.executable = exec.NewExecutable(
@@ -173,6 +174,7 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 			klog.ErrorS(err, "failed to unmarshal claude stream event (analysis follow-up)", "line", string(line))
 			return
 		}
+		in.recordSessionID(event.SessionID)
 		if event.Message != nil {
 			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
 			if in.onMessage != nil && msg != nil {
@@ -204,17 +206,17 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 
 	if in.Config.Run.IsProxyEnabled() {
 		options = append(options,
-			exec.WithEnv([]string{
+			exec.WithEnv(in.withConfigEnv([]string{
 				fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", in.consoleToken),
 				fmt.Sprintf("ANTHROPIC_BASE_URL=%s", fmt.Sprintf("%s/ext/ai/anthropic", in.consoleURL)),
-			}),
+			})),
 		)
 	} else {
 		env := []string{fmt.Sprintf("ANTHROPIC_API_KEY=%s", in.token)}
 		if in.Config.Run.Runtime.Config.Claude.Endpoint != nil {
 			env = append(env, fmt.Sprintf("ANTHROPIC_BASE_URL=%s", *in.Config.Run.Runtime.Config.Claude.Endpoint))
 		}
-		options = append(options, exec.WithEnv(env))
+		options = append(options, exec.WithEnv(in.withConfigEnv(env)))
 	}
 
 	in.executable = exec.NewExecutable(
@@ -240,6 +242,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 			in.Config.ErrorChan <- err
 			return
 		}
+		in.recordSessionID(event.SessionID)
 
 		if event.Message != nil {
 			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
@@ -343,6 +346,17 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 
 func (in *Claude) configPath() string {
 	return path.Join(in.Config.WorkDir, ".claude")
+}
+
+func (in *Claude) withConfigEnv(env []string) []string {
+	return append(env, fmt.Sprintf("CLAUDE_CONFIG_DIR=%s", in.configPath()))
+}
+
+func (in *Claude) recordSessionID(sessionID string) {
+	if sessionID == "" {
+		return
+	}
+	in.sessionID = sessionID
 }
 
 func (in *Claude) OnMessage(f func(message *console.AgentMessageAttributes)) {

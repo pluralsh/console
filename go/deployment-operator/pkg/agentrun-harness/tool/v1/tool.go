@@ -1,10 +1,13 @@
 package v1
 
 import (
+	"context"
 	"fmt"
 	"path"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
+
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
@@ -102,4 +105,12 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		RepositoryDir:  in.Config.RepositoryDir,
 		Prompt:         in.Config.Run.Prompt,
 	}
+}
+
+func (in DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
+	return artifacts.NewUploadArtifactBuilder(artifacts.Config{
+		WorkDir:       in.Config.WorkDir,
+		RepositoryDir: in.Config.RepositoryDir,
+		Run:           in.Config.Run,
+	}).Build(ctx, opts)
 }

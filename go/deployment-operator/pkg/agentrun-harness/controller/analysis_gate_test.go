@@ -8,13 +8,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
 	gqlclient "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -74,6 +76,10 @@ func (t *recordingTool) OnMessage(func(*gqlclient.AgentMessageAttributes)) {}
 func (t *recordingTool) AnalysisFollowUpRun(context.Context, string) error {
 	t.analysisFollowUps++
 	return t.followErr
+}
+
+func (t *recordingTool) UploadArtifacts(context.Context) (*artifacts.UploadArtifacts, error) {
+	return nil, nil
 }
 
 func TestRequeuePendingInitialRunError(t *testing.T) {

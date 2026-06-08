@@ -309,6 +309,7 @@ fragment PullRequestFragment on PullRequest {
     url
     title
     creator
+    ref
 }
 
 fragment SyncConfigFragment on SyncConfig {

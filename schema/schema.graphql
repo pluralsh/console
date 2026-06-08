@@ -2191,6 +2191,9 @@ type AgentRun {
   "the messages this agent run has generated during its run"
   messages: [AgentMessage]
 
+  "the upload bundle this agent run has generated"
+  upload: AgentRunUpload
+
   "the runtime this agent is using"
   runtime: AgentRuntime
 
@@ -13491,6 +13494,8 @@ type PullRequest {
   title: String
 
   creator: String
+
+  ref: String
 
   labels: [String]
 

@@ -93,9 +93,10 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 // prepare sets up the agent run environment and AI credentials
 func (in *agentRunController) prepare() error {
 	var err error
+	repositoryDir := filepath.Join(in.dir, "shared", "repository")
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
-		RepositoryDir: filepath.Join(in.dir, "shared", "repository"),
+		RepositoryDir: repositoryDir,
 		FinishedChan:  in.done,
 		ErrorChan:     in.errChan,
 		Run:           in.agentRun,
@@ -242,7 +243,11 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 		}
 	}
 
-	return callback(ctx, bCtx)
+	stop := callback(ctx, bCtx)
+	if bCtx != nil {
+		in.uploadAgentRunArtifacts(context.Background())
+	}
+	return stop
 }
 
 // buildBabysitContext fetches live PR data from the SCM provider, computes a

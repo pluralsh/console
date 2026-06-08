@@ -169,8 +169,8 @@ func TestConfigTemplate_Provider(t *testing.T) {
 
 		providers := out["provider"].(map[string]any)
 		compat := providers[string(ProviderOpenAICompatible)].(map[string]any)
-		if compat["npm"] != "@ai-sdk/openai-compatible" {
-			t.Errorf("expected npm=@ai-sdk/openai-compatible, got %v", compat["npm"])
+		if compat["npm"] != "@ai-sdk/openai" {
+			t.Errorf("expected npm=@ai-sdk/openai, got %v", compat["npm"])
 		}
 		options := compat["options"].(map[string]any)
 		if options["baseURL"] != "https://litellm.example/v1" {
