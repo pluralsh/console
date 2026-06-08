@@ -152,7 +152,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided contain no detailed changes; both versions
+          point to the repository CHANGELOG for details.]
+      breaking_changes: [No breaking changes are described in the provided release
+          notes; must review the upstream CHANGELOG between v1.60.0 and v1.61.1 to
+          confirm.]
     chart_version: 2.61.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.2',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.7', 'public.ecr.aws/csi-components/csi-resizer:v2.2.0-eksbuild.2',
@@ -180,7 +187,14 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific features were included in the provided v1.59.0 release
+          note excerpt; it only links to the upstream CHANGELOG for details.]
+      breaking_changes: [No breaking changes were listed in the provided release note
+          excerpt; you must review the upstream CHANGELOG between v1.58.0 and v1.59.0
+          to confirm.]
     chart_version: 2.59.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.11.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v2.1.0-eksbuild.4',
@@ -564,7 +578,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t enumerate changes between v1.36.0\
+          \ and v1.37.0; both point to the upstream CHANGELOG for details."]
+      breaking_changes: [No breaking changes can be identified from the provided notes;
+          you must consult the upstream CHANGELOG for v1.37.0 to confirm.]
     chart_version: 2.37.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.37.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-7',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-7',
@@ -577,7 +597,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific features are listed in the provided release notes; both
+          versions point to the project CHANGELOG for details.]
+      breaking_changes: [No breaking changes are listed in the provided release notes;
+          you must consult the upstream CHANGELOG between v1.35.0 and v1.36.0 to confirm.]
     chart_version: 2.36.0
     images: ['public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.36.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.7.0-eks-1-31-5',
       'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
@@ -610,7 +636,14 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided only link to the full CHANGELOG; no feature-level
+          details are included in the supplied notes for v1.34.0.]
+      breaking_changes: [No breaking changes are stated in the provided release notes;
+          must review upstream CHANGELOG for any upgrade-impacting changes between
+          v1.33.0 and v1.34.0.]
     chart_version: 2.34.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240803-cf1183f2db-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.34.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.6.1-eks-1-30-10',
@@ -731,7 +764,15 @@ addons:
       '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not include specific changes; both v1.28.0
+          and v1.29.0 point to the repository CHANGELOG for details. No concrete features
+          can be derived from the pasted notes alone.]
+      breaking_changes: [No breaking changes are mentioned in the provided release
+          notes; need the linked CHANGELOG (and Helm chart changelog/values diff)
+          to assess potential breaking changes.]
     chart_version: 2.29.0
     images: ['gcr.io/k8s-staging-test-infra/kubekins-e2e:v20240311-b09cdeb92c-master',
       'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.29.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.5.0-eks-1-29-7',
@@ -821,7 +862,13 @@ addons:
     kube: []
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not enumerate changes; v3.1.0 points to
+          the CHANGELOG-3.x.md for details.]
+      breaking_changes: [No breaking changes are listed in the provided release notes;
+          must review CHANGELOG-3.x.md between v3.0.0 and v3.1.0 to confirm.]
     chart_version: 4.1.0
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
@@ -15686,6 +15733,23 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.6.0
+    kube: ['1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm chart released for app v2.5.0 (packaging update)., 'Chart
+          bugfix: PodDisruptionBudget now renders the PDB spec even when `minAvailable`
+          or `maxUnavailable` is set to `0` (previously treated as empty/falsey).']
+      features: ['Keeper provider: adds `provider_api_calls_count` metric to help
+          observe/alert on provider API usage.', 'Passbolt: supports `v5-custom-fields`
+          resource type (enables syncing secrets stored as custom fields).', 'Testing:
+          adds OpenBao end-to-end test coverage (improves confidence for Vault/OpenBao
+          users).']
+      breaking_changes: []
+    chart_version: 2.6.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.6.0']
   - version: 2.5.0
     kube: ['1.35', '1.34']
     requirements: []
@@ -23520,7 +23584,7 @@ addons:
           switch from `argocd.argoproj.io/kubernetes-version` in `Major.Minor` to
           `vMajor.Minor.Patch` format. This can affect cluster selection and therefore
           what apps get generated/synced if not updated.']
-    chart_version: 9.5.19
+    chart_version: 9.5.20
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.3']
   - version: 3.4.1
