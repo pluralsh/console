@@ -4,7 +4,11 @@ import { Suspense, useMemo, useRef } from 'react'
 
 import {
   AI_SETTINGS_ABS_PATH,
+  AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
+  AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
+  AI_SETTINGS_MCP_SERVERS_REL_PATH,
+  AI_SETTINGS_MODEL_ROUTING_REL_PATH,
 } from 'routes/settingsRoutesConst'
 
 import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
@@ -22,8 +26,10 @@ export const getAISettingsBreadcrumbs = (tab: string) => [
 
 const directory = [
   { path: AI_SETTINGS_AI_PROVIDER_REL_PATH, label: 'AI providers' },
-  { path: 'agent-runtimes', label: 'Agent runtimes' },
-  { path: 'mcp-servers', label: 'MCP servers' },
+  { path: AI_SETTINGS_MODEL_ROUTING_REL_PATH, label: 'Model routing' },
+  { path: AI_SETTINGS_AI_INSIGHTS_REL_PATH, label: 'AI insights' },
+  { path: AI_SETTINGS_AGENT_RUNTIMES_REL_PATH, label: 'Agent runtimes' },
+  { path: AI_SETTINGS_MCP_SERVERS_REL_PATH, label: 'MCP servers' },
 ]
 
 export function AISettings() {
