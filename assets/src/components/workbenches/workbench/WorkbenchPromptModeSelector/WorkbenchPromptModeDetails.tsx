@@ -76,10 +76,17 @@ export function WorkbenchPromptModeDetails({
             severity={config.badge.severity}
             css={{
               flexShrink: 0,
-              '&&': {
-                backgroundColor: green[900],
-                border: `1px solid ${green[850]}`,
-              },
+              '&&':
+                config.badge.severity === 'success'
+                  ? {
+                      backgroundColor: green[900],
+                      border: `1px solid ${green[850]}`,
+                    }
+                  : {
+                      color: theme.colors['text-xlight'],
+                      backgroundColor: theme.colors['fill-three'],
+                      border: theme.borders['fill-three'],
+                    },
             }}
           >
             {config.badge.label}
