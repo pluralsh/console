@@ -26,7 +26,7 @@ type AISettingsProvidersTableMeta = {
   onEdit: (provider: AiProvider) => void
 }
 
-const aiProviderToLabel = {
+export const aiProviderToLabel = {
   [AiProvider.Openai]: 'OpenAI',
   [AiProvider.OpenaiCompatible]: 'OpenAI-compatible',
   [AiProvider.Anthropic]: 'Anthropic',
