@@ -4,20 +4,14 @@ import {
   Flex,
   FormField,
   ListBoxItem,
-  Radio,
-  RadioGroup,
   Select,
   SelectPropsSingle,
   Switch,
   Toast,
 } from '@pluralsh/design-system'
-import {
-  AIVerbosityLevel,
-  useExplainWithAIContext,
-} from 'components/ai/AIContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
@@ -79,7 +73,6 @@ export function AISettingsProvider() {
     updateSettings,
     initialSettingsAttributes(ai)
   )
-  const { verbosityLevel, setVerbosityLevel } = useExplainWithAIContext()
   const [showToast, setShowToast] = useState(false)
 
   let settings: ReactNode
@@ -268,45 +261,6 @@ export function AISettingsProvider() {
             Save changes
           </Button>
         </WrapperCardSC>
-        {enabled && (
-          <>
-            <Card
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.small,
-                padding: theme.spacing.xlarge,
-              }}
-            >
-              <Body2BoldP>AI explain length</Body2BoldP>
-              <Body2P>
-                Control the level of depth for the “Explain with AI” feature on
-                some pages. Please note that this is local setting that impacts
-                only your current browser.
-              </Body2P>
-              <RadioGroup
-                value={verbosityLevel}
-                onChange={(v) => setVerbosityLevel(v as AIVerbosityLevel)}
-                css={{
-                  backgroundColor: theme.colors['fill-two'],
-                  borderRadius: theme.borderRadiuses.large,
-                  display: 'flex',
-                  gap: theme.spacing.xxxxxlarge,
-                  padding: theme.spacing.medium,
-                }}
-              >
-                {Object.values(AIVerbosityLevel).map((value) => (
-                  <Radio
-                    value={value}
-                    key={value}
-                  >
-                    {value}
-                  </Radio>
-                ))}
-              </RadioGroup>
-            </Card>
-          </>
-        )}
       </Flex>
       <Toast
         severity="success"
@@ -326,16 +280,6 @@ const WrapperCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   padding: theme.spacing.xlarge,
-}))
-
-const InsightsCalloutSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.small,
-  alignItems: 'flex-start',
-  background: theme.colors['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
-  padding: theme.spacing.medium,
-  borderLeft: `3px solid ${theme.colors['border-info']}`,
 }))
 
 function SelectWithDisable({
