@@ -30,3 +30,23 @@ export function updateCodingModes(
 ): WorkbenchJobModesAttributes {
   return { ...modes, coding: { ...modes?.coding, ...coding } }
 }
+
+export function defaultPromptModesFromWorkbench(
+  workbench:
+    | {
+        id: string
+        configuration?: {
+          coding?: { enableBabysitting?: boolean | null } | null
+        } | null
+      }
+    | null
+    | undefined,
+  workbenchId: string | null
+): WorkbenchJobModesAttributes | null | undefined {
+  if (!workbenchId || !workbench || workbench.id !== workbenchId)
+    return undefined
+
+  return workbench.configuration?.coding?.enableBabysitting
+    ? { coding: { babysit: true } }
+    : null
+}

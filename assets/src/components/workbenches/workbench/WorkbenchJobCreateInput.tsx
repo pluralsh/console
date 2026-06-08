@@ -29,7 +29,7 @@ import capitalize from 'lodash/capitalize'
 import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import type { ComponentProps } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
@@ -41,7 +41,10 @@ import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
-import { modesAttributes } from './WorkbenchPromptModeSelector/workbenchPromptModes'
+import {
+  defaultPromptModesFromWorkbench,
+  modesAttributes,
+} from './WorkbenchPromptModeSelector/workbenchPromptModes'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import { CaptionP } from 'components/utils/typography/Text'
 
@@ -70,6 +73,7 @@ export function WorkbenchJobCreateInput({
   const [promptSyncKey, setPromptSyncKey] = useState(0)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
+  const initializedWorkbenchIdRef = useRef<string | null>(null)
 
   const { data } = useWorkbenchQuery({
     variables: { id: workbenchId },
@@ -77,16 +81,25 @@ export function WorkbenchJobCreateInput({
   })
 
   useEffect(() => {
-    if (!data?.workbench || data.workbench.id !== workbenchId) {
+    if (!workbenchId) {
+      initializedWorkbenchIdRef.current = null
       setPromptModes(null)
       return
     }
 
-    setPromptModes(
-      data?.workbench?.configuration?.coding?.enableBabysitting
-        ? { coding: { babysit: true } }
-        : null
+    if (initializedWorkbenchIdRef.current === workbenchId) return
+
+    initializedWorkbenchIdRef.current = null
+    setPromptModes(null)
+
+    const defaults = defaultPromptModesFromWorkbench(
+      data?.workbench,
+      workbenchId
     )
+    if (defaults === undefined) return
+
+    initializedWorkbenchIdRef.current = workbenchId
+    setPromptModes(defaults)
   }, [workbenchId, data?.workbench])
 
   useEffect(() => {
