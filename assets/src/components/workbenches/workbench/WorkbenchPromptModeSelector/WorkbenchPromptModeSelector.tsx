@@ -7,7 +7,9 @@ import {
   ListIcon,
   LogsIcon,
   useFloatingDropdown,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
+import ContainerRuntimeIcon from '../../../../../design-system/src/components/icons/ContainerRuntimeIcon'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { cloneElement, type ReactNode, useRef, useState } from 'react'
@@ -129,7 +131,7 @@ export function WorkbenchPromptModeSelector({
       {selectedModeConfig ? (
         <>
           <selectedModeConfig.Icon
-            size={10}
+            size={12}
             color={selectedIconColor!}
           />
           <span
@@ -139,10 +141,22 @@ export function WorkbenchPromptModeSelector({
           >
             {selectedModeConfig.label}
           </span>
+          {selectedMode === 'agent' && value?.coding?.approval && (
+            <WarningShieldIcon
+              size={12}
+              color="icon-light"
+            />
+          )}
+          {selectedMode === 'agent' && value?.coding?.babysit && (
+            <ContainerRuntimeIcon
+              size={12}
+              color="icon-light"
+            />
+          )}
         </>
       ) : (
         <>
-          <LogsIcon size={10} />
+          <LogsIcon size={12} />
           <span>Select mode</span>
         </>
       )}
