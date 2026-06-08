@@ -5704,6 +5704,16 @@ type OllamaSettings struct {
 	URL string `json:"url"`
 }
 
+type OpenaiHeader struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type OpenaiHeaderAttributes struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 // OpenAI connection information
 type OpenaiSettings struct {
 	// the base url to use when querying an OpenAI compatible API, leave blank for OpenAI
@@ -5720,6 +5730,8 @@ type OpenaiSettings struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// OAuth2 client credentials configured for token endpoint exchange
 	TokenExchange *OpenaiTokenExchange `json:"tokenExchange,omitempty"`
+	// custom HTTP headers included in OpenAI-compatible API requests
+	Headers []*OpenaiHeader `json:"headers,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5736,6 +5748,8 @@ type OpenaiSettingsAttributes struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// OAuth2 client credentials against a token endpoint to obtain access tokens
 	TokenExchange *OpenaiTokenExchangeAttributes `json:"tokenExchange,omitempty"`
+	// custom HTTP headers to include in OpenAI-compatible API requests
+	Headers []*OpenaiHeaderAttributes `json:"headers,omitempty"`
 }
 
 // OAuth2 token endpoint client credentials for OpenAI-compatible APIs

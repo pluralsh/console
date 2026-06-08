@@ -1897,6 +1897,23 @@ _Appears in:_
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to a secret containing the password to connect with basic auth. |  | Optional: \{\} <br /> |
 
 
+#### HTTPHeader
+
+
+
+
+
+
+
+_Appears in:_
+- [OpenAISettings](#openaisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the HTTP header name. |  | Required: \{\} <br /> |
+| `value` _string_ | Value is the HTTP header value. |  | Required: \{\} <br /> |
+
+
 
 
 #### HelmMinimal
@@ -3030,6 +3047,7 @@ _Appears in:_
 | `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec).  Should be similar to https://api.openai.com/v1 |  | Optional: \{\} <br /> |
 | `tokenExchange` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs. |  | Optional: \{\} <br /> |
+| `headers` _[HTTPHeader](#httpheader) array_ | Headers are custom HTTP headers to include in OpenAI-compatible API requests. |  | Optional: \{\} <br /> |
 | `method` _[OpenAiMethod](#openaimethod)_ | Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies) |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 

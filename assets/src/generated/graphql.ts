@@ -6949,6 +6949,17 @@ export enum OpenAiMethod {
   Responses = 'RESPONSES'
 }
 
+export type OpenaiHeader = {
+  __typename?: 'OpenaiHeader';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type OpenaiHeaderAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
 /** OpenAI connection information */
 export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
@@ -6956,6 +6967,8 @@ export type OpenaiSettings = {
   baseUrl?: Maybe<Scalars['String']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
+  /** custom HTTP headers included in OpenAI-compatible API requests */
+  headers?: Maybe<Array<Maybe<OpenaiHeader>>>;
   /** the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions) */
   method?: Maybe<OpenAiMethod>;
   /** the openai model version to use */
@@ -6973,6 +6986,8 @@ export type OpenaiSettingsAttributes = {
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
+  /** custom HTTP headers to include in OpenAI-compatible API requests */
+  headers?: InputMaybe<Array<InputMaybe<OpenaiHeaderAttributes>>>;
   /** the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions) */
   method?: InputMaybe<OpenAiMethod>;
   model?: InputMaybe<Scalars['String']['input']>;

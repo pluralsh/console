@@ -156,6 +156,11 @@ defmodule Console.Schema.DeploymentSettings do
 
       embeds_one :token_exchange, OauthToken, on_replace: :update
 
+      embeds_many :headers, Header, on_replace: :delete do
+        field :name,  :string
+        field :value, :string
+      end
+
       field :proxy_models, {:array, :string}
     end
 
@@ -164,8 +169,16 @@ defmodule Console.Schema.DeploymentSettings do
       |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
       |> trim_changes(~w(access_token)a)
       |> cast_embed(:token_exchange)
+      |> cast_embed(:headers, with: &header_changeset/2)
+    end
+
+    defp header_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(name value)a)
+      |> validate_required([:name, :value])
     end
   end
+
 
   schema "deployment_settings" do
     field :name,             :string

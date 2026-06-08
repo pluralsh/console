@@ -913,6 +913,11 @@ type OpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	TokenExchange *OAuth2TokenExchange `json:"tokenExchange,omitempty"`
 
+	// Headers are custom HTTP headers to include in OpenAI-compatible API requests.
+	//
+	// +kubebuilder:validation:Optional
+	Headers []HTTPHeader `json:"headers,omitempty"`
+
 	// Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies)
 	//
 	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
@@ -924,6 +929,18 @@ type OpenAISettings struct {
 	//
 	// +kubebuilder:validation:Required
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
+}
+
+type HTTPHeader struct {
+	// Name is the HTTP header name.
+	//
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Value is the HTTP header value.
+	//
+	// +kubebuilder:validation:Required
+	Value string `json:"value"`
 }
 
 // OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
@@ -1231,6 +1248,7 @@ func (in *OpenAISettings) Attributes(ctx context.Context, c client.Client, names
 		EmbeddingModel: in.EmbeddingModel,
 		Method:         in.Method,
 		ProxyModels:    lo.ToSlicePtr(in.ProxyModels),
+		Headers:        httpHeaderAttributes(in.Headers),
 	}
 	if in.TokenExchange != nil {
 		tokenExchange, err := in.TokenExchange.Attributes(ctx, c, namespace)
@@ -1241,6 +1259,19 @@ func (in *OpenAISettings) Attributes(ctx context.Context, c client.Client, names
 	}
 
 	return attr, nil
+}
+
+func httpHeaderAttributes(headers []HTTPHeader) []*console.OpenaiHeaderAttributes {
+	if len(headers) == 0 {
+		return nil
+	}
+
+	return lo.Map(headers, func(header HTTPHeader, _ int) *console.OpenaiHeaderAttributes {
+		return &console.OpenaiHeaderAttributes{
+			Name:  header.Name,
+			Value: header.Value,
+		}
+	})
 }
 
 func (in *AzureOpenAISettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {

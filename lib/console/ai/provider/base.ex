@@ -10,6 +10,9 @@ defmodule Console.AI.Provider.Base do
   def select_model(%{model_id: model}, _) when is_binary(model), do: model
   def select_model(%{model: model}, _), do: model
 
+  def http_options(%{headers: [_ | _] = headers}), do: [req_http_options: [headers: Enum.map(headers, &{&1.name, &1.value})]]
+  def http_options(_), do: []
+
   def chunk_size(model) do
     case ReqLLM.model(model) do
       {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
