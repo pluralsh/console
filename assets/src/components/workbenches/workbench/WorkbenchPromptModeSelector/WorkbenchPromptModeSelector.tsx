@@ -117,6 +117,10 @@ export function WorkbenchPromptModeSelector({
       )
     )
 
+  const selectedIconColor = selectedModeConfig
+    ? workbenchPromptModeIconColor(selectedModeConfig, theme)
+    : undefined
+
   const trigger = (
     <ChatOptionPill
       isOpen={isOpen}
@@ -126,9 +130,15 @@ export function WorkbenchPromptModeSelector({
         <>
           <selectedModeConfig.Icon
             size={10}
-            color={workbenchPromptModeIconColor(selectedModeConfig, theme)}
+            color={selectedIconColor!}
           />
-          <span>{selectedModeConfig.label}</span>
+          <span
+            css={
+              selectedMode === 'plan' ? { color: selectedIconColor } : undefined
+            }
+          >
+            {selectedModeConfig.label}
+          </span>
         </>
       ) : (
         <>
