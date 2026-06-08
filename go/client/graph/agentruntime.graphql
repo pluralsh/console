@@ -41,11 +41,30 @@ query GetAgentRun($id: ID!) {
     }
 }
 
+query GetAgentRunMinimal($id: ID!) {
+    agentRun(id: $id) {
+        ...AgentRunMinimalFragment
+    }
+}
+
 query ListAgentRuns($after: String, $first: Int, $before: String, $last: Int) {
     agentRuns(after: $after, first: $first, before: $before, last: $last) {
         edges {
             node {
                 ...AgentRunFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+query ListAgentRunsMinimal($after: String, $first: Int, $before: String, $last: Int) {
+    agentRuns(after: $after, first: $first, before: $before, last: $last) {
+        edges {
+            node {
+                ...AgentRunMinimalFragment
             }
         }
         pageInfo {
@@ -243,4 +262,27 @@ fragment AgentRunFragment on AgentRun {
     }
     babysit
     babysitInterval
+}
+
+
+fragment AgentRunMinimalFragment on AgentRun {
+    id
+    prompt
+    repository
+    branch
+    runtime {
+        type
+    }
+    pullRequests {
+        id
+        status
+        url
+        title
+        ref
+    }
+    upload {
+        session
+        patch
+        screenRecording
+    }
 }
