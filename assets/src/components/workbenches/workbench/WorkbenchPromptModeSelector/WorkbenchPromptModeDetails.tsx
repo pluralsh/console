@@ -72,7 +72,6 @@ export function WorkbenchPromptModeDetails({
         </Body2BoldP>
         {config.badge && (
           <Chip
-            size="small"
             severity={config.badge.severity}
             css={{
               flexShrink: 0,
