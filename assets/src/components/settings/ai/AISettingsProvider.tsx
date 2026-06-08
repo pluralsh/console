@@ -199,6 +199,12 @@ export function AISettingsProvider() {
           ai={ai}
           onEdit={setProvider}
         />
+        <Switch
+          checked={enabled}
+          onChange={(checked) => setEnabled(checked)}
+        >
+          Enable AI insights
+        </Switch>
         <WrapperCardSC
           forwardedAs="form"
           onSubmit={handleSubmit}
@@ -206,14 +212,6 @@ export function AISettingsProvider() {
           {(error || deploymentSettingsError) && (
             <GqlError error={error || deploymentSettingsError} />
           )}
-          <Flex justifyContent="space-between">
-            <Switch
-              checked={enabled}
-              onChange={(checked) => setEnabled(checked)}
-            >
-              Enable AI insights
-            </Switch>
-          </Flex>
           <FormField label="AI provider">
             <SelectWithDisable
               disabled={!enabled}
