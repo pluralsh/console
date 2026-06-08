@@ -48,6 +48,8 @@ export function AISettingsProviderForm({
   error,
   deploymentSettingsError,
   hideProviderSelect = false,
+  providerOptions,
+  forceEnableProviderSelect = false,
 }: {
   enabled: boolean
   provider: AiProvider
@@ -63,7 +65,10 @@ export function AISettingsProviderForm({
   error?: Error | null
   deploymentSettingsError?: Error | null
   hideProviderSelect?: boolean
+  providerOptions?: readonly AiProvider[]
+  forceEnableProviderSelect?: boolean
 }) {
+  const selectableProviders = providerOptions ?? aiProviders
   let settings: ReactNode
   switch (provider) {
     case AiProvider.Openai:
@@ -153,13 +158,13 @@ export function AISettingsProviderForm({
       {!hideProviderSelect && (
         <FormField label="AI provider">
           <SelectWithDisable
-            disabled={!enabled}
+            disabled={!forceEnableProviderSelect && !enabled}
             selectedKey={provider}
             onSelectionChange={(v) => {
               onProviderChange?.(v as AiProvider)
             }}
           >
-            {aiProviders.map((key) => (
+            {selectableProviders.map((key) => (
               <ListBoxItem
                 key={key}
                 label={aiProviderToLabel[key]}

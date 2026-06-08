@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Switch, Toast } from '@pluralsh/design-system'
+import { Button, Flex, Switch, Toast } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Body2P } from 'components/utils/typography/Text'
 import {
@@ -11,14 +11,14 @@ import { produce } from 'immer'
 import merge from 'lodash/merge'
 import pick from 'lodash/pick'
 import { FormEvent, useMemo, useReducer, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
-import { AISettingsConfiguredProviders } from './AISettingsConfiguredProviders.tsx'
-import { AISettingsProviderEditModal } from './AISettingsProviderEditModal.tsx'
 import {
-  AISettingsProviderForm,
-  providerSettingsKey,
-} from './AISettingsProviderForm.tsx'
+  AISettingsConfiguredProviders,
+  getUnconfiguredProviders,
+} from './AISettingsConfiguredProviders.tsx'
+import { AISettingsProviderModal } from './AISettingsProviderEditModal.tsx'
+import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 import {
   initialSettingsAttributes,
   validateAttributes,
@@ -42,9 +42,7 @@ export function AISettingsProvider() {
   const ai = deploymentSettings.deploymentSettings?.ai
 
   const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
-  const [provider, setProvider] = useState<AiProvider>(
-    ai?.provider ?? AiProvider.Openai
-  )
+  const activeProvider = ai?.provider ?? AiProvider.Openai
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     initialSettingsAttributes(ai)
@@ -53,10 +51,13 @@ export function AISettingsProvider() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingProvider, setEditingProvider] =
     useState<Nullable<AiProvider>>(null)
+  const [connectModalOpen, setConnectModalOpen] = useState(false)
+  const [connectingProvider, setConnectingProvider] =
+    useState<Nullable<AiProvider>>(null)
 
-  const valid = useMemo(
-    () => validateAttributes(enabled, provider, providerSettings),
-    [enabled, provider, providerSettings]
+  const unconfiguredProviders = useMemo(
+    () => getUnconfiguredProviders(ai),
+    [ai]
   )
 
   const editValid = useMemo(
@@ -67,11 +68,21 @@ export function AISettingsProvider() {
     [enabled, editingProvider, providerSettings]
   )
 
+  const connectValid = useMemo(
+    () =>
+      connectingProvider
+        ? validateAttributes(enabled, connectingProvider, providerSettings)
+        : false,
+    [enabled, connectingProvider, providerSettings]
+  )
+
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
     onCompleted: (data) => {
       setShowToast(true)
       setEditModalOpen(false)
       setEditingProvider(null)
+      setConnectModalOpen(false)
+      setConnectingProvider(null)
       updateProviderSettings(
         initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
       )
@@ -80,7 +91,7 @@ export function AISettingsProvider() {
 
   const saveSettings = (
     settingsProvider: AiProvider,
-    activeProvider: AiProvider
+    routingProvider: AiProvider
   ) => {
     mutation({
       variables: {
@@ -89,7 +100,7 @@ export function AISettingsProvider() {
             enabled,
             ...(enabled
               ? {
-                  provider: activeProvider,
+                  provider: routingProvider,
                   ...pick(
                     providerSettings,
                     providerSettingsKey[settingsProvider]
@@ -102,16 +113,30 @@ export function AISettingsProvider() {
     })
   }
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    saveSettings(provider, provider)
+  const saveEnabled = (checked: boolean) => {
+    setEnabled(checked)
+    mutation({
+      variables: {
+        attributes: {
+          ai: {
+            enabled: checked,
+            ...(checked
+              ? {
+                  provider: activeProvider,
+                  ...providerSettings,
+                }
+              : {}),
+          } satisfies AiSettingsAttributes,
+        },
+      },
+    })
   }
 
   const handleEditSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!editingProvider) return
 
-    saveSettings(editingProvider, ai?.provider ?? provider)
+    saveSettings(editingProvider, activeProvider)
   }
 
   const handleEditProvider = (editProvider: AiProvider) => {
@@ -119,10 +144,24 @@ export function AISettingsProvider() {
     setEditModalOpen(true)
   }
 
+  const handleConnectProvider = () => {
+    const nextProvider = unconfiguredProviders[0]
+    if (!nextProvider) return
+
+    setConnectingProvider(nextProvider)
+    setConnectModalOpen(true)
+  }
+
+  const handleConnectSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    if (!connectingProvider) return
+
+    saveSettings(connectingProvider, activeProvider)
+  }
+
   const formProps = {
     enabled,
-    provider,
-    onProviderChange: setProvider,
+    provider: activeProvider,
     providerSettings,
     updateProviderSettings,
     loading,
@@ -137,6 +176,12 @@ export function AISettingsProvider() {
         direction="column"
         gap="medium"
       >
+        <Switch
+          checked={enabled}
+          onChange={saveEnabled}
+        >
+          Enable AI insights
+        </Switch>
         <Flex
           align="center"
           gap="xlarge"
@@ -146,29 +191,24 @@ export function AISettingsProvider() {
             You can connect more than one and pin specific roles in Model
             routing.
           </Body2P>
-          <Button>Connect provider</Button>
+          {unconfiguredProviders.length > 0 && (
+            <Button
+              style={{ flexShrink: 0 }}
+              onClick={handleConnectProvider}
+            >
+              Connect provider
+            </Button>
+          )}
         </Flex>
         <AISettingsConfiguredProviders
           ai={ai}
           onEdit={handleEditProvider}
         />
-        <Switch
-          checked={enabled}
-          onChange={(checked) => setEnabled(checked)}
-        >
-          Enable AI insights
-        </Switch>
-        <WrapperCardSC>
-          <AISettingsProviderForm
-            {...formProps}
-            onSubmit={handleSubmit}
-            valid={valid}
-          />
-        </WrapperCardSC>
       </Flex>
       {editingProvider && (
-        <AISettingsProviderEditModal
+        <AISettingsProviderModal
           open={editModalOpen}
+          hideProviderSelect
           onClose={() => {
             setEditModalOpen(false)
             setEditingProvider(null)
@@ -177,6 +217,23 @@ export function AISettingsProvider() {
           provider={editingProvider}
           onSubmit={handleEditSubmit}
           valid={editValid}
+        />
+      )}
+      {connectingProvider && (
+        <AISettingsProviderModal
+          open={connectModalOpen}
+          header="Connect AI provider"
+          providerOptions={unconfiguredProviders}
+          forceEnableProviderSelect
+          onClose={() => {
+            setConnectModalOpen(false)
+            setConnectingProvider(null)
+          }}
+          {...formProps}
+          provider={connectingProvider}
+          onProviderChange={setConnectingProvider}
+          onSubmit={handleConnectSubmit}
+          valid={connectValid}
         />
       )}
       <Toast
@@ -191,10 +248,3 @@ export function AISettingsProvider() {
     </ScrollablePage>
   )
 }
-
-const WrapperCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  padding: theme.spacing.xlarge,
-}))

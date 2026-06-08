@@ -16,7 +16,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
-import { aiProviderToLabel } from './AISettingsProviders.tsx'
+import { aiProviderToLabel, aiProviders } from './AISettingsProviders.tsx'
 
 type ConfiguredAiProvider = {
   provider: AiProvider
@@ -36,6 +36,20 @@ const aiProviderToIcon = {
   [AiProvider.Ollama]: OllamaLogoIcon,
   [AiProvider.Vertex]: VertexLogoIcon,
 } as const satisfies Record<AiProvider, ComponentType<IconProps>>
+
+export function getUnconfiguredProviders(
+  ai: Nullable<AiSettings>
+): AiProvider[] {
+  const configured = new Set(
+    ai
+      ? configuredProviderSources.flatMap(([provider, key]) =>
+          ai[key] ? [provider] : []
+        )
+      : []
+  )
+
+  return aiProviders.filter((provider) => !configured.has(provider))
+}
 
 const configuredProviderSources = [
   [AiProvider.Openai, 'openai', 'model'],
