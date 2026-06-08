@@ -2,13 +2,13 @@ import {
   Chip,
   ContainerRuntimeIcon,
   Flex,
+  green,
   WarningShieldIcon,
   type SemanticColorKey,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { type DefaultTheme, useTheme } from 'styled-components'
-import { green } from '../../../../../design-system/src/theme/colors-base'
 import type { WorkbenchPromptMode } from './workbenchPromptModes'
 import { WorkbenchPromptSupervisionOption } from './WorkbenchPromptSupervisionOption'
 

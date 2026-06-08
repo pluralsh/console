@@ -2,14 +2,17 @@ import {
   AnimatedDiv,
   Card,
   CheckRoundedIcon,
+  ContainerRuntimeIcon,
   DiscoverIcon,
   Flex,
   ListIcon,
   LogsIcon,
+  orange,
+  Popover,
+  PopoverWrapper,
   useFloatingDropdown,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
-import ContainerRuntimeIcon from '../../../../../design-system/src/components/icons/ContainerRuntimeIcon'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { cloneElement, type ReactNode, useRef, useState } from 'react'
@@ -20,9 +23,6 @@ import {
   type UseFloatingReturn,
 } from '@floating-ui/react-dom-interactions'
 import { useTheme } from 'styled-components'
-import { PopoverWrapper } from '../../../../../design-system/src/components/PopoverListBox'
-import { Popover } from '../../../../../design-system/src/components/ReactAriaPopover'
-import { orange } from '../../../../../design-system/src/theme/colors-base'
 import type {
   WorkbenchJobCodingModesAttributes,
   WorkbenchJobModesAttributes,
