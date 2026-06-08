@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult, WorkbenchJobActivityAgentRun}
+  alias Console.Schema.{User, WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult, WorkbenchJobActivityAgentRun}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Type,
@@ -80,7 +80,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     end
 
     belongs_to :workbench_job, WorkbenchJob
-    belongs_to :agent_run, AgentRun
+    belongs_to :agent_run,     AgentRun
+    belongs_to :user,          User
 
     has_many :agent_run_associations, WorkbenchJobActivityAgentRun,
       on_replace: :delete,
@@ -123,6 +124,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast_embed(:tool_call, with: &tool_call_changeset/2)
     |> foreign_key_constraint(:workbench_job_id)
     |> foreign_key_constraint(:agent_run_id)
+    |> foreign_key_constraint(:user_id)
     |> validate_required([:status, :type, :prompt, :workbench_job_id])
   end
 

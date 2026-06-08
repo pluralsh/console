@@ -7,7 +7,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   require Logger
 
   @table :clouds_addons
-  @poll :timer.minutes(30)
+  @poll :timer.hours(6)
   @url "/matrices/compatability/static/addons/"
 
   defmodule State do

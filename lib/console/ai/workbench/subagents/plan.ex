@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
   alias Console.Schema.WorkbenchJob
   alias Console.AI.Workbench.Environment
   alias Console.AI.Tools.Workbench.{Skills, Skill, Plan, Subagents, Scratchpad}
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   @system Console.priv_file!("prompts/workbench/plan.md")
 
@@ -11,7 +12,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
     job = Repo.preload(job, [:result])
 
     tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: @system, acc: %{})
+    |> MemoryEngine.new(20, engine_opts(job) ++ [system_prompt: @system, acc: %{}])
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs

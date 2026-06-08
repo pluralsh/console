@@ -117,3 +117,46 @@ func TestHandleOpenAIKeys_tokenExchangeEnabledIncomplete(t *testing.T) {
 	_, err := acct.GetKeysForProvider(context.Background(), schemas.OpenAI)
 	require.Error(t, err)
 }
+
+func TestAccountOpenAICompatibleProvider(t *testing.T) {
+	chat := pb.OpenAiMethod_CHAT
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Openai: &pb.OpenAiConfig{
+			Model:  lo.ToPtr("gpt-4o"),
+			ApiKey: lo.ToPtr("openai-key"),
+		},
+		OpenaiCompatible: &pb.OpenAiConfig{
+			Model:       lo.ToPtr("llama"),
+			ToolModel:   lo.ToPtr("llama-tools"),
+			BaseUrl:     lo.ToPtr("https://litellm.example/v1"),
+			ApiKey:      lo.ToPtr("compat-key"),
+			ProxyModels: []string{"deepseek"},
+			Method:      &chat,
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.Contains(t, providers, schemas.OpenAI)
+	require.Contains(t, providers, openAICompatibleProvider)
+
+	keys, err := acct.GetKeysForProvider(context.Background(), openAICompatibleProvider)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.Equal(t, "compat-key", keys[0].Value.Val)
+	require.ElementsMatch(t, []string{"llama", "llama-tools", "deepseek"}, keys[0].Models)
+
+	providerConfig, err := acct.GetConfigForProvider(openAICompatibleProvider)
+	require.NoError(t, err)
+	require.Equal(t, "https://litellm.example", providerConfig.NetworkConfig.BaseURL)
+	require.NotNil(t, providerConfig.CustomProviderConfig)
+	require.Equal(t, schemas.OpenAI, providerConfig.CustomProviderConfig.BaseProviderType)
+	require.True(t, providerConfig.CustomProviderConfig.AllowedRequests.ChatCompletion)
+	require.False(t, providerConfig.CustomProviderConfig.AllowedRequests.Responses)
+}

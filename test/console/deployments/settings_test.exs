@@ -17,6 +17,130 @@ defmodule Console.Deployments.SettingsTest do
     end
   end
 
+  describe "#available_models/0" do
+    test "it returns normalized models for configured providers" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai: %{
+            access_token: "key",
+            model: "gpt-custom",
+            tool_model: "gpt-tool",
+            proxy_models: ["gpt-proxy", "gpt-tool", ""]
+          },
+          bedrock: %{
+            region: "us-east-1",
+            model_id: "anthropic.custom",
+            proxy_models: ["anthropic.proxy"]
+          }
+        }
+      )
+
+      assert Enum.map(Settings.available_models(), &Map.take(&1, [:provider, :model])) == [
+               %{provider: :openai, model: "gpt-custom"},
+               %{provider: :openai, model: "gpt-tool"},
+               %{provider: :openai, model: "text-embedding-3-large"},
+               %{provider: :openai, model: "gpt-proxy"},
+               %{provider: :bedrock, model: "anthropic.custom"},
+               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
+               %{provider: :bedrock, model: "cohere.embed-english-v3"},
+               %{provider: :bedrock, model: "anthropic.proxy"}
+             ]
+    end
+
+    test "it only returns models when ai is enabled and a provider is configured" do
+      deployment_settings(ai: %{enabled: true})
+
+      assert Settings.available_models() == []
+
+      Console.Cache.flush()
+
+      update_record(Settings.fetch_consistent(),
+        ai: %{enabled: false, openai: %{access_token: "key"}}
+      )
+
+      assert Settings.available_models() == []
+    end
+
+    test "it falls back to defaults for partially configured providers" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai: %{access_token: "key"},
+          anthropic: %{access_token: "anthropic-key"},
+          azure: %{access_token: "azure-key", endpoint: "https://example.com/openai/deployments"},
+          vertex: %{project: "project", location: "us-central1"},
+          bedrock: %{region: "us-east-1"}
+        }
+      )
+
+      assert model_fields() == [
+               %{provider: :openai, model: "gpt-5.4-mini"},
+               %{provider: :openai, model: "gpt-5.4"},
+               %{provider: :openai, model: "text-embedding-3-large"},
+               %{provider: :anthropic, model: "claude-4-5-haiku-latest"},
+               %{provider: :anthropic, model: "claude-4-6-sonnet-latest"},
+               %{provider: :vertex, model: "claude-haiku-4-5@20251001"},
+               %{provider: :vertex, model: "claude-sonnet-4-6@20260114"},
+               %{provider: :vertex, model: "gemini-embedding-001"},
+               %{provider: :bedrock, model: "global.anthropic.claude-haiku-4-5-20251001-v1:0"},
+               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
+               %{provider: :bedrock, model: "cohere.embed-english-v3"},
+               %{provider: :azure, model: "gpt-5.4-mini"},
+               %{provider: :azure, model: "gpt-5.4"},
+               %{provider: :azure, model: "text-embedding-3-large"}
+             ]
+    end
+
+    test "it ignores selected providers that are not configured" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :azure,
+          tool_provider: :bedrock,
+          embedding_provider: :vertex,
+          openai: %{access_token: "key"}
+        }
+      )
+
+      assert model_fields() == [
+               %{provider: :openai, model: "gpt-5.4-mini"},
+               %{provider: :openai, model: "gpt-5.4"},
+               %{provider: :openai, model: "text-embedding-3-large"}
+             ]
+    end
+
+    test "it supports custom, proxy-only, and duplicate model configuration" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai_compatible: %{
+            base_url: "https://openai-compatible.example.com",
+            model: "custom-default",
+            proxy_models: ["custom-proxy", "custom-default", nil, "  "]
+          },
+          azure: %{
+            access_token: "azure-key",
+            endpoint: "https://example.com/openai/deployments",
+            tool_model: "azure-tool",
+            proxy_models: ["azure-proxy", "azure-tool"]
+          }
+        }
+      )
+
+      assert model_fields() == [
+               %{provider: :openai_compatible, model: "custom-default"},
+               %{provider: :openai_compatible, model: "gpt-5.4"},
+               %{provider: :openai_compatible, model: "text-embedding-3-large"},
+               %{provider: :openai_compatible, model: "custom-proxy"},
+               %{provider: :azure, model: "gpt-5.4-mini"},
+               %{provider: :azure, model: "azure-tool"},
+               %{provider: :azure, model: "text-embedding-3-large"},
+               %{provider: :azure, model: "azure-proxy"}
+             ]
+    end
+  end
+
   describe "#update/2" do
     test "admins can update global settings" do
       admin = admin_user()
@@ -97,20 +221,31 @@ defmodule Console.Deployments.SettingsTest do
 
     test "nonadmins cannot create projects" do
       user = insert(:user)
-      {:error, _} = Settings.create_project(%{
-        name: "test",
-        write_bindings: [%{user_id: user.id}]
-      }, user)
+
+      {:error, _} =
+        Settings.create_project(
+          %{
+            name: "test",
+            write_bindings: [%{user_id: user.id}]
+          },
+          user
+        )
     end
   end
 
   describe "#update_project/3" do
     test "admins can update a new project" do
       proj = insert(:project)
-      {:ok, updated} = Settings.update_project(%{
-        name: "test",
-        write_bindings: [%{user_id: insert(:user).id}]
-      }, proj.id, admin_user())
+
+      {:ok, updated} =
+        Settings.update_project(
+          %{
+            name: "test",
+            write_bindings: [%{user_id: insert(:user).id}]
+          },
+          proj.id,
+          admin_user()
+        )
 
       assert updated.id == proj.id
       assert updated.name == "test"
@@ -119,10 +254,16 @@ defmodule Console.Deployments.SettingsTest do
     test "nonadmins cannot update projects" do
       proj = insert(:project)
       user = insert(:user)
-      {:error, _} = Settings.update_project(%{
-        name: "test",
-        write_bindings: [%{user_id: user.id}]
-      }, proj.id, user)
+
+      {:error, _} =
+        Settings.update_project(
+          %{
+            name: "test",
+            write_bindings: [%{user_id: user.id}]
+          },
+          proj.id,
+          user
+        )
     end
   end
 
@@ -149,17 +290,21 @@ defmodule Console.Deployments.SettingsTest do
 
   describe "#upsert_cloud_connection/2" do
     test "admins can create a cloud connection" do
-      {:ok, updated} = Settings.upsert_cloud_connection(%{
-        provider: :aws,
-        name: "test",
-        configuration: %{
-          aws: %{
-            access_key_id: "access-key-id",
-            secret_access_key: "secret-access-key",
-            region: "us-east-1"
-          }
-        }
-      }, admin_user())
+      {:ok, updated} =
+        Settings.upsert_cloud_connection(
+          %{
+            provider: :aws,
+            name: "test",
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          admin_user()
+        )
 
       assert updated.name == "test"
       assert updated.provider == :aws
@@ -171,16 +316,20 @@ defmodule Console.Deployments.SettingsTest do
     test "admins can update a cloud connection" do
       conn = insert(:cloud_connection)
 
-      {:ok, updated} = Settings.upsert_cloud_connection(%{
-        name: conn.name,
-        configuration: %{
-          aws: %{
-            access_key_id: "access-key-id",
-            secret_access_key: "new-secret-access-key",
-            region: "us-east-1"
-          }
-        }
-      }, admin_user())
+      {:ok, updated} =
+        Settings.upsert_cloud_connection(
+          %{
+            name: conn.name,
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          admin_user()
+        )
 
       assert updated.id == conn.id
       assert updated.name == conn.name
@@ -193,17 +342,21 @@ defmodule Console.Deployments.SettingsTest do
     test "nonadmins cannot upsert cloud connections" do
       conn = insert(:cloud_connection)
 
-      {:error, _} = Settings.upsert_cloud_connection(%{
-        id: conn.id,
-        name: "test",
-        configuration: %{
-          aws: %{
-            access_key_id: "access-key-id",
-            secret_access_key: "new-secret-access-key",
-            region: "us-east-1"
-          }
-        }
-      }, insert(:user))
+      {:error, _} =
+        Settings.upsert_cloud_connection(
+          %{
+            id: conn.id,
+            name: "test",
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          insert(:user)
+        )
     end
   end
 
@@ -229,12 +382,17 @@ defmodule Console.Deployments.SettingsTest do
   describe "#create_federated_credential/2" do
     test "admins can create a federated credential" do
       user = insert(:user)
-      {:ok, updated} = Settings.create_federated_credential(%{
-        issuer: "https://oidc.plural.sh",
-        claims_like: %{"sub" => ".*@example.com"},
-        scopes: ["createPullRequest"],
-        user_id: user.id
-      }, admin_user())
+
+      {:ok, updated} =
+        Settings.create_federated_credential(
+          %{
+            issuer: "https://oidc.plural.sh",
+            claims_like: %{"sub" => ".*@example.com"},
+            scopes: ["createPullRequest"],
+            user_id: user.id
+          },
+          admin_user()
+        )
 
       assert updated.issuer == "https://oidc.plural.sh"
       assert updated.claims_like == %{"sub" => ".*@example.com"}
@@ -243,32 +401,46 @@ defmodule Console.Deployments.SettingsTest do
     end
 
     test "nonadmins cannot create federated credentials" do
-      {:error, _} = Settings.create_federated_credential(%{
-        issuer: "https://oidc.plural.sh",
-        claims_like: %{"sub" => ".*@example.com"},
-        scopes: ["createPullRequest"]
-      }, insert(:user))
+      {:error, _} =
+        Settings.create_federated_credential(
+          %{
+            issuer: "https://oidc.plural.sh",
+            claims_like: %{"sub" => ".*@example.com"},
+            scopes: ["createPullRequest"]
+          },
+          insert(:user)
+        )
     end
   end
 
   describe "#update_federated_credential/3" do
     test "admins can update a federated credential" do
       credential = insert(:federated_credential)
-      {:ok, updated} = Settings.update_federated_credential(%{
-        claims_like: %{"sub" => ".*@plural.sh"},
-        scopes: ["createPullRequest"]
-      }, credential.id, admin_user())
+
+      {:ok, updated} =
+        Settings.update_federated_credential(
+          %{
+            claims_like: %{"sub" => ".*@plural.sh"},
+            scopes: ["createPullRequest"]
+          },
+          credential.id,
+          admin_user()
+        )
 
       assert updated.id == credential.id
       assert updated.claims_like == %{"sub" => ".*@plural.sh"}
     end
 
     test "nonadmins cannot create federated credentials" do
-      {:error, _} = Settings.create_federated_credential(%{
-        issuer: "https://oidc.plural.sh",
-        claims_like: %{"sub" => ".*@example.com"},
-        scopes: ["createPullRequest"]
-      }, insert(:user))
+      {:error, _} =
+        Settings.create_federated_credential(
+          %{
+            issuer: "https://oidc.plural.sh",
+            claims_like: %{"sub" => ".*@example.com"},
+            scopes: ["createPullRequest"]
+          },
+          insert(:user)
+        )
     end
   end
 
@@ -287,17 +459,24 @@ defmodule Console.Deployments.SettingsTest do
   describe "#exchange_token/2" do
     test "it will exchange a token for a user" do
       user = insert(:user)
+
       insert(:federated_credential,
         issuer: "https://oidc.plural.sh",
         user: user,
         claims_like: %{"sub" => user.email}
       )
+
       signer = Joken.Signer.create("HS256", "secret")
 
-      {:ok, token, _} = Console.TestToken.generate_and_sign(%{
-        "iss" => "https://oidc.plural.sh",
-        "sub" => user.email
-      }, signer)
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(
+          %{
+            "iss" => "https://oidc.plural.sh",
+            "sub" => user.email
+          },
+          signer
+        )
+
       expect(Oidcc.Token, :validate_jwt, fn _, _, _ -> {:ok, %{"sub" => user.email}} end)
 
       {:ok, token} = Settings.exchange_token(token, user.email)
@@ -307,20 +486,30 @@ defmodule Console.Deployments.SettingsTest do
 
     test "it will fail if no federated credential is found" do
       user = insert(:user)
+
       insert(:federated_credential,
         issuer: "https://oidc.plural.sh",
         user: user,
         claims_like: %{"sub" => "ignore-me"}
       )
+
       signer = Joken.Signer.create("HS256", "secret")
 
-      {:ok, token, _} = Console.TestToken.generate_and_sign(%{
-        "iss" => "https://oidc.plural.sh",
-        "sub" => user.email
-      }, signer)
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(
+          %{
+            "iss" => "https://oidc.plural.sh",
+            "sub" => user.email
+          },
+          signer
+        )
+
       expect(Oidcc.Token, :validate_jwt, fn _, _, _ -> {:ok, %{"sub" => user.email}} end)
 
       {:error, "no federated credential" <> _} = Settings.exchange_token(token, user.email)
     end
   end
+
+  defp model_fields(),
+    do: Enum.map(Settings.available_models(), &Map.take(&1, [:provider, :model]))
 end

@@ -26,7 +26,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_job_modes_attributes do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :model,  :workbench_job_model_attributes, description: "model override for this job"
     field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+  end
+
+  input_object :workbench_job_model_attributes do
+    field :provider, non_null(:ai_provider), description: "the ai provider for this job"
+    field :model,    non_null(:string), description: "the model name for this job"
   end
 
   input_object :workbench_job_coding_modes_attributes do
@@ -505,7 +511,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_modes do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :model,  :workbench_job_model, description: "model override for this job"
     field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+  end
+
+  object :workbench_job_model do
+    field :provider, :ai_provider, description: "the ai provider for this job"
+    field :model,    :string, description: "the model name for this job"
   end
 
   object :workbench_job_coding_modes do
@@ -526,6 +538,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
+    field :user,         :user, resolve: dataloader(User), description: "the user who created this activity"
 
     timestamps()
   end

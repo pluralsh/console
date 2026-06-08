@@ -474,6 +474,8 @@ type RootQueryType {
 
   deploymentSettings: DeploymentSettings
 
+  availableModels: [AvailableModel]
+
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
 
   project(id: ID, name: String): Project
@@ -2547,8 +2549,19 @@ input WorkbenchJobModesAttributes {
   "whether planning mode is enabled for this job"
   plan: Boolean
 
+  "model override for this job"
+  model: WorkbenchJobModelAttributes
+
   "coding mode options for this job"
   coding: WorkbenchJobCodingModesAttributes
+}
+
+input WorkbenchJobModelAttributes {
+  "the ai provider for this job"
+  provider: AiProvider!
+
+  "the model name for this job"
+  model: String!
 }
 
 input WorkbenchJobCodingModesAttributes {
@@ -3389,8 +3402,19 @@ type WorkbenchJobModes {
   "whether planning mode is enabled for this job"
   plan: Boolean
 
+  "model override for this job"
+  model: WorkbenchJobModel
+
   "coding mode options for this job"
   coding: WorkbenchJobCodingModes
+}
+
+type WorkbenchJobModel {
+  "the ai provider for this job"
+  provider: AiProvider
+
+  "the model name for this job"
+  model: String
 }
 
 type WorkbenchJobCodingModes {
@@ -3431,6 +3455,9 @@ type WorkbenchJobActivity {
 
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
+
+  "the user who created this activity"
+  user: User
 
   insertedAt: DateTime
 
@@ -6244,6 +6271,11 @@ type FederatedCredential {
   user: User
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type AvailableModel {
+  provider: AiProvider!
+  model: String!
 }
 
 type ProjectConnection {

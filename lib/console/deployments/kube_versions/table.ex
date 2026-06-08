@@ -10,7 +10,7 @@ defmodule Console.Deployments.KubeVersions.Table do
 
   @table :extended_kube_versions
   @changelog_url "/matrices/compatability/static/kube_changelog.yaml"
-  @poll :timer.minutes(60)
+  @poll :timer.hours(6)
 
   defmodule State do
     defstruct [:table, :url, :static]

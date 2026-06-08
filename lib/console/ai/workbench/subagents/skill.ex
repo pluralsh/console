@@ -11,6 +11,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
     Scratchpad,
     Coding.PullRequests
   }
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
@@ -22,10 +23,12 @@ defmodule Console.AI.Workbench.Subagents.Skill do
 
     tools(target_job, environment)
     |> MemoryEngine.new(20,
-      system_prompt: String.trim(system_prompt(job: target_job)),
-      continue_msg: cont_msg(),
-      acc: %{},
-      callback: &callback(activity, &1)
+      engine_opts(job) ++ [
+        system_prompt: String.trim(system_prompt(job: target_job)),
+        continue_msg: cont_msg(),
+        acc: %{},
+        callback: &callback(activity, &1)
+      ]
     )
     |> MemoryEngine.reduce([{:user, String.trim(eval_job_prompt(job: target_job))}, @skill_prompt], &reducer/2)
     |> case do

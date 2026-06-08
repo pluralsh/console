@@ -1027,9 +1027,12 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
   describe "workbenchJobActivity" do
     test "it can fetch a workbench job activity by id" do
+      user = insert(:user)
+
       activity =
         insert(:workbench_job_activity,
           workbench_job: insert(:workbench_job),
+          user: user,
           type: :coding,
           status: :running,
           prompt: "fix the bug"
@@ -1042,6 +1045,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             status
             type
             prompt
+            user {
+              id
+            }
           }
         }
       """, %{"id" => activity.id}, %{current_user: admin_user()})
@@ -1050,6 +1056,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == "RUNNING"
       assert found["type"] == "CODING"
       assert found["prompt"] == "fix the bug"
+      assert found["user"]["id"] == user.id
     end
 
     test "users with read access to the workbench can fetch workbench job activities" do

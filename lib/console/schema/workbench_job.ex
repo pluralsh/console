@@ -28,6 +28,11 @@ defmodule Console.Schema.WorkbenchJob do
     field :completed_at, :utc_datetime_usec
 
     embeds_one :modes, Modes, on_replace: :update do
+      embeds_one :model, Model, on_replace: :update do
+        field :provider, Console.Schema.DeploymentSettings.AIProvider
+        field :model,    :string
+      end
+
       field :plan, :boolean
       embeds_one :coding, Coding, on_replace: :update do
         field :babysit,  :boolean
@@ -175,7 +180,14 @@ defmodule Console.Schema.WorkbenchJob do
   defp modes_changeset(model, attrs) do
     model
     |> cast(attrs, [:plan])
+    |> cast_embed(:model, with: &model_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
+  end
+
+  defp model_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:provider, :model])
+    |> validate_required([:provider, :model])
   end
 
   defp coding_changeset(model, attrs) do

@@ -37,7 +37,7 @@ defmodule Console.AI.Bedrock do
   def completion(%__MODULE__{} = bedrock, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client])}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
+    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:model], opts[:client])}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
     |> reqllm_result()
   end
 
@@ -50,7 +50,7 @@ defmodule Console.AI.Bedrock do
 
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client] || :tool)}", bedrock.stream, provider_opts)
+    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:model], opts[:client] || :tool)}", bedrock.stream, provider_opts)
     |> reqllm_result()
     |> tool_calls()
   end
