@@ -1,5 +1,6 @@
-import { Card, Flex, Switch, Toast } from '@pluralsh/design-system'
+import { Button, Card, Flex, Switch, Toast } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
@@ -136,6 +137,17 @@ export function AISettingsProvider() {
         direction="column"
         gap="medium"
       >
+        <Flex
+          align="center"
+          gap="xlarge"
+        >
+          <Body2P $color="text-light">
+            Connect the LLM and embedding providers you want Plural AI to use.
+            You can connect more than one and pin specific roles in Model
+            routing.
+          </Body2P>
+          <Button>Connect provider</Button>
+        </Flex>
         <AISettingsConfiguredProviders
           ai={ai}
           onEdit={handleEditProvider}
