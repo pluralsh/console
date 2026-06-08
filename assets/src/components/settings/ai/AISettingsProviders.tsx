@@ -11,6 +11,26 @@ import {
 } from '../../../generated/graphql.ts'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
 
+export const aiProviderToLabel = {
+  [AiProvider.Openai]: 'OpenAI',
+  [AiProvider.OpenaiCompatible]: 'OpenAI-compatible',
+  [AiProvider.Anthropic]: 'Anthropic',
+  [AiProvider.Azure]: 'Azure AI',
+  [AiProvider.Bedrock]: 'AWS Bedrock',
+  [AiProvider.Ollama]: 'Ollama',
+  [AiProvider.Vertex]: 'Vertex AI',
+} as const satisfies Record<AiProvider, string>
+
+export const aiProviders = [
+  AiProvider.Openai,
+  AiProvider.OpenaiCompatible,
+  AiProvider.Anthropic,
+  AiProvider.Azure,
+  AiProvider.Bedrock,
+  AiProvider.Ollama,
+  AiProvider.Vertex,
+] as const satisfies readonly AiProvider[]
+
 export function initialSettingsAttributes(
   ai: Nullable<AiSettings>
 ): Omit<AiSettingsAttributes, 'enabled' | 'provider'> {

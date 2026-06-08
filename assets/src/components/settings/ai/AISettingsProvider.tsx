@@ -1,17 +1,5 @@
-import {
-  Button,
-  Card,
-  Flex,
-  FormField,
-  ListBoxItem,
-  Select,
-  SelectPropsSingle,
-  Switch,
-  Toast,
-} from '@pluralsh/design-system'
-import { GqlError } from 'components/utils/Alert.tsx'
+import { Card, Flex, Switch, Toast } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
@@ -21,19 +9,18 @@ import {
 import { produce } from 'immer'
 import merge from 'lodash/merge'
 import pick from 'lodash/pick'
-import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
+import { FormEvent, useMemo, useReducer, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
 import { AISettingsConfiguredProviders } from './AISettingsConfiguredProviders.tsx'
+import { AISettingsProviderEditModal } from './AISettingsProviderEditModal.tsx'
 import {
-  AnthropicSettings,
-  AzureSettings,
-  BedrockSettings,
+  AISettingsProviderForm,
+  providerSettingsKey,
+} from './AISettingsProviderForm.tsx'
+import {
   initialSettingsAttributes,
-  OllamaSettings,
-  OpenAISettings,
   validateAttributes,
-  VertexSettings,
 } from './AISettingsProviders.tsx'
 
 const updateSettings = produce(
@@ -46,19 +33,6 @@ const updateSettings = produce(
     return original
   }
 )
-
-const providerSettingsKey: Record<
-  AiProvider,
-  keyof Omit<AiSettingsAttributes, 'enabled' | 'provider'>
-> = {
-  [AiProvider.Openai]: 'openai',
-  [AiProvider.OpenaiCompatible]: 'openaiCompatible',
-  [AiProvider.Anthropic]: 'anthropic',
-  [AiProvider.Bedrock]: 'bedrock',
-  [AiProvider.Ollama]: 'ollama',
-  [AiProvider.Azure]: 'azure',
-  [AiProvider.Vertex]: 'vertex',
-}
 
 export function AISettingsProvider() {
   const theme = useTheme()
@@ -75,118 +49,85 @@ export function AISettingsProvider() {
     initialSettingsAttributes(ai)
   )
   const [showToast, setShowToast] = useState(false)
-
-  let settings: ReactNode
-  switch (provider) {
-    case AiProvider.Openai:
-      settings = (
-        <OpenAISettings
-          enabled={enabled}
-          settings={providerSettings.openai}
-          updateSettings={(settings) =>
-            updateProviderSettings({ openai: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.OpenaiCompatible:
-      settings = (
-        <OpenAISettings
-          enabled={enabled}
-          settings={providerSettings.openaiCompatible}
-          updateSettings={(settings) =>
-            updateProviderSettings({ openaiCompatible: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Anthropic:
-      settings = (
-        <AnthropicSettings
-          enabled={enabled}
-          settings={providerSettings.anthropic}
-          updateSettings={(settings) =>
-            updateProviderSettings({ anthropic: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Bedrock:
-      settings = (
-        <BedrockSettings
-          enabled={enabled}
-          settings={providerSettings.bedrock}
-          updateSettings={(settings) =>
-            updateProviderSettings({ bedrock: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Ollama:
-      settings = (
-        <OllamaSettings
-          enabled={enabled}
-          settings={providerSettings.ollama}
-          updateSettings={(settings) =>
-            updateProviderSettings({ ollama: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Azure:
-      settings = (
-        <AzureSettings
-          enabled={enabled}
-          settings={providerSettings.azure}
-          updateSettings={(settings) =>
-            updateProviderSettings({ azure: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Vertex:
-      settings = (
-        <VertexSettings
-          enabled={enabled}
-          settings={providerSettings.vertex}
-          updateSettings={(settings) =>
-            updateProviderSettings({ vertex: settings })
-          }
-        />
-      )
-      break
-  }
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingProvider, setEditingProvider] =
+    useState<Nullable<AiProvider>>(null)
 
   const valid = useMemo(
     () => validateAttributes(enabled, provider, providerSettings),
     [enabled, provider, providerSettings]
   )
 
+  const editValid = useMemo(
+    () =>
+      editingProvider
+        ? validateAttributes(enabled, editingProvider, providerSettings)
+        : false,
+    [enabled, editingProvider, providerSettings]
+  )
+
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
-    variables: {
-      attributes: {
-        ai: {
-          enabled,
-          ...(enabled
-            ? {
-                provider,
-                ...pick(providerSettings, providerSettingsKey[provider]),
-              }
-            : {}),
-        } satisfies AiSettingsAttributes,
-      },
-    },
     onCompleted: (data) => {
       setShowToast(true)
+      setEditModalOpen(false)
+      setEditingProvider(null)
       updateProviderSettings(
         initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
       )
     },
   })
 
+  const saveSettings = (
+    settingsProvider: AiProvider,
+    activeProvider: AiProvider
+  ) => {
+    mutation({
+      variables: {
+        attributes: {
+          ai: {
+            enabled,
+            ...(enabled
+              ? {
+                  provider: activeProvider,
+                  ...pick(
+                    providerSettings,
+                    providerSettingsKey[settingsProvider]
+                  ),
+                }
+              : {}),
+          } satisfies AiSettingsAttributes,
+        },
+      },
+    })
+  }
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    mutation()
+    saveSettings(provider, provider)
+  }
+
+  const handleEditSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    if (!editingProvider) return
+
+    saveSettings(editingProvider, ai?.provider ?? provider)
+  }
+
+  const handleEditProvider = (editProvider: AiProvider) => {
+    setEditingProvider(editProvider)
+    setEditModalOpen(true)
+  }
+
+  const formProps = {
+    enabled,
+    provider,
+    onProviderChange: setProvider,
+    providerSettings,
+    updateProviderSettings,
+    loading,
+    saveDisabled: !ai?.enabled && !enabled,
+    error,
+    deploymentSettingsError,
   }
 
   return (
@@ -197,7 +138,7 @@ export function AISettingsProvider() {
       >
         <AISettingsConfiguredProviders
           ai={ai}
-          onEdit={setProvider}
+          onEdit={handleEditProvider}
         />
         <Switch
           checked={enabled}
@@ -205,66 +146,27 @@ export function AISettingsProvider() {
         >
           Enable AI insights
         </Switch>
-        <WrapperCardSC
-          forwardedAs="form"
-          onSubmit={handleSubmit}
-        >
-          {(error || deploymentSettingsError) && (
-            <GqlError error={error || deploymentSettingsError} />
-          )}
-          <FormField label="AI provider">
-            <SelectWithDisable
-              disabled={!enabled}
-              selectedKey={provider}
-              onSelectionChange={(v) => {
-                setProvider(v as AiProvider)
-              }}
-            >
-              <ListBoxItem
-                key={AiProvider.Openai}
-                label="OpenAI"
-              />
-              <ListBoxItem
-                key={AiProvider.OpenaiCompatible}
-                label="OpenAI-compatible"
-              />
-              <ListBoxItem
-                key={AiProvider.Anthropic}
-                label="Anthropic"
-              />
-              <ListBoxItem
-                key={AiProvider.Azure}
-                label="Azure AI"
-              />
-              <ListBoxItem
-                key={AiProvider.Bedrock}
-                label="AWS Bedrock"
-              />
-              <ListBoxItem
-                key={AiProvider.Ollama}
-                label="Ollama"
-              />
-              <ListBoxItem
-                key={AiProvider.Vertex}
-                label="Vertex AI"
-              />
-            </SelectWithDisable>
-          </FormField>
-          <Body2P $color="text-xlight">
-            Note: model fields can be left blank to use Plural defaults unless
-            otherwise specified.
-          </Body2P>
-          {settings}
-          <Button
-            alignSelf="flex-end"
-            type="submit"
-            disabled={!valid || (!ai?.enabled && !enabled)}
-            loading={loading}
-          >
-            Save changes
-          </Button>
+        <WrapperCardSC>
+          <AISettingsProviderForm
+            {...formProps}
+            onSubmit={handleSubmit}
+            valid={valid}
+          />
         </WrapperCardSC>
       </Flex>
+      {editingProvider && (
+        <AISettingsProviderEditModal
+          open={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false)
+            setEditingProvider(null)
+          }}
+          {...formProps}
+          provider={editingProvider}
+          onSubmit={handleEditSubmit}
+          valid={editValid}
+        />
+      )}
       <Toast
         severity="success"
         css={{ margin: theme.spacing.large }}
@@ -284,29 +186,3 @@ const WrapperCardSC = styled(Card)(({ theme }) => ({
   gap: theme.spacing.medium,
   padding: theme.spacing.xlarge,
 }))
-
-function SelectWithDisable({
-  disabled,
-  ...props
-}: { disabled: boolean } & SelectPropsSingle) {
-  const theme = useTheme()
-  return (
-    <div
-      css={
-        disabled
-          ? {
-              '& div:last-child': {
-                color: theme.colors['text-input-disabled'],
-                cursor: 'unset',
-              },
-            }
-          : undefined
-      }
-    >
-      <Select
-        {...props}
-        isDisabled={disabled}
-      />
-    </div>
-  )
-}

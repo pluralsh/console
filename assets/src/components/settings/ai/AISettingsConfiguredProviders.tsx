@@ -16,6 +16,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
+import { aiProviderToLabel } from './AISettingsProviders.tsx'
 
 type ConfiguredAiProvider = {
   provider: AiProvider
@@ -25,16 +26,6 @@ type ConfiguredAiProvider = {
 type AISettingsProvidersTableMeta = {
   onEdit: (provider: AiProvider) => void
 }
-
-export const aiProviderToLabel = {
-  [AiProvider.Openai]: 'OpenAI',
-  [AiProvider.OpenaiCompatible]: 'OpenAI-compatible',
-  [AiProvider.Anthropic]: 'Anthropic',
-  [AiProvider.Azure]: 'Azure AI',
-  [AiProvider.Bedrock]: 'AWS Bedrock',
-  [AiProvider.Ollama]: 'Ollama',
-  [AiProvider.Vertex]: 'Vertex AI',
-} as const satisfies Record<AiProvider, string>
 
 const aiProviderToIcon = {
   [AiProvider.Openai]: OpenAILogoIcon,
