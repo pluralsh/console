@@ -1,5 +1,4 @@
 import {
-  AiSparkleFilledIcon,
   Button,
   Card,
   Flex,
@@ -18,11 +17,7 @@ import {
 } from 'components/ai/AIContext.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import {
-  Body1BoldP,
-  Body2BoldP,
-  Body2P,
-} from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
