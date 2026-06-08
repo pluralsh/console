@@ -14,7 +14,7 @@ The Plural Console is the core control plane of the Plural fleet-management plat
 * Notification Routing, allowing for fine grained notification delivery to slack/teams/email targeted by event or affected resource
 * Handling core information gathering and querying for all AI-related functionality w/in Plural
 
-It provides a low-maintainence, all-in-one solution for virtually any devops task that might be associated w/ managing Kubernetes infrastructure, in a package that can be hosted naturally anywhere, whether it be in your own cloud, or on our own infrastructure using Plural Cloud.
+It provides a low-maintenance, all-in-one solution for virtually any devops task that might be associated w/ managing Kubernetes infrastructure, in a package that can be hosted naturally anywhere, whether it be in your own cloud, or on our own infrastructure using Plural Cloud.
 
 ## Contributor Program
 
