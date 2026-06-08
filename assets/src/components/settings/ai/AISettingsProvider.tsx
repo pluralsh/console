@@ -310,7 +310,6 @@ export function AISettingsProvider() {
                 ))}
               </RadioGroup>
             </Card>
-            <InsightsCallout />
           </>
         )}
       </Flex>
@@ -343,28 +342,6 @@ const InsightsCalloutSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   borderLeft: `3px solid ${theme.colors['border-info']}`,
 }))
-
-function InsightsCallout() {
-  return (
-    <InsightsCalloutSC>
-      <AiSparkleFilledIcon
-        marginTop="xxsmall"
-        color="icon-info"
-      />
-      <Flex
-        direction="column"
-        gap="xxsmall"
-      >
-        <Body1BoldP>
-          Look out for the Insights icon, shown to the left
-        </Body1BoldP>
-        <Body2P $color="text-light">
-          Wherever you see this icon there will be AI-generated insights.
-        </Body2P>
-      </Flex>
-    </InsightsCalloutSC>
-  )
-}
 
 function SelectWithDisable({
   disabled,
