@@ -76,6 +76,10 @@ export const green = {
   50: '#F1FEF9',
 } as const satisfies Record<number, CSSProperties['color']>
 
+export const orange = {
+  400: '#FB923C',
+} as const satisfies Record<number, CSSProperties['color']>
+
 export const yellow = {
   950: '#242000',
   900: '#3D2F00',
@@ -111,6 +115,7 @@ export const baseColors = {
   blue,
   grey,
   green,
+  orange,
   yellow,
   red,
   purple,

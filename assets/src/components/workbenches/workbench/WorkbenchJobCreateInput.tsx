@@ -21,6 +21,7 @@ import {
   useCreateWorkbenchJobMutation,
   useWorkbenchesQuery,
   useWorkbenchPromptsQuery,
+  useWorkbenchQuery,
   WorkbenchJobFragment,
   WorkbenchPromptFragment,
 } from 'generated/graphql'
@@ -28,7 +29,7 @@ import capitalize from 'lodash/capitalize'
 import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import type { ComponentProps } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
@@ -39,6 +40,12 @@ import { mapExistingNodes } from 'utils/graphql'
 import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
+import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
+import {
+  defaultPromptModesFromWorkbench,
+  modesAttributes,
+} from './WorkbenchPromptModeSelector/workbenchPromptModes'
+import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import { CaptionP } from 'components/utils/typography/Text'
 
 const MAX_WIDTH = 924
@@ -64,6 +71,36 @@ export function WorkbenchJobCreateInput({
   const inputRef = useAutofocusRef<ChatInputSimpleRef>()
   const [prompt, setPrompt] = useState('')
   const [promptSyncKey, setPromptSyncKey] = useState(0)
+  const [promptModes, setPromptModes] =
+    useState<WorkbenchJobModesAttributes | null>(null)
+  const initializedWorkbenchIdRef = useRef<string | null>(null)
+
+  const { data } = useWorkbenchQuery({
+    variables: { id: workbenchId },
+    skip: !workbenchId,
+  })
+
+  useEffect(() => {
+    if (!workbenchId) {
+      initializedWorkbenchIdRef.current = null
+      setPromptModes(null)
+      return
+    }
+
+    if (initializedWorkbenchIdRef.current === workbenchId) return
+
+    initializedWorkbenchIdRef.current = null
+    setPromptModes(null)
+
+    const defaults = defaultPromptModesFromWorkbench(
+      data?.workbench,
+      workbenchId
+    )
+    if (defaults === undefined) return
+
+    initializedWorkbenchIdRef.current = workbenchId
+    setPromptModes(defaults)
+  }, [workbenchId, data?.workbench])
 
   useEffect(() => {
     if (promptSyncKey > 0) inputRef.current?.focus()
@@ -96,12 +133,17 @@ export function WorkbenchJobCreateInput({
 
   const handleSubmitPrompt = (nextPrompt?: string) => {
     const trimmedPrompt = (nextPrompt ?? prompt).trim()
-
     if (!trimmedPrompt || !workbenchId) return
-
     setPrompt(trimmedPrompt)
+    const modes = modesAttributes(promptModes)
     createWorkbenchJob({
-      variables: { workbenchId, attributes: { prompt: trimmedPrompt } },
+      variables: {
+        workbenchId,
+        attributes: {
+          prompt: trimmedPrompt,
+          ...(modes ? { modes } : {}),
+        },
+      },
     })
   }
 
@@ -136,6 +178,11 @@ export function WorkbenchJobCreateInput({
               gap="xsmall"
               height={32}
             >
+              <WorkbenchPromptModeSelector
+                value={promptModes}
+                onChange={setPromptModes}
+                disabled={disabled || loading}
+              />
               {setWorkbenchId && (
                 <WorkbenchPillSelector
                   workbenchId={workbenchId}
