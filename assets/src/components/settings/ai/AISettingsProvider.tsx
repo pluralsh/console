@@ -24,6 +24,7 @@ import pick from 'lodash/pick'
 import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
+import { AISettingsConfiguredProviders } from './AISettingsConfiguredProviders.tsx'
 import {
   AnthropicSettings,
   AzureSettings,
@@ -194,6 +195,10 @@ export function AISettingsProvider() {
         direction="column"
         gap="medium"
       >
+        <AISettingsConfiguredProviders
+          ai={ai}
+          onEdit={setProvider}
+        />
         <WrapperCardSC
           forwardedAs="form"
           onSubmit={handleSubmit}
