@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	cloudwatchtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
@@ -234,15 +233,16 @@ func (in *CloudwatchProvider) newAWSConfig(ctx context.Context) (aws.Config, err
 	}
 
 	if roleARN := strings.TrimSpace(in.conn.GetRoleArn()); roleARN != "" {
-		assumeRoleProvider := stscreds.NewAssumeRoleProvider(sts.NewFromConfig(cfg), roleARN, func(options *stscreds.AssumeRoleOptions) {
-			if externalID := strings.TrimSpace(in.conn.GetExternalId()); externalID != "" {
-				options.ExternalID = aws.String(externalID)
-			}
-			if sessionName := strings.TrimSpace(in.conn.GetRoleSessionName()); sessionName != "" {
-				options.RoleSessionName = sessionName
-			}
-		})
-		cfg.Credentials = aws.NewCredentialsCache(assumeRoleProvider)
+		cfg.Credentials = aws.NewCredentialsCache(aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
+			return cachedAssumeRoleCredentials(ctx, cfg, roleARN, func(input *sts.AssumeRoleInput) {
+				if externalID := strings.TrimSpace(in.conn.GetExternalId()); externalID != "" {
+					input.ExternalId = aws.String(externalID)
+				}
+				if sessionName := strings.TrimSpace(in.conn.GetRoleSessionName()); sessionName != "" {
+					input.RoleSessionName = aws.String(sessionName)
+				}
+			})
+		}))
 	}
 
 	return cfg, nil

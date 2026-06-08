@@ -17,6 +17,32 @@ defmodule Console.AI.Workbench.ConversionTest do
       assert is_binary(Protobuf.encode(res))
     end
 
+    test "converts opensearch tool to proto" do
+      tool = %WorkbenchTool{
+        tool: :opensearch,
+        configuration: %{
+          opensearch: %{
+            host: "https://search-domain.us-east-1.es.amazonaws.com",
+            index: "logs",
+            aws_region: "us-east-1",
+            assume_role_arn: "arn:aws:iam::123456789012:role/opensearch-readonly",
+            use_pod_identity: true
+          }
+        }
+      }
+
+      {:ok, res} = Conversion.to_proto(tool)
+      {:opensearch, opensearch} = res.connection
+
+      assert opensearch.host == "https://search-domain.us-east-1.es.amazonaws.com"
+      assert opensearch.index == "logs"
+      assert opensearch.aws_region == "us-east-1"
+      assert opensearch.assume_role_arn == "arn:aws:iam::123456789012:role/opensearch-readonly"
+      assert opensearch.use_pod_identity
+      {:ok, _} = Protobuf.JSON.encode(res)
+      assert is_binary(Protobuf.encode(res))
+    end
+
     test "converts cloudwatch tool to proto" do
       tool = %WorkbenchTool{
         tool: :cloudwatch,

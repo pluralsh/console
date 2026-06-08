@@ -9,21 +9,45 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Calico v3.32.0 release artifacts include updated tigera-operator Helm
+        chart (v3.32.0) and separate CRD Helm charts for `crd.projectcalico.org/v1`
+        (v3.32.0) and a tech-preview `projectcalico.org/v3` CRD chart., v3.32.0 continues
+        to publish the standard Calico release bundle (images/binaries/manifests)
+        plus Windows and OpenShift (ocp.tgz) assets for this version.]
+    breaking_changes: []
   chart_version: 3.32.0
   images: ['quay.io/tigera/operator:v1.42.0']
 - version: 3.31.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['New release artifacts packaging includes per-arch image tarballs (including
+        FIPS for linux/amd64), making air-gapped installs/upgrades easier by importing
+        images directly from provided tar files.', Updated tigera-operator Helm chart
+        package version to v3.31.0 (chart content likely updated to reference Calico
+        v3.31.0 images/manifests).]
+    breaking_changes: []
   chart_version: 3.31.0
   images: ['quay.io/tigera/operator:v1.40.0']
 - version: 3.30.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [v3.30.0 ships updated Calico component images/binaries and updated
+        install bundles (including tigera-operator Helm v3 chart) compared to v3.29.0.
+        (No feature-level details were provided in the notes you shared.)]
+    breaking_changes: [No breaking changes were listed in the notes you shared; confirm
+        by reviewing the v3.30.0 release notes and the tigera-operator Helm chart
+        changelog before upgrading.]
   chart_version: 3.30.0
   images: ['quay.io/tigera/operator:v1.38.0']
   eolAt: '2026-04-30'
@@ -31,7 +55,12 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release artifacts updated to v3.29.0 (new container images/binaries/manifests,
+        Windows bundle, and tigera-operator Helm v3 chart).']
+    breaking_changes: []
   chart_version: 3.29.0
   images: ['quay.io/tigera/operator:v1.36.0']
   eolAt: '2025-10-21'
@@ -39,7 +68,14 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release v3.28.0 is available with updated container images/binaries/manifests
+        and an updated tigera-operator Helm v3 chart artifact., Updated Calico for
+        Windows bundle is provided for v3.28.0., Updated OpenShift manifest bundle
+        (ocp.tgz) is provided for v3.28.0.]
+    breaking_changes: []
   chart_version: 3.28.0
   images: ['quay.io/tigera/operator:v1.34.0']
   eolAt: '2025-05-05'
@@ -47,7 +83,13 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release notes content for v3.27.0 vs v3.26.0 not provided beyond artifact
+        lists; cannot extract specific new features from supplied text.]
+    breaking_changes: [No breaking changes described in the provided excerpts; full
+        v3.27.0 release notes link would be needed to confirm.]
   chart_version: 3.27.0
   images: ['quay.io/tigera/operator:v1.32.3']
   eolAt: '2024-10-29'
@@ -55,7 +97,12 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Calico v3.26.0 release available with updated artifacts (including
+        tigera-operator-v3.26.0.tgz).]
+    breaking_changes: []
   chart_version: 3.26.0
   images: ['quay.io/tigera/operator:v1.30.0']
   eolAt: '2024-05-11'
@@ -63,7 +110,13 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Upgrade Calico application and bundled artifacts from v3.24.1 to v3.25.0
+        (new release tarball, updated Windows zip, updated tigera-operator Helm chart
+        bundle).']
+    breaking_changes: []
   chart_version: 3.25.0
   images: ['quay.io/tigera/operator:v1.29.0']
   eolAt: '2023-12-15'
@@ -71,21 +124,48 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided are high-level metadata only (assets, links)
+        for v3.23.4 and v3.24.1; no functional changes are included in the excerpt,
+        so no specific new features can be confirmed from the supplied text.']
+    breaking_changes: [No breaking changes are stated in the supplied release metadata;
+        must review the linked v3.24.x and v3.23.x release notes/changelog for actual
+        upgrade-impacting changes.]
   chart_version: 3.24.1
   images: ['quay.io/tigera/operator:v1.28.1']
 - version: 3.23.4
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Tigera operator Helm chart artifact updated from v3.22.5 to v3.23.4
+        (chart bundle size 47KB -> 49KB); no explicit chart changelog details provided
+        in supplied notes.]
+    features: [No specific feature list provided in the supplied release note excerpts;
+        refer to the Calico v3.23 release notes page for details.]
+    breaking_changes: [No breaking changes described in the supplied excerpts; review
+        the Calico v3.23 release notes for any upgrade-impacting changes between 3.22
+        and 3.23.]
   chart_version: 3.23.4
   images: ['quay.io/tigera/operator:v1.27.14']
 - version: 3.22.5
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Upgrade Calico application from v3.20.6 to v3.22.5 (includes updated
+        container images, binaries, and Kubernetes manifests).', Updated bundled Tigera
+        Operator Helm v3 chart artifact to tigera-operator-v3.22.5.tgz., Release includes
+        updated calicoctl binaries across multiple platforms and updated Windows packaging
+        (calico-windows-v3.22.5.zip).]
+    breaking_changes: ['Not provided in the notes shared; review the Calico v3.21
+        and v3.22 archived release notes for any breaking changes impacting CNI, Felix,
+        BGP, IPAM, or CRDs before upgrading.']
   chart_version: 3.22.5
   images: ['quay.io/tigera/operator:v1.25.13']
 - version: 3.20.6

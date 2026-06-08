@@ -69,6 +69,10 @@ fragment Stack on InfrastructureStack {
       parallelism
       refresh
     }
+    terragrunt {
+      parallelism
+      refresh
+    }
   }
   repository {
     id
@@ -261,6 +265,10 @@ fragment StackConfiguration on StackConfiguration {
   version
   image
   terraform {
+    parallelism
+    refresh
+  }
+  terragrunt {
     parallelism
     refresh
   }

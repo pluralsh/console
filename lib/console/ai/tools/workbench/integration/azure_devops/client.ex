@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Http
   alias Console.Schema.{WorkbenchTool, ScmConnection}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
 
@@ -129,7 +130,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 
@@ -146,7 +147,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 
@@ -167,7 +168,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 
@@ -181,7 +182,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 

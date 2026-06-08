@@ -14,6 +14,16 @@ message ElasticConnection {
   string index = 4;
 }
 
+message OpensearchConnection {
+  string host = 1;
+  string index = 2;
+  optional string aws_access_key_id = 3;
+  optional string aws_secret_access_key = 4;
+  optional string aws_region = 5;
+  optional bool use_pod_identity = 6;
+  optional string assume_role_arn = 7;
+}
+
 message DatadogConnection {
   optional string site = 1;
   string apiKey = 2;
@@ -96,6 +106,7 @@ message ToolConnection {
     CloudwatchConnection cloudwatch = 8;
     AzureConnection azure = 9;
     JaegerConnection jaeger = 10;
+    OpensearchConnection opensearch = 11;
   }
 }
 

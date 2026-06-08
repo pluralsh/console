@@ -1,0 +1,65 @@
+# https://github.com/pluralsh/terragrunt-samples
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: target-cluster
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: terragrunt-samples
+  namespace: default
+spec:
+  url: https://github.com/pluralsh/terragrunt-samples.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-sample-terraform-aws-s3
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  repositoryRef:
+    name: terragrunt-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: terraform-aws-s3
+  jobSpec:
+    namespace: plrl-deploy-operator
+    serviceAccount: stacks
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-sample-opentofu-local-file
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  repositoryRef:
+    name: terragrunt-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: opentofu-local-file
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-sample-opentofu-random
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  repositoryRef:
+    name: terragrunt-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: opentofu-random

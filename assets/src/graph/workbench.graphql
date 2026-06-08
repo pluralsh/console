@@ -162,6 +162,14 @@ fragment WorkbenchTool on WorkbenchTool {
       url
       username
     }
+    opensearch {
+      host
+      index
+      awsAccessKeyId
+      awsRegion
+      assumeRoleArn
+      usePodIdentity
+    }
     loki {
       url
       username

@@ -98,6 +98,20 @@ function sentryConfigurationIsComplete(
   return scmTokenIsSet(c?.accessToken)
 }
 
+function opensearchConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['opensearch'] | null | undefined
+): boolean {
+  const hasEndpoint = (c?.host ?? '').trim().length > 0
+  const hasIndex = (c?.index ?? '').trim().length > 0
+  const hasStaticCredentials =
+    (c?.awsAccessKeyId ?? '').trim().length > 0 &&
+    (c?.awsSecretAccessKey ?? '').trim().length > 0
+
+  return (
+    hasEndpoint && hasIndex && (!!c?.usePodIdentity || hasStaticCredentials)
+  )
+}
+
 function bitbucketDatacenterConfigurationIsComplete(
   c:
     | WorkbenchToolConfigurationAttributes['bitbucketDatacenter']
@@ -184,6 +198,8 @@ export function WorkbenchToolForm({
         appId: tool?.configuration?.github?.appId,
         installationId: tool?.configuration?.github?.installationId,
       })) &&
+    (type !== WorkbenchToolType.Opensearch ||
+      opensearchConfigurationIsComplete(state.configuration?.opensearch)) &&
     (type !== WorkbenchToolType.Gitlab ||
       hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.gitlab?.token)) &&
@@ -436,6 +452,27 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         url: url ?? '',
         username: username ?? '',
         password: '',
+      },
+    }
+  },
+  [WorkbenchToolType.Opensearch]: (config) => {
+    const {
+      host,
+      index,
+      awsAccessKeyId,
+      awsRegion,
+      assumeRoleArn,
+      usePodIdentity,
+    } = config?.opensearch ?? {}
+    return {
+      opensearch: {
+        host: host ?? '',
+        index: index ?? '',
+        awsAccessKeyId: awsAccessKeyId ?? undefined,
+        awsSecretAccessKey: undefined,
+        awsRegion: awsRegion ?? undefined,
+        assumeRoleArn: assumeRoleArn ?? undefined,
+        usePodIdentity: usePodIdentity ?? false,
       },
     }
   },

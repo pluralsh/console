@@ -1,4 +1,4 @@
-import { FormField, Input } from '@pluralsh/design-system'
+import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
 import { isEmpty } from 'lodash'
 import { useCallback, useState } from 'react'
@@ -7,6 +7,7 @@ import {
   AiProvider,
   AiSettings,
   AiSettingsAttributes,
+  OpenAiMethod,
 } from '../../../generated/graphql.ts'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
 
@@ -64,6 +65,19 @@ export function initialSettingsAttributes(
                 toolModel: ai.openai.toolModel,
                 embeddingModel: ai.openai.embeddingModel,
                 baseUrl: ai.openai.baseUrl,
+                method: ai.openai.method,
+                accessToken: '',
+              },
+            }
+          : {}),
+        ...(ai.openaiCompatible
+          ? {
+              openaiCompatible: {
+                model: ai.openaiCompatible.model,
+                toolModel: ai.openaiCompatible.toolModel,
+                embeddingModel: ai.openaiCompatible.embeddingModel,
+                baseUrl: ai.openaiCompatible.baseUrl,
+                method: ai.openaiCompatible.method,
                 accessToken: '',
               },
             }
@@ -95,6 +109,8 @@ export function validateAttributes(
   switch (provider) {
     case AiProvider.Openai:
       return !!settings.openai?.accessToken
+    case AiProvider.OpenaiCompatible:
+      return !!settings.openaiCompatible?.accessToken
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Bedrock:
@@ -176,6 +192,32 @@ export function OpenAISettings({
           value={settings?.baseUrl}
           onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
         />
+      </FormField>
+      <FormField
+        label="API method"
+        hint="Choose which OpenAI API style to use. Auto lets Plural select the best method for each request."
+        flex={1}
+      >
+        <Select
+          isDisabled={!enabled}
+          selectedKey={settings?.method ?? OpenAiMethod.Auto}
+          onSelectionChange={(key) =>
+            updateSettings({ method: key as OpenAiMethod })
+          }
+        >
+          <ListBoxItem
+            key={OpenAiMethod.Auto}
+            label="Auto"
+          />
+          <ListBoxItem
+            key={OpenAiMethod.Responses}
+            label="Responses API"
+          />
+          <ListBoxItem
+            key={OpenAiMethod.Chat}
+            label="Chat completions API"
+          />
+        </Select>
       </FormField>
       <FormField
         label="Access token"

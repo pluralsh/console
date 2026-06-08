@@ -47,7 +47,7 @@ const (
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
 
-	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getPRState,getCILogs,reactToComment,downloadServiceManifests"
+	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getCILogs,reactToComment,downloadServiceManifests"
 )
 
 var dindClientEnvs = []corev1.EnvVar{

@@ -62,7 +62,7 @@ jobs:
         include:
         - name: console
           dir: charts/console
-          repository: pluralsh/console-chart
+          repository: pluralsh/charts
         - name: controller
           dir: charts/controller
           repository: pluralsh/controller-chart

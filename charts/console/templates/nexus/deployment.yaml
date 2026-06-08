@@ -74,8 +74,14 @@ spec:
         - name: nexus-config
           mountPath: /home/nexus
           readOnly: true
+        {{ if .Values.global.additionalVolumeMounts }}
+        {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{ end }}
       volumes:
       - name: nexus-config
         secret:
           secretName: nexus-config
+      {{ if .Values.global.additionalVolumes }}
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
+      {{ end }}
 {{- end }}

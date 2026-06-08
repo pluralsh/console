@@ -168,6 +168,8 @@ defmodule Console.AI.Provider do
 
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai, openai: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai_compatible, openai_compatible: %{} = openai}}),
+    do: {:ok, OpenAI.new(openai)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :anthropic, anthropic: %{} = anthropic}}),
     do: {:ok, Anthropic.new(anthropic)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :ollama, ollama: %{} = ollama}}),

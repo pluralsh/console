@@ -71,6 +71,8 @@ export function WorkbenchToolFormFields({
       return render(type, DatadogFormFields)
     case WorkbenchToolType.Elastic:
       return render(type, ElasticFormFields)
+    case WorkbenchToolType.Opensearch:
+      return render(type, OpensearchFormFields)
     case WorkbenchToolType.Http:
       return render(type, HttpFormFields)
     case WorkbenchToolType.Loki:
@@ -180,6 +182,98 @@ function ElasticFormFields({
         value={c.password ?? ''}
         onChange={(e) => set({ ...c, password: e.target.value })}
       />
+    </>
+  )
+}
+
+function OpensearchFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Opensearch>) {
+  const { colors } = useTheme()
+  const usePodIdentity = !!c.usePodIdentity
+
+  return (
+    <>
+      <InputField
+        label="Host"
+        required
+        placeholder="https://search-domain.us-east-1.es.amazonaws.com"
+        value={c.host ?? ''}
+        onChange={(e) => set({ ...c, host: e.target.value })}
+      />
+      <InputField
+        label="Index"
+        required
+        placeholder="Index name"
+        value={c.index ?? ''}
+        onChange={(e) => set({ ...c, index: e.target.value })}
+      />
+      <InputField
+        label="AWS region"
+        placeholder="us-east-1"
+        value={c.awsRegion ?? ''}
+        onChange={(e) => set({ ...c, awsRegion: e.target.value || undefined })}
+      />
+      <InputField
+        label="Assume role ARN"
+        hint="Optional IAM role ARN to assume before signing OpenSearch requests."
+        placeholder="arn:aws:iam::123456789012:role/opensearch-readonly"
+        value={c.assumeRoleArn ?? ''}
+        onChange={(e) =>
+          set({ ...c, assumeRoleArn: e.target.value || undefined })
+        }
+      />
+      <Switch
+        checked={usePodIdentity}
+        onChange={(checked) =>
+          set({
+            ...c,
+            usePodIdentity: checked,
+            ...(checked
+              ? {
+                  awsAccessKeyId: undefined,
+                  awsSecretAccessKey: undefined,
+                }
+              : {}),
+          })
+        }
+      >
+        Use pod identity / IRSA
+      </Switch>
+      <p
+        css={{
+          margin: 0,
+          fontSize: 14,
+          color: colors['text-xlight'],
+        }}
+      >
+        {usePodIdentity
+          ? 'Requests will be signed with AWS SigV4 using credentials available to the Console runtime, such as IRSA, pod identity, or another default AWS credential source.'
+          : 'Provide static AWS credentials for SigV4 signing, or enable pod identity / IRSA to use credentials available to the Console runtime.'}
+      </p>
+      {!usePodIdentity && (
+        <>
+          <InputField
+            label="Access key ID"
+            required
+            value={c.awsAccessKeyId ?? ''}
+            onChange={(e) =>
+              set({ ...c, awsAccessKeyId: e.target.value || undefined })
+            }
+          />
+          <InputField
+            label="Secret access key"
+            hint="Leave blank when editing to keep the stored secret unless you are rotating it."
+            required
+            revealer
+            value={c.awsSecretAccessKey ?? ''}
+            onChange={(e) =>
+              set({ ...c, awsSecretAccessKey: e.target.value || undefined })
+            }
+          />
+        </>
+      )}
     </>
   )
 }

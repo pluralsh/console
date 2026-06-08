@@ -6,6 +6,8 @@ import {
 } from '@pluralsh/design-system'
 import { ReactNode, useEffect, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { stackTypeLabel } from 'components/stacks/common/stackTypeUtils'
+import { StackType } from 'generated/graphql'
 import { ChipAttrs, KIND_LABELS, MentionKind } from './mentionTypes'
 import { isEmpty } from 'lodash'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -24,7 +26,7 @@ function subtitleForItem(item: ChipAttrs) {
     case MentionKind.Service:
       return item['cluster-handle'] ?? item['cluster-name'] ?? item.namespace
     case MentionKind.Stack:
-      return item.type
+      return item.type ? stackTypeLabel(item.type as StackType) : undefined
     case MentionKind.Skill:
       return item.description
   }

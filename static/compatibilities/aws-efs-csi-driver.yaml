@@ -8,7 +8,14 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No specific feature details were included in the provided release notes;
+        both versions only point to the upstream CHANGELOG-3.x.md.]
+    breaking_changes: [No breaking changes were listed in the provided release notes;
+        need to review CHANGELOG-3.x.md and the Helm chart changelog for v3.2.0 to
+        confirm.]
   chart_version: 4.2.0
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.16.0-eksbuild.4',
     'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
@@ -26,7 +33,15 @@ versions:
   kube: []
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided only link to external CHANGELOG files for v3.x
+        and v2.x; no specific feature items were included in the supplied text, so
+        features cannot be enumerated from the given data.']
+    breaking_changes: ['Upgrade to major version v3.0.0 likely implies breaking changes,
+        but none are specified in the provided release-note excerpts; consult CHANGELOG-3.x.md
+        for explicit breaking changes before upgrading.']
   chart_version: 4.0.0
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
     'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
@@ -35,7 +50,14 @@ versions:
   kube: []
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Release notes provided don\u2019t include itemized changes for v2.3.0;\
+        \ they only point to the upstream CHANGELOG-2.x.md. No specific new features\
+        \ were listed in the notes you shared."]
+    breaking_changes: [No breaking changes were listed in the provided release notes;
+        need to consult CHANGELOG-2.x.md between v2.2.0 and v2.3.0 to confirm.]
   chart_version: 3.4.0
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.3',
     'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
@@ -45,7 +67,15 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Release notes provided don\u2019t include the actual v2.2.0 changelog\
+        \ items; only a pointer to CHANGELOG-2.x.md. No concrete new features can\
+        \ be derived from the pasted text."]
+    breaking_changes: [No breaking changes are listed in the provided notes; need
+        the actual entries from CHANGELOG-2.x.md (between v2.1.2 and v2.2.0) or the
+        Helm chart changelog to confirm.]
   chart_version: 3.3.0
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
     'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
@@ -64,7 +94,15 @@ versions:
     '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Release notes provided don\u2019t include change details; both versions\
+        \ defer to the upstream CHANGELOG-2.x.md. No concrete features can be confirmed\
+        \ from the supplied text."]
+    breaking_changes: [No breaking changes are listed in the provided release notes;
+        both versions only link to the full changelog. Treat breaking-change status
+        as unknown until reviewing CHANGELOG-2.x.md between v2.0.2 and v2.1.1.]
   chart_version: 3.1.2
   images: ['public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.1', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
     'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.12.0-eks-1-31-5']
@@ -73,7 +111,15 @@ versions:
     '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Release notes provided don\u2019t include detailed changes between\
+        \ 2.0.0 and 2.0.2; v2.0.2 points to the 2.x changelog for the actual list\
+        \ of fixes/features."]
+    breaking_changes: [No breaking changes are stated in the provided notes; you must
+        review CHANGELOG-2.x.md and the Helm chart changelog/values for any breaking
+        changes before upgrading.]
   chart_version: 3.0.3
   images: ['public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.0.2', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7']
@@ -82,7 +128,14 @@ versions:
     '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release notes provided do not include any detailed change items; both
+        versions only link to the 1.x changelog.]
+    breaking_changes: ['Potential breaking changes may exist between 1.7.4 and 2.0.0,
+        but none are listed in the provided notes; you must consult the v2.0.0 changelog/release
+        documentation before upgrading.']
   chart_version: 3.0.0
   images: ['amazon/aws-efs-csi-driver:v2.0.0', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v4.0.0-eks-1-29-7',
     'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.12.0-eks-1-29-7', 'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.10.0-eks-1-29-7']

@@ -97,6 +97,13 @@ defmodule Console.Schema.Base do
     end)
   end
 
+  def trim_changes(cs, fields) do
+    Enum.reduce(fields, cs, &update_change(&2, &1, fn
+      value when is_binary(value) -> String.trim(value)
+      value -> value
+    end))
+  end
+
   def seconds(%Duration{hour: h, minute: m, second: s}), do: h * 3600 + m * 60 + s
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)

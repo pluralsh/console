@@ -1426,8 +1426,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it errors if the upgrade plan is not ready" do
       user = admin_user()
-      cluster = insert(:cluster, current_version: "1.35.1", write_bindings: [%{user_id: user.id}])
-      insert(:cloud_addon, cluster: cluster, name: "coredns", version: "v1.13.1-eksbuild.1", distro: :eks)
+      cluster = insert(:cluster, current_version: "1.36.1", write_bindings: [%{user_id: user.id}])
+      insert(:cloud_addon, cluster: cluster, name: "coredns", version: "v1.14.3-eksbuild.2", distro: :eks)
 
       {:error, msg} = Clusters.create_cluster_upgrade(cluster.id, user)
 

@@ -233,8 +233,6 @@ config :req_llm,
     }
   ]
 
-config :console, :kas_service, "console-kas-service.plrl-console:8154"
-
 # config :rustler_precompiled, :force_build, tiktoken: true
 
 import_config "#{Mix.env()}.exs"

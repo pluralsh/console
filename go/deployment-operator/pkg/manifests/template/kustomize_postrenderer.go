@@ -168,15 +168,3 @@ func serializeUnstructured(items []unstructured.Unstructured) ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
-
-func isKustomizationFile(name string) bool {
-	if name == "" {
-		return false
-	}
-	switch filepath.Base(name) {
-	case "kustomization.yaml", "kustomization.yml", "Kustomization":
-		return true
-	default:
-		return false
-	}
-}

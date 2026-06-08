@@ -82,6 +82,12 @@ query PrAutomations(
   }
 }
 
+query PrAutomation($id: ID, $name: String) {
+  prAutomation(id: $id, name: $name) {
+    ...PrAutomation
+  }
+}
+
 mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
   createPrAutomation(attributes: $attributes) {
     ...PrAutomation

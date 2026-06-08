@@ -28,6 +28,7 @@ func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput
 				Name:    p.Name,
 				BaseURL: p.BaseURL,
 				EnvKey:  p.EnvKey,
+				WireAPI: p.WireAPI,
 			}
 		}
 	}

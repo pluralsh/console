@@ -206,6 +206,8 @@ type ModelProviderInput struct {
 	BaseURL string
 	// EnvKey is the name of the environment variable that holds the API key.
 	EnvKey string
+	// WireAPI chooses the OpenAI API shape Codex uses for this provider: "chat" or "responses".
+	WireAPI string
 }
 
 // ModelProviderConfig is serialized into [model_providers.<key>] in config.toml.
@@ -213,6 +215,7 @@ type ModelProviderConfig struct {
 	Name    string `toml:"name,omitempty"`
 	BaseURL string `toml:"base_url,omitempty"`
 	EnvKey  string `toml:"env_key,omitempty"`
+	WireAPI string `toml:"wire_api,omitempty"`
 }
 
 type ShellEnvPolicy struct {

@@ -55,6 +55,17 @@ func TestConfigTemplate_PluralMcpServer(t *testing.T) {
 	})
 }
 
+func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+	if out["autoupdate"] != false {
+		t.Fatalf("expected autoupdate=false, got %v", out["autoupdate"])
+	}
+	if out["snapshot"] != false {
+		t.Fatalf("expected snapshot=false, got %v", out["snapshot"])
+	}
+}
+
 func TestConfigTemplate_DindPermissions(t *testing.T) {
 	t.Run("ANALYZE with dind allows bash for docker", func(t *testing.T) {
 		input := baseInput(console.AgentRunModeAnalyze)

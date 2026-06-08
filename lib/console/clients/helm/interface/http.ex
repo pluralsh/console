@@ -58,10 +58,20 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
 
   def download(%{client: client}, "https://" <> _ = url, to) do
     Req.Request.delete_option(client, :base_url)
-    |> Req.get(url: url, into: to)
+    |> Req.get(url: url, into: to, redirect: true)
+    |> handle_download()
   end
 
-  def download(%{client: client}, url, to), do: Req.get(client, url: url, into: to)
+  def download(%{client: client}, url, to) do
+    client
+    |> Req.get(url: url, into: to, redirect: true)
+    |> handle_download()
+  end
+
+  defp handle_download({:ok, %Req.Response{status: status}} = resp) when status in 200..299, do: resp
+  defp handle_download({:ok, %Req.Response{status: status, body: body}}),
+    do: {:error, "helm chart download failed status=#{status}: #{inspect(body)}"}
+  defp handle_download(err), do: err
 
   defp check_url(["oci://" <> _ = url | _]), do: {:error, "invalid oci helm url: #{url}"}
   defp check_url([url | _]) when is_binary(url), do: {:ok, url}

@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	analyzePluralMCPTools = []string{mcpUpdateAnalysis}
+	analyzePluralMCPTools = []string{mcpGetPRState, mcpUpdateAnalysis}
 	writePluralMCPTools   = []string{
 		mcpAgentPullRequest,
 		mcpCreateBranch,

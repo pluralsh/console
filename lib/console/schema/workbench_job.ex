@@ -27,6 +27,14 @@ defmodule Console.Schema.WorkbenchJob do
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
 
+    embeds_one :modes, Modes, on_replace: :update do
+      field :plan, :boolean
+      embeds_one :coding, Coding, on_replace: :update do
+        field :babysit,  :boolean
+        field :approval, :boolean
+      end
+    end
+
     belongs_to :workbench,      Workbench
     belongs_to :user,           User
     belongs_to :alert,          Alert
@@ -148,6 +156,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, @valid)
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
+    |> cast_embed(:modes, with: &modes_changeset/2)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
@@ -161,6 +170,17 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, [])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
+  end
+
+  defp modes_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:plan])
+    |> cast_embed(:coding, with: &coding_changeset/2)
+  end
+
+  defp coding_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(babysit approval)a)
   end
 end
 

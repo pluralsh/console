@@ -30,7 +30,8 @@ defmodule Console.Schema.WorkbenchTool do
     bitbucket: 21,
     bitbucket_datacenter: 22,
     azure_devops: 23,
-    pagerduty: 24
+    pagerduty: 24,
+    opensearch: 25
 
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8, chat: 9
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
@@ -53,6 +54,16 @@ defmodule Console.Schema.WorkbenchTool do
         field :username, :string
         field :password, EncryptedString
         field :index,    :string
+      end
+
+      embeds_one :opensearch, OpensearchConnection, on_replace: :update do
+        field :host,                  :string
+        field :index,                 :string
+        field :aws_access_key_id,     :string
+        field :aws_secret_access_key, EncryptedString
+        field :aws_region,            :string
+        field :assume_role_arn,       :string
+        field :use_pod_identity,      :boolean, default: false
       end
 
       embeds_one :sentry, SentryConnection, on_replace: :update do
@@ -307,6 +318,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:prometheus), do: [:metrics]
   defp categories(:loki), do: [:logs]
   defp categories(:elastic), do: [:logs]
+  defp categories(:opensearch), do: [:logs]
   defp categories(:tempo), do: [:traces]
   defp categories(:jaeger), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
@@ -329,6 +341,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast(attrs, [])
     |> cast_embed(:http, with: &http_configuration_changeset/2)
     |> cast_embed(:elastic, with: &elastic_configuration_changeset/2)
+    |> cast_embed(:opensearch, with: &opensearch_configuration_changeset/2)
     |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
     |> cast_embed(:loki, with: &prom_configuration_changeset/2)
     |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
@@ -429,6 +442,20 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url username password index)a)
     |> validate_required([:url, :username, :password, :index])
+  end
+
+  defp opensearch_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region assume_role_arn use_pod_identity)a)
+    |> validate_required([:host, :index])
+    |> validate_opensearch_creds()
+  end
+
+  defp validate_opensearch_creds(changeset) do
+    case get_field(changeset, :use_pod_identity) do
+      true -> changeset
+      false -> validate_required(changeset, [:aws_access_key_id, :aws_secret_access_key], message: "aws_access_key_id and aws_secret_access_key are required when pod identity is disabled")
+    end
   end
 
   defp sentry_configuration_changeset(model, attrs) do
