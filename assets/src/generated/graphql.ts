@@ -15396,6 +15396,8 @@ export type WorkbenchChatbot = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** how the chatbot posts responses in the channel */
   messageBehavior: WorkbenchChatbotMessageBehavior;
+  /** mode-specific options for jobs created by this chatbot */
+  modes?: Maybe<WorkbenchJobModes>;
   /** optional prompt text applied when this chatbot runs */
   prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -15414,6 +15416,8 @@ export type WorkbenchChatbotAttributes = {
   chatConnectionId?: InputMaybe<Scalars['ID']['input']>;
   /** how the chatbot posts responses in the channel */
   messageBehavior?: InputMaybe<WorkbenchChatbotMessageBehavior>;
+  /** mode-specific options for jobs created by this chatbot */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** when true on update, sets userId to the authenticated user */
   overrideChatbotUser?: InputMaybe<Scalars['Boolean']['input']>;
   /** optional prompt text applied when this chatbot runs */
@@ -15492,6 +15496,8 @@ export type WorkbenchCron = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** when the cron last ran */
   lastRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** mode-specific options for jobs created by this cron */
+  modes?: Maybe<WorkbenchJobModes>;
   /** when the cron will next run */
   nextRunAt?: Maybe<Scalars['DateTime']['output']>;
   /** prompt to run when the cron triggers */
@@ -15506,6 +15512,8 @@ export type WorkbenchCron = {
 export type WorkbenchCronAttributes = {
   /** cron expression (e.g. *\/5 * * * *) (required for create) */
   crontab?: InputMaybe<Scalars['String']['input']>;
+  /** mode-specific options for jobs created by this cron */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** the prompt to run when the cron triggers */
   prompt?: InputMaybe<Scalars['String']['input']>;
   /** user this cron runs as; must have read access to the workbench */
@@ -16065,6 +16073,8 @@ export type WorkbenchPrompt = {
   /** the id of the saved prompt */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** mode-specific options for jobs created from this prompt */
+  modes?: Maybe<WorkbenchJobModes>;
   /** the saved prompt text */
   prompt?: Maybe<Scalars['String']['output']>;
   /** display title for the saved prompt */
@@ -16077,6 +16087,8 @@ export type WorkbenchPrompt = {
 export type WorkbenchPromptAttributes = {
   /** grouping category for the saved prompt */
   category?: InputMaybe<Scalars['String']['input']>;
+  /** mode-specific options for jobs created from this prompt */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** the saved prompt text */
   prompt: Scalars['String']['input'];
   /** display title for the saved prompt */
@@ -16879,6 +16891,8 @@ export type WorkbenchWebhook = {
   issueWebhook?: Maybe<IssueWebhook>;
   /** criteria to match incoming webhook payloads */
   matches?: Maybe<WorkbenchWebhookMatches>;
+  /** mode-specific options for jobs created by this webhook */
+  modes?: Maybe<WorkbenchJobModes>;
   /** name of this webhook trigger */
   name?: Maybe<Scalars['String']['output']>;
   /** higher values are preferred when multiple webhooks match the same payload */
@@ -16901,6 +16915,8 @@ export type WorkbenchWebhookAttributes = {
   issueWebhookId?: InputMaybe<Scalars['ID']['input']>;
   /** criteria to match incoming webhook payloads */
   matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
+  /** mode-specific options for jobs created by this webhook */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** unique name for this webhook on the workbench (required for create) */
   name?: InputMaybe<Scalars['String']['input']>;
   /** when true on update, sets userId to the authenticated user */

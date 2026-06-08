@@ -1,11 +1,14 @@
 defmodule Console.Schema.WorkbenchWebhook do
   use Console.Schema.Base
   alias Console.Schema.{ObservabilityWebhook, Workbench, IssueWebhook, User}
+  alias Console.Schema.WorkbenchJob.Modes
 
   schema "workbench_webhooks" do
     field :name,     :string
     field :prompt,   :string
     field :priority, :integer, default: 0
+
+    embeds_one :modes, Modes, on_replace: :update
 
     embeds_one :matches, Matches, on_replace: :update do
       field :regex,            :string
@@ -59,6 +62,7 @@ defmodule Console.Schema.WorkbenchWebhook do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:matches, with: &matches_changeset/2)
+    |> cast_embed(:modes)
     |> foreign_key_constraint(:webhook_id)
     |> foreign_key_constraint(:issue_webhook_id)
     |> foreign_key_constraint(:workbench_id)

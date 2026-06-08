@@ -2690,6 +2690,9 @@ input WorkbenchCronAttributes {
   "the prompt to run when the cron triggers"
   prompt: String
 
+  "mode-specific options for jobs created by this cron"
+  modes: WorkbenchJobModesAttributes
+
   "user this cron runs as; must have read access to the workbench"
   userId: ID
 }
@@ -2703,6 +2706,9 @@ input WorkbenchPromptAttributes {
 
   "the saved prompt text"
   prompt: String!
+
+  "mode-specific options for jobs created from this prompt"
+  modes: WorkbenchJobModesAttributes
 }
 
 input WorkbenchSkillAttributes {
@@ -2757,6 +2763,9 @@ input WorkbenchWebhookAttributes {
   "optional prompt text applied when this webhook matches"
   prompt: String
 
+  "mode-specific options for jobs created by this webhook"
+  modes: WorkbenchJobModesAttributes
+
   "higher values are preferred when multiple webhooks match the same payload"
   priority: Int
 
@@ -2776,6 +2785,9 @@ input WorkbenchChatbotAttributes {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "mode-specific options for jobs created by this chatbot"
+  modes: WorkbenchJobModesAttributes
 
   "how the chatbot posts responses in the channel"
   messageBehavior: WorkbenchChatbotMessageBehavior
@@ -3747,6 +3759,9 @@ type WorkbenchCron {
   "prompt to run when the cron triggers"
   prompt: String
 
+  "mode-specific options for jobs created by this cron"
+  modes: WorkbenchJobModes
+
   "when the cron will next run"
   nextRunAt: DateTime
 
@@ -3776,6 +3791,9 @@ type WorkbenchPrompt {
 
   "the saved prompt text"
   prompt: String
+
+  "mode-specific options for jobs created from this prompt"
+  modes: WorkbenchJobModes
 
   "the workbench this prompt belongs to"
   workbench: Workbench
@@ -3951,6 +3969,9 @@ type WorkbenchWebhook {
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches
 
+  "mode-specific options for jobs created by this webhook"
+  modes: WorkbenchJobModes
+
   "user this webhook runs as"
   userId: ID
 
@@ -3980,6 +4001,9 @@ type WorkbenchChatbot {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "mode-specific options for jobs created by this chatbot"
+  modes: WorkbenchJobModes
 
   "how the chatbot posts responses in the channel"
   messageBehavior: WorkbenchChatbotMessageBehavior!

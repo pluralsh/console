@@ -15,6 +15,42 @@ defmodule Console.Schema.WorkbenchJob do
   }
   alias Console.Deployments.Policies.Rbac
 
+  defmodule Modes do
+    use Console.Schema.Base
+    alias Console.Schema.DeploymentSettings.AIProvider
+
+    embedded_schema do
+      embeds_one :model, Model, on_replace: :update do
+        field :provider, AIProvider
+        field :model,    :string
+      end
+
+      field :plan, :boolean
+      embeds_one :coding, Coding, on_replace: :update do
+        field :babysit,  :boolean
+        field :approval, :boolean
+      end
+    end
+
+    def changeset(model, attrs) do
+      model
+      |> cast(attrs, [:plan])
+      |> cast_embed(:model, with: &model_changeset/2)
+      |> cast_embed(:coding, with: &coding_changeset/2)
+    end
+
+    defp model_changeset(model, attrs) do
+      model
+      |> cast(attrs, [:provider, :model])
+      |> validate_required([:provider, :model])
+    end
+
+    defp coding_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(babysit approval)a)
+    end
+  end
+
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, paused: 5
   defenum Type, job: 0, skill: 1
 
@@ -27,18 +63,7 @@ defmodule Console.Schema.WorkbenchJob do
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
 
-    embeds_one :modes, Modes, on_replace: :update do
-      embeds_one :model, Model, on_replace: :update do
-        field :provider, Console.Schema.DeploymentSettings.AIProvider
-        field :model,    :string
-      end
-
-      field :plan, :boolean
-      embeds_one :coding, Coding, on_replace: :update do
-        field :babysit,  :boolean
-        field :approval, :boolean
-      end
-    end
+    embeds_one :modes, Modes, on_replace: :update
 
     belongs_to :workbench,      Workbench
     belongs_to :user,           User
@@ -161,7 +186,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, @valid)
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
-    |> cast_embed(:modes, with: &modes_changeset/2)
+    |> cast_embed(:modes)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
@@ -175,24 +200,6 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, [])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
-  end
-
-  defp modes_changeset(model, attrs) do
-    model
-    |> cast(attrs, [:plan])
-    |> cast_embed(:model, with: &model_changeset/2)
-    |> cast_embed(:coding, with: &coding_changeset/2)
-  end
-
-  defp model_changeset(model, attrs) do
-    model
-    |> cast(attrs, [:provider, :model])
-    |> validate_required([:provider, :model])
-  end
-
-  defp coding_changeset(model, attrs) do
-    model
-    |> cast(attrs, ~w(babysit approval)a)
   end
 end
 

@@ -9810,6 +9810,8 @@ type WorkbenchChatbot struct {
 	Channel string `json:"channel"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this chatbot
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// how the chatbot posts responses in the channel
 	MessageBehavior WorkbenchChatbotMessageBehavior `json:"messageBehavior"`
 	// user this chatbot runs as
@@ -9831,6 +9833,8 @@ type WorkbenchChatbotAttributes struct {
 	Channel *string `json:"channel,omitempty"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this chatbot
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// how the chatbot posts responses in the channel
 	MessageBehavior *WorkbenchChatbotMessageBehavior `json:"messageBehavior,omitempty"`
 	// user this chatbot runs as; must have read access to the workbench
@@ -9897,6 +9901,8 @@ type WorkbenchCron struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this cron
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// when the cron will next run
 	NextRunAt *string `json:"nextRunAt,omitempty"`
 	// when the cron last ran
@@ -9914,6 +9920,8 @@ type WorkbenchCronAttributes struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// the prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this cron
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// user this cron runs as; must have read access to the workbench
 	UserID *string `json:"userId,omitempty"`
 }
@@ -10376,6 +10384,8 @@ type WorkbenchPrompt struct {
 	Category string `json:"category"`
 	// the saved prompt text
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created from this prompt
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// the workbench this prompt belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10389,6 +10399,8 @@ type WorkbenchPromptAttributes struct {
 	Category *string `json:"category,omitempty"`
 	// the saved prompt text
 	Prompt string `json:"prompt"`
+	// mode-specific options for jobs created from this prompt
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type WorkbenchPromptConnection struct {
@@ -11090,6 +11102,8 @@ type WorkbenchWebhook struct {
 	Priority *int64 `json:"priority,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
+	// mode-specific options for jobs created by this webhook
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// user this webhook runs as
 	UserID *string `json:"userId,omitempty"`
 	// the workbench this webhook belongs to
@@ -11115,6 +11129,8 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this webhook
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// higher values are preferred when multiple webhooks match the same payload
 	Priority *int64 `json:"priority,omitempty"`
 	// user this webhook runs as; must have read access to the workbench

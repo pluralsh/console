@@ -1,12 +1,14 @@
 defmodule Console.Schema.WorkbenchPrompt do
   use Console.Schema.Base
   alias Console.Schema.Workbench
+  alias Console.Schema.WorkbenchJob.Modes
 
   schema "workbench_prompts" do
     field :title,    :string
     field :category, :string
     field :prompt,   :binary
 
+    embeds_one :modes, Modes, on_replace: :update
     belongs_to :workbench, Workbench
 
     timestamps()
@@ -25,6 +27,7 @@ defmodule Console.Schema.WorkbenchPrompt do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:modes)
     |> foreign_key_constraint(:workbench_id)
     |> validate_required([:prompt])
   end

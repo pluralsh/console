@@ -14,6 +14,7 @@ defmodule Console.Chat.Utils do
         Workbenches.create_workbench_job(%{
           prompt: prompt(chat: conn, msg: msg, channel: chan_ref, custom: prompt, behavior: behavior),
           workbench_id: chatbot.workbench_id,
+          modes: Console.mapify(chatbot.modes),
           chatbot_message: %{message: msg.text, channel: channel, chat_connection_id: id}
         }, chatbot.workbench_id, user)
       nil -> :ok
