@@ -102,6 +102,7 @@ defmodule Console.Deployments.Helm.AgentCache do
         File.rm(tmp)
         {:ok, line, cache}
       err ->
+        Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
         File.rm(tmp)
         err
     end

@@ -960,17 +960,22 @@ defmodule Console.GraphQl.Deployments.Git do
   end
 
   object :pr_automation_search_item do
-    field :id,          non_null(:id)
-    field :name,        non_null(:string)
-    field :description, :string, description: "the description for this pr automation"
-    field :icon,        :string, description: "an icon url to use for this pr automation"
-    field :dark_icon,   :string, description: "a darkmode icon url to use for this pr automation"
+    field :id,            non_null(:id)
+    field :name,          non_null(:string)
+    field :documentation, :string
+    field :identifier,    :string
+    field :role,          :pr_role
+    field :icon,          :string, description: "an icon url to use for this pr automation"
+    field :dark_icon,     :string, description: "a darkmode icon url to use for this pr automation"
+    field :cluster,       :cluster, resolve: dataloader(Deployments)
   end
 
   object :catalog_search_item do
     field :id,            non_null(:id)
     field :name,          non_null(:string)
-    field :documentation, :string, description: "the documentation for this pr automation"
+    field :author,        :string, description: "the name of the author of this catalog"
+    field :description,   :string, description: "longform description for the purpose of this catalog"
+    field :category,      :string, description: "short category name used for browsing catalogs"
     field :icon,          :string, description: "an icon url to use for this catalog"
     field :dark_icon,     :string, description: "a darkmode icon url to use for this catalog"
   end

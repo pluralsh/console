@@ -3,6 +3,44 @@ git_url: https://github.com/rook/rook
 release_url: https://github.com/rook/rook/releases/tag/v{vsn}
 helm_repository_url: https://charts.rook.io/release
 versions:
+- version: 1.20.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **Ceph-CSI settings move out of the `rook-ceph` operator chart/configmap**\
+      \ in v1.20.\n  - Previously-applied CSI settings will continue to work after\
+      \ upgrade, but **future changes must be made via the Ceph-CSI Operator CRs**.\n\
+      \  - CSI settings are removed from `rook-ceph-operator-config` and from the\
+      \ `rook-ceph` Helm chart values.\n  - **Helm users must manage CSI operator\
+      \ settings via the `ceph-csi-drivers` chart** (`OperatorConfig` and `Driver`\
+      \ CRs). \n  - **Custom CSI images** remain configured via `rook-ceph` chart\
+      \ values.\n- From v1.19 (still relevant if you are crossing it): `rook-ceph-cluster`\
+      \ chart changed Ceph image configuration to **separate repository and tag**\
+      \ (ensure your values match the new schema)."
+    chart_updates: ['CSI settings removed from the rook operator configmap and operator
+        Helm chart; new `ceph-csi-drivers` chart/CRs (`OperatorConfig`, `Driver`)
+        become the place to configure CSI behavior going forward.', Defaults for CSI
+        CRs are provided in `operator.yaml`; customizations now documented under CSI
+        Configuration in v1.20 docs.]
+    features: ["Kubernetes support window moves to v1.31\u2013v1.36 (from v1.30\u2013\
+        v1.35 in v1.19).", SSE-S3 object store encryption can now use HashiCorp Vault
+        Agent auth for key management., Rook now cleans up unused CRUSH rules by default
+        after the Ceph mgr starts (can be disabled)., Multi-CephCluster concurrent
+        reconcile setting (`ROOK_RECONCILE_CONCURRENT_CLUSTERS`) is now stable., Operator
+        reconciliation is more robust by matching containers by name instead of declaration
+        order (helps when mutating webhooks reorder containers)., 'Encrypted host-based
+        OSDs auto-expand when the underlying disk is resized (with `encryptedDevice:
+        true`).', 'Experimental: RGW Accounts via `CephObjectStoreAccount` CRD and
+        `accountRef` on `CephObjectStoreUser` (currently only testable with Ceph main
+        image).', 'Experimental: Two-node clusters can use a ''floating'' mon that
+        migrates between nodes on failure.']
+    breaking_changes: ['Ceph-CSI operator is now required to manage CSI driver settings;
+        CSI config is removed from the rook operator configmap/chart, and ongoing
+        CSI changes must be applied via Ceph-CSI `OperatorConfig`/`Driver` CRs (Helm:
+        `ceph-csi-drivers` chart).']
+  chart_version: 1.20.0
+  images: []
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []

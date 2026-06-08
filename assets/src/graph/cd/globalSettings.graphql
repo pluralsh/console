@@ -21,6 +21,14 @@ fragment AiSettings on AiSettings {
     model
     toolModel
     embeddingModel
+    method
+  }
+  openaiCompatible {
+    baseUrl
+    model
+    toolModel
+    embeddingModel
+    method
   }
   azure {
     apiVersion
@@ -52,6 +60,10 @@ fragment AiSettings on AiSettings {
   enabled
   toolsEnabled
   provider
+  vectorStore {
+    enabled
+    store
+  }
 }
 
 fragment DeploymentSettings on DeploymentSettings {

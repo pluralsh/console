@@ -37,6 +37,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :flow_id,          :id, description: "the flow this agent run is associated with"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
+    field :approval,         :boolean, description: "whether this run requires approval before continuing"
   end
 
   input_object :agent_run_status_attributes do
@@ -46,6 +47,9 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :pod_reference,    :namespaced_name, description: "the kubernetes pod this agent is running on"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
+    field :approval,         :boolean, description: "whether this run requires approval before continuing"
+    field :approved_at,      :datetime, description: "when this run was approved"
+    field :consumed,         :id, description: "the agent run this run consumed"
   end
 
   input_object :agent_pull_request_attributes do
@@ -157,6 +161,9 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :shared,           :boolean, description: "whether this agent run is shared"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
+    field :approval,         :boolean, description: "whether this run requires approval before continuing"
+    field :approved_at,      :datetime, description: "when this run was approved"
+    field :consumed,         :id, description: "the agent run this run consumed"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
 

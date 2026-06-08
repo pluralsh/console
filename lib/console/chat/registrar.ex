@@ -31,7 +31,7 @@ defmodule Console.Chat.Registrar do
   end
   def handle_info(_, state), do: {:noreply, state}
 
-  defp local?(%ChatConnection{id: id}), do: Console.ClusterRing.node(id) == node()
+  def local?(%ChatConnection{id: id}), do: Console.ClusterRing.node(id) == node()
 
   defp start_chats(chats) do
     chats

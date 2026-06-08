@@ -130,8 +130,8 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp call_tools(engine, tools, impls) do
     by_name = Map.new(impls, & {Tool.name(&1), &1})
     Enum.reduce_while(tools, {[], engine}, fn %Tool{id: id, name: name, arguments: args} = tool, {acc, engine} ->
-      with {:ok, impl}    <- Map.fetch(by_name, name),
-           {:ok, parsed}  <- Tool.validate(impl, args) do
+      with {:ok, impl}   <- Map.fetch(by_name, name),
+           {:ok, parsed} <- Tool.validate(impl, args) do
         case Tool.implement(impl, Map.put(parsed, :id, tool)) do
           %EnabledTools{} = enabled ->
             msg = callback(engine, tool_msg("enabled tools: #{Enum.join(EnabledTools.enabled(enabled), ", ")}", id, name, args, engine.tool_fmt))

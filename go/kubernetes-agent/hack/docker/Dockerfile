@@ -3,7 +3,7 @@
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
 # Builder stage for all binaries
-FROM golang:1.26.3-alpine3.22 AS builder
+FROM golang:1.26.4-alpine3.22 AS builder
 
 ARG TARGETARCH
 ARG TARGETOS

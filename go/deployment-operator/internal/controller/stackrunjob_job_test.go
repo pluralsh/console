@@ -50,6 +50,14 @@ func TestGetDefaultContainerImage(t *testing.T) {
 			expectedImage: "ghcr.io/pluralsh/harness:0.6.18-terraform-1.8.4",
 		},
 		{
+			name: "terragrunt_defaults",
+			run: &console.StackRunMinimalFragment{
+				Type:          console.StackTypeTerragrunt,
+				Configuration: console.StackConfigurationFragment{},
+			},
+			expectedImage: "ghcr.io/pluralsh/harness:0.6.18-terragrunt-1.8",
+		},
+		{
 			name: "custom_tag_provided",
 			run: &console.StackRunMinimalFragment{
 				Type: console.StackTypeTerraform,

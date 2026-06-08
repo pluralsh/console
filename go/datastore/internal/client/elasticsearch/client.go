@@ -27,6 +27,9 @@ type client struct {
 type ElasticsearchClient interface {
 	Init(ctx context.Context, client k8sclient.Client, credentials *v1alpha1.ElasticsearchCredentials) error
 	ClusterHealth() (*esapi.Response, error)
+	ExistsIndex(ctx context.Context, index string) (*esapi.Response, error)
+	CreateIndex(index string, definition runtime.RawExtension) (*esapi.Response, error)
+	DeleteIndex(ctx context.Context, index string) (*esapi.Response, error)
 	PutILMPolicy(policy string, definition runtime.RawExtension) (*esapi.Response, error)
 	DeleteILMPolicy(policy string) (*esapi.Response, error)
 	DeleteUserRole(ctx context.Context, roleName string) (*esapi.Response, error)
@@ -80,6 +83,23 @@ func (c *client) Init(ctx context.Context, client k8sclient.Client, credentials 
 
 func (c client) ClusterHealth() (*esapi.Response, error) {
 	return c.elasticsearch.Cluster.Health()
+}
+
+func (c client) ExistsIndex(ctx context.Context, index string) (*esapi.Response, error) {
+	return c.elasticsearch.Indices.Exists([]string{index}, c.elasticsearch.Indices.Exists.WithContext(ctx))
+}
+
+func (c client) CreateIndex(index string, definition runtime.RawExtension) (*esapi.Response, error) {
+	body, err := json.Marshal(definition)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.elasticsearch.Indices.Create(index, c.elasticsearch.Indices.Create.WithBody(bytes.NewReader(body)))
+}
+
+func (c client) DeleteIndex(ctx context.Context, index string) (*esapi.Response, error) {
+	return c.elasticsearch.Indices.Delete([]string{index}, c.elasticsearch.Indices.Delete.WithContext(ctx))
 }
 
 func (c client) PutILMPolicy(policy string, definition runtime.RawExtension) (*esapi.Response, error) {

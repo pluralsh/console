@@ -100,9 +100,16 @@ defmodule Console.Schema.Service do
     end
 
     defp ensure_chart(cs) do
-      case get_field(cs, :repository) do
-        %{} -> validate_required(cs, ~w(chart version)a)
+      case byte_size(get_field(cs, :url) || "") > 0 || has_flux?(cs) do
+        true -> validate_required(cs, ~w(chart version)a)
         _ -> cs
+      end
+    end
+
+    defp has_flux?(cs) do
+      case get_field(cs, :repository) do
+        %{namespace: ns, name: n} when is_binary(ns) and is_binary(n) -> true
+        _ -> false
       end
     end
   end

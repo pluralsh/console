@@ -1,6 +1,5 @@
 import { Card, Prop } from '@pluralsh/design-system'
 
-import capitalize from 'lodash/capitalize'
 import { Link, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -14,6 +13,7 @@ import { StackApprovalChip } from '../common/StackApprovalChip'
 import { StackStatusChip } from '../common/StackStatusChip'
 import { ViolationSeverity } from '../run/violations/columns.tsx'
 import { StackOutletContextT } from '../Stacks'
+import { stackTypeLabel } from '../common/stackTypeUtils'
 
 export default function StackMetadata() {
   const theme = useTheme()
@@ -50,7 +50,7 @@ export default function StackMetadata() {
           title="Type"
           margin={0}
         >
-          {capitalize(stack.type)}
+          {stackTypeLabel(stack.type)}
         </Prop>
         <Prop
           title="Paused"

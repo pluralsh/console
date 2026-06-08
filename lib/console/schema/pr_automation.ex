@@ -1,5 +1,5 @@
 defmodule Console.Schema.PrAutomation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Cluster,
     Service,
@@ -317,12 +317,24 @@ defmodule Console.Schema.PrAutomation.Mini do
 
   @derive Jason.Encoder
   @derive JSON.Encoder
-  defstruct [:id, :name, :documentation, :title, :message, :branch, :branch_prefix, :icon, :dark_icon]
+  defstruct [
+    :id,
+    :name,
+    :description,
+    :documentation,
+    :title,
+    :message,
+    :branch,
+    :branch_prefix,
+    :icon,
+    :dark_icon
+  ]
 
   def new(%PrAutomation{} = pr) do
     %__MODULE__{
       id: pr.id,
       name: pr.name,
+      description: pr.documentation,
       documentation: pr.documentation,
       title: pr.title,
       message: pr.message,
@@ -337,6 +349,7 @@ defmodule Console.Schema.PrAutomation.Mini do
     %__MODULE__{
       id: attrs["id"],
       name: attrs["name"],
+      description: attrs["description"] || attrs["documentation"],
       documentation: attrs["documentation"],
       title: attrs["title"],
       message: attrs["message"],

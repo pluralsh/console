@@ -100,6 +100,23 @@ func (c *bitBucketCloudClient) GetPRDetails(ctx context.Context, prURL string) (
 	}, nil
 }
 
+func (c *bitBucketCloudClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	workspace, repo, prID, err := parseCloudPRURL(prURL)
+	if err != nil {
+		return nil, err
+	}
+	var pr bbCloudPR
+	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", bbCloudAPIBase, workspace, repo, prID), &pr); err != nil {
+		return nil, fmt.Errorf("get PR: %w", err)
+	}
+	return &PRDetails{
+		Title:   pr.Title,
+		Body:    pr.Description,
+		HeadRef: pr.Source.Branch.Name,
+		State:   bbCloudState(pr.State),
+	}, nil
+}
+
 func (c *bitBucketCloudClient) allComments(ctx context.Context, workspace, repo string, prID int64) ([]PRComment, error) {
 	u := fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d/comments?pagelen=100", bbCloudAPIBase, workspace, repo, prID)
 	var all []PRComment
@@ -292,6 +309,23 @@ func (c *bitBucketDCClient) GetPRDetails(ctx context.Context, prURL string) (*PR
 		State:    bbDCState(pr.State),
 		Comments: comments,
 		CIChecks: checks,
+	}, nil
+}
+
+func (c *bitBucketDCClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	project, repo, prID, err := parseDCPRURL(prURL)
+	if err != nil {
+		return nil, err
+	}
+	var pr bbDCPR
+	if err := c.get(ctx, fmt.Sprintf("%s/api/1.0/projects/%s/repos/%s/pull-requests/%d", c.baseURL, project, repo, prID), &pr); err != nil {
+		return nil, fmt.Errorf("get PR: %w", err)
+	}
+	return &PRDetails{
+		Title:   pr.Title,
+		Body:    pr.Description,
+		HeadRef: pr.FromRef.DisplayId,
+		State:   bbDCState(pr.State),
 	}, nil
 }
 

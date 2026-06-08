@@ -42,6 +42,8 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 	switch provider := conn.GetConnection().(type) {
 	case *toolquery.ToolConnection_Elastic:
 		return NewElasticProvider(provider.Elastic)
+	case *toolquery.ToolConnection_Opensearch:
+		return NewOpensearchProvider(provider.Opensearch)
 	case *toolquery.ToolConnection_Loki:
 		return NewLokiProvider(provider.Loki), nil
 	case *toolquery.ToolConnection_Datadog:

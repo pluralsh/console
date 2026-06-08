@@ -36,6 +36,41 @@ query Catalog($id: ID, $name: String) {
   }
 }
 
+fragment CatalogSearchItem on CatalogSearchItem {
+  id
+  name
+  author
+  description
+  category
+  icon
+  darkIcon
+}
+
+fragment PrAutomationSearchItem on PrAutomationSearchItem {
+  id
+  name
+  documentation
+  identifier
+  role
+  icon
+  darkIcon
+  cluster {
+    id
+    name
+  }
+}
+
+query CatalogSearch($q: String!) {
+  catalogSearch(q: $q) {
+    catalog {
+      ...CatalogSearchItem
+    }
+    prAutomation {
+      ...PrAutomationSearchItem
+    }
+  }
+}
+
 mutation UpsertCatalog($attributes: CatalogAttributes) {
   upsertCatalog(attributes: $attributes) {
     ...Catalog

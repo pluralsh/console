@@ -233,6 +233,103 @@ jobs:
             HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/stackrun-harness-base
             HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}
 
+  publish-harness-terragrunt:
+    name: Build and push harness terragrunt container
+    runs-on: ubuntu-latest
+    needs: [publish-base-image]
+    env:
+      OPENTOFU_VERSION: 1.12.0
+      TERRAGRUNT_VERSION: 1.0.6
+    strategy:
+      matrix:
+        versions:
+          - full: 1.14.9
+            minor: "1.14"
+          - full: 1.13.5
+            minor: "1.13"
+          - full: 1.12.2
+            minor: "1.12"
+          - full: 1.11.4
+            minor: "1.11"
+          - full: 1.10.5
+            minor: "1.10"
+          - full: 1.9.8
+            minor: "1.9"
+          - full: 1.8.2
+            minor: "1.8"
+          - full: 1.7.5
+            minor: "1.7"
+          - full: 1.6.6
+            minor: "1.6"
+          - full: 1.5.7
+            minor: "1.5"
+          - full: 1.4.7
+            minor: "1.4"
+          - full: 1.3.10
+            minor: "1.3"
+          - full: 1.2.9
+            minor: "1.2"
+          - full: 1.1.9
+            minor: "1.1"
+          - full: 1.0.11
+            minor: "1.0"
+    permissions:
+      contents: write
+      discussions: write
+      pull-requests: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pluralsh/harness
+            docker.io/pluralsh/harness
+          tags: |
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-terragrunt-${{ matrix.versions.full }},priority=1000
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,suffix=-terragrunt-${{ matrix.versions.minor }},priority=1000
+            type=sha,suffix=-terragrunt-${{ matrix.versions.full }},priority=800
+            type=sha,suffix=-terragrunt-${{ matrix.versions.minor }},priority=800
+            type=ref,event=pr,suffix=-terragrunt-${{ matrix.versions.full }},priority=600
+            type=ref,event=pr,suffix=-terragrunt-${{ matrix.versions.minor }},priority=600
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/dockerfiles/harness/terragrunt.Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            TERRAFORM_IMAGE_TAG=${{ matrix.versions.full }}
+            OPENTOFU_IMAGE_TAG=${{ env.OPENTOFU_VERSION }}
+            TERRAGRUNT_VERSION=${{ env.TERRAGRUNT_VERSION }}
+            HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/stackrun-harness-base
+            HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}
+
   publish-harness-ansible:
     name: Build and push harness ansible container
     runs-on: ubuntu-latest

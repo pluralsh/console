@@ -5,32 +5,62 @@ import {
   EmptyState,
   FiltersIcon,
   Flex,
-  Input,
-  MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import Fuse from 'fuse.js'
 import { useCatalogsQuery } from 'generated/graphql'
-import { chain, isEmpty } from 'lodash'
+import Fuse from 'fuse.js'
+import { chain, countBy, isEmpty } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { CatalogsFilters } from './CatalogsFilters'
 import { CatalogsGrid } from './CatalogsGrid'
+import { SelfServiceSearchBar } from './SelfServiceSearchBar'
+import { useSelfServiceCatalogSearch } from './useSelfServiceCatalogSearch'
 
-// TODO: Replace with server-side search once it will be available.
-const searchOptions = {
-  keys: ['name', 'description'],
+type CatalogFilterKey = 'author' | 'category'
+
+const catalogFuseSearchOptions = {
+  keys: ['name', 'description', 'category'],
   threshold: 0.25,
+}
+
+function getCatalogFilters(
+  catalogs: ReturnType<typeof mapExistingNodes>,
+  filterKey: CatalogFilterKey
+) {
+  return chain(catalogs)
+    .map(filterKey)
+    .compact()
+    .thru(countBy)
+    .map((items, key) => ({ key, items }))
+    .value()
+}
+
+function matchesCatalogFilters({
+  author,
+  authorFilters: af,
+  category,
+  categoryFilters: cf,
+}: {
+  author?: Nullable<string>
+  authorFilters: string[]
+  category?: Nullable<string>
+  categoryFilters: string[]
+}) {
+  return (
+    (isEmpty(af) || (!!author && af.includes(author))) &&
+    (isEmpty(cf) || (!!category && cf.includes(category)))
+  )
 }
 
 export function Catalogs() {
   const theme = useTheme()
-  const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(false)
   const [authorFilters, setAuthorFilters] = useState<string[]>([])
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
+  const search = useSelfServiceCatalogSearch()
 
   const { data, error, loading, pageInfo, fetchNextPage } =
     useFetchPaginatedData({
@@ -43,63 +73,80 @@ export function Catalogs() {
     [data?.catalogs]
   )
 
-  const authors = useMemo(
-    () =>
-      chain(catalogs)
-        .filter(({ author }) => !!author)
-        .groupBy('author')
-        .map((value, key) => ({ key, items: value.length }))
-        .value(),
-    [catalogs]
-  )
-
-  const categories = useMemo(
-    () =>
-      chain(catalogs)
-        .filter(({ category }) => !!category)
-        .groupBy('category')
-        .map((value, key) => ({ key, items: value.length }))
-        .value(),
-    [catalogs]
-  )
-
   const resetFilters = useCallback(() => {
     setAuthorFilters([])
     setCategoryFilters([])
-  }, [setAuthorFilters, setCategoryFilters])
+  }, [])
 
-  const hasActiveSearch = !!query
   const hasActiveFilters = !isEmpty(authorFilters) || !isEmpty(categoryFilters)
 
-  const resultCatalogs = useMemo(() => {
-    const filteredCatalogs = catalogs.filter(({ author, category }) => {
-      if (
-        !isEmpty(authorFilters) &&
-        (!author || !authorFilters.includes(author))
-      ) {
-        return false
-      }
+  const {
+    hasActiveSearch,
+    useFallbackSearch,
+    isSearchPending,
+    debouncedSearchQuery,
+    semanticSearchEnabled,
+  } = search
 
-      if (
-        !isEmpty(categoryFilters) &&
-        (!category || !categoryFilters.includes(category))
-      ) {
-        return false
-      }
+  const filterCatalogs = useMemo(() => {
+    if (useFallbackSearch)
+      return new Fuse(catalogs, catalogFuseSearchOptions)
+        .search(debouncedSearchQuery)
+        .map(({ item }) => item)
+    return catalogs
+  }, [catalogs, debouncedSearchQuery, useFallbackSearch])
 
-      return true
-    })
+  const authors = useMemo(
+    () => getCatalogFilters(filterCatalogs, 'author'),
+    [filterCatalogs]
+  )
 
-    const fuse = new Fuse(filteredCatalogs, searchOptions)
-    return hasActiveSearch
-      ? fuse.search(query).map(({ item }) => item)
-      : filteredCatalogs
-  }, [authorFilters, catalogs, categoryFilters, hasActiveSearch, query])
+  const categories = useMemo(
+    () => getCatalogFilters(filterCatalogs, 'category'),
+    [filterCatalogs]
+  )
+
+  const displayCatalogs = useMemo(
+    () =>
+      filterCatalogs.filter(({ author, category }) =>
+        matchesCatalogFilters({
+          author,
+          authorFilters,
+          category,
+          categoryFilters,
+        })
+      ),
+    [authorFilters, categoryFilters, filterCatalogs]
+  )
 
   if (error) return <GqlError error={error} />
 
+  const filtersButton = (
+    <Button
+      onClick={() =>
+        hasActiveFilters ? resetFilters() : setFiltersVisible(!filtersVisible)
+      }
+      secondary
+      startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
+      style={{
+        borderColor: hasActiveFilters
+          ? theme.colors['border-primary']
+          : undefined,
+      }}
+    >
+      {hasActiveFilters ? 'Reset filters' : 'Filters'}
+    </Button>
+  )
+
   return (
-    <WrapperSC>
+    <Flex
+      css={{
+        height: '100%',
+        width: '100%',
+        overflow: 'hidden',
+        gap: theme.spacing.large,
+      }}
+    >
       <Flex
         direction="column"
         grow={1}
@@ -107,40 +154,20 @@ export function Catalogs() {
         overflow="hidden"
         gap="medium"
       >
-        <Flex
-          gap="medium"
-          width="100%"
-          justify="space-between"
-        >
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-            showClearButton
-            placeholder="Search catalog"
-            startIcon={<MagnifyingGlassIcon color="icon-light" />}
-            width="100%"
+        {semanticSearchEnabled ? (
+          <SelfServiceSearchBar
+            search={search}
+            aside={filtersButton}
           />
-          <Button
-            onClick={() =>
-              hasActiveFilters
-                ? resetFilters()
-                : setFiltersVisible(!filtersVisible)
-            }
-            secondary
-            startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
-            style={{
-              borderColor: hasActiveFilters
-                ? theme.colors['border-primary']
-                : undefined,
-            }}
-          >
-            {hasActiveFilters ? 'Reset filters' : 'Filters'}
-          </Button>
-        </Flex>
+        ) : (
+          <Flex justify="flex-end">{filtersButton}</Flex>
+        )}
         <CatalogsGrid
-          catalogs={resultCatalogs}
+          catalogs={displayCatalogs}
           onBottomReached={() => {
-            if (!loading && pageInfo?.hasNextPage) fetchNextPage()
+            if (!isSearchPending && !loading && pageInfo?.hasNextPage) {
+              fetchNextPage()
+            }
           }}
           loading={loading}
           emptyState={
@@ -165,10 +192,10 @@ export function Catalogs() {
                     secondary
                     onClick={() => {
                       resetFilters()
-                      setQuery('')
+                      search.setSearchQuery('')
                     }}
                   >
-                    Reset filers
+                    Reset filters
                   </Button>
                 )}
               </EmptyState>
@@ -186,14 +213,6 @@ export function Catalogs() {
           setCategoryFilters={setCategoryFilters}
         />
       )}
-    </WrapperSC>
+    </Flex>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  height: '100%',
-  width: '100%',
-  overflow: 'hidden',
-  gap: theme.spacing.large,
-}))

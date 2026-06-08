@@ -235,6 +235,11 @@ fragment StackConfigurationFragment on StackConfiguration {
         refresh
         approveEmpty
     }
+    terragrunt {
+        parallelism
+        refresh
+        approveEmpty
+    }
     ansible {
         inventory
         playbook

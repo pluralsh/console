@@ -38,6 +38,27 @@ def fetch_page(url):
         return None
     return response.content.decode("utf-8")
 
+def _extract_requirement_changes(from_vsn, to_vsn):
+    """Extract component version changes between two versions."""
+    from_reqs = {r['name']: r['version'] for r in from_vsn.get('requirements', [])}
+    to_reqs = {r['name']: r['version'] for r in to_vsn.get('requirements', [])}
+
+    changes = []
+    # Components that were upgraded
+    for name, to_v in to_reqs.items():
+        from_v = from_reqs.get(name)
+        if from_v and from_v != to_v:
+            changes.append(f"- {name}: {from_v} → {to_v}")
+        elif not from_v:
+            changes.append(f"- {name}: new (added at {to_v})")
+
+    # Components that were removed
+    for name, from_v in from_reqs.items():
+        if name not in to_reqs:
+            changes.append(f"- {name}: {from_v} → removed")
+
+    return changes
+
 def helm_summary(name, compatibility, from_vsn, to_vsn):
   chart_url = compatibility.get('chart_changelog')
   release_url = compatibility.get('release_url')
@@ -65,14 +86,20 @@ def helm_summary(name, compatibility, from_vsn, to_vsn):
     response = _get_exa().get_contents(list(release_urls), text=True)
     release_pages = [result.text for result in response.results if result.text]
 
-    if not pages and not release_pages:
+    # Extract component version changes for context
+    requirement_changes = _extract_requirement_changes(from_vsn, to_vsn)
+
+    if not pages and not release_pages and not requirement_changes:
         return None
 
     prompt = f"I'll list all the release notes I've found for the upgrade of {name} from {from_vsn['version']} to {to_vsn['version']}:"
     if pages:
-        prompt += f"Here are the helm changelogs for the update:\n\n" + "\n\n".join(pages)
+        prompt += f"\n\nHere are the helm changelogs for the update:\n\n" + "\n\n".join(pages)
     if release_pages:
         prompt += f"\n\nHere are the application release notes for the update:\n\n" + "\n\n".join(release_pages)
+
+    if requirement_changes:
+        prompt += f"\n\nComponent version changes in this upgrade:\n" + "\n".join(requirement_changes)
 
     response = _get_oai_client().responses.create(
         model="gpt-5.2",
@@ -89,14 +116,24 @@ def helm_summary(name, compatibility, from_vsn, to_vsn):
 
     if len(response.output) > 0 and response.output[0].type == 'function_call':
         result = json.loads(response.output[0].arguments)
-        if result["confident"]:
-            result.pop("confident")
+        confident = result.pop("confident", False)
+
+        if not confident:
+            # Check if summary has any meaningful content
+            has_content = any(result.get(k) for k in ["helm_changes", "chart_updates", "features", "breaking_changes"])
+            if not has_content:
+                # Completely empty summary, skip it
+                print("Not confident in the summary and content is empty, ignoring")
+                return None
+            # Summary has content but low confidence - use it with warning
+            from utils import print_warning
+            print_warning(f"Using low-confidence summary for {name} {from_vsn['version']} → {to_vsn['version']}")
             return result
-        
-        print("Not confident in the summary, ignoring")
-        
+
+        return result
+
   return None
-    
+
 
 def kube_summary(contents, version, schema):
     response = _get_oai_client().responses.create(
@@ -117,5 +154,5 @@ def kube_summary(contents, version, schema):
         if summary["confident"]:
             summary.pop("confident")
             return summary
-    
+
     return None

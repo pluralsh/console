@@ -1,7 +1,7 @@
 defmodule Console.Chat.DynamicSupervisor do
   use DynamicSupervisor
   alias Console.Schema.ChatConnection
-  alias Console.Chat.Impl.Slack
+  alias Console.Chat.Bot
 
   def start_link(init_arg) do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
@@ -11,7 +11,7 @@ defmodule Console.Chat.DynamicSupervisor do
     DynamicSupervisor.start_child(__MODULE__, %{
       id: id,
       restart: :transient,
-      start: worker_spec(conn)
+      start: {Bot, :start_link, [conn]}
     })
   end
 
@@ -25,6 +25,4 @@ defmodule Console.Chat.DynamicSupervisor do
       max_children: 30
     )
   end
-
-  defp worker_spec(%ChatConnection{type: :slack} = conn), do: Slack.child_spec(conn)
 end

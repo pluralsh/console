@@ -212,8 +212,8 @@ spec:
                       type: string
                     type: array
                   dependencies:
-                    description: Dependencies specify services that must be healthy before
-                      this service can be deployed.
+                    description: Dependencies specify services that must be healthy
+                      before this service can be deployed.
                     items:
                       properties:
                         name:

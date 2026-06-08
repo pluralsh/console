@@ -1,6 +1,6 @@
 import { CatalogCard } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { CatalogFragment } from 'generated/graphql'
+import { CatalogFragment, CatalogSearchItemFragment } from 'generated/graphql'
 import { CSSProperties, useTheme } from 'styled-components'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useNavigate } from 'react-router-dom'
@@ -22,7 +22,7 @@ export function CatalogsGrid({
   loading,
   ...props
 }: {
-  catalogs: CatalogFragment[]
+  catalogs: (CatalogFragment | CatalogSearchItemFragment)[]
   emptyState?: ReactNode
   loading?: boolean
 } & CardGridProps) {

@@ -21,6 +21,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_job_attributes do
     field :prompt, :string, description: "the prompt for this job"
+    field :modes,  :workbench_job_modes_attributes, description: "mode-specific options for this job"
+  end
+
+  input_object :workbench_job_modes_attributes do
+    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+  end
+
+  input_object :workbench_job_coding_modes_attributes do
+    field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
+    field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
   end
 
   input_object :workbench_job_update_attributes do
@@ -149,6 +160,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_tool_configuration_attributes do
     field :http,       :workbench_tool_http_configuration_attributes, description: "http tool configuration"
     field :elastic,    :workbench_tool_elastic_connection_attributes, description: "elasticsearch connection (logs)"
+    field :opensearch, :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
     field :prometheus, :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
     field :loki,       :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
     field :splunk,     :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
@@ -178,6 +190,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :username, non_null(:string), description: "basic auth username"
     field :password, :string, description: "basic auth password"
     field :index,    non_null(:string), description: "elasticsearch index"
+  end
+
+  input_object :workbench_tool_opensearch_connection_attributes do
+    field :host,                  non_null(:string), description: "aws opensearch endpoint"
+    field :index,                 non_null(:string), description: "opensearch index"
+    field :aws_access_key_id,     :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_secret_access_key, :string, description: "AWS secret access key for SigV4 authentication"
+    field :aws_region,            :string, description: "AWS region for SigV4 authentication"
+    field :assume_role_arn,       :string, description: "optional IAM role ARN to assume before signing OpenSearch requests"
+    field :use_pod_identity,      :boolean, description: "whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials"
   end
 
   input_object :workbench_tool_prometheus_connection_attributes do
@@ -435,6 +457,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+    field :modes,        :workbench_job_modes, description: "mode-specific options for this job"
 
     field :chatbot_message, :chatbot_message,
       resolve: dataloader(Deployments),
@@ -478,6 +501,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
 
     timestamps()
+  end
+
+  object :workbench_job_modes do
+    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+  end
+
+  object :workbench_job_coding_modes do
+    field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
+    field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
   end
 
   object :workbench_job_activity do
@@ -842,6 +875,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_configuration do
     field :http,      :workbench_tool_http_configuration, description: "http tool configuration"
     field :elastic,   :workbench_tool_elastic_connection, description: "elasticsearch connection (no secrets)"
+    field :opensearch, :workbench_tool_opensearch_connection, description: "aws opensearch connection (no secrets)"
     field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
     field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
@@ -870,6 +904,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url,      non_null(:string), description: "elasticsearch base url (credentials never exposed)"
     field :index,    non_null(:string), description: "elasticsearch index"
     field :username, non_null(:string), description: "basic auth username"
+  end
+
+  object :workbench_tool_opensearch_connection do
+    field :host,              non_null(:string), description: "aws opensearch endpoint"
+    field :index,             non_null(:string), description: "opensearch index"
+    field :aws_access_key_id, :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_region,        :string, description: "AWS region for SigV4 authentication"
+    field :assume_role_arn,   :string, description: "assumed role ARN when configured"
+    field :use_pod_identity,  :boolean, description: "whether pod identity (IRSA/Workload Identity) is used for AWS authentication"
   end
 
   object :workbench_tool_prometheus_connection do

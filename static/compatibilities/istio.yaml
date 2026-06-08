@@ -9,7 +9,17 @@ versions:
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided are mostly metadata (assets, dates, links)
+        for Istio 1.30.0 vs 1.29.0; no functional change list is included in the text
+        shared. As a result, specific new features cannot be extracted from the provided
+        notes.']
+    breaking_changes: [No breaking changes are listed in the provided release note
+        text; you need the 'Announcing 1.30' page content or detailed changelog to
+        identify any. Treat this as 'unknown' until validated from the official release
+        notes/migration guide.]
   chart_version: 1.30.0
   images: ['registry.istio.io/release/pilot:1.30.0']
   eolAt: '2026-11-30'
@@ -17,7 +27,18 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['No Helm chart changelog was provided in the notes shared (only
+        upstream Istio application release metadata and asset lists), so no chart
+        template/value changes can be identified from this input.']
+    features: [No concrete 1.29.0 feature items were included in the provided notes
+        (only links to the full release notes). Review the linked 1.29.0 announcement
+        page for user-facing features and improvements before upgrading.]
+    breaking_changes: ['No breaking changes were included in the provided notes. You
+        must review the linked 1.29.0 release notes and any ''Upgrade Notes'' section
+        to identify removals, behavior changes, or config deprecations that could
+        affect your cluster.']
   chart_version: 1.29.0
   images: ['docker.io/istio/pilot:1.29.0']
   eolAt: '2026-08-31'
@@ -25,15 +46,31 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [New Istio release 1.28.0 published (see official release notes link
+        provided)., 'Updated istioctl and platform bundles are available for all supported
+        OS/architectures (linux/amd64, linux/arm64, linux/armv7, macOS, Windows).']
+    breaking_changes: [No breaking changes were included in the provided notes; review
+        the official 1.28.0 announcement for any upgrade-impacting changes not captured
+        here.]
   chart_version: 1.28.0
   images: ['docker.io/istio/pilot:1.28.0']
-  eolAt: '2026-05-31'
+  eolAt: '2026-06-28'
 - version: 1.27.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes links moved from 1.26.x to 1.27.x (new minor release),
+        with updated istioctl/istio artifacts for multiple platforms.', Updated Istio
+        and istioctl binaries/images to version 1.27.0 (new tarballs/zips and SPDX
+        files published).]
+    breaking_changes: [No breaking changes were included in the provided notes; verify
+        the official 1.27 upgrade notes for deprecations/removals before upgrading.]
   chart_version: 1.27.0
   images: ['docker.io/istio/pilot:1.27.0']
   eolAt: '2026-04-07'
@@ -41,7 +78,16 @@ versions:
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Upgrade target is Istio 1.26.0 (published 2025-05-08); new istioctl/istio
+        binaries and artifacts are available for multiple platforms., No functional
+        changes are described in the provided notes; only release metadata and artifact
+        listings are included.]
+    breaking_changes: ['No breaking changes are listed in the provided release notes
+        snippet; you should review the official Istio 1.26.x announcement/changelog
+        for deprecations, API changes, and upgrade notes before proceeding.']
   chart_version: 1.26.0
   images: ['docker.io/istio/pilot:1.26.0']
   eolAt: '2025-12-22'
@@ -49,7 +95,15 @@ versions:
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No actionable feature details were included in the provided notes beyond
+        links and artifact lists; refer to the official 1.25 release notes page for
+        the actual feature list before upgrading.]
+    breaking_changes: [No breaking-change details were included in the provided notes
+        beyond links and artifact lists; review the official 1.25 release notes and
+        upgrade notes for any behavior/config/API changes before proceeding.]
   chart_version: 1.25.0
   images: ['docker.io/istio/pilot:1.25.0']
   eolAt: '2025-09-30'
@@ -57,7 +111,15 @@ versions:
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided are just release metadata/assets links; no
+        actual 1.24.0 vs 1.23.0 feature list was included, so specific new features
+        cannot be summarized from the supplied text.']
+    breaking_changes: ['No breaking-change details were included in the supplied notes
+        (only release metadata and artifact lists), so breaking changes cannot be
+        identified from this input.']
   chart_version: 1.24.0
   images: ['docker.io/istio/pilot:1.24.0']
   eolAt: '2025-06-24'
@@ -65,7 +127,15 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [1.23.0 is a new Istio minor release compared to 1.22.0; use the matching
+        1.23.0 artifacts/istioctl and upgrade control plane + data plane in a coordinated
+        rollout.]
+    breaking_changes: [No specific breaking changes were provided in the pasted release
+        notes (only metadata and asset lists). Review the official 1.23.0 release
+        notes link for deprecations/behavior changes before upgrading.]
   chart_version: 1.23.0
   images: ['docker.io/istio/pilot:1.23.0']
   eolAt: '2025-04-16'
@@ -73,7 +143,18 @@ versions:
   kube: ['1.30', '1.29', 1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release note excerpt provided contains primarily metadata (dates,
+        links, artifacts) for Istio 1.21.0 and 1.22.0; no functional changes, new
+        features, or upgrade-impacting behavior changes are listed in the text you
+        pasted.', Both versions publish new istioctl and istio distribution artifacts
+        for multiple OS/arch combinations; your upgrade should use the matching 1.22.0
+        istioctl to install/validate 1.22 control plane changes.]
+    breaking_changes: [No breaking changes are described in the provided text; to
+        assess real breaking/behavior changes you must review the linked Istio 1.22
+        release notes page (and especially the 'Upgrade Notes' / 'Deprecations' sections).]
   chart_version: 1.22.0
   images: ['docker.io/istio/pilot:1.22.0']
   eolAt: '2025-01-22'
@@ -81,7 +162,14 @@ versions:
   kube: ['1.29', 1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided only include metadata and artifact lists for
+        1.20.0 and 1.21.0, without the actual change log content; no concrete feature
+        deltas can be extracted from the text shared.']
+    breaking_changes: [No breaking changes can be determined from the provided release
+        note excerpts because they do not include the detailed changelog/upgrade notes.]
   chart_version: 1.21.0
   images: ['docker.io/istio/pilot:1.21.0']
   eolAt: '2024-09-27'
@@ -89,7 +177,16 @@ versions:
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided include artifact listings and links but do
+        not include the actual 1.20 feature list; review the official 1.20 announcement
+        for specifics (telemetry, ambient, gateway, security, and UX improvements
+        are typical areas).']
+    breaking_changes: [No breaking changes were included in the provided excerpts;
+        you must check the 1.19 and 1.20 upgrade notes/Deprecations pages before upgrading
+        from 1.18 to 1.20.]
   chart_version: 1.20.0
   images: ['docker.io/istio/pilot:1.20.0']
   eolAt: '2024-06-25'
@@ -97,7 +194,16 @@ versions:
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided here mostly list artifacts and metadata; no
+        concrete feature list for 1.18.0 vs 1.17.0 is included in the pasted content.
+        See the linked Istio 1.18 announcement/release notes for the actual new features
+        and improvements (traffic management, security, telemetry, platform support).']
+    breaking_changes: [No breaking-change details are included in the pasted content;
+        breaking changes (if any) must be taken from the Istio 1.18 release notes
+        / upgrade notes page linked in the announcement.]
   chart_version: 1.18.0
   images: ['docker.io/istio/pilot:1.18.0']
   eolAt: '2024-01-04'
@@ -105,7 +211,19 @@ versions:
   kube: ['1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['This note set you provided is mostly metadata (artifact links, file
+        sizes, download counts) for 1.16.0 and 1.17.0; it does not include the actual
+        1.17 feature list.', 'From the official 1.17 announcement page (linked), you
+        should extract the specific new features/fixes relevant to your cluster (ambient/sidecar
+        behavior, gateway changes, telemetry, security, etc.).']
+    breaking_changes: [No breaking changes can be reliably identified from the pasted
+        content because it doesn't include the 'upgrade notes'/deprecations section
+        from the 1.17 release notes., 'Check the 1.17 release notes for removals/deprecations
+        and any required API/version bumps (Kubernetes version support, Envoy, gateway
+        APIs) before upgrading.']
   chart_version: 1.17.0
   images: ['docker.io/istio/pilot:1.17.0']
   eolAt: '2023-10-27'
@@ -113,7 +231,16 @@ versions:
   kube: ['1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Istio 1.16.0 is a new minor release over 1.14.0; expect updated control
+        plane and sidecar images, plus fixes and enhancements across traffic management,
+        security, and observability (details not included in provided notes).']
+    breaking_changes: ['The provided release snippets do not include upgrade notes,
+        deprecations, or breaking changes; you must review the official 1.15.x and
+        1.16.x upgrade notes before proceeding to catch any incompatible API/behavior
+        changes.']
   chart_version: 1.16.0
   images: ['docker.io/istio/pilot:1.16.0']
   eolAt: '2023-07-25'
@@ -121,7 +248,17 @@ versions:
   kube: ['1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided are metadata (dates, assets, links) for Istio
+        1.14.0 vs 1.13.0; no functional changes are listed in the excerpt.', 'Upgrade
+        involves moving Istio control plane and istioctl binaries to 1.14.0 artifacts
+        for your platform (amd64/arm64/armv7, etc.).']
+    breaking_changes: [No breaking changes can be determined from the provided notes
+        because they do not include feature/behavior/deprecation details. Review the
+        linked Istio 1.14.0 announcement and full release notes for breaking changes
+        and upgrade notes before proceeding.]
   chart_version: 1.14.0
   images: ['docker.io/istio/pilot:1.14.0']
   eolAt: '2022-12-27'
@@ -129,7 +266,17 @@ versions:
   kube: ['1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Istio 1.13.0 is the target version for the upgrade from 1.12.0; the
+        notes provided here only include release metadata and artifact lists, not
+        functional changes.', 'New build artifacts are published for Istio 1.13.0
+        across linux/osx/windows and amd64/arm64/armv7, including separate istioctl
+        bundles.']
+    breaking_changes: ['No breaking changes were included in the provided release
+        notes excerpt; consult the official Istio 1.13.0 announcement/changelog and
+        the 1.13 upgrade notes for any removals, deprecations, or behavior changes.']
   chart_version: 1.13.0
   images: ['docker.io/istio/pilot:1.13.0']
   eolAt: '2022-10-12'

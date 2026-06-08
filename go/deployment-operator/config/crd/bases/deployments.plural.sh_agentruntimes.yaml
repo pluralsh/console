@@ -1785,6 +1785,16 @@ spec:
                         description: Endpoint is the base URL for the Codex API (supports
                           OpenAI/Azure-compatible endpoints).
                         type: string
+                      method:
+                        description: |-
+                          Method configures which OpenAI API Codex should use.
+                          AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.
+                          RESPONSES forces /responses.
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
+                        type: string
                       model:
                         description: Model to use.
                         type: string

@@ -14,6 +14,7 @@ import {
   LokiLogoIcon,
   McpLogoIcon,
   MsTeamsLogoIcon,
+  OpenSearchLogoIcon,
   PrometheusLogoIcon,
   SentryLogoIcon,
   PagerdutyLogoIcon,
@@ -37,6 +38,7 @@ import styled from 'styled-components'
 const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Datadog,
   WorkbenchToolType.Elastic,
+  WorkbenchToolType.Opensearch,
   WorkbenchToolType.Http,
   WorkbenchToolType.Loki,
   WorkbenchToolType.Prometheus,
@@ -70,6 +72,7 @@ export type ConfigurableWorkbenchToolType =
 export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Http]: 'http',
   [WorkbenchToolType.Elastic]: 'elastic',
+  [WorkbenchToolType.Opensearch]: 'opensearch',
   [WorkbenchToolType.Prometheus]: 'prometheus',
   [WorkbenchToolType.Loki]: 'loki',
   [WorkbenchToolType.Tempo]: 'tempo',
@@ -130,6 +133,7 @@ const WORKBENCH_TOOL_LABELS: Record<
 > = {
   [WorkbenchToolType.Http]: 'Custom',
   [WorkbenchToolType.Elastic]: 'Elasticsearch',
+  [WorkbenchToolType.Opensearch]: 'OpenSearch',
   [WorkbenchToolType.Prometheus]: 'Prometheus',
   [WorkbenchToolType.Loki]: 'Loki',
   [WorkbenchToolType.Tempo]: 'Tempo',
@@ -175,6 +179,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Logs,
   ],
   [WorkbenchToolType.Elastic]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Opensearch]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Prometheus]: [WorkbenchToolCategory.Metrics],
   [WorkbenchToolType.Loki]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
@@ -217,6 +222,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
 > = {
   [WorkbenchToolType.Datadog]: 'Connect to Datadog for metrics, logs, and APM.',
   [WorkbenchToolType.Elastic]: 'Query logs and search data in Elasticsearch.',
+  [WorkbenchToolType.Opensearch]:
+    'Query logs and search data in AWS OpenSearch using SigV4 auth.',
   [WorkbenchToolType.Prometheus]:
     'Query metrics from Prometheus or Prometheus-compatible stores.',
   [WorkbenchToolType.Loki]: 'Query log data from Grafana Loki.',
@@ -383,6 +390,7 @@ const toolToIcon: Record<
 > = {
   [WorkbenchToolType.Datadog]: DatadogLogoIcon,
   [WorkbenchToolType.Elastic]: ElasticsearchLogoIcon,
+  [WorkbenchToolType.Opensearch]: OpenSearchLogoIcon,
   [WorkbenchToolType.Loki]: LokiLogoIcon,
   [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
   [WorkbenchToolType.Tempo]: TempoLogoIcon,

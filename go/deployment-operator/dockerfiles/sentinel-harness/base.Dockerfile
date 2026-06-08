@@ -1,4 +1,4 @@
-FROM golang:1.26.3-alpine AS builder
+FROM golang:1.26.4-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS  
@@ -31,7 +31,7 @@ RUN CGO_ENABLED=0 \
     -o /sentinel-harness \
     cmd/sentinel-harness/main.go
 
-FROM golang:1.26.3-alpine AS final
+FROM golang:1.26.4-alpine AS final
 
 ARG TARGETARCH
 ARG TARGETOS

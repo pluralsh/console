@@ -103,6 +103,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_provider, :ai_provider, description: "ai provider to use with embeddings (for vector indexing)"
     field :log_analysis,       :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
     field :openai,             :openai_settings_attributes
+    field :openai_compatible,  :openai_settings_attributes
     field :anthropic,          :anthropic_settings_attributes
     field :ollama,             :ollama_attributes
     field :azure,              :azure_openai_attributes
@@ -350,18 +351,25 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for configuring access to common LLM providers"
   object :ai_settings do
-    field :enabled,        :boolean
-    field :analysis_rates, :ai_analysis_rates
-    field :tools_enabled,  :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
-    field :provider,       :ai_provider
-    field :tool_provider,  :ai_provider, description: "ai provider to use with tool calls"
-    field :log_analysis,   :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
-    field :openai,         :openai_settings
-    field :anthropic,      :anthropic_settings
-    field :ollama,         :ollama_settings
-    field :azure,          :azure_openai_settings
-    field :bedrock,        :bedrock_ai_settings
-    field :vertex,         :vertex_ai_settings
+    field :enabled,           :boolean
+    field :analysis_rates,    :ai_analysis_rates
+    field :tools_enabled,     :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
+    field :provider,          :ai_provider
+    field :tool_provider,     :ai_provider, description: "ai provider to use with tool calls"
+    field :log_analysis,      :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
+    field :vector_store,      :vector_store_settings, description: "settings for vector-backed search"
+    field :openai,            :openai_settings
+    field :openai_compatible, :openai_settings
+    field :anthropic,         :anthropic_settings
+    field :ollama,            :ollama_settings
+    field :azure,             :azure_openai_settings
+    field :bedrock,           :bedrock_ai_settings
+    field :vertex,            :vertex_ai_settings
+  end
+
+  object :vector_store_settings do
+    field :enabled, :boolean
+    field :store,   :vector_store
   end
 
   object :ai_analysis_rates do

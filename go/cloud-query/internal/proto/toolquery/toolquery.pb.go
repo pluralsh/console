@@ -91,6 +91,98 @@ func (x *ElasticConnection) GetIndex() string {
 	return ""
 }
 
+type OpensearchConnection struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Host               string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Index              string                 `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+	AwsAccessKeyId     *string                `protobuf:"bytes,3,opt,name=aws_access_key_id,json=awsAccessKeyId,proto3,oneof" json:"aws_access_key_id,omitempty"`
+	AwsSecretAccessKey *string                `protobuf:"bytes,4,opt,name=aws_secret_access_key,json=awsSecretAccessKey,proto3,oneof" json:"aws_secret_access_key,omitempty"`
+	AwsRegion          *string                `protobuf:"bytes,5,opt,name=aws_region,json=awsRegion,proto3,oneof" json:"aws_region,omitempty"`
+	UsePodIdentity     *bool                  `protobuf:"varint,6,opt,name=use_pod_identity,json=usePodIdentity,proto3,oneof" json:"use_pod_identity,omitempty"`
+	AssumeRoleArn      *string                `protobuf:"bytes,7,opt,name=assume_role_arn,json=assumeRoleArn,proto3,oneof" json:"assume_role_arn,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *OpensearchConnection) Reset() {
+	*x = OpensearchConnection{}
+	mi := &file_toolquery_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OpensearchConnection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpensearchConnection) ProtoMessage() {}
+
+func (x *OpensearchConnection) ProtoReflect() protoreflect.Message {
+	mi := &file_toolquery_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpensearchConnection.ProtoReflect.Descriptor instead.
+func (*OpensearchConnection) Descriptor() ([]byte, []int) {
+	return file_toolquery_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *OpensearchConnection) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *OpensearchConnection) GetIndex() string {
+	if x != nil {
+		return x.Index
+	}
+	return ""
+}
+
+func (x *OpensearchConnection) GetAwsAccessKeyId() string {
+	if x != nil && x.AwsAccessKeyId != nil {
+		return *x.AwsAccessKeyId
+	}
+	return ""
+}
+
+func (x *OpensearchConnection) GetAwsSecretAccessKey() string {
+	if x != nil && x.AwsSecretAccessKey != nil {
+		return *x.AwsSecretAccessKey
+	}
+	return ""
+}
+
+func (x *OpensearchConnection) GetAwsRegion() string {
+	if x != nil && x.AwsRegion != nil {
+		return *x.AwsRegion
+	}
+	return ""
+}
+
+func (x *OpensearchConnection) GetUsePodIdentity() bool {
+	if x != nil && x.UsePodIdentity != nil {
+		return *x.UsePodIdentity
+	}
+	return false
+}
+
+func (x *OpensearchConnection) GetAssumeRoleArn() string {
+	if x != nil && x.AssumeRoleArn != nil {
+		return *x.AssumeRoleArn
+	}
+	return ""
+}
+
 type DatadogConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Site          *string                `protobuf:"bytes,1,opt,name=site,proto3,oneof" json:"site,omitempty"`
@@ -102,7 +194,7 @@ type DatadogConnection struct {
 
 func (x *DatadogConnection) Reset() {
 	*x = DatadogConnection{}
-	mi := &file_toolquery_proto_msgTypes[1]
+	mi := &file_toolquery_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -114,7 +206,7 @@ func (x *DatadogConnection) String() string {
 func (*DatadogConnection) ProtoMessage() {}
 
 func (x *DatadogConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[1]
+	mi := &file_toolquery_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -127,7 +219,7 @@ func (x *DatadogConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatadogConnection.ProtoReflect.Descriptor instead.
 func (*DatadogConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{1}
+	return file_toolquery_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *DatadogConnection) GetSite() string {
@@ -168,7 +260,7 @@ type PrometheusConnection struct {
 
 func (x *PrometheusConnection) Reset() {
 	*x = PrometheusConnection{}
-	mi := &file_toolquery_proto_msgTypes[2]
+	mi := &file_toolquery_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -180,7 +272,7 @@ func (x *PrometheusConnection) String() string {
 func (*PrometheusConnection) ProtoMessage() {}
 
 func (x *PrometheusConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[2]
+	mi := &file_toolquery_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -193,7 +285,7 @@ func (x *PrometheusConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrometheusConnection.ProtoReflect.Descriptor instead.
 func (*PrometheusConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{2}
+	return file_toolquery_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PrometheusConnection) GetUrl() string {
@@ -272,7 +364,7 @@ type LokiConnection struct {
 
 func (x *LokiConnection) Reset() {
 	*x = LokiConnection{}
-	mi := &file_toolquery_proto_msgTypes[3]
+	mi := &file_toolquery_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -284,7 +376,7 @@ func (x *LokiConnection) String() string {
 func (*LokiConnection) ProtoMessage() {}
 
 func (x *LokiConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[3]
+	mi := &file_toolquery_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -297,7 +389,7 @@ func (x *LokiConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LokiConnection.ProtoReflect.Descriptor instead.
 func (*LokiConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{3}
+	return file_toolquery_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *LokiConnection) GetUrl() string {
@@ -348,7 +440,7 @@ type TempoConnection struct {
 
 func (x *TempoConnection) Reset() {
 	*x = TempoConnection{}
-	mi := &file_toolquery_proto_msgTypes[4]
+	mi := &file_toolquery_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -360,7 +452,7 @@ func (x *TempoConnection) String() string {
 func (*TempoConnection) ProtoMessage() {}
 
 func (x *TempoConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[4]
+	mi := &file_toolquery_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -373,7 +465,7 @@ func (x *TempoConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TempoConnection.ProtoReflect.Descriptor instead.
 func (*TempoConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{4}
+	return file_toolquery_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *TempoConnection) GetUrl() string {
@@ -423,7 +515,7 @@ type JaegerConnection struct {
 
 func (x *JaegerConnection) Reset() {
 	*x = JaegerConnection{}
-	mi := &file_toolquery_proto_msgTypes[5]
+	mi := &file_toolquery_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -435,7 +527,7 @@ func (x *JaegerConnection) String() string {
 func (*JaegerConnection) ProtoMessage() {}
 
 func (x *JaegerConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[5]
+	mi := &file_toolquery_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -448,7 +540,7 @@ func (x *JaegerConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JaegerConnection.ProtoReflect.Descriptor instead.
 func (*JaegerConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{5}
+	return file_toolquery_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *JaegerConnection) GetUrl() string {
@@ -491,7 +583,7 @@ type SplunkConnection struct {
 
 func (x *SplunkConnection) Reset() {
 	*x = SplunkConnection{}
-	mi := &file_toolquery_proto_msgTypes[6]
+	mi := &file_toolquery_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -503,7 +595,7 @@ func (x *SplunkConnection) String() string {
 func (*SplunkConnection) ProtoMessage() {}
 
 func (x *SplunkConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[6]
+	mi := &file_toolquery_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -516,7 +608,7 @@ func (x *SplunkConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SplunkConnection.ProtoReflect.Descriptor instead.
 func (*SplunkConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{6}
+	return file_toolquery_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SplunkConnection) GetUrl() string {
@@ -557,7 +649,7 @@ type DynatraceConnection struct {
 
 func (x *DynatraceConnection) Reset() {
 	*x = DynatraceConnection{}
-	mi := &file_toolquery_proto_msgTypes[7]
+	mi := &file_toolquery_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -569,7 +661,7 @@ func (x *DynatraceConnection) String() string {
 func (*DynatraceConnection) ProtoMessage() {}
 
 func (x *DynatraceConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[7]
+	mi := &file_toolquery_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -582,7 +674,7 @@ func (x *DynatraceConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DynatraceConnection.ProtoReflect.Descriptor instead.
 func (*DynatraceConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{7}
+	return file_toolquery_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DynatraceConnection) GetUrl() string {
@@ -614,7 +706,7 @@ type CloudwatchConnection struct {
 
 func (x *CloudwatchConnection) Reset() {
 	*x = CloudwatchConnection{}
-	mi := &file_toolquery_proto_msgTypes[8]
+	mi := &file_toolquery_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -626,7 +718,7 @@ func (x *CloudwatchConnection) String() string {
 func (*CloudwatchConnection) ProtoMessage() {}
 
 func (x *CloudwatchConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[8]
+	mi := &file_toolquery_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -639,7 +731,7 @@ func (x *CloudwatchConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloudwatchConnection.ProtoReflect.Descriptor instead.
 func (*CloudwatchConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{8}
+	return file_toolquery_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CloudwatchConnection) GetRegion() string {
@@ -703,7 +795,7 @@ type AzureConnection struct {
 
 func (x *AzureConnection) Reset() {
 	*x = AzureConnection{}
-	mi := &file_toolquery_proto_msgTypes[9]
+	mi := &file_toolquery_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -715,7 +807,7 @@ func (x *AzureConnection) String() string {
 func (*AzureConnection) ProtoMessage() {}
 
 func (x *AzureConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[9]
+	mi := &file_toolquery_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -728,7 +820,7 @@ func (x *AzureConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AzureConnection.ProtoReflect.Descriptor instead.
 func (*AzureConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{9}
+	return file_toolquery_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *AzureConnection) GetSubscriptionId() string {
@@ -773,6 +865,7 @@ type ToolConnection struct {
 	//	*ToolConnection_Cloudwatch
 	//	*ToolConnection_Azure
 	//	*ToolConnection_Jaeger
+	//	*ToolConnection_Opensearch
 	Connection    isToolConnection_Connection `protobuf_oneof:"connection"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -780,7 +873,7 @@ type ToolConnection struct {
 
 func (x *ToolConnection) Reset() {
 	*x = ToolConnection{}
-	mi := &file_toolquery_proto_msgTypes[10]
+	mi := &file_toolquery_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -792,7 +885,7 @@ func (x *ToolConnection) String() string {
 func (*ToolConnection) ProtoMessage() {}
 
 func (x *ToolConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[10]
+	mi := &file_toolquery_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -805,7 +898,7 @@ func (x *ToolConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToolConnection.ProtoReflect.Descriptor instead.
 func (*ToolConnection) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{10}
+	return file_toolquery_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ToolConnection) GetConnection() isToolConnection_Connection {
@@ -905,6 +998,15 @@ func (x *ToolConnection) GetJaeger() *JaegerConnection {
 	return nil
 }
 
+func (x *ToolConnection) GetOpensearch() *OpensearchConnection {
+	if x != nil {
+		if x, ok := x.Connection.(*ToolConnection_Opensearch); ok {
+			return x.Opensearch
+		}
+	}
+	return nil
+}
+
 type isToolConnection_Connection interface {
 	isToolConnection_Connection()
 }
@@ -949,6 +1051,10 @@ type ToolConnection_Jaeger struct {
 	Jaeger *JaegerConnection `protobuf:"bytes,10,opt,name=jaeger,proto3,oneof"`
 }
 
+type ToolConnection_Opensearch struct {
+	Opensearch *OpensearchConnection `protobuf:"bytes,11,opt,name=opensearch,proto3,oneof"`
+}
+
 func (*ToolConnection_Elastic) isToolConnection_Connection() {}
 
 func (*ToolConnection_Datadog) isToolConnection_Connection() {}
@@ -969,6 +1075,8 @@ func (*ToolConnection_Azure) isToolConnection_Connection() {}
 
 func (*ToolConnection_Jaeger) isToolConnection_Connection() {}
 
+func (*ToolConnection_Opensearch) isToolConnection_Connection() {}
+
 type TimeRange struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Start         *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
@@ -979,7 +1087,7 @@ type TimeRange struct {
 
 func (x *TimeRange) Reset() {
 	*x = TimeRange{}
-	mi := &file_toolquery_proto_msgTypes[11]
+	mi := &file_toolquery_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -991,7 +1099,7 @@ func (x *TimeRange) String() string {
 func (*TimeRange) ProtoMessage() {}
 
 func (x *TimeRange) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[11]
+	mi := &file_toolquery_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1004,7 +1112,7 @@ func (x *TimeRange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TimeRange.ProtoReflect.Descriptor instead.
 func (*TimeRange) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{11}
+	return file_toolquery_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *TimeRange) GetStart() *timestamppb.Timestamp {
@@ -1034,7 +1142,7 @@ type MetricsQueryInput struct {
 
 func (x *MetricsQueryInput) Reset() {
 	*x = MetricsQueryInput{}
-	mi := &file_toolquery_proto_msgTypes[12]
+	mi := &file_toolquery_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1046,7 +1154,7 @@ func (x *MetricsQueryInput) String() string {
 func (*MetricsQueryInput) ProtoMessage() {}
 
 func (x *MetricsQueryInput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[12]
+	mi := &file_toolquery_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1059,7 +1167,7 @@ func (x *MetricsQueryInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsQueryInput.ProtoReflect.Descriptor instead.
 func (*MetricsQueryInput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{12}
+	return file_toolquery_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *MetricsQueryInput) GetConnection() *ToolConnection {
@@ -1106,7 +1214,7 @@ type MetricsOptions struct {
 
 func (x *MetricsOptions) Reset() {
 	*x = MetricsOptions{}
-	mi := &file_toolquery_proto_msgTypes[13]
+	mi := &file_toolquery_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1118,7 +1226,7 @@ func (x *MetricsOptions) String() string {
 func (*MetricsOptions) ProtoMessage() {}
 
 func (x *MetricsOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[13]
+	mi := &file_toolquery_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1131,7 +1239,7 @@ func (x *MetricsOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsOptions.ProtoReflect.Descriptor instead.
 func (*MetricsOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{13}
+	return file_toolquery_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *MetricsOptions) GetAzure() *AzureMetricsOptions {
@@ -1157,7 +1265,7 @@ type AzureMetricsOptions struct {
 
 func (x *AzureMetricsOptions) Reset() {
 	*x = AzureMetricsOptions{}
-	mi := &file_toolquery_proto_msgTypes[14]
+	mi := &file_toolquery_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1169,7 +1277,7 @@ func (x *AzureMetricsOptions) String() string {
 func (*AzureMetricsOptions) ProtoMessage() {}
 
 func (x *AzureMetricsOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[14]
+	mi := &file_toolquery_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1182,7 +1290,7 @@ func (x *AzureMetricsOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AzureMetricsOptions.ProtoReflect.Descriptor instead.
 func (*AzureMetricsOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{14}
+	return file_toolquery_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AzureMetricsOptions) GetResourceId() string {
@@ -1251,7 +1359,7 @@ type LogsQueryFacet struct {
 
 func (x *LogsQueryFacet) Reset() {
 	*x = LogsQueryFacet{}
-	mi := &file_toolquery_proto_msgTypes[15]
+	mi := &file_toolquery_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1263,7 +1371,7 @@ func (x *LogsQueryFacet) String() string {
 func (*LogsQueryFacet) ProtoMessage() {}
 
 func (x *LogsQueryFacet) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[15]
+	mi := &file_toolquery_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1276,7 +1384,7 @@ func (x *LogsQueryFacet) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogsQueryFacet.ProtoReflect.Descriptor instead.
 func (*LogsQueryFacet) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{15}
+	return file_toolquery_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *LogsQueryFacet) GetName() string {
@@ -1307,7 +1415,7 @@ type LogsQueryInput struct {
 
 func (x *LogsQueryInput) Reset() {
 	*x = LogsQueryInput{}
-	mi := &file_toolquery_proto_msgTypes[16]
+	mi := &file_toolquery_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1319,7 +1427,7 @@ func (x *LogsQueryInput) String() string {
 func (*LogsQueryInput) ProtoMessage() {}
 
 func (x *LogsQueryInput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[16]
+	mi := &file_toolquery_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1332,7 +1440,7 @@ func (x *LogsQueryInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogsQueryInput.ProtoReflect.Descriptor instead.
 func (*LogsQueryInput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{16}
+	return file_toolquery_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *LogsQueryInput) GetConnection() *ToolConnection {
@@ -1386,7 +1494,7 @@ type LogsOptions struct {
 
 func (x *LogsOptions) Reset() {
 	*x = LogsOptions{}
-	mi := &file_toolquery_proto_msgTypes[17]
+	mi := &file_toolquery_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1398,7 +1506,7 @@ func (x *LogsOptions) String() string {
 func (*LogsOptions) ProtoMessage() {}
 
 func (x *LogsOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[17]
+	mi := &file_toolquery_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1411,7 +1519,7 @@ func (x *LogsOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogsOptions.ProtoReflect.Descriptor instead.
 func (*LogsOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{17}
+	return file_toolquery_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *LogsOptions) GetAzure() *AzureLogsOptions {
@@ -1430,7 +1538,7 @@ type AzureLogsOptions struct {
 
 func (x *AzureLogsOptions) Reset() {
 	*x = AzureLogsOptions{}
-	mi := &file_toolquery_proto_msgTypes[18]
+	mi := &file_toolquery_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1442,7 +1550,7 @@ func (x *AzureLogsOptions) String() string {
 func (*AzureLogsOptions) ProtoMessage() {}
 
 func (x *AzureLogsOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[18]
+	mi := &file_toolquery_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1455,7 +1563,7 @@ func (x *AzureLogsOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AzureLogsOptions.ProtoReflect.Descriptor instead.
 func (*AzureLogsOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{18}
+	return file_toolquery_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *AzureLogsOptions) GetResourceId() string {
@@ -1478,7 +1586,7 @@ type TracesQueryInput struct {
 
 func (x *TracesQueryInput) Reset() {
 	*x = TracesQueryInput{}
-	mi := &file_toolquery_proto_msgTypes[19]
+	mi := &file_toolquery_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1490,7 +1598,7 @@ func (x *TracesQueryInput) String() string {
 func (*TracesQueryInput) ProtoMessage() {}
 
 func (x *TracesQueryInput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[19]
+	mi := &file_toolquery_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1503,7 +1611,7 @@ func (x *TracesQueryInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TracesQueryInput.ProtoReflect.Descriptor instead.
 func (*TracesQueryInput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{19}
+	return file_toolquery_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *TracesQueryInput) GetConnection() *ToolConnection {
@@ -1550,7 +1658,7 @@ type TracesOptions struct {
 
 func (x *TracesOptions) Reset() {
 	*x = TracesOptions{}
-	mi := &file_toolquery_proto_msgTypes[20]
+	mi := &file_toolquery_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1562,7 +1670,7 @@ func (x *TracesOptions) String() string {
 func (*TracesOptions) ProtoMessage() {}
 
 func (x *TracesOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[20]
+	mi := &file_toolquery_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1575,7 +1683,7 @@ func (x *TracesOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TracesOptions.ProtoReflect.Descriptor instead.
 func (*TracesOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{20}
+	return file_toolquery_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *TracesOptions) GetJaeger() *JaegerTracesOptions {
@@ -1595,7 +1703,7 @@ type JaegerTraceQueryAttribute struct {
 
 func (x *JaegerTraceQueryAttribute) Reset() {
 	*x = JaegerTraceQueryAttribute{}
-	mi := &file_toolquery_proto_msgTypes[21]
+	mi := &file_toolquery_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1607,7 +1715,7 @@ func (x *JaegerTraceQueryAttribute) String() string {
 func (*JaegerTraceQueryAttribute) ProtoMessage() {}
 
 func (x *JaegerTraceQueryAttribute) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[21]
+	mi := &file_toolquery_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1620,7 +1728,7 @@ func (x *JaegerTraceQueryAttribute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JaegerTraceQueryAttribute.ProtoReflect.Descriptor instead.
 func (*JaegerTraceQueryAttribute) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{21}
+	return file_toolquery_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *JaegerTraceQueryAttribute) GetName() string {
@@ -1649,7 +1757,7 @@ type JaegerTracesOptions struct {
 
 func (x *JaegerTracesOptions) Reset() {
 	*x = JaegerTracesOptions{}
-	mi := &file_toolquery_proto_msgTypes[22]
+	mi := &file_toolquery_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1661,7 +1769,7 @@ func (x *JaegerTracesOptions) String() string {
 func (*JaegerTracesOptions) ProtoMessage() {}
 
 func (x *JaegerTracesOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[22]
+	mi := &file_toolquery_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1674,7 +1782,7 @@ func (x *JaegerTracesOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JaegerTracesOptions.ProtoReflect.Descriptor instead.
 func (*JaegerTracesOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{22}
+	return file_toolquery_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *JaegerTracesOptions) GetOperationName() string {
@@ -1717,7 +1825,7 @@ type MetricPoint struct {
 
 func (x *MetricPoint) Reset() {
 	*x = MetricPoint{}
-	mi := &file_toolquery_proto_msgTypes[23]
+	mi := &file_toolquery_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1729,7 +1837,7 @@ func (x *MetricPoint) String() string {
 func (*MetricPoint) ProtoMessage() {}
 
 func (x *MetricPoint) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[23]
+	mi := &file_toolquery_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1742,7 +1850,7 @@ func (x *MetricPoint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricPoint.ProtoReflect.Descriptor instead.
 func (*MetricPoint) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{23}
+	return file_toolquery_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *MetricPoint) GetTimestamp() *timestamppb.Timestamp {
@@ -1782,7 +1890,7 @@ type MetricsQueryOutput struct {
 
 func (x *MetricsQueryOutput) Reset() {
 	*x = MetricsQueryOutput{}
-	mi := &file_toolquery_proto_msgTypes[24]
+	mi := &file_toolquery_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1794,7 +1902,7 @@ func (x *MetricsQueryOutput) String() string {
 func (*MetricsQueryOutput) ProtoMessage() {}
 
 func (x *MetricsQueryOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[24]
+	mi := &file_toolquery_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1807,7 +1915,7 @@ func (x *MetricsQueryOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsQueryOutput.ProtoReflect.Descriptor instead.
 func (*MetricsQueryOutput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{24}
+	return file_toolquery_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *MetricsQueryOutput) GetMetrics() []*MetricPoint {
@@ -1834,7 +1942,7 @@ type MetricsSearchInput struct {
 
 func (x *MetricsSearchInput) Reset() {
 	*x = MetricsSearchInput{}
-	mi := &file_toolquery_proto_msgTypes[25]
+	mi := &file_toolquery_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1846,7 +1954,7 @@ func (x *MetricsSearchInput) String() string {
 func (*MetricsSearchInput) ProtoMessage() {}
 
 func (x *MetricsSearchInput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[25]
+	mi := &file_toolquery_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1859,7 +1967,7 @@ func (x *MetricsSearchInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsSearchInput.ProtoReflect.Descriptor instead.
 func (*MetricsSearchInput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{25}
+	return file_toolquery_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *MetricsSearchInput) GetConnection() *ToolConnection {
@@ -1899,7 +2007,7 @@ type MetricsSearchOptions struct {
 
 func (x *MetricsSearchOptions) Reset() {
 	*x = MetricsSearchOptions{}
-	mi := &file_toolquery_proto_msgTypes[26]
+	mi := &file_toolquery_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1911,7 +2019,7 @@ func (x *MetricsSearchOptions) String() string {
 func (*MetricsSearchOptions) ProtoMessage() {}
 
 func (x *MetricsSearchOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[26]
+	mi := &file_toolquery_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1924,7 +2032,7 @@ func (x *MetricsSearchOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsSearchOptions.ProtoReflect.Descriptor instead.
 func (*MetricsSearchOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{26}
+	return file_toolquery_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *MetricsSearchOptions) GetAzure() *AzureMetricsSearchOptions {
@@ -1944,7 +2052,7 @@ type AzureMetricsSearchOptions struct {
 
 func (x *AzureMetricsSearchOptions) Reset() {
 	*x = AzureMetricsSearchOptions{}
-	mi := &file_toolquery_proto_msgTypes[27]
+	mi := &file_toolquery_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1956,7 +2064,7 @@ func (x *AzureMetricsSearchOptions) String() string {
 func (*AzureMetricsSearchOptions) ProtoMessage() {}
 
 func (x *AzureMetricsSearchOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[27]
+	mi := &file_toolquery_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1969,7 +2077,7 @@ func (x *AzureMetricsSearchOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AzureMetricsSearchOptions.ProtoReflect.Descriptor instead.
 func (*AzureMetricsSearchOptions) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{27}
+	return file_toolquery_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *AzureMetricsSearchOptions) GetResourceId() string {
@@ -1996,7 +2104,7 @@ type MetricsSearchResult struct {
 
 func (x *MetricsSearchResult) Reset() {
 	*x = MetricsSearchResult{}
-	mi := &file_toolquery_proto_msgTypes[28]
+	mi := &file_toolquery_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2008,7 +2116,7 @@ func (x *MetricsSearchResult) String() string {
 func (*MetricsSearchResult) ProtoMessage() {}
 
 func (x *MetricsSearchResult) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[28]
+	mi := &file_toolquery_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2021,7 +2129,7 @@ func (x *MetricsSearchResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsSearchResult.ProtoReflect.Descriptor instead.
 func (*MetricsSearchResult) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{28}
+	return file_toolquery_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *MetricsSearchResult) GetName() string {
@@ -2040,7 +2148,7 @@ type MetricsSearchOutput struct {
 
 func (x *MetricsSearchOutput) Reset() {
 	*x = MetricsSearchOutput{}
-	mi := &file_toolquery_proto_msgTypes[29]
+	mi := &file_toolquery_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2052,7 +2160,7 @@ func (x *MetricsSearchOutput) String() string {
 func (*MetricsSearchOutput) ProtoMessage() {}
 
 func (x *MetricsSearchOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[29]
+	mi := &file_toolquery_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2065,7 +2173,7 @@ func (x *MetricsSearchOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsSearchOutput.ProtoReflect.Descriptor instead.
 func (*MetricsSearchOutput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{29}
+	return file_toolquery_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *MetricsSearchOutput) GetMetrics() []*MetricsSearchResult {
@@ -2086,7 +2194,7 @@ type LogEntry struct {
 
 func (x *LogEntry) Reset() {
 	*x = LogEntry{}
-	mi := &file_toolquery_proto_msgTypes[30]
+	mi := &file_toolquery_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2098,7 +2206,7 @@ func (x *LogEntry) String() string {
 func (*LogEntry) ProtoMessage() {}
 
 func (x *LogEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[30]
+	mi := &file_toolquery_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2111,7 +2219,7 @@ func (x *LogEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogEntry.ProtoReflect.Descriptor instead.
 func (*LogEntry) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{30}
+	return file_toolquery_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *LogEntry) GetTimestamp() *timestamppb.Timestamp {
@@ -2144,7 +2252,7 @@ type LogsQueryOutput struct {
 
 func (x *LogsQueryOutput) Reset() {
 	*x = LogsQueryOutput{}
-	mi := &file_toolquery_proto_msgTypes[31]
+	mi := &file_toolquery_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2156,7 +2264,7 @@ func (x *LogsQueryOutput) String() string {
 func (*LogsQueryOutput) ProtoMessage() {}
 
 func (x *LogsQueryOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[31]
+	mi := &file_toolquery_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2169,7 +2277,7 @@ func (x *LogsQueryOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogsQueryOutput.ProtoReflect.Descriptor instead.
 func (*LogsQueryOutput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{31}
+	return file_toolquery_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *LogsQueryOutput) GetLogs() []*LogEntry {
@@ -2195,7 +2303,7 @@ type TraceSpan struct {
 
 func (x *TraceSpan) Reset() {
 	*x = TraceSpan{}
-	mi := &file_toolquery_proto_msgTypes[32]
+	mi := &file_toolquery_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2207,7 +2315,7 @@ func (x *TraceSpan) String() string {
 func (*TraceSpan) ProtoMessage() {}
 
 func (x *TraceSpan) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[32]
+	mi := &file_toolquery_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2220,7 +2328,7 @@ func (x *TraceSpan) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TraceSpan.ProtoReflect.Descriptor instead.
 func (*TraceSpan) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{32}
+	return file_toolquery_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *TraceSpan) GetTraceId() string {
@@ -2288,7 +2396,7 @@ type TracesQueryOutput struct {
 
 func (x *TracesQueryOutput) Reset() {
 	*x = TracesQueryOutput{}
-	mi := &file_toolquery_proto_msgTypes[33]
+	mi := &file_toolquery_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2300,7 +2408,7 @@ func (x *TracesQueryOutput) String() string {
 func (*TracesQueryOutput) ProtoMessage() {}
 
 func (x *TracesQueryOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[33]
+	mi := &file_toolquery_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2313,7 +2421,7 @@ func (x *TracesQueryOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TracesQueryOutput.ProtoReflect.Descriptor instead.
 func (*TracesQueryOutput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{33}
+	return file_toolquery_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *TracesQueryOutput) GetSpans() []*TraceSpan {
@@ -2334,7 +2442,7 @@ type InvokeLambdaInput struct {
 
 func (x *InvokeLambdaInput) Reset() {
 	*x = InvokeLambdaInput{}
-	mi := &file_toolquery_proto_msgTypes[34]
+	mi := &file_toolquery_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2346,7 +2454,7 @@ func (x *InvokeLambdaInput) String() string {
 func (*InvokeLambdaInput) ProtoMessage() {}
 
 func (x *InvokeLambdaInput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[34]
+	mi := &file_toolquery_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2359,7 +2467,7 @@ func (x *InvokeLambdaInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvokeLambdaInput.ProtoReflect.Descriptor instead.
 func (*InvokeLambdaInput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{34}
+	return file_toolquery_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *InvokeLambdaInput) GetConnection() *cloudquery.Connection {
@@ -2393,7 +2501,7 @@ type InvokeLambdaOutput struct {
 
 func (x *InvokeLambdaOutput) Reset() {
 	*x = InvokeLambdaOutput{}
-	mi := &file_toolquery_proto_msgTypes[35]
+	mi := &file_toolquery_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2405,7 +2513,7 @@ func (x *InvokeLambdaOutput) String() string {
 func (*InvokeLambdaOutput) ProtoMessage() {}
 
 func (x *InvokeLambdaOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[35]
+	mi := &file_toolquery_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2418,7 +2526,7 @@ func (x *InvokeLambdaOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvokeLambdaOutput.ProtoReflect.Descriptor instead.
 func (*InvokeLambdaOutput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{35}
+	return file_toolquery_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *InvokeLambdaOutput) GetResult() string {
@@ -2445,7 +2553,7 @@ type RunLuaInput struct {
 
 func (x *RunLuaInput) Reset() {
 	*x = RunLuaInput{}
-	mi := &file_toolquery_proto_msgTypes[36]
+	mi := &file_toolquery_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2457,7 +2565,7 @@ func (x *RunLuaInput) String() string {
 func (*RunLuaInput) ProtoMessage() {}
 
 func (x *RunLuaInput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[36]
+	mi := &file_toolquery_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2470,7 +2578,7 @@ func (x *RunLuaInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunLuaInput.ProtoReflect.Descriptor instead.
 func (*RunLuaInput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{36}
+	return file_toolquery_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *RunLuaInput) GetScript() string {
@@ -2490,7 +2598,7 @@ type RunLuaOutput struct {
 
 func (x *RunLuaOutput) Reset() {
 	*x = RunLuaOutput{}
-	mi := &file_toolquery_proto_msgTypes[37]
+	mi := &file_toolquery_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2502,7 +2610,7 @@ func (x *RunLuaOutput) String() string {
 func (*RunLuaOutput) ProtoMessage() {}
 
 func (x *RunLuaOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_toolquery_proto_msgTypes[37]
+	mi := &file_toolquery_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2515,7 +2623,7 @@ func (x *RunLuaOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunLuaOutput.ProtoReflect.Descriptor instead.
 func (*RunLuaOutput) Descriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{37}
+	return file_toolquery_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *RunLuaOutput) GetResultJson() string {
@@ -2534,7 +2642,21 @@ const file_toolquery_proto_rawDesc = "" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x14\n" +
-	"\x05index\x18\x04 \x01(\tR\x05index\"u\n" +
+	"\x05index\x18\x04 \x01(\tR\x05index\"\x90\x03\n" +
+	"\x14OpensearchConnection\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x14\n" +
+	"\x05index\x18\x02 \x01(\tR\x05index\x12.\n" +
+	"\x11aws_access_key_id\x18\x03 \x01(\tH\x00R\x0eawsAccessKeyId\x88\x01\x01\x126\n" +
+	"\x15aws_secret_access_key\x18\x04 \x01(\tH\x01R\x12awsSecretAccessKey\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"aws_region\x18\x05 \x01(\tH\x02R\tawsRegion\x88\x01\x01\x12-\n" +
+	"\x10use_pod_identity\x18\x06 \x01(\bH\x03R\x0eusePodIdentity\x88\x01\x01\x12+\n" +
+	"\x0fassume_role_arn\x18\a \x01(\tH\x04R\rassumeRoleArn\x88\x01\x01B\x14\n" +
+	"\x12_aws_access_key_idB\x18\n" +
+	"\x16_aws_secret_access_keyB\r\n" +
+	"\v_aws_regionB\x13\n" +
+	"\x11_use_pod_identityB\x12\n" +
+	"\x10_assume_role_arn\"u\n" +
 	"\x11DatadogConnection\x12\x17\n" +
 	"\x04site\x18\x01 \x01(\tH\x00R\x04site\x88\x01\x01\x12\x16\n" +
 	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\x12\x1b\n" +
@@ -2621,7 +2743,7 @@ const file_toolquery_proto_rawDesc = "" +
 	"\x0fsubscription_id\x18\x01 \x01(\tR\x0esubscriptionId\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1b\n" +
 	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12#\n" +
-	"\rclient_secret\x18\x04 \x01(\tR\fclientSecret\"\xdf\x04\n" +
+	"\rclient_secret\x18\x04 \x01(\tR\fclientSecret\"\xa2\x05\n" +
 	"\x0eToolConnection\x128\n" +
 	"\aelastic\x18\x01 \x01(\v2\x1c.toolquery.ElasticConnectionH\x00R\aelastic\x128\n" +
 	"\adatadog\x18\x02 \x01(\v2\x1c.toolquery.DatadogConnectionH\x00R\adatadog\x12A\n" +
@@ -2637,7 +2759,10 @@ const file_toolquery_proto_rawDesc = "" +
 	"cloudwatch\x122\n" +
 	"\x05azure\x18\t \x01(\v2\x1a.toolquery.AzureConnectionH\x00R\x05azure\x125\n" +
 	"\x06jaeger\x18\n" +
-	" \x01(\v2\x1b.toolquery.JaegerConnectionH\x00R\x06jaegerB\f\n" +
+	" \x01(\v2\x1b.toolquery.JaegerConnectionH\x00R\x06jaeger\x12A\n" +
+	"\n" +
+	"opensearch\x18\v \x01(\v2\x1f.toolquery.OpensearchConnectionH\x00R\n" +
+	"opensearchB\f\n" +
 	"\n" +
 	"connection\"k\n" +
 	"\tTimeRange\x120\n" +
@@ -2813,111 +2938,113 @@ func file_toolquery_proto_rawDescGZIP() []byte {
 	return file_toolquery_proto_rawDescData
 }
 
-var file_toolquery_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
+var file_toolquery_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_toolquery_proto_goTypes = []any{
 	(*ElasticConnection)(nil),         // 0: toolquery.ElasticConnection
-	(*DatadogConnection)(nil),         // 1: toolquery.DatadogConnection
-	(*PrometheusConnection)(nil),      // 2: toolquery.PrometheusConnection
-	(*LokiConnection)(nil),            // 3: toolquery.LokiConnection
-	(*TempoConnection)(nil),           // 4: toolquery.TempoConnection
-	(*JaegerConnection)(nil),          // 5: toolquery.JaegerConnection
-	(*SplunkConnection)(nil),          // 6: toolquery.SplunkConnection
-	(*DynatraceConnection)(nil),       // 7: toolquery.DynatraceConnection
-	(*CloudwatchConnection)(nil),      // 8: toolquery.CloudwatchConnection
-	(*AzureConnection)(nil),           // 9: toolquery.AzureConnection
-	(*ToolConnection)(nil),            // 10: toolquery.ToolConnection
-	(*TimeRange)(nil),                 // 11: toolquery.TimeRange
-	(*MetricsQueryInput)(nil),         // 12: toolquery.MetricsQueryInput
-	(*MetricsOptions)(nil),            // 13: toolquery.MetricsOptions
-	(*AzureMetricsOptions)(nil),       // 14: toolquery.AzureMetricsOptions
-	(*LogsQueryFacet)(nil),            // 15: toolquery.LogsQueryFacet
-	(*LogsQueryInput)(nil),            // 16: toolquery.LogsQueryInput
-	(*LogsOptions)(nil),               // 17: toolquery.LogsOptions
-	(*AzureLogsOptions)(nil),          // 18: toolquery.AzureLogsOptions
-	(*TracesQueryInput)(nil),          // 19: toolquery.TracesQueryInput
-	(*TracesOptions)(nil),             // 20: toolquery.TracesOptions
-	(*JaegerTraceQueryAttribute)(nil), // 21: toolquery.JaegerTraceQueryAttribute
-	(*JaegerTracesOptions)(nil),       // 22: toolquery.JaegerTracesOptions
-	(*MetricPoint)(nil),               // 23: toolquery.MetricPoint
-	(*MetricsQueryOutput)(nil),        // 24: toolquery.MetricsQueryOutput
-	(*MetricsSearchInput)(nil),        // 25: toolquery.MetricsSearchInput
-	(*MetricsSearchOptions)(nil),      // 26: toolquery.MetricsSearchOptions
-	(*AzureMetricsSearchOptions)(nil), // 27: toolquery.AzureMetricsSearchOptions
-	(*MetricsSearchResult)(nil),       // 28: toolquery.MetricsSearchResult
-	(*MetricsSearchOutput)(nil),       // 29: toolquery.MetricsSearchOutput
-	(*LogEntry)(nil),                  // 30: toolquery.LogEntry
-	(*LogsQueryOutput)(nil),           // 31: toolquery.LogsQueryOutput
-	(*TraceSpan)(nil),                 // 32: toolquery.TraceSpan
-	(*TracesQueryOutput)(nil),         // 33: toolquery.TracesQueryOutput
-	(*InvokeLambdaInput)(nil),         // 34: toolquery.InvokeLambdaInput
-	(*InvokeLambdaOutput)(nil),        // 35: toolquery.InvokeLambdaOutput
-	(*RunLuaInput)(nil),               // 36: toolquery.RunLuaInput
-	(*RunLuaOutput)(nil),              // 37: toolquery.RunLuaOutput
-	nil,                               // 38: toolquery.MetricPoint.LabelsEntry
-	nil,                               // 39: toolquery.LogEntry.LabelsEntry
-	nil,                               // 40: toolquery.TraceSpan.TagsEntry
-	(*timestamppb.Timestamp)(nil),     // 41: google.protobuf.Timestamp
-	(*cloudquery.Connection)(nil),     // 42: cloudquery.Connection
+	(*OpensearchConnection)(nil),      // 1: toolquery.OpensearchConnection
+	(*DatadogConnection)(nil),         // 2: toolquery.DatadogConnection
+	(*PrometheusConnection)(nil),      // 3: toolquery.PrometheusConnection
+	(*LokiConnection)(nil),            // 4: toolquery.LokiConnection
+	(*TempoConnection)(nil),           // 5: toolquery.TempoConnection
+	(*JaegerConnection)(nil),          // 6: toolquery.JaegerConnection
+	(*SplunkConnection)(nil),          // 7: toolquery.SplunkConnection
+	(*DynatraceConnection)(nil),       // 8: toolquery.DynatraceConnection
+	(*CloudwatchConnection)(nil),      // 9: toolquery.CloudwatchConnection
+	(*AzureConnection)(nil),           // 10: toolquery.AzureConnection
+	(*ToolConnection)(nil),            // 11: toolquery.ToolConnection
+	(*TimeRange)(nil),                 // 12: toolquery.TimeRange
+	(*MetricsQueryInput)(nil),         // 13: toolquery.MetricsQueryInput
+	(*MetricsOptions)(nil),            // 14: toolquery.MetricsOptions
+	(*AzureMetricsOptions)(nil),       // 15: toolquery.AzureMetricsOptions
+	(*LogsQueryFacet)(nil),            // 16: toolquery.LogsQueryFacet
+	(*LogsQueryInput)(nil),            // 17: toolquery.LogsQueryInput
+	(*LogsOptions)(nil),               // 18: toolquery.LogsOptions
+	(*AzureLogsOptions)(nil),          // 19: toolquery.AzureLogsOptions
+	(*TracesQueryInput)(nil),          // 20: toolquery.TracesQueryInput
+	(*TracesOptions)(nil),             // 21: toolquery.TracesOptions
+	(*JaegerTraceQueryAttribute)(nil), // 22: toolquery.JaegerTraceQueryAttribute
+	(*JaegerTracesOptions)(nil),       // 23: toolquery.JaegerTracesOptions
+	(*MetricPoint)(nil),               // 24: toolquery.MetricPoint
+	(*MetricsQueryOutput)(nil),        // 25: toolquery.MetricsQueryOutput
+	(*MetricsSearchInput)(nil),        // 26: toolquery.MetricsSearchInput
+	(*MetricsSearchOptions)(nil),      // 27: toolquery.MetricsSearchOptions
+	(*AzureMetricsSearchOptions)(nil), // 28: toolquery.AzureMetricsSearchOptions
+	(*MetricsSearchResult)(nil),       // 29: toolquery.MetricsSearchResult
+	(*MetricsSearchOutput)(nil),       // 30: toolquery.MetricsSearchOutput
+	(*LogEntry)(nil),                  // 31: toolquery.LogEntry
+	(*LogsQueryOutput)(nil),           // 32: toolquery.LogsQueryOutput
+	(*TraceSpan)(nil),                 // 33: toolquery.TraceSpan
+	(*TracesQueryOutput)(nil),         // 34: toolquery.TracesQueryOutput
+	(*InvokeLambdaInput)(nil),         // 35: toolquery.InvokeLambdaInput
+	(*InvokeLambdaOutput)(nil),        // 36: toolquery.InvokeLambdaOutput
+	(*RunLuaInput)(nil),               // 37: toolquery.RunLuaInput
+	(*RunLuaOutput)(nil),              // 38: toolquery.RunLuaOutput
+	nil,                               // 39: toolquery.MetricPoint.LabelsEntry
+	nil,                               // 40: toolquery.LogEntry.LabelsEntry
+	nil,                               // 41: toolquery.TraceSpan.TagsEntry
+	(*timestamppb.Timestamp)(nil),     // 42: google.protobuf.Timestamp
+	(*cloudquery.Connection)(nil),     // 43: cloudquery.Connection
 }
 var file_toolquery_proto_depIdxs = []int32{
 	0,  // 0: toolquery.ToolConnection.elastic:type_name -> toolquery.ElasticConnection
-	1,  // 1: toolquery.ToolConnection.datadog:type_name -> toolquery.DatadogConnection
-	2,  // 2: toolquery.ToolConnection.prometheus:type_name -> toolquery.PrometheusConnection
-	3,  // 3: toolquery.ToolConnection.loki:type_name -> toolquery.LokiConnection
-	4,  // 4: toolquery.ToolConnection.tempo:type_name -> toolquery.TempoConnection
-	6,  // 5: toolquery.ToolConnection.splunk:type_name -> toolquery.SplunkConnection
-	7,  // 6: toolquery.ToolConnection.dynatrace:type_name -> toolquery.DynatraceConnection
-	8,  // 7: toolquery.ToolConnection.cloudwatch:type_name -> toolquery.CloudwatchConnection
-	9,  // 8: toolquery.ToolConnection.azure:type_name -> toolquery.AzureConnection
-	5,  // 9: toolquery.ToolConnection.jaeger:type_name -> toolquery.JaegerConnection
-	41, // 10: toolquery.TimeRange.start:type_name -> google.protobuf.Timestamp
-	41, // 11: toolquery.TimeRange.end:type_name -> google.protobuf.Timestamp
-	10, // 12: toolquery.MetricsQueryInput.connection:type_name -> toolquery.ToolConnection
-	11, // 13: toolquery.MetricsQueryInput.range:type_name -> toolquery.TimeRange
-	13, // 14: toolquery.MetricsQueryInput.options:type_name -> toolquery.MetricsOptions
-	14, // 15: toolquery.MetricsOptions.azure:type_name -> toolquery.AzureMetricsOptions
-	10, // 16: toolquery.LogsQueryInput.connection:type_name -> toolquery.ToolConnection
-	11, // 17: toolquery.LogsQueryInput.range:type_name -> toolquery.TimeRange
-	15, // 18: toolquery.LogsQueryInput.facets:type_name -> toolquery.LogsQueryFacet
-	17, // 19: toolquery.LogsQueryInput.options:type_name -> toolquery.LogsOptions
-	18, // 20: toolquery.LogsOptions.azure:type_name -> toolquery.AzureLogsOptions
-	10, // 21: toolquery.TracesQueryInput.connection:type_name -> toolquery.ToolConnection
-	11, // 22: toolquery.TracesQueryInput.range:type_name -> toolquery.TimeRange
-	20, // 23: toolquery.TracesQueryInput.options:type_name -> toolquery.TracesOptions
-	22, // 24: toolquery.TracesOptions.jaeger:type_name -> toolquery.JaegerTracesOptions
-	21, // 25: toolquery.JaegerTracesOptions.attributes:type_name -> toolquery.JaegerTraceQueryAttribute
-	41, // 26: toolquery.MetricPoint.timestamp:type_name -> google.protobuf.Timestamp
-	38, // 27: toolquery.MetricPoint.labels:type_name -> toolquery.MetricPoint.LabelsEntry
-	23, // 28: toolquery.MetricsQueryOutput.metrics:type_name -> toolquery.MetricPoint
-	10, // 29: toolquery.MetricsSearchInput.connection:type_name -> toolquery.ToolConnection
-	26, // 30: toolquery.MetricsSearchInput.options:type_name -> toolquery.MetricsSearchOptions
-	27, // 31: toolquery.MetricsSearchOptions.azure:type_name -> toolquery.AzureMetricsSearchOptions
-	28, // 32: toolquery.MetricsSearchOutput.metrics:type_name -> toolquery.MetricsSearchResult
-	41, // 33: toolquery.LogEntry.timestamp:type_name -> google.protobuf.Timestamp
-	39, // 34: toolquery.LogEntry.labels:type_name -> toolquery.LogEntry.LabelsEntry
-	30, // 35: toolquery.LogsQueryOutput.logs:type_name -> toolquery.LogEntry
-	41, // 36: toolquery.TraceSpan.start:type_name -> google.protobuf.Timestamp
-	41, // 37: toolquery.TraceSpan.end:type_name -> google.protobuf.Timestamp
-	40, // 38: toolquery.TraceSpan.tags:type_name -> toolquery.TraceSpan.TagsEntry
-	32, // 39: toolquery.TracesQueryOutput.spans:type_name -> toolquery.TraceSpan
-	42, // 40: toolquery.InvokeLambdaInput.connection:type_name -> cloudquery.Connection
-	12, // 41: toolquery.ToolQuery.Metrics:input_type -> toolquery.MetricsQueryInput
-	25, // 42: toolquery.ToolQuery.MetricsSearch:input_type -> toolquery.MetricsSearchInput
-	16, // 43: toolquery.ToolQuery.Logs:input_type -> toolquery.LogsQueryInput
-	19, // 44: toolquery.ToolQuery.Traces:input_type -> toolquery.TracesQueryInput
-	34, // 45: toolquery.ToolQuery.InvokeLambda:input_type -> toolquery.InvokeLambdaInput
-	36, // 46: toolquery.ToolQuery.RunLua:input_type -> toolquery.RunLuaInput
-	24, // 47: toolquery.ToolQuery.Metrics:output_type -> toolquery.MetricsQueryOutput
-	29, // 48: toolquery.ToolQuery.MetricsSearch:output_type -> toolquery.MetricsSearchOutput
-	31, // 49: toolquery.ToolQuery.Logs:output_type -> toolquery.LogsQueryOutput
-	33, // 50: toolquery.ToolQuery.Traces:output_type -> toolquery.TracesQueryOutput
-	35, // 51: toolquery.ToolQuery.InvokeLambda:output_type -> toolquery.InvokeLambdaOutput
-	37, // 52: toolquery.ToolQuery.RunLua:output_type -> toolquery.RunLuaOutput
-	47, // [47:53] is the sub-list for method output_type
-	41, // [41:47] is the sub-list for method input_type
-	41, // [41:41] is the sub-list for extension type_name
-	41, // [41:41] is the sub-list for extension extendee
-	0,  // [0:41] is the sub-list for field type_name
+	2,  // 1: toolquery.ToolConnection.datadog:type_name -> toolquery.DatadogConnection
+	3,  // 2: toolquery.ToolConnection.prometheus:type_name -> toolquery.PrometheusConnection
+	4,  // 3: toolquery.ToolConnection.loki:type_name -> toolquery.LokiConnection
+	5,  // 4: toolquery.ToolConnection.tempo:type_name -> toolquery.TempoConnection
+	7,  // 5: toolquery.ToolConnection.splunk:type_name -> toolquery.SplunkConnection
+	8,  // 6: toolquery.ToolConnection.dynatrace:type_name -> toolquery.DynatraceConnection
+	9,  // 7: toolquery.ToolConnection.cloudwatch:type_name -> toolquery.CloudwatchConnection
+	10, // 8: toolquery.ToolConnection.azure:type_name -> toolquery.AzureConnection
+	6,  // 9: toolquery.ToolConnection.jaeger:type_name -> toolquery.JaegerConnection
+	1,  // 10: toolquery.ToolConnection.opensearch:type_name -> toolquery.OpensearchConnection
+	42, // 11: toolquery.TimeRange.start:type_name -> google.protobuf.Timestamp
+	42, // 12: toolquery.TimeRange.end:type_name -> google.protobuf.Timestamp
+	11, // 13: toolquery.MetricsQueryInput.connection:type_name -> toolquery.ToolConnection
+	12, // 14: toolquery.MetricsQueryInput.range:type_name -> toolquery.TimeRange
+	14, // 15: toolquery.MetricsQueryInput.options:type_name -> toolquery.MetricsOptions
+	15, // 16: toolquery.MetricsOptions.azure:type_name -> toolquery.AzureMetricsOptions
+	11, // 17: toolquery.LogsQueryInput.connection:type_name -> toolquery.ToolConnection
+	12, // 18: toolquery.LogsQueryInput.range:type_name -> toolquery.TimeRange
+	16, // 19: toolquery.LogsQueryInput.facets:type_name -> toolquery.LogsQueryFacet
+	18, // 20: toolquery.LogsQueryInput.options:type_name -> toolquery.LogsOptions
+	19, // 21: toolquery.LogsOptions.azure:type_name -> toolquery.AzureLogsOptions
+	11, // 22: toolquery.TracesQueryInput.connection:type_name -> toolquery.ToolConnection
+	12, // 23: toolquery.TracesQueryInput.range:type_name -> toolquery.TimeRange
+	21, // 24: toolquery.TracesQueryInput.options:type_name -> toolquery.TracesOptions
+	23, // 25: toolquery.TracesOptions.jaeger:type_name -> toolquery.JaegerTracesOptions
+	22, // 26: toolquery.JaegerTracesOptions.attributes:type_name -> toolquery.JaegerTraceQueryAttribute
+	42, // 27: toolquery.MetricPoint.timestamp:type_name -> google.protobuf.Timestamp
+	39, // 28: toolquery.MetricPoint.labels:type_name -> toolquery.MetricPoint.LabelsEntry
+	24, // 29: toolquery.MetricsQueryOutput.metrics:type_name -> toolquery.MetricPoint
+	11, // 30: toolquery.MetricsSearchInput.connection:type_name -> toolquery.ToolConnection
+	27, // 31: toolquery.MetricsSearchInput.options:type_name -> toolquery.MetricsSearchOptions
+	28, // 32: toolquery.MetricsSearchOptions.azure:type_name -> toolquery.AzureMetricsSearchOptions
+	29, // 33: toolquery.MetricsSearchOutput.metrics:type_name -> toolquery.MetricsSearchResult
+	42, // 34: toolquery.LogEntry.timestamp:type_name -> google.protobuf.Timestamp
+	40, // 35: toolquery.LogEntry.labels:type_name -> toolquery.LogEntry.LabelsEntry
+	31, // 36: toolquery.LogsQueryOutput.logs:type_name -> toolquery.LogEntry
+	42, // 37: toolquery.TraceSpan.start:type_name -> google.protobuf.Timestamp
+	42, // 38: toolquery.TraceSpan.end:type_name -> google.protobuf.Timestamp
+	41, // 39: toolquery.TraceSpan.tags:type_name -> toolquery.TraceSpan.TagsEntry
+	33, // 40: toolquery.TracesQueryOutput.spans:type_name -> toolquery.TraceSpan
+	43, // 41: toolquery.InvokeLambdaInput.connection:type_name -> cloudquery.Connection
+	13, // 42: toolquery.ToolQuery.Metrics:input_type -> toolquery.MetricsQueryInput
+	26, // 43: toolquery.ToolQuery.MetricsSearch:input_type -> toolquery.MetricsSearchInput
+	17, // 44: toolquery.ToolQuery.Logs:input_type -> toolquery.LogsQueryInput
+	20, // 45: toolquery.ToolQuery.Traces:input_type -> toolquery.TracesQueryInput
+	35, // 46: toolquery.ToolQuery.InvokeLambda:input_type -> toolquery.InvokeLambdaInput
+	37, // 47: toolquery.ToolQuery.RunLua:input_type -> toolquery.RunLuaInput
+	25, // 48: toolquery.ToolQuery.Metrics:output_type -> toolquery.MetricsQueryOutput
+	30, // 49: toolquery.ToolQuery.MetricsSearch:output_type -> toolquery.MetricsSearchOutput
+	32, // 50: toolquery.ToolQuery.Logs:output_type -> toolquery.LogsQueryOutput
+	34, // 51: toolquery.ToolQuery.Traces:output_type -> toolquery.TracesQueryOutput
+	36, // 52: toolquery.ToolQuery.InvokeLambda:output_type -> toolquery.InvokeLambdaOutput
+	38, // 53: toolquery.ToolQuery.RunLua:output_type -> toolquery.RunLuaOutput
+	48, // [48:54] is the sub-list for method output_type
+	42, // [42:48] is the sub-list for method input_type
+	42, // [42:42] is the sub-list for extension type_name
+	42, // [42:42] is the sub-list for extension extendee
+	0,  // [0:42] is the sub-list for field type_name
 }
 
 func init() { file_toolquery_proto_init() }
@@ -2931,8 +3058,9 @@ func file_toolquery_proto_init() {
 	file_toolquery_proto_msgTypes[4].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[5].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[6].OneofWrappers = []any{}
-	file_toolquery_proto_msgTypes[8].OneofWrappers = []any{}
-	file_toolquery_proto_msgTypes[10].OneofWrappers = []any{
+	file_toolquery_proto_msgTypes[7].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[9].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[11].OneofWrappers = []any{
 		(*ToolConnection_Elastic)(nil),
 		(*ToolConnection_Datadog)(nil),
 		(*ToolConnection_Prometheus)(nil),
@@ -2943,25 +3071,26 @@ func file_toolquery_proto_init() {
 		(*ToolConnection_Cloudwatch)(nil),
 		(*ToolConnection_Azure)(nil),
 		(*ToolConnection_Jaeger)(nil),
+		(*ToolConnection_Opensearch)(nil),
 	}
-	file_toolquery_proto_msgTypes[12].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[13].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[14].OneofWrappers = []any{}
-	file_toolquery_proto_msgTypes[16].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[15].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[17].OneofWrappers = []any{}
-	file_toolquery_proto_msgTypes[19].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[18].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[20].OneofWrappers = []any{}
-	file_toolquery_proto_msgTypes[22].OneofWrappers = []any{}
-	file_toolquery_proto_msgTypes[25].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[21].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[23].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[26].OneofWrappers = []any{}
 	file_toolquery_proto_msgTypes[27].OneofWrappers = []any{}
+	file_toolquery_proto_msgTypes[28].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_toolquery_proto_rawDesc), len(file_toolquery_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   41,
+			NumMessages:   42,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -1,9 +1,9 @@
 defmodule Console.Schema.DeploymentSettings do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
   alias Piazza.Ecto.EncryptedString
 
-  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
+  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5, openai_compatible: 6
   defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
   defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2
   defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
@@ -34,7 +34,7 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defmodule OauthToken do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Piazza.Ecto.EncryptedString
 
     embedded_schema do
@@ -47,6 +47,7 @@ defmodule Console.Schema.DeploymentSettings do
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(enabled token_url client_id client_secret)a)
+      |> trim_changes(~w(client_secret)a)
       |> validate_required([:token_url, :client_id, :client_secret])
     end
   end
@@ -79,7 +80,7 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defmodule Opensearch do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     @aws_service_name :es
 
@@ -95,6 +96,7 @@ defmodule Console.Schema.DeploymentSettings do
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region use_pod_identity)a)
+      |> trim_changes(~w(aws_access_key_id aws_secret_access_key)a)
       |> validate_required([:host, :index])
       |> validate_creds()
     end
@@ -136,6 +138,32 @@ defmodule Console.Schema.DeploymentSettings do
 
     def url(%__MODULE__{host: host}, path) when is_binary(host) do
       Path.join(host, path)
+    end
+  end
+
+  defmodule OpenAI do
+    use Console.Schema.Base
+    alias Console.Schema.DeploymentSettings.{OauthToken, OpenAIMethod}
+    alias Piazza.Ecto.EncryptedString
+
+    embedded_schema do
+      field :base_url,        :string
+      field :access_token,    EncryptedString
+      field :model,           :string
+      field :tool_model,      :string
+      field :embedding_model, :string
+      field :method,          OpenAIMethod, default: :auto
+
+      embeds_one :token_exchange, OauthToken, on_replace: :update
+
+      field :proxy_models, {:array, :string}
+    end
+
+    def changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
+      |> trim_changes(~w(access_token)a)
+      |> cast_embed(:token_exchange)
     end
   end
 
@@ -230,18 +258,8 @@ defmodule Console.Schema.DeploymentSettings do
         end
       end
 
-      embeds_one :openai, OpenAi, on_replace: :update do
-        field :base_url,        :string
-        field :access_token,    EncryptedString
-        field :model,           :string
-        field :tool_model,      :string
-        field :embedding_model, :string
-        field :method,          OpenAIMethod, default: :auto
-
-        embeds_one :token_exchange, Console.Schema.DeploymentSettings.OauthToken, on_replace: :update
-
-        field :proxy_models, {:array, :string}
-      end
+      embeds_one :openai, OpenAI, on_replace: :update
+      embeds_one :openai_compatible, OpenAI, on_replace: :update
 
       embeds_one :anthropic, Anthropic, on_replace: :update do
         field :base_url,        :string
@@ -383,7 +401,8 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)
     |> cast_embed(:graph, with: &graph_store_changeset/2)
-    |> cast_embed(:openai, with: &openai_changeset/2)
+    |> cast_embed(:openai, with: &OpenAI.changeset/2)
+    |> cast_embed(:openai_compatible, with: &OpenAI.changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
     |> cast_embed(:ollama, with: &ollama_changeset/2)
     |> cast_embed(:azure, with: &azure_openai_changeset/2)
@@ -397,23 +416,20 @@ defmodule Console.Schema.DeploymentSettings do
   defp ai_api_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(access_token model tool_model embedding_model base_url proxy_models)a)
-  end
-
-  defp openai_changeset(model, attrs) do
-    model
-    |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
-    |> cast_embed(:token_exchange)
+    |> trim_changes(~w(access_token)a)
   end
 
   defp ollama_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url model tool_model embedding_model authorization)a)
+    |> trim_changes(~w(authorization)a)
     |> validate_required(~w(url model)a)
   end
 
   defp azure_openai_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model proxy_models deployments)a)
+    |> trim_changes(~w(access_token)a)
     |> validate_required(~w(access_token endpoint)a)
     |> validate_change(:endpoint, fn :endpoint, endpoint ->
       with %URI{path: path, scheme: "https"} <- URI.parse(endpoint),
@@ -429,6 +445,7 @@ defmodule Console.Schema.DeploymentSettings do
   defp bedrock_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments)a)
+    |> trim_changes(~w(access_token aws_access_key_id aws_secret_access_key)a)
     |> validate_required(~w(region)a)
   end
 
@@ -447,6 +464,7 @@ defmodule Console.Schema.DeploymentSettings do
   defp nexus_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url access_token model tool_model embedding_model)a)
+    |> trim_changes(~w(access_token)a)
     |> validate_required(~w(url)a)
   end
 

@@ -32,6 +32,9 @@ func (in *GetPRState) Install(s *server.MCPServer) {
 				mcp.Required(),
 				mcp.Description("Full URL of the pull request, e.g. https://github.com/owner/repo/pull/42"),
 			),
+			mcp.WithBoolean("sideload",
+				mcp.Description("When true, sideloads reviewer comments and CI check status. Disable this when comments and CI details are unnecessary to reduce SCM API calls and response size. Defaults to true."),
+			),
 		),
 		in.handler,
 	)
@@ -49,13 +52,19 @@ func (in *GetPRState) handler(ctx context.Context, request mcp.CallToolRequest) 
 	}
 
 	client := scm.NewClient(token)
-	details, err := client.GetPRDetails(ctx, prURL)
+	sideload := request.GetBool("sideload", true)
+	details, err := prDetails(ctx, client, prURL, sideload)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("failed to fetch PR state: %v", err)), nil
 	}
 
 	var sb strings.Builder
-	_, _ = fmt.Fprintf(&sb, "# PR: %s\nURL: %s\nBranch: %s\n\n", details.Title, prURL, details.HeadRef)
+	_, _ = fmt.Fprintf(&sb, "# PR: %s\nURL: %s\nBranch: %s\nState: %s\n\n", details.Title, prURL, details.HeadRef, details.State)
+
+	if !sideload {
+		sb.WriteString("Comments and CI checks were not sideloaded. Call again with `sideload: true` if you need reviewer comments, CI status, or check run IDs.\n")
+		return mcp.NewToolResultText(sb.String()), nil
+	}
 
 	_, _ = fmt.Fprintf(&sb, "## Comments (%d)\n\n", len(details.Comments))
 	for _, c := range details.Comments {
@@ -81,9 +90,16 @@ func (in *GetPRState) handler(ctx context.Context, request mcp.CallToolRequest) 
 	return mcp.NewToolResultText(sb.String()), nil
 }
 
+func prDetails(ctx context.Context, client scm.Client, prURL string, sideload bool) (*scm.PRDetails, error) {
+	if sideload {
+		return client.GetPRDetails(ctx, prURL)
+	}
+	return client.GetPRSummary(ctx, prURL)
+}
+
 func NewGetPRState() Tool {
 	return &GetPRState{
 		id:          GetPRStateTool,
-		description: "Fetches live pull request state from the SCM provider (GitHub). Returns all comments and CI check statuses. Use this to understand what reviewers have said and which CI checks are failing.",
+		description: "Fetches live pull request state from the SCM provider. By default sideloads all reviewer comments and CI check statuses; set sideload=false when you only need basic PR metadata.",
 	}
 }

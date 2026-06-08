@@ -9,7 +9,12 @@ versions:
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [No chart template/values changes were provided in the notes shared
+        (release entry only lists the packaged chart asset).]
+    features: []
+    breaking_changes: []
   chart_version: 1.0.11181
   images: ['wizio.azurecr.io/sensor:v1']
 - version: 1.0.3999

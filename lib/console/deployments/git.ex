@@ -95,6 +95,8 @@ defmodule Console.Deployments.Git do
 
   def get_catalog_by_name!(name), do: Repo.get_by!(Catalog, name: name)
 
+  def get_catalog(id), do: Repo.get(Catalog, id)
+
   def get_catalog!(id), do: Repo.get!(Catalog, id)
 
   def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
@@ -569,7 +571,30 @@ defmodule Console.Deployments.Git do
       true -> VectorStore.fetch(q, opts)
       false -> {:error, "Vector store is not enabled, cannot query"}
     end
+    |> collect_results()
   end
+
+  def collect_results({:ok, results}) do
+    {cat_ids, pr_ids} = Enum.reduce(results, {[], []}, fn
+      %{type: :catalog, catalog: %{id: id}}, {cat_ids, pr_ids} -> {[id | cat_ids], pr_ids}
+      %{type: :pr_automation, pr_automation: %{id: id}}, {cat_ids, pr_ids} -> {cat_ids, [id | pr_ids]}
+      _, acc -> acc
+    end)
+
+    catalogs =
+      Catalog.for_ids(cat_ids)
+      |> Repo.all()
+      |> Enum.map(&%{catalog: &1})
+
+    pr_automations =
+      PrAutomation.for_ids(pr_ids)
+      |> Repo.all()
+      |> Enum.map(&%{pr_automation: &1})
+
+    {:ok, catalogs ++ pr_automations}
+  end
+  def collect_results(err), do: err
+
   @doc """
   Upserts a new catalog instance, requires at least project write permissions
   """

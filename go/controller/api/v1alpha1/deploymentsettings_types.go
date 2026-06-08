@@ -457,21 +457,21 @@ type AISettings struct {
 
 	// Provider defines which of the supported LLM providers should be used.
 	//
-	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:default=OPENAI
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
 
 	// ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks
 	//
-	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:validation:Optional
 	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
 
 	// EmbeddingProvider to use for generating embeddings. Oftentimes foundational
 	// model providers do not have embeddings models, and it's better to simply use OpenAI.
 	//
-	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:validation:Optional
 	EmbeddingProvider *console.AiProvider `json:"embeddingProvider,omitempty"`
 
@@ -484,6 +484,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	OpenAI *OpenAISettings `json:"openAI,omitempty"`
+
+	// OpenAICompatible holds the OpenAI-compatible provider configuration.
+	//
+	// +kubebuilder:validation:Optional
+	OpenAICompatible *OpenAISettings `json:"openAICompatible,omitempty"`
 
 	// Anthropic holds the Anthropic provider configuration.
 	//
@@ -633,27 +638,21 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 	}
 
 	if in.OpenAI != nil {
-		token, err := in.OpenAI.Token(ctx, c, namespace)
+		openai, err := in.OpenAI.Attributes(ctx, c, namespace)
 		if err != nil {
 			return nil, err
 		}
 
-		attr.Openai = &console.OpenaiSettingsAttributes{
-			AccessToken:    &token,
-			Model:          in.OpenAI.Model,
-			BaseURL:        in.OpenAI.BaseUrl,
-			ToolModel:      in.OpenAI.ToolModel,
-			EmbeddingModel: in.OpenAI.EmbeddingModel,
-			Method:         in.OpenAI.Method,
-			ProxyModels:    lo.ToSlicePtr(in.OpenAI.ProxyModels),
+		attr.Openai = openai
+	}
+
+	if in.OpenAICompatible != nil {
+		openaiCompatible, err := in.OpenAICompatible.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
 		}
-		if in.OpenAI.TokenExchange != nil {
-			tokenExchange, err := in.OpenAI.TokenExchange.Attributes(ctx, c, namespace)
-			if err != nil {
-				return nil, err
-			}
-			attr.Openai.TokenExchange = tokenExchange
-		}
+
+		attr.OpenaiCompatible = openaiCompatible
 	}
 
 	if in.Anthropic != nil {
@@ -820,6 +819,10 @@ func (in *AISettings) checkProvider(provider *console.AiProvider, ptype string) 
 	case console.AiProviderOpenai:
 		if in.OpenAI == nil {
 			return fmt.Errorf("must provide openai configuration to set the %s to OPENAI", ptype)
+		}
+	case console.AiProviderOpenaiCompatible:
+		if in.OpenAICompatible == nil {
+			return fmt.Errorf("must provide openai compatible configuration to set the %s to OPENAI_COMPATIBLE", ptype)
 		}
 	case console.AiProviderAnthropic:
 		if in.Anthropic == nil {
@@ -1212,6 +1215,32 @@ func (in *OpenAISettings) Token(ctx context.Context, c client.Client, namespace 
 	}
 
 	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
+}
+
+func (in *OpenAISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.OpenaiSettingsAttributes, error) {
+	token, err := in.Token(ctx, c, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	attr := &console.OpenaiSettingsAttributes{
+		AccessToken:    &token,
+		Model:          in.Model,
+		BaseURL:        in.BaseUrl,
+		ToolModel:      in.ToolModel,
+		EmbeddingModel: in.EmbeddingModel,
+		Method:         in.Method,
+		ProxyModels:    lo.ToSlicePtr(in.ProxyModels),
+	}
+	if in.TokenExchange != nil {
+		tokenExchange, err := in.TokenExchange.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.TokenExchange = tokenExchange
+	}
+
+	return attr, nil
 }
 
 func (in *AzureOpenAISettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {

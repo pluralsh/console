@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Http
   alias Console.Schema.{WorkbenchTool, ScmConnection}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketConnection}
 
@@ -9,14 +10,19 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{base_url: base, token: token}}),
     do: {:ok, %{base_url: api_root(base), token: token}}
-  def build(%WorkbenchTool{configuration: %Configuration{bitbucket: %BitbucketConnection{token: token, url: url}}}) do
+
+  def build(%WorkbenchTool{
+        configuration: %Configuration{bitbucket: %BitbucketConnection{token: token, url: url}}
+      }) do
     {:ok, %{base_url: api_root(url), token: token}}
   end
+
   def build(%WorkbenchTool{}),
     do: {:error, "Bitbucket Cloud connection is not configured for this workbench tool."}
 
   @doc false
   def api_root(url) when url in [nil, ""], do: @default_api_root
+
   def api_root(url) when is_binary(url) do
     url
     |> String.trim()
@@ -59,7 +65,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
         {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Cloud", reason)
     end
   end
 
@@ -77,7 +83,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
         {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Cloud", reason)
     end
   end
 

@@ -3,7 +3,7 @@ defmodule Console.GRPC.Server do
   alias Console.AI.Provider
   alias Console.Deployments.{Settings, Agents}
   alias Console.Schema.{DeploymentSettings, User, Cluster}
-  alias Console.Schema.DeploymentSettings.{AI, OauthToken}
+  alias Console.Schema.DeploymentSettings.{AI, OauthToken, OpenAI}
 
   def meter_metrics(%Plrl.MeterMetricsRequest{bytes: bytes}, _) do
     Console.Prom.Meter.incr(max(bytes, 0))
@@ -68,7 +68,7 @@ defmodule Console.GRPC.Server do
 
   defp to_pb(nil), do: nil
 
-  defp to_pb(%AI.OpenAi{} = openai) do
+  defp to_pb(%OpenAI{} = openai) do
     defaults = Provider.defaults(:openai)
     %Plrl.OpenAiConfig{
       apiKey: openai.access_token,

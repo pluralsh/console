@@ -560,7 +560,15 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Release notes provided are only the GitHub release metadata (no
+        changelog entries for values, templates, CRDs, RBAC, or defaults). Cannot
+        infer chart changes between 0.29.6 and 1.15.0 from this data alone.']
+    features: [Not specified in the provided notes (no feature list or commit/changelog
+        details included).]
+    breaking_changes: [Not specified in the provided notes (no breaking-change section
+        or migration guidance included).]
   chart_version: 1.15.0
   images: []
 - version: 0.29.6
