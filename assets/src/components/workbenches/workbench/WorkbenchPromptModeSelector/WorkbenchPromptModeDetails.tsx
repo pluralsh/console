@@ -86,12 +86,7 @@ export function WorkbenchPromptModeDetails({
           </Chip>
         )}
       </Flex>
-      <Body2P
-        $color="text-xlight"
-        css={{ margin: 0 }}
-      >
-        {config.description}
-      </Body2P>
+      <Body2P $color="text-xlight">{config.description}</Body2P>
       {config.supervisionOptions && mode === 'agent' && (
         <Flex
           direction="column"
