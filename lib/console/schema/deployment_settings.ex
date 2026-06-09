@@ -396,7 +396,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled provider tool_provider embedding_provider)a)
+    |> cast(attrs, ~w(enabled provider tool_provider embedding_provider log_analysis)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)
