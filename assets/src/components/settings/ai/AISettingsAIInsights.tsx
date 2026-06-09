@@ -45,8 +45,12 @@ export function AISettingsAIInsights() {
       logAnalysis !== (ai?.logAnalysis ?? false))
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
-    onCompleted: () =>
-      popToast({ content: 'Changes saved', severity: 'success' }),
+    onCompleted: () => {
+      setFastInterval(toDuration(ai?.analysisRates?.fast))
+      setSlowInterval(toDuration(ai?.analysisRates?.slow))
+      setLogAnalysis(!!ai?.logAnalysis)
+      popToast({ content: 'Changes saved', severity: 'success' })
+    },
   })
 
   const handleReset = () => {
