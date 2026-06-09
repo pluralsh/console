@@ -1,0 +1,11 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: KubecostExtractor
+metadata:
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+  name: default
+spec:
+  provider: OpenCost
+  interval: "10h"
+  recommendationThreshold: "0.00002"
