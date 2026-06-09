@@ -20,6 +20,10 @@ fragment AgentRunTiny on AgentRun {
     name
     namespace
   }
+  upload {
+    id
+    session
+  }
   insertedAt
   updatedAt
 }
