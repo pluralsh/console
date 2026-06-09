@@ -5,7 +5,6 @@ import {
   SelectPropsSingle,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
-import { Body2P } from 'components/utils/typography/Text'
 import { AiProvider, AiSettingsAttributes } from 'generated/graphql'
 import { ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -163,10 +162,6 @@ export function AISettingsProviderForm({
           </SelectWithDisable>
         </FormField>
       )}
-      <Body2P $color="text-xlight">
-        Note: model fields can be left blank to use Plural defaults unless
-        otherwise specified.
-      </Body2P>
       {settings}
     </FormContentSC>
   )
