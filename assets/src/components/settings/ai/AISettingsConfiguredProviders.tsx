@@ -16,8 +16,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
-import { aiProviderToLabel, aiProviders } from './AISettingsProviders.tsx'
 import { useTheme } from 'styled-components'
+import { aiProviderToLabel, aiProviders } from './AISettingsProviders.tsx'
 
 type ConfiguredAiProvider = {
   provider: AiProvider
@@ -133,9 +133,11 @@ const columns = [
 export function AISettingsConfiguredProviders({
   ai,
   onEdit,
+  enabled = true,
 }: {
   ai: Nullable<AiSettings>
   onEdit: (provider: AiProvider) => void
+  enabled?: boolean
 }) {
   const configuredProviders = useMemo(
     () =>
@@ -151,12 +153,25 @@ export function AISettingsConfiguredProviders({
   )
 
   return (
-    <Table
-      fillLevel={1}
-      data={configuredProviders}
-      columns={columns}
-      reactTableOptions={{ meta: { onEdit } }}
-      emptyStateProps={{ message: 'No providers configured.' }}
-    />
+    <div style={{ position: 'relative' }}>
+      <Table
+        fillLevel={1}
+        data={configuredProviders}
+        columns={columns}
+        reactTableOptions={{ meta: { onEdit } }}
+        emptyStateProps={{ message: 'No providers configured.' }}
+      />
+      {!enabled && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 10,
+            backgroundColor: 'rgba(33, 36, 44, 0.7)',
+            cursor: 'not-allowed',
+          }}
+        />
+      )}
+    </div>
   )
 }

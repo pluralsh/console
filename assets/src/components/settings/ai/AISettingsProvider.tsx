@@ -213,6 +213,7 @@ export function AISettingsProvider() {
         </Flex>
         <AISettingsConfiguredProviders
           ai={ai}
+          enabled={enabled}
           onEdit={handleEditProvider}
         />
       </Flex>
