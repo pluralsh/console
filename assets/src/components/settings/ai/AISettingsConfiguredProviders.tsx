@@ -28,7 +28,7 @@ type AISettingsProvidersTableMeta = {
   onEdit: (provider: AiProvider) => void
 }
 
-const aiProviderToIcon = {
+export const aiProviderToIcon = {
   [AiProvider.Openai]: OpenAILogoIcon,
   [AiProvider.OpenaiCompatible]: OpenCodeLogoIcon,
   [AiProvider.Anthropic]: ClaudeLogoIcon,
@@ -37,6 +37,14 @@ const aiProviderToIcon = {
   [AiProvider.Ollama]: OllamaLogoIcon,
   [AiProvider.Vertex]: VertexLogoIcon,
 } as const satisfies Record<AiProvider, ComponentType<IconProps>>
+
+export function getConfiguredProviders(ai: Nullable<AiSettings>): AiProvider[] {
+  if (!ai) return []
+
+  return configuredProviderSources.flatMap(([provider, key]) =>
+    ai[key] ? [provider] : []
+  )
+}
 
 export function getUnconfiguredProviders(
   ai: Nullable<AiSettings>
