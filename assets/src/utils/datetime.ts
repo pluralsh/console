@@ -18,7 +18,7 @@ export const DAY_TO_SECONDS = HOUR_TO_SECONDS * 24
 export const DAY_TO_MILLISECONDS = DAY_TO_SECONDS * SECOND_TO_MILLISECONDS
 const MS_PER_MINUTE = MINUTE_TO_SECONDS * SECOND_TO_MILLISECONDS
 
-export function parseHumanDurationToMinutes(
+export function parseDurationToMinutes(
   duration: string
 ): number | null | undefined {
   const trimmed = duration.trim()
@@ -30,7 +30,7 @@ export function parseHumanDurationToMinutes(
   return Math.round(millis / MS_PER_MINUTE)
 }
 
-export function formatMinutesAsHumanDuration(
+export function formatMinutesAsDuration(
   minutes: number | null | undefined
 ): string {
   if (minutes == null) return ''
@@ -38,8 +38,8 @@ export function formatMinutesAsHumanDuration(
   return ms(minutes * MS_PER_MINUTE) ?? ''
 }
 
-export function isValidHumanDuration(duration: string) {
-  return parseHumanDurationToMinutes(duration) !== undefined
+export function isValidDuration(duration: string) {
+  return parseDurationToMinutes(duration) !== undefined
 }
 
 // Duration presets for graphs/charts

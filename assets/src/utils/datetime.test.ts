@@ -1,13 +1,13 @@
 import { expect, vi } from 'vitest'
 import {
   formatDateTime,
-  formatMinutesAsHumanDuration,
+  formatMinutesAsDuration,
   isSameDay,
   isBefore,
   isAfter,
   fromNow,
-  isValidHumanDuration,
-  parseHumanDurationToMinutes,
+  isValidDuration,
+  parseDurationToMinutes,
   toDateOrUndef,
   formatLocalizedDateTime,
   sortDatesAsc,
@@ -157,24 +157,24 @@ describe('datetime utils', () => {
 
   describe('human duration helpers', () => {
     it('parses compact duration strings to minutes', () => {
-      expect(parseHumanDurationToMinutes('30m')).toBe(30)
-      expect(parseHumanDurationToMinutes('4h')).toBe(240)
-      expect(parseHumanDurationToMinutes('1d')).toBe(1440)
-      expect(parseHumanDurationToMinutes('')).toBe(null)
-      expect(parseHumanDurationToMinutes('bad')).toBe(undefined)
+      expect(parseDurationToMinutes('30m')).toBe(30)
+      expect(parseDurationToMinutes('4h')).toBe(240)
+      expect(parseDurationToMinutes('1d')).toBe(1440)
+      expect(parseDurationToMinutes('')).toBe(null)
+      expect(parseDurationToMinutes('bad')).toBe(undefined)
     })
 
     it('formats minutes as compact duration strings', () => {
-      expect(formatMinutesAsHumanDuration(30)).toBe('30m')
-      expect(formatMinutesAsHumanDuration(240)).toBe('4h')
-      expect(formatMinutesAsHumanDuration(1440)).toBe('1d')
-      expect(formatMinutesAsHumanDuration(null)).toBe('')
+      expect(formatMinutesAsDuration(30)).toBe('30m')
+      expect(formatMinutesAsDuration(240)).toBe('4h')
+      expect(formatMinutesAsDuration(1440)).toBe('1d')
+      expect(formatMinutesAsDuration(null)).toBe('')
     })
 
     it('validates human duration strings', () => {
-      expect(isValidHumanDuration('4h')).toBe(true)
-      expect(isValidHumanDuration('')).toBe(true)
-      expect(isValidHumanDuration('bad')).toBe(false)
+      expect(isValidDuration('4h')).toBe(true)
+      expect(isValidDuration('')).toBe(true)
+      expect(isValidDuration('bad')).toBe(false)
     })
   })
 })
