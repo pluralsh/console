@@ -13,7 +13,6 @@ import {
   VertexLogoIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
 import { useTheme } from 'styled-components'
@@ -85,24 +84,17 @@ const columns = [
   }),
   columnHelper.display({
     id: 'actions',
-    meta: { gridTemplate: 'fit-content(100px)' },
+    meta: { gridTemplate: 'fit-content(40px)' },
     cell: function Cell({ row, table }) {
       const { onEdit } = table.options.meta as AISettingsProvidersTableMeta
 
       return (
-        <Flex
-          gap="xsmall"
-          justify="flex-end"
-        >
+        <Flex justify="flex-end">
           <IconFrame
             clickable
             tooltip="Edit provider"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original.provider)}
-          />
-          <DeleteIconButton
-            clickable={false}
-            tooltip="Delete provider"
           />
         </Flex>
       )
