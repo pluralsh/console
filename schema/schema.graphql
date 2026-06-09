@@ -7162,6 +7162,7 @@ input CommandAttributes {
   cmd: String!
   args: [String]
   dir: String
+  approve: Boolean
 }
 
 input StackDefinitionAttributes {
@@ -7751,6 +7752,9 @@ type StackCommand {
 
   "working directory for this command (not required)"
   dir: String
+
+  "whether this command requires approval before running"
+  approve: Boolean
 }
 
 type StackPolicyViolation {

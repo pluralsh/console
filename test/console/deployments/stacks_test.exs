@@ -1177,6 +1177,23 @@ defmodule Console.Deployments.StacksTest do
       assert step.args == ["hello world!"]
     end
 
+    test "infers command stages from approval requirements" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], sha: "test-sha")
+
+      {:ok, run} = Stacks.create_custom_run(stack.id, [
+        %{cmd: "setup", args: [], approve: false},
+        %{cmd: "apply", args: [], approve: true},
+        %{cmd: "cleanup", args: []}
+      ], user)
+
+      assert [
+        %{cmd: "setup", stage: :init},
+        %{cmd: "apply", stage: :apply},
+        %{cmd: "cleanup", stage: :init}
+      ] = run.steps
+    end
+
     test "non admins cannot create custom runs" do
       user = insert(:user)
       stack = insert(:stack)

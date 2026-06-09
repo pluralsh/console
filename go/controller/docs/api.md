@@ -1004,6 +1004,7 @@ _Appears in:_
 | `cmd` _string_ | Cmd is the command to execute |  | Required: \{\} <br /> |
 | `args` _string array_ | Args are the arguments to pass to the command. |  | Optional: \{\} <br /> |
 | `dir` _string_ | Dir is the working directory for the command. |  | Optional: \{\} <br /> |
+| `approve` _boolean_ | Approve determines whether this command should run in the approval-gated stage. |  | Optional: \{\} <br /> |
 
 
 #### CompatibilityMatrixSummary

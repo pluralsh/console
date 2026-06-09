@@ -50,6 +50,10 @@ spec:
                 description: Commands to execute as part of this custom run.
                 items:
                   properties:
+                    approve:
+                      description: Approve determines whether this command should
+                        run in the approval-gated stage.
+                      type: boolean
                     args:
                       description: Args are the arguments to pass to the command.
                       items:

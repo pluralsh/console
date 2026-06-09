@@ -2594,9 +2594,10 @@ type ClusterVulnAggregate struct {
 }
 
 type CommandAttributes struct {
-	Cmd  string    `json:"cmd"`
-	Args []*string `json:"args,omitempty"`
-	Dir  *string   `json:"dir,omitempty"`
+	Cmd     string    `json:"cmd"`
+	Args    []*string `json:"args,omitempty"`
+	Dir     *string   `json:"dir,omitempty"`
+	Approve *bool     `json:"approve,omitempty"`
 }
 
 type CommitShaAttributes struct {
@@ -8571,6 +8572,8 @@ type StackCommand struct {
 	Args []*string `json:"args,omitempty"`
 	// working directory for this command (not required)
 	Dir *string `json:"dir,omitempty"`
+	// whether this command requires approval before running
+	Approve *bool `json:"approve,omitempty"`
 }
 
 type StackConfiguration struct {

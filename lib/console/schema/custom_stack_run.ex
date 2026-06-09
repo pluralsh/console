@@ -7,9 +7,10 @@ defmodule Console.Schema.CustomStackRun do
     field :documentation, :string
 
     embeds_many :commands, Command, on_replace: :delete do
-      field :cmd,  :string
-      field :args, {:array, :string}
-      field :dir,  :string
+      field :approve, :boolean
+      field :args,    {:array, :string}
+      field :cmd,     :string
+      field :dir,     :string
     end
 
     embeds_many :configuration, Configuration, on_replace: :delete
@@ -35,7 +36,7 @@ defmodule Console.Schema.CustomStackRun do
 
   def command_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(cmd args dir)a)
+    |> cast(attrs, ~w(cmd args dir approve)a)
     |> validate_required([:cmd])
   end
 end

@@ -3187,6 +3187,7 @@ export type ClusterVulnAggregate = {
 };
 
 export type CommandAttributes = {
+  approve?: InputMaybe<Scalars['Boolean']['input']>;
   args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cmd: Scalars['String']['input'];
   dir?: InputMaybe<Scalars['String']['input']>;
@@ -13887,6 +13888,8 @@ export type StackAttributes = {
 
 export type StackCommand = {
   __typename?: 'StackCommand';
+  /** whether this command requires approval before running */
+  approve?: Maybe<Scalars['Boolean']['output']>;
   /** cli args to pass */
   args?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the executable to call */

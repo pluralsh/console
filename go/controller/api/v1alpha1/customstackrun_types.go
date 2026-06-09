@@ -105,12 +105,17 @@ type CommandAttributes struct {
 	// Dir is the working directory for the command.
 	// +kubebuilder:validation:Optional
 	Dir *string `json:"dir,omitempty"`
+
+	// Approve determines whether this command should run in the approval-gated stage.
+	// +kubebuilder:validation:Optional
+	Approve *bool `json:"approve,omitempty"`
 }
 
 func (in *CommandAttributes) Attributes() *console.CommandAttributes {
 	return &console.CommandAttributes{
-		Cmd:  in.Cmd,
-		Args: algorithms.Map(in.Args, func(b string) *string { return &b }),
-		Dir:  in.Dir,
+		Cmd:     in.Cmd,
+		Args:    algorithms.Map(in.Args, func(b string) *string { return &b }),
+		Dir:     in.Dir,
+		Approve: in.Approve,
 	}
 }

@@ -717,8 +717,9 @@ defmodule Console.Deployments.Stacks do
   def create_custom_run(stack, commands, ctx \\ nil, user)
   def create_custom_run(%Stack{id: id, sha: sha} = stack, commands, ctx, %User{} = user) do
     steps =
-      Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: :init, status: :pending, name: "cmd #{&2}"}))
+      Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: infer_stage(&1), status: :pending, name: "cmd #{&2}"}))
       |> template_cmds(ctx)
+
     %StackRun{stack_id: id, status: :queued}
     |> StackRun.changeset(
       stack_attrs(stack, sha)
@@ -733,6 +734,9 @@ defmodule Console.Deployments.Stacks do
     get_stack!(stack_id)
     |> create_custom_run(commands, ctx, user)
   end
+
+  defp infer_stage(%{approve: true}), do: :apply
+  defp infer_stage(_), do: :init
 
   defp template_cmds(commands, ctx) when is_map(ctx) do
     Enum.map(commands, fn %{args: args} = cmd ->
