@@ -1,4 +1,4 @@
-import { Button, Flex, Switch, Toast } from '@pluralsh/design-system'
+import { Button, Callout, Flex, Switch, Toast } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Body2P } from 'components/utils/typography/Text'
 import {
@@ -180,8 +180,18 @@ export function AISettingsProvider() {
           checked={enabled}
           onChange={saveEnabled}
         >
-          Enable AI insights
+          {enabled ? 'Disable' : 'Enable'} AI in Plural
         </Switch>
+        {!enabled && (
+          <Callout
+            severity="neutral"
+            size="compact"
+            css={{ padding: theme.spacing.small }}
+          >
+            Plural AI is disabled. Enable to access Model routing and AI
+            insights tabs.
+          </Callout>
+        )}
         <Flex
           align="center"
           gap="xlarge"
