@@ -60,6 +60,8 @@ fragment AiSettings on AiSettings {
   enabled
   toolsEnabled
   provider
+  toolProvider
+  embeddingProvider
   vectorStore {
     enabled
     store
