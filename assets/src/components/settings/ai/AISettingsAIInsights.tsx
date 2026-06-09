@@ -12,6 +12,11 @@ export function AISettingsAIInsights() {
         direction="column"
         gap="medium"
       >
+        <Body2P $color="text-light">
+          Continuous background analysis of your fleet. Plural AI scans
+          clusters, services, and stacks on two cadences and surfaces issues to
+          the inbox.
+        </Body2P>
         <Card
           css={{
             display: 'flex',
