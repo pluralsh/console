@@ -17,7 +17,7 @@ import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { aiProviderToLabel, aiProviders } from './AISettingsProviders.tsx'
+import { aiProviderToLabel } from './AISettingsProviders.tsx'
 
 type ConfiguredAiProvider = {
   provider: AiProvider
@@ -57,7 +57,9 @@ export function getUnconfiguredProviders(
       : []
   )
 
-  return aiProviders.filter((provider) => !configured.has(provider))
+  return Object.values(AiProvider).filter(
+    (provider) => !configured.has(provider)
+  )
 }
 
 const configuredProviderSources = [

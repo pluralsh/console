@@ -12,7 +12,6 @@ import styled, { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
 import {
   aiProviderToLabel,
-  aiProviders,
   AnthropicSettings,
   AzureSettings,
   BedrockSettings,
@@ -59,7 +58,7 @@ export function AISettingsProviderForm({
   providerOptions?: readonly AiProvider[]
   forceEnableProviderSelect?: boolean
 }) {
-  const selectableProviders = providerOptions ?? aiProviders
+  const selectableProviders = providerOptions ?? Object.values(AiProvider)
   let settings: ReactNode
   switch (provider) {
     case AiProvider.Openai:
