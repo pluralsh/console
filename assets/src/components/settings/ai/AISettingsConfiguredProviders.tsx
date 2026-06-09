@@ -17,6 +17,7 @@ import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
 import { useTheme } from 'styled-components'
+import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
 
 type ConfiguredAiProvider = {
@@ -41,49 +42,18 @@ export const aiProviderToIcon = {
 export function getConfiguredProviders(ai: Nullable<AiSettings>): AiProvider[] {
   if (!ai) return []
 
-  return configuredProviderSources.flatMap(([provider, key]) =>
-    ai[key] ? [provider] : []
+  return Object.values(AiProvider).filter(
+    (provider) => ai[providerSettingsKey[provider]]
   )
 }
 
 export function getUnconfiguredProviders(
   ai: Nullable<AiSettings>
 ): AiProvider[] {
-  const configured = new Set(
-    ai
-      ? configuredProviderSources.flatMap(([provider, key]) =>
-          ai[key] ? [provider] : []
-        )
-      : []
-  )
-
   return Object.values(AiProvider).filter(
-    (provider) => !configured.has(provider)
+    (provider) => !ai?.[providerSettingsKey[provider]]
   )
 }
-
-const configuredProviderSources = [
-  [AiProvider.Openai, 'openai', 'model'],
-  [AiProvider.OpenaiCompatible, 'openaiCompatible', 'model'],
-  [AiProvider.Anthropic, 'anthropic', 'model'],
-  [AiProvider.Azure, 'azure', 'model'],
-  [AiProvider.Bedrock, 'bedrock', 'modelId'],
-  [AiProvider.Ollama, 'ollama', 'model'],
-  [AiProvider.Vertex, 'vertex', 'model'],
-] as const satisfies readonly [
-  AiProvider,
-  keyof Pick<
-    AiSettings,
-    | 'openai'
-    | 'openaiCompatible'
-    | 'anthropic'
-    | 'azure'
-    | 'bedrock'
-    | 'ollama'
-    | 'vertex'
-  >,
-  'model' | 'modelId',
-][]
 
 const columnHelper = createColumnHelper<ConfiguredAiProvider>()
 
@@ -151,14 +121,10 @@ export function AISettingsConfiguredProviders({
 }) {
   const configuredProviders = useMemo(
     () =>
-      ai
-        ? configuredProviderSources.flatMap(([provider, key]) => {
-            const config = ai[key]
-            if (!config) return []
-
-            return [{ provider, name: aiProviderToLabel[provider] }]
-          })
-        : [],
+      getConfiguredProviders(ai).map((provider) => ({
+        provider,
+        name: aiProviderToLabel[provider],
+      })),
     [ai]
   )
 
