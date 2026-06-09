@@ -1,4 +1,10 @@
-import { Button, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  CloseIcon,
+  Flex,
+  IconFrame,
+  Modal,
+} from '@pluralsh/design-system'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { AiProvider } from 'generated/graphql'
 import { ComponentProps, FormEvent } from 'react'
@@ -50,8 +56,23 @@ export function AISettingsProviderModal({
         }}
         onClose={onClose}
         header={
-          header ??
-          `Edit ${aiProviderToLabel[formProps.provider]} provider connection`
+          <Flex
+            align="center"
+            justify="space-between"
+            width="100%"
+          >
+            <span>
+              {header ??
+                `Edit ${aiProviderToLabel[formProps.provider]} provider connection`}
+            </span>
+            <IconFrame
+              clickable
+              size="small"
+              icon={<CloseIcon size={12} />}
+              tooltip="Close"
+              onClick={onClose}
+            />
+          </Flex>
         }
         actions={
           <div
