@@ -12,10 +12,16 @@ import {
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
 
 const modelTooltip =
-  'Primary model for Explain/Fix with AI, Insights, and similar features. Leave blank to use Plural defaults.'
+  'Primary model for Explain/Fix with AI, Insights, and similar features.'
 const embeddingModelTooltip = 'Model used for embeddings and vector search.'
 const toolModelTooltip =
   'Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
+const bedrockModelIdTooltip =
+  'Primary Bedrock model for Explain/Fix with AI, Insights, and similar features. Leave blank to use Plural defaults.'
+const bedrockEmbeddingModelTooltip =
+  'Bedrock model used for embeddings and vector search.'
+const bedrockToolModelTooltip =
+  'Bedrock model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
 
 export const aiProviderToLabel = {
   [AiProvider.Openai]: 'OpenAI',
@@ -237,7 +243,6 @@ export function OpenAISettings({
       </FormField>
       <FormField
         label="Access token"
-        infoTooltip="API key for authentication."
         required={enabled}
         flex={1}
       >
@@ -290,7 +295,6 @@ export function AnthropicSettings({
       </FormField>
       <FormField
         label="Access token"
-        infoTooltip="API key for authentication."
         required={enabled}
         flex={1}
       >
@@ -321,7 +325,7 @@ export function BedrockSettings({
     <>
       <FormField
         label="Model ID"
-        infoTooltip={modelTooltip}
+        infoTooltip={bedrockModelIdTooltip}
         flex={1}
       >
         <Input
@@ -332,7 +336,7 @@ export function BedrockSettings({
       </FormField>
       <FormField
         label="Embedding Model ID"
-        infoTooltip={embeddingModelTooltip}
+        infoTooltip={bedrockEmbeddingModelTooltip}
         flex={1}
       >
         <Input
@@ -345,7 +349,7 @@ export function BedrockSettings({
       </FormField>
       <FormField
         label="Tool model ID"
-        infoTooltip={toolModelTooltip}
+        infoTooltip={bedrockToolModelTooltip}
         flex={1}
       >
         <Input
@@ -478,7 +482,6 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="API version"
-        infoTooltip="The Azure OpenAI API version to use for inference requests."
         required={enabled}
         flex={1}
       >
@@ -516,7 +519,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Endpoint"
-        infoTooltip="The endpoint of your Azure OpenAI deployment. It should look like https://{endpoint}/openai/deployments."
+        infoTooltip="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
         required={enabled}
         flex={1}
       >
@@ -623,7 +626,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Project"
-        infoTooltip="The GCP project ID."
+        infoTooltip="The GCP Project ID"
         flex={1}
         required={enabled}
       >
@@ -646,7 +649,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Location"
-        infoTooltip="The GCP location you're querying from."
+        infoTooltip="The GCP Location you're querying from."
         flex={1}
         required={enabled}
       >
@@ -669,7 +672,6 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Service account"
-        infoTooltip="GCP service account JSON for authentication. Optional if default credentials are available."
         error={!!fileError}
         hint={fileError}
       >
