@@ -160,6 +160,8 @@ describe('datetime utils', () => {
       expect(parseDurationToMinutes('30m')).toBe(30)
       expect(parseDurationToMinutes('4h')).toBe(240)
       expect(parseDurationToMinutes('1d')).toBe(1440)
+      expect(parseDurationToMinutes('3h30m')).toBe(210)
+      expect(parseDurationToMinutes('3h 30m')).toBe(210)
       expect(parseDurationToMinutes('')).toBe(null)
       expect(parseDurationToMinutes('bad')).toBe(undefined)
     })
@@ -168,11 +170,14 @@ describe('datetime utils', () => {
       expect(formatMinutesAsDuration(30)).toBe('30m')
       expect(formatMinutesAsDuration(240)).toBe('4h')
       expect(formatMinutesAsDuration(1440)).toBe('1d')
+      expect(formatMinutesAsDuration(210)).toBe('3h 30m')
+      expect(formatMinutesAsDuration(90)).toBe('1h 30m')
       expect(formatMinutesAsDuration(null)).toBe('')
     })
 
     it('validates human duration strings', () => {
       expect(isValidDuration('4h')).toBe(true)
+      expect(isValidDuration('3h30m')).toBe(true)
       expect(isValidDuration('')).toBe(true)
       expect(isValidDuration('bad')).toBe(false)
     })
