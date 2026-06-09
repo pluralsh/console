@@ -12,6 +12,7 @@ import (
 	"k8s.io/klog/v2"
 
 	gqlclient "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -20,6 +21,8 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 	if in.tool == nil {
 		return
 	}
+
+	in.persistHeadBranchFromConfig(ctx)
 
 	artifacts, err := in.tool.UploadArtifacts(ctx)
 	if err != nil {
@@ -49,6 +52,20 @@ func (in *agentRunController) uploadAgentRunArtifacts(ctx context.Context) {
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("agent run artifacts uploaded", "agentRunID", in.agentRunID)
+}
+
+func (in *agentRunController) persistHeadBranchFromConfig(ctx context.Context) {
+	config, err := environment.Load()
+	if err != nil || strings.TrimSpace(config.HeadBranch) == "" {
+		return
+	}
+
+	if _, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{
+		Status:     gqlclient.AgentRunStatusRunning,
+		HeadBranch: &config.HeadBranch,
+	}); err != nil {
+		klog.ErrorS(err, "failed to persist agent run head branch", "agentRunID", in.agentRunID)
+	}
 }
 
 func (in *agentRunController) uploadAttributes(artifacts *artifacts.UploadArtifacts) (gqlclient.AgentRunUploadAttributes, func(), error) {

@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   input_object :agent_run_attributes do
     field :prompt,           non_null(:string), description: "the prompt to give to the agent"
     field :repository,       non_null(:string), description: "the repository the agent will be working in"
+    field :branch,           :string, description: "the branch this agent run should operate on (if not set, the repository default branch is used)"
     field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
@@ -45,6 +46,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :messages,         list_of(:agent_message_attributes), description: "the messages this agent run has generated during its run"
     field :error,            :string, description: "the error reason of the agent run"
     field :pod_reference,    :namespaced_name, description: "the kubernetes pod this agent is running on"
+    field :head_branch,      :string, description: "the head branch this agent run has created for its pull request"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
     field :approval,         :boolean, description: "whether this run requires approval before continuing"
@@ -154,6 +156,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :repository,       non_null(:string), description: "the repository the agent will be working in",
       resolve: &Deployments.agent_repository/3
     field :branch,           :string, description: "the branch this agent run is operating on (if not set, use default branch on clone)"
+    field :head_branch,      :string, description: "the head branch this agent run has created for its pull request"
     field :status,           non_null(:agent_run_status), description: "the status of this agent run"
     field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
     field :pod_reference,    :agent_pod_reference, description: "the kubernetes pod this agent is running on"

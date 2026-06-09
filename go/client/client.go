@@ -615,6 +615,7 @@ type AgentRunFragment struct {
 	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
 	Repository      string                     "json:\"repository\" graphql:\"repository\""
 	Branch          *string                    "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadBranch      *string                    "json:\"headBranch,omitempty\" graphql:\"headBranch\""
 	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
 	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
@@ -657,6 +658,12 @@ func (t *AgentRunFragment) GetBranch() *string {
 		t = &AgentRunFragment{}
 	}
 	return t.Branch
+}
+func (t *AgentRunFragment) GetHeadBranch() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.HeadBranch
 }
 func (t *AgentRunFragment) GetMode() *AgentRunMode {
 	if t == nil {
@@ -766,6 +773,7 @@ type AgentRunMinimalFragment struct {
 	Prompt       string                                  "json:\"prompt\" graphql:\"prompt\""
 	Repository   string                                  "json:\"repository\" graphql:\"repository\""
 	Branch       *string                                 "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadBranch   *string                                 "json:\"headBranch,omitempty\" graphql:\"headBranch\""
 	Runtime      *AgentRunMinimalFragment_Runtime        "json:\"runtime,omitempty\" graphql:\"runtime\""
 	PullRequests []*AgentRunMinimalFragment_PullRequests "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Upload       *AgentRunMinimalFragment_Upload         "json:\"upload,omitempty\" graphql:\"upload\""
@@ -794,6 +802,12 @@ func (t *AgentRunMinimalFragment) GetBranch() *string {
 		t = &AgentRunMinimalFragment{}
 	}
 	return t.Branch
+}
+func (t *AgentRunMinimalFragment) GetHeadBranch() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.HeadBranch
 }
 func (t *AgentRunMinimalFragment) GetRuntime() *AgentRunMinimalFragment_Runtime {
 	if t == nil {
@@ -40324,6 +40338,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -40478,6 +40493,7 @@ fragment AgentRunMinimalFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	runtime {
 		type
 	}
@@ -40530,6 +40546,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -40698,6 +40715,7 @@ fragment AgentRunMinimalFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	runtime {
 		type
 	}
@@ -40759,6 +40777,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -40976,6 +40995,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -41131,6 +41151,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion

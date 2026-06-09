@@ -13,15 +13,16 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     field :babysit,      :boolean
     field :approval,     :boolean
     field :repository,   :string
+    field :branch,       :string
     field :prompt,       :string
   end
 
-  @valid ~w(mode repository prompt babysit approval)a
+  @valid ~w(mode repository branch prompt babysit approval)a
 
   def changeset(%__MODULE__{workbench: bench, job: job} = model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid -- [:babysit, :approval])
+    |> validate_required(@valid -- [:branch, :babysit, :approval])
     |> fix_mode(bench, job)
     |> fix_babysit(bench, job)
     |> fix_approval(bench, job)
@@ -74,7 +75,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def name(_), do: "workbench_coding_agent"
   def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt to either analyze the code in question or modify it and generate a reviewable PR."
 
-  @run_attrs ~w(mode repository prompt activity babysit approval)a
+  @run_attrs ~w(mode repository branch prompt activity babysit approval)a
 
   def implement(%__MODULE__{id: tool} = args) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},

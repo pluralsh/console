@@ -97,17 +97,24 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
           createAgentRun(runtimeId: $runtimeId, attributes: $attrs) {
             id
             prompt
+            branch
             runtime { id }
             user { id }
           }
         }
       """, %{
-        "attrs" => %{"mode" => "WRITE", "prompt" => "test", "repository" => "https://github.com/pluralsh/console.git"},
+        "attrs" => %{
+          "mode" => "WRITE",
+          "prompt" => "test",
+          "repository" => "https://github.com/pluralsh/console.git",
+          "branch" => "release-1.2"
+        },
         "runtimeId" => runtime.id,
       }, %{current_user: user})
 
       assert run["id"]
       assert run["prompt"] == "test"
+      assert run["branch"] == "release-1.2"
       assert run["runtime"]["id"] == runtime.id
       assert run["user"]["id"] == user.id
     end
@@ -124,12 +131,36 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
           updateAgentRun(id: $id, attributes: $attrs) {
             id
             status
+            headBranch
           }
         }
       """, %{"id" => run.id, "attrs" => %{"status" => "RUNNING"}}, %{cluster: cluster})
 
       assert found["id"] == run.id
       assert found["status"] == "RUNNING"
+    end
+
+    test "a cluster can set the agent run head branch" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, %{data: %{"updateAgentRun" => found}}} = run_query("""
+        mutation Update($id: ID!, $attrs: AgentRunStatusAttributes!) {
+          updateAgentRun(id: $id, attributes: $attrs) {
+            id
+            status
+            headBranch
+          }
+        }
+      """, %{
+        "id" => run.id,
+        "attrs" => %{"status" => "RUNNING", "headBranch" => "agent/example"}
+      }, %{cluster: cluster})
+
+      assert found["id"] == run.id
+      assert found["status"] == "RUNNING"
+      assert found["headBranch"] == "agent/example"
     end
   end
 

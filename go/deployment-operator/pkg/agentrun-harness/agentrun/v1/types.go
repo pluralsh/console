@@ -31,6 +31,7 @@ type AgentRun struct {
 	Prompt     string                 `json:"prompt"`
 	Repository string                 `json:"repository"`
 	Branch     *string                `json:"branch,omitempty"`
+	HeadBranch *string                `json:"headBranch,omitempty"`
 	Mode       console.AgentRunMode   `json:"mode"`
 	Status     console.AgentRunStatus `json:"status"`
 	FlowID     *string                `json:"flowId,omitempty"`
@@ -107,6 +108,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		Prompt:      fragment.Prompt,
 		Repository:  fragment.Repository,
 		Branch:      fragment.Branch,
+		HeadBranch:  fragment.HeadBranch,
 		Mode:        fragment.Mode,
 		Status:      fragment.Status,
 		ScmCreds:    fragment.ScmCreds,

@@ -267,6 +267,11 @@ func (in *AgentRunList) DeepCopyObject() runtime.Object {
 func (in *AgentRunSpec) DeepCopyInto(out *AgentRunSpec) {
 	*out = *in
 	out.RuntimeRef = in.RuntimeRef
+	if in.Branch != nil {
+		in, out := &in.Branch, &out.Branch
+		*out = new(string)
+		**out = **in
+	}
 	if in.FlowID != nil {
 		in, out := &in.FlowID, &out.FlowID
 		*out = new(string)

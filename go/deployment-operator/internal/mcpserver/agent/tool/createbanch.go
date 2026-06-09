@@ -7,6 +7,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	gqlclient "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
@@ -65,6 +66,18 @@ func (in *CreateBranch) handler(ctx context.Context, request mcp.CallToolRequest
 	cmd = exec.NewExecutable("git", exec.WithArgs([]string{"push", "--set-upstream", "origin", in.BranchName}), exec.WithDir(repoDir))
 	if out, err := cmd.RunWithOutput(ctx); err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("failed to push changes: %v: %s", err, out)), nil
+	}
+
+	config.HeadBranch = in.BranchName
+	if err := config.Save(); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch locally: %v", err)), nil
+	}
+
+	if _, err := in.client.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{
+		Status:     gqlclient.AgentRunStatusRunning,
+		HeadBranch: &in.BranchName,
+	}); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch: %v", err)), nil
 	}
 
 	return mcp.NewToolResultJSON(struct {

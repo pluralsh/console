@@ -1902,6 +1902,9 @@ input AgentRunAttributes {
   "the repository the agent will be working in"
   repository: String!
 
+  "the branch this agent run should operate on (if not set, the repository default branch is used)"
+  branch: String
+
   "the mode of the agent run"
   mode: AgentRunMode!
 
@@ -1936,6 +1939,9 @@ input AgentRunStatusAttributes {
 
   "the kubernetes pod this agent is running on"
   podReference: NamespacedName
+
+  "the head branch this agent run has created for its pull request"
+  headBranch: String
 
   "whether babysit mode is enabled for this run"
   babysit: Boolean
@@ -2137,6 +2143,9 @@ type AgentRun {
 
   "the branch this agent run is operating on (if not set, use default branch on clone)"
   branch: String
+
+  "the head branch this agent run has created for its pull request"
+  headBranch: String
 
   "the status of this agent run"
   status: AgentRunStatus!

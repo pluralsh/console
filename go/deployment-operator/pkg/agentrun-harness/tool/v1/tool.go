@@ -97,6 +97,11 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 }
 
 func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
+	branch := ""
+	if in.Config.Run.Branch != nil {
+		branch = *in.Config.Run.Branch
+	}
+
 	return &SystemPromptTemplateInput{
 		Mode:           in.Config.Run.Mode,
 		BrowserEnabled: in.Config.Run.BrowserEnabled,
@@ -104,6 +109,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		WorkDir:        in.Config.WorkDir,
 		RepositoryDir:  in.Config.RepositoryDir,
 		Prompt:         in.Config.Run.Prompt,
+		Branch:         branch,
 	}
 }
 

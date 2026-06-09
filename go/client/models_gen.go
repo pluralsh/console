@@ -350,6 +350,8 @@ type AgentRun struct {
 	Repository string `json:"repository"`
 	// the branch this agent run is operating on (if not set, use default branch on clone)
 	Branch *string `json:"branch,omitempty"`
+	// the head branch this agent run has created for its pull request
+	HeadBranch *string `json:"headBranch,omitempty"`
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
 	// the mode of the agent run
@@ -405,6 +407,8 @@ type AgentRunAttributes struct {
 	Prompt string `json:"prompt"`
 	// the repository the agent will be working in
 	Repository string `json:"repository"`
+	// the branch this agent run should operate on (if not set, the repository default branch is used)
+	Branch *string `json:"branch,omitempty"`
 	// the mode of the agent run
 	Mode AgentRunMode `json:"mode"`
 	// the programming language used in the agent run
@@ -466,6 +470,8 @@ type AgentRunStatusAttributes struct {
 	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *NamespacedName `json:"podReference,omitempty"`
+	// the head branch this agent run has created for its pull request
+	HeadBranch *string `json:"headBranch,omitempty"`
 	// whether babysit mode is enabled for this run
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
