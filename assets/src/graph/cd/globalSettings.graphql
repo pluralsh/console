@@ -62,6 +62,11 @@ fragment AiSettings on AiSettings {
   provider
   toolProvider
   embeddingProvider
+  analysisRates {
+    fast
+    slow
+  }
+  logAnalysis
   vectorStore {
     enabled
     store
