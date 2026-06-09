@@ -203,6 +203,7 @@ export function AISettingsProvider() {
           </Body2P>
           {unconfiguredProviders.length > 0 && (
             <Button
+              disabled={!enabled}
               style={{ flexShrink: 0 }}
               onClick={handleConnectProvider}
             >
