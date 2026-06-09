@@ -17,6 +17,7 @@ import { DeleteIconButton } from 'components/utils/IconButtons'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
 import { aiProviderToLabel, aiProviders } from './AISettingsProviders.tsx'
+import { useTheme } from 'styled-components'
 
 type ConfiguredAiProvider = {
   provider: AiProvider
@@ -81,6 +82,7 @@ const columns = [
     id: 'Provider',
     meta: { gridTemplate: '1fr' },
     cell: function Cell({ getValue }) {
+      const { colors } = useTheme()
       const { provider, name } = getValue()
       const Icon = aiProviderToIcon[provider]
 
@@ -91,9 +93,10 @@ const columns = [
         >
           <IconFrame
             size="medium"
-            type="tertiary"
+            type="secondary"
             tooltip={aiProviderToLabel[provider]}
             icon={<Icon fullColor />}
+            css={{ backgroundColor: colors['fill-one'] }}
           />
           <span>{name}</span>
         </Flex>
@@ -137,12 +140,11 @@ export function AISettingsConfiguredProviders({
   const configuredProviders = useMemo(
     () =>
       ai
-        ? configuredProviderSources.flatMap(([provider, key, modelKey]) => {
+        ? configuredProviderSources.flatMap(([provider, key]) => {
             const config = ai[key]
             if (!config) return []
 
-            const model = config[modelKey]
-            return [{ provider, name: model || aiProviderToLabel[provider] }]
+            return [{ provider, name: aiProviderToLabel[provider] }]
           })
         : [],
     [ai]
