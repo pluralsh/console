@@ -73,11 +73,13 @@ func (in *CreateBranch) handler(ctx context.Context, request mcp.CallToolRequest
 		return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch locally: %v", err)), nil
 	}
 
-	if _, err := in.client.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{
-		Status:     gqlclient.AgentRunStatusRunning,
-		HeadBranch: &in.BranchName,
-	}); err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch: %v", err)), nil
+	if in.runtimeClient != nil {
+		if _, err := in.runtimeClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{
+			Status:     gqlclient.AgentRunStatusRunning,
+			HeadBranch: &in.BranchName,
+		}); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch: %v", err)), nil
+		}
 	}
 
 	return mcp.NewToolResultJSON(struct {
@@ -103,13 +105,14 @@ func (in *CreateBranch) fromRequest(request mcp.CallToolRequest) (err error) {
 	return
 }
 
-func NewCreateBranch(client console.Client, agentRunID string) Tool {
+func NewCreateBranch(client, runtimeClient console.Client, agentRunID string) Tool {
 	return &CreateBranch{
 		ConsoleTool: ConsoleTool{
-			id:          CreateBranchTool,
-			description: "Creates a new branch and commits current changes to it. This should always be used before creating a pull request",
-			client:      client,
-			agentRunID:  agentRunID,
+			id:            CreateBranchTool,
+			description:   "Creates a new branch and commits current changes to it. This should always be used before creating a pull request",
+			client:        client,
+			runtimeClient: runtimeClient,
+			agentRunID:    agentRunID,
 		},
 	}
 }

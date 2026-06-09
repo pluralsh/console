@@ -46,7 +46,7 @@ func (in *CreatePullRequest) handler(ctx context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultError(fmt.Sprintf("could not map request to attributes: %v", err)), nil
 	}
 
-	if err := in.persistHeadBranch(ctx, attrs.Head); err != nil {
+	if err := in.persistRemoteHeadBranch(ctx, attrs.Head); err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch: %v", err)), nil
 	}
 
@@ -76,7 +76,19 @@ func (in *CreatePullRequest) handler(ctx context.Context, request mcp.CallToolRe
 	})
 }
 
-func (in *CreatePullRequest) persistHeadBranch(ctx context.Context, branch string) error {
+func (in *CreatePullRequest) persistRemoteHeadBranch(ctx context.Context, branch string) error {
+	if strings.TrimSpace(branch) == "" || in.runtimeClient == nil {
+		return nil
+	}
+
+	_, err := in.runtimeClient.UpdateAgentRun(ctx, in.agentRunID, client.AgentRunStatusAttributes{
+		Status:     client.AgentRunStatusRunning,
+		HeadBranch: &branch,
+	})
+	return err
+}
+
+func (in *CreatePullRequest) persistHeadBranch(branch string) error {
 	if strings.TrimSpace(branch) == "" {
 		return nil
 	}
@@ -89,11 +101,7 @@ func (in *CreatePullRequest) persistHeadBranch(ctx context.Context, branch strin
 		}
 	}
 
-	_, err = in.client.UpdateAgentRun(ctx, in.agentRunID, client.AgentRunStatusAttributes{
-		Status:     client.AgentRunStatusRunning,
-		HeadBranch: &branch,
-	})
-	return err
+	return nil
 }
 
 func (in *CreatePullRequest) fromRequest(request mcp.CallToolRequest) (result client.AgentPullRequestAttributes, err error) {
@@ -106,6 +114,10 @@ func (in *CreatePullRequest) fromRequest(request mcp.CallToolRequest) (result cl
 	}
 
 	if result.Head, err = request.RequireString("head"); err != nil {
+		return
+	}
+
+	if err = in.persistHeadBranch(result.Head); err != nil {
 		return
 	}
 
@@ -157,13 +169,14 @@ func (in *CreatePullRequest) getCommitSHA(repoDir, branch string) (string, error
 	return string(bytes.TrimSpace(shaBytes)), nil
 }
 
-func NewCreatePullRequest(client console.Client, agentRunID string) Tool {
+func NewCreatePullRequest(client, runtimeClient console.Client, agentRunID string) Tool {
 	return &CreatePullRequest{
 		ConsoleTool: ConsoleTool{
-			id:          CreatePullRequestTool,
-			description: "Create a pull request through the Plural console GraphQL API for agent-generated changes",
-			client:      client,
-			agentRunID:  agentRunID,
+			id:            CreatePullRequestTool,
+			description:   "Create a pull request through the Plural console GraphQL API for agent-generated changes",
+			client:        client,
+			runtimeClient: runtimeClient,
+			agentRunID:    agentRunID,
 		},
 	}
 }

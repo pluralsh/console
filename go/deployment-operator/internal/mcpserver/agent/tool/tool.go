@@ -77,6 +77,9 @@ type ConsoleTool struct {
 	// client is the Plural Console client
 	client console.Client
 
+	// runtimeClient is the deploy-token Console client for runtime-owned updates.
+	runtimeClient console.Client
+
 	// agentRunID is the ID of the agent run that is being processed
 	agentRunID string
 }
