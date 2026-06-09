@@ -1,5 +1,12 @@
 import { AiProvider, AiSettings, AiSettingsAttributes } from 'generated/graphql'
+import pick from 'lodash/pick'
 import { providerSettingsKey } from './AISettingsProviderForm.tsx'
+
+const modelRoutingStateKeys = [
+  'provider',
+  'toolProvider',
+  'embeddingProvider',
+] as const
 
 export type ModelRoutingRole = 'chat' | 'embedding' | 'tool'
 
@@ -78,20 +85,15 @@ export function modelFieldKeyFor(
   }
 }
 
-export type ModelRoutingState = {
-  provider: AiProvider
-  toolProvider: Nullable<AiProvider>
-  embeddingProvider: Nullable<AiProvider>
-}
+export type ModelRoutingState = Pick<
+  AiSettings,
+  (typeof modelRoutingStateKeys)[number]
+>
 
 export function initialModelRoutingState(
   ai: Nullable<AiSettings>
 ): ModelRoutingState {
-  return {
-    provider: ai?.provider ?? AiProvider.Openai,
-    toolProvider: ai?.toolProvider ?? null,
-    embeddingProvider: ai?.embeddingProvider ?? null,
-  }
+  return { ...pick(ai ?? {}, modelRoutingStateKeys) }
 }
 
 export function selectedProviderForRole(
@@ -139,28 +141,6 @@ export function getModelValue(
   const fromServer =
     serverConfig?.[field as keyof NonNullable<typeof serverConfig>]
   return typeof fromServer === 'string' ? fromServer : ''
-}
-
-export function getModelSuggestions(
-  provider: AiProvider,
-  ai: Nullable<AiSettings>
-): string[] {
-  const key = providerSettingsKey[provider]
-  const config = ai?.[key as ProviderConfigKey]
-  if (!config) return []
-
-  const fields =
-    provider === AiProvider.Bedrock
-      ? (['modelId', 'toolModelId', 'embeddingModel'] as const)
-      : (['model', 'toolModel', 'embeddingModel'] as const)
-
-  return [
-    ...new Set(
-      fields
-        .map((field) => config[field as keyof typeof config])
-        .filter((value): value is string => !!value)
-    ),
-  ]
 }
 
 export function setRoutingProvider(

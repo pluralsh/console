@@ -1,18 +1,16 @@
 import {
-  ComboBox,
   Flex,
   FormField,
   IconFrame,
+  Input,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { AiProvider, AiSettings } from 'generated/graphql'
-import { useMemo } from 'react'
 import styled from 'styled-components'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
 import {
-  getModelSuggestions,
   getModelValue,
   ModelRoutingRole,
   modelRoutingRoleMeta,
@@ -42,11 +40,12 @@ export function AISettingsModelRoutingRoleCard({
 }) {
   const { title, description, modelHint } = modelRoutingRoleMeta[role]
   const selectedProvider = selectedProviderForRole(role, routing)
+  const SelectedProviderIcon = selectedProvider
+    ? aiProviderToIcon[selectedProvider]
+    : null
   const modelValue = getModelValue(role, routing, providerSettings, ai)
-  const modelSuggestions = useMemo(
-    () => (selectedProvider ? getModelSuggestions(selectedProvider, ai) : []),
-    [ai, selectedProvider]
-  )
+  const modelDisabled =
+    !selectedProvider || (role !== 'chat' && !routing.provider)
 
   return (
     <CardSC>
@@ -69,6 +68,14 @@ export function AISettingsModelRoutingRoleCard({
             <Select
               label="Select provider"
               selectedKey={selectedProvider ?? null}
+              leftContent={
+                SelectedProviderIcon ? (
+                  <IconFrame
+                    size="xsmall"
+                    icon={<SelectedProviderIcon fullColor />}
+                  />
+                ) : undefined
+              }
               onSelectionChange={(key) => {
                 onRoutingChange(
                   setRoutingProvider(role, (key as AiProvider) ?? null, routing)
@@ -95,32 +102,22 @@ export function AISettingsModelRoutingRoleCard({
           </FormField>
           <FormField
             label="Model"
-            hint={modelHint}
+            infoTooltip={modelHint}
           >
-            <ComboBox
-              inputValue={modelValue}
-              inputProps={{ placeholder: 'Model ID' }}
-              onInputChange={(value) => {
+            <Input
+              value={modelValue}
+              disabled={modelDisabled}
+              onChange={(e) => {
                 onProviderSettingsChange(
-                  setModelValue(role, routing, providerSettings, value)
+                  setModelValue(
+                    role,
+                    routing,
+                    providerSettings,
+                    e.currentTarget.value
+                  )
                 )
               }}
-              onSelectionChange={(key) => {
-                if (key) {
-                  onProviderSettingsChange(
-                    setModelValue(role, routing, providerSettings, String(key))
-                  )
-                }
-              }}
-              isDisabled={role !== 'chat' && !routing.provider}
-            >
-              {modelSuggestions.map((model) => (
-                <ListBoxItem
-                  key={model}
-                  label={model}
-                />
-              ))}
-            </ComboBox>
+            />
           </FormField>
         </FieldsSC>
       </Flex>
