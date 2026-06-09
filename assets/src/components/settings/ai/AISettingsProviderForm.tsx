@@ -1,5 +1,4 @@
 import {
-  Button,
   FormField,
   ListBoxItem,
   Select,
@@ -8,7 +7,7 @@ import {
 import { GqlError } from 'components/utils/Alert.tsx'
 import { Body2P } from 'components/utils/typography/Text'
 import { AiProvider, AiSettingsAttributes } from 'generated/graphql'
-import { FormEvent, ReactNode } from 'react'
+import { ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
 import {
@@ -41,10 +40,6 @@ export function AISettingsProviderForm({
   onProviderChange,
   providerSettings,
   updateProviderSettings,
-  onSubmit,
-  loading,
-  valid,
-  saveDisabled,
   error,
   deploymentSettingsError,
   hideProviderSelect = false,
@@ -58,10 +53,6 @@ export function AISettingsProviderForm({
   updateProviderSettings: (
     update: PartialDeep<Omit<AiSettingsAttributes, 'enabled' | 'provider'>>
   ) => void
-  onSubmit: (e: FormEvent) => void
-  loading: boolean
-  valid: boolean
-  saveDisabled: boolean
   error?: Error | null
   deploymentSettingsError?: Error | null
   hideProviderSelect?: boolean
@@ -151,7 +142,7 @@ export function AISettingsProviderForm({
   }
 
   return (
-    <FormSC onSubmit={onSubmit}>
+    <FormContentSC>
       {(error || deploymentSettingsError) && (
         <GqlError error={error || deploymentSettingsError} />
       )}
@@ -178,19 +169,11 @@ export function AISettingsProviderForm({
         otherwise specified.
       </Body2P>
       {settings}
-      <Button
-        alignSelf="flex-end"
-        type="submit"
-        disabled={!valid || saveDisabled}
-        loading={loading}
-      >
-        Save changes
-      </Button>
-    </FormSC>
+    </FormContentSC>
   )
 }
 
-const FormSC = styled.form(({ theme }) => ({
+const FormContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
