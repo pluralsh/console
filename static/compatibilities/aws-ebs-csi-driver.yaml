@@ -237,7 +237,13 @@ versions:
     '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No specific changes are included in the provided release notes beyond
+        pointers to the full CHANGELOG for v1.48.0.]
+    breaking_changes: [No breaking changes are stated in the provided release notes;
+        you must consult the upstream CHANGELOG for v1.48.0 vs v1.47.0 to confirm.]
   chart_version: 2.48.0
   images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
     'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
@@ -265,7 +271,13 @@ versions:
     '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No specific changes were provided in the supplied release notes; they
+        only link to the upstream CHANGELOG.md.]
+    breaking_changes: [No breaking changes were described in the supplied release
+        notes; review the upstream CHANGELOG.md between v1.45.0 and v1.46.0 to confirm.]
   chart_version: 2.46.0
   images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
     'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
