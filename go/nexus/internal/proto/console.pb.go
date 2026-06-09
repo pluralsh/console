@@ -111,15 +111,16 @@ func (*AiConfigRequest) Descriptor() ([]byte, []int) {
 }
 
 type AiConfig struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Enabled       bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Openai        *OpenAiConfig          `protobuf:"bytes,2,opt,name=openai,proto3" json:"openai,omitempty"`
-	Anthropic     *AnthropicConfig       `protobuf:"bytes,3,opt,name=anthropic,proto3" json:"anthropic,omitempty"`
-	VertexAi      *VertexAiConfig        `protobuf:"bytes,4,opt,name=vertexAi,proto3" json:"vertexAi,omitempty"`
-	Bedrock       *BedrockConfig         `protobuf:"bytes,5,opt,name=bedrock,proto3" json:"bedrock,omitempty"`
-	Azure         *AzureOpenAiConfig     `protobuf:"bytes,6,opt,name=azure,proto3" json:"azure,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Enabled          bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Openai           *OpenAiConfig          `protobuf:"bytes,2,opt,name=openai,proto3" json:"openai,omitempty"`
+	Anthropic        *AnthropicConfig       `protobuf:"bytes,3,opt,name=anthropic,proto3" json:"anthropic,omitempty"`
+	VertexAi         *VertexAiConfig        `protobuf:"bytes,4,opt,name=vertexAi,proto3" json:"vertexAi,omitempty"`
+	Bedrock          *BedrockConfig         `protobuf:"bytes,5,opt,name=bedrock,proto3" json:"bedrock,omitempty"`
+	Azure            *AzureOpenAiConfig     `protobuf:"bytes,6,opt,name=azure,proto3" json:"azure,omitempty"`
+	OpenaiCompatible *OpenAiConfig          `protobuf:"bytes,7,opt,name=openaiCompatible,proto3" json:"openaiCompatible,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *AiConfig) Reset() {
@@ -190,6 +191,13 @@ func (x *AiConfig) GetBedrock() *BedrockConfig {
 func (x *AiConfig) GetAzure() *AzureOpenAiConfig {
 	if x != nil {
 		return x.Azure
+	}
+	return nil
+}
+
+func (x *AiConfig) GetOpenaiCompatible() *OpenAiConfig {
+	if x != nil {
+		return x.OpenaiCompatible
 	}
 	return nil
 }
@@ -1071,14 +1079,15 @@ var File_console_proto protoreflect.FileDescriptor
 const file_console_proto_rawDesc = "" +
 	"\n" +
 	"\rconsole.proto\x12\x04plrl\"\x11\n" +
-	"\x0fAiConfigRequest\"\x95\x02\n" +
+	"\x0fAiConfigRequest\"\xd5\x02\n" +
 	"\bAiConfig\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12*\n" +
 	"\x06openai\x18\x02 \x01(\v2\x12.plrl.OpenAiConfigR\x06openai\x123\n" +
 	"\tanthropic\x18\x03 \x01(\v2\x15.plrl.AnthropicConfigR\tanthropic\x120\n" +
 	"\bvertexAi\x18\x04 \x01(\v2\x14.plrl.VertexAiConfigR\bvertexAi\x12-\n" +
 	"\abedrock\x18\x05 \x01(\v2\x13.plrl.BedrockConfigR\abedrock\x12-\n" +
-	"\x05azure\x18\x06 \x01(\v2\x17.plrl.AzureOpenAiConfigR\x05azure\"\xd6\x01\n" +
+	"\x05azure\x18\x06 \x01(\v2\x17.plrl.AzureOpenAiConfigR\x05azure\x12>\n" +
+	"\x10openaiCompatible\x18\a \x01(\v2\x12.plrl.OpenAiConfigR\x10openaiCompatible\"\xd6\x01\n" +
 	"\x13OpenAiTokenExchange\x12\x1d\n" +
 	"\aenabled\x18\x01 \x01(\bH\x00R\aenabled\x88\x01\x01\x12\x1f\n" +
 	"\btokenUrl\x18\x02 \x01(\tH\x01R\btokenUrl\x88\x01\x01\x12\x1f\n" +
@@ -1257,23 +1266,24 @@ var file_console_proto_depIdxs = []int32{
 	6,  // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
 	7,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
 	8,  // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
-	3,  // 5: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
-	0,  // 6: plrl.OpenAiConfig.method:type_name -> plrl.OpenAiMethod
-	15, // 7: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
-	16, // 8: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
-	12, // 9: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
-	1,  // 10: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	14, // 11: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
-	9,  // 12: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	13, // 13: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
-	2,  // 14: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	11, // 15: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
-	10, // 16: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	13, // [13:17] is the sub-list for method output_type
-	9,  // [9:13] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	4,  // 5: plrl.AiConfig.openaiCompatible:type_name -> plrl.OpenAiConfig
+	3,  // 6: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
+	0,  // 7: plrl.OpenAiConfig.method:type_name -> plrl.OpenAiMethod
+	15, // 8: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
+	16, // 9: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	12, // 10: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
+	1,  // 11: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
+	14, // 12: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
+	9,  // 13: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
+	13, // 14: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
+	2,  // 15: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	11, // 16: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
+	10, // 17: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	14, // [14:18] is the sub-list for method output_type
+	10, // [10:14] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_console_proto_init() }

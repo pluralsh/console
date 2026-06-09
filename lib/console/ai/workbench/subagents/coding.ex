@@ -11,16 +11,19 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     Coding.PullRequests
   }
   alias Console.AI.Workbench.Environment
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
     tools(activity, environment)
     |> MemoryEngine.new(20,
-      system_prompt: String.trim(system_prompt(prompt: jprompt)),
-      acc: %{},
-      callback: &callback(activity, &1),
-      continue_msg: cont_msg()
+      engine_opts(job) ++ [
+        system_prompt: String.trim(system_prompt(prompt: jprompt)),
+        acc: %{},
+        callback: &callback(activity, &1),
+        continue_msg: cont_msg()
+      ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do

@@ -2,6 +2,9 @@ defmodule Console.AI.Provider.Base do
   alias ReqLLM.{Context, Response, ToolCall, StreamResponse}
   alias Console.AI.{Tool, Stream}
 
+  def select_model(_, model, _) when is_binary(model), do: model
+  def select_model(prov, _, type), do: select_model(prov, type)
+
   def select_model(%{tool_model: tool_model}, :tool) when is_binary(tool_model), do: tool_model
   def select_model(%{tool_model_id: tool_model}, :tool) when is_binary(tool_model), do: tool_model
   def select_model(%{model_id: model}, _) when is_binary(model), do: model

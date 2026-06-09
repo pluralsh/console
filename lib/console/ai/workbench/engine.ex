@@ -11,6 +11,7 @@ defmodule Console.AI.Workbench.Engine do
   """
   import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -81,7 +82,7 @@ defmodule Console.AI.Workbench.Engine do
     end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, system_prompt: &sysprompt(job, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1))
+    |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{

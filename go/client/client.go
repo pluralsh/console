@@ -16,7 +16,9 @@ type ConsoleClient interface {
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
+	GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
+	ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error)
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
 	GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error)
 	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
@@ -757,6 +759,59 @@ func (t *AgentRunFragment) GetBabysitInterval() *int64 {
 		t = &AgentRunFragment{}
 	}
 	return t.BabysitInterval
+}
+
+type AgentRunMinimalFragment struct {
+	ID           string                                  "json:\"id\" graphql:\"id\""
+	Prompt       string                                  "json:\"prompt\" graphql:\"prompt\""
+	Repository   string                                  "json:\"repository\" graphql:\"repository\""
+	Branch       *string                                 "json:\"branch,omitempty\" graphql:\"branch\""
+	Runtime      *AgentRunMinimalFragment_Runtime        "json:\"runtime,omitempty\" graphql:\"runtime\""
+	PullRequests []*AgentRunMinimalFragment_PullRequests "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Upload       *AgentRunMinimalFragment_Upload         "json:\"upload,omitempty\" graphql:\"upload\""
+}
+
+func (t *AgentRunMinimalFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunMinimalFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunMinimalFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunMinimalFragment) GetBranch() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Branch
+}
+func (t *AgentRunMinimalFragment) GetRuntime() *AgentRunMinimalFragment_Runtime {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Runtime
+}
+func (t *AgentRunMinimalFragment) GetPullRequests() []*AgentRunMinimalFragment_PullRequests {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.PullRequests
+}
+func (t *AgentRunMinimalFragment) GetUpload() *AgentRunMinimalFragment_Upload {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Upload
 }
 
 type ScmWebhookFragment struct {
@@ -7078,6 +7133,81 @@ func (t *AgentRunFragment_Flow) GetName() string {
 		t = &AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type AgentRunMinimalFragment_Runtime struct {
+	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+}
+
+func (t *AgentRunMinimalFragment_Runtime) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Runtime{}
+	}
+	return &t.Type
+}
+
+type AgentRunMinimalFragment_PullRequests struct {
+	ID     string    "json:\"id\" graphql:\"id\""
+	Ref    *string   "json:\"ref,omitempty\" graphql:\"ref\""
+	Status *PrStatus "json:\"status,omitempty\" graphql:\"status\""
+	Title  *string   "json:\"title,omitempty\" graphql:\"title\""
+	URL    string    "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunMinimalFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetRef() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Ref
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetStatus() *PrStatus {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Status
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetTitle() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Title
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.URL
+}
+
+type AgentRunMinimalFragment_Upload struct {
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+}
+
+func (t *AgentRunMinimalFragment_Upload) GetPatch() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Upload{}
+	}
+	return t.Patch
+}
+func (t *AgentRunMinimalFragment_Upload) GetScreenRecording() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Upload{}
+	}
+	return t.ScreenRecording
+}
+func (t *AgentRunMinimalFragment_Upload) GetSession() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Upload{}
+	}
+	return t.Session
 }
 
 type ClusterBackupFragment_Cluster struct {
@@ -14536,6 +14666,81 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
 	return t.Name
 }
 
+type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime struct {
+	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+}
+
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime{}
+	}
+	return &t.Type
+}
+
+type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests struct {
+	ID     string    "json:\"id\" graphql:\"id\""
+	Ref    *string   "json:\"ref,omitempty\" graphql:\"ref\""
+	Status *PrStatus "json:\"status,omitempty\" graphql:\"status\""
+	Title  *string   "json:\"title,omitempty\" graphql:\"title\""
+	URL    string    "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetRef() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Ref
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetStatus() *PrStatus {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Status
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetTitle() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Title
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.URL
+}
+
+type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload struct {
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+}
+
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetPatch() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Patch
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetScreenRecording() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
+	}
+	return t.ScreenRecording
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetSession() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Session
+}
+
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14604,6 +14809,110 @@ func (t *ListAgentRuns_AgentRuns) GetEdges() []*ListAgentRuns_AgentRuns_Edges {
 func (t *ListAgentRuns_AgentRuns) GetPageInfo() *PageInfoFragment {
 	if t == nil {
 		t = &ListAgentRuns_AgentRuns{}
+	}
+	return &t.PageInfo
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Runtime struct {
+	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Runtime) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Runtime{}
+	}
+	return &t.Type
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests struct {
+	ID     string    "json:\"id\" graphql:\"id\""
+	Ref    *string   "json:\"ref,omitempty\" graphql:\"ref\""
+	Status *PrStatus "json:\"status,omitempty\" graphql:\"status\""
+	Title  *string   "json:\"title,omitempty\" graphql:\"title\""
+	URL    string    "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetRef() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Ref
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetStatus() *PrStatus {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Status
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetTitle() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Title
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.URL
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload struct {
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload) GetPatch() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Patch
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload) GetScreenRecording() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload{}
+	}
+	return t.ScreenRecording
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload) GetSession() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Session
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges struct {
+	Node *AgentRunMinimalFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges) GetNode() *AgentRunMinimalFragment {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRunsMinimal_AgentRuns struct {
+	Edges    []*ListAgentRunsMinimal_AgentRuns_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                        "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns) GetEdges() []*ListAgentRunsMinimal_AgentRuns_Edges {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRunsMinimal_AgentRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns{}
 	}
 	return &t.PageInfo
 }
@@ -36270,6 +36579,17 @@ func (t *GetAgentRun) GetAgentRun() *AgentRunFragment {
 	return t.AgentRun
 }
 
+type GetAgentRunMinimal struct {
+	AgentRun *AgentRunMinimalFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunMinimal) GetAgentRun() *AgentRunMinimalFragment {
+	if t == nil {
+		t = &GetAgentRunMinimal{}
+	}
+	return t.AgentRun
+}
+
 type ListAgentRuns struct {
 	AgentRuns *ListAgentRuns_AgentRuns "json:\"agentRuns,omitempty\" graphql:\"agentRuns\""
 }
@@ -36277,6 +36597,17 @@ type ListAgentRuns struct {
 func (t *ListAgentRuns) GetAgentRuns() *ListAgentRuns_AgentRuns {
 	if t == nil {
 		t = &ListAgentRuns{}
+	}
+	return t.AgentRuns
+}
+
+type ListAgentRunsMinimal struct {
+	AgentRuns *ListAgentRunsMinimal_AgentRuns "json:\"agentRuns,omitempty\" graphql:\"agentRuns\""
+}
+
+func (t *ListAgentRunsMinimal) GetAgentRuns() *ListAgentRunsMinimal_AgentRuns {
+	if t == nil {
+		t = &ListAgentRunsMinimal{}
 	}
 	return t.AgentRuns
 }
@@ -40137,6 +40468,51 @@ func (c *Client) GetAgentRun(ctx context.Context, id string, interceptors ...cli
 	return &res, nil
 }
 
+const GetAgentRunMinimalDocument = `query GetAgentRunMinimal ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunMinimalFragment
+	}
+}
+fragment AgentRunMinimalFragment on AgentRun {
+	id
+	prompt
+	repository
+	branch
+	runtime {
+		type
+	}
+	pullRequests {
+		id
+		status
+		url
+		title
+		ref
+	}
+	upload {
+		session
+		patch
+		screenRecording
+	}
+}
+`
+
+func (c *Client) GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunMinimal
+	if err := c.Client.Post(ctx, "GetAgentRunMinimal", GetAgentRunMinimalDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListAgentRunsDocument = `query ListAgentRuns ($after: String, $first: Int, $before: String, $last: Int) {
 	agentRuns(after: $after, first: $first, before: $before, last: $last) {
 		edges {
@@ -40295,6 +40671,65 @@ func (c *Client) ListAgentRuns(ctx context.Context, after *string, first *int64,
 
 	var res ListAgentRuns
 	if err := c.Client.Post(ctx, "ListAgentRuns", ListAgentRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRunsMinimalDocument = `query ListAgentRunsMinimal ($after: String, $first: Int, $before: String, $last: Int) {
+	agentRuns(after: $after, first: $first, before: $before, last: $last) {
+		edges {
+			node {
+				... AgentRunMinimalFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment AgentRunMinimalFragment on AgentRun {
+	id
+	prompt
+	repository
+	branch
+	runtime {
+		type
+	}
+	pullRequests {
+		id
+		status
+		url
+		title
+		ref
+	}
+	upload {
+		session
+		patch
+		screenRecording
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListAgentRunsMinimal
+	if err := c.Client.Post(ctx, "ListAgentRunsMinimal", ListAgentRunsMinimalDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -63906,7 +64341,9 @@ var DocumentOperationNames = map[string]string{
 	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
 	GetAgentRunDocument:                               "GetAgentRun",
+	GetAgentRunMinimalDocument:                        "GetAgentRunMinimal",
 	ListAgentRunsDocument:                             "ListAgentRuns",
+	ListAgentRunsMinimalDocument:                      "ListAgentRunsMinimal",
 	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
 	GetAgentRunTodosDocument:                          "GetAgentRunTodos",
 	CancelAgentRunDocument:                            "CancelAgentRun",

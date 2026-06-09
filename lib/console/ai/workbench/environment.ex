@@ -24,6 +24,10 @@ defmodule Console.AI.Workbench.Environment do
     |> save()
   end
 
+  def engine_opts(%WorkbenchJob{modes: %{model: %{model: m, provider: p}}}) when is_binary(m),
+    do: [model: m, provider: p]
+  def engine_opts(_), do: []
+
   def with_builtins(skills) when is_map(skills) do
     Builtins.builtins()
     |> Map.new(fn %Skill{name: name} = skill -> {name, skill} end)

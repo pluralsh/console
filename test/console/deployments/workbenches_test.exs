@@ -549,7 +549,8 @@ defmodule Console.Deployments.WorkbenchesTest do
   describe "create_message/3" do
     test "job owner can create a user message for their job" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench)
 
       {:ok, activity} =
         Workbenches.create_message(%{prompt: "follow-up from user"}, job.id, user)
@@ -558,6 +559,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "follow-up from user"
       assert activity.type == :user
       assert activity.status == :successful
+      assert activity.user_id == user.id
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
 
       assert refetch(job).status == :pending
@@ -565,7 +567,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
     test "job owner can create a message when passing the job struct" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench)
 
       {:ok, activity} =
         Workbenches.create_message(%{prompt: "via struct"}, job, user)
@@ -574,19 +577,41 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "via struct"
     end
 
-    test "another user cannot create messages for someone else's job" do
+    test "user with workbench read access can create messages for someone else's job" do
+      owner = insert(:user)
+      reader = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}, %{user_id: reader.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench)
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "reader follow-up"}, job.id, reader)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "reader follow-up"
+      assert activity.user_id == reader.id
+      assert refetch(job).user_id == reader.id
+    end
+
+    test "user without workbench read access cannot create messages for someone else's job" do
       owner = insert(:user)
       other = insert(:user)
-      job = insert(:workbench_job, user: owner)
+      workbench = insert(:workbench, read_bindings: [%{user_id: owner.id}])
+      job = insert(:workbench_job, user: owner, workbench: workbench)
 
-      {:error, _} = Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
+      {:error, "forbidden"} = Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
 
       refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
     end
 
     test "creates a message when the job is idle" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user, status: :successful)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
 
       assert WorkbenchJob.idle?(job)
 
@@ -600,7 +625,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
     test "returns an error when the job is active (not idle)" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user, status: :running)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
 
       refute WorkbenchJob.idle?(job)
 

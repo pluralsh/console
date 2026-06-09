@@ -3357,12 +3357,43 @@
         ],
         "type": "object"
       },
+      "WorkbenchJobModel": {
+        "title": "WorkbenchJobModel",
+        "description": "Model override for a workbench job",
+        "properties": {
+          "model": {
+            "description": "The model name for this job",
+            "type": "string"
+          },
+          "provider": {
+            "description": "The AI provider for this job",
+            "enum": [
+              "openai",
+              "anthropic",
+              "ollama",
+              "azure",
+              "bedrock",
+              "vertex",
+              "openai_compatible"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "model"
+        ],
+        "type": "object"
+      },
       "WorkbenchJobModes": {
         "title": "WorkbenchJobModes",
         "description": "Mode-specific options for a workbench job",
         "properties": {
           "coding": {
             "$ref": "#/components/schemas/WorkbenchJobCodingModes"
+          },
+          "model": {
+            "$ref": "#/components/schemas/WorkbenchJobModel"
           },
           "plan": {
             "description": "Whether planning mode is enabled for this job",

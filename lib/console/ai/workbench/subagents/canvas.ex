@@ -19,13 +19,14 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
     Empty
   }
   alias Console.AI.Workbench.Environment
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
   @spec run(WorkbenchJobActivity.t(), WorkbenchJob.t(), Environment.t()) :: binary
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.new(20, engine_opts(job) ++ [system_prompt: String.trim(system_prompt(prompt: jprompt)), acc: %{}, callback: &callback(activity, &1)])
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, output} -> output

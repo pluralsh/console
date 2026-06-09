@@ -1374,6 +1374,12 @@ export type AvailableFeatures = {
   vpn?: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type AvailableModel = {
+  __typename?: 'AvailableModel';
+  model: Scalars['String']['output'];
+  provider: AiProvider;
+};
+
 /** aws node customizations */
 export type AwsCloud = {
   __typename?: 'AwsCloud';
@@ -10579,6 +10585,7 @@ export type RootQueryType = {
   argoRollout?: Maybe<ArgoRollout>;
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;
   audits?: Maybe<AuditConnection>;
+  availableModels?: Maybe<Array<Maybe<AvailableModel>>>;
   averageEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsAverage>>>;
   averageWorkbenchEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsWorkbenchAverage>>>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
@@ -15718,6 +15725,8 @@ export type WorkbenchJobActivity = {
   /** the type of the activity */
   type?: Maybe<WorkbenchJobActivityType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who created this activity */
+  user?: Maybe<User>;
   /** whimsically describes current progress for you */
   whimsey?: Maybe<Scalars['String']['output']>;
   /** the job this activity belongs to */
@@ -15874,10 +15883,27 @@ export type WorkbenchJobEdge = {
   node?: Maybe<WorkbenchJob>;
 };
 
+export type WorkbenchJobModel = {
+  __typename?: 'WorkbenchJobModel';
+  /** the model name for this job */
+  model?: Maybe<Scalars['String']['output']>;
+  /** the ai provider for this job */
+  provider?: Maybe<AiProvider>;
+};
+
+export type WorkbenchJobModelAttributes = {
+  /** the model name for this job */
+  model: Scalars['String']['input'];
+  /** the ai provider for this job */
+  provider: AiProvider;
+};
+
 export type WorkbenchJobModes = {
   __typename?: 'WorkbenchJobModes';
   /** coding mode options for this job */
   coding?: Maybe<WorkbenchJobCodingModes>;
+  /** model override for this job */
+  model?: Maybe<WorkbenchJobModel>;
   /** whether planning mode is enabled for this job */
   plan?: Maybe<Scalars['Boolean']['output']>;
 };
@@ -15885,6 +15911,8 @@ export type WorkbenchJobModes = {
 export type WorkbenchJobModesAttributes = {
   /** coding mode options for this job */
   coding?: InputMaybe<WorkbenchJobCodingModesAttributes>;
+  /** model override for this job */
+  model?: InputMaybe<WorkbenchJobModelAttributes>;
   /** whether planning mode is enabled for this job */
   plan?: InputMaybe<Scalars['Boolean']['input']>;
 };
