@@ -1,9 +1,16 @@
-import { Button, Flex, Modal } from '@pluralsh/design-system'
+import { Button, Modal } from '@pluralsh/design-system'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { AiProvider } from 'generated/graphql'
 import { ComponentProps, FormEvent } from 'react'
+import styled from 'styled-components'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
 import { AISettingsProviderForm } from './AISettingsProviderForm.tsx'
+
+const FormScrollSC = styled.div(({ theme }) => ({
+  maxHeight: 'calc(100vh - 200px)',
+  overflowY: 'auto',
+  paddingRight: theme.spacing.xxsmall,
+}))
 
 export function AISettingsProviderModal({
   open,
@@ -36,15 +43,23 @@ export function AISettingsProviderModal({
         formProps={{ onSubmit }}
         open={open}
         size="large"
+        scrollable={false}
+        css={{
+          maxHeight: 'calc(100vh - 64px)',
+          overflow: 'hidden',
+        }}
         onClose={onClose}
         header={
           header ??
           `Edit ${aiProviderToLabel[formProps.provider]} provider connection`
         }
         actions={
-          <Flex
-            justify="space-between"
-            width="100%"
+          <div
+            css={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
           >
             <Button
               destructive
@@ -60,15 +75,17 @@ export function AISettingsProviderModal({
             >
               Save
             </Button>
-          </Flex>
+          </div>
         }
       >
-        <AISettingsProviderForm
-          hideProviderSelect={hideProviderSelect}
-          providerOptions={providerOptions}
-          forceEnableProviderSelect={forceEnableProviderSelect}
-          {...formProps}
-        />
+        <FormScrollSC>
+          <AISettingsProviderForm
+            hideProviderSelect={hideProviderSelect}
+            providerOptions={providerOptions}
+            forceEnableProviderSelect={forceEnableProviderSelect}
+            {...formProps}
+          />
+        </FormScrollSC>
       </Modal>
     </ModalMountTransition>
   )
