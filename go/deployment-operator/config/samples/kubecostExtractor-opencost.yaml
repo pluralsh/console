@@ -9,3 +9,6 @@ spec:
   provider: OpenCost
   interval: "10h"
   recommendationThreshold: "0.00002"
+  kubecostServiceRef:
+    name: opencost
+    namespace: opencost

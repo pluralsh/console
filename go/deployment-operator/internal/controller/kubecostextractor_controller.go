@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"sort"
@@ -169,7 +170,7 @@ func (r *KubecostExtractorReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 
 	r.RunOnInterval(ctx, req.String(), kubecost.Spec.GetInterval(), func(ctx context.Context) (done bool, err error) {
-		//time.Sleep(time.Duration(rand.Int63n(int64(kubeCostJitter))))
+		time.Sleep(time.Duration(rand.Int63n(int64(kubeCostJitter))))
 		// Always patch object when exiting this function, so we can persist any object changes.
 		defer func() {
 			if err := scope.PatchObject(); err != nil && reterr == nil {
@@ -252,7 +253,7 @@ func (r *KubecostExtractorReconciler) getAllocation(ctx context.Context, srv *co
 	servicePort := spec.GetPort()
 	allocationPath := spec.GetAllocationPath()
 	queryParams := map[string]string{
-		"window":     "30d",
+		"window":     "10d",
 		"aggregate":  aggregate,
 		"accumulate": "true",
 	}
