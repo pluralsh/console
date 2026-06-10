@@ -132,6 +132,28 @@ Each failure → **one** cycle updating only the relevant todo’s `description`
 
 ---
 
+## Plural GitOps skills
+
+If the repository you are working on is a **Plural-managed GitOps repo** (i.e. it contains
+`ServiceDeployment`, `GlobalService`, `InfrastructureStack`, or other `deployments.plural.sh`
+CRs), read the skill files below **before** analysing or editing any manifests:
+
+- `/plural/skills/repo-structure.md` — standard directory layout, naming conventions, and
+  how the Plural operator reconciles changes.
+- `/plural/skills/infrastructure-stack.md` — field-by-field mapping between
+  `InfrastructureStack` CRs and Terraform / Terragrunt / Ansible runs, state management,
+  variable injection, and lifecycle.
+- `/plural/skills/services.md` — when to use `ServiceDeployment` vs `GlobalService`, how
+  child ServiceDeployments are created by a GlobalService, and common mistakes.
+- `/plural/skills/official-cd-extensions.md` — official docs-backed advanced patterns
+  (service-of-services, multi-source services, Lua Helm config, sync controls, observers,
+  pipelines).
+
+Read the `/plural/skills/README.md` index first for architecture context and a quick-start
+checklist.
+
+---
+
 ## Plural MCP tool hints
 
 ### `downloadServiceManifests`

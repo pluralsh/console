@@ -105,6 +105,7 @@ RUN groupadd -g 65532 nonroot && \
 WORKDIR /plural
 
 COPY deployment-operator/dockerfiles/agent-harness/system /plural/system
+COPY deployment-operator/dockerfiles/agent-harness/skills /plural/skills
 
 RUN mkdir -p /plural/.opencode && \
     mkdir -p /plural/.claude && \
