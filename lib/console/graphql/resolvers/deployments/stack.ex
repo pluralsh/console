@@ -226,7 +226,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     do: Stacks.delete_stack_definition(id, user)
 
   def create_stack_run(%{stack_id: id, commands: commands} = args, %{context: %{current_user: user}}),
-    do: Stacks.create_custom_run(id, commands, args[:context], user)
+    do: Stacks.create_custom_run(id, commands, args[:run_name], args[:context], user)
 
   def trigger_run(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.trigger_run(id, user)

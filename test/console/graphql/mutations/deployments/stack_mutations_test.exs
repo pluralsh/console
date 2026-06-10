@@ -463,17 +463,23 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       stack = insert(:stack, sha: "test-sha")
 
       {:ok, %{data: %{"onDemandRun" => run}}} = run_query("""
-        mutation Create($id: ID!, $cmds: [CommandAttributes]) {
-          onDemandRun(stackId: $id, commands: $cmds) {
+        mutation Create($id: ID!, $cmds: [CommandAttributes], $runName: String) {
+          onDemandRun(stackId: $id, commands: $cmds, runName: $runName) {
             id
+            message
             steps { cmd args }
             git { ref folder }
           }
         }
-      """, %{"id" => stack.id, "cmds" => %{"cmd" => "echo", "args" => ["Hello World!"]}}, %{current_user: admin_user()})
+      """, %{
+        "id" => stack.id,
+        "cmds" => %{"cmd" => "echo", "args" => ["Hello World!"]},
+        "runName" => "Restart elasticsearch"
+      }, %{current_user: admin_user()})
 
       assert run["git"]["ref"] == "test-sha"
       assert run["git"]["folder"] == stack.git.folder
+      assert run["message"] == "Restart elasticsearch"
 
       [step] = run["steps"]
       assert step["cmd"] == "echo"

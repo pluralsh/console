@@ -894,6 +894,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :on_demand_run, :stack_run do
       middleware Authenticated
       arg :stack_id, non_null(:id)
+      arg :run_name, :string
       arg :commands, list_of(:command_attributes)
       arg :context,  :json
 

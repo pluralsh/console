@@ -10004,6 +10004,7 @@ export type RootMutationTypeOauthConsentArgs = {
 export type RootMutationTypeOnDemandRunArgs = {
   commands?: InputMaybe<Array<InputMaybe<CommandAttributes>>>;
   context?: InputMaybe<Scalars['Json']['input']>;
+  runName?: InputMaybe<Scalars['String']['input']>;
   stackId: Scalars['ID']['input'];
 };
 
@@ -20326,6 +20327,7 @@ export type CreateOnDemandRunMutationVariables = Exact<{
   stackId: Scalars['ID']['input'];
   context?: InputMaybe<Scalars['Json']['input']>;
   commands?: InputMaybe<Array<InputMaybe<CommandAttributes>> | InputMaybe<CommandAttributes>>;
+  runName?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -41386,8 +41388,13 @@ export type CreateStackMutationHookResult = ReturnType<typeof useCreateStackMuta
 export type CreateStackMutationResult = Apollo.MutationResult<CreateStackMutation>;
 export type CreateStackMutationOptions = Apollo.BaseMutationOptions<CreateStackMutation, CreateStackMutationVariables>;
 export const CreateOnDemandRunDocument = gql`
-    mutation CreateOnDemandRun($stackId: ID!, $context: Json, $commands: [CommandAttributes]) {
-  onDemandRun(stackId: $stackId, context: $context, commands: $commands) {
+    mutation CreateOnDemandRun($stackId: ID!, $context: Json, $commands: [CommandAttributes], $runName: String) {
+  onDemandRun(
+    stackId: $stackId
+    context: $context
+    commands: $commands
+    runName: $runName
+  ) {
     ...StackRun
   }
 }
@@ -41410,6 +41417,7 @@ export type CreateOnDemandRunMutationFn = Apollo.MutationFunction<CreateOnDemand
  *      stackId: // value for 'stackId'
  *      context: // value for 'context'
  *      commands: // value for 'commands'
+ *      runName: // value for 'runName'
  *   },
  * });
  */

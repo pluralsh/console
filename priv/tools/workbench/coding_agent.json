@@ -12,7 +12,7 @@
         },
         "base_branch": {
             "type": "string",
-            "description": "Optional branch to use as the agent run's starting branch and pull request base. If omitted, the repository default branch is used.  Only set this if you know it needs to be based off something other than the repo default branch."
+            "description": "**OPTIONAL** branch to clone when starting the run and use as the pull request base.  This should **always** be left blank unless you are explicitly prompted to set it."
         },
         "prompt": {
             "type": "string", 

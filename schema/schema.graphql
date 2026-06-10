@@ -1159,7 +1159,7 @@ type RootMutationType {
   deleteStackDefinition(id: ID!): StackDefinition
 
   "Creates a custom run, with the given command list, to execute w\/in the stack's environment"
-  onDemandRun(stackId: ID!, commands: [CommandAttributes], context: Json): StackRun
+  onDemandRun(stackId: ID!, runName: String, commands: [CommandAttributes], context: Json): StackRun
 
   "start a new run from the newest sha in the stack's run history"
   triggerRun(id: ID!): StackRun

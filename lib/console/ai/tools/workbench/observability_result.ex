@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.ObservabilityResult do
 
   def name(), do: "observability_result"
   def json_schema(), do: @json_schema
-  def description(), do: "The result of the observability tool call"
+  def description(), do: "The result of the observability tool call. Output should be a thorough summary of work done in response to the original prompt, usable for any future agent to understand everything without diving into the details of this session."
 
   def changeset(model, attrs) do
     model

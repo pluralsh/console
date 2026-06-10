@@ -543,8 +543,14 @@ mutation CreateOnDemandRun(
   $stackId: ID!
   $context: Json
   $commands: [CommandAttributes]
+  $runName: String
 ) {
-  onDemandRun(stackId: $stackId, context: $context, commands: $commands) {
+  onDemandRun(
+    stackId: $stackId
+    context: $context
+    commands: $commands
+    runName: $runName
+  ) {
     ...StackRun
   }
 }

@@ -1170,11 +1170,29 @@ defmodule Console.Deployments.StacksTest do
       refute run.dry_run
       assert run.git.ref == "test-sha"
       assert run.git.folder == stack.git.folder
+      assert run.message == "Custom stack run"
 
       [step] = run.steps
 
       assert step.cmd == "echo"
       assert step.args == ["hello world!"]
+    end
+
+    test "stack writers can name custom runs" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], sha: "test-sha")
+
+      {:ok, run} =
+        Stacks.create_custom_run(
+          stack.id,
+          [%{cmd: "echo", args: ["hello world!"]}],
+          "Restart elasticsearch",
+          nil,
+          user
+        )
+
+      assert run.stack_id == stack.id
+      assert run.message == "Restart elasticsearch"
     end
 
     test "infers command stages from approval requirements" do
