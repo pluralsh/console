@@ -528,6 +528,23 @@ _Appears in:_
 
 
 
+#### CostProvider
+
+_Underlying type:_ _string_
+
+CostProvider identifies which cost allocation backend to query.
+
+
+
+_Appears in:_
+- [KubecostExtractorSpec](#kubecostextractorspec)
+
+| Field | Description |
+| --- | --- |
+| `Kubecost` |  |
+| `OpenCost` |  |
+
+
 #### CustomHealth
 
 
@@ -814,8 +831,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `provider` _[CostProvider](#costprovider)_ | Provider selects which cost backend to query. Defaults to Kubecost. | Kubecost | Enum: [Kubecost OpenCost] <br />Optional: \{\} <br /> |
 | `interval` _string_ |  | 1h | Optional: \{\} <br /> |
-| `kubecostServiceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  |  |
+| `kubecostServiceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | KubecostServiceRef points at the cost analyzer Service. When omitted, defaults<br />are chosen from provider: kubecost-cost-analyzer/kubecost or opencost/opencost. |  | Optional: \{\} <br /> |
 | `kubecostPort` _integer_ |  |  | Optional: \{\} <br /> |
 | `recommendationThreshold` _string_ | RecommendationThreshold float value for example: `1.2 or 0.001` |  |  |
 | `recommendationsSettings` _[RecommendationsSettings](#recommendationssettings)_ |  |  | Optional: \{\} <br /> |
