@@ -13,11 +13,6 @@ Plural CD uses **two cooperating layers**:
 2. **Deployment operator agent** (runs on each target cluster) — pulls service definitions from
    Console, renders Helm/Kustomize/raw YAML, and applies manifests locally.
 
-`InfrastructureStack` runs execute as **Batch Jobs** on a cluster (usually mgmt) via the
-deployment-operator harness — not on every workload cluster unless configured that way.
-
-Reference repos: run `plural up` to scaffold a full layout, or study
-[pluralsh/demo](https://github.com/pluralsh/demo). Layouts are **not** enforced — repos vary.
 
 **CRD field reference**: for authoritative `spec` / `status` definitions of every
 `deployments.plural.sh/v1alpha1` kind (`Cluster`, `ServiceDeployment`, `GlobalService`,
