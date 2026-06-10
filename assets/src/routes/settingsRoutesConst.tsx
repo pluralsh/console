@@ -26,6 +26,27 @@ export const AI_SETTINGS_MCP_SERVERS_REL_PATH = 'mcp-servers' as const
 export const AI_SETTINGS_MCP_SERVERS_ABS_PATH =
   `${AI_SETTINGS_ABS_PATH}/${AI_SETTINGS_MCP_SERVERS_REL_PATH}` as const
 
+// webhooks
+export const WEBHOOKS_SETTINGS_REL_PATH = 'webhooks' as const
+export const WEBHOOKS_SETTINGS_ABS_PATH =
+  `${SETTINGS_ABS_PATH}/${WEBHOOKS_SETTINGS_REL_PATH}` as const
+export const WEBHOOKS_SETTINGS_CREATE_REL_PATH = 'create' as const
+export const WEBHOOKS_SETTINGS_CREATE_ABS_PATH =
+  `${WEBHOOKS_SETTINGS_ABS_PATH}/${WEBHOOKS_SETTINGS_CREATE_REL_PATH}` as const
+export const WEBHOOKS_SETTINGS_WEBHOOK_ID_PARAM_ID = 'webhookId' as const
+export const WEBHOOKS_SETTINGS_EDIT_REL_PATH =
+  `:${WEBHOOKS_SETTINGS_WEBHOOK_ID_PARAM_ID}/edit` as const
+export const WEBHOOKS_SETTINGS_EDIT_PATH_MATCHER_ABS =
+  `${WEBHOOKS_SETTINGS_ABS_PATH}/${WEBHOOKS_SETTINGS_EDIT_REL_PATH}` as const
+export const getWebhooksSettingsEditAbsPath = ({
+  webhookId,
+}: {
+  webhookId: Nullable<string>
+}) => `${WEBHOOKS_SETTINGS_ABS_PATH}/${webhookId ?? ''}/edit`
+
+// chatbots
+export const CHATBOTS_SETTINGS_REL_PATH = 'chatbots' as const
+
 // project
 export const PROJECT_SETTINGS_REL_PATH = 'projects' as const
 export const PROJECT_SETTINGS_ABS_PATH =

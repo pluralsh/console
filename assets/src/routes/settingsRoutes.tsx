@@ -45,6 +45,7 @@ import {
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
+  CHATBOTS_SETTINGS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
   NOTIFICATIONS_ROUTERS_REL_PATH,
@@ -53,10 +54,17 @@ import {
   SETTINGS_REL_PATH,
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
+  WEBHOOKS_SETTINGS_EDIT_REL_PATH,
+  WEBHOOKS_SETTINGS_CREATE_REL_PATH,
+  WEBHOOKS_SETTINGS_REL_PATH,
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
 import { McpServers } from 'components/settings/ai/mcp/McpServers'
 import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
+import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
+import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
+import { WebhookCreateSettings } from 'components/settings/webhooks/WebhookCreateSettings'
+import { WebhookEditSettings } from 'components/settings/webhooks/WebhookEditSettings'
 
 const userManagementRoutes = (
   <Route
@@ -183,6 +191,30 @@ const aiSettingsRoutes = (
   </Route>
 )
 
+const webhooksSettingsRoutes = (
+  <>
+    <Route
+      path={WEBHOOKS_SETTINGS_REL_PATH}
+      element={<WebhooksSettings />}
+    />
+    <Route
+      path={`${WEBHOOKS_SETTINGS_REL_PATH}/${WEBHOOKS_SETTINGS_CREATE_REL_PATH}`}
+      element={<WebhookCreateSettings />}
+    />
+    <Route
+      path={`${WEBHOOKS_SETTINGS_REL_PATH}/${WEBHOOKS_SETTINGS_EDIT_REL_PATH}`}
+      element={<WebhookEditSettings />}
+    />
+  </>
+)
+
+const chatbotsSettingsRoutes = (
+  <Route
+    path={CHATBOTS_SETTINGS_REL_PATH}
+    element={<ChatbotsSettings />}
+  />
+)
+
 const projectSettingsRoutes = (
   <Route
     path={PROJECT_SETTINGS_REL_PATH}
@@ -259,6 +291,8 @@ export const settingsRoutes = (
     {userManagementRoutes}
     {globalSettingsRoutes}
     {aiSettingsRoutes}
+    {webhooksSettingsRoutes}
+    {chatbotsSettingsRoutes}
     {projectSettingsRoutes}
     {notificationsRoutes}
     {auditRoutes}

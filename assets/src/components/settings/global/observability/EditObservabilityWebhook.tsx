@@ -36,11 +36,11 @@ import { SecretInputWithGenerate } from 'components/utils/SecretInputWithGenerat
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
-import { WebhookAccessPolicyStep } from 'components/workbenches/workbench/webhooks/WebhookAccessPolicyStep'
+import { WebhookAccessPolicyStep } from 'components/settings/webhooks/WebhookAccessPolicyStep'
 import {
   WEBHOOK_ACCESS_FORM_STEPS,
   WebhookAccessFormStep,
-} from 'components/workbenches/workbench/webhooks/webhookFormSteps'
+} from 'components/settings/webhooks/webhookFormSteps'
 import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
 import { isNonNullable } from 'utils/isNonNullable'
 

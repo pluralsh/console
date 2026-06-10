@@ -722,6 +722,11 @@
          "name": "ObservabilityWebhooks",
          "body": "query ObservabilityWebhooks($first: Int, $after: String) {\n  observabilityWebhooks(first: $first, after: $after) {\n    edges {\n      node {\n        ...ObservabilityWebhook\n        __typename\n      }\n      __typename\n    }\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ObservabilityWebhook on ObservabilityWebhook {\n  id\n  name\n  type\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}"
       },
+      "sha256:f2e9dd99e91cc080befa6cd7b1a4308e57749f3aad0c5e6593bf7d419a9bd90c": {
+         "type": "query",
+         "name": "ObservabilityWebhook",
+         "body": "query ObservabilityWebhook($id: ID, $name: String) {\n  observabilityWebhook(id: $id, name: $name) {\n    ...ObservabilityWebhook\n    __typename\n  }\n}\n\nfragment ObservabilityWebhook on ObservabilityWebhook {\n  id\n  name\n  type\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:41a6241c4176bc8befbb79e167b0fd728c5977cf9689f2727c4450be8a3da5ac": {
          "type": "mutation",
          "name": "UpdateDeploymentSettings",
@@ -1942,6 +1947,11 @@
          "name": "IssueWebhooks",
          "body": "query IssueWebhooks($first: Int, $after: String) {\n  issueWebhooks(first: $first, after: $after) {\n    edges {\n      node {\n        ...IssueWebhook\n        __typename\n      }\n      __typename\n    }\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}"
       },
+      "sha256:6e6d763bd1d05069ea2e866b5df8545e0b6033882a17a453a0aa27b27538a4d1": {
+         "type": "query",
+         "name": "IssueWebhook",
+         "body": "query IssueWebhook($id: ID, $name: String) {\n  issueWebhook(id: $id, name: $name) {\n    ...IssueWebhook\n    __typename\n  }\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:5666ff586d900a2870519b06de708c3bbd2f323fe6910e81c0c5af78a98a3dd6": {
          "type": "query",
          "name": "WorkbenchTriggersSummary",
@@ -2136,6 +2146,11 @@
          "type": "mutation",
          "name": "UpdateIssueWebhook",
          "body": "mutation UpdateIssueWebhook($id: ID!, $attributes: IssueWebhookAttributes!) {\n  updateIssueWebhook(id: $id, attributes: $attributes) {\n    ...IssueWebhook\n    __typename\n  }\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:293b92cd22f21f03ae9f44936c40a76b1b5a515e58e1e07d215e947ca8ec2eac": {
+         "type": "mutation",
+         "name": "DeleteIssueWebhook",
+         "body": "mutation DeleteIssueWebhook($id: ID!) {\n  deleteIssueWebhook(id: $id) {\n    ...IssueWebhook\n    __typename\n  }\n}\n\nfragment IssueWebhook on IssueWebhook {\n  id\n  name\n  provider\n  url\n  insertedAt\n  updatedAt\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:25e7bad7186fbd9e92d3d47c1c1a6e815e0e88265a4653d13758e87e238eab98": {
          "type": "subscription",

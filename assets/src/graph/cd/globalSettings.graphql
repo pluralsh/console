@@ -167,6 +167,12 @@ query ObservabilityWebhooks($first: Int, $after: String) {
   }
 }
 
+query ObservabilityWebhook($id: ID, $name: String) {
+  observabilityWebhook(id: $id, name: $name) {
+    ...ObservabilityWebhook
+  }
+}
+
 mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
   updateDeploymentSettings(attributes: $attributes) {
     ...DeploymentSettings

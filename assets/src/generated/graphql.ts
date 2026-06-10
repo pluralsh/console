@@ -18383,6 +18383,14 @@ export type ObservabilityWebhooksQueryVariables = Exact<{
 
 export type ObservabilityWebhooksQuery = { __typename?: 'RootQueryType', observabilityWebhooks?: { __typename?: 'ObservabilityWebhookConnection', edges?: Array<{ __typename?: 'ObservabilityWebhookEdge', node?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
+export type ObservabilityWebhookQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ObservabilityWebhookQuery = { __typename?: 'RootQueryType', observabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type UpdateDeploymentSettingsMutationVariables = Exact<{
   attributes: DeploymentSettingsAttributes;
 }>;
@@ -20785,6 +20793,14 @@ export type IssueWebhooksQueryVariables = Exact<{
 
 export type IssueWebhooksQuery = { __typename?: 'RootQueryType', issueWebhooks?: { __typename?: 'IssueWebhookConnection', edges?: Array<{ __typename?: 'IssueWebhookEdge', node?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
+export type IssueWebhookQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type IssueWebhookQuery = { __typename?: 'RootQueryType', issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type WorkbenchTriggersSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -21082,6 +21098,13 @@ export type UpdateIssueWebhookMutationVariables = Exact<{
 
 
 export type UpdateIssueWebhookMutation = { __typename?: 'RootMutationType', updateIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeleteIssueWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteIssueWebhookMutation = { __typename?: 'RootMutationType', deleteIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -32844,6 +32867,50 @@ export type ObservabilityWebhooksQueryHookResult = ReturnType<typeof useObservab
 export type ObservabilityWebhooksLazyQueryHookResult = ReturnType<typeof useObservabilityWebhooksLazyQuery>;
 export type ObservabilityWebhooksSuspenseQueryHookResult = ReturnType<typeof useObservabilityWebhooksSuspenseQuery>;
 export type ObservabilityWebhooksQueryResult = Apollo.QueryResult<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>;
+export const ObservabilityWebhookDocument = gql`
+    query ObservabilityWebhook($id: ID, $name: String) {
+  observabilityWebhook(id: $id, name: $name) {
+    ...ObservabilityWebhook
+  }
+}
+    ${ObservabilityWebhookFragmentDoc}`;
+
+/**
+ * __useObservabilityWebhookQuery__
+ *
+ * To run a query within a React component, call `useObservabilityWebhookQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObservabilityWebhookQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObservabilityWebhookQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useObservabilityWebhookQuery(baseOptions?: Apollo.QueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>(ObservabilityWebhookDocument, options);
+      }
+export function useObservabilityWebhookLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>(ObservabilityWebhookDocument, options);
+        }
+// @ts-ignore
+export function useObservabilityWebhookSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>;
+export function useObservabilityWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<ObservabilityWebhookQuery | undefined, ObservabilityWebhookQueryVariables>;
+export function useObservabilityWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>(ObservabilityWebhookDocument, options);
+        }
+export type ObservabilityWebhookQueryHookResult = ReturnType<typeof useObservabilityWebhookQuery>;
+export type ObservabilityWebhookLazyQueryHookResult = ReturnType<typeof useObservabilityWebhookLazyQuery>;
+export type ObservabilityWebhookSuspenseQueryHookResult = ReturnType<typeof useObservabilityWebhookSuspenseQuery>;
+export type ObservabilityWebhookQueryResult = Apollo.QueryResult<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>;
 export const UpdateDeploymentSettingsDocument = gql`
     mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
   updateDeploymentSettings(attributes: $attributes) {
@@ -43540,6 +43607,50 @@ export type IssueWebhooksQueryHookResult = ReturnType<typeof useIssueWebhooksQue
 export type IssueWebhooksLazyQueryHookResult = ReturnType<typeof useIssueWebhooksLazyQuery>;
 export type IssueWebhooksSuspenseQueryHookResult = ReturnType<typeof useIssueWebhooksSuspenseQuery>;
 export type IssueWebhooksQueryResult = Apollo.QueryResult<IssueWebhooksQuery, IssueWebhooksQueryVariables>;
+export const IssueWebhookDocument = gql`
+    query IssueWebhook($id: ID, $name: String) {
+  issueWebhook(id: $id, name: $name) {
+    ...IssueWebhook
+  }
+}
+    ${IssueWebhookFragmentDoc}`;
+
+/**
+ * __useIssueWebhookQuery__
+ *
+ * To run a query within a React component, call `useIssueWebhookQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIssueWebhookQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIssueWebhookQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useIssueWebhookQuery(baseOptions?: Apollo.QueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IssueWebhookQuery, IssueWebhookQueryVariables>(IssueWebhookDocument, options);
+      }
+export function useIssueWebhookLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IssueWebhookQuery, IssueWebhookQueryVariables>(IssueWebhookDocument, options);
+        }
+// @ts-ignore
+export function useIssueWebhookSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhookQuery, IssueWebhookQueryVariables>;
+export function useIssueWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhookQuery | undefined, IssueWebhookQueryVariables>;
+export function useIssueWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IssueWebhookQuery, IssueWebhookQueryVariables>(IssueWebhookDocument, options);
+        }
+export type IssueWebhookQueryHookResult = ReturnType<typeof useIssueWebhookQuery>;
+export type IssueWebhookLazyQueryHookResult = ReturnType<typeof useIssueWebhookLazyQuery>;
+export type IssueWebhookSuspenseQueryHookResult = ReturnType<typeof useIssueWebhookSuspenseQuery>;
+export type IssueWebhookQueryResult = Apollo.QueryResult<IssueWebhookQuery, IssueWebhookQueryVariables>;
 export const WorkbenchTriggersSummaryDocument = gql`
     query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
@@ -45060,6 +45171,39 @@ export function useUpdateIssueWebhookMutation(baseOptions?: Apollo.MutationHookO
 export type UpdateIssueWebhookMutationHookResult = ReturnType<typeof useUpdateIssueWebhookMutation>;
 export type UpdateIssueWebhookMutationResult = Apollo.MutationResult<UpdateIssueWebhookMutation>;
 export type UpdateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>;
+export const DeleteIssueWebhookDocument = gql`
+    mutation DeleteIssueWebhook($id: ID!) {
+  deleteIssueWebhook(id: $id) {
+    ...IssueWebhook
+  }
+}
+    ${IssueWebhookFragmentDoc}`;
+export type DeleteIssueWebhookMutationFn = Apollo.MutationFunction<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>;
+
+/**
+ * __useDeleteIssueWebhookMutation__
+ *
+ * To run a mutation, you first call `useDeleteIssueWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteIssueWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteIssueWebhookMutation, { data, loading, error }] = useDeleteIssueWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteIssueWebhookMutation(baseOptions?: Apollo.MutationHookOptions<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>(DeleteIssueWebhookDocument, options);
+      }
+export type DeleteIssueWebhookMutationHookResult = ReturnType<typeof useDeleteIssueWebhookMutation>;
+export type DeleteIssueWebhookMutationResult = Apollo.MutationResult<DeleteIssueWebhookMutation>;
+export type DeleteIssueWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>;
 export const WorkbenchJobDeltaDocument = gql`
     subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
   workbenchJobDelta(id: $id, workbenchId: $workbenchId) {
@@ -45343,6 +45487,7 @@ export const namedOperations = {
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProviders: 'ObservabilityProviders',
     ObservabilityWebhooks: 'ObservabilityWebhooks',
+    ObservabilityWebhook: 'ObservabilityWebhook',
     Observers: 'Observers',
     Observer: 'Observer',
     Pipelines: 'Pipelines',
@@ -45491,6 +45636,7 @@ export const namedOperations = {
     SearchConversations: 'SearchConversations',
     ChatProviderConnections: 'ChatProviderConnections',
     IssueWebhooks: 'IssueWebhooks',
+    IssueWebhook: 'IssueWebhook',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobMetricsTool: 'WorkbenchJobMetricsTool',
@@ -45682,7 +45828,8 @@ export const namedOperations = {
     DeleteWorkbenchChatbot: 'DeleteWorkbenchChatbot',
     UpsertChatProviderConnection: 'UpsertChatProviderConnection',
     CreateIssueWebhook: 'CreateIssueWebhook',
-    UpdateIssueWebhook: 'UpdateIssueWebhook'
+    UpdateIssueWebhook: 'UpdateIssueWebhook',
+    DeleteIssueWebhook: 'DeleteIssueWebhook'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',

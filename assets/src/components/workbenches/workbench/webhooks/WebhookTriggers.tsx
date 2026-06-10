@@ -1,4 +1,5 @@
 import {
+  ArrowTopRightIcon,
   Button,
   Card,
   EmptyState,
@@ -22,11 +23,10 @@ import {
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { WEBHOOKS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import {
-  getWorkbenchWebhookTriggerCreateWebhookAbsPath,
   getWorkbenchWebhookTriggerCreateAbsPath,
   getWorkbenchWebhookTriggerEditAbsPath,
-  getWorkbenchWebhookTriggersAbsPath,
   WORKBENCH_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -127,28 +127,17 @@ export function WebhookTriggers() {
           <Card>
             <EmptyState
               message="No webhooks yet"
-              description="No webhook connected. Select an existing webhook or create a new one."
+              description="No webhook connected. Select an existing webhook or manage webhook integrations in settings."
               css={{ margin: '0 auto', width: 500 }}
             >
               <Flex gap="small">
                 <Button
                   small
                   secondary
-                  onClick={() => {
-                    navigate(
-                      getWorkbenchWebhookTriggerCreateWebhookAbsPath(
-                        workbenchId
-                      ),
-                      {
-                        state: {
-                          returnPath:
-                            getWorkbenchWebhookTriggersAbsPath(workbenchId),
-                        },
-                      }
-                    )
-                  }}
+                  endIcon={<ArrowTopRightIcon />}
+                  onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
                 >
-                  Create new webhook
+                  Manage webhooks
                 </Button>
                 <Button
                   small
@@ -185,21 +174,10 @@ export function WebhookTriggers() {
                 <Button
                   small
                   secondary
-                  onClick={() => {
-                    navigate(
-                      getWorkbenchWebhookTriggerCreateWebhookAbsPath(
-                        workbenchId
-                      ),
-                      {
-                        state: {
-                          returnPath:
-                            getWorkbenchWebhookTriggersAbsPath(workbenchId),
-                        },
-                      }
-                    )
-                  }}
+                  endIcon={<ArrowTopRightIcon />}
+                  onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
                 >
-                  Create new webhook
+                  Manage webhooks
                 </Button>
                 <Button
                   small

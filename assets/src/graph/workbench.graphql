@@ -955,6 +955,12 @@ query IssueWebhooks($first: Int, $after: String) {
   }
 }
 
+query IssueWebhook($id: ID, $name: String) {
+  issueWebhook(id: $id, name: $name) {
+    ...IssueWebhook
+  }
+}
+
 query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
     id
@@ -1312,6 +1318,12 @@ mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
 
 mutation UpdateIssueWebhook($id: ID!, $attributes: IssueWebhookAttributes!) {
   updateIssueWebhook(id: $id, attributes: $attributes) {
+    ...IssueWebhook
+  }
+}
+
+mutation DeleteIssueWebhook($id: ID!) {
+  deleteIssueWebhook(id: $id) {
     ...IssueWebhook
   }
 }
