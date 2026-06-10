@@ -54,8 +54,8 @@ If the repository you are working on is a **Plural-managed GitOps repo** (i.e. i
 `ServiceDeployment`, `GlobalService`, `InfrastructureStack`, or other `deployments.plural.sh`
 CRs), read the skill files below **before** analysing or editing any manifests:
 
-- `/plural/skills/repo-structure.md` — standard directory layout, naming conventions, and
-  how the Plural operator reconciles changes.
+- `/plural/skills/git-repository.md` — `GitRepository` CRs, source vs GitOps repos, and
+  `repositoryRef` / `spec.git` wiring.
 - `/plural/skills/infrastructure-stack.md` — field-by-field mapping between
   `InfrastructureStack` CRs and Terraform / Terragrunt / Ansible runs, state management,
   variable injection, and lifecycle.

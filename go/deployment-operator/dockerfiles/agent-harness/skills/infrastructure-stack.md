@@ -215,7 +215,7 @@ spec:
 ```
 
 In Liquid templates, outputs appear under `imports.<stack-name>.<output-name>` (see
-`repo-structure.md`).
+`services.md`).
 
 ---
 

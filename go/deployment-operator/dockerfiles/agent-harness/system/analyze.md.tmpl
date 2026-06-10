@@ -38,8 +38,8 @@ If the repository you are analysing is a **Plural-managed GitOps repo** (i.e. it
 `ServiceDeployment`, `GlobalService`, `InfrastructureStack`, or other `deployments.plural.sh`
 CRs), read the skill files below **before** starting the environment scan:
 
-- `/plural/skills/repo-structure.md` — standard directory layout, naming conventions, and
-  how the Plural operator reconciles changes.
+- `/plural/skills/git-repository.md` — `GitRepository` CRs, source vs GitOps repos, and
+  `repositoryRef` / `spec.git` wiring.
 - `/plural/skills/infrastructure-stack.md` — field-by-field mapping between
   `InfrastructureStack` CRs and Terraform / Terragrunt / Ansible runs, state management,
   variable injection, and lifecycle.
