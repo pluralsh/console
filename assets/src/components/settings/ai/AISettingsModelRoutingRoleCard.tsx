@@ -2,13 +2,12 @@ import {
   Flex,
   FormField,
   IconFrame,
-  Input,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { AiProvider, AiSettings } from 'generated/graphql'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
 import {
   getModelValue,
@@ -16,7 +15,6 @@ import {
   modelRoutingRoleMeta,
   ModelRoutingState,
   selectedProviderForRole,
-  setModelValue,
   setRoutingProvider,
 } from './aiModelRoutingUtils.ts'
 import { aiProviderToIcon } from './AISettingsConfiguredProviders.tsx'
@@ -26,16 +24,12 @@ export function AISettingsModelRoutingRoleCard({
   ai,
   routing,
   onRoutingChange,
-  providerSettings,
-  onProviderSettingsChange,
   configuredProviders,
 }: {
   role: ModelRoutingRole
   ai: Nullable<AiSettings>
   routing: ModelRoutingState
   onRoutingChange: (routing: ModelRoutingState) => void
-  providerSettings: Parameters<typeof setModelValue>[2]
-  onProviderSettingsChange: (settings: ReturnType<typeof setModelValue>) => void
   configuredProviders: AiProvider[]
 }) {
   const { title, description, modelHint } = modelRoutingRoleMeta[role]
@@ -43,9 +37,8 @@ export function AISettingsModelRoutingRoleCard({
   const SelectedProviderIcon = selectedProvider
     ? aiProviderToIcon[selectedProvider]
     : null
-  const modelValue = getModelValue(role, routing, providerSettings, ai)
-  const modelDisabled =
-    !selectedProvider || (role !== 'chat' && !routing.provider)
+  const theme = useTheme()
+  const modelName = getModelValue(role, routing, ai)
 
   return (
     <CardSC>
@@ -104,20 +97,17 @@ export function AISettingsModelRoutingRoleCard({
             label="Model"
             infoTooltip={modelHint}
           >
-            <Input
-              value={modelValue}
-              disabled={modelDisabled}
-              onChange={(e) => {
-                onProviderSettingsChange(
-                  setModelValue(
-                    role,
-                    routing,
-                    providerSettings,
-                    e.currentTarget.value
-                  )
-                )
+            <span
+              css={{
+                ...theme.partials.text.body2,
+                display: 'flex',
+                alignItems: 'center',
+                minHeight: 36,
+                color: theme.colors['text-light'],
               }}
-            />
+            >
+              {modelName}
+            </span>
           </FormField>
         </FieldsSC>
       </Flex>

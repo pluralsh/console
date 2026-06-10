@@ -4,16 +4,12 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
-  AiSettingsAttributes,
   useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
-import { produce } from 'immer'
 import { isEqual } from 'lodash'
-import merge from 'lodash/merge'
-import { useMemo, useReducer, useState } from 'react'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { PartialDeep } from 'type-fest'
 import {
   initialModelRoutingState,
   modelRoutingRoles,
@@ -21,18 +17,6 @@ import {
 } from './aiModelRoutingUtils.ts'
 import { AISettingsModelRoutingRoleCard } from './AISettingsModelRoutingRoleCard.tsx'
 import { getConfiguredProviders } from './AISettingsConfiguredProviders.tsx'
-import { initialSettingsAttributes } from './AISettingsProviders.tsx'
-
-const updateSettings = produce(
-  (
-    original: Omit<AiSettingsAttributes, 'enabled' | 'provider'>,
-    update: PartialDeep<Omit<AiSettingsAttributes, 'enabled' | 'provider'>>
-  ) => {
-    merge(original, update)
-
-    return original
-  }
-)
 
 export function AISettingsModelRouting() {
   const { popToast } = useSimpleToast()
@@ -41,23 +25,13 @@ export function AISettingsModelRouting() {
   const ai = deploymentSettings.deploymentSettings?.ai
 
   const initialRouting = useMemo(() => initialModelRoutingState(ai), [ai])
-  const initialProviderSettings = useMemo(
-    () => initialSettingsAttributes(ai),
-    [ai]
-  )
 
   const [routing, setRouting] = useState<ModelRoutingState>(initialRouting)
-  const [providerSettings, updateProviderSettings] = useReducer(
-    updateSettings,
-    initialProviderSettings
-  )
   const configuredProviders = useMemo(() => getConfiguredProviders(ai), [ai])
 
   const hasChanges = useMemo(
-    () =>
-      !isEqual(routing, initialRouting) ||
-      !isEqual(providerSettings, initialProviderSettings),
-    [routing, initialRouting, providerSettings, initialProviderSettings]
+    () => !isEqual(routing, initialRouting),
+    [routing, initialRouting]
   )
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
@@ -65,13 +39,11 @@ export function AISettingsModelRouting() {
       popToast({ content: 'Changes saved', severity: 'success' })
       const updatedAi = data?.updateDeploymentSettings?.ai
       setRouting(initialModelRoutingState(updatedAi))
-      updateProviderSettings(initialSettingsAttributes(updatedAi))
     },
   })
 
   const handleReset = () => {
     setRouting(initialRouting)
-    updateProviderSettings(initialProviderSettings)
   }
 
   const handleSave = () => {
@@ -85,8 +57,7 @@ export function AISettingsModelRouting() {
             provider: routing.provider,
             toolProvider: routing.toolProvider,
             embeddingProvider: routing.embeddingProvider,
-            ...providerSettings,
-          } satisfies AiSettingsAttributes,
+          },
         },
       },
     })
@@ -99,9 +70,9 @@ export function AISettingsModelRouting() {
         gap="medium"
       >
         <Body2P $color="text-light">
-          Pin specific roles to specific provider and model combinations. The
-          router falls back to a provider&apos;s default model if a role is
-          unset.
+          Pin specific roles to specific providers. Models are configured per
+          provider in AI providers. The router falls back to a provider&apos;s
+          default model if none is set.
         </Body2P>
         {deploymentSettingsError && (
           <GqlError error={deploymentSettingsError} />
@@ -114,8 +85,6 @@ export function AISettingsModelRouting() {
             ai={ai}
             routing={routing}
             onRoutingChange={setRouting}
-            providerSettings={providerSettings}
-            onProviderSettingsChange={updateProviderSettings}
             configuredProviders={configuredProviders}
           />
         ))}

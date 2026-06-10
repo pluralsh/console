@@ -22,20 +22,20 @@ export const modelRoutingRoleMeta = {
     description:
       'Powers conversations, fix-it suggestions, and post-incident summaries.',
     providerField: 'provider',
-    modelHint: 'Leave blank to use the provider default model.',
+    modelHint: 'Configured in the provider connection settings.',
   },
   embedding: {
     title: 'Embedding model',
     description: 'Used for embeddings and vector search.',
     providerField: 'embeddingProvider',
-    modelHint: 'Leave blank to use the provider default embedding model.',
+    modelHint: 'Configured in the provider connection settings.',
   },
   tool: {
     title: 'Tool model',
     description:
       'Indexes documents, code, and runbooks for retrieval. Re-indexes on change.',
     providerField: 'toolProvider',
-    modelHint: 'Leave blank to use the provider default tool model.',
+    modelHint: 'Configured in the provider connection settings.',
   },
 } as const satisfies Record<
   ModelRoutingRole,
@@ -50,7 +50,6 @@ export const modelRoutingRoleMeta = {
   }
 >
 
-type ProviderSettings = Omit<AiSettingsAttributes, 'enabled' | 'provider'>
 type ProviderConfigKey = (typeof providerSettingsKey)[AiProvider]
 
 type ModelFieldKey =
@@ -123,7 +122,6 @@ export function effectiveProviderForRole(
 export function getModelValue(
   role: ModelRoutingRole,
   routing: ModelRoutingState,
-  providerSettings: ProviderSettings,
   ai: Nullable<AiSettings>
 ): string {
   const provider = effectiveProviderForRole(role, routing)
@@ -131,16 +129,9 @@ export function getModelValue(
 
   const key = providerSettingsKey[provider]
   const field = modelFieldKeyFor(provider, role)
-  const fromState =
-    providerSettings[key]?.[
-      field as keyof (typeof providerSettings)[typeof key]
-    ]
-  if (typeof fromState === 'string') return fromState
-
   const serverConfig = ai?.[key as ProviderConfigKey]
-  const fromServer =
-    serverConfig?.[field as keyof NonNullable<typeof serverConfig>]
-  return typeof fromServer === 'string' ? fromServer : ''
+  const value = serverConfig?.[field as keyof NonNullable<typeof serverConfig>]
+  return typeof value === 'string' ? value : ''
 }
 
 export function setRoutingProvider(
@@ -155,29 +146,5 @@ export function setRoutingProvider(
       return { ...routing, toolProvider: provider }
     default:
       return { ...routing, embeddingProvider: provider }
-  }
-}
-
-export function setModelValue(
-  role: ModelRoutingRole,
-  routing: ModelRoutingState,
-  providerSettings: ProviderSettings,
-  model: string
-): ProviderSettings {
-  const provider = effectiveProviderForRole(role, routing)
-  if (!provider) return providerSettings
-
-  const key = providerSettingsKey[provider]
-  const field = modelFieldKeyFor(provider, role)
-
-  const current = providerSettings[key]
-  const currentObject = current && typeof current === 'object' ? current : {}
-
-  return {
-    ...providerSettings,
-    [key]: {
-      ...currentObject,
-      [field]: model || null,
-    },
   }
 }
