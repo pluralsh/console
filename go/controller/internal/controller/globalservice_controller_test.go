@@ -21,6 +21,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/controller"
 	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 var _ = Describe("Global Service Controller", Ordered, func() {
@@ -432,6 +433,74 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			service := &v1alpha1.GlobalService{}
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should annotate configuration secrets referenced by the template", func() {
+			const (
+				configSecretName = "global-service-config"
+				templateName     = "global-service-template-config"
+			)
+
+			configSecret := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Name: configSecretName, Namespace: namespace},
+				Data: map[string][]byte{
+					"key": []byte("value"),
+				},
+			}
+			Expect(k8sClient.Create(ctx, configSecret)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(ctx, configSecret)).To(Succeed())
+			}()
+
+			templateNamespacedName := types.NamespacedName{Name: templateName, Namespace: namespace}
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GlobalService{
+				ObjectMeta: metav1.ObjectMeta{Name: templateName, Namespace: namespace},
+				Spec: v1alpha1.GlobalServiceSpec{
+					Distro: lo.ToPtr(gqlclient.ClusterDistroGeneric),
+					Template: &v1alpha1.ServiceTemplate{
+						ConfigurationRef: &corev1.SecretReference{
+							Name:      configSecretName,
+							Namespace: namespace,
+						},
+						RepositoryRef: &corev1.ObjectReference{
+							Name:      repoName,
+							Namespace: namespace,
+						},
+						Git: &v1alpha1.GitRef{
+							Ref:    "main",
+							Folder: "test",
+						},
+					},
+				},
+			}, nil)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(ctx, &v1alpha1.GlobalService{
+					ObjectMeta: metav1.ObjectMeta{Name: templateName, Namespace: namespace},
+				})).To(Succeed())
+			}()
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetGlobalServiceByName", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, templateName))
+			fakeConsoleClient.On("CreateGlobalServiceFromTemplate", mock.Anything, mock.Anything).Return(&gqlclient.GlobalServiceFragment{ID: "456"}, nil)
+			fakeConsoleClient.On("GetGlobalService", mock.Anything).Return(&gqlclient.GlobalServiceFragment{ID: "456"}, nil)
+
+			serviceReconciler := &controller.GlobalServiceReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := serviceReconciler.Process(ctx, reconcile.Request{
+				NamespacedName: templateNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedSecret := &corev1.Secret{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: configSecretName, Namespace: namespace}, updatedSecret)).To(Succeed())
+			Expect(updatedSecret.GetAnnotations()).NotTo(BeNil())
+			Expect(updatedSecret.GetAnnotations()[utils.OwnerRefAnnotation]).To(ContainSubstring(namespace + "/" + templateName))
 		})
 	})
 

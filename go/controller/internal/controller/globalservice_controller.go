@@ -23,6 +23,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -69,6 +70,7 @@ func (r *GlobalServiceReconciler) Name() internaltypes.Reconciler {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop.
 func (r *GlobalServiceReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -150,6 +152,10 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		}
 
 		attr.Template = st
+
+		if err := r.addConfigurationSecretRefs(ctx, globalService); err != nil {
+			return common.HandleRequeue(nil, err, globalService.SetCondition)
+		}
 	}
 
 	attr.IgnoreClusters = r.ignoreClusters(ctx, globalService)
@@ -283,11 +289,25 @@ func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) 
 	return nil
 }
 
+func (r *GlobalServiceReconciler) addConfigurationSecretRefs(ctx context.Context, globalService *v1alpha1.GlobalService) error {
+	if globalService.Spec.Template == nil || globalService.Spec.Template.ConfigurationRef == nil {
+		return nil
+	}
+
+	configurationSecret, err := utils.GetSecret(ctx, r.Client, globalService.Spec.Template.ConfigurationRef)
+	if err != nil {
+		return err
+	}
+
+	return utils.AddOwnerRefAnnotation(ctx, r.Client, globalService, configurationSecret)
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                           // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.GlobalServiceList))). // Reconcile objects on credentials change.
+		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.GlobalService))).
 		For(&v1alpha1.GlobalService{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
