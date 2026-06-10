@@ -115,13 +115,13 @@ export function WebhooksList() {
       }}
       emptyStateProps={{
         message: 'No webhooks found.',
-        children: <AddWebhookButton />,
+        children: <CreateWebhookButton />,
       }}
     />
   )
 }
 
-export function AddWebhookButton({
+export function CreateWebhookButton({
   buttonProps,
 }: {
   buttonProps?: ButtonProps
@@ -133,7 +133,7 @@ export function AddWebhookButton({
       height="fit-content"
       {...buttonProps}
     >
-      Add webhook
+      Create webhook
     </Button>
   )
 }

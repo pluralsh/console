@@ -22,7 +22,6 @@ import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webh
 import {
   useIssueWebhookQuery,
   useObservabilityWebhookQuery,
-  WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -74,7 +73,7 @@ export function WebhookEditSettings() {
 
     if (observabilityWebhook) {
       return {
-        webhookType: WorkbenchJobActivityType.Observability,
+        webhookType: 'observability',
         webhook: observabilityWebhook,
       }
     }
@@ -83,7 +82,7 @@ export function WebhookEditSettings() {
 
     return issueWebhook
       ? {
-          webhookType: WorkbenchJobActivityType.Ticketing,
+          webhookType: 'issue',
           webhook: issueWebhook,
         }
       : null

@@ -9,7 +9,7 @@ import { WEBHOOKS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
 
 import { SETTINGS_BREADCRUMBS } from '../Settings'
-import { AddWebhookButton, WebhooksList } from './WebhooksList'
+import { CreateWebhookButton, WebhooksList } from './WebhooksList'
 import { StackedTextSC } from '../../utils/table/StackedText'
 
 const WEBHOOKS_SETTINGS_BREADCRUMBS: Breadcrumb[] = [
@@ -34,7 +34,7 @@ export default function WebhooksSettings() {
           within workbenches to set up chatbots.
         </span>
       </StackedTextSC>
-      <AddWebhookButton
+      <CreateWebhookButton
         buttonProps={{
           secondary: true,
           endIcon: <ArrowTopRightIcon />,

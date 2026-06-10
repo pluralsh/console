@@ -487,6 +487,12 @@ fragment ChatProviderConnection on ChatProviderConnection {
       tenantId
     }
   }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
 }
 
 fragment WorkbenchChatbot on WorkbenchChatbot {
@@ -936,6 +942,12 @@ query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
   }
 }
 
+query ChatProviderConnection($id: ID!) {
+  chatProviderConnection(id: $id) {
+    ...ChatProviderConnection
+  }
+}
+
 mutation GetWorkbenchWebhook($id: ID!) {
   getWorkbenchWebhook(id: $id) {
     ...WorkbenchWebhook
@@ -1306,6 +1318,12 @@ mutation UpsertChatProviderConnection(
   $attributes: ChatProviderConnectionAttributes!
 ) {
   upsertChatProviderConnection(attributes: $attributes) {
+    ...ChatProviderConnection
+  }
+}
+
+mutation DeleteChatProviderConnection($id: ID!) {
+  deleteChatProviderConnection(id: $id) {
     ...ChatProviderConnection
   }
 }

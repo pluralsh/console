@@ -4,7 +4,6 @@ import {
   ObservabilityWebhookFragment,
   ObservabilityWebhookType,
   PolicyBindingFragment,
-  WorkbenchJobActivityType,
 } from 'generated/graphql'
 
 export type CreateWebhookType = 'observability' | 'issue'
@@ -29,10 +28,10 @@ export type SetupGuideSelection = {
 
 export type ExistingWebhook =
   | {
-      webhookType: WorkbenchJobActivityType.Observability
+      webhookType: 'observability'
       webhook: ObservabilityWebhookFragment
     }
   | {
-      webhookType: WorkbenchJobActivityType.Ticketing
+      webhookType: 'issue'
       webhook: IssueWebhookFragment
     }

@@ -46,6 +46,21 @@ export const getWebhooksSettingsEditAbsPath = ({
 
 // chatbots
 export const CHATBOTS_SETTINGS_REL_PATH = 'chatbots' as const
+export const CHATBOTS_SETTINGS_ABS_PATH =
+  `${SETTINGS_ABS_PATH}/${CHATBOTS_SETTINGS_REL_PATH}` as const
+export const CHATBOTS_SETTINGS_CREATE_REL_PATH = 'create' as const
+export const CHATBOTS_SETTINGS_CREATE_ABS_PATH =
+  `${CHATBOTS_SETTINGS_ABS_PATH}/${CHATBOTS_SETTINGS_CREATE_REL_PATH}` as const
+export const CHATBOTS_SETTINGS_CHATBOT_ID_PARAM_ID = 'chatbotId' as const
+export const CHATBOTS_SETTINGS_EDIT_REL_PATH =
+  `:${CHATBOTS_SETTINGS_CHATBOT_ID_PARAM_ID}/edit` as const
+export const CHATBOTS_SETTINGS_EDIT_PATH_MATCHER_ABS =
+  `${CHATBOTS_SETTINGS_ABS_PATH}/${CHATBOTS_SETTINGS_EDIT_REL_PATH}` as const
+export const getChatbotsSettingsEditAbsPath = ({
+  chatbotId,
+}: {
+  chatbotId: Nullable<string>
+}) => `${CHATBOTS_SETTINGS_ABS_PATH}/${chatbotId ?? ''}/edit`
 
 // project
 export const PROJECT_SETTINGS_REL_PATH = 'projects' as const

@@ -34,12 +34,12 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import {
-  getWorkbenchChatbotCreateConnectionAbsPath,
   getWorkbenchChatbotsAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_CHATBOT_PARAM_ID,
   WORKBENCHES_CHATBOT_SELECTED_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
+import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
@@ -201,6 +201,13 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
     if (chatbot) updateWorkbenchChatbot()
     else createWorkbenchChatbot()
   }
+  const navigateToCreateChatbotSettings = () =>
+    navigate(CHATBOTS_SETTINGS_CREATE_ABS_PATH, {
+      state: {
+        returnPath: `${location.pathname}${location.search}`,
+        draftState: formState,
+      },
+    })
 
   useSetBreadcrumbs(
     useMemo(
@@ -296,17 +303,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                       href=""
                       onClick={(e) => {
                         e.preventDefault()
-                        navigate(
-                          getWorkbenchChatbotCreateConnectionAbsPath(
-                            workbenchId
-                          ),
-                          {
-                            state: {
-                              returnPath: `${location.pathname}${location.search}`,
-                              draftState: formState,
-                            },
-                          }
-                        )
+                        navigateToCreateChatbotSettings()
                       }}
                       css={{
                         display: 'flex',
@@ -314,7 +311,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                         gap: '4px',
                       }}
                     >
-                      Add new chatbot
+                      Create chatbot in settings
                     </InlineA>
                   </Flex>
                   <FormField>
@@ -352,17 +349,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                             href=""
                             onClick={(e) => {
                               e.preventDefault()
-                              navigate(
-                                getWorkbenchChatbotCreateConnectionAbsPath(
-                                  workbenchId
-                                ),
-                                {
-                                  state: {
-                                    returnPath: `${location.pathname}${location.search}`,
-                                    draftState: formState,
-                                  },
-                                }
-                              )
+                              navigateToCreateChatbotSettings()
                             }}
                             css={{
                               display: 'flex',
@@ -371,7 +358,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                             }}
                           >
                             <AddIcon size={14} />
-                            Add new chatbot
+                            Create chatbot in settings
                           </InlineA>
                         </ListBoxFooter>,
                       ]}

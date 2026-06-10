@@ -45,6 +45,8 @@ import {
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
+  CHATBOTS_SETTINGS_CREATE_REL_PATH,
+  CHATBOTS_SETTINGS_EDIT_REL_PATH,
   CHATBOTS_SETTINGS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
@@ -65,6 +67,8 @@ import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
 import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
 import { WebhookCreateSettings } from 'components/settings/webhooks/WebhookCreateSettings'
 import { WebhookEditSettings } from 'components/settings/webhooks/WebhookEditSettings'
+import { ChatbotCreateSettings } from 'components/settings/chatbots/ChatbotCreateSettings'
+import { ChatbotEditSettings } from 'components/settings/chatbots/ChatbotEditSettings'
 
 const userManagementRoutes = (
   <Route
@@ -209,10 +213,20 @@ const webhooksSettingsRoutes = (
 )
 
 const chatbotsSettingsRoutes = (
-  <Route
-    path={CHATBOTS_SETTINGS_REL_PATH}
-    element={<ChatbotsSettings />}
-  />
+  <>
+    <Route
+      path={CHATBOTS_SETTINGS_REL_PATH}
+      element={<ChatbotsSettings />}
+    />
+    <Route
+      path={`${CHATBOTS_SETTINGS_REL_PATH}/${CHATBOTS_SETTINGS_CREATE_REL_PATH}`}
+      element={<ChatbotCreateSettings />}
+    />
+    <Route
+      path={`${CHATBOTS_SETTINGS_REL_PATH}/${CHATBOTS_SETTINGS_EDIT_REL_PATH}`}
+      element={<ChatbotEditSettings />}
+    />
+  </>
 )
 
 const projectSettingsRoutes = (
