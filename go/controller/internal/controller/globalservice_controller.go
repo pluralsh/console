@@ -190,11 +190,9 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if service != nil {
-		if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService.DeepCopy(), r.Scheme); err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
+	if err := r.addServiceControllerRef(ctx, service, globalService); err != nil {
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
 	}
 
 	globalService.Status.SHA = &sha
@@ -202,6 +200,13 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return globalService.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *GlobalServiceReconciler) addServiceControllerRef(ctx context.Context, service *v1alpha1.ServiceDeployment, globalService *v1alpha1.GlobalService) error {
+	if service == nil {
+		return nil
+	}
+	return utils.TryAddControllerRef(ctx, r.Client, service, globalService.DeepCopy(), r.Scheme)
 }
 
 func (r *GlobalServiceReconciler) ignoreClusters(ctx context.Context, globalService *v1alpha1.GlobalService) []*string {
