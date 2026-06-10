@@ -10,9 +10,9 @@
             "type": "string",
             "description": "The url of the repository to create a PR for"
         },
-        "branch": {
+        "base_branch": {
             "type": "string",
-            "description": "Optional branch to use as the agent run's starting branch and pull request base. If omitted, the repository default branch is used."
+            "description": "Optional branch to use as the agent run's starting branch and pull request base. If omitted, the repository default branch is used.  Only set this if you know it needs to be based off something other than the repo default branch."
         },
         "prompt": {
             "type": "string", 

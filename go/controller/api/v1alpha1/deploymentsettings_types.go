@@ -468,6 +468,12 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
 
+	// Streaming defines whether to stream responses from LLM providers.
+	//
+	// +kubebuilder:default=true
+	// +kubebuilder:validation:Optional
+	Streaming *bool `json:"streaming,omitempty"`
+
 	// EmbeddingProvider to use for generating embeddings. Oftentimes foundational
 	// model providers do not have embeddings models, and it's better to simply use OpenAI.
 	//
@@ -605,6 +611,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		Enabled:           in.Enabled,
 		Provider:          in.Provider,
 		ToolProvider:      in.ToolProvider,
+		Streaming:         in.Streaming,
 		EmbeddingProvider: in.EmbeddingProvider,
 		VectorStore:       vectorStoreAttributes,
 		Graph:             graphStoreAttributes,

@@ -978,6 +978,8 @@ export type AiSettings = {
   openai?: Maybe<OpenaiSettings>;
   openaiCompatible?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
+  /** whether to stream responses from LLM providers */
+  streaming?: Maybe<Scalars['Boolean']['output']>;
   /** ai provider to use with tool calls */
   toolProvider?: Maybe<AiProvider>;
   toolsEnabled?: Maybe<Scalars['Boolean']['output']>;
@@ -1001,6 +1003,8 @@ export type AiSettingsAttributes = {
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   openaiCompatible?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
+  /** whether to stream responses from LLM providers */
+  streaming?: InputMaybe<Scalars['Boolean']['input']>;
   /** ai provider to use with tool calls */
   toolProvider?: InputMaybe<AiProvider>;
   tools?: InputMaybe<ToolConfigAttributes>;

@@ -97,6 +97,11 @@ func (in *AISettings) DeepCopyInto(out *AISettings) {
 		*out = new(client.AiProvider)
 		**out = **in
 	}
+	if in.Streaming != nil {
+		in, out := &in.Streaming, &out.Streaming
+		*out = new(bool)
+		**out = **in
+	}
 	if in.EmbeddingProvider != nil {
 		in, out := &in.EmbeddingProvider, &out.EmbeddingProvider
 		*out = new(client.AiProvider)

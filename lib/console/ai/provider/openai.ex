@@ -102,8 +102,11 @@ defmodule Console.AI.OpenAI do
   end
 
   defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
-    with {:ok, %OAuth2.AccessToken{access_token: token}} <- TokenExchange.exchange(token.token_url, token.client_id, token.client_secret),
-      do: {:ok, token}
+    case TokenExchange.exchange(token.token_url, token.client_id, token.client_secret) do
+      {:ok, %OAuth2.AccessToken{access_token: token}} when is_binary(token) -> {:ok, token}
+      {:ok, token} when is_binary(token) -> {:ok, token}
+      err -> err
+    end
   end
   defp api_key(%__MODULE__{access_key: key}) when is_binary(key), do: {:ok, key}
   defp api_key(_), do: {:ok, "ignore"}

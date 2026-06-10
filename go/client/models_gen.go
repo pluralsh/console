@@ -762,6 +762,8 @@ type AiSettings struct {
 	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to stream responses from LLM providers
+	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
@@ -784,6 +786,8 @@ type AiSettingsAttributes struct {
 	Provider      *AiProvider              `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to stream responses from LLM providers
+	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)

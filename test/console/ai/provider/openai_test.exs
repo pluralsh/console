@@ -1,24 +1,29 @@
 defmodule Console.AI.Provider.OpenAITest do
-  use ExUnit.Case, async: false
+  use Console.DataCase, async: false
   use Mimic
 
-  alias Console.AI.OpenAI
+  alias Console.AI.Provider
   alias ReqLLM.{Message, Message.ContentPart, Response}
 
   setup :set_mimic_global
 
   describe "completion/3" do
     test "passes configured headers through to Req" do
-      openai =
-        OpenAI.new(%{
-          access_token: "test-key",
-          model: "gpt-5.4-mini",
-          method: :chat,
-          headers: [
-            %{name: "X-Plural-Org", value: "test-org"},
-            %{name: "X-Trace-Id", value: "trace-123"}
-          ]
-        })
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{
+            access_token: "test-key",
+            model: "gpt-5.4-mini",
+            method: :chat,
+            headers: [
+              %{name: "X-Plural-Org", value: "test-org"},
+              %{name: "X-Trace-Id", value: "trace-123"}
+            ]
+          }
+        }
+      )
 
       expect(Req, :request, fn %Req.Request{} = request ->
         assert request.method == :post
@@ -43,19 +48,24 @@ defmodule Console.AI.Provider.OpenAITest do
          }}
       end)
 
-      assert {:ok, "ok"} = OpenAI.completion(openai, [{:user, "ping"}], [])
+      assert {:ok, "ok"} = Provider.completion([{:user, "ping"}], preface: :ignore)
     end
 
     test "passes configured accept header through to Req" do
-      openai =
-        OpenAI.new(%{
-          access_token: "test-key",
-          model: "gpt-5.4-mini",
-          method: :chat,
-          headers: [
-            %{name: "Accept", value: "application/json;v=1"}
-          ]
-        })
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{
+            access_token: "test-key",
+            model: "gpt-5.4-mini",
+            method: :chat,
+            headers: [
+              %{name: "Accept", value: "application/json;v=1"}
+            ]
+          }
+        }
+      )
 
       expect(Req, :request, fn %Req.Request{} = request ->
         assert request.method == :post
@@ -79,7 +89,7 @@ defmodule Console.AI.Provider.OpenAITest do
          }}
       end)
 
-      assert {:ok, "ok"} = OpenAI.completion(openai, [{:user, "ping"}], [])
+      assert {:ok, "ok"} = Provider.completion([{:user, "ping"}], preface: :ignore)
     end
   end
 end

@@ -5610,6 +5610,9 @@ input AiSettingsAttributes {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "whether to stream responses from LLM providers"
+  streaming: Boolean
+
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
@@ -6034,6 +6037,9 @@ type AiSettings {
 
   "ai provider to use with tool calls"
   toolProvider: AiProvider
+
+  "whether to stream responses from LLM providers"
+  streaming: Boolean
 
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider

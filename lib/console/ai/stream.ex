@@ -1,13 +1,19 @@
 defmodule Console.AI.Stream do
-  alias Console.Schema.User
+  alias Console.Schema.{User, DeploymentSettings}
   alias ConsoleWeb.AIChannel
+  alias Console.Deployments.Settings
 
   defstruct [:topic, stream_callbacks: [], role: :assistant, offset: 0, msg: 0, index: 0, subagent: false]
 
   @stream {__MODULE__, :ai, :stream}
   @tool {__MODULE__, :ai, :tool}
 
-  def enable(topic), do: Process.put(@stream, %__MODULE__{topic: topic})
+  def enable(topic) do
+    case Settings.local_cached() do
+      %DeploymentSettings{ai: %{streaming: false}} -> :ok
+      _ -> Process.put(@stream, %__MODULE__{topic: topic})
+    end
+  end
 
   def stream(), do: Process.get(@stream)
 

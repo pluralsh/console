@@ -78,7 +78,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
                  mode: :write,
                  repository: "https://github.com/pluralsh/console.git",
                  prompt: "update the readme",
-                 branch: "release-1.2",
+                 base_branch: "release-1.2",
                  approval: true
                })
 

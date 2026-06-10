@@ -251,6 +251,15 @@ defmodule Console.Schema.Service do
     timestamps()
   end
 
+  def conflicting(query \\ __MODULE__, %GlobalService{id: gid} = global) do
+    name = GlobalService.svc_name(global)
+    from(s in query,
+      join: c in ^subquery(Cluster.target(global)),
+        on: c.id == s.cluster_id,
+      where: s.name == ^name and s.owner_id != ^gid
+    )
+  end
+
   def for_flow(query \\ __MODULE__, flow_id) do
     from(s in query, where: s.flow_id == ^flow_id)
   end

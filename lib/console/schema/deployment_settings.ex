@@ -242,6 +242,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :tool_provider,      AIProvider
       field :embedding_provider, AIProvider
       field :log_analysis,       :boolean, default: false
+      field :streaming,          :boolean, default: true
 
       embeds_one :analysis_rates, AnalysisRates, on_replace: :update do
         field :fast, :integer
@@ -409,7 +410,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled provider tool_provider embedding_provider log_analysis)a)
+    |> cast(attrs, ~w(enabled provider streaming tool_provider embedding_provider log_analysis)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)

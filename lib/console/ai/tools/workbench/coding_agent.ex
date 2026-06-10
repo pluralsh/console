@@ -13,16 +13,16 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     field :babysit,      :boolean
     field :approval,     :boolean
     field :repository,   :string
-    field :branch,       :string
+    field :base_branch,       :string
     field :prompt,       :string
   end
 
-  @valid ~w(mode repository branch prompt babysit approval)a
+  @valid ~w(mode repository base_branch prompt babysit approval)a
 
   def changeset(%__MODULE__{workbench: bench, job: job} = model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid -- [:branch, :babysit, :approval])
+    |> validate_required(@valid -- [:base_branch, :babysit, :approval])
     |> fix_mode(bench, job)
     |> fix_babysit(bench, job)
     |> fix_approval(bench, job)
@@ -80,12 +80,17 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def implement(%__MODULE__{id: tool} = args) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
          {:runtime, %AgentRuntime{} = runtime} <- {:runtime, Tool.agent_runtime()},
-         {:ok, run} <- Agents.create_agent_run(Map.take(args, @run_attrs), runtime.id, user) do
+         {:ok, run} <- Agents.create_agent_run(run_args(args), runtime.id, user) do
       {:ok, %{run | tool: tool}}
     else
       {:user, _} -> {:error, "no actor found for this session"}
       {:runtime, _} -> {:error, "no runtime found, you need to manually specify this in the chat context menu"}
       err -> err
     end
+  end
+
+  defp run_args(tool) do
+    Map.take(tool, @run_attrs)
+    |> Map.put(:branch, tool.base_branch)
   end
 end

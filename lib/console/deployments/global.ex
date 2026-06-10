@@ -58,6 +58,7 @@ defmodule Console.Deployments.Global do
       |> allow(user, :write)
       |> when_ok(:insert)
     end)
+    |> add_operation(:conflicts, fn %{global: global} -> check_conflicts(global) end)
     |> add_operation(:rev, fn %{global: global} ->
       Repo.preload(global, template: :dependencies)
       |> Map.get(:template)
@@ -96,6 +97,7 @@ defmodule Console.Deployments.Global do
       |> GlobalService.changeset(attrs)
       |> Repo.update()
     end)
+    |> add_operation(:conflicts, fn %{global: global} -> check_conflicts(global) end)
     |> add_operation(:rev, fn %{global: global} ->
       Repo.preload(global, template: :dependencies)
       |> Map.get(:template)
@@ -537,6 +539,15 @@ defmodule Console.Deployments.Global do
   defp batched(ids, operation) do
     Stream.chunk_every(ids, 500)
     |> Enum.each(operation)
+  end
+
+  defp check_conflicts(%GlobalService{} = global) do
+    Service.conflicting(global)
+    |> Repo.exists?()
+    |> case do
+      true -> {:error, "A global service managed service with the same name already exists on one or more clusters"}
+      false -> {:ok, global}
+    end
   end
 
   defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name

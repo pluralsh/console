@@ -723,6 +723,11 @@ spec:
                     - BEDROCK
                     - VERTEX
                     type: string
+                  streaming:
+                    default: true
+                    description: Streaming defines whether to stream responses from
+                      LLM providers.
+                    type: boolean
                   toolProvider:
                     description: ToolProvider to use for tool calling, in case you
                       want to use a different LLM more optimized to those tasks
