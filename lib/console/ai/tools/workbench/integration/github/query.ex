@@ -5,7 +5,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Query do
   @default_per_page 30
 
   def qp(params) when map_size(params) == 0, do: ""
-  def qp(params), do: "?" <> URI.encode_query(params, :safe)
+  def qp(params), do: "?" <> URI.encode_query(params, :rfc3986)
 
   def paginated(params) do
     params
