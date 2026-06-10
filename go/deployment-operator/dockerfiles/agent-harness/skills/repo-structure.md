@@ -1,46 +1,13 @@
 # Plural GitOps Repository Structure
 
 A Plural-managed GitOps repository holds Kubernetes Custom Resource manifests (`apiVersion:
-deployments.plural.sh/v1alpha1`) that the **management controller** reconciles into the Plural
-Console API. The **deployment-operator agent** on each cluster then applies workloads from
-Console.
+deployments.plural.sh/v1alpha1`).
 
-Understanding the layout helps you locate, read, and modify the right files without breaking
-unrelated services.
+## Cluster CRs
 
----
-
-## Top-level layout
-
-```
-<repo-root>/
-  clusters/               # Cluster CRs (one per managed cluster)
-  services/               # ServiceDeployment CRs (single-cluster deployments)
-  global-services/        # GlobalService CRs (fleet-wide deployments)
-  stacks/                 # InfrastructureStack CRs (IaC runs)
-  projects/               # Project CRs (optional multi-tenancy grouping)
-  git-repositories/       # GitRepository CRs (SCM source references)
-  pipelines/              # Pipeline CRs (promotion workflows)
-  namespaces/             # ManagedNamespace CRs
-  observers/              # Observer CRs (event-driven triggers)
-```
-
-> **Note**: Directory names vary by repo. There is no required layout — `plural up` generates
-> one reference architecture, but teams often reorganize. Find CRs with:
->
-> ```bash
-> grep -rl 'kind: ServiceDeployment\|kind: InfrastructureStack\|kind: GlobalService' .
-> grep -rl 'deployments.plural.sh/v1alpha1' .
-> ```
-
-Application manifests and Terraform usually live in **separate git repos** referenced by
-`GitRepository` + `spec.git.folder`, not necessarily next to the CR YAML.
-
----
-
-## Cluster CRs (`clusters/`)
-
-Each file describes one registered cluster (management or workload).
+Each file **adopts** an existing cluster already registered in Console — it does **not**
+provision a new cluster from YAML alone. The controller looks up `spec.handle` in Console,
+sets `.status.readonly: true`, and syncs a limited set of fields (tags, metadata, bindings).
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -49,30 +16,28 @@ metadata:
   name: prod-eu-1
   namespace: infra
 spec:
-  handle: prod-eu-1       # Short handle used in ServiceDeployment.spec.cluster
-  projectRef:
-    name: my-project
+  handle: prod-eu-1       # Required — must match an existing Console cluster handle
   tags:
     env: prod
     region: eu-west-1
-  metadata:               # Arbitrary JSON — key for fleet-wide templating
+  metadata:               # Arbitrary JSON — exposed in Liquid as cluster.metadata.*
     externaldnsRoleArn: arn:aws:iam::123456789012:role/external-dns
     domain: prod.example.com
 ```
 
 Key fields:
-- **`spec.handle`** — referenced by `ServiceDeployment.spec.cluster` and Plural MCP
-  `downloadServiceManifests`. Prefer the handle over `metadata.name`.
-- **`spec.tags`** — used by `GlobalService` cluster selection.
-- **`spec.metadata`** — per-cluster values exposed as `cluster.metadata.*` in Liquid templates
-  (often populated from Terraform via `plural_cluster`).
+- **`spec.handle`** — must match a cluster already in Console. Used by
+  `ServiceDeployment.spec.cluster` and Plural MCP `downloadServiceManifests`.
+- **`spec.tags`** — synced to Console; used by `GlobalService` cluster selection.
+- **`spec.metadata`** — synced to Console; available as `cluster.metadata.*` in Liquid (often
+  populated from Terraform via `plural_cluster`).
 
-Read-only clusters: if `.status.readonly: true`, the cluster was created elsewhere (e.g.
-Terraform). The controller observes it — do not treat the CR as the write path.
+Clusters are provisioned via Terraform or Console — not by applying a bare Cluster CR without
+a matching handle.
 
 ---
 
-## GitRepository CRs (`git-repositories/`)
+## GitRepository CRs
 
 SCM sources referenced by `ServiceDeployment` and `InfrastructureStack` via `spec.repositoryRef`.
 You can also inline `spec.git.url` on a ServiceDeployment without a separate CR.
@@ -87,7 +52,8 @@ spec:
   url: https://github.com/my-org/my-app.git
 ```
 
-Plural is **Flux-interoperable** for repository types — many repos reuse Flux source patterns.
+Plural CD is **Flux-interoperable** for source types ([deployment operator
+docs](https://docs.plural.sh/plural-features/continuous-deployment/deployment-operator)).
 
 ---
 
@@ -102,19 +68,32 @@ existing files before creating new ones.
 
 ### Management controller (CRD → Console)
 
-1. Watches CRDs in the GitOps repo (via Flux, app-of-apps, or direct apply).
-2. **Creation mode** — creates/updates/deletes the matching Console resource; sets `.status.id`.
-3. **Read-only mode** — resource already exists externally; controller sets `.status.id` but
-   does not push spec changes or delete Console on CR removal.
+Runs on the **management cluster**. Watches CRDs applied there (Flux, app-of-apps, or
+`kubectl apply`).
+
+| Mode | When | Behavior |
+|------|------|----------|
+| **Creation** | New CR, no matching Console resource | Creates Console resource; sets `.status.id`; manages updates/deletes via finalizers |
+| **Read-only** | Resource already in Console and `spec.reconciliation.driftDetection: false`, or resource owned elsewhere (e.g. Terraform-provisioned Cluster) | Sets `.status.id`; does **not** push spec changes or delete Console on CR removal |
+
+Most writable GitOps resources (`ServiceDeployment`, `GlobalService`, `InfrastructureStack`) use
+**creation mode** when defined only in git. `Cluster` is special: it always adopts by handle and
+runs in read-only mode after linking.
 
 See [management-controllers-reconciliation-logic](https://docs.plural.sh/plural-features/continuous-deployment/management-controllers-reconciliation-logic).
 
 ### Deployment operator (Console → cluster)
 
-On each target cluster, the agent:
-- **ServiceDeployment / GlobalService children** → fetch git/helm, render, apply manifests.
-- **InfrastructureStack** → not applied here; stack runs are Batch Jobs (see
-  `infrastructure-stack.md`).
+Runs on **each registered cluster** (agent pod):
+
+- **ServiceDeployment** (and GlobalService children) → clone git / pull helm, render, apply
+  manifests on **that** cluster.
+- **InfrastructureStack** → stack runs execute as **Batch Jobs** on the cluster referenced by
+  `InfrastructureStack.spec.clusterRef` (often mgmt), not as ongoing service sync. See
+  `infrastructure-stack.md`.
+
+The management controller does not talk to workload clusters directly for CD — Console is the
+hub between git CRDs and per-cluster agents.
 
 ---
 
@@ -136,24 +115,28 @@ Shorthand: `spec.cluster: prod-eu-1` instead of `clusterRef` — follow the repo
 ### Liquid templating
 
 Plural uses [Liquid](https://shopify.github.io/liquid/) (plus a Sprig subset) at **apply time**
-on the deployment-operator agent — not in the GitOps CR YAML itself.
+on the deployment-operator agent — not inside GitOps CR YAML.
 
-Templatable files (per [official docs](https://docs.plural.sh/plural-features/continuous-deployment/service-templating)):
-- Raw YAML: files with a `.liquid` extension (e.g. `deployment.yaml.liquid`)
-- Helm: values files ending in `.liquid`
+Templatable files ([official docs](https://docs.plural.sh/plural-features/continuous-deployment/service-templating)):
+- Raw services: files whose path ends in **`.liquid`** (e.g. `deployment.yaml.liquid`)
+- Helm: values files ending in **`.liquid`**
 
-`spec.templated: true` (default) gates whether templating runs. Available Liquid roots
-(from the deployment-operator renderer):
+Plain `.yaml` / `.yml` files are **not** Liquid-processed. `spec.templated: true` (default)
+enables Liquid only for `.liquid` files; when `false`, even `.liquid` files are skipped.
+
+Available Liquid roots (from `pkg/manifests/template/`):
 
 | Variable | Contents |
 |----------|----------|
-| `cluster` | `handle`, `name`, `distro`, `tags`, **`metadata`**, `kasUrl`, … |
+| `cluster` | `handle`, `name`, `distro`, `tags`, `metadata`, `kasUrl`, … |
 | `configuration` | `spec.configuration` key-value pairs on the service |
 | `contexts` | Named `ServiceContext` configurations |
-| `imports` | Stack outputs keyed by stack name → output name |
+| `imports` | Stack outputs: `imports.<stack-name>.<output-name>` |
 | `service` | Service name, namespace, helm block |
 
-Use `cluster.metadata.<key>` for fleet-specific IRSA ARNs, domains, etc.
+Use `cluster.metadata.<key>` for per-cluster IRSA ARNs, domains, etc.
+
+Helm also supports **Lua** scripts for dynamic values — see `official-cd-extensions.md`.
 
 ---
 
@@ -166,4 +149,4 @@ Use `cluster.metadata.<key>` for fleet-specific IRSA ARNs, domains, etc.
 - [Controller reconciliation modes](https://docs.plural.sh/plural-features/continuous-deployment/management-controllers-reconciliation-logic)
 
 **Rule of thumb**: if Terraform or another tool owns a resource, do not duplicate writes from
-GitOps YAML — observe via read-only CRs or stack outputs instead.
+GitOps YAML — observe via read-only CRs or consume stack outputs via `spec.imports`.
