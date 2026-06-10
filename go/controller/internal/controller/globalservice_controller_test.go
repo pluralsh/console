@@ -181,6 +181,11 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+
+			controllerRef := metav1.GetControllerOf(service)
+			Expect(controllerRef).NotTo(BeNil())
+			Expect(controllerRef.Kind).To(Equal("ServiceDeployment"))
+			Expect(controllerRef.Name).To(Equal(serviceName))
 		})
 
 		It("should wait for service deployment", func() {
