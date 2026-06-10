@@ -1,6 +1,7 @@
-import { Button, Flex, Toast } from '@pluralsh/design-system'
+import { Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   AiSettingsAttributes,
@@ -11,7 +12,7 @@ import { produce } from 'immer'
 import { isEqual } from 'lodash'
 import merge from 'lodash/merge'
 import { useMemo, useReducer, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { PartialDeep } from 'type-fest'
 import {
   initialModelRoutingState,
@@ -34,7 +35,7 @@ const updateSettings = produce(
 )
 
 export function AISettingsModelRouting() {
-  const theme = useTheme()
+  const { popToast } = useSimpleToast()
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
@@ -50,8 +51,6 @@ export function AISettingsModelRouting() {
     updateSettings,
     initialProviderSettings
   )
-  const [showToast, setShowToast] = useState(false)
-
   const configuredProviders = useMemo(() => getConfiguredProviders(ai), [ai])
 
   const hasChanges = useMemo(
@@ -63,7 +62,7 @@ export function AISettingsModelRouting() {
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
     onCompleted: (data) => {
-      setShowToast(true)
+      popToast({ content: 'Changes saved', severity: 'success' })
       const updatedAi = data?.updateDeploymentSettings?.ai
       setRouting(initialModelRoutingState(updatedAi))
       updateProviderSettings(initialSettingsAttributes(updatedAi))
@@ -139,15 +138,6 @@ export function AISettingsModelRouting() {
           </Button>
         </ActionsSC>
       </Flex>
-      <Toast
-        severity="success"
-        css={{ margin: theme.spacing.large }}
-        position="bottom"
-        show={showToast}
-        onClose={() => setShowToast(false)}
-      >
-        Changes saved
-      </Toast>
     </ScrollablePage>
   )
 }

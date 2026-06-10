@@ -1,5 +1,6 @@
-import { Button, Callout, Flex, Switch, Toast } from '@pluralsh/design-system'
+import { Button, Callout, Flex, Switch } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
@@ -37,6 +38,7 @@ const updateSettings = produce(
 
 export function AISettingsProvider() {
   const theme = useTheme()
+  const { popToast } = useSimpleToast()
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
@@ -47,7 +49,6 @@ export function AISettingsProvider() {
     updateSettings,
     initialSettingsAttributes(ai)
   )
-  const [showToast, setShowToast] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingProvider, setEditingProvider] =
     useState<Nullable<AiProvider>>(null)
@@ -78,11 +79,12 @@ export function AISettingsProvider() {
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
     onCompleted: (data) => {
-      setShowToast(true)
+      popToast({ content: 'Changes saved', severity: 'success' })
       setEditModalOpen(false)
       setEditingProvider(null)
       setConnectModalOpen(false)
       setConnectingProvider(null)
+      setEnabled(data?.updateDeploymentSettings?.ai?.enabled ?? false)
       updateProviderSettings(
         initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
       )
@@ -107,28 +109,18 @@ export function AISettingsProvider() {
                   ),
                 }
               : {}),
-          } satisfies AiSettingsAttributes,
+          },
         },
       },
     })
   }
 
   const saveEnabled = (checked: boolean) => {
+    const previous = ai?.enabled ?? false
     setEnabled(checked)
     mutation({
-      variables: {
-        attributes: {
-          ai: {
-            enabled: checked,
-            ...(checked
-              ? {
-                  provider: activeProvider,
-                  ...providerSettings,
-                }
-              : {}),
-          } satisfies AiSettingsAttributes,
-        },
-      },
+      variables: { attributes: { ai: { enabled: checked } } },
+      onError: () => setEnabled(previous),
     })
   }
 
@@ -248,15 +240,6 @@ export function AISettingsProvider() {
           valid={connectValid}
         />
       )}
-      <Toast
-        severity="success"
-        css={{ margin: theme.spacing.large }}
-        position="bottom"
-        show={showToast}
-        onClose={() => setShowToast(false)}
-      >
-        Changes saved
-      </Toast>
     </ScrollablePage>
   )
 }
