@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	console "github.com/pluralsh/console/go/client"
+	pkgcommon "github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -16,7 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
-	pkgcommon "github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
 )
 
@@ -89,7 +89,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 		BeforeEach(func() {
 			// Clear any Lua scripts that might be set from other tests
-			pkgcommon.GetLuaScript().SetValue("")
+			pkgcommon.ClearLuaScripts()
 		})
 
 		AfterAll(func() {

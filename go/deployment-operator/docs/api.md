@@ -560,6 +560,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `script` _string_ |  |  |  |
+| `group` _string_ |  |  | Optional: \{\} <br /> |
+| `version` _string_ |  |  | Optional: \{\} <br /> |
+| `kind` _string_ |  |  | Optional: \{\} <br /> |
 
 
 

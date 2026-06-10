@@ -154,17 +154,26 @@ func convertObjectToString(obj *unstructured.Unstructured) string {
 
 // GetHealthCheckFunc returns built-in health check function or nil if health check is not supported
 func GetHealthCheckFunc(gvk schema.GroupVersionKind) func(obj *unstructured.Unstructured) (*HealthStatus, error) {
+	if IsLuaScriptValueForGVK(gvk) {
+		return getLuaHealthConvertForGVK
+	}
+
 	if healthFunc := GetHealthCheckFuncByGroupVersionKind(gvk); healthFunc != nil {
 		return healthFunc
 	}
 
-	if GetLuaScript().IsLuaScriptValue() {
-		return getLuaHealthConvert
+	// for the default Lua script, we want to return the Lua health convert function even if the GVK is not explicitly set
+	if IsLuaScriptValueForGVK(schema.GroupVersionKind{}) {
+		return getDefaultLuaHealthConvert
 	}
 
 	return GetOtherHealthStatus
 }
 
-func getLuaHealthConvert(obj *unstructured.Unstructured) (*HealthStatus, error) {
-	return GetLuaHealthConvert(obj, GetLuaScript().GetValue())
+func getLuaHealthConvertForGVK(obj *unstructured.Unstructured) (*HealthStatus, error) {
+	return GetLuaHealthConvert(obj, GetLuaScriptForGVK(obj.GroupVersionKind()))
+}
+
+func getDefaultLuaHealthConvert(obj *unstructured.Unstructured) (*HealthStatus, error) {
+	return GetLuaHealthConvert(obj, GetLuaScriptForGVK(schema.GroupVersionKind{}))
 }

@@ -108,13 +108,16 @@ var _ = Describe("Health Test", Ordered, func() {
 		})
 
 		It("should get status from Lua script", func() {
+			common.ClearLuaScripts()
+			DeferCleanup(common.ClearLuaScripts)
+
 			customResource.DeletionTimestamp = nil
 			obj, err := common.ToUnstructured(customResource)
 			Expect(err).NotTo(HaveOccurred())
 			scriptPath := filepath.Join("..", "..", "test", "lua", "test.lua")
 			script, err := os.ReadFile(scriptPath)
 			Expect(err).NotTo(HaveOccurred())
-			common.GetLuaScript().SetValue(string(script))
+			common.SetLuaScriptForGVK(obj.GroupVersionKind(), string(script))
 			status, err := common.GetResourceHealth(obj)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(status).To(Not(BeNil()))
