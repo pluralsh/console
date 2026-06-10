@@ -11,6 +11,28 @@ import {
 } from '../../../generated/graphql.ts'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
 
+const modelTooltip =
+  'Primary model for Explain/Fix with AI, Insights, and similar features.'
+const embeddingModelTooltip = 'Model used for embeddings and vector search.'
+const toolModelTooltip =
+  'Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
+const bedrockModelIdTooltip =
+  'Primary Bedrock model for Explain/Fix with AI, Insights, and similar features. Leave blank to use Plural defaults.'
+const bedrockEmbeddingModelTooltip =
+  'Bedrock model used for embeddings and vector search.'
+const bedrockToolModelTooltip =
+  'Bedrock model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
+
+export const aiProviderToLabel = {
+  [AiProvider.Openai]: 'OpenAI',
+  [AiProvider.OpenaiCompatible]: 'OpenAI-compatible',
+  [AiProvider.Anthropic]: 'Anthropic',
+  [AiProvider.Azure]: 'Azure AI',
+  [AiProvider.Bedrock]: 'AWS Bedrock',
+  [AiProvider.Ollama]: 'Ollama',
+  [AiProvider.Vertex]: 'Vertex AI',
+} as const satisfies Record<AiProvider, string>
+
 export function initialSettingsAttributes(
   ai: Nullable<AiSettings>
 ): Omit<AiSettingsAttributes, 'enabled' | 'provider'> {
@@ -149,7 +171,7 @@ export function OpenAISettings({
     <>
       <FormField
         label="Model"
-        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
+        infoTooltip={modelTooltip}
         flex={1}
       >
         <Input
@@ -160,7 +182,7 @@ export function OpenAISettings({
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Model used for embeddings and vector search."
+        infoTooltip={embeddingModelTooltip}
         flex={1}
       >
         <Input
@@ -173,7 +195,7 @@ export function OpenAISettings({
       </FormField>
       <FormField
         label="Tool model"
-        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        infoTooltip={toolModelTooltip}
         flex={1}
       >
         <Input
@@ -184,7 +206,7 @@ export function OpenAISettings({
       </FormField>
       <FormField
         label="Base URL"
-        hint="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
+        infoTooltip="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
         flex={1}
       >
         <Input
@@ -195,7 +217,7 @@ export function OpenAISettings({
       </FormField>
       <FormField
         label="API method"
-        hint="Choose which OpenAI API style to use. Auto lets Plural select the best method for each request."
+        infoTooltip="Choose which OpenAI API style to use. Auto lets Plural select the best method for each request."
         flex={1}
       >
         <Select
@@ -251,7 +273,7 @@ export function AnthropicSettings({
     <>
       <FormField
         label="Model"
-        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
+        infoTooltip={modelTooltip}
         flex={1}
       >
         <Input
@@ -262,7 +284,7 @@ export function AnthropicSettings({
       </FormField>
       <FormField
         label="Tool model"
-        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        infoTooltip={toolModelTooltip}
         flex={1}
       >
         <Input
@@ -303,7 +325,7 @@ export function BedrockSettings({
     <>
       <FormField
         label="Model ID"
-        hint="Primary Bedrock model for Explain/Fix with AI, Insights, and similar features. Leave blank to use Plural defaults."
+        infoTooltip={bedrockModelIdTooltip}
         flex={1}
       >
         <Input
@@ -314,7 +336,7 @@ export function BedrockSettings({
       </FormField>
       <FormField
         label="Embedding Model ID"
-        hint="Bedrock model used for embeddings and vector search."
+        infoTooltip={bedrockEmbeddingModelTooltip}
         flex={1}
       >
         <Input
@@ -327,7 +349,7 @@ export function BedrockSettings({
       </FormField>
       <FormField
         label="Tool model ID"
-        hint="Bedrock model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        infoTooltip={bedrockToolModelTooltip}
         flex={1}
       >
         <Input
@@ -340,7 +362,7 @@ export function BedrockSettings({
       </FormField>
       <FormField
         label="AWS access key ID"
-        hint="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
+        infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
         flex={1}
       >
         <Input
@@ -353,7 +375,7 @@ export function BedrockSettings({
       </FormField>
       <FormField
         label="AWS secret access key"
-        hint="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
+        infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
         flex={1}
       >
         <InputRevealer
@@ -383,7 +405,7 @@ export function OllamaSettings({
     <>
       <FormField
         label="Model"
-        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
+        infoTooltip={modelTooltip}
         required={enabled}
         flex={1}
       >
@@ -395,7 +417,7 @@ export function OllamaSettings({
       </FormField>
       <FormField
         label="Tool model"
-        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        infoTooltip={toolModelTooltip}
         flex={1}
       >
         <Input
@@ -406,7 +428,7 @@ export function OllamaSettings({
       </FormField>
       <FormField
         label="URL"
-        hint="The URL your Ollama deployment is hosted on."
+        infoTooltip="The URL your Ollama deployment is hosted on."
         required={enabled}
         flex={1}
       >
@@ -418,7 +440,7 @@ export function OllamaSettings({
       </FormField>
       <FormField
         label="Authorization"
-        hint="An HTTP Authorization header to use on calls to the Ollama API."
+        infoTooltip="An HTTP Authorization header to use on calls to the Ollama API."
         required={enabled}
         flex={1}
       >
@@ -449,7 +471,7 @@ export function AzureSettings({
     <>
       <FormField
         label="Model"
-        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
+        infoTooltip={modelTooltip}
         flex={1}
       >
         <Input
@@ -473,7 +495,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Model used for embeddings and vector search."
+        infoTooltip={embeddingModelTooltip}
         flex={1}
       >
         <Input
@@ -486,7 +508,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Tool model"
-        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        infoTooltip={toolModelTooltip}
         flex={1}
       >
         <Input
@@ -497,7 +519,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Endpoint"
-        hint="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
+        infoTooltip="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
         required={enabled}
         flex={1}
       >
@@ -509,7 +531,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Access token"
-        hint="The Azure OpenAI access token to use."
+        infoTooltip="The Azure OpenAI access token to use."
         required={enabled}
         flex={1}
       >
@@ -580,7 +602,7 @@ export function VertexSettings({
     <>
       <FormField
         label="Model"
-        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
+        infoTooltip={modelTooltip}
         flex={1}
       >
         <Input
@@ -591,7 +613,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Model used for embeddings and vector search."
+        infoTooltip={embeddingModelTooltip}
         flex={1}
       >
         <Input
@@ -604,7 +626,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Project"
-        hint="The GCP Project ID"
+        infoTooltip="The GCP Project ID"
         flex={1}
         required={enabled}
       >
@@ -616,7 +638,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Tool model"
-        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        infoTooltip={toolModelTooltip}
         flex={1}
       >
         <Input
@@ -627,7 +649,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Location"
-        hint="The GCP Location you're querying from."
+        infoTooltip="The GCP Location you're querying from."
         flex={1}
         required={enabled}
       >
@@ -639,7 +661,7 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Endpoint"
-        hint="Custom Vertex AI endpoint for dedicated deployments. Leave blank to use the default endpoint."
+        infoTooltip="Custom Vertex AI endpoint for dedicated deployments. Leave blank to use the default endpoint."
         flex={1}
       >
         <Input
