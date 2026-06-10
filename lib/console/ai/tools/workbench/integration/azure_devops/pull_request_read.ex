@@ -5,7 +5,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.PullRequestRead do
 
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
-  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Client
+  alias Console.AI.Tools.Workbench.Integration.{AzureDevops.Client, Query}
 
   embedded_schema do
     field :tool, :map, virtual: true
@@ -46,12 +46,12 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.PullRequestRead do
       repo = Client.encode_repo_id(m.repository)
 
       pr_url =
-        "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}?#{URI.encode_query(%{"api-version" => "7.1"}, :safe)}"
+        "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}#{Query.query_string(%{"api-version" => "7.1"})}"
 
       with {:ok, pr} <- Client.get_json(client, pr_url) do
         if m.include_threads do
           threads_url =
-            "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}/threads?#{URI.encode_query(%{"api-version" => "7.1"}, :safe)}"
+            "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}/threads#{Query.query_string(%{"api-version" => "7.1"})}"
 
           with {:ok, threads} <- Client.get_json(client, threads_url) do
             Jason.encode(%{"pull_request" => pr, "threads" => threads})

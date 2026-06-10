@@ -1,11 +1,12 @@
 defmodule Console.AI.Tools.Workbench.Integration.Github.Query do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Query, as: SharedQuery
+
   @default_page 1
   @default_per_page 30
 
-  def qp(params) when map_size(params) == 0, do: ""
-  def qp(params), do: "?" <> URI.encode_query(params, :rfc3986)
+  def qp(params), do: SharedQuery.query_string(params)
 
   def paginated(params) do
     params
@@ -28,14 +29,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Query do
   def normalize_head(%{head: head}), do: head
 
   def stringify_params(map) do
-    map
-    |> Enum.reject(fn {_, v} -> is_nil(v) end)
-    |> Enum.map(fn {k, v} -> {param_key(k), v} end)
-    |> Map.new()
+    SharedQuery.stringify_params(map)
   end
-
-  defp param_key(k) when is_atom(k), do: k |> Atom.to_string()
-  defp param_key(k) when is_binary(k), do: k
 
   def merge_optional(base, source, keys) do
     Enum.reduce(keys, base, fn key, acc ->
