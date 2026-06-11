@@ -152,10 +152,10 @@ function CrumbSelect({
         isDisabled={isDisabled}
         selectedKey={null}
         onSelectionChange={(key) => {
-          const url = breadcrumbs[key as number]?.url
+          const crumb = breadcrumbs.find((c) => getCrumbKey(c) === key)
 
-          if (url) {
-            navigate(url)
+          if (crumb?.url) {
+            navigate(crumb.url)
           }
         }}
         placement="left"
