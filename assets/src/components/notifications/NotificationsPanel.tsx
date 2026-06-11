@@ -1,6 +1,7 @@
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo } from 'react'
 import {
+  BellIcon,
   Button,
   Card,
   CloseIcon,
@@ -10,6 +11,7 @@ import {
   Table,
   Toast,
 } from '@pluralsh/design-system'
+import { Overline } from 'components/cd/utils/PermissionsModal'
 import { useNavigate } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
@@ -45,7 +47,7 @@ export function NotificationsPanel({
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { data, pageInfo, fetchNextPage, setVirtualSlice } =
+  const { data, pageInfo, fetchNextPage, setVirtualSlice, loading } =
     useFetchPaginatedData({
       queryHook: useAppNotificationsQuery,
       keyPath: ['appNotifications'],
@@ -56,9 +58,10 @@ export function NotificationsPanel({
     [data?.appNotifications]
   )
 
-  const [mutation, { loading, error }] = useReadAppNotificationsMutation({
-    onCompleted: () => refetchUnreadNotificationsCount(),
-  })
+  const [mutation, { loading: markingRead, error }] =
+    useReadAppNotificationsMutation({
+      onCompleted: () => refetchUnreadNotificationsCount(),
+    })
 
   return (
     <>
@@ -67,39 +70,33 @@ export function NotificationsPanel({
         css={{
           display: 'flex',
           flexDirection: 'column',
-          border: theme.borders.input,
+          border: theme.borders['fill-two'],
           minHeight: 0,
-          width: 480,
+          width: 460,
+          maxHeight: '70vh',
         }}
         {...props}
       >
         <Flex
           align="center"
-          gap="small"
-          padding="medium"
-          borderBottom={theme.borders.input}
+          gap="xsmall"
+          padding="small"
+          borderBottom={theme.borders['fill-two']}
         >
-          <span
-            css={{
-              ...theme.partials.text.overline,
-              color: theme.colors['text-xlight'],
-              flexGrow: 1,
-            }}
-          >
-            Notifications
-          </span>
+          <IconFrame icon={<BellIcon color="icon-xlight" />} />
+          <Overline css={{ flexGrow: 1 }}>Notifications</Overline>
           <IconFrame
             clickable
-            icon={<GearTrainIcon />}
+            size="medium"
+            icon={<GearTrainIcon color="icon-light" />}
             onClick={() => {
               navigate(NOTIFICATIONS_ABS_PATH)
               onClose()
             }}
             tooltip="Go to notifications settings"
-            type="secondary"
           />
           <Button
-            loading={loading}
+            loading={markingRead}
             onClick={() => mutation()}
             small
             secondary
@@ -108,7 +105,8 @@ export function NotificationsPanel({
           </Button>
           <IconFrame
             clickable
-            icon={<CloseIcon />}
+            size="medium"
+            icon={<CloseIcon color="icon-light" />}
             onClick={onClose}
             tooltip="Close"
           />
@@ -117,8 +115,8 @@ export function NotificationsPanel({
           <div
             css={{
               color: theme.colors['text-light'],
+              minHeight: 120,
               padding: theme.spacing.medium,
-              height: 240,
             }}
           >
             You do not have any notifications yet.

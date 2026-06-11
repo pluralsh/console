@@ -1,9 +1,12 @@
+import {
+  ClipboardChecked,
+  IconFrame,
+  IconFrameProps,
+} from '@pluralsh/design-system'
 import { Merge } from 'type-fest'
-import { BellIcon, IconFrame, IconFrameProps } from '@pluralsh/design-system'
-
 import { CountBadge } from '../utils/CountBadge'
 
-export function NotificationsLauncherButton({
+export function AwaitingReviewLauncherButton({
   open,
   count = 0,
   ...props
@@ -14,12 +17,19 @@ export function NotificationsLauncherButton({
     <div css={{ position: 'relative', marginRight: count > 0 ? 6 : 0 }}>
       <IconFrame
         clickable
-        icon={<BellIcon />}
-        tooltip={open ? undefined : `You have ${count} notifications`}
+        icon={<ClipboardChecked />}
+        tooltip={
+          open
+            ? undefined
+            : count > 0
+              ? `${count} stack${count === 1 ? '' : 's'} awaiting review`
+              : 'No stacks awaiting review'
+        }
         {...props}
       />
       {count > 0 && (
         <CountBadge
+          variant="warning"
           size="medium"
           count={count}
           css={{

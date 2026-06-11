@@ -1,0 +1,37 @@
+fragment AwaitingReviewStack on InfrastructureStack {
+  id
+  name
+  status
+  runs(first: 50) {
+    edges {
+      node {
+        id
+        status
+        message
+        approvalResult {
+          reason
+          result
+        }
+        configuration {
+          aiApproval {
+            enabled
+          }
+        }
+        pullRequest {
+          id
+          title
+        }
+      }
+    }
+  }
+}
+
+query PendingApprovalStacks($first: Int = 50) {
+  infrastructureStacks(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewStack
+      }
+    }
+  }
+}

@@ -37,13 +37,10 @@ export default function Notification({
     <div
       css={{
         width: '100%',
-        backgroundColor: notification.readAt
-          ? theme.colors['fill-one']
-          : theme.colors['fill-two'],
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
-        padding: `${theme.spacing.large}px ${theme.spacing.medium}px `,
+        padding: theme.spacing.large,
       }}
     >
       <div
