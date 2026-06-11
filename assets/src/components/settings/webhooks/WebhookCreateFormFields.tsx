@@ -34,16 +34,19 @@ function getWebhookTypeIcon(type: CreateWebhookType) {
 
 export function WebhookCreateFormFields({
   formState,
+  layout = 'vertical',
   mode = 'create',
   setFormState,
 }: {
   formState: CreateWebhookFormState
+  layout?: 'vertical' | 'horizontal'
   mode?: 'create' | 'edit'
   setFormState: Dispatch<SetStateAction<CreateWebhookFormState>>
 }) {
   return (
     <>
       <FormField
+        layout={layout}
         label="Type of webhook"
         required
       >
@@ -74,12 +77,14 @@ export function WebhookCreateFormFields({
       {formState.webhookType === 'observability' ? (
         <ObservabilityWebhookFields
           formState={formState}
+          layout={layout}
           mode={mode}
           setFormState={setFormState}
         />
       ) : (
         <IssueWebhookFields
           formState={formState}
+          layout={layout}
           mode={mode}
           setFormState={setFormState}
         />
@@ -90,16 +95,19 @@ export function WebhookCreateFormFields({
 
 function ObservabilityWebhookFields({
   formState,
+  layout,
   mode,
   setFormState,
 }: {
   formState: CreateWebhookFormState
+  layout: 'vertical' | 'horizontal'
   mode: 'create' | 'edit'
   setFormState: Dispatch<SetStateAction<CreateWebhookFormState>>
 }) {
   return (
     <>
       <FormField
+        layout={layout}
         label="Provider type"
         required
       >
@@ -126,6 +134,7 @@ function ObservabilityWebhookFields({
         </Select>
       </FormField>
       <FormField
+        layout={layout}
         label="Name"
         required
       >
@@ -140,6 +149,7 @@ function ObservabilityWebhookFields({
         />
       </FormField>
       <FormField
+        layout={layout}
         label="Secret"
         required={mode === 'create'}
         hint={
@@ -166,16 +176,19 @@ function ObservabilityWebhookFields({
 
 function IssueWebhookFields({
   formState,
+  layout,
   mode,
   setFormState,
 }: {
   formState: CreateWebhookFormState
+  layout: 'vertical' | 'horizontal'
   mode: 'create' | 'edit'
   setFormState: Dispatch<SetStateAction<CreateWebhookFormState>>
 }) {
   return (
     <>
       <FormField
+        layout={layout}
         label="Provider type"
         required
       >
@@ -200,6 +213,7 @@ function IssueWebhookFields({
         </Select>
       </FormField>
       <FormField
+        layout={layout}
         label="Name"
         required
       >
@@ -214,6 +228,7 @@ function IssueWebhookFields({
         />
       </FormField>
       <FormField
+        layout={layout}
         label="Secret"
         required={mode === 'create'}
         hint={

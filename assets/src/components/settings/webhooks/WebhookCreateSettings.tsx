@@ -5,7 +5,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { FormCardSC } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import {
   getSetupGuideDocumentationUrl,
   getSetupGuideMarkdownPath,
@@ -113,21 +112,13 @@ export function WebhookCreateSettings() {
   ])
 
   return (
-    <div>
-      <FormCardSC
-        css={{
-          width: 'auto',
-        }}
-      >
-        <WebhookCreateForm
-          createdActionLabel="Back to all webhooks"
-          onGuideSelectionChange={setSetupGuideSelection}
-          onReturn={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-          refetchQueries={['ObservabilityWebhooks', 'IssueWebhooks']}
-          returnPathIsList
-          onCreated={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-        />
-      </FormCardSC>
-    </div>
+    <WebhookCreateForm
+      createdActionLabel="Back to all webhooks"
+      onGuideSelectionChange={setSetupGuideSelection}
+      onReturn={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+      refetchQueries={['ObservabilityWebhooks', 'IssueWebhooks']}
+      returnPathIsList
+      onCreated={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+    />
   )
 }

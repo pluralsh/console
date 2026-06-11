@@ -8,7 +8,6 @@ import {
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { FormCardSC } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import {
   getSetupGuideDocumentationUrl,
   getSetupGuideMarkdownPath,
@@ -177,32 +176,22 @@ export function WebhookEditSettings() {
   if (error) return <GqlError error={error} />
   if (loading && !existingWebhook) return <LoadingIndicator />
 
-  return (
-    <div>
-      {existingWebhook ? (
-        <FormCardSC
-          css={{
-            width: 'auto',
-          }}
-        >
-          <WebhookCreateForm
-            existingWebhook={existingWebhook}
-            mode="edit"
-            onGuideSelectionChange={setSetupGuideSelection}
-            onReturn={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-            onSaved={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-            refetchQueries={['ObservabilityWebhooks', 'IssueWebhooks']}
-            returnPathIsList
-            onCreated={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-          />
-        </FormCardSC>
-      ) : (
-        <EmptyState message="Webhook not found.">
-          <Button onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}>
-            Back to all webhooks
-          </Button>
-        </EmptyState>
-      )}
-    </div>
+  return existingWebhook ? (
+    <WebhookCreateForm
+      existingWebhook={existingWebhook}
+      mode="edit"
+      onGuideSelectionChange={setSetupGuideSelection}
+      onReturn={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+      onSaved={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+      refetchQueries={['ObservabilityWebhooks', 'IssueWebhooks']}
+      returnPathIsList
+      onCreated={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+    />
+  ) : (
+    <EmptyState message="Webhook not found.">
+      <Button onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}>
+        Back to all webhooks
+      </Button>
+    </EmptyState>
   )
 }

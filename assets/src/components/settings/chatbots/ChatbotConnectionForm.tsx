@@ -239,6 +239,7 @@ export function ChatbotConnectionForm({
           background: 'inherit',
           border: 'none',
           paddingTop: 0,
+          marginTop: 0,
         }}
       >
         <Button
@@ -251,14 +252,14 @@ export function ChatbotConnectionForm({
           }
           disabled={loading}
         >
-          Back
+          Back to all chatbots
         </Button>
         <Button
           onClick={() => upsertChatProviderConnection()}
           loading={loading}
           disabled={!canSave}
         >
-          Save
+          {mode === 'create' ? 'Create' : 'Update'}
         </Button>
       </StickyActionsFooterSC>
     </Flex>

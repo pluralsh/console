@@ -1,13 +1,14 @@
 import {
   Button,
+  Card,
   Codeline,
   Flex,
   FormField,
   ReturnIcon,
-  Stepper,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { bindingToBindingAttributes } from 'components/utils/bindings'
+import { PolicyBindingsCardForm } from 'components/utils/PolicyBindingsCardForm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
@@ -24,17 +25,14 @@ import { useEffect, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { StickyActionsFooterSC } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
-import { WebhookAccessPolicyStep } from './WebhookAccessPolicyStep'
 import { WebhookCreateFormFields } from './WebhookCreateFormFields'
 import {
   CreateWebhookFormState,
   ExistingWebhook,
   SetupGuideSelection,
 } from './WebhookCreateFormTypes'
-import {
-  WEBHOOK_ACCESS_FORM_STEPS,
-  WebhookAccessFormStep,
-} from './webhookFormSteps'
+import styled from 'styled-components'
+import { Overline } from 'components/cd/utils/PermissionsModal'
 
 function getInitialCreateWebhookFormState(
   existingWebhook?: ExistingWebhook
@@ -119,12 +117,8 @@ export function WebhookCreateForm({
   const [formState, setFormState] = useState<CreateWebhookFormState>(() =>
     getInitialCreateWebhookFormState(existingWebhook)
   )
-  const [currentStep, setCurrentStep] = useState<WebhookAccessFormStep>('setup')
   const [newWebHook, setNewWebHook] =
     useState<Nullable<IssueWebhook | ObservabilityWebhook>>(null)
-  const stepIndex = WEBHOOK_ACCESS_FORM_STEPS.findIndex(
-    (s) => s.key === currentStep
-  )
 
   const [upsertObservabilityWebhook, upsertObservabilityWebhookState] =
     useUpsertObservabilityWebhookMutation()
@@ -286,58 +280,70 @@ export function WebhookCreateForm({
   return (
     <Flex
       direction="column"
-      gap="medium"
+      gap="large"
+      height="100%"
+      width="100%"
+      overflow="hidden"
     >
       {error && <GqlError error={error} />}
-      {newWebHook && !error && (
-        <>
-          <Body2P>
-            {`Add a new webhook in your ${formState.webhookType === 'observability' ? 'observability provider' : 'ticketing provider'} with the
+      <Flex
+        direction="column"
+        gap="large"
+        overflow="auto"
+      >
+        {newWebHook && !error && (
+          <CardSC>
+            <Overline>Webhook details</Overline>
+            <Body2P>
+              {`Add a new webhook in your ${formState.webhookType === 'observability' ? 'observability provider' : 'ticketing provider'} with the
             following url and validation secret`}
-          </Body2P>
-          <FormField label="Webhook URL">
-            <Codeline>{newWebHook.url}</Codeline>
-          </FormField>
-          <FormField label="Secret">
-            <Codeline>
-              {formState.webhookType === 'observability'
-                ? formState.observabilitySecret
-                : formState.issueSecret}
-            </Codeline>
-          </FormField>
-          <Button
-            startIcon={returnPathIsList ? <ReturnIcon /> : undefined}
-            onClick={() =>
-              onCreated(
-                `${formState.webhookType === 'observability' ? 'obs' : 'issue'}:${newWebHook.id}`
-              )
-            }
-            disabled={isSaving}
-            marginBottom="xlarge"
-          >
-            {createdActionLabel}
-          </Button>
-        </>
-      )}
-      {!newWebHook && (
-        <Flex
-          css={{ paddingTop: 2 }}
-          direction="column"
-          gap="medium"
-        >
-          <Stepper
-            compact
-            steps={WEBHOOK_ACCESS_FORM_STEPS}
-            stepIndex={stepIndex}
-          />
-          {currentStep === 'setup' ? (
-            <WebhookCreateFormFields
-              formState={formState}
-              mode={mode}
-              setFormState={setFormState}
-            />
-          ) : (
-            <WebhookAccessPolicyStep
+            </Body2P>
+            <FormField label="Webhook URL">
+              <Codeline>{newWebHook.url}</Codeline>
+            </FormField>
+            <FormField label="Secret">
+              <Codeline>
+                {formState.webhookType === 'observability'
+                  ? formState.observabilitySecret
+                  : formState.issueSecret}
+              </Codeline>
+            </FormField>
+            <Button
+              startIcon={returnPathIsList ? <ReturnIcon /> : undefined}
+              onClick={() =>
+                onCreated(
+                  `${formState.webhookType === 'observability' ? 'obs' : 'issue'}:${newWebHook.id}`
+                )
+              }
+              disabled={isSaving}
+            >
+              {createdActionLabel}
+            </Button>
+          </CardSC>
+        )}
+        {!newWebHook && (
+          <>
+            <CardSC>
+              <Overline>Integration configuration</Overline>
+              <WebhookCreateFormFields
+                layout="horizontal"
+                formState={formState}
+                mode={mode}
+                setFormState={setFormState}
+              />
+            </CardSC>
+            <PolicyBindingsCardForm
+              layout="horizontal"
+              readTitle="Read permissions"
+              writeTitle="Write permissions"
+              readHints={{
+                user: 'Users with read permissions for this webhook',
+                group: 'Groups with read permissions for this webhook',
+              }}
+              writeHints={{
+                user: 'Users with write permissions for this webhook',
+                group: 'Groups with write permissions for this webhook',
+              }}
               readBindings={formState.readBindings.filter(isNonNullable)}
               writeBindings={formState.writeBindings.filter(isNonNullable)}
               onReadBindingsChange={(next) =>
@@ -347,13 +353,21 @@ export function WebhookCreateForm({
                 setFormState((prev) => ({ ...prev, writeBindings: next }))
               }
             />
-          )}
-        </Flex>
-      )}
+          </>
+        )}
+      </Flex>
       {!newWebHook && (
-        <StickyActionsFooterSC css={{ justifyContent: 'stretch' }}>
+        <StickyActionsFooterSC
+          css={{
+            justifyContent: 'stretch',
+            background: 'inherit',
+            border: 'none',
+            paddingTop: 0,
+            marginTop: 0,
+          }}
+        >
           <Flex
-            justify="space-between"
+            justify="right"
             wrap="wrap"
             align="center"
             width="100%"
@@ -367,40 +381,31 @@ export function WebhookCreateForm({
             >
               {returnPathIsList ? 'Back to all webhooks' : 'Back'}
             </Button>
-            {currentStep === 'setup' ? (
-              <Flex gap="small">
-                <Button
-                  secondary
-                  onClick={() => setCurrentStep('access-policy')}
-                  disabled={isSaving}
-                >
-                  Configure access policy
-                </Button>
-                <Button
-                  onClick={() =>
-                    void (isEdit
-                      ? handleUpdateWebhook()
-                      : handleCreateNewWebhook())
-                  }
-                  loading={isSaving}
-                  disabled={!canSubmitWebhook}
-                >
-                  {isEdit ? 'Update webhook' : 'Create new webhook'}
-                </Button>
-              </Flex>
-            ) : null}
-            {currentStep === 'access-policy' ? (
+            <Flex gap="small">
               <Button
-                secondary
-                onClick={() => setCurrentStep('setup')}
-                disabled={isSaving}
+                onClick={() =>
+                  void (isEdit
+                    ? handleUpdateWebhook()
+                    : handleCreateNewWebhook())
+                }
+                loading={isSaving}
+                disabled={!canSubmitWebhook}
               >
-                Back to setup
+                {isEdit ? 'Update' : 'Create'}
               </Button>
-            ) : null}
+            </Flex>
           </Flex>
         </StickyActionsFooterSC>
       )}
     </Flex>
   )
 }
+
+const CardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.large,
+  minWidth: 150,
+  maxWidth: '100%',
+  gap: theme.spacing.large,
+  display: 'flex',
+  flexDirection: 'column',
+}))
