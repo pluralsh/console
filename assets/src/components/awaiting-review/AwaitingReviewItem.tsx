@@ -7,9 +7,8 @@ import {
   StackIcon,
   WarningOutlineIcon,
 } from '@pluralsh/design-system'
-import { aiGradientBorderStyles } from 'components/ai/explain/ExplainWithAIButton.tsx'
 import { StackAIApprovalChip } from 'components/stacks/common/StackApprovalChip'
-import { CaptionP } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import { StackedText } from 'components/utils/table/StackedText'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { AwaitingReviewStackFragment } from 'generated/graphql'
@@ -70,8 +69,11 @@ export function AwaitingReviewItem({
           gap="xsmall"
           padding="small"
           css={{
-            ...aiGradientBorderStyles(theme),
-            borderRadius: theme.borderRadiuses.medium,
+            backgroundImage: `linear-gradient(${theme.colors['fill-one']}, ${theme.colors['fill-one']}), linear-gradient(316deg, #E3A966 0%, #8961F4 32%, #747AF6 71%, #6D94F9 100%)`,
+            backgroundClip: 'padding-box, border-box',
+            backgroundOrigin: 'border-box',
+            border: '1px solid transparent',
+            borderRadius: theme.borderRadiuses.large,
           }}
         >
           <StretchedFlex
@@ -86,7 +88,11 @@ export function AwaitingReviewItem({
               size={13}
             />
           </StretchedFlex>
-          <StackAIApprovalChip approvalResult={approvalResult?.result} />
+          <StackAIApprovalChip
+            approvalResult={approvalResult?.result}
+            size="small"
+            width="fit-content"
+          />
           {approvalResult?.reason && (
             <>
               <CaptionP
@@ -95,7 +101,7 @@ export function AwaitingReviewItem({
               >
                 Approval reason
               </CaptionP>
-              <CaptionP $color="text-light">{approvalResult?.reason}</CaptionP>
+              <Body2P $color="text-light">{approvalResult?.reason}</Body2P>
             </>
           )}
         </Flex>
