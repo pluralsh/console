@@ -263,6 +263,16 @@ type CodexConfig struct {
 	Profiles       map[string]*Profile             `toml:"profiles"`
 	MCPServers     map[string]*MCPServer           `toml:"mcp_servers"`
 	Features       *CodexGlobalFeatures            `toml:"features,omitempty"`
+	Skills         *SkillsSettings                 `toml:"skills,omitempty"`
+}
+
+type SkillsSettings struct {
+	Config []SkillConfigEntry `toml:"config,omitempty"`
+}
+
+type SkillConfigEntry struct {
+	Path    string `toml:"path"`
+	Enabled bool   `toml:"enabled,omitempty"`
 }
 
 type CodexGlobalFeatures struct {
