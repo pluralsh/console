@@ -407,6 +407,11 @@
          "name": "RegisterGitHubApp",
          "body": "mutation RegisterGitHubApp($installationId: String!, $name: String!) {\n  registerGithubApp(installationId: $installationId, name: $name) {\n    id\n    __typename\n  }\n}"
       },
+      "sha256:f66622b40c448ddf7de62ed645b6d911633fef5ab84cafa9393d6644144ddcf4": {
+         "type": "query",
+         "name": "PendingApprovalStacks",
+         "body": "query PendingApprovalStacks($first: Int = 50) {\n  infrastructureStacks(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        ...AwaitingReviewStack\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AwaitingReviewStack on InfrastructureStack {\n  id\n  name\n  status\n  runs(first: 1) {\n    edges {\n      node {\n        id\n        status\n        message\n        approvalResult {\n          reason\n          result\n          __typename\n        }\n        configuration {\n          aiApproval {\n            enabled\n            __typename\n          }\n          __typename\n        }\n        pullRequest {\n          id\n          title\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:988ccffca43dd7f6a0d38dc29d76ea7b85bb4b829d0df9f1ae79511ca4472221": {
          "type": "query",
          "name": "ObjectStores",

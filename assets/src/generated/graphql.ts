@@ -17735,6 +17735,15 @@ export type RegisterGitHubAppMutationVariables = Exact<{
 
 export type RegisterGitHubAppMutation = { __typename?: 'RootMutationType', registerGithubApp?: { __typename?: 'ScmConnection', id: string } | null };
 
+export type AwaitingReviewStackFragment = { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, runs?: { __typename?: 'StackRunConnection', edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus, message?: string | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, configuration: { __typename?: 'StackConfiguration', aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean } | null }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null } | null } | null } | null> | null } | null };
+
+export type PendingApprovalStacksQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type PendingApprovalStacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, runs?: { __typename?: 'StackRunConnection', edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus, message?: string | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, configuration: { __typename?: 'StackConfiguration', aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean } | null }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null } | null } | null } | null> | null } | null } | null } | null> | null } | null };
+
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
 export type ClustersObjectStoresFragment = { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null };
@@ -22275,6 +22284,35 @@ export const ScmWebhookFragmentDoc = gql`
   url
   insertedAt
   updatedAt
+}
+    `;
+export const AwaitingReviewStackFragmentDoc = gql`
+    fragment AwaitingReviewStack on InfrastructureStack {
+  id
+  name
+  status
+  runs(first: 1) {
+    edges {
+      node {
+        id
+        status
+        message
+        approvalResult {
+          reason
+          result
+        }
+        configuration {
+          aiApproval {
+            enabled
+          }
+        }
+        pullRequest {
+          id
+          title
+        }
+      }
+    }
+  }
 }
     `;
 export const ObjectStoreFragmentDoc = gql`
@@ -30004,6 +30042,53 @@ export function useRegisterGitHubAppMutation(baseOptions?: Apollo.MutationHookOp
 export type RegisterGitHubAppMutationHookResult = ReturnType<typeof useRegisterGitHubAppMutation>;
 export type RegisterGitHubAppMutationResult = Apollo.MutationResult<RegisterGitHubAppMutation>;
 export type RegisterGitHubAppMutationOptions = Apollo.BaseMutationOptions<RegisterGitHubAppMutation, RegisterGitHubAppMutationVariables>;
+export const PendingApprovalStacksDocument = gql`
+    query PendingApprovalStacks($first: Int = 50) {
+  infrastructureStacks(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewStack
+      }
+    }
+  }
+}
+    ${AwaitingReviewStackFragmentDoc}`;
+
+/**
+ * __usePendingApprovalStacksQuery__
+ *
+ * To run a query within a React component, call `usePendingApprovalStacksQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePendingApprovalStacksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePendingApprovalStacksQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function usePendingApprovalStacksQuery(baseOptions?: Apollo.QueryHookOptions<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>(PendingApprovalStacksDocument, options);
+      }
+export function usePendingApprovalStacksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>(PendingApprovalStacksDocument, options);
+        }
+// @ts-ignore
+export function usePendingApprovalStacksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>): Apollo.UseSuspenseQueryResult<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>;
+export function usePendingApprovalStacksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>): Apollo.UseSuspenseQueryResult<PendingApprovalStacksQuery | undefined, PendingApprovalStacksQueryVariables>;
+export function usePendingApprovalStacksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>(PendingApprovalStacksDocument, options);
+        }
+export type PendingApprovalStacksQueryHookResult = ReturnType<typeof usePendingApprovalStacksQuery>;
+export type PendingApprovalStacksLazyQueryHookResult = ReturnType<typeof usePendingApprovalStacksLazyQuery>;
+export type PendingApprovalStacksSuspenseQueryHookResult = ReturnType<typeof usePendingApprovalStacksSuspenseQuery>;
+export type PendingApprovalStacksQueryResult = Apollo.QueryResult<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>;
 export const ObjectStoresDocument = gql`
     query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
@@ -45304,6 +45389,7 @@ export const namedOperations = {
     ScmConnections: 'ScmConnections',
     ScmConnection: 'ScmConnection',
     ScmWebhooks: 'ScmWebhooks',
+    PendingApprovalStacks: 'PendingApprovalStacks',
     ObjectStores: 'ObjectStores',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
@@ -45760,6 +45846,7 @@ export const namedOperations = {
     PrConfirmation: 'PrConfirmation',
     ScmConnection: 'ScmConnection',
     ScmWebhook: 'ScmWebhook',
+    AwaitingReviewStack: 'AwaitingReviewStack',
     ObjectStore: 'ObjectStore',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
