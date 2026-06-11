@@ -107,10 +107,16 @@ WORKDIR /plural
 COPY deployment-operator/dockerfiles/agent-harness/system /plural/system
 COPY deployment-operator/dockerfiles/agent-harness/skills /plural/skills
 
-RUN mkdir -p /plural/.opencode && \
-    mkdir -p /plural/.claude && \
-    mkdir -p /plural/.gemini && \
-    mkdir -p /plural/.codex
+RUN for provider in .claude .codex .gemini .opencode; do \
+      mkdir -p "/plural/$${provider}/skills"; \
+    done && \
+    for skill in /plural/skills/*/; do \
+      name="$$(basename "$$skill")"; \
+      [ -f "$$skill/SKILL.md" ] || continue; \
+      for provider in .claude .codex .gemini .opencode; do \
+        ln -sfn "/plural/skills/$${name}" "/plural/$${provider}/skills/$${name}"; \
+      done; \
+    done
 
 RUN chown -R 65532:65532 /plural && \
     mkdir -p /run/user/65532 && \

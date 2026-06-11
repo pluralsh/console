@@ -64,10 +64,6 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 		return fmt.Errorf("failed configuring %s system prompt/context file %q: %w", runtime, outputFile, err)
 	}
 
-	if err := in.ConfigureSkills(runtime); err != nil {
-		return fmt.Errorf("failed configuring %s skills: %w", runtime, err)
-	}
-
 	klog.V(log.LogLevelExtended).InfoS("system prompt/context file configured", "output", outputFile)
 	return nil
 }
