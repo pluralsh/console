@@ -1,3 +1,7 @@
+---
+name: plural-git-repository
+description: Explains GitRepository CRs and how GitOps repos relate to source repos. Use when editing Plural GitOps repos, ServiceDeployment repositoryRef, spec.git.folder, or deployments.plural.sh GitRepository CRs.
+---
 # GitRepository
 
 Plural CD separates **where CRs are defined** from **where application or IaC code lives**:

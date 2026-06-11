@@ -1,3 +1,7 @@
+---
+name: plural-cd-extensions
+description: Advanced Plural CD patterns including service-of-services, multi-source services, Liquid/Lua templating, observers, and pipelines. Use when implementing advanced continuous deployment features in Plural GitOps.
+---
 # Official Continuous Deployment Extensions
 
 This file maps common "advanced" Plural CD workflows to official docs so agents can quickly

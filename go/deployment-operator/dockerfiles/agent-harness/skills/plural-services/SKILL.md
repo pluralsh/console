@@ -1,3 +1,7 @@
+---
+name: plural-services
+description: Compares ServiceDeployment vs GlobalService and fleet deployment patterns. Use when creating or modifying ServiceDeployment, GlobalService, or child service CRs in Plural GitOps repos.
+---
 # GlobalService vs ServiceDeployment
 
 Plural provides two CRDs for deploying workloads to Kubernetes clusters. Choosing the right

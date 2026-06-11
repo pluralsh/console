@@ -186,6 +186,7 @@ func (in *Codex) writeCodexConfig() error {
 	if err != nil {
 		return err
 	}
+	cfg.Features = &CodexGlobalFeatures{Skills: true}
 
 	config, err := WriteCodexConfig(path.Join(in.Config.WorkDir, ".codex"), cfg)
 	if err != nil {

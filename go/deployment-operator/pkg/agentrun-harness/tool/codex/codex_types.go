@@ -262,4 +262,9 @@ type CodexConfig struct {
 	ModelProviders map[string]*ModelProviderConfig `toml:"model_providers,omitempty"`
 	Profiles       map[string]*Profile             `toml:"profiles"`
 	MCPServers     map[string]*MCPServer           `toml:"mcp_servers"`
+	Features       *CodexGlobalFeatures            `toml:"features,omitempty"`
+}
+
+type CodexGlobalFeatures struct {
+	Skills bool `toml:"skills,omitempty"`
 }

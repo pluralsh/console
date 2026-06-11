@@ -1,7 +1,9 @@
 # Plural GitOps Skills
 
-Domain-knowledge reference files for AI coding agents working on Plural-managed GitOps
-repositories. Read the relevant files **before** making changes.
+Agent skills for Plural-managed GitOps repositories. Each skill is a directory with a
+`SKILL.md` file (YAML frontmatter + markdown body) following the
+[Claude Code skills format](https://code.claude.com/docs/en/skills). The agent harness
+symlinks them into each runtime's skills discovery path at pod startup.
 
 ## Architecture (read this once)
 
@@ -13,37 +15,44 @@ Plural CD uses **two cooperating layers**:
 2. **Deployment operator agent** (runs on each target cluster) — pulls service definitions from
    Console, renders Helm/Kustomize/raw YAML, and applies manifests locally.
 
-
 **CRD field reference**: for authoritative `spec` / `status` definitions of every
-`deployments.plural.sh/v1alpha1` kind (`Cluster`, `ServiceDeployment`, `GlobalService`,
-`InfrastructureStack`, `Pipeline`, `Observer`, …), use the
+`deployments.plural.sh/v1alpha1` kind, use the
 [Management API Reference](https://docs.plural.sh/api-reference/kubernetes/management-api-reference).
 Agent-side CRDs are documented separately in the
 [Agent API Reference](https://docs.plural.sh/api-reference/kubernetes/agent-api-reference).
 
-## Files
+## Skills
 
-| File | When to read |
+| Skill | When to use |
 |---|---|
-| [`git-repository.md`](git-repository.md) | Always — start here. How GitOps repos relate to source repos, `GitRepository` CRs, and `repositoryRef` / `spec.git` wiring. |
-| [`infrastructure-stack.md`](infrastructure-stack.md) | When creating or modifying `InfrastructureStack` CRs, or any Terraform / Terragrunt / Ansible IaC runs. |
-| [`services.md`](services.md) | When creating or modifying `ServiceDeployment` or `GlobalService` CRs, or deciding which one to use. |
-| [`official-cd-extensions.md`](official-cd-extensions.md) | When you need advanced patterns from official docs: service-of-services, multi-source services, Lua Helm generation, sync controls, observers, and pipelines. |
+| `plural-git-repository` | GitRepository CRs, source vs GitOps repos, `repositoryRef` / `spec.git` |
+| `plural-infrastructure-stack` | InfrastructureStack CRs, Terraform / Terragrunt / Ansible runs |
+| `plural-services` | ServiceDeployment vs GlobalService |
+| `plural-cd-extensions` | Advanced CD patterns from official docs |
+
+## Runtime discovery paths
+
+The harness links bundled skills from `/plural/skills/<name>/` into:
+
+| Runtime | Work dir | Cloned repo (when separate) |
+|---|---|---|
+| Claude | `.claude/skills/` | `.claude/skills/` |
+| Codex | `.codex/skills/` | `.agents/skills/` |
+| Gemini | `.gemini/skills/` | `.agents/skills/` |
+| OpenCode | `.opencode/skills/` | `.claude/skills/`, `.agents/skills/` |
+
+Codex requires `[features] skills = true` in its config (set by the harness).
 
 ## Quick-start checklist
 
 Before editing any YAML in a Plural GitOps repo:
 
-1. **Read `git-repository.md`** to understand how this repo relates to GitOps CRs and source repos.
-2. **Identify the CR kind** you are modifying (`ServiceDeployment`, `GlobalService`,
-   `InfrastructureStack`, etc.). For field-level specs, check the
+1. **Load `plural-git-repository`** to understand how this repo relates to GitOps CRs and source repos.
+2. **Identify the CR kind** you are modifying. For field-level specs, check the
    [Management API Reference](https://docs.plural.sh/api-reference/kubernetes/management-api-reference).
-3. **Read the matching skill file** for that kind.
-4. **If using advanced CD patterns**, read `official-cd-extensions.md` and follow the
-   linked official docs for the specific feature.
-5. **Check the existing CRs** in the repo for the namespace and naming convention already
-   in use — follow the same pattern.
+3. **Load the matching skill** for that kind.
+4. **If using advanced CD patterns**, load `plural-cd-extensions` and follow the linked official docs.
+5. **Check existing CRs** in `manifests/` for namespace and naming conventions — follow the same pattern.
 6. **Check read-only resources** — if `.status.readonly: true` on a Cluster (or similar), the
    CR is observed from Console/Terraform and **must not** be edited as the write path; update
    the upstream source instead.
-

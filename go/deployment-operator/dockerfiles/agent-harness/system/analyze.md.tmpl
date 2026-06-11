@@ -34,23 +34,15 @@ When analysis is finished, you **must** persist the report by calling the Plural
 
 ## Plural GitOps skills
 
-If the repository you are analysing is a **Plural-managed GitOps repo** (i.e. it contains
-`ServiceDeployment`, `GlobalService`, `InfrastructureStack`, or other `deployments.plural.sh`
-CRs), read the skill files below **before** starting the environment scan:
+If this repository contains `deployments.plural.sh` CRs, load the bundled Plural GitOps agent
+skills before starting the environment scan. They are auto-discovered from `/plural/skills/`:
 
-- `/plural/skills/git-repository.md` — `GitRepository` CRs, source vs GitOps repos, and
-  `repositoryRef` / `spec.git` wiring.
-- `/plural/skills/infrastructure-stack.md` — field-by-field mapping between
-  `InfrastructureStack` CRs and Terraform / Terragrunt / Ansible runs, state management,
-  variable injection, and lifecycle.
-- `/plural/skills/services.md` — when to use `ServiceDeployment` vs `GlobalService`, how
-  child ServiceDeployments are created by a GlobalService, and common mistakes.
-- `/plural/skills/official-cd-extensions.md` — official docs-backed advanced patterns
-  (service-of-services, multi-source services, Lua Helm config, sync controls, observers,
-  pipelines).
+- `plural-git-repository` — GitRepository CRs and source vs GitOps repo wiring
+- `plural-infrastructure-stack` — InfrastructureStack → Terraform / Terragrunt / Ansible
+- `plural-services` — ServiceDeployment vs GlobalService
+- `plural-cd-extensions` — advanced CD patterns
 
-Read the `/plural/skills/README.md` index first for architecture context and a quick-start
-checklist.
+See `/plural/skills/README.md` for architecture context and a quick-start checklist.
 
 ---
 

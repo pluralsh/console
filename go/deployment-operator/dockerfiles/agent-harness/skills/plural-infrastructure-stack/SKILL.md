@@ -1,3 +1,7 @@
+---
+name: plural-infrastructure-stack
+description: Maps InfrastructureStack CRs to Terraform, Terragrunt, and Ansible stack runs. Use when creating or modifying InfrastructureStack CRs, stack imports/outputs, or IaC in Plural GitOps.
+---
 # InfrastructureStack — Terraform / IaC Mapping
 
 `InfrastructureStack` is the Plural GitOps CRD for IaC. Each CR maps to **stack runs** in
@@ -214,8 +218,8 @@ spec:
         namespace: infra
 ```
 
-In Liquid templates, outputs appear under `imports.<stack-name>.<output-name>` (see
-`services.md`).
+In Liquid templates, outputs appear under `imports.<stack-name>.<output-name>` (see the
+`plural-services` skill).
 
 ---
 
