@@ -44,7 +44,7 @@ export function AwaitingReviewPanel({
     >
       <Flex
         align="center"
-        gap="xxxsmall"
+        gap="xsmall"
         padding="xsmall"
         borderBottom={theme.borders.input}
       >
@@ -52,7 +52,7 @@ export function AwaitingReviewPanel({
         <Overline css={{ flexGrow: 1 }}>Awaiting review</Overline>
         <IconFrame
           clickable
-          size="xsmall"
+          size="medium"
           icon={<CloseIcon color="icon-light" />}
           onClick={onClose}
           tooltip="Close"
