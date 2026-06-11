@@ -242,10 +242,6 @@ func (in *Claude) ConfigureBabysitRun() error {
 		return err
 	}
 
-	if err := in.ensureBundledSkills(); err != nil {
-		return err
-	}
-
 	settings := NewSettingsBuilder(in.model)
 	settings.AllowTools(
 		"Read",
@@ -268,10 +264,6 @@ func (in *Claude) ConfigureBabysitRun() error {
 
 func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeClaude); err != nil {
-		return err
-	}
-
-	if err := in.ensureBundledSkills(); err != nil {
 		return err
 	}
 
