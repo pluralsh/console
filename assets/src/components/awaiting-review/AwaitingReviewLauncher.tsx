@@ -2,7 +2,7 @@ import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { useTransition, animated } from '@react-spring/web'
 import { usePendingApprovalStacksQuery } from 'generated/graphql'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { AwaitingReviewLauncherButton } from './AwaitingReviewLauncherButton'
 import { AwaitingReviewPanel } from './AwaitingReviewPanel'
@@ -46,24 +46,25 @@ export default function AwaitingReviewLauncher() {
         count={stacks.length}
       />
       {transitions((styles) => (
-        <AnimatedWrapperSC style={styles}>
+        <animated.div
+          style={{
+            ...styles,
+            position: 'absolute',
+            right: 0,
+            top: 32 + theme.spacing.xsmall,
+            display: 'flex',
+            flexDirection: 'column',
+            transformOrigin: 'top right',
+          }}
+        >
           <AwaitingReviewPanel
             stacks={stacks}
             loading={loading}
             error={error}
             onClose={() => setOpen(false)}
           />
-        </AnimatedWrapperSC>
+        </animated.div>
       ))}
     </div>
   )
 }
-
-const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
-  position: 'absolute',
-  right: 0,
-  top: 32 + theme.spacing.xsmall,
-  display: 'flex',
-  flexDirection: 'column',
-  transformOrigin: 'top right',
-}))

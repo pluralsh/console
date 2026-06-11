@@ -8,11 +8,12 @@ import {
 import { aiGradientBorderStyles } from 'components/ai/explain/ExplainWithAIButton.tsx'
 import { StackAIApprovalChip } from 'components/stacks/common/StackApprovalChip'
 import { StackStatusChip } from 'components/stacks/common/StackStatusChip'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
+import { StackedText } from 'components/utils/table/StackedText'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { AwaitingReviewStackFragment, StackStatus } from 'generated/graphql'
 import { Link } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import {
   getStackRunsAbsPath,
@@ -29,39 +30,62 @@ export function AwaitingReviewItem({
   const theme = useTheme()
   const run = mapExistingNodes(stack.runs)[0]
   const { approvalResult, configuration, message, pullRequest } = run ?? {}
-  const aiApprovalResult = approvalResult?.result
-
   const planPath = run
     ? `${getStackRunsAbsPath(stack.id, run.id)}/${STACK_RUNS_PLAN_REL_PATH}`
     : null
 
-  const description = pullRequest?.title ?? message
-
   return (
-    <ItemSC>
-      <ItemHeaderSC>
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+        padding: theme.spacing.medium,
+        borderBottom: theme.borders.default,
+      }}
+    >
+      <Flex
+        align="center"
+        gap="small"
+      >
         <IconFrame
           icon={<StackIcon />}
-          size="small"
+          size="large"
+          type="secondary"
+          css={{ borderRadius: '50%', border: theme.borders.default }}
         />
-        <div>
-          <Body2BoldP>Approval required</Body2BoldP>
-          <CaptionP $color="text-xlight">{stack.name}</CaptionP>
-        </div>
-      </ItemHeaderSC>
+        <StackedText
+          first="Approval required"
+          firstPartialType="body2Bold"
+          firstColor="text"
+          second={pullRequest?.title ?? message}
+          truncate
+        />
+      </Flex>
 
-      {description && <CaptionP $color="text-light">{description}</CaptionP>}
-
-      {configuration?.aiApproval?.enabled && aiApprovalResult && (
-        <ApprovalBoxSC css={aiGradientBorderStyles(theme)}>
-          <ApprovalRowSC>
+      {configuration?.aiApproval?.enabled && approvalResult?.result && (
+        <Flex
+          direction="column"
+          gap="xsmall"
+          padding="small"
+          css={{
+            ...aiGradientBorderStyles(theme),
+            borderRadius: theme.borderRadiuses.medium,
+          }}
+        >
+          <StretchedFlex
+            css={{
+              alignItems: 'center',
+              gap: theme.spacing.xsmall,
+            }}
+          >
             <CaptionP $color="text-xlight">Approval decision</CaptionP>
             <AiSparkleFilledIcon
               color="icon-info"
               size={13}
             />
-          </ApprovalRowSC>
-          <StackAIApprovalChip approvalResult={aiApprovalResult} />
+          </StretchedFlex>
+          <StackAIApprovalChip approvalResult={approvalResult?.result} />
           {approvalResult?.reason && (
             <>
               <CaptionP
@@ -73,7 +97,7 @@ export function AwaitingReviewItem({
               <CaptionP $color="text-light">{approvalResult?.reason}</CaptionP>
             </>
           )}
-        </ApprovalBoxSC>
+        </Flex>
       )}
 
       <Flex
@@ -96,33 +120,6 @@ export function AwaitingReviewItem({
           </Button>
         )}
       </Flex>
-    </ItemSC>
+    </div>
   )
 }
-
-const ItemSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.medium,
-  borderBottom: theme.borders.default,
-}))
-
-const ItemHeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: theme.spacing.xsmall,
-}))
-
-const ApprovalBoxSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.medium,
-}))
-
-const ApprovalRowSC = styled(StretchedFlex)(({ theme }) => ({
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-}))
