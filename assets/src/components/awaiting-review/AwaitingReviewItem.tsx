@@ -1,17 +1,18 @@
 import {
   AiSparkleFilledIcon,
   Button,
+  Chip,
   Flex,
   IconFrame,
   StackIcon,
+  WarningOutlineIcon,
 } from '@pluralsh/design-system'
 import { aiGradientBorderStyles } from 'components/ai/explain/ExplainWithAIButton.tsx'
 import { StackAIApprovalChip } from 'components/stacks/common/StackApprovalChip'
-import { StackStatusChip } from 'components/stacks/common/StackStatusChip'
 import { CaptionP } from 'components/utils/typography/Text'
 import { StackedText } from 'components/utils/table/StackedText'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
-import { AwaitingReviewStackFragment, StackStatus } from 'generated/graphql'
+import { AwaitingReviewStackFragment } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -40,8 +41,7 @@ export function AwaitingReviewItem({
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
-        padding: theme.spacing.medium,
-        borderBottom: theme.borders.default,
+        padding: theme.spacing.large,
       }}
     >
       <Flex
@@ -60,6 +60,7 @@ export function AwaitingReviewItem({
           firstColor="text"
           second={pullRequest?.title ?? message}
           truncate
+          css={{ flex: 1 }}
         />
       </Flex>
 
@@ -105,10 +106,13 @@ export function AwaitingReviewItem({
         justify="space-between"
         gap="small"
       >
-        <StackStatusChip
-          status={StackStatus.PendingApproval}
+        <Chip
           size="small"
-        />
+          iconColor="icon-warning"
+          icon={<WarningOutlineIcon />}
+        >
+          Pending approval
+        </Chip>
         {planPath && (
           <Button
             small

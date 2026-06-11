@@ -35,7 +35,7 @@ export function AwaitingReviewPanel({
       css={{
         display: 'flex',
         flexDirection: 'column',
-        border: theme.borders.input,
+        border: theme.borders['fill-two'],
         minHeight: 0,
         width: 460,
         maxHeight: '70vh',
@@ -45,8 +45,8 @@ export function AwaitingReviewPanel({
       <Flex
         align="center"
         gap="xsmall"
-        padding="xsmall"
-        borderBottom={theme.borders.input}
+        padding="small"
+        borderBottom={theme.borders['fill-two']}
       >
         <IconFrame icon={<ClipboardChecked color="icon-xlight" />} />
         <Overline css={{ flexGrow: 1 }}>Awaiting review</Overline>
@@ -58,7 +58,15 @@ export function AwaitingReviewPanel({
           tooltip="Close"
         />
       </Flex>
-      <div css={{ overflow: 'auto', minHeight: 0 }}>
+      <div
+        css={{
+          overflow: 'auto',
+          minHeight: 0,
+          '& > *:not(:last-child)': {
+            borderBottom: theme.borders['fill-two'],
+          },
+        }}
+      >
         {loading && isEmpty(stacks) ? (
           <RectangleSkeleton
             $width="100%"

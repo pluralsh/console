@@ -47,7 +47,7 @@ export function NotificationsPanel({
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { data, pageInfo, fetchNextPage, setVirtualSlice } =
+  const { data, pageInfo, fetchNextPage, setVirtualSlice, loading } =
     useFetchPaginatedData({
       queryHook: useAppNotificationsQuery,
       keyPath: ['appNotifications'],
@@ -58,9 +58,10 @@ export function NotificationsPanel({
     [data?.appNotifications]
   )
 
-  const [mutation, { loading, error }] = useReadAppNotificationsMutation({
-    onCompleted: () => refetchUnreadNotificationsCount(),
-  })
+  const [mutation, { loading: markingRead, error }] =
+    useReadAppNotificationsMutation({
+      onCompleted: () => refetchUnreadNotificationsCount(),
+    })
 
   return (
     <>
@@ -69,17 +70,18 @@ export function NotificationsPanel({
         css={{
           display: 'flex',
           flexDirection: 'column',
-          border: theme.borders.input,
+          border: theme.borders['fill-two'],
           minHeight: 0,
-          width: 480,
+          width: 460,
+          maxHeight: '70vh',
         }}
         {...props}
       >
         <Flex
           align="center"
           gap="xsmall"
-          padding="xsmall"
-          borderBottom={theme.borders.input}
+          padding="small"
+          borderBottom={theme.borders['fill-two']}
         >
           <IconFrame icon={<BellIcon color="icon-xlight" />} />
           <Overline css={{ flexGrow: 1 }}>Notifications</Overline>
@@ -94,7 +96,7 @@ export function NotificationsPanel({
             tooltip="Go to notifications settings"
           />
           <Button
-            loading={loading}
+            loading={markingRead}
             onClick={() => mutation()}
             small
             secondary
@@ -113,8 +115,8 @@ export function NotificationsPanel({
           <div
             css={{
               color: theme.colors['text-light'],
+              minHeight: 120,
               padding: theme.spacing.medium,
-              height: 240,
             }}
           >
             You do not have any notifications yet.
