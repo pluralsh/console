@@ -25,13 +25,13 @@ export default function AwaitingReviewLauncher() {
   useKeyDown(['Escape'], () => setOpen(false))
   useClickOutside(ref, () => setOpen(false))
 
-  const { data } = usePendingApprovalStacksQuery({
+  const { data, loading, error } = usePendingApprovalStacksQuery({
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
-  const count = useMemo(
-    () => mapExistingNodes(data?.infrastructureStacks).length,
+  const stacks = useMemo(
+    () => mapExistingNodes(data?.infrastructureStacks),
     [data?.infrastructureStacks]
   )
 
@@ -43,11 +43,16 @@ export default function AwaitingReviewLauncher() {
       <AwaitingReviewLauncherButton
         open={open}
         onClick={toggle}
-        count={count}
+        count={stacks.length}
       />
       {transitions((styles) => (
         <AnimatedWrapperSC style={styles}>
-          <AwaitingReviewPanel onClose={() => setOpen(false)} />
+          <AwaitingReviewPanel
+            stacks={stacks}
+            loading={loading}
+            error={error}
+            onClose={() => setOpen(false)}
+          />
         </AnimatedWrapperSC>
       ))}
     </div>
