@@ -115,7 +115,6 @@ RUN for provider in .claude .codex .gemini .opencode; do \
       name="$$(basename "$$skill")"; \
       [ -f "$$skill/SKILL.md" ] || continue; \
       for provider in .claude .codex .gemini .opencode; do \
-        rm -rf "/plural/$${provider}/skills/$${name}"; \
         cp -a "$$skill" "/plural/$${provider}/skills/$${name}"; \
       done; \
     done
