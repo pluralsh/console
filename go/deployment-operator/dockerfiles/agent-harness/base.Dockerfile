@@ -108,14 +108,15 @@ COPY deployment-operator/dockerfiles/agent-harness/system /plural/system
 COPY deployment-operator/dockerfiles/agent-harness/skills /plural/skills
 
 # Copy bundled skills into each runtime's discovery path under /plural.
+# Shell vars use single `$` here (not `$$`) — `$$` expands to the shell PID in RUN.
 RUN for provider in .claude .codex .gemini .opencode; do \
-      mkdir -p "/plural/$${provider}/skills"; \
+      mkdir -p "/plural/${provider}/skills"; \
     done && \
     for skill in /plural/skills/*/; do \
-      name="$$(basename "$$skill")"; \
-      [ -f "$$skill/SKILL.md" ] || continue; \
+      name="$(basename "$skill")"; \
+      [ -f "$skill/SKILL.md" ] || continue; \
       for provider in .claude .codex .gemini .opencode; do \
-        cp -a "$$skill" "/plural/$${provider}/skills/$${name}"; \
+        cp -a "$skill" "/plural/${provider}/skills/${name}"; \
       done; \
     done
 
