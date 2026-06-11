@@ -9,7 +9,6 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { StackedTextSC } from 'components/utils/table/StackedText'
-import { FormCardSC } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { useChatProviderConnectionQuery } from 'generated/graphql'
 import { useEffect, useEffectEvent, useMemo } from 'react'
@@ -106,9 +105,7 @@ export function ChatbotEditSettings() {
   if (loading && !chatbot) return <LoadingIndicator />
 
   return chatbot ? (
-    <FormCardSC css={{ width: 'auto' }}>
-      <ChatbotConnectionForm existingConnection={chatbot} />
-    </FormCardSC>
+    <ChatbotConnectionForm existingConnection={chatbot} />
   ) : (
     <EmptyState message="Chatbot not found.">
       <Button onClick={() => navigate(CHATBOTS_SETTINGS_ABS_PATH)}>

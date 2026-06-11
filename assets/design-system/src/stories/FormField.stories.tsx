@@ -121,6 +121,13 @@ FullDisabled.args = {
   },
 }
 
+export const Horizontal = Template.bind({})
+
+Horizontal.args = {
+  ...Full.args,
+  layout: 'horizontal',
+}
+
 export const Default = AllSizesTemplate.bind({})
 
 Default.args = {}

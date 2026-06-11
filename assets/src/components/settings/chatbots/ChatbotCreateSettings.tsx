@@ -6,7 +6,6 @@ import {
 } from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { StackedTextSC } from 'components/utils/table/StackedText'
-import { FormCardSC } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { useEffect, useEffectEvent, useMemo } from 'react'
 import {
@@ -83,9 +82,5 @@ export function ChatbotCreateSettings() {
     })
   }, [isOpen, openSetupGuidePanel])
 
-  return (
-    <FormCardSC css={{ width: 'auto' }}>
-      <ChatbotConnectionForm />
-    </FormCardSC>
-  )
+  return <ChatbotConnectionForm />
 }
