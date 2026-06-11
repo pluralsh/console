@@ -11,7 +11,7 @@ import { StackAIApprovalChip } from 'components/stacks/common/StackApprovalChip'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import { StackedText } from 'components/utils/table/StackedText'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
-import { AwaitingReviewStackFragment } from 'generated/graphql'
+import { AwaitingReviewStackFragment, StackStatus } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -28,7 +28,9 @@ export function AwaitingReviewItem({
   onNavigate: () => void
 }) {
   const theme = useTheme()
-  const run = mapExistingNodes(stack.runs)[0]
+  const run = mapExistingNodes(stack.runs).findLast(
+    (stackRun) => stackRun.status === StackStatus.PendingApproval
+  )
   const { approvalResult, configuration, message, pullRequest } = run ?? {}
   const planPath = run
     ? `${getStackRunsAbsPath(stack.id, run.id)}/${STACK_RUNS_PLAN_REL_PATH}`

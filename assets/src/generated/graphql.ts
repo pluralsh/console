@@ -22291,7 +22291,7 @@ export const AwaitingReviewStackFragmentDoc = gql`
   id
   name
   status
-  runs(first: 1) {
+  runs(first: 50) {
     edges {
       node {
         id
