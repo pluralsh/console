@@ -35,7 +35,6 @@ import NotificationRouters from '../components/settings/notifications/routers/No
 
 import { AISettingsProvider } from 'components/settings/ai/AISettingsProvider'
 import { ObservabilityProviders } from 'components/settings/global/observability/ObservabilityProviders'
-import { ObservabilityWebhooks } from 'components/settings/global/observability/ObservabilityWebhooks'
 import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 import { RequireCdEnabled } from './cdRoutes'
 import {
@@ -58,6 +57,7 @@ import {
   USER_MANAGEMENT_REL_PATH,
   WEBHOOKS_SETTINGS_EDIT_REL_PATH,
   WEBHOOKS_SETTINGS_CREATE_REL_PATH,
+  WEBHOOKS_SETTINGS_ABS_PATH,
   WEBHOOKS_SETTINGS_REL_PATH,
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
@@ -152,7 +152,12 @@ const globalSettingsRoutes = (
       />
       <Route
         path="webhooks"
-        element={<ObservabilityWebhooks />}
+        element={
+          <Navigate
+            replace
+            to={WEBHOOKS_SETTINGS_ABS_PATH}
+          />
+        }
       />
     </Route>
     <Route

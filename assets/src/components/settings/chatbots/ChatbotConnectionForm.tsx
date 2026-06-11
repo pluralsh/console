@@ -1,6 +1,5 @@
 import {
   Button,
-  Card,
   Flex,
   FormField,
   Input2,
@@ -11,6 +10,7 @@ import {
 import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { GqlError } from 'components/utils/Alert'
 import { PolicyBindingsCardForm } from 'components/utils/PolicyBindingsCardForm'
+import { SettingsFormCard } from 'components/utils/SettingsFormCard'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import {
   ChatProviderConnectionFragment,
@@ -30,7 +30,7 @@ import {
 } from 'components/workbenches/workbench/chatbots/utils'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { StickyActionsFooterSC } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 
 type RouteState = {
   returnPath?: string
@@ -125,7 +125,7 @@ export function ChatbotConnectionForm({
         gap="large"
         overflow="auto"
       >
-        <CardSC>
+        <SettingsFormCard>
           <Overline>Integration configuration</Overline>
           <FormField
             required
@@ -210,7 +210,7 @@ export function ChatbotConnectionForm({
               disabled={loading}
             />
           </FormField>
-        </CardSC>
+        </SettingsFormCard>
         <PolicyBindingsCardForm
           layout="horizontal"
           readTitle="Read permissions"
@@ -278,12 +278,3 @@ function getInitialFormState(
       existingConnection?.writeBindings?.filter(isNonNullable) ?? [],
   }
 }
-
-const CardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.large,
-  minWidth: 150,
-  maxWidth: '100%',
-  gap: theme.spacing.large,
-  display: 'flex',
-  flexDirection: 'column',
-}))

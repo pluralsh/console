@@ -1,14 +1,15 @@
-import { Card } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
+import { SettingsFormCard } from 'components/utils/SettingsFormCard'
 import { FormBindings } from 'components/utils/bindings'
 import type { PolicyBindingFragment } from 'generated/graphql'
 import type { ComponentProps, ReactNode } from 'react'
-import styled from 'styled-components'
 
 type PolicyBindingsCardFormLayout = 'vertical' | 'horizontal'
 type BindingHints = ComponentProps<typeof FormBindings>['hints']
 
-export type PolicyBindingsCardFormProps = ComponentProps<typeof Card> & {
+export type PolicyBindingsCardFormProps = ComponentProps<
+  typeof SettingsFormCard
+> & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
   onReadBindingsChange: (next: PolicyBindingFragment[]) => void
@@ -40,7 +41,7 @@ export function PolicyBindingsCardForm({
 }: PolicyBindingsCardFormProps) {
   return (
     <>
-      <CardSC {...props}>
+      <SettingsFormCard {...props}>
         <Overline>{readTitle}</Overline>
         <FormBindings
           bindings={readBindings}
@@ -48,8 +49,8 @@ export function PolicyBindingsCardForm({
           hints={readHints}
           layout={layout}
         />
-      </CardSC>
-      <CardSC {...props}>
+      </SettingsFormCard>
+      <SettingsFormCard {...props}>
         <Overline>{writeTitle}</Overline>
         <FormBindings
           bindings={writeBindings}
@@ -57,16 +58,7 @@ export function PolicyBindingsCardForm({
           hints={writeHints}
           layout={layout}
         />
-      </CardSC>
+      </SettingsFormCard>
     </>
   )
 }
-
-const CardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.large,
-  minWidth: 150,
-  maxWidth: '100%',
-  gap: theme.spacing.large,
-  display: 'flex',
-  flexDirection: 'column',
-}))

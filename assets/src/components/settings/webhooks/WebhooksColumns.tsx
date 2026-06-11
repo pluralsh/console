@@ -12,13 +12,20 @@ import {
   getIssueWebhookProviderIcon,
   getObservabilityWebhookTypeIcon,
 } from './webhookIcons'
+import {
+  humanizeIssueWebhookProvider,
+  humanizeObservabilityWebhookType,
+} from 'utils/webhookLabels'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWebhooksSettingsEditAbsPath } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
-import { DeleteObservabilityWebhookModal } from '../global/observability/ObservabilityWebhooksColumns'
+import CopyButton from 'components/utils/CopyButton'
+import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE } from 'components/utils/truncate'
 import { DeleteIssueWebhookModal } from './DeleteIssueWebhookModal'
+import { DeleteObservabilityWebhookModal } from './DeleteObservabilityWebhookModal'
 import { type WebhookListItem } from './WebhooksList'
 import { WorkbenchJobActivityType } from '../../../generated/graphql'
 
@@ -39,11 +46,15 @@ export function getWebhookColumns({
         const item = getValue()
         const isObservability =
           item.kind === WorkbenchJobActivityType.Observability
+        const providerName = isObservability
+          ? humanizeObservabilityWebhookType(item.webhook.type)
+          : humanizeIssueWebhookProvider(item.webhook.provider)
 
         return (
           <IconFrame
             size="small"
             type="floating"
+            tooltip={providerName}
             icon={
               isObservability
                 ? getObservabilityWebhookTypeIcon(item.webhook.type)
@@ -55,8 +66,30 @@ export function getWebhookColumns({
     }),
     columnHelper.accessor((item) => item.webhook.name, {
       id: 'name',
-      meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
-      cell: ({ getValue }) => getValue(),
+      meta: { gridTemplate: 'minmax(0, 0.5fr)' },
+      cell: ({ getValue }) => (
+        <StackedText
+          first={getValue()}
+          truncate
+        />
+      ),
+    }),
+    columnHelper.accessor((item) => item.webhook.url, {
+      id: 'url',
+      meta: { gridTemplate: 'minmax(0, 1fr)' },
+      cell: function Cell({ getValue }) {
+        const [showCopy, setShowCopy] = useState(false)
+
+        return (
+          <ColUrlWrapper
+            onMouseEnter={() => setShowCopy(true)}
+            onMouseLeave={() => setShowCopy(false)}
+          >
+            <span css={TRUNCATE}>{getValue()}</span>
+            {showCopy && <CopyButton text={getValue()} />}
+          </ColUrlWrapper>
+        )
+      },
     }),
     columnHelper.accessor((item) => item.kind, {
       id: 'kind',
@@ -78,6 +111,17 @@ export function getWebhookColumns({
     }),
   ]
 }
+
+const ColUrlWrapper = styled.span(({ theme }) => ({
+  maxWidth: '100%',
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  '> span:first-child': {
+    minWidth: 0,
+  },
+}))
 
 function WebhookActions({
   item,

@@ -124,7 +124,7 @@ export function SettingsPageHeader({
   children,
 }: {
   heading?: ReactNode
-  children: ReactNode
+  children?: ReactNode
 }) {
   const theme = useTheme()
 

@@ -1,6 +1,5 @@
 import {
   Button,
-  Card,
   Codeline,
   Flex,
   FormField,
@@ -9,6 +8,7 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { PolicyBindingsCardForm } from 'components/utils/PolicyBindingsCardForm'
+import { SettingsFormCard } from 'components/utils/SettingsFormCard'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
@@ -31,7 +31,6 @@ import {
   ExistingWebhook,
   SetupGuideSelection,
 } from './WebhookCreateFormTypes'
-import styled from 'styled-components'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 
 function getInitialCreateWebhookFormState(
@@ -292,7 +291,7 @@ export function WebhookCreateForm({
         overflow="auto"
       >
         {newWebHook && !error && (
-          <CardSC>
+          <SettingsFormCard>
             <Overline>Webhook details</Overline>
             <Body2P>
               {`Add a new webhook in your ${formState.webhookType === 'observability' ? 'observability provider' : 'ticketing provider'} with the
@@ -319,11 +318,11 @@ export function WebhookCreateForm({
             >
               {createdActionLabel}
             </Button>
-          </CardSC>
+          </SettingsFormCard>
         )}
         {!newWebHook && (
           <>
-            <CardSC>
+            <SettingsFormCard>
               <Overline>Integration configuration</Overline>
               <WebhookCreateFormFields
                 layout="horizontal"
@@ -331,7 +330,7 @@ export function WebhookCreateForm({
                 mode={mode}
                 setFormState={setFormState}
               />
-            </CardSC>
+            </SettingsFormCard>
             <PolicyBindingsCardForm
               layout="horizontal"
               readTitle="Read permissions"
@@ -400,12 +399,3 @@ export function WebhookCreateForm({
     </Flex>
   )
 }
-
-const CardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.large,
-  minWidth: 150,
-  maxWidth: '100%',
-  gap: theme.spacing.large,
-  display: 'flex',
-  flexDirection: 'column',
-}))

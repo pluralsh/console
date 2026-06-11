@@ -114,6 +114,7 @@ function ObservabilityWebhookFields({
         <Select
           selectedKey={formState.observabilityType}
           label="Provider type"
+          isDisabled={mode === 'edit'}
           leftContent={getObservabilityWebhookTypeIcon(
             formState.observabilityType
           )}
@@ -140,6 +141,7 @@ function ObservabilityWebhookFields({
       >
         <Input2
           value={formState.observabilityName}
+          disabled={mode === 'edit'}
           onChange={(e) =>
             setFormState((prev) => ({
               ...prev,
