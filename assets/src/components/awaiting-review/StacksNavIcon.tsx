@@ -19,10 +19,10 @@ export function StacksNavIcon() {
         <div
           css={{
             position: 'absolute',
-            top: -4,
-            right: -5,
-            width: 4,
-            height: 4,
+            top: -6,
+            right: -6,
+            width: 5,
+            height: 5,
             borderRadius: '50%',
             backgroundColor: theme.colors.yellow[300],
           }}
