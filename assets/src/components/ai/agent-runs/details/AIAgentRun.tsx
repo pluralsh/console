@@ -124,7 +124,7 @@ export function AIAgentRun() {
         minWidth={0}
         height="100%"
         paddingRight={spacing.medium}
-        overflow="hidden"
+        overflow="auto"
       >
         <StretchedFlex
           gap="xxxxlarge"

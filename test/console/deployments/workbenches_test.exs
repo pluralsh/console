@@ -218,33 +218,131 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_tool/2" do
-    test "project writers can create a tool" do
+    test "project writers can create each tool type with a likely configuration" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
 
-      {:ok, tool} = Workbenches.create_tool(%{
-        name: "my_http_tool",
-        tool: :http,
-        project_id: project.id,
-        configuration: %{
-          http: %{
-            url: "https://example.com",
-            method: :post,
-            headers: [],
-            body: "{}",
-            input_schema: %{
-              "type" => "object",
-              "properties" => %{},
-              "required" => []
-            }
-          }
-        }
-      }, user)
+      cases = [
+        {:http, [configuration: %{http: %{
+          url: "https://example.com",
+          method: :post,
+          headers: [],
+          body: "{}",
+          input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+        }}], [:integration]},
+        {:elastic, [configuration: %{elastic: %{
+          url: "https://elastic.example.com",
+          username: "elastic",
+          password: "elastic-password",
+          index: "logs-*"
+        }}], [:logs]},
+        {:opensearch, [configuration: %{opensearch: %{
+          host: "https://opensearch.example.com",
+          index: "logs-*",
+          use_pod_identity: true
+        }}], [:logs]},
+        {:datadog, [configuration: %{datadog: %{
+          site: "datadoghq.com",
+          api_key: "datadog-api-key",
+          app_key: "datadog-app-key"
+        }}], [:metrics, :logs]},
+        {:prometheus, [configuration: %{prometheus: %{
+          url: "https://prometheus.example.com",
+          token: "prometheus-bearer-token"
+        }}], [:metrics]},
+        {:loki, [configuration: %{loki: %{
+          url: "https://loki.example.com",
+          token: "loki-bearer-token"
+        }}], [:logs]},
+        {:tempo, [configuration: %{tempo: %{
+          url: "https://tempo.example.com",
+          token: "tempo-bearer-token"
+        }}], [:traces]},
+        {:jaeger, [configuration: %{jaeger: %{
+          url: "https://jaeger.example.com",
+          token: "jaeger-bearer-token"
+        }}], [:traces]},
+        {:splunk, [configuration: %{splunk: %{
+          url: "https://splunk.example.com",
+          token: "splunk-token"
+        }}], [:logs]},
+        {:dynatrace, [configuration: %{dynatrace: %{
+          url: "https://dynatrace.example.com",
+          platform_token: "dynatrace-platform-token"
+        }}], [:metrics, :logs, :traces]},
+        {:cloudwatch, [configuration: %{cloudwatch: %{
+          region: "us-east-1",
+          log_group_names: ["/aws/eks/test"]
+        }}], [:metrics, :logs]},
+        {:azure, [configuration: %{azure: %{
+          subscription_id: "subscription-id",
+          tenant_id: "tenant-id",
+          client_id: "client-id",
+          client_secret: "client-secret",
+          prometheus_url: "https://prometheus.monitor.azure.com"
+        }}], [:metrics, :logs]},
+        {:sentry, [configuration: %{sentry: %{
+          url: "https://sentry.example.com",
+          access_token: "sentry-access-token"
+        }}], [:error_tracking]},
+        {:linear, [configuration: %{linear: %{
+          access_token: "linear-access-token"
+        }}], [:ticketing]},
+        {:slack, [configuration: %{slack: %{
+          bot_token: "xoxb-slack-bot-token"
+        }}], [:chat]},
+        {:pagerduty, [configuration: %{pagerduty: %{
+          api_token: "pagerduty-api-token"
+        }}], [:integration]},
+        {:teams, [configuration: %{teams: %{
+          client_id: "teams-client-id",
+          client_secret: "teams-client-secret",
+          tenant_id: "teams-tenant-id"
+        }}], [:chat]},
+        {:atlassian, [configuration: %{atlassian: %{
+          email: "jira@example.com",
+          api_token: "atlassian-api-token"
+        }}], [:ticketing]},
+        {:exa, [configuration: %{exa: %{
+          api_key: "exa-api-key"
+        }}], [:search]},
+        {:github, [configuration: %{github: %{
+          url: "https://api.github.com",
+          access_token: "github-access-token"
+        }}], [:scm]},
+        {:gitlab, [configuration: %{gitlab: %{
+          url: "https://gitlab.com",
+          token: "gitlab-token"
+        }}], [:scm]},
+        {:bitbucket, [configuration: %{bitbucket: %{
+          url: "https://api.bitbucket.org/2.0",
+          token: "bitbucket-token"
+        }}], [:scm]},
+        {:bitbucket_datacenter, [configuration: %{bitbucket_datacenter: %{
+          url: "https://bitbucket.example.com",
+          token: "bitbucket-datacenter-token"
+        }}], [:scm]},
+        {:azure_devops, [configuration: %{azure_devops: %{
+          url: "https://dev.azure.com/plural",
+          token: "azure-devops-token"
+        }}], [:scm]},
+        {:cloud, [cloud_connection_id: insert(:cloud_connection).id], [:infrastructure]},
+        {:mcp, [mcp_server_id: insert(:mcp_server, project: project).id], [:integration]}
+      ]
 
-      assert tool.project_id == project.id
-      assert tool.name == "my_http_tool"
-      assert tool.tool == :http
-      assert_receive {:event, %PubSub.WorkbenchToolCreated{item: ^tool}}
+      for {tool_type, attrs, categories} <- cases do
+        {:ok, tool} =
+          attrs
+          |> Map.new()
+          |> Map.merge(%{name: "#{tool_type}_tool", tool: tool_type, project_id: project.id})
+          |> Workbenches.create_tool(user)
+
+        assert tool.project_id == project.id
+        assert tool.name == "#{tool_type}_tool"
+        assert tool.tool == tool_type
+        assert tool.categories == categories
+        assert_receive {:event, %PubSub.WorkbenchToolCreated{item: ^tool}}
+      end
     end
 
     test "project readers cannot create a tool" do
