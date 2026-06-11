@@ -7,7 +7,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.ReactToComment do
 
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
-  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Client
+  alias Console.AI.Tools.Workbench.Integration.{AzureDevops.Client, Query}
 
   defenum Resource,
     pull_request: 0,
@@ -76,7 +76,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.ReactToComment do
             repo = Client.encode_repo_id(m.repository)
 
             url =
-              "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}/threads/#{m.thread_id}/comments/#{m.comment_id}/likes?#{URI.encode_query(%{"api-version" => "7.1"}, :safe)}"
+              "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}/threads/#{m.thread_id}/comments/#{m.comment_id}/likes#{Query.query_string(%{"api-version" => "7.1"})}"
 
             with {:ok, result} <- Client.post_empty(client, url) do
               Jason.encode(result)
@@ -88,7 +88,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.ReactToComment do
             m.reaction |> String.trim() |> String.downcase() |> Client.encode_path_segment()
 
           url =
-            "#{root}/_apis/wit/workItems/#{m.work_item_id}/comments/#{m.comment_id}/reactions/#{enc_reaction}?#{URI.encode_query(%{"api-version" => "7.1-preview.1"}, :safe)}"
+            "#{root}/_apis/wit/workItems/#{m.work_item_id}/comments/#{m.comment_id}/reactions/#{enc_reaction}#{Query.query_string(%{"api-version" => "7.1-preview.1"})}"
 
           with {:ok, result} <- Client.put_json(client, url, %{}) do
             Jason.encode(result)

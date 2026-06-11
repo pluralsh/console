@@ -10,11 +10,11 @@ import { AiProvider, AiSettings } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
 import {
+  effectiveProviderForRole,
   getModelValue,
   ModelRoutingRole,
   modelRoutingRoleMeta,
   ModelRoutingState,
-  selectedProviderForRole,
   setRoutingProvider,
 } from './aiModelRoutingUtils.ts'
 import { aiProviderToIcon } from './AISettingsConfiguredProviders.tsx'
@@ -33,9 +33,9 @@ export function AISettingsModelRoutingRoleCard({
   configuredProviders: AiProvider[]
 }) {
   const { title, description, modelHint } = modelRoutingRoleMeta[role]
-  const selectedProvider = selectedProviderForRole(role, routing)
-  const SelectedProviderIcon = selectedProvider
-    ? aiProviderToIcon[selectedProvider]
+  const effectiveProvider = effectiveProviderForRole(role, routing)
+  const EffectiveProviderIcon = effectiveProvider
+    ? aiProviderToIcon[effectiveProvider]
     : null
   const theme = useTheme()
   const modelName = getModelValue(role, routing, ai)
@@ -60,12 +60,12 @@ export function AISettingsModelRoutingRoleCard({
           <FormField label="Provider">
             <Select
               label="Select provider"
-              selectedKey={selectedProvider ?? null}
+              selectedKey={effectiveProvider ?? null}
               leftContent={
-                SelectedProviderIcon ? (
+                EffectiveProviderIcon ? (
                   <IconFrame
                     size="xsmall"
-                    icon={<SelectedProviderIcon fullColor />}
+                    icon={<EffectiveProviderIcon fullColor />}
                   />
                 ) : undefined
               }

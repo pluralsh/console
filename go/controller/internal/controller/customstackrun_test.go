@@ -305,6 +305,19 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 
 		})
 
+		It("should map command approve attributes", func() {
+			approve := true
+
+			attr := (&v1alpha1.CommandAttributes{
+				Cmd:     "echo",
+				Args:    []string{"hello"},
+				Approve: lo.ToPtr(approve),
+			}).Attributes()
+
+			Expect(attr.Approve).NotTo(BeNil())
+			Expect(*attr.Approve).To(BeTrue())
+		})
+
 		It("should successfully delete the custom stack run", func() {
 			By("Delete resource")
 			Expect(common.MaybePatch(k8sClient, &v1alpha1.CustomStackRun{

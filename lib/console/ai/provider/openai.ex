@@ -9,7 +9,7 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange]
+  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange, :headers]
 
   @type t :: %__MODULE__{}
 
@@ -27,6 +27,7 @@ defmodule Console.AI.OpenAI do
       azure_token: Map.get(opts, :azure_token),
       method: Map.get(opts, :method) || :auto,
       token_exchange: Map.get(opts, :token_exchange),
+      headers: Map.get(opts, :headers),
       stream: Stream.stream()
     }
   end
@@ -97,12 +98,15 @@ defmodule Console.AI.OpenAI do
 
   defp provider_options(%__MODULE__{base_url: base_url} = openai) do
     with {:ok, key} <- api_key(openai),
-      do: {:ok, Enum.filter([base_url: base_url, api_key: key], fn {_, v} -> not is_nil(v) end)}
+      do: {:ok, Enum.filter([base_url: base_url, api_key: key] ++ http_options(openai), fn {_, v} -> not is_nil(v) end)}
   end
 
   defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
-    with {:ok, %OAuth2.AccessToken{access_token: token}} <- TokenExchange.exchange(token.token_url, token.client_id, token.client_secret),
-      do: {:ok, token}
+    case TokenExchange.exchange(token.token_url, token.client_id, token.client_secret) do
+      {:ok, %OAuth2.AccessToken{access_token: token}} when is_binary(token) -> {:ok, token}
+      {:ok, token} when is_binary(token) -> {:ok, token}
+      err -> err
+    end
   end
   defp api_key(%__MODULE__{access_key: key}) when is_binary(key), do: {:ok, key}
   defp api_key(_), do: {:ok, "ignore"}

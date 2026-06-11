@@ -156,6 +156,11 @@ defmodule Console.Schema.DeploymentSettings do
 
       embeds_one :token_exchange, OauthToken, on_replace: :update
 
+      embeds_many :headers, Header, on_replace: :delete do
+        field :name,  :string
+        field :value, :string
+      end
+
       field :proxy_models, {:array, :string}
     end
 
@@ -164,8 +169,16 @@ defmodule Console.Schema.DeploymentSettings do
       |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
       |> trim_changes(~w(access_token)a)
       |> cast_embed(:token_exchange)
+      |> cast_embed(:headers, with: &header_changeset/2)
+    end
+
+    defp header_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(name value)a)
+      |> validate_required([:name, :value])
     end
   end
+
 
   schema "deployment_settings" do
     field :name,             :string
@@ -229,6 +242,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :tool_provider,      AIProvider
       field :embedding_provider, AIProvider
       field :log_analysis,       :boolean, default: false
+      field :streaming,          :boolean, default: true
 
       embeds_one :analysis_rates, AnalysisRates, on_replace: :update do
         field :fast, :integer
@@ -396,7 +410,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled provider tool_provider embedding_provider log_analysis)a)
+    |> cast(attrs, ~w(enabled provider streaming tool_provider embedding_provider log_analysis)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)

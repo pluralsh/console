@@ -612,7 +612,7 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:create, user)
   end
 
-  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook) do
+  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
     hook = Repo.preload(hook, [:user])
     bench = get_workbench!(workbench_id) |> Repo.preload([:bot_user])
     start_transaction()
@@ -623,7 +623,10 @@ defmodule Console.Deployments.Workbenches do
         _ -> {:error, "workbench webhook does not have a bot user"}
       end
     end)
-    |> add_operation(:job, fn %{actor: user} -> create_workbench_job(attrs, workbench_id, user) end)
+    |> add_operation(:job, fn %{actor: user} ->
+      Map.put(attrs, :modes, Console.mapify(modes))
+      |> create_workbench_job(workbench_id, user)
+    end)
     |> execute(extract: :job)
   end
 

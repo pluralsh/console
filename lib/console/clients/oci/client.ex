@@ -59,10 +59,9 @@ defmodule Console.OCI.Client do
   def blob(client, digest), do: authed_get(client, "/v2/:repo/blobs/#{digest}")
 
   def download_blob(client, digest, to) do
-    case authed_get(client, "/v2/:repo/blobs/#{digest}", into: to, redirect: true) do
-      {:ok, %Req.Response{status: status}} = resp when status in 200..299 -> resp
-      err -> handle_error(err)
-    end
+    url = "/v2/:repo/blobs/#{digest}"
+    with {:ok, %{client: req}} <- prepare_blob_download(client, url),
+      do: stream_blob(req, url, to)
   end
 
   defp dkr_client(h, repo) do
@@ -83,15 +82,8 @@ defmodule Console.OCI.Client do
     case {Req.get(req, add_opts(req, [url: url], opts)), no_recurse} do
       {{:ok, %Req.Response{status: status}} = resp, true} when status in 200..299 -> resp
       {{:ok, %Req.Response{status: 401, headers: %{"www-authenticate" => [www_auth | _]}}}, false} ->
-        with [bearer: auth_params] <- :cow_http_hd.parse_www_authenticate(www_auth),
-             %{"realm" => auth_url, "service" => svc, "scope" => scope} = Map.new(auth_params),
-            {:ok, token} <- authenticate(auth_url, svc, scope, auth) do
-          with_token(client, token)
-          |> authed_get(url, Keyword.put(opts, :no_recurse, true))
-        else
-          {:error, _} = err -> err
-          _ -> {:error, "could not resolve authentication for #{url}"}
-        end
+        with {:ok, client} <- authenticate_challenge(client, url, www_auth, auth),
+          do: authed_get(client, url, Keyword.put(opts, :no_recurse, true))
       {_, true} -> {:error, "could not resolve authentication for #{url}"}
       {err, _} -> err
     end
@@ -100,6 +92,33 @@ defmodule Console.OCI.Client do
   # don't attempt to stream unless we're authenticated
   defp add_opts(%{options: %{auth: {:bearer, _}}}, base, opts), do: base ++ opts
   defp add_opts(_, base, _), do: base
+
+  defp prepare_blob_download(%__MODULE__{client: req, auth_client: auth} = client, url) do
+    case Req.head(req, url: url, redirect: true) do
+      {:ok, %Req.Response{status: status}} when status in 200..299 -> {:ok, client}
+      {:ok, %Req.Response{status: 401, headers: %{"www-authenticate" => [www_auth | _]}}} ->
+        authenticate_challenge(client, url, www_auth, auth)
+      err -> handle_error(err)
+    end
+  end
+
+  defp stream_blob(req, url, to) do
+    case Req.get(req, url: url, into: to, redirect: true) do
+      {:ok, %Req.Response{status: status}} = resp when status in 200..299 -> resp
+      err -> handle_error(err)
+    end
+  end
+
+  defp authenticate_challenge(client, url, www_auth, auth) do
+    with [bearer: auth_params] <- :cow_http_hd.parse_www_authenticate(www_auth),
+         %{"realm" => auth_url, "service" => svc, "scope" => scope} <- Map.new(auth_params),
+         {:ok, token} <- authenticate(auth_url, svc, scope, auth) do
+      {:ok, with_token(client, token)}
+    else
+      {:error, _} = err -> err
+      _ -> {:error, "could not resolve authentication for #{url}"}
+    end
+  end
 
   defp authenticate(url, svc, scope, auth) do
     auth_client(auth)

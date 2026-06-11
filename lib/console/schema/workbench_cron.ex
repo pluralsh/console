@@ -1,6 +1,7 @@
 defmodule Console.Schema.WorkbenchCron do
   use Console.Schema.Base
   alias Console.Schema.{Workbench, User}
+  alias Console.Schema.WorkbenchJob.Modes
 
   schema "workbench_crons" do
     field :crontab,     :string
@@ -8,6 +9,8 @@ defmodule Console.Schema.WorkbenchCron do
 
     field :next_run_at, :utc_datetime_usec
     field :last_run_at, :utc_datetime_usec
+
+    embeds_one :modes, Modes, on_replace: :update
 
     belongs_to :workbench, Workbench
     belongs_to :user,      User
@@ -36,6 +39,7 @@ defmodule Console.Schema.WorkbenchCron do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:modes)
     |> add_next_run()
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)

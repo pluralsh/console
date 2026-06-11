@@ -99,8 +99,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
 
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, user) do
-    [
-      ServiceComponent,
+    if_vector_store_enabled(ServiceComponent) ++ [
       %ServiceInspect{user: user},
       %ClusterServices{user: user},
       %Cluster{user: user},
@@ -112,8 +111,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp svc_tools(_, _), do: []
 
   defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}, user) do
-    [
-      Stack,
+    if_vector_store_enabled(Stack) ++ [
       %StackInspect{user: user},
       %StackList{user: user}
     ]

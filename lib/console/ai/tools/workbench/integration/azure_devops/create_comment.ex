@@ -7,7 +7,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.CreateComment do
 
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
-  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Client
+  alias Console.AI.Tools.Workbench.Integration.{AzureDevops.Client, Query}
 
   defenum Resource,
     pull_request: 0,
@@ -57,7 +57,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.CreateComment do
           repo = Client.encode_repo_id(m.repository)
 
           url =
-            "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}/threads?#{URI.encode_query(%{"api-version" => "7.1"}, :safe)}"
+            "#{root}/_apis/git/repositories/#{repo}/pullRequests/#{m.pull_request_id}/threads#{Query.query_string(%{"api-version" => "7.1"})}"
 
           body = %{
             "comments" => [
@@ -76,7 +76,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.CreateComment do
 
         :work_item ->
           url =
-            "#{root}/_apis/wit/workItems/#{m.work_item_id}/comments?#{URI.encode_query(%{"api-version" => "7.0-preview.3"}, :safe)}"
+            "#{root}/_apis/wit/workItems/#{m.work_item_id}/comments#{Query.query_string(%{"api-version" => "7.0-preview.3"})}"
 
           with {:ok, created} <- Client.post_json(client, url, %{"text" => m.body}) do
             Jason.encode(created)

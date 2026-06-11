@@ -222,6 +222,7 @@ fragment AgentRunFragment on AgentRun {
     prompt
     repository
     branch
+    headBranch
     mode
     language
     languageVersion
@@ -270,6 +271,7 @@ fragment AgentRunMinimalFragment on AgentRun {
     prompt
     repository
     branch
+    headBranch
     runtime {
         type
     }

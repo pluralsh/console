@@ -107,14 +107,14 @@ defmodule Console.Deployments.Init do
 
   defp maybe_ai(attrs) do
     case {Console.cloud?(), Console.conf(:provider)} do
-      # {true, :aws} ->
-      #   Map.put(attrs, :ai, %{
-      #     provider: :bedrock,
-      #     embedding_provider: :openai,
-      #     enabled: true,
-      #     bedrock: %{region: "us-east-1"},
-      #     openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
-      #   })
+      {true, :aws} ->
+        Map.put(attrs, :ai, %{
+          provider: :openai,
+          embedding_provider: :openai,
+          enabled: true,
+          bedrock: %{region: "us-east-1"},
+          openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
+        })
       {true, _} ->
         Map.put(attrs, :ai, %{
           provider: :openai,

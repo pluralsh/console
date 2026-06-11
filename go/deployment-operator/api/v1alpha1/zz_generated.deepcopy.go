@@ -23,7 +23,7 @@ package v1alpha1
 import (
 	"github.com/pluralsh/console/go/client"
 	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -267,6 +267,11 @@ func (in *AgentRunList) DeepCopyObject() runtime.Object {
 func (in *AgentRunSpec) DeepCopyInto(out *AgentRunSpec) {
 	*out = *in
 	out.RuntimeRef = in.RuntimeRef
+	if in.Branch != nil {
+		in, out := &in.Branch, &out.Branch
+		*out = new(string)
+		**out = **in
+	}
 	if in.FlowID != nil {
 		in, out := &in.FlowID, &out.FlowID
 		*out = new(string)

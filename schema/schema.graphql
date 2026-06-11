@@ -1159,7 +1159,7 @@ type RootMutationType {
   deleteStackDefinition(id: ID!): StackDefinition
 
   "Creates a custom run, with the given command list, to execute w\/in the stack's environment"
-  onDemandRun(stackId: ID!, commands: [CommandAttributes], context: Json): StackRun
+  onDemandRun(stackId: ID!, runName: String, commands: [CommandAttributes], context: Json): StackRun
 
   "start a new run from the newest sha in the stack's run history"
   triggerRun(id: ID!): StackRun
@@ -1902,6 +1902,9 @@ input AgentRunAttributes {
   "the repository the agent will be working in"
   repository: String!
 
+  "the branch this agent run should operate on (if not set, the repository default branch is used)"
+  branch: String
+
   "the mode of the agent run"
   mode: AgentRunMode!
 
@@ -1936,6 +1939,9 @@ input AgentRunStatusAttributes {
 
   "the kubernetes pod this agent is running on"
   podReference: NamespacedName
+
+  "the head branch this agent run has created for its pull request"
+  headBranch: String
 
   "whether babysit mode is enabled for this run"
   babysit: Boolean
@@ -2137,6 +2143,9 @@ type AgentRun {
 
   "the branch this agent run is operating on (if not set, use default branch on clone)"
   branch: String
+
+  "the head branch this agent run has created for its pull request"
+  headBranch: String
 
   "the status of this agent run"
   status: AgentRunStatus!
@@ -2690,6 +2699,9 @@ input WorkbenchCronAttributes {
   "the prompt to run when the cron triggers"
   prompt: String
 
+  "mode-specific options for jobs created by this cron"
+  modes: WorkbenchJobModesAttributes
+
   "user this cron runs as; must have read access to the workbench"
   userId: ID
 }
@@ -2703,6 +2715,9 @@ input WorkbenchPromptAttributes {
 
   "the saved prompt text"
   prompt: String!
+
+  "mode-specific options for jobs created from this prompt"
+  modes: WorkbenchJobModesAttributes
 }
 
 input WorkbenchSkillAttributes {
@@ -2757,6 +2772,9 @@ input WorkbenchWebhookAttributes {
   "optional prompt text applied when this webhook matches"
   prompt: String
 
+  "mode-specific options for jobs created by this webhook"
+  modes: WorkbenchJobModesAttributes
+
   "higher values are preferred when multiple webhooks match the same payload"
   priority: Int
 
@@ -2776,6 +2794,9 @@ input WorkbenchChatbotAttributes {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "mode-specific options for jobs created by this chatbot"
+  modes: WorkbenchJobModesAttributes
 
   "how the chatbot posts responses in the channel"
   messageBehavior: WorkbenchChatbotMessageBehavior
@@ -3747,6 +3768,9 @@ type WorkbenchCron {
   "prompt to run when the cron triggers"
   prompt: String
 
+  "mode-specific options for jobs created by this cron"
+  modes: WorkbenchJobModes
+
   "when the cron will next run"
   nextRunAt: DateTime
 
@@ -3776,6 +3800,9 @@ type WorkbenchPrompt {
 
   "the saved prompt text"
   prompt: String
+
+  "mode-specific options for jobs created from this prompt"
+  modes: WorkbenchJobModes
 
   "the workbench this prompt belongs to"
   workbench: Workbench
@@ -3951,6 +3978,9 @@ type WorkbenchWebhook {
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches
 
+  "mode-specific options for jobs created by this webhook"
+  modes: WorkbenchJobModes
+
   "user this webhook runs as"
   userId: ID
 
@@ -3980,6 +4010,9 @@ type WorkbenchChatbot {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "mode-specific options for jobs created by this chatbot"
+  modes: WorkbenchJobModes
 
   "how the chatbot posts responses in the channel"
   messageBehavior: WorkbenchChatbotMessageBehavior!
@@ -5577,6 +5610,9 @@ input AiSettingsAttributes {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "whether to stream responses from LLM providers"
+  streaming: Boolean
+
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
@@ -5640,6 +5676,14 @@ input OpenaiSettingsAttributes {
 
   "OAuth2 client credentials against a token endpoint to obtain access tokens"
   tokenExchange: OpenaiTokenExchangeAttributes
+
+  "custom HTTP headers to include in OpenAI-compatible API requests"
+  headers: [OpenaiHeaderAttributes]
+}
+
+input OpenaiHeaderAttributes {
+  name: String!
+  value: String!
 }
 
 input OpenaiTokenExchangeAttributes {
@@ -5994,6 +6038,9 @@ type AiSettings {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "whether to stream responses from LLM providers"
+  streaming: Boolean
+
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
@@ -6053,6 +6100,14 @@ type OpenaiSettings {
 
   "OAuth2 client credentials configured for token endpoint exchange"
   tokenExchange: OpenaiTokenExchange
+
+  "custom HTTP headers included in OpenAI-compatible API requests"
+  headers: [OpenaiHeader]
+}
+
+type OpenaiHeader {
+  name: String!
+  value: String!
 }
 
 "OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
@@ -7122,6 +7177,7 @@ input CommandAttributes {
   cmd: String!
   args: [String]
   dir: String
+  approve: Boolean
 }
 
 input StackDefinitionAttributes {
@@ -7711,6 +7767,9 @@ type StackCommand {
 
   "working directory for this command (not required)"
   dir: String
+
+  "whether this command requires approval before running"
+  approve: Boolean
 }
 
 type StackPolicyViolation {

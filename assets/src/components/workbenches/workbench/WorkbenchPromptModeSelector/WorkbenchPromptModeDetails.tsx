@@ -1,8 +1,6 @@
 import {
-  Chip,
   ContainerRuntimeIcon,
   Flex,
-  green,
   WarningShieldIcon,
   type SemanticColorKey,
 } from '@pluralsh/design-system'
@@ -19,7 +17,6 @@ export type WorkbenchPromptModeConfig = {
   Icon: React.ComponentType<{ size: number; color: string }>
   iconColor?: SemanticColorKey
   iconFill?: string
-  badge?: { label: string; severity: 'success' | 'neutral' }
   description: string
   supervisionOptions?: boolean
 }
@@ -70,27 +67,6 @@ export function WorkbenchPromptModeDetails({
         >
           {config.label}
         </Body2BoldP>
-        {config.badge && (
-          <Chip
-            severity={config.badge.severity}
-            css={{
-              flexShrink: 0,
-              '&&':
-                config.badge.severity === 'success'
-                  ? {
-                      backgroundColor: green[900],
-                      border: `1px solid ${green[850]}`,
-                    }
-                  : {
-                      color: theme.colors['text-xlight'],
-                      backgroundColor: theme.colors['fill-three'],
-                      border: theme.borders['fill-three'],
-                    },
-            }}
-          >
-            {config.badge.label}
-          </Chip>
-        )}
       </Flex>
       <Body2P $color="text-xlight">{config.description}</Body2P>
       {config.supervisionOptions && mode === 'agent' && (
@@ -124,7 +100,7 @@ export function WorkbenchPromptModeDetails({
                 />
               }
               label="Babysit"
-              hint="Stays active after opening the PR to monitor review feedback and requested changes, then follows up until it's ready to merge."
+              hint="Stays active after opening the PR to respond to review feedback or CI failures."
               checked={babysit}
               onChange={onBabysitChange}
             />

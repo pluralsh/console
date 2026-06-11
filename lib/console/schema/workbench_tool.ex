@@ -343,9 +343,9 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:elastic, with: &elastic_configuration_changeset/2)
     |> cast_embed(:opensearch, with: &opensearch_configuration_changeset/2)
     |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
-    |> cast_embed(:loki, with: &prom_configuration_changeset/2)
+    |> cast_embed(:loki, with: &loki_configuration_changeset/2)
     |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
-    |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
+    |> cast_embed(:tempo, with: &tempo_configuration_changeset/2)
     |> cast_embed(:jaeger, with: &jaeger_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:dynatrace, with: &dynatrace_configuration_changeset/2)
@@ -381,6 +381,18 @@ defmodule Console.Schema.WorkbenchTool do
   defp prom_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url token tenant_id username password aws_sigv4 aws_access_key_id aws_secret_access_key aws_region)a)
+    |> validate_required([:url])
+  end
+
+  defp loki_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token tenant_id username password)a)
+    |> validate_required([:url])
+  end
+
+  defp tempo_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token tenant_id username password)a)
     |> validate_required([:url])
   end
 

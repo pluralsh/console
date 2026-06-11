@@ -99,6 +99,7 @@ _Appears in:_
 | `tools` _[Tools](#tools)_ | Tools holds the configuration for the tools that can be used with the AI integration. |  | Optional: \{\} <br /> |
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `streaming` _boolean_ | Streaming defines whether to stream responses from LLM providers. | true | Optional: \{\} <br /> |
 | `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `logAnalysis` _boolean_ | LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs) |  | Optional: \{\} <br /> |
 | `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
@@ -1004,6 +1005,7 @@ _Appears in:_
 | `cmd` _string_ | Cmd is the command to execute |  | Required: \{\} <br /> |
 | `args` _string array_ | Args are the arguments to pass to the command. |  | Optional: \{\} <br /> |
 | `dir` _string_ | Dir is the working directory for the command. |  | Optional: \{\} <br /> |
+| `approve` _boolean_ | Approve determines whether this command should run in the approval-gated stage. |  | Optional: \{\} <br /> |
 
 
 #### CompatibilityMatrixSummary
@@ -1895,6 +1897,23 @@ _Appears in:_
 | `user` _string_ | User to connect with basic auth. |  | Optional: \{\} <br /> |
 | `password` _string_ | Password to connect w/ for basic auth. |  | Optional: \{\} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to a secret containing the password to connect with basic auth. |  | Optional: \{\} <br /> |
+
+
+#### HTTPHeader
+
+
+
+
+
+
+
+_Appears in:_
+- [OpenAISettings](#openaisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the HTTP header name. |  | Required: \{\} <br /> |
+| `value` _string_ | Value is the HTTP header value. |  | Required: \{\} <br /> |
 
 
 
@@ -3030,6 +3049,7 @@ _Appears in:_
 | `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec).  Should be similar to https://api.openai.com/v1 |  | Optional: \{\} <br /> |
 | `tokenExchange` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs. |  | Optional: \{\} <br /> |
+| `headers` _[HTTPHeader](#httpheader) array_ | Headers are custom HTTP headers to include in OpenAI-compatible API requests. |  | Optional: \{\} <br /> |
 | `method` _[OpenAiMethod](#openaimethod)_ | Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies) |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 

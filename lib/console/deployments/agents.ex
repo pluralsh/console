@@ -314,6 +314,7 @@ defmodule Console.Deployments.Agents do
          %ScmConnection{} = conn <- scm_connection(run),
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
+         {:ok, run} <- persist_pr_branches(run, ba, he),
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
       %PullRequest{fresh: true}
       |> PullRequest.changeset(
@@ -328,6 +329,17 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
+
+  defp persist_pr_branches(%AgentRun{} = run, base, head) when is_binary(head) do
+    Console.drop_nils(%{
+      head_branch: head,
+      branch: base
+    })
+    |> then(&AgentRun.changeset(run, &1))
+    |> Repo.update()
+    |> notify(:update)
+  end
+  defp persist_pr_branches(%AgentRun{} = run, _, _), do: {:ok, run}
 
   @doc """
   Updates the todos for an agent run, can only be performed by the user who initiated it

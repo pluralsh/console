@@ -1,7 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
   @moduledoc false
 
-  alias Console.AI.Tools.Workbench.Integration.Http
+  alias Console.AI.Tools.Workbench.Integration.{Http, Query}
   alias Console.Schema.{ScmConnection, WorkbenchTool}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.GitlabConnection}
 
@@ -36,14 +36,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
 
   @spec get(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def get(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
-    qs =
-      case query do
-        %{} = m when map_size(m) == 0 -> ""
-        %{} = m -> "?" <> URI.encode_query(m, :safe)
-        _ -> ""
-      end
-
-    url = base <> path <> qs
+    url = base <> path <> Query.query_string(query)
     headers = [{"PRIVATE-TOKEN", token}]
 
     case HTTPoison.get(url, headers, http_opts()) do
@@ -61,15 +54,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
   @spec post(map(), String.t(), keyword()) :: {:ok, term()} | {:error, String.t()}
   def post(%{base_url: base, token: token}, path, opts \\ []) when is_binary(path) do
     query = Keyword.get(opts, :query, %{})
-
-    qs =
-      case query do
-        %{} = m when map_size(m) == 0 -> ""
-        %{} = m -> "?" <> URI.encode_query(m, :safe)
-        _ -> ""
-      end
-
-    url = base <> path <> qs
+    url = base <> path <> Query.query_string(query)
     headers = [{"PRIVATE-TOKEN", token}]
 
     case HTTPoison.post(url, "", headers, http_opts()) do

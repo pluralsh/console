@@ -47,9 +47,7 @@ const PROMPT_MODES: (WorkbenchPromptModeConfig & {
     mode: 'agent',
     label: 'Coding agent',
     Icon: DiscoverIcon,
-    badge: { label: 'Can write', severity: 'success' },
-    description:
-      'Full access. Agents edit code, apply changes and open pull requests to fix what they find.',
+    description: 'Tune coding agent functionality for this job.',
     supervisionOptions: true,
   },
   {
@@ -57,9 +55,8 @@ const PROMPT_MODES: (WorkbenchPromptModeConfig & {
     label: 'Plan',
     Icon: ListIcon,
     iconFill: orange[400],
-    badge: { label: 'Read-only', severity: 'neutral' },
     description:
-      'Investigates read-only and drafts a step-by-step plan you can hand off to an agent. Forces every tool read-only — no writes, no PRs.',
+      'Run entirely in read-only mode.  No PRs will be created, use for exploring infrastructure or root cause analysis.',
   },
 ]
 

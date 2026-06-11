@@ -11,6 +11,7 @@ import (
 	"k8s.io/klog/v2"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -148,12 +149,20 @@ func (in *ArtifactBuilder) sessionManifest(opts BuildArtifactsOptions) (*Session
 		return nil, nil, err
 	}
 
+	branch := lo.FromPtr(in.config.Run.HeadBranch)
+	if branch == "" {
+		branch = lo.FromPtr(in.config.Run.Branch)
+	}
+	if config, err := environment.Load(); err == nil && config.HeadBranch != "" {
+		branch = config.HeadBranch
+	}
+
 	manifest := &SessionManifest{
 		Version:    1,
 		AgentRunID: in.config.Run.ID,
 		Provider:   opts.Provider,
 		Repository: in.config.Run.Repository,
-		Branch:     lo.FromPtr(in.config.Run.Branch),
+		Branch:     branch,
 		Session: SessionMetadata{
 			ID: opts.SessionID,
 		},

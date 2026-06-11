@@ -221,7 +221,7 @@ defmodule Console.Deployments.AgentsTest do
              )
 
       assert %WorkbenchJobActivity{agent_run_id: run_agent_id, status: :running} =
-               Repo.get!(WorkbenchJobActivity, activity.id)
+               refetch(activity)
 
       assert run_agent_id == run.id
 
@@ -319,6 +319,9 @@ defmodule Console.Deployments.AgentsTest do
       assert pr.title == "a pr"
       assert pr.flow_id == run.flow_id
       assert pr.agent_run_id == run.id
+      updated = refetch(run)
+      assert updated.branch == "main"
+      assert updated.head_branch == "plrl/ai/pr-test"
 
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end

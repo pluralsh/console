@@ -21,8 +21,8 @@ var _ = Describe("Customhealt Controller", Ordered, func() {
 			resourceName      = "default"
 			resourceNameOther = "apps-v1-deployment"
 			namespace         = "default"
-			script            = "test script"
-			scriptOther       = "test script for apps/v1 deployment"
+			script            = `healthStatus = { status = "Healthy" }`
+			scriptOther       = `healthStatus = { status = "Progressing" }`
 		)
 
 		ctx := context.Background()
@@ -80,6 +80,8 @@ var _ = Describe("Customhealt Controller", Ordered, func() {
 		})
 
 		AfterAll(func() {
+			common.ClearLuaScripts()
+
 			resource := &v1alpha1.CustomHealth{}
 			err := kClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())

@@ -102,6 +102,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_cron_attributes do
     field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
+    field :modes,   :workbench_job_modes_attributes, description: "mode-specific options for jobs created by this cron"
     field :user_id, :id, description: "user this cron runs as; must have read access to the workbench"
   end
 
@@ -109,6 +110,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :title,    :string, description: "display title for the saved prompt"
     field :category, :string, description: "grouping category for the saved prompt"
     field :prompt,   non_null(:string), description: "the saved prompt text"
+    field :modes,    :workbench_job_modes_attributes, description: "mode-specific options for jobs created from this prompt"
   end
 
   input_object :workbench_skill_attributes do
@@ -136,6 +138,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
     field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :modes,                  :workbench_job_modes_attributes, description: "mode-specific options for jobs created by this webhook"
     field :priority,               :integer, description: "higher values are preferred when multiple webhooks match the same payload"
     field :user_id,                :id, description: "user this webhook runs as; must have read access to the workbench"
     field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
@@ -145,6 +148,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :chat_connection_id,      :id, description: "chat provider connection id (required for create)"
     field :channel,                 :string, description: "external channel identifier (globally unique)"
     field :prompt,                  :string, description: "optional prompt text applied when this chatbot runs"
+    field :modes,                   :workbench_job_modes_attributes, description: "mode-specific options for jobs created by this chatbot"
     field :message_behavior,        :workbench_chatbot_message_behavior, description: "how the chatbot posts responses in the channel"
     field :user_id,                 :id, description: "user this chatbot runs as; must have read access to the workbench"
     field :override_chatbot_user,   :boolean, description: "when true on update, sets userId to the authenticated user"
@@ -719,6 +723,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :id,          non_null(:string), description: "the id of the cron"
     field :crontab,     :string, description: "cron expression"
     field :prompt,      :string, description: "prompt to run when the cron triggers"
+    field :modes,       :workbench_job_modes, description: "mode-specific options for jobs created by this cron"
     field :next_run_at, :datetime, description: "when the cron will next run"
     field :last_run_at, :datetime, description: "when the cron last ran"
     field :user_id,     :id, description: "user this cron runs as"
@@ -742,6 +747,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     field :prompt, :string, description: "the saved prompt text"
+    field :modes,  :workbench_job_modes, description: "mode-specific options for jobs created from this prompt"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this prompt belongs to"
 
@@ -845,6 +851,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,   :string, description: "optional prompt text applied when this webhook matches"
     field :priority, :integer, description: "higher values are preferred when multiple webhooks match the same payload"
     field :matches,  :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+    field :modes,    :workbench_job_modes, description: "mode-specific options for jobs created by this webhook"
     field :user_id,  :id, description: "user this webhook runs as"
 
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
@@ -859,6 +866,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :id,               non_null(:string), description: "the id of this chatbot binding"
     field :channel,          non_null(:string), description: "external channel identifier (globally unique)"
     field :prompt,           :string, description: "optional prompt text applied when this chatbot runs"
+    field :modes,            :workbench_job_modes, description: "mode-specific options for jobs created by this chatbot"
     field :message_behavior, non_null(:workbench_chatbot_message_behavior), description: "how the chatbot posts responses in the channel"
     field :user_id, :id, description: "user this chatbot runs as"
 

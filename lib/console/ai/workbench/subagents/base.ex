@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Base do
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
-  alias Console.AI.Stream
+  alias Console.AI.{Stream, VectorStore}
   alias Console.Deployments.Workbenches
   alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity}
   require Logger
@@ -25,6 +25,14 @@ defmodule Console.AI.Workbench.Subagents.Base do
   end
 
   def cont_msg(), do: "looks like we aren't done, let's continue and if you're done just call subagent_result to wrap up"
+
+  def if_vector_store_enabled(tools) when is_list(tools) do
+    case VectorStore.enabled?() do
+      true -> tools
+      _ -> []
+    end
+  end
+  def if_vector_store_enabled(tool), do: if_vector_store_enabled([tool])
 
   def stream_callbacks(%WorkbenchJob{id: id}) do
     Stream.stream_callbacks(

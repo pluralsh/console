@@ -92,6 +92,7 @@ defmodule Console.Deployments.Helm.AgentCache do
     with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
          {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
          {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
+         :ok <- validate_download(tmp),
          :ok <- Utils.clean_chart(tmp, path, chart),
          line <- Line.new(path, chart, vsn, digest),
          :ok <- File.rm(tmp) do
@@ -118,6 +119,14 @@ defmodule Console.Deployments.Helm.AgentCache do
       {:ok, %Line{digest: ^digest} = line} -> {line, true}
       {:ok, l} -> {l, false}
       _ -> {nil, false}
+    end
+  end
+
+  defp validate_download(path) do
+    case File.stat(path) do
+      {:ok, %{size: size}} when size > 0 -> :ok
+      {:ok, %{size: 0}} -> {:error, "downloaded helm chart was empty"}
+      err -> err
     end
   end
 

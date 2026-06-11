@@ -2,6 +2,8 @@ import { AiProvider, AiSettings, AiSettingsAttributes } from 'generated/graphql'
 import pick from 'lodash/pick'
 import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 
+export const DEFAULT_MODEL_ROUTING_OPTION = 'default'
+
 const modelRoutingStateKeys = [
   'provider',
   'toolProvider',
@@ -19,21 +21,20 @@ export const modelRoutingRoles = [
 export const modelRoutingRoleMeta = {
   chat: {
     title: 'Chat model',
-    description:
-      'Powers conversations, fix-it suggestions, and post-incident summaries.',
+    description: 'Used for low-compute chat and completion use cases.',
     providerField: 'provider',
     modelHint: 'Configured in the provider connection settings.',
   },
   embedding: {
     title: 'Embedding model',
-    description: 'Used for embeddings and vector search.',
+    description:
+      'Indexes Kubernetes and IaC state information for semantic search.',
     providerField: 'embeddingProvider',
     modelHint: 'Configured in the provider connection settings.',
   },
   tool: {
     title: 'Tool model',
-    description:
-      'Indexes documents, code, and runbooks for retrieval. Re-indexes on change.',
+    description: 'Used for complex agentic inference.',
     providerField: 'toolProvider',
     modelHint: 'Configured in the provider connection settings.',
   },
@@ -125,13 +126,15 @@ export function getModelValue(
   ai: Nullable<AiSettings>
 ): string {
   const provider = effectiveProviderForRole(role, routing)
-  if (!provider) return ''
+  if (!provider) return DEFAULT_MODEL_ROUTING_OPTION
 
   const key = providerSettingsKey[provider]
   const field = modelFieldKeyFor(provider, role)
   const serverConfig = ai?.[key as ProviderConfigKey]
   const value = serverConfig?.[field as keyof NonNullable<typeof serverConfig>]
-  return typeof value === 'string' ? value : ''
+  return typeof value === 'string' && value.trim()
+    ? value
+    : DEFAULT_MODEL_ROUTING_OPTION
 }
 
 export function setRoutingProvider(

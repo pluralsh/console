@@ -68,6 +68,10 @@ spec:
                 description: Repository is the git repository the agent will work
                   with
                 type: string
+              branch:
+                description: Branch is the repository branch the agent should operate
+                  on. If omitted, the repository default branch is used.
+                type: string
               runtimeRef:
                 properties:
                   name:

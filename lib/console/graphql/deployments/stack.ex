@@ -179,9 +179,10 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :command_attributes do
-    field :cmd,  non_null(:string)
-    field :args, list_of(:string)
-    field :dir,  :string
+    field :cmd,     non_null(:string)
+    field :args,    list_of(:string)
+    field :dir,     :string
+    field :approve, :boolean
   end
 
   input_object :stack_definition_attributes do
@@ -593,9 +594,10 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_command do
-    field :cmd,  non_null(:string), description: "the executable to call"
-    field :args, list_of(:string), description: "cli args to pass"
-    field :dir,  :string, description: "working directory for this command (not required)"
+    field :cmd,     non_null(:string), description: "the executable to call"
+    field :args,    list_of(:string), description: "cli args to pass"
+    field :dir,     :string, description: "working directory for this command (not required)"
+    field :approve, :boolean, description: "whether this command requires approval before running"
   end
 
   object :stack_policy_violation do
@@ -892,6 +894,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :on_demand_run, :stack_run do
       middleware Authenticated
       arg :stack_id, non_null(:id)
+      arg :run_name, :string
       arg :commands, list_of(:command_attributes)
       arg :context,  :json
 

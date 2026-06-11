@@ -350,6 +350,8 @@ type AgentRun struct {
 	Repository string `json:"repository"`
 	// the branch this agent run is operating on (if not set, use default branch on clone)
 	Branch *string `json:"branch,omitempty"`
+	// the head branch this agent run has created for its pull request
+	HeadBranch *string `json:"headBranch,omitempty"`
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
 	// the mode of the agent run
@@ -405,6 +407,8 @@ type AgentRunAttributes struct {
 	Prompt string `json:"prompt"`
 	// the repository the agent will be working in
 	Repository string `json:"repository"`
+	// the branch this agent run should operate on (if not set, the repository default branch is used)
+	Branch *string `json:"branch,omitempty"`
 	// the mode of the agent run
 	Mode AgentRunMode `json:"mode"`
 	// the programming language used in the agent run
@@ -466,6 +470,8 @@ type AgentRunStatusAttributes struct {
 	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *NamespacedName `json:"podReference,omitempty"`
+	// the head branch this agent run has created for its pull request
+	HeadBranch *string `json:"headBranch,omitempty"`
 	// whether babysit mode is enabled for this run
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
@@ -756,6 +762,8 @@ type AiSettings struct {
 	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to stream responses from LLM providers
+	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
@@ -778,6 +786,8 @@ type AiSettingsAttributes struct {
 	Provider      *AiProvider              `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to stream responses from LLM providers
+	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
@@ -2594,9 +2604,10 @@ type ClusterVulnAggregate struct {
 }
 
 type CommandAttributes struct {
-	Cmd  string    `json:"cmd"`
-	Args []*string `json:"args,omitempty"`
-	Dir  *string   `json:"dir,omitempty"`
+	Cmd     string    `json:"cmd"`
+	Args    []*string `json:"args,omitempty"`
+	Dir     *string   `json:"dir,omitempty"`
+	Approve *bool     `json:"approve,omitempty"`
 }
 
 type CommitShaAttributes struct {
@@ -5704,6 +5715,16 @@ type OllamaSettings struct {
 	URL string `json:"url"`
 }
 
+type OpenaiHeader struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type OpenaiHeaderAttributes struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 // OpenAI connection information
 type OpenaiSettings struct {
 	// the base url to use when querying an OpenAI compatible API, leave blank for OpenAI
@@ -5720,6 +5741,8 @@ type OpenaiSettings struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// OAuth2 client credentials configured for token endpoint exchange
 	TokenExchange *OpenaiTokenExchange `json:"tokenExchange,omitempty"`
+	// custom HTTP headers included in OpenAI-compatible API requests
+	Headers []*OpenaiHeader `json:"headers,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5736,6 +5759,8 @@ type OpenaiSettingsAttributes struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// OAuth2 client credentials against a token endpoint to obtain access tokens
 	TokenExchange *OpenaiTokenExchangeAttributes `json:"tokenExchange,omitempty"`
+	// custom HTTP headers to include in OpenAI-compatible API requests
+	Headers []*OpenaiHeaderAttributes `json:"headers,omitempty"`
 }
 
 // OAuth2 token endpoint client credentials for OpenAI-compatible APIs
@@ -8557,6 +8582,8 @@ type StackCommand struct {
 	Args []*string `json:"args,omitempty"`
 	// working directory for this command (not required)
 	Dir *string `json:"dir,omitempty"`
+	// whether this command requires approval before running
+	Approve *bool `json:"approve,omitempty"`
 }
 
 type StackConfiguration struct {
@@ -9810,6 +9837,8 @@ type WorkbenchChatbot struct {
 	Channel string `json:"channel"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this chatbot
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// how the chatbot posts responses in the channel
 	MessageBehavior WorkbenchChatbotMessageBehavior `json:"messageBehavior"`
 	// user this chatbot runs as
@@ -9831,6 +9860,8 @@ type WorkbenchChatbotAttributes struct {
 	Channel *string `json:"channel,omitempty"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this chatbot
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// how the chatbot posts responses in the channel
 	MessageBehavior *WorkbenchChatbotMessageBehavior `json:"messageBehavior,omitempty"`
 	// user this chatbot runs as; must have read access to the workbench
@@ -9897,6 +9928,8 @@ type WorkbenchCron struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this cron
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// when the cron will next run
 	NextRunAt *string `json:"nextRunAt,omitempty"`
 	// when the cron last ran
@@ -9914,6 +9947,8 @@ type WorkbenchCronAttributes struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// the prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this cron
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// user this cron runs as; must have read access to the workbench
 	UserID *string `json:"userId,omitempty"`
 }
@@ -10376,6 +10411,8 @@ type WorkbenchPrompt struct {
 	Category string `json:"category"`
 	// the saved prompt text
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created from this prompt
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// the workbench this prompt belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10389,6 +10426,8 @@ type WorkbenchPromptAttributes struct {
 	Category *string `json:"category,omitempty"`
 	// the saved prompt text
 	Prompt string `json:"prompt"`
+	// mode-specific options for jobs created from this prompt
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type WorkbenchPromptConnection struct {
@@ -11090,6 +11129,8 @@ type WorkbenchWebhook struct {
 	Priority *int64 `json:"priority,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
+	// mode-specific options for jobs created by this webhook
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// user this webhook runs as
 	UserID *string `json:"userId,omitempty"`
 	// the workbench this webhook belongs to
@@ -11115,6 +11156,8 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this webhook
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// higher values are preferred when multiple webhooks match the same payload
 	Priority *int64 `json:"priority,omitempty"`
 	// user this webhook runs as; must have read access to the workbench

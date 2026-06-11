@@ -8,8 +8,11 @@ defmodule Console.Pipelines.AI.WorkbenchCron.Pipeline do
   def handle_event(%WorkbenchCron{prompt: p} = cron) do
     mark_last_run(cron)
     case Repo.preload(cron, [:workbench, user: [:groups]]) do
-      %WorkbenchCron{workbench: %Workbench{} = workbench, user: %User{} = user} ->
-        Workbenches.create_workbench_job(%{prompt: p}, workbench.id, user)
+      %WorkbenchCron{workbench: %Workbench{} = workbench, user: %User{} = user, modes: modes} ->
+        Workbenches.create_workbench_job(%{
+          prompt: p,
+          modes: Console.mapify(modes)
+        }, workbench.id, user)
       _ -> :ok
     end
   end

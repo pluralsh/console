@@ -177,6 +177,10 @@
             "description": "Whether this agent run requires approval before continuing",
             "type": "boolean"
           },
+          "branch": {
+            "description": "The branch this agent run should operate on (if not set, the repository default branch is used)",
+            "type": "string"
+          },
           "flow_id": {
             "description": "Optional flow ID to associate this agent run with",
             "type": "string"
