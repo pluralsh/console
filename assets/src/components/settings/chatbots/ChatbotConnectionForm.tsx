@@ -13,6 +13,7 @@ import { PolicyBindingsCardForm } from 'components/utils/PolicyBindingsCardForm'
 import { SettingsFormCard } from 'components/utils/SettingsFormCard'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import {
+  ChatProviderConnectionAttributes,
   ChatProviderConnectionFragment,
   ChatProviderConnectionType,
   PolicyBindingFragment,
@@ -66,20 +67,27 @@ export function ChatbotConnectionForm({
   const name = formState.name.trim()
   const appToken = formState.appToken.trim()
   const botToken = formState.botToken.trim()
+  const hasTokenUpdate = !!appToken || !!botToken
+  const hasCompleteTokenUpdate = !!appToken && !!botToken
   const canSave =
     !!name &&
-    !!appToken &&
-    !!botToken &&
+    (mode === 'create'
+      ? hasCompleteTokenUpdate
+      : !hasTokenUpdate || hasCompleteTokenUpdate) &&
     (mode === 'create' || !isEqual(formState, initialFormState))
 
-  const attributes = {
+  const attributes: ChatProviderConnectionAttributes = {
     name,
     type: ChatProviderConnectionType.Slack,
     configuration: {
-      slack: {
-        appToken,
-        botToken,
-      },
+      ...(mode === 'create' || hasTokenUpdate
+        ? {
+            slack: {
+              appToken,
+              botToken,
+            },
+          }
+        : {}),
     },
     readBindings: formState.readBindings.map(bindingToBindingAttributes),
     writeBindings: formState.writeBindings.map(bindingToBindingAttributes),
@@ -175,10 +183,14 @@ export function ChatbotConnectionForm({
             />
           </FormField>
           <FormField
-            required
+            required={mode === 'create'}
             layout="horizontal"
             label="App-level token"
-            hint="Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here."
+            hint={
+              mode === 'edit'
+                ? 'Leave blank to keep the existing app-level token.'
+                : 'Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here.'
+            }
           >
             <Input2
               value={formState.appToken}
@@ -193,10 +205,14 @@ export function ChatbotConnectionForm({
             />
           </FormField>
           <FormField
-            required
+            required={mode === 'create'}
             layout="horizontal"
             label="Bot user OAuth token"
-            hint="Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode."
+            hint={
+              mode === 'edit'
+                ? 'Leave blank to keep the existing bot user OAuth token.'
+                : 'Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode.'
+            }
           >
             <Input2
               value={formState.botToken}

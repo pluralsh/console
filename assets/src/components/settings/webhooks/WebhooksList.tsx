@@ -1,6 +1,9 @@
 import { Button, ButtonProps, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  useFetchPaginatedData,
+  type VirtualSlice,
+} from 'components/utils/table/useFetchPaginatedData'
 import {
   IssueWebhookFragment,
   ObservabilityWebhookFragment,
@@ -60,22 +63,55 @@ export function WebhooksList() {
     pollInterval: WEBHOOKS_POLLING_INTERVAL,
   })
 
-  const webhooks = useMemo<WebhookListItem[]>(() => {
-    const observabilityWebhooks = mapExistingNodes(
-      observabilityData?.observabilityWebhooks
-    ).map((webhook) => ({
-      kind: WorkbenchJobActivityType.Observability as const,
-      webhook,
-    }))
-    const issueWebhooks = mapExistingNodes(issueData?.issueWebhooks).map(
-      (webhook) => ({
+  const observabilityWebhooks = useMemo(
+    () =>
+      mapExistingNodes(observabilityData?.observabilityWebhooks).map(
+        (webhook) => ({
+          kind: WorkbenchJobActivityType.Observability as const,
+          webhook,
+        })
+      ),
+    [observabilityData?.observabilityWebhooks]
+  )
+  const issueWebhooks = useMemo(
+    () =>
+      mapExistingNodes(issueData?.issueWebhooks).map((webhook) => ({
         kind: WorkbenchJobActivityType.Ticketing as const,
         webhook,
-      })
-    )
+      })),
+    [issueData?.issueWebhooks]
+  )
+  const webhooks = useMemo<WebhookListItem[]>(
+    () => [...observabilityWebhooks, ...issueWebhooks],
+    [issueWebhooks, observabilityWebhooks]
+  )
 
-    return [...observabilityWebhooks, ...issueWebhooks]
-  }, [issueData?.issueWebhooks, observabilityData?.observabilityWebhooks])
+  const handleVirtualSliceChange = useCallback(
+    (slice: VirtualSlice) => {
+      const observabilityLength = observabilityWebhooks.length
+
+      setObservabilityVirtualSlice(
+        getListVirtualSlice(slice, {
+          startIndex: 0,
+          endIndex: observabilityLength - 1,
+          offset: 0,
+        })
+      )
+      setIssueVirtualSlice(
+        getListVirtualSlice(slice, {
+          startIndex: observabilityLength,
+          endIndex: observabilityLength + issueWebhooks.length - 1,
+          offset: observabilityLength,
+        })
+      )
+    },
+    [
+      issueWebhooks.length,
+      observabilityWebhooks.length,
+      setIssueVirtualSlice,
+      setObservabilityVirtualSlice,
+    ]
+  )
 
   const loading = observabilityLoading || issueLoading
   const error = observabilityError || issueError
@@ -109,16 +145,50 @@ export function WebhooksList() {
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
-      onVirtualSliceChange={(slice) => {
-        setObservabilityVirtualSlice(slice)
-        setIssueVirtualSlice(slice)
-      }}
+      onVirtualSliceChange={handleVirtualSliceChange}
       emptyStateProps={{
         message: 'No webhooks found.',
         children: <CreateWebhookButton />,
       }}
     />
   )
+}
+
+function getListVirtualSlice(
+  slice: VirtualSlice,
+  {
+    startIndex,
+    endIndex,
+    offset,
+  }: {
+    startIndex: number
+    endIndex: number
+    offset: number
+  }
+): VirtualSlice {
+  const start = slice.start?.index ?? 0
+  const end = slice.end?.index ?? start
+  const overlapStart = Math.max(start, startIndex)
+  const overlapEnd = Math.min(end, endIndex)
+
+  if (overlapStart > overlapEnd) return { start: undefined, end: undefined }
+
+  return {
+    start: slice.start
+      ? {
+          ...slice.start,
+          index: overlapStart - offset,
+          key: `${overlapStart - offset}`,
+        }
+      : undefined,
+    end: slice.end
+      ? {
+          ...slice.end,
+          index: overlapEnd - offset,
+          key: `${overlapEnd - offset}`,
+        }
+      : undefined,
+  }
 }
 
 export function CreateWebhookButton({
