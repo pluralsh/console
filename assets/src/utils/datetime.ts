@@ -1,4 +1,6 @@
 import dayjs from 'dayjs'
+import parseDuration from 'parse-duration-ms'
+import prettyMilliseconds from 'pretty-ms'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import durationPlugin from 'dayjs/plugin/duration'
 import isBetweenPlugin from 'dayjs/plugin/isBetween'
@@ -15,6 +17,25 @@ export const MINUTE_TO_SECONDS = 60
 export const HOUR_TO_SECONDS = MINUTE_TO_SECONDS * 60
 export const DAY_TO_SECONDS = HOUR_TO_SECONDS * 24
 export const DAY_TO_MILLISECONDS = DAY_TO_SECONDS * SECOND_TO_MILLISECONDS
+
+export function parseDurationToMinutes(
+  duration: string
+): number | null | undefined {
+  const trimmed = duration.trim()
+  if (!trimmed) return null
+
+  const millis = parseDuration(trimmed)
+  return millis == null ? undefined : Math.round(millis / 60_000)
+}
+
+export function formatMinutesAsDuration(minutes: number | null | undefined) {
+  return minutes ? prettyMilliseconds(minutes * 60_000) : ''
+}
+
+export function isValidDuration(duration: string) {
+  const trimmed = duration.trim()
+  return !trimmed || parseDuration(trimmed) != null
+}
 
 // Duration presets for graphs/charts
 export const DURATIONS = [

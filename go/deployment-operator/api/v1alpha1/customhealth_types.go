@@ -24,6 +24,15 @@ import (
 // CustomHealthSpec defines the desired state of CustomHealth
 type CustomHealthSpec struct {
 	Script string `json:"script,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Group string `json:"group,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Version string `json:"version,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Kind string `json:"kind,omitempty"`
 }
 
 // CustomHealthStatus defines the observed state of CustomHealth

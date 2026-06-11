@@ -383,7 +383,13 @@ addons:
       '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific changes are included in the provided release notes beyond
+          pointers to the full CHANGELOG for v1.48.0.]
+      breaking_changes: [No breaking changes are stated in the provided release notes;
+          you must consult the upstream CHANGELOG for v1.48.0 vs v1.47.0 to confirm.]
     chart_version: 2.48.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.4',
@@ -411,7 +417,13 @@ addons:
       '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific changes were provided in the supplied release notes;
+          they only link to the upstream CHANGELOG.md.]
+      breaking_changes: [No breaking changes were described in the supplied release
+          notes; review the upstream CHANGELOG.md between v1.45.0 and v1.46.0 to confirm.]
     chart_version: 2.46.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.9.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v1.14.0-eksbuild.3',
@@ -929,7 +941,13 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes for v2.1.2 do not enumerate changes; they only point
+          to the upstream CHANGELOG-2.x.md for details.]
+      breaking_changes: [None stated in the provided notes; treat as unknown until
+          you review the linked CHANGELOG-2.x.md.]
     chart_version: 3.1.3
     images: ['public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.2', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v5.1.0-eks-1-31-5',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.14.0-eks-1-31-5',
@@ -17985,6 +18003,22 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 86.2.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumps kube-prometheus-stack chart dependency versions with non-major
+          updates (via Renovate).]
+      features: []
+      breaking_changes: []
+    chart_version: 86.2.2
+    images: ['docker.io/grafana/grafana:13.0.1-security-01', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+      'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.91.0',
+      'quay.io/prometheus/alertmanager:v0.32.2', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
   - version: 86.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -21601,32 +21635,25 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.1
+  - version: 3.7.4
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['v3.7.1 adds a Kubernetes cross-namespace capability via a new CrossProviderNamespaces
-          option across the Ingress, CRD, and Gateway API providers.', 'v3.7.0 introduces
-          many new capabilities, primarily around the ingress-nginx compatibility
-          provider (more supported annotations, generated dynamic config via a metamodel,
-          rate limiting annotations, auth-related annotations, canary features, buffering,
-          and more).', 'v3.7.0 expands Kubernetes/Gateway API features (multiple certificateRefs
-          on listeners, BackendTLSPolicy CA secret refs) and CRD features (ingressClassName
-          in CRDs, TraefikService failover, ServersTransport cipher suites).', 'v3.7.0
-          adds general proxy features like providers routing precedence, ACME CertificateTimeout,
-          retry improvements, encodedCharacters middleware, and dashboard TLS certificate
-          views and UX improvements.']
-      breaking_changes: [v3.7.1 includes a security fix for CVE-2026-44774; upgrading
-          may change behavior compared to vulnerable versions and should be validated
-          against your traffic patterns., 'v3.7.0 deprecates ForwardAuth.TrustForwardHeader,
-          so configs relying on it should be reviewed and migrated per the v3.7 migration
-          guide.', 'v3.7.0 contains behavioral/security hardening around encoded characters
-          handling (now more strict/opt-in in places), which can affect requests with
-          unusual URL encodings and should be regression-tested.']
-    chart_version: 40.2.0
+      features: ['v3.7.0 introduced many enhancements across Kubernetes providers
+          (especially ingress-nginx and Gateway API), new middleware capabilities
+          (e.g., encodedCharacters, expanded retry conditions), ACME improvements,
+          observability/logging additions, and various dashboard/UI improvements.',
+        'v3.7.4 is a patch release focused on bug fixes, including Redis write timeout
+          option handling, Gateway API BackendTLSPolicy status updates, TLS SNI checking
+          with keepalive, HTTP/3 dependency bump, and Web UI dependency updates.']
+      breaking_changes: [v3.7.0 release notes explicitly require reading the v3.7.0
+          migration guide; treat this as the key source of any breaking changes when
+          moving into the 3.7 line., 'ForwardAuth.TrustForwardHeader was deprecated
+          in the 3.7.0 notes, so plan to migrate away from it to avoid future breakage.']
+    chart_version: 40.3.0
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -24781,7 +24808,13 @@ addons:
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were included in the provided notes; only release
+          metadata and build artifacts for 0.34.0 and 0.34.2 were shown.]
+      breaking_changes: [No breaking-change details were included in the provided
+          notes; only release metadata and build artifacts were shown.]
     chart_version: 0.29.1
     images: ['timberio/vector:0.34.2-distroless-libc']
   - version: 0.34.0

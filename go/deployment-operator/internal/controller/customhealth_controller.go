@@ -18,10 +18,10 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -49,10 +49,7 @@ type CustomHealthReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *CustomHealthReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	if req.Name != "default" {
-		logger.Error(fmt.Errorf("expected 'default' name, got %s", req.Name), "")
-		return reconcile.Result{}, nil
-	}
+
 	script := &v1alpha1.CustomHealth{}
 	if err := r.Get(ctx, req.NamespacedName, script); err != nil {
 		logger.Error(err, "Unable to fetch LuaScript")
@@ -73,7 +70,12 @@ func (r *CustomHealthReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}()
 
-	common.GetLuaScript().SetValue(script.Spec.Script)
+	gvk := schema.GroupVersionKind{
+		Group:   script.Spec.Group,
+		Version: script.Spec.Version,
+		Kind:    script.Spec.Kind,
+	}
+	common.SetLuaScriptForGVK(gvk, script.Spec.Script)
 	utils.MarkCondition(script.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil

@@ -33,6 +33,8 @@ import NotificationSinks from '../components/settings/notifications/sinks/Notifi
 
 import NotificationRouters from '../components/settings/notifications/routers/NotificationRouters'
 
+import { AISettingsAIInsights } from 'components/settings/ai/AISettingsAIInsights'
+import { AISettingsModelRouting } from 'components/settings/ai/AISettingsModelRouting'
 import { AISettingsProvider } from 'components/settings/ai/AISettingsProvider'
 import { ObservabilityProviders } from 'components/settings/global/observability/ObservabilityProviders'
 import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
@@ -40,8 +42,10 @@ import { RequireCdEnabled } from './cdRoutes'
 import {
   ACCESS_TOKENS_REL_PATH,
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
+  AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
+  AI_SETTINGS_MODEL_ROUTING_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
   CHATBOTS_SETTINGS_CREATE_REL_PATH,
@@ -188,6 +192,14 @@ const aiSettingsRoutes = (
     <Route
       path={AI_SETTINGS_AI_PROVIDER_REL_PATH}
       element={<AISettingsProvider />}
+    />
+    <Route
+      path={AI_SETTINGS_MODEL_ROUTING_REL_PATH}
+      element={<AISettingsModelRouting />}
+    />
+    <Route
+      path={AI_SETTINGS_AI_INSIGHTS_REL_PATH}
+      element={<AISettingsAIInsights />}
     />
     <Route
       path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}

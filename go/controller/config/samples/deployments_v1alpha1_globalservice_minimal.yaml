@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: configuration
+  namespace: default
+data:
+  key: dmFsdWU=
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: minimal
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: minimal
+  namespace: default
+spec:
+  url: https://github.com/argoproj/argocd-example-apps.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: minimal
+  namespace: default
+spec:
+  git:
+    folder: guestbook
+    ref: master
+  repositoryRef:
+    name: minimal
+    namespace: default
+  clusterRef:
+    name: minimal
+    namespace: default
+  configurationRef:
+    name: configuration
+    namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GlobalService
+metadata:
+  name: minimal
+  namespace: default
+spec:
+  serviceRef:
+    name: minimal
+    namespace: default
+  template:
+    configurationRef:
+      name: configuration
+      namespace: default
+    repositoryRef:
+      name: minimal
+      namespace: default
+    git:
+      folder: guestbook
+      ref: master

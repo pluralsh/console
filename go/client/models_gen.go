@@ -756,6 +756,8 @@ type AiSettings struct {
 	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// ai provider to use with embeddings (for vector indexing)
+	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
 	LogAnalysis *bool `json:"logAnalysis,omitempty"`
 	// settings for vector-backed search

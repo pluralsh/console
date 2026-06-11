@@ -33,6 +33,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
+import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
@@ -152,6 +153,12 @@ export function AIAgentRun() {
               >
                 Cancel agent run
               </Button>
+            )}
+            {run?.upload?.session && (
+              <AIAgentRunLocalButton
+                runId={run.id}
+                repository={run.repository}
+              />
             )}
             {run && <AIAgentRunShareButton runId={run?.id} />}
           </Flex>
