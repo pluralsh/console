@@ -107,19 +107,16 @@ WORKDIR /plural
 COPY deployment-operator/dockerfiles/agent-harness/system /plural/system
 COPY deployment-operator/dockerfiles/agent-harness/skills /plural/skills
 
-# Provider skill paths:
-# - Claude/Gemini/OpenCode: .<provider>/skills under /plural
-# - Codex: [[skills.config]] in /plural/.codex/config.toml (see codex writeCodexConfig)
-#   https://developers.openai.com/codex/skills
-RUN for provider in .claude .gemini .opencode; do \
+# Copy bundled skills into each runtime's discovery path under /plural.
+RUN for provider in .claude .codex .gemini .opencode; do \
       mkdir -p "/plural/$${provider}/skills"; \
     done && \
     for skill in /plural/skills/*/; do \
       name="$$(basename "$$skill")"; \
       [ -f "$$skill/SKILL.md" ] || continue; \
-      for dest in /plural/.claude/skills /plural/.gemini/skills /plural/.opencode/skills; do \
-        rm -rf "$${dest}/$${name}"; \
-        cp -a "$$skill" "$${dest}/$${name}"; \
+      for provider in .claude .codex .gemini .opencode; do \
+        rm -rf "/plural/$${provider}/skills/$${name}"; \
+        cp -a "$$skill" "/plural/$${provider}/skills/$${name}"; \
       done; \
     done
 
