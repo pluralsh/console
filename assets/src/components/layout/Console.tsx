@@ -10,6 +10,7 @@ import { Outlet } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
+import { PendingApprovalStacksProvider } from 'components/contexts/PendingApprovalStacksContext'
 
 import { useCloudSetupUnfinished } from 'components/contexts'
 
@@ -54,17 +55,19 @@ export default function Console() {
                         <ShareSecretProvider>
                           <AccessTokenProvider>
                             <DeploymentSettingsProvider>
-                              <SidebarProvider>
-                                <TopLevelSidePanelProviders>
-                                  <FeatureFlagProvider>
-                                    <CommandPaletteProvider>
-                                      <SimpleToastProvider>
-                                        <ConsoleContent />
-                                      </SimpleToastProvider>
-                                    </CommandPaletteProvider>
-                                  </FeatureFlagProvider>
-                                </TopLevelSidePanelProviders>
-                              </SidebarProvider>
+                              <PendingApprovalStacksProvider>
+                                <SidebarProvider>
+                                  <TopLevelSidePanelProviders>
+                                    <FeatureFlagProvider>
+                                      <CommandPaletteProvider>
+                                        <SimpleToastProvider>
+                                          <ConsoleContent />
+                                        </SimpleToastProvider>
+                                      </CommandPaletteProvider>
+                                    </FeatureFlagProvider>
+                                  </TopLevelSidePanelProviders>
+                                </SidebarProvider>
+                              </PendingApprovalStacksProvider>
                             </DeploymentSettingsProvider>
                           </AccessTokenProvider>
                         </ShareSecretProvider>

@@ -1,13 +1,10 @@
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { useTransition, animated } from '@react-spring/web'
-import { usePendingApprovalStacksQuery } from 'generated/graphql'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { usePendingApprovalStacks } from 'components/contexts/PendingApprovalStacksContext'
+import { useCallback, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { AwaitingReviewLauncherButton } from './AwaitingReviewLauncherButton'
 import { AwaitingReviewPanel } from './AwaitingReviewPanel'
-
-const POLL_INTERVAL = 60 * 1000
 
 export default function AwaitingReviewLauncher() {
   const theme = useTheme()
@@ -25,15 +22,7 @@ export default function AwaitingReviewLauncher() {
   useKeyDown(['Escape'], () => setOpen(false))
   useClickOutside(ref, () => setOpen(false))
 
-  const { data, loading, error } = usePendingApprovalStacksQuery({
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const stacks = useMemo(
-    () => mapExistingNodes(data?.infrastructureStacks),
-    [data?.infrastructureStacks]
-  )
+  const { stacks, count, loading, error } = usePendingApprovalStacks()
 
   return (
     <div
@@ -43,7 +32,7 @@ export default function AwaitingReviewLauncher() {
       <AwaitingReviewLauncherButton
         open={open}
         onClick={toggle}
-        count={stacks.length}
+        count={count}
       />
       {transitions((styles) => (
         <animated.div

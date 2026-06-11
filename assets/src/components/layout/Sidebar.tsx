@@ -10,7 +10,6 @@ import {
   KubernetesAltIcon,
   MenuCollapseIcon,
   MenuOpenIcon,
-  StackIcon,
   Tooltip,
   WarningShieldIcon,
   WorkbenchIcon,
@@ -57,6 +56,7 @@ import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import { WORKBENCHES_ABS_PATH } from '../../routes/workbenchesRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
+import { StacksNavIcon } from 'components/awaiting-review/StacksNavIcon'
 
 const SIDEBAR_WIDTH = 64
 const SIDEBAR_EXPANDED_WIDTH = 180
@@ -129,7 +129,7 @@ function getMenuItems({
     {
       text: 'Stacks',
       expandedLabel: 'Stacks',
-      icon: <StackIcon />,
+      icon: <StacksNavIcon />,
       path: getStacksAbsPath(''),
       hotkeys: ['shift S'],
     },
