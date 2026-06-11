@@ -20,6 +20,7 @@ type FormFieldProps = DivProps &
     label?: ReactNode
     labelProps?: Omit<LabelHTMLAttributes<HTMLLabelElement>, 'id'>
     labellingProps?: AriaLabelingProps
+    layout?: 'vertical' | 'horizontal'
     caption?: ReactNode
     hint?: ReactNode
     infoTooltip?: ReactNode
@@ -51,6 +52,7 @@ function FormField({
   label,
   labelProps = {},
   labellingProps = {},
+  layout = 'vertical',
   caption,
   hint,
   infoTooltip,
@@ -84,91 +86,117 @@ function FormField({
     [caption, error, hint, label, maxLength, useLabelProps.fieldProps]
   )
 
-  const content = (
-    <Div {...props}>
-      {hasTopContent && (
-        <Flex
-          align="center"
-          marginBottom="xsmall"
+  const topContent = hasTopContent && (
+    <Flex align="center">
+      {hasLabel && (
+        <Label
+          caption={small}
+          body2={!small}
+          fontWeight="600"
+          flexShrink={0}
+          flexGrow={1}
+          margin={0}
+          {...labelProps}
         >
-          {hasLabel && (
-            <Label
-              caption={small}
-              body2={!small}
-              fontWeight="600"
-              flexShrink={0}
-              flexGrow={1}
-              margin={0}
-              {...labelProps}
-            >
-              {label}
-              {required ? '*' : ''}
-              {infoTooltip && (
-                <IconFrame
-                  clickable
-                  icon={<InfoOutlineIcon color="text-light" />}
-                  size="xsmall"
-                  color="text-light"
-                  tooltip={infoTooltip}
-                  tooltipProps={{ style: { maxWidth: 450 } }}
-                  css={{ display: 'inline-flex', marginLeft: spacing.xxsmall }}
-                />
-              )}
-            </Label>
-          )}
-          {caption && (
-            <P
-              caption={small}
-              body2={!small}
-              marginLeft="medium"
-              truncate
-              flexShrink={1}
+          {label}
+          {required ? '*' : ''}
+          {infoTooltip && (
+            <IconFrame
+              clickable
+              icon={<InfoOutlineIcon color="text-light" />}
+              size="xsmall"
               color="text-light"
-            >
-              {caption}
-            </P>
+              tooltip={infoTooltip}
+              tooltipProps={{ style: { maxWidth: 450 } }}
+              css={{ display: 'inline-flex', marginLeft: spacing.xxsmall }}
+            />
           )}
-        </Flex>
+        </Label>
       )}
-      <Div
-        marginTop={hasTopContent ? 'xxsmall' : 0}
-        marginBottom={hasBottomContent ? 'xxsmall' : 0}
-      >
-        {children}
-      </Div>
-      {hasBottomContent && (
-        <Flex
-          align="flex-start"
+      {caption && (
+        <P
+          caption={small}
+          body2={!small}
+          marginLeft="medium"
+          truncate
+          flexShrink={1}
           color="text-light"
-          marginTop="xsmall"
         >
-          {typeof hint === 'string' ? (
-            <P
-              flexGrow={1}
-              caption
-              color={error ? 'text-danger' : 'text-xlight'}
-            >
-              {hint}
-            </P>
-          ) : (
-            hint
-          )}
-          {typeof maxLength === 'number' && (
-            <P
-              caption
-              color="text-xlight"
-              marginLeft={hint ? 'medium' : 0}
-              whiteSpace="nowrap"
-              textAlign="right"
-              flexGrow={1}
-            >
-              {length} / {maxLength}
-            </P>
-          )}
-        </Flex>
+          {caption}
+        </P>
       )}
+    </Flex>
+  )
+
+  const bottomContent = hasBottomContent && (
+    <Flex
+      align="flex-start"
+      color="text-light"
+      marginTop={layout === 'vertical' ? 'xsmall' : 'xxxsmall'}
+    >
+      {typeof hint === 'string' ? (
+        <P
+          flexGrow={1}
+          caption
+          color={error ? 'text-danger' : 'text-xlight'}
+        >
+          {hint}
+        </P>
+      ) : (
+        hint
+      )}
+      {typeof maxLength === 'number' && (
+        <P
+          caption
+          color="text-xlight"
+          marginLeft={hint ? 'medium' : 0}
+          whiteSpace="nowrap"
+          textAlign="right"
+          flexGrow={1}
+        >
+          {length} / {maxLength}
+        </P>
+      )}
+    </Flex>
+  )
+
+  const fieldContent = (
+    <Div
+      marginTop={layout === 'vertical' && hasTopContent ? 'xxsmall' : 0}
+      marginBottom={layout === 'vertical' && hasBottomContent ? 'xxsmall' : 0}
+    >
+      {children}
     </Div>
   )
+
+  const content =
+    layout === 'horizontal' ? (
+      <Flex
+        align="flex-start"
+        gap="medium"
+        {...props}
+      >
+        <Div
+          flex="1 1 0"
+          minWidth={0}
+        >
+          {topContent}
+          {bottomContent}
+        </Div>
+        <Div
+          flex="1 1 0"
+          minWidth={0}
+        >
+          {fieldContent}
+        </Div>
+      </Flex>
+    ) : (
+      <Div {...props}>
+        {topContent && <Div marginBottom="xsmall">{topContent}</Div>}
+        {fieldContent}
+        {bottomContent}
+      </Div>
+    )
 
   return (
     <FormFieldContext.Provider value={contextVal}>

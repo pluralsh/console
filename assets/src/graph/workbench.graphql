@@ -487,6 +487,12 @@ fragment ChatProviderConnection on ChatProviderConnection {
       tenantId
     }
   }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
 }
 
 fragment WorkbenchChatbot on WorkbenchChatbot {
@@ -936,6 +942,12 @@ query ChatProviderConnections($first: Int = 100, $after: String, $q: String) {
   }
 }
 
+query ChatProviderConnection($id: ID!) {
+  chatProviderConnection(id: $id) {
+    ...ChatProviderConnection
+  }
+}
+
 mutation GetWorkbenchWebhook($id: ID!) {
   getWorkbenchWebhook(id: $id) {
     ...WorkbenchWebhook
@@ -952,6 +964,12 @@ query IssueWebhooks($first: Int, $after: String) {
     pageInfo {
       ...PageInfo
     }
+  }
+}
+
+query IssueWebhook($id: ID, $name: String) {
+  issueWebhook(id: $id, name: $name) {
+    ...IssueWebhook
   }
 }
 
@@ -1304,6 +1322,12 @@ mutation UpsertChatProviderConnection(
   }
 }
 
+mutation DeleteChatProviderConnection($id: ID!) {
+  deleteChatProviderConnection(id: $id) {
+    ...ChatProviderConnection
+  }
+}
+
 mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
   createIssueWebhook(attributes: $attributes) {
     ...IssueWebhook
@@ -1312,6 +1336,12 @@ mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
 
 mutation UpdateIssueWebhook($id: ID!, $attributes: IssueWebhookAttributes!) {
   updateIssueWebhook(id: $id, attributes: $attributes) {
+    ...IssueWebhook
+  }
+}
+
+mutation DeleteIssueWebhook($id: ID!) {
+  deleteIssueWebhook(id: $id) {
     ...IssueWebhook
   }
 }

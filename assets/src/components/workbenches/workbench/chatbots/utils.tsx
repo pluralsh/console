@@ -32,13 +32,14 @@ export function messageBehaviorLabel(
 }
 
 export function chatProviderConnectionIcon(
-  type?: Nullable<ChatProviderConnectionType>
+  type?: Nullable<ChatProviderConnectionType>,
+  fullColor: boolean = true
 ) {
   switch (type) {
     case ChatProviderConnectionType.Slack:
-      return <SlackLogoIcon fullColor />
+      return <SlackLogoIcon fullColor={fullColor} />
     case ChatProviderConnectionType.Teams:
-      return <MsTeamsLogoIcon fullColor />
+      return <MsTeamsLogoIcon fullColor={fullColor} />
     default:
       return <BotIcon />
   }

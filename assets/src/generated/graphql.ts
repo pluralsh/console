@@ -18385,6 +18385,14 @@ export type ObservabilityWebhooksQueryVariables = Exact<{
 
 export type ObservabilityWebhooksQuery = { __typename?: 'RootQueryType', observabilityWebhooks?: { __typename?: 'ObservabilityWebhookConnection', edges?: Array<{ __typename?: 'ObservabilityWebhookEdge', node?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
+export type ObservabilityWebhookQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ObservabilityWebhookQuery = { __typename?: 'RootQueryType', observabilityWebhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type UpdateDeploymentSettingsMutationVariables = Exact<{
   attributes: DeploymentSettingsAttributes;
 }>;
@@ -20555,9 +20563,9 @@ export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: stri
 
 export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, priority?: number | null, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
-export type ChatProviderConnectionFragment = { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } };
+export type ChatProviderConnectionFragment = { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
-export type WorkbenchChatbotFragment = { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null };
+export type WorkbenchChatbotFragment = { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null };
 
 export type WorkbenchIssueFragment = { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null };
 
@@ -20746,14 +20754,14 @@ export type WorkbenchChatbotsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchChatbotsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, chatbots?: { __typename?: 'WorkbenchChatbotConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchChatbotsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, chatbots?: { __typename?: 'WorkbenchChatbotConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchChatbotQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchChatbotQuery = { __typename?: 'RootQueryType', workbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+export type WorkbenchChatbotQuery = { __typename?: 'RootQueryType', workbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
 
 export type SearchConversationsQueryVariables = Exact<{
   chatConnectionId: Scalars['ID']['input'];
@@ -20770,7 +20778,14 @@ export type ChatProviderConnectionsQueryVariables = Exact<{
 }>;
 
 
-export type ChatProviderConnectionsQuery = { __typename?: 'RootQueryType', chatProviderConnections?: { __typename?: 'ChatProviderConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatProviderConnectionEdge', node?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null } | null> | null } | null };
+export type ChatProviderConnectionsQuery = { __typename?: 'RootQueryType', chatProviderConnections?: { __typename?: 'ChatProviderConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatProviderConnectionEdge', node?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
+
+export type ChatProviderConnectionQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ChatProviderConnectionQuery = { __typename?: 'RootQueryType', chatProviderConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type GetWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -20787,12 +20802,20 @@ export type IssueWebhooksQueryVariables = Exact<{
 
 export type IssueWebhooksQuery = { __typename?: 'RootQueryType', issueWebhooks?: { __typename?: 'IssueWebhookConnection', edges?: Array<{ __typename?: 'IssueWebhookEdge', node?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
+export type IssueWebhookQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type IssueWebhookQuery = { __typename?: 'RootQueryType', issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type WorkbenchTriggersSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null, chatbots?: { __typename?: 'WorkbenchChatbotConnection', edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null } | null } | null> | null } | null } | null };
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, prompt?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null, chatbots?: { __typename?: 'WorkbenchChatbotConnection', edges?: Array<{ __typename?: 'WorkbenchChatbotEdge', node?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21046,7 +21069,7 @@ export type CreateWorkbenchChatbotMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', createWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+export type CreateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', createWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
 
 export type UpdateWorkbenchChatbotMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21054,7 +21077,7 @@ export type UpdateWorkbenchChatbotMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', updateWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
+export type UpdateWorkbenchChatbotMutation = { __typename?: 'RootMutationType', updateWorkbenchChatbot?: { __typename?: 'WorkbenchChatbot', id: string, channel: string, prompt?: string | null, messageBehavior: WorkbenchChatbotMessageBehavior, userId?: string | null, insertedAt?: string | null, updatedAt?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null } | null };
 
 export type DeleteWorkbenchChatbotMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21068,7 +21091,14 @@ export type UpsertChatProviderConnectionMutationVariables = Exact<{
 }>;
 
 
-export type UpsertChatProviderConnectionMutation = { __typename?: 'RootMutationType', upsertChatProviderConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null } } | null };
+export type UpsertChatProviderConnectionMutation = { __typename?: 'RootMutationType', upsertChatProviderConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeleteChatProviderConnectionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteChatProviderConnectionMutation = { __typename?: 'RootMutationType', deleteChatProviderConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType, configuration: { __typename?: 'ChatProviderConnectionConfiguration', slack?: { __typename?: 'SlackConnectionConfiguration', botId?: string | null } | null, teams?: { __typename?: 'TeamsConnectionConfiguration', clientId?: string | null, tenantId?: string | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateIssueWebhookMutationVariables = Exact<{
   attributes: IssueWebhookAttributes;
@@ -21084,6 +21114,13 @@ export type UpdateIssueWebhookMutationVariables = Exact<{
 
 
 export type UpdateIssueWebhookMutation = { __typename?: 'RootMutationType', updateIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeleteIssueWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteIssueWebhookMutation = { __typename?: 'RootMutationType', deleteIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -26422,8 +26459,14 @@ export const ChatProviderConnectionFragmentDoc = gql`
       tenantId
     }
   }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
 }
-    `;
+    ${PolicyBindingFragmentDoc}`;
 export const WorkbenchChatbotFragmentDoc = gql`
     fragment WorkbenchChatbot on WorkbenchChatbot {
   id
@@ -32857,6 +32900,50 @@ export type ObservabilityWebhooksQueryHookResult = ReturnType<typeof useObservab
 export type ObservabilityWebhooksLazyQueryHookResult = ReturnType<typeof useObservabilityWebhooksLazyQuery>;
 export type ObservabilityWebhooksSuspenseQueryHookResult = ReturnType<typeof useObservabilityWebhooksSuspenseQuery>;
 export type ObservabilityWebhooksQueryResult = Apollo.QueryResult<ObservabilityWebhooksQuery, ObservabilityWebhooksQueryVariables>;
+export const ObservabilityWebhookDocument = gql`
+    query ObservabilityWebhook($id: ID, $name: String) {
+  observabilityWebhook(id: $id, name: $name) {
+    ...ObservabilityWebhook
+  }
+}
+    ${ObservabilityWebhookFragmentDoc}`;
+
+/**
+ * __useObservabilityWebhookQuery__
+ *
+ * To run a query within a React component, call `useObservabilityWebhookQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObservabilityWebhookQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObservabilityWebhookQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useObservabilityWebhookQuery(baseOptions?: Apollo.QueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>(ObservabilityWebhookDocument, options);
+      }
+export function useObservabilityWebhookLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>(ObservabilityWebhookDocument, options);
+        }
+// @ts-ignore
+export function useObservabilityWebhookSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>;
+export function useObservabilityWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<ObservabilityWebhookQuery | undefined, ObservabilityWebhookQueryVariables>;
+export function useObservabilityWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>(ObservabilityWebhookDocument, options);
+        }
+export type ObservabilityWebhookQueryHookResult = ReturnType<typeof useObservabilityWebhookQuery>;
+export type ObservabilityWebhookLazyQueryHookResult = ReturnType<typeof useObservabilityWebhookLazyQuery>;
+export type ObservabilityWebhookSuspenseQueryHookResult = ReturnType<typeof useObservabilityWebhookSuspenseQuery>;
+export type ObservabilityWebhookQueryResult = Apollo.QueryResult<ObservabilityWebhookQuery, ObservabilityWebhookQueryVariables>;
 export const UpdateDeploymentSettingsDocument = gql`
     mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
   updateDeploymentSettings(attributes: $attributes) {
@@ -43468,6 +43555,49 @@ export type ChatProviderConnectionsQueryHookResult = ReturnType<typeof useChatPr
 export type ChatProviderConnectionsLazyQueryHookResult = ReturnType<typeof useChatProviderConnectionsLazyQuery>;
 export type ChatProviderConnectionsSuspenseQueryHookResult = ReturnType<typeof useChatProviderConnectionsSuspenseQuery>;
 export type ChatProviderConnectionsQueryResult = Apollo.QueryResult<ChatProviderConnectionsQuery, ChatProviderConnectionsQueryVariables>;
+export const ChatProviderConnectionDocument = gql`
+    query ChatProviderConnection($id: ID!) {
+  chatProviderConnection(id: $id) {
+    ...ChatProviderConnection
+  }
+}
+    ${ChatProviderConnectionFragmentDoc}`;
+
+/**
+ * __useChatProviderConnectionQuery__
+ *
+ * To run a query within a React component, call `useChatProviderConnectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatProviderConnectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatProviderConnectionQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useChatProviderConnectionQuery(baseOptions: Apollo.QueryHookOptions<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables> & ({ variables: ChatProviderConnectionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>(ChatProviderConnectionDocument, options);
+      }
+export function useChatProviderConnectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>(ChatProviderConnectionDocument, options);
+        }
+// @ts-ignore
+export function useChatProviderConnectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>): Apollo.UseSuspenseQueryResult<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>;
+export function useChatProviderConnectionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>): Apollo.UseSuspenseQueryResult<ChatProviderConnectionQuery | undefined, ChatProviderConnectionQueryVariables>;
+export function useChatProviderConnectionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>(ChatProviderConnectionDocument, options);
+        }
+export type ChatProviderConnectionQueryHookResult = ReturnType<typeof useChatProviderConnectionQuery>;
+export type ChatProviderConnectionLazyQueryHookResult = ReturnType<typeof useChatProviderConnectionLazyQuery>;
+export type ChatProviderConnectionSuspenseQueryHookResult = ReturnType<typeof useChatProviderConnectionSuspenseQuery>;
+export type ChatProviderConnectionQueryResult = Apollo.QueryResult<ChatProviderConnectionQuery, ChatProviderConnectionQueryVariables>;
 export const GetWorkbenchWebhookDocument = gql`
     mutation GetWorkbenchWebhook($id: ID!) {
   getWorkbenchWebhook(id: $id) {
@@ -43553,6 +43683,50 @@ export type IssueWebhooksQueryHookResult = ReturnType<typeof useIssueWebhooksQue
 export type IssueWebhooksLazyQueryHookResult = ReturnType<typeof useIssueWebhooksLazyQuery>;
 export type IssueWebhooksSuspenseQueryHookResult = ReturnType<typeof useIssueWebhooksSuspenseQuery>;
 export type IssueWebhooksQueryResult = Apollo.QueryResult<IssueWebhooksQuery, IssueWebhooksQueryVariables>;
+export const IssueWebhookDocument = gql`
+    query IssueWebhook($id: ID, $name: String) {
+  issueWebhook(id: $id, name: $name) {
+    ...IssueWebhook
+  }
+}
+    ${IssueWebhookFragmentDoc}`;
+
+/**
+ * __useIssueWebhookQuery__
+ *
+ * To run a query within a React component, call `useIssueWebhookQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIssueWebhookQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIssueWebhookQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useIssueWebhookQuery(baseOptions?: Apollo.QueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IssueWebhookQuery, IssueWebhookQueryVariables>(IssueWebhookDocument, options);
+      }
+export function useIssueWebhookLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IssueWebhookQuery, IssueWebhookQueryVariables>(IssueWebhookDocument, options);
+        }
+// @ts-ignore
+export function useIssueWebhookSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhookQuery, IssueWebhookQueryVariables>;
+export function useIssueWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhookQuery | undefined, IssueWebhookQueryVariables>;
+export function useIssueWebhookSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhookQuery, IssueWebhookQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IssueWebhookQuery, IssueWebhookQueryVariables>(IssueWebhookDocument, options);
+        }
+export type IssueWebhookQueryHookResult = ReturnType<typeof useIssueWebhookQuery>;
+export type IssueWebhookLazyQueryHookResult = ReturnType<typeof useIssueWebhookLazyQuery>;
+export type IssueWebhookSuspenseQueryHookResult = ReturnType<typeof useIssueWebhookSuspenseQuery>;
+export type IssueWebhookQueryResult = Apollo.QueryResult<IssueWebhookQuery, IssueWebhookQueryVariables>;
 export const WorkbenchTriggersSummaryDocument = gql`
     query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
@@ -45006,6 +45180,39 @@ export function useUpsertChatProviderConnectionMutation(baseOptions?: Apollo.Mut
 export type UpsertChatProviderConnectionMutationHookResult = ReturnType<typeof useUpsertChatProviderConnectionMutation>;
 export type UpsertChatProviderConnectionMutationResult = Apollo.MutationResult<UpsertChatProviderConnectionMutation>;
 export type UpsertChatProviderConnectionMutationOptions = Apollo.BaseMutationOptions<UpsertChatProviderConnectionMutation, UpsertChatProviderConnectionMutationVariables>;
+export const DeleteChatProviderConnectionDocument = gql`
+    mutation DeleteChatProviderConnection($id: ID!) {
+  deleteChatProviderConnection(id: $id) {
+    ...ChatProviderConnection
+  }
+}
+    ${ChatProviderConnectionFragmentDoc}`;
+export type DeleteChatProviderConnectionMutationFn = Apollo.MutationFunction<DeleteChatProviderConnectionMutation, DeleteChatProviderConnectionMutationVariables>;
+
+/**
+ * __useDeleteChatProviderConnectionMutation__
+ *
+ * To run a mutation, you first call `useDeleteChatProviderConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteChatProviderConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteChatProviderConnectionMutation, { data, loading, error }] = useDeleteChatProviderConnectionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteChatProviderConnectionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteChatProviderConnectionMutation, DeleteChatProviderConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteChatProviderConnectionMutation, DeleteChatProviderConnectionMutationVariables>(DeleteChatProviderConnectionDocument, options);
+      }
+export type DeleteChatProviderConnectionMutationHookResult = ReturnType<typeof useDeleteChatProviderConnectionMutation>;
+export type DeleteChatProviderConnectionMutationResult = Apollo.MutationResult<DeleteChatProviderConnectionMutation>;
+export type DeleteChatProviderConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteChatProviderConnectionMutation, DeleteChatProviderConnectionMutationVariables>;
 export const CreateIssueWebhookDocument = gql`
     mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
   createIssueWebhook(attributes: $attributes) {
@@ -45073,6 +45280,39 @@ export function useUpdateIssueWebhookMutation(baseOptions?: Apollo.MutationHookO
 export type UpdateIssueWebhookMutationHookResult = ReturnType<typeof useUpdateIssueWebhookMutation>;
 export type UpdateIssueWebhookMutationResult = Apollo.MutationResult<UpdateIssueWebhookMutation>;
 export type UpdateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<UpdateIssueWebhookMutation, UpdateIssueWebhookMutationVariables>;
+export const DeleteIssueWebhookDocument = gql`
+    mutation DeleteIssueWebhook($id: ID!) {
+  deleteIssueWebhook(id: $id) {
+    ...IssueWebhook
+  }
+}
+    ${IssueWebhookFragmentDoc}`;
+export type DeleteIssueWebhookMutationFn = Apollo.MutationFunction<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>;
+
+/**
+ * __useDeleteIssueWebhookMutation__
+ *
+ * To run a mutation, you first call `useDeleteIssueWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteIssueWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteIssueWebhookMutation, { data, loading, error }] = useDeleteIssueWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteIssueWebhookMutation(baseOptions?: Apollo.MutationHookOptions<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>(DeleteIssueWebhookDocument, options);
+      }
+export type DeleteIssueWebhookMutationHookResult = ReturnType<typeof useDeleteIssueWebhookMutation>;
+export type DeleteIssueWebhookMutationResult = Apollo.MutationResult<DeleteIssueWebhookMutation>;
+export type DeleteIssueWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteIssueWebhookMutation, DeleteIssueWebhookMutationVariables>;
 export const WorkbenchJobDeltaDocument = gql`
     subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
   workbenchJobDelta(id: $id, workbenchId: $workbenchId) {
@@ -45356,6 +45596,7 @@ export const namedOperations = {
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProviders: 'ObservabilityProviders',
     ObservabilityWebhooks: 'ObservabilityWebhooks',
+    ObservabilityWebhook: 'ObservabilityWebhook',
     Observers: 'Observers',
     Observer: 'Observer',
     Pipelines: 'Pipelines',
@@ -45503,7 +45744,9 @@ export const namedOperations = {
     WorkbenchChatbot: 'WorkbenchChatbot',
     SearchConversations: 'SearchConversations',
     ChatProviderConnections: 'ChatProviderConnections',
+    ChatProviderConnection: 'ChatProviderConnection',
     IssueWebhooks: 'IssueWebhooks',
+    IssueWebhook: 'IssueWebhook',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobMetricsTool: 'WorkbenchJobMetricsTool',
@@ -45694,8 +45937,10 @@ export const namedOperations = {
     UpdateWorkbenchChatbot: 'UpdateWorkbenchChatbot',
     DeleteWorkbenchChatbot: 'DeleteWorkbenchChatbot',
     UpsertChatProviderConnection: 'UpsertChatProviderConnection',
+    DeleteChatProviderConnection: 'DeleteChatProviderConnection',
     CreateIssueWebhook: 'CreateIssueWebhook',
-    UpdateIssueWebhook: 'UpdateIssueWebhook'
+    UpdateIssueWebhook: 'UpdateIssueWebhook',
+    DeleteIssueWebhook: 'DeleteIssueWebhook'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
