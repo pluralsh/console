@@ -39,6 +39,14 @@ func (in DefaultTool) ConfigureSkills(runtime console.AgentRuntimeType) error {
 	}
 
 	skillsRoot := path.Join(in.Config.WorkDir, bundledSkillsDir)
+	klog.V(log.LogLevelInfo).InfoS(
+		"configuring agent skills",
+		"runtime", runtime,
+		"skillsRoot", skillsRoot,
+		"workDir", in.Config.WorkDir,
+		"repositoryDir", in.Config.RepositoryDir,
+	)
+
 	entries, err := os.ReadDir(skillsRoot)
 	if err != nil {
 		return fmt.Errorf("read bundled skills dir %q: %w", skillsRoot, err)
@@ -57,43 +65,43 @@ func (in DefaultTool) ConfigureSkills(runtime console.AgentRuntimeType) error {
 
 		for _, rel := range dirs {
 			dst := path.Join(in.Config.WorkDir, rel, entry.Name())
-			if err := linkSkillDir(dst, src); err != nil {
+			if err := linkSkillDir(dst, src, "workDir", runtime, entry.Name()); err != nil {
 				return fmt.Errorf("link skill %q for %s: %w", entry.Name(), runtime, err)
 			}
 		}
 
-		if err := in.linkRepositorySkills(entry.Name(), src); err != nil {
+		if err := in.linkRepositorySkills(runtime, entry.Name(), src); err != nil {
 			return err
 		}
 
 		linked++
 	}
 
-	klog.V(log.LogLevelExtended).InfoS(
-		"skills configured",
+	klog.V(log.LogLevelInfo).InfoS(
+		"agent skills configured",
 		"runtime", runtime,
-		"count", linked,
-		"workDir", in.Config.WorkDir,
-		"repositoryDir", in.Config.RepositoryDir,
+		"skillCount", linked,
+		"workDirTargets", dirs,
+		"repositoryTargets", repositorySkillsDirs,
 	)
 	return nil
 }
 
-func (in DefaultTool) linkRepositorySkills(name, src string) error {
+func (in DefaultTool) linkRepositorySkills(runtime console.AgentRuntimeType, name, src string) error {
 	if in.Config.RepositoryDir == "" || in.Config.RepositoryDir == in.Config.WorkDir {
 		return nil
 	}
 
 	for _, rel := range repositorySkillsDirs {
 		dst := path.Join(in.Config.RepositoryDir, rel, name)
-		if err := linkSkillDir(dst, src); err != nil {
+		if err := linkSkillDir(dst, src, "repositoryDir", runtime, name); err != nil {
 			return fmt.Errorf("link repository skill %q at %q: %w", name, dst, err)
 		}
 	}
 	return nil
 }
 
-func linkSkillDir(dst, src string) error {
+func linkSkillDir(dst, src, scope string, runtime console.AgentRuntimeType, skill string) error {
 	if err := os.MkdirAll(path.Dir(dst), 0755); err != nil {
 		return fmt.Errorf("create skills parent dir: %w", err)
 	}
@@ -108,5 +116,14 @@ func linkSkillDir(dst, src string) error {
 	if err := os.Symlink(srcAbs, dst); err != nil {
 		return fmt.Errorf("symlink %q -> %q: %w", dst, srcAbs, err)
 	}
+
+	klog.V(log.LogLevelInfo).InfoS(
+		"skill symlink created",
+		"runtime", runtime,
+		"skill", skill,
+		"scope", scope,
+		"dst", dst,
+		"src", srcAbs,
+	)
 	return nil
 }

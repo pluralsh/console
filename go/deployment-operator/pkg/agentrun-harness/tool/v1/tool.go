@@ -97,10 +97,6 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 		return fmt.Errorf("failed to write babysit system prompt %q: %w", outputFile, err)
 	}
 
-	if err := in.ConfigureSkills(runtime); err != nil {
-		return fmt.Errorf("failed configuring %s skills: %w", runtime, err)
-	}
-
 	return nil
 }
 
