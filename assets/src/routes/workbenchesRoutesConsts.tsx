@@ -115,11 +115,6 @@ export const getWorkbenchChatbotCreateAbsPath = (
 ) =>
   `${getWorkbenchChatbotsAbsPath(workbenchId)}/${WORKBENCHES_CREATE_REL_PATH}`
 
-export const getWorkbenchChatbotCreateConnectionAbsPath = (
-  workbenchId: Nullable<string>
-) =>
-  `${getWorkbenchChatbotsAbsPath(workbenchId)}/${WORKBENCHES_CHATBOTS_CREATE_CHATBOT_REL_PATH}`
-
 export const getWorkbenchChatbotEditAbsPath = ({
   workbenchId,
   chatbotId,
