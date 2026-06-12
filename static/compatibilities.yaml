@@ -20856,6 +20856,107 @@ addons:
     chart_version: 3.5.0
     images: ['k8s.gcr.io/metrics-server/metrics-server:v0.5.0']
   name: metrics-server
+- icon: https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/main/charts/nginx-gateway-fabric/chart-icon.png
+  git_url: https://github.com/nginx/nginx-gateway-fabric
+  release_url: https://github.com/nginx/nginx-gateway-fabric/releases/tag/v{vsn}
+  helm_repository_url: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
+  chart_name: nginx-gateway-fabric
+  versions:
+  - version: 2.6.3
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.6.3
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.6.3', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.6.3']
+  - version: 2.5.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.5.1
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.5.1', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.5.1']
+  - version: 2.4.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.4.2
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.4.2', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.4.2']
+  - version: 2.3.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.3.0
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.3.0', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.3.0']
+  - version: 2.2.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.2.2
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.2.2', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.2.2']
+  - version: 2.1.4
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.1.4
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.1.4', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.1.4']
+  - version: 2.0.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.0.2
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.0.2', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.0.2']
+  - version: 1.6.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.6.2
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:1.6.2', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.6.2']
+  - version: 1.5.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.5.1
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:1.5.1', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.5.1']
+  - version: 1.4.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.4.0
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:1.4.0', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.4.0']
+  - version: 1.3.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.3.0
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:1.3.0', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.3.0']
+  - version: 1.2.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.2.0
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:1.2.0', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.2.0']
+  name: nginx-gateway-fabric
 - icon: https://avatars.githubusercontent.com/u/49998002?s=48&v=4
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
