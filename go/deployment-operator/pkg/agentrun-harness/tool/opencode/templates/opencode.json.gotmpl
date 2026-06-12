@@ -67,11 +67,6 @@
     }
   },
   "username": "plural",
-  "skills": {
-    "paths": [
-      "/plural/skills"
-    ]
-  },
   "provider": {
     "{{ .Provider }}": {
       {{ if or (eq .Provider "plural") .OpenAICompatible }}"npm": "@ai-sdk/openai",
