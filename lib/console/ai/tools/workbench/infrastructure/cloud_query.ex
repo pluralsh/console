@@ -26,7 +26,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudQuery do
   def implement(%__MODULE__{query: query, tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}}) do
     with {:ok, client} <- Client.connect(),
          input = %QueryInput{query: query, connection: to_pb(connection)},
-         {:ok, %QueryResult{result: result}} <- Stub.query(client, input) do
+         {:ok, %QueryResult{result: result}} <- Stub.query(client, input, Client.cloud_query_rpc_opts()) do
       {:ok, result}
     end
   end

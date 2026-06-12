@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Lua do
   def implement(%__MODULE__{code: code}) do
     with {:ok, client} <- Client.connect(),
          input = %RunLuaInput{script: code},
-         {:ok, %RunLuaOutput{result_json: result_json}} <- Stub.run_lua(client, input) do
+         {:ok, %RunLuaOutput{result_json: result_json}} <- Stub.run_lua(client, input, Client.cloud_query_rpc_opts()) do
       {:ok, result_json}
     end
   end

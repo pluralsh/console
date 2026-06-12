@@ -41,7 +41,7 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %MetricsSearchOutput{} = output} <- Stub.metrics_search(conn, input),
+         {:ok, %MetricsSearchOutput{} = output} <- Stub.metrics_search(conn, input, Client.metrics_rpc_opts()),
       do: Protobuf.JSON.encode(output)
   end
 

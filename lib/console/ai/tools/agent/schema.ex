@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Agent.Schema do
     with {:session, %AgentSession{connection: %CloudConnection{} = connection}} <- session(),
          {:ok, client} <- Client.connect(),
          input = %SchemaInput{connection: to_pb(connection)},
-         {:ok, %SchemaOutput{result: results}} <- Stub.schema(client, input) do
+         {:ok, %SchemaOutput{result: results}} <- Stub.schema(client, input, Client.cloud_query_rpc_opts()) do
       Enum.map(results, fn %SchemaResult{table: table, columns: columns} ->
         %{table: table, columns: Enum.map(columns, &column_map/1)}
       end)

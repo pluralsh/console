@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudSchema do
   def implement(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}, table: table}) do
     with {:ok, client} <- Client.connect(),
          input = %SchemaInput{connection: to_pb(connection), table: table},
-         {:ok, output} <- Stub.schema(client, input) do
+         {:ok, output} <- Stub.schema(client, input, Client.cloud_query_rpc_opts()) do
       Protobuf.JSON.encode(output)
     end
   end

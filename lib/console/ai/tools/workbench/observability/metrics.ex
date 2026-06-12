@@ -52,7 +52,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     with :ok <- TimeRange.safe(tool.time_range),
          {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input),
+         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: content, metrics: Enum.map(output.metrics, &mapify/1)}}
     end
@@ -61,7 +61,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
-         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input) do
+         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()) do
       {:ok, Enum.map(output.metrics, &mapify/1)}
     end
   end
@@ -107,7 +107,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   def azure_opts(%{azure: %{} = az}), do: az
   def azure_opts(_), do: %{}
 
-  @known_providers ~w(prometheus datadog elastic loki splunk tempo dynatrace newrelic)a
+  @known_providers ~w(prometheus cloudwatch datadog elastic loki splunk tempo dynatrace newrelic)a
 
   def provider_hint(%Console.Schema.WorkbenchTool{tool: type}) when type in @known_providers,
     do: "This tool is configured against #{type}, and so you should be able to use its documented query format as needed."
