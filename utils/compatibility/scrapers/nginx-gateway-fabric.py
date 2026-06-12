@@ -1,6 +1,9 @@
 from collections import OrderedDict
 import re
 
+import requests
+import yaml
+
 from utils import (
     current_kube_version,
     ensure_keys,
@@ -18,6 +21,7 @@ from utils import (
 
 APP_NAME = "nginx-gateway-fabric"
 COMPATIBILITY_URL = "https://raw.githubusercontent.com/nginx/documentation/main/content/ngf/overview/technical-specifications.md"
+CHART_VALUES_URL = "https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v{version}/charts/nginx-gateway-fabric/values.yaml"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
 
 
@@ -31,12 +35,54 @@ def _clean_cell(cell):
 
 def _parse_kube_versions(value):
     cleaned = _clean_cell(value).lstrip("v")
-    if cleaned.endswith("+"):
-        return expand_kube_versions(cleaned[:-1], current_kube_version())
-    if "-" in cleaned:
-        start, end = [part.strip().lstrip("v") for part in cleaned.split("-", 1)]
-        return expand_kube_versions(start, end)
-    return [cleaned]
+    plus_match = re.fullmatch(r"(\d+\.\d+)\+", cleaned)
+    if plus_match:
+        return expand_kube_versions(plus_match.group(1), current_kube_version())
+
+    range_match = re.fullmatch(r"(\d+\.\d+)\s*(?:-|–|—)\s*(\d+\.\d+)", cleaned)
+    if range_match:
+        return expand_kube_versions(range_match.group(1), range_match.group(2))
+
+    version_match = re.fullmatch(r"\d+\.\d+", cleaned)
+    return [cleaned] if version_match else []
+
+
+def _image_from_config(config, fallback_repository, fallback_tag):
+    image = config.get("image", {}) if isinstance(config, dict) else {}
+    repository = image.get("repository") or fallback_repository
+    tag = image.get("tag") or fallback_tag
+    return f"{repository}:{tag}"
+
+
+def _default_images(version):
+    fallbacks = [
+        f"ghcr.io/nginx/nginx-gateway-fabric:{version}",
+        f"ghcr.io/nginx/nginx-gateway-fabric/nginx:{version}",
+    ]
+    try:
+        response = requests.get(CHART_VALUES_URL.format(version=version), timeout=10)
+    except requests.RequestException:
+        return fallbacks
+    if response.status_code != 200:
+        return fallbacks
+
+    try:
+        values = yaml.safe_load(response.text) or {}
+    except yaml.YAMLError as exc:
+        print_error(f"Failed to parse NGINX Gateway Fabric chart values: {exc}")
+        return fallbacks
+
+    control_plane = _image_from_config(
+        values.get("nginxGateway", {}),
+        "ghcr.io/nginx/nginx-gateway-fabric",
+        version,
+    )
+    data_plane = _image_from_config(
+        values.get("nginx", {}),
+        "ghcr.io/nginx/nginx-gateway-fabric/nginx",
+        version,
+    )
+    return [control_plane, data_plane]
 
 
 def _write_compatibility_info(filepath, new_versions):
@@ -80,13 +126,7 @@ def extract_table_data(content):
                     ("version", ver),
                     ("kube", _parse_kube_versions(columns[2])),
                     ("chart_version", ver),
-                    (
-                        "images",
-                        [
-                            f"ghcr.io/nginx/nginx-gateway-fabric:{ver}",
-                            f"ghcr.io/nginx/nginx-gateway-fabric/nginx:{ver}",
-                        ],
-                    ),
+                    ("images", _default_images(ver)),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]
