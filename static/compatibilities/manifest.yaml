@@ -17,6 +17,7 @@ names:
 - external-secrets
 - flux
 - ingress-nginx
+- nginx-ingress-controller
 - istio
 - jaeger
 - karpenter
