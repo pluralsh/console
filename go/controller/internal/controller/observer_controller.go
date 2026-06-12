@@ -224,6 +224,12 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		}
 	}
 
+	if renovate := observer.Spec.Target.Renovate; renovate != nil {
+		target.Renovate = &console.ObserverRenovateAttributes{
+			IgnoreUnstable: renovate.IgnoreUnstable,
+		}
+	}
+
 	if len(observer.Spec.Actions) > 0 {
 		actions = make([]*console.ObserverActionAttributes, len(observer.Spec.Actions))
 		for i, action := range observer.Spec.Actions {

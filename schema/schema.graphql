@@ -12462,6 +12462,7 @@ enum ObserverGitTargetType {
 enum ObserverTargetOrder {
   SEMVER
   LATEST
+  RENOVATE
 }
 
 enum ObserverStatus {
@@ -13005,6 +13006,8 @@ input ObserverTargetAttributes {
   addon: ObserverAddonAttributes
 
   eksAddon: ObserverAddonAttributes
+
+  renovate: ObserverRenovateAttributes
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -13038,6 +13041,12 @@ input ObserverGitAttributes {
 input ObserverGitFilterAttributes {
   "a regex to filter the git repository tags for the observed value"
   regex: String
+}
+
+"Renovate regex versioning options for observer target ordering"
+input ObserverRenovateAttributes {
+  "whether prerelease matches captured by the renovate regex should be ignored"
+  ignoreUnstable: Boolean
 }
 
 "configuration for an observer action"
@@ -13679,6 +13688,8 @@ type ObserverTarget {
   oci: ObserverOciRepo
 
   git: ObserverGitRepo
+
+  renovate: ObserverRenovate
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -13714,6 +13725,12 @@ type ObserverGitRepo {
 type ObserverGitFilter {
   "a regex to filter the git repository tags for the observed value"
   regex: String
+}
+
+"Renovate regex versioning options for observer target ordering"
+type ObserverRenovate {
+  "whether prerelease matches captured by the renovate regex should be ignored"
+  ignoreUnstable: Boolean
 }
 
 "configuration for an observer action"

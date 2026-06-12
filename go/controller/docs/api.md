@@ -2962,6 +2962,22 @@ _Appears in:_
 | `prompt` _string_ | The prompt to use to guide the AI code change for this PR. |  | Required: \{\} <br /> |
 
 
+#### ObserverRenovate
+
+
+
+ObserverRenovate defines Renovate regex versioning options for observer target ordering.
+
+
+
+_Appears in:_
+- [ObserverTarget](#observertarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `ignoreUnstable` _boolean_ | IgnoreUnstable skips prerelease values captured by the target format regex. |  | Optional: \{\} <br /> |
+
+
 #### ObserverSpec
 
 
@@ -3003,7 +3019,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `type` _[ObserverTargetType](#observertargettype)_ | Type specifies the kind of external source to monitor.<br />Each type has different configuration requirements and polling mechanisms.<br />Supported types include Helm charts, OCI images, Git tags, and Kubernetes add-ons. |  | Enum: [OCI HELM GIT ADDON EKS_ADDON] <br />Required: \{\} <br />Type: string <br /> |
 | `format` _string_ | Format is a regex pattern with a capture group for extracting version information.<br />Useful when version strings are embedded in larger release names or tags.<br />The first capture group is used as the version value.<br />Example: "app-v([0-9]+.[0-9]+.[0-9]+)" extracts "1.2.3" from "app-v1.2.3". |  | Optional: \{\} <br /> |
-| `order` _[ObserverTargetOrder](#observertargetorder)_ | Order determines how discovered versions are sorted and which one is selected.<br />SEMVER sorts by semantic version rules, while LATEST uses chronological ordering.<br />SEMVER is recommended for most use cases as it provides predictable version ordering. |  | Enum: [SEMVER LATEST] <br />Required: \{\} <br />Type: string <br /> |
+| `order` _[ObserverTargetOrder](#observertargetorder)_ | Order determines how discovered versions are sorted and which one is selected.<br />SEMVER sorts by semantic version rules, LATEST uses chronological ordering,<br />and RENOVATE uses regex capture groups with Renovate-style version comparison. |  | Enum: [SEMVER LATEST RENOVATE] <br />Required: \{\} <br />Type: string <br /> |
+| `renovate` _[ObserverRenovate](#observerrenovate)_ | Renovate contains options for RENOVATE target ordering.<br />Used when Order is RENOVATE to control prerelease filtering and related behavior. |  | Optional: \{\} <br /> |
 | `helm` _[ObserverHelm](#observerhelm)_ | Helm contains configuration for monitoring Helm chart repositories.<br />Used when Type is HELM to specify the repository URL, chart name, and authentication. |  | Optional: \{\} <br /> |
 | `oci` _[ObserverOci](#observeroci)_ | OCI contains configuration for monitoring OCI (container) registries.<br />Used when Type is OCI to specify the registry URL and authentication credentials. |  | Optional: \{\} <br /> |
 | `git` _[ObserverGit](#observergit)_ | Git contains configuration for monitoring Git repository tags.<br />Used when Type is GIT to specify which Git repository to monitor for new tags. |  | Optional: \{\} <br /> |

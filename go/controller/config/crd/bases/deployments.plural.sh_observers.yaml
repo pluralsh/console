@@ -1141,12 +1141,23 @@ spec:
                   order:
                     description: |-
                       Order determines how discovered versions are sorted and which one is selected.
-                      SEMVER sorts by semantic version rules, while LATEST uses chronological ordering.
-                      SEMVER is recommended for most use cases as it provides predictable version ordering.
+                      SEMVER sorts by semantic version rules, LATEST uses chronological ordering,
+                      and RENOVATE uses regex capture groups with Renovate-style version comparison.
                     enum:
                     - SEMVER
                     - LATEST
+                    - RENOVATE
                     type: string
+                  renovate:
+                    description: |-
+                      Renovate contains options for RENOVATE target ordering.
+                      Used when Order is RENOVATE to control prerelease filtering and related behavior.
+                    properties:
+                      ignoreUnstable:
+                        description: IgnoreUnstable skips prerelease values captured
+                          by the target format regex.
+                        type: boolean
+                    type: object
                   type:
                     description: |-
                       Type specifies the kind of external source to monitor.

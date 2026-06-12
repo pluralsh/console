@@ -92,6 +92,5 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   defp run_args(tool) do
     Map.take(tool, @run_attrs)
     |> Map.put(:branch, tool.base_branch)
-    |> IO.inspect(label: "coding agent attrs")
   end
 end
