@@ -2,15 +2,19 @@ import json
 import re
 from collections import OrderedDict
 
+import requests
 import yaml
 from packaging.version import Version
 
 from utils import (
+    ensure_keys,
     expand_kube_versions,
     fetch_page,
     print_error,
     print_success,
     read_yaml,
+    reduce_versions,
+    update_versions_data,
     write_yaml,
 )
 
@@ -19,6 +23,7 @@ APP_NAME = "nginx-ingress-controller"
 COMPATIBILITY_URL = "https://raw.githubusercontent.com/nginx/documentation/main/content/includes/nic/compatibility-tables/nic-k8s.md"
 LATEST_RELEASE_URL = "https://api.github.com/repos/nginx/kubernetes-ingress/releases/latest"
 CHART_YAML_URL = "https://raw.githubusercontent.com/nginx/kubernetes-ingress/v{version}/charts/nginx-ingress/Chart.yaml"
+CHART_VALUES_URL = "https://raw.githubusercontent.com/nginx/kubernetes-ingress/v{version}/charts/nginx-ingress/values.yaml"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
 
 
@@ -59,6 +64,23 @@ def _latest_release_versions():
     return version, str(chart.get("version", ""))
 
 
+def _fetch_yaml(url):
+    try:
+        response = requests.get(url, timeout=10)
+    except requests.RequestException:
+        return {}
+    if response.status_code != 200:
+        return {}
+
+    try:
+        parsed = yaml.safe_load(response.text)
+    except yaml.YAMLError as exc:
+        print_error(f"Failed to parse NGINX Ingress Controller chart metadata: {exc}")
+        return {}
+
+    return parsed if isinstance(parsed, dict) else {}
+
+
 def _resolve_shortcodes(value, latest_version, latest_chart_version):
     return (
         value.replace("{{< nic-version >}}", latest_version)
@@ -73,6 +95,18 @@ def _kube_versions(value):
         return expand_kube_versions(match.group(1), match.group(2))
 
     return [match.group(1) for match in re.finditer(r"(\d+\.\d+)", value)]
+
+
+def _default_image(app_version):
+    chart = _fetch_yaml(CHART_YAML_URL.format(version=app_version))
+    values = _fetch_yaml(CHART_VALUES_URL.format(version=app_version))
+
+    controller = values.get("controller", {}) if isinstance(values, dict) else {}
+    image = controller.get("image", {}) if isinstance(controller, dict) else {}
+    repository = image.get("repository") or "nginx/nginx-ingress"
+    tag = image.get("tag") or chart.get("appVersion") or app_version
+
+    return f"{repository}:{tag}"
 
 
 def _table_rows(content, latest_version, latest_chart_version):
@@ -111,9 +145,8 @@ def _table_rows(content, latest_version, latest_chart_version):
                     ("kube", sorted(kube_versions, key=Version, reverse=True)),
                     ("requirements", []),
                     ("incompatibilities", []),
-                    ("summary", None),
                     ("chart_version", chart_version),
-                    ("images", [f"nginx/nginx-ingress:{app_version}"]),
+                    ("images", [_default_image(app_version)]),
                 ]
             )
         )
@@ -138,7 +171,8 @@ def scrape():
         return
 
     data = read_yaml(TARGET_FILE) or {}
-    data["versions"] = rows
+    update_versions_data(data, [ensure_keys(row) for row in rows])
+    data["versions"] = reduce_versions(data["versions"])
 
     if write_yaml(TARGET_FILE, data):
         print_success(f"Updated compatibility info table: {TARGET_FILE}")
