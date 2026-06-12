@@ -1,13 +1,20 @@
 import {
   ComponentProps,
   Dispatch,
+  KeyboardEvent,
   SetStateAction,
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react'
 import Fuse from 'fuse.js'
-import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
+import {
+  AddIcon,
+  ComboBox,
+  ListBoxFooterPlus,
+  ListBoxItem,
+} from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 import { NamespaceListFooter } from '../../utils/NamespaceListFooter.tsx'
@@ -29,16 +36,41 @@ export function NamespaceFilter({
     setValue(namespace)
   }, [namespace])
 
+  const trimmedValue = value?.trim() ?? ''
+
   const filteredNamespaces = useMemo(() => {
     const fuse = new Fuse(namespaces, { threshold: 0.25 })
 
-    return value ? fuse.search(value).map(({ item }) => item) : namespaces
-  }, [namespaces, value])
+    return trimmedValue
+      ? fuse.search(trimmedValue).map(({ item }) => item)
+      : namespaces
+  }, [namespaces, trimmedValue])
+
+  const isCustomNamespace = !!trimmedValue && !namespaces.includes(trimmedValue)
+
+  const applyNamespace = useCallback(
+    (ns: string) => {
+      onChange(ns)
+      setValue(ns)
+    },
+    [onChange]
+  )
+
+  const handleEnter = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key !== 'Enter' || !trimmedValue) return
+
+      event.preventDefault()
+      applyNamespace(trimmedValue)
+    },
+    [applyNamespace, trimmedValue]
+  )
 
   return (
     <ComboBox
       startIcon={null}
       showArrow={false}
+      allowsEmptyCollection={isCustomNamespace}
       inputProps={{
         placeholder: 'Filter by namespace',
         style: {
@@ -46,14 +78,31 @@ export function NamespaceFilter({
           borderRadius: 0,
           background: theme.colors['fill-two'],
         },
+        onKeyDown: handleEnter,
       }}
       inputValue={value}
       onInputChange={setValue}
       selectedKey={namespace}
       onSelectionChange={(key) => {
-        onChange(key as string | undefined)
-        setValue((key ?? '') as string)
+        applyNamespace((key ?? '') as string)
       }}
+      onFooterClick={
+        isCustomNamespace ? () => applyNamespace(trimmedValue) : undefined
+      }
+      dropdownFooter={
+        isCustomNamespace ? (
+          <ListBoxFooterPlus
+            leftContent={
+              <AddIcon
+                size={16}
+                color="text-primary-accent"
+              />
+            }
+          >
+            Use &quot;{trimmedValue}&quot;
+          </ListBoxFooterPlus>
+        ) : undefined
+      }
       dropdownFooterFixed={
         <NamespaceListFooter
           onClick={() => {
