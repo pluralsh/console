@@ -97,4 +97,4 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 1.2.0
-  images: ['ghcr.io/nginx/nginx-gateway-fabric:1.2.0', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.2.0']
+  images: ['ghcr.io/nginxinc/nginx-gateway-fabric:1.2.0', 'ghcr.io/nginxinc/nginx-gateway-fabric/nginx:1.2.0']

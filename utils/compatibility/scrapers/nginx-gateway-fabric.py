@@ -54,10 +54,18 @@ def _image_from_config(config, fallback_repository, fallback_tag):
     return f"{repository}:{tag}"
 
 
+def _fallback_image_repositories(version):
+    parsed = validate_semver(version)
+    org = "nginxinc" if parsed and parsed.major == 1 and parsed.minor < 6 else "nginx"
+    repository = f"ghcr.io/{org}/nginx-gateway-fabric"
+    return repository, f"{repository}/nginx"
+
+
 def _default_images(version):
+    control_plane_repository, data_plane_repository = _fallback_image_repositories(version)
     fallbacks = [
-        f"ghcr.io/nginx/nginx-gateway-fabric:{version}",
-        f"ghcr.io/nginx/nginx-gateway-fabric/nginx:{version}",
+        f"{control_plane_repository}:{version}",
+        f"{data_plane_repository}:{version}",
     ]
     try:
         response = requests.get(CHART_VALUES_URL.format(version=version), timeout=10)
@@ -74,12 +82,12 @@ def _default_images(version):
 
     control_plane = _image_from_config(
         values.get("nginxGateway", {}),
-        "ghcr.io/nginx/nginx-gateway-fabric",
+        control_plane_repository,
         version,
     )
     data_plane = _image_from_config(
         values.get("nginx", {}),
-        "ghcr.io/nginx/nginx-gateway-fabric/nginx",
+        data_plane_repository,
         version,
     )
     return [control_plane, data_plane]

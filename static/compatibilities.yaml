@@ -20955,7 +20955,7 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 1.2.0
-    images: ['ghcr.io/nginx/nginx-gateway-fabric:1.2.0', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:1.2.0']
+    images: ['ghcr.io/nginxinc/nginx-gateway-fabric:1.2.0', 'ghcr.io/nginxinc/nginx-gateway-fabric/nginx:1.2.0']
   name: nginx-gateway-fabric
 - icon: https://avatars.githubusercontent.com/u/49998002?s=48&v=4
   git_url: https://github.com/open-telemetry/opentelemetry-operator
