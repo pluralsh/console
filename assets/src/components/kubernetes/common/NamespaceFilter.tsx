@@ -58,12 +58,12 @@ export function NamespaceFilter({
 
   const handleEnter = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key !== 'Enter' || !trimmedValue) return
+      if (event.key !== 'Enter' || !trimmedValue || !isCustomNamespace) return
 
       event.preventDefault()
       applyNamespace(trimmedValue)
     },
-    [applyNamespace, trimmedValue]
+    [applyNamespace, trimmedValue, isCustomNamespace]
   )
 
   return (
