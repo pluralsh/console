@@ -170,21 +170,30 @@ export function CreateSecretModal({
           label="Namespace"
           required
         >
-          <Select
-            label="Select namespace"
-            selectedKey={namespace}
-            onSelectionChange={(key) => {
-              setNamespace(key as string)
-            }}
-          >
-            {namespaces.map((ns) => (
-              <ListBoxItem
-                key={ns}
-                label={ns}
-                textValue={ns}
-              />
-            ))}
-          </Select>
+          {namespaces.length > 0 ? (
+            <Select
+              label="Select namespace"
+              selectedKey={namespace}
+              onSelectionChange={(key) => {
+                setNamespace(key as string)
+              }}
+            >
+              {namespaces.map((ns) => (
+                <ListBoxItem
+                  key={ns}
+                  label={ns}
+                  textValue={ns}
+                />
+              ))}
+            </Select>
+          ) : (
+            <Input
+              placeholder="Enter namespace"
+              value={namespace}
+              onChange={(e) => setNamespace(e.target.value)}
+              required
+            />
+          )}
         </FormField>
         <FormField
           label="Type"
