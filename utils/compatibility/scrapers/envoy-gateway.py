@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from packaging.version import Version
 
-from utils import fetch_page, print_error, update_compatibility_info
+from utils import fetch_page, print_error, print_warning, update_compatibility_info
 
 
 APP_NAME = "envoy-gateway"
@@ -73,6 +73,8 @@ def _latest_patch_versions():
 
 def _matrix_rows(content):
     rows = {}
+    version_idx = None
+    kube_idx = None
 
     for line in _decode(content).splitlines():
         stripped = line.strip()
@@ -82,11 +84,21 @@ def _matrix_rows(content):
             continue
 
         columns = [_clean_cell(column) for column in stripped.strip("|").split("|")]
-        if len(columns) < 5 or columns[0] in {"Envoy Gateway version", "latest"}:
+        if "Envoy Gateway version" in columns and "Kubernetes version" in columns:
+            version_idx = columns.index("Envoy Gateway version")
+            kube_idx = columns.index("Kubernetes version")
             continue
 
-        series = _version_series(columns[0])
-        kube_versions = _kube_versions(columns[4])
+        if version_idx is None or kube_idx is None:
+            continue
+        if len(columns) <= max(version_idx, kube_idx):
+            continue
+
+        if columns[version_idx] == "latest":
+            continue
+
+        series = _version_series(columns[version_idx])
+        kube_versions = _kube_versions(columns[kube_idx])
         if series and kube_versions:
             rows[series] = kube_versions
 
@@ -110,9 +122,11 @@ def scrape():
         return
 
     versions = []
+    skipped_series = []
     for series, kube_versions in compatibility.items():
         app_version = latest_versions.get(series)
         if not app_version:
+            skipped_series.append(series)
             continue
 
         versions.append(
@@ -124,6 +138,12 @@ def scrape():
                     ("incompatibilities", []),
                 ]
             )
+        )
+
+    if skipped_series:
+        print_warning(
+            "Skipped Envoy Gateway series without stable release tags: "
+            + ", ".join(skipped_series)
         )
 
     if not versions:

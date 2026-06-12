@@ -13,9 +13,9 @@ names:
 - cloudnative-pg
 - cluster-autoscaler
 - descheduler
+- envoy-gateway
 - external-dns
 - external-secrets
-- envoy-gateway
 - flux
 - ingress-nginx
 - istio
