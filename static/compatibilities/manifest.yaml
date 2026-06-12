@@ -15,6 +15,7 @@ names:
 - descheduler
 - external-dns
 - external-secrets
+- envoy-gateway
 - flux
 - ingress-nginx
 - istio
