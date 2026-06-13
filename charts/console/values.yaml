@@ -88,6 +88,9 @@ console:
 
     kasHost: ~
 
+    # groupsWhitelist is used to configure the set of groups plural syncs from OIDC.
+    groupsWhitelist: []
+
     objectStore:
       # path is used to configure the path within object storage for storing large files, useful for multi-tenant bucket usage.
       path: ~

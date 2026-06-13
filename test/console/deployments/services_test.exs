@@ -1544,5 +1544,76 @@ defmodule Console.Deployments.ServicesSyncTest do
       {:ok, sha} = Services.digest(svc)
       {:ok, ^sha} = Services.digest(svc)
     end
+
+    test "digest changes when helm lua paths change on a git-backed service" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      cluster = insert(:cluster)
+      user = admin_user()
+
+      {:ok, svc} =
+        Services.create_service(
+          %{
+            name: "lua-digest-service",
+            namespace: "default",
+            version: "0.0.1",
+            repository_id: git.id,
+            git: %{ref: "main", folder: "charts/deployment-operator"},
+            helm: %{lua_folder: "lua", values: "x: 1"}
+          },
+          cluster.id,
+          user
+        )
+
+      {:ok, folder_sha} = Services.digest(svc)
+
+      {:ok, updated} =
+        Services.update_service(
+          %{helm: %{lua_folder: "scripts/lua", values: "x: 1"}},
+          svc.id,
+          user
+        )
+
+      assert updated.helm.lua_folder == "scripts/lua"
+
+      {:ok, other_sha} = Services.digest(updated)
+      refute folder_sha == other_sha
+    end
+
+    test "digest resolves git when helm url and lua folder are both configured" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      cluster = insert(:cluster)
+      user = admin_user()
+
+      {:ok, svc} =
+        Services.create_service(
+          %{
+            name: "lua-url-digest-service",
+            namespace: "default",
+            version: "0.0.1",
+            repository_id: git.id,
+            git: %{ref: "main", folder: "charts/deployment-operator"},
+            helm: %{
+              url: "https://stefanprodan.github.io/podinfo",
+              chart: "podinfo",
+              version: "6.5.2",
+              lua_folder: "lua"
+            }
+          },
+          cluster.id,
+          user
+        )
+
+      {:ok, sha} = Services.digest(svc)
+
+      {:ok, updated} =
+        Services.update_service(
+          %{helm: %{lua_folder: "scripts/lua"}},
+          svc.id,
+          user
+        )
+
+      assert {:ok, other_sha} = Services.digest(updated)
+      refute sha == other_sha
+    end
   end
 end

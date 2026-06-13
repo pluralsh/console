@@ -5613,6 +5613,18 @@ type ObserverPrAiActionAttributes struct {
 	Prompt string `json:"prompt"`
 }
 
+// Renovate regex versioning options for observer target ordering
+type ObserverRenovate struct {
+	// whether prerelease matches captured by the renovate regex should be ignored
+	IgnoreUnstable *bool `json:"ignoreUnstable,omitempty"`
+}
+
+// Renovate regex versioning options for observer target ordering
+type ObserverRenovateAttributes struct {
+	// whether prerelease matches captured by the renovate regex should be ignored
+	IgnoreUnstable *bool `json:"ignoreUnstable,omitempty"`
+}
+
 // Resets the current value of the observer
 type ObserverResetAttributes struct {
 	LastValue string `json:"lastValue"`
@@ -5627,24 +5639,26 @@ type ObserverTarget struct {
 	// in a larger release string.  The first capture group is the substring that is used for the value.
 	Format *string `json:"format,omitempty"`
 	// the order in which polled results are applied, defaults to SEMVER
-	Order ObserverTargetOrder `json:"order"`
-	Helm  *ObserverHelmRepo   `json:"helm,omitempty"`
-	Oci   *ObserverOciRepo    `json:"oci,omitempty"`
-	Git   *ObserverGitRepo    `json:"git,omitempty"`
+	Order    ObserverTargetOrder `json:"order"`
+	Helm     *ObserverHelmRepo   `json:"helm,omitempty"`
+	Oci      *ObserverOciRepo    `json:"oci,omitempty"`
+	Git      *ObserverGitRepo    `json:"git,omitempty"`
+	Renovate *ObserverRenovate   `json:"renovate,omitempty"`
 }
 
 // A spec for a target to poll
 type ObserverTargetAttributes struct {
 	Type *ObserverTargetType `json:"type,omitempty"`
 	// present for backwards compat
-	Target   *ObserverTargetType      `json:"target,omitempty"`
-	Format   *string                  `json:"format,omitempty"`
-	Order    ObserverTargetOrder      `json:"order"`
-	Helm     *ObserverHelmAttributes  `json:"helm,omitempty"`
-	Oci      *ObserverOciAttributes   `json:"oci,omitempty"`
-	Git      *ObserverGitAttributes   `json:"git,omitempty"`
-	Addon    *ObserverAddonAttributes `json:"addon,omitempty"`
-	EksAddon *ObserverAddonAttributes `json:"eksAddon,omitempty"`
+	Target   *ObserverTargetType         `json:"target,omitempty"`
+	Format   *string                     `json:"format,omitempty"`
+	Order    ObserverTargetOrder         `json:"order"`
+	Helm     *ObserverHelmAttributes     `json:"helm,omitempty"`
+	Oci      *ObserverOciAttributes      `json:"oci,omitempty"`
+	Git      *ObserverGitAttributes      `json:"git,omitempty"`
+	Addon    *ObserverAddonAttributes    `json:"addon,omitempty"`
+	EksAddon *ObserverAddonAttributes    `json:"eksAddon,omitempty"`
+	Renovate *ObserverRenovateAttributes `json:"renovate,omitempty"`
 }
 
 // A representation of a created OIDC provider client
@@ -14589,18 +14603,20 @@ func (e ObserverStatus) MarshalJSON() ([]byte, error) {
 type ObserverTargetOrder string
 
 const (
-	ObserverTargetOrderSemver ObserverTargetOrder = "SEMVER"
-	ObserverTargetOrderLatest ObserverTargetOrder = "LATEST"
+	ObserverTargetOrderSemver   ObserverTargetOrder = "SEMVER"
+	ObserverTargetOrderLatest   ObserverTargetOrder = "LATEST"
+	ObserverTargetOrderRenovate ObserverTargetOrder = "RENOVATE"
 )
 
 var AllObserverTargetOrder = []ObserverTargetOrder{
 	ObserverTargetOrderSemver,
 	ObserverTargetOrderLatest,
+	ObserverTargetOrderRenovate,
 }
 
 func (e ObserverTargetOrder) IsValid() bool {
 	switch e {
-	case ObserverTargetOrderSemver, ObserverTargetOrderLatest:
+	case ObserverTargetOrderSemver, ObserverTargetOrderLatest, ObserverTargetOrderRenovate:
 		return true
 	}
 	return false

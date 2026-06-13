@@ -86,7 +86,9 @@ You should also take heed of any criticism in the notes tool in case that provid
 
 **Never** have a coding agent reevaluate if a prior pr has been merged or anything similar, as it just wastes tokens.
 
-Once work is done, wrap up all todos, write a final conclusion.
+**KEY POINT**: You should **NEVER** go in circles, if you're doing the same analysis again and again, or making the same status update again and again, just call the job done.
+
+Once work is done, wrap up all todos and write an effective final conclusion for a human reviewer to understand.
 
 ## Parallelism Guidance
 

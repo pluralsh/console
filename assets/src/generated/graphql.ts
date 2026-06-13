@@ -6814,6 +6814,19 @@ export type ObserverPrAiActionAttributes = {
   prompt: Scalars['String']['input'];
 };
 
+/** Renovate regex versioning options for observer target ordering */
+export type ObserverRenovate = {
+  __typename?: 'ObserverRenovate';
+  /** whether prerelease matches captured by the renovate regex should be ignored */
+  ignoreUnstable?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** Renovate regex versioning options for observer target ordering */
+export type ObserverRenovateAttributes = {
+  /** whether prerelease matches captured by the renovate regex should be ignored */
+  ignoreUnstable?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** Resets the current value of the observer */
 export type ObserverResetAttributes = {
   lastValue: Scalars['String']['input'];
@@ -6837,6 +6850,7 @@ export type ObserverTarget = {
   oci?: Maybe<ObserverOciRepo>;
   /** the order in which polled results are applied, defaults to SEMVER */
   order: ObserverTargetOrder;
+  renovate?: Maybe<ObserverRenovate>;
   /** present for backwards compat, use `type` instead */
   target: ObserverTargetType;
   type: ObserverTargetType;
@@ -6851,6 +6865,7 @@ export type ObserverTargetAttributes = {
   helm?: InputMaybe<ObserverHelmAttributes>;
   oci?: InputMaybe<ObserverOciAttributes>;
   order: ObserverTargetOrder;
+  renovate?: InputMaybe<ObserverRenovateAttributes>;
   /** present for backwards compat */
   target?: InputMaybe<ObserverTargetType>;
   type?: InputMaybe<ObserverTargetType>;
@@ -6858,6 +6873,7 @@ export type ObserverTargetAttributes = {
 
 export enum ObserverTargetOrder {
   Latest = 'LATEST',
+  Renovate = 'RENOVATE',
   Semver = 'SEMVER'
 }
 

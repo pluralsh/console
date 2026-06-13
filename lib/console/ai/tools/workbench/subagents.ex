@@ -27,7 +27,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   defp subagent_description(_, :coding, _), do: "Invoke a coding subagent to analyze or modify code, generating a pull request.  This subagent will use either direct repository urls or container image urls to determine where to make code changes, so include either or both to guide it appropriately, alongside a clear spec of the change or analysis needed."
   defp subagent_description(%Workbench{configuration: %{infrastructure: %{} = infra}}, :infrastructure, _), do: infra_description(infra)
-  defp subagent_description(_, :infrastructure, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration."
+  defp subagent_description(_, :infrastructure, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration.  Use this to deeply investiage kubernetes or IaaS data necessary for the job at hand."
   defp subagent_description(_, :observability, categories), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
   defp subagent_description(_, :integration, _), do: "Invoke an integration subagent to interact with enterprise systems, usually not directly related to devops infrastructure. Often Task tracking tools, knowledge bases or internal compliance software that's not SRE related."
   defp subagent_description(_, :memory, _), do: "Invoke a memory subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
@@ -38,7 +38,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   defp infra_description(%{vulnerabilities: vulns, pod_logs: logs}) when vulns or logs do
     Enum.filter([additional(:vulns, vulns), additional(:pod_logs, logs)], & &1 != nil)
-    |> Enum.join("and ")
+    |> Enum.join(" and ")
     |> then(& "#{subagent_description(nil, :infrastructure, nil)} including #{&1}")
   end
   defp infra_description(_), do: subagent_description(nil, :infrastructure, nil)

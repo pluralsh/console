@@ -74,7 +74,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input),
+         {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input, Client.cloud_query_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: content, traces: Enum.map(output.spans, &mapify/1)}}
     end
@@ -83,7 +83,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input) do
+         {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input, Client.cloud_query_rpc_opts()) do
       {:ok, Enum.map(output.spans, &mapify/1)}
     end
   end
