@@ -8,7 +8,13 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No concrete feature details provided in the supplied release notes;
+        v3.3.0 points to the upstream CHANGELOG for the actual list of changes.]
+    breaking_changes: [No breaking-change information provided in the supplied release
+        notes; must review CHANGELOG-3.x.md between v3.2.0 and v3.3.0 to confirm.]
   chart_version: 4.3.0
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.2',
     'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2',
