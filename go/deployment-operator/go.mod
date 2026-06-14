@@ -48,6 +48,7 @@ require (
 	github.com/onsi/gomega v1.39.1
 	github.com/open-policy-agent/frameworks/constraint v0.0.0-20250908215021-e67dab92c8a3
 	github.com/open-policy-agent/gatekeeper/v3 v3.20.1
+	github.com/openai/openai-go v1.8.2
 	github.com/opencost/opencost/core v1.117.3
 	github.com/openshift/api v0.0.0-20250908150922-8634aa495a26
 	github.com/orcaman/concurrent-map/v2 v2.0.1
@@ -83,10 +84,16 @@ require (
 	sigs.k8s.io/cluster-api v1.12.2
 	sigs.k8s.io/controller-runtime v0.23.1
 	sigs.k8s.io/kustomize/api v0.20.1
-	sigs.k8s.io/kustomize/kustomize/v5 v5.7.1
 	sigs.k8s.io/kustomize/kyaml v0.20.1
 	sigs.k8s.io/yaml v1.6.0
 	zombiezen.com/go/sqlite v1.4.2
+)
+
+require (
+	github.com/tidwall/gjson v1.18.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 )
 
 require (
@@ -94,7 +101,7 @@ require (
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/storage v1.56.1 // indirect
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/99designs/gqlgen v0.17.78 // indirect
+	github.com/99designs/gqlgen v0.17.78
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect

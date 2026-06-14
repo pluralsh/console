@@ -166,13 +166,16 @@ func startMcpServer(server *agent.Server) <-chan error {
 }
 
 func createServerOptions(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
-	return append(
-		[]agent.Option{
-			agent.WithTools(),
-			agent.WithVersion(Version),
-		},
-		createServerTools(client, runtimeClient, agentRun)...,
-	)
+	opts := []agent.Option{
+		agent.WithTools(),
+		agent.WithVersion(Version),
+	}
+
+	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
+		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL()))
+	}
+
+	return append(opts, createServerTools(client, runtimeClient, agentRun)...)
 }
 
 func createServerTools(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {

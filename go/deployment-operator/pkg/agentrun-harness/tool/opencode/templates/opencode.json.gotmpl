@@ -67,7 +67,11 @@
       {{ end }}"name": "{{ .Provider }}",
       "options": {
         {{- if eq .Provider "plural" }}
+        {{- if .StreamingProxy }}
+        "baseURL": "{{ .StreamingProxyBaseURL }}",
+        {{- else }}
         "baseURL": "{{ .ConsoleURL }}/ext/ai/v1",
+        {{- end }}
         "apiKey": "{{ .ConsoleToken }}"
         {{- else if .OpenAICompatible }}
         "baseURL": "{{ .Endpoint }}",

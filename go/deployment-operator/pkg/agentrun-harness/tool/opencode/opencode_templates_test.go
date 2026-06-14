@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 const (
@@ -137,6 +138,23 @@ func TestConfigTemplate_Provider(t *testing.T) {
 		}
 		if options["apiKey"] != testConsoleToken {
 			t.Errorf("expected apiKey=%s, got %v", testConsoleToken, options["apiKey"])
+		}
+	})
+
+	t.Run("plural provider with streaming proxy uses mcpserver base URL", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+		input.StreamingProxy = true
+		input.StreamingProxyBaseURL = common.AgentOpenAIBaseURL
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		options := plural["options"].(map[string]any)
+
+		if options["baseURL"] != common.AgentOpenAIBaseURL {
+			t.Errorf("expected mcpserver baseURL %s, got %v", common.AgentOpenAIBaseURL, options["baseURL"])
 		}
 	})
 
