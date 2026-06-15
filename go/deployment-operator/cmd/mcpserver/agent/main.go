@@ -172,7 +172,7 @@ func createServerOptions(client, runtimeClient console.Client, agentRun *console
 	}
 
 	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
-		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL()))
+		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL()))
 	}
 
 	return append(opts, createServerTools(client, runtimeClient, agentRun)...)

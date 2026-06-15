@@ -11,6 +11,12 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
   def external_id(%{"object_kind" => "note", "object_attributes" => %{"id" => id}} = payload)
       when is_binary(id),
       do: "#{infer_project(payload)}:comment:#{id}"
+  def external_id(%{"object_kind" => "work_item", "object_attributes" => %{"iid" => iid}} = payload)
+      when is_integer(iid),
+      do: "#{infer_project(payload)}:work_item:#{iid}"
+  def external_id(%{"object_kind" => "work_item", "object_attributes" => %{"iid" => iid}} = payload)
+      when is_binary(iid),
+      do: "#{infer_project(payload)}:work_item:#{iid}"
   def external_id(%{"object_attributes" => %{"iid" => iid}} = payload) when is_integer(iid),
     do: "#{infer_project(payload)}:issue:#{iid}"
   def external_id(%{"object_attributes" => %{"iid" => iid}} = payload) when is_binary(iid),
@@ -35,10 +41,14 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
 
   def status(%{"object_kind" => "note", "merge_request" => %{"state" => state}}), do: map_status(state)
   def status(%{"object_attributes" => %{"state" => state}}), do: map_status(state)
+  def status(%{"object_attributes" => %{"action" => action}}), do: map_status(action)
   def status(_), do: :open
 
+  defp map_status("open"), do: :open
   defp map_status("opened"), do: :open
+  defp map_status("reopen"), do: :open
   defp map_status("reopened"), do: :open
+  defp map_status("close"), do: :completed
   defp map_status("closed"), do: :completed
   defp map_status(_), do: :open
 

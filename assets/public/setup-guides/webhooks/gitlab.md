@@ -28,7 +28,7 @@ Open your GitLab host (for example `https://<your-gitlab-host>/`) and navigate t
 
 Enable at least:
 
-- Issue events
+- Issue events for classic GitLab issues, or Work item events for GitLab work items
 - Note/comment events (if comments matter for workflows)
 - Label or state changes used by your routing logic
 

@@ -43,6 +43,9 @@ type Server struct {
 
 	// openaiProxy optionally exposes a local OpenAI chat completion endpoint
 	openaiProxy *openaiproxy.Handler
+
+	// openaiResponsesProxy optionally exposes a local OpenAI responses endpoint
+	openaiResponsesProxy *openaiproxy.ResponsesHandler
 }
 
 // Start starts the MCP server with streamable HTTP transport
@@ -84,6 +87,10 @@ func (in *Server) init() *Server {
 	if in.openaiProxy != nil {
 		mux.Handle(common.AgentOpenAIChatCompletionsPath, in.openaiProxy)
 		klog.V(log.LogLevelDefault).InfoS("registered openai chat completion proxy", "path", common.AgentOpenAIChatCompletionsPath)
+	}
+	if in.openaiResponsesProxy != nil {
+		mux.Handle(common.AgentOpenAIResponsesPath, in.openaiResponsesProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered openai responses proxy", "path", common.AgentOpenAIResponsesPath)
 	}
 
 	in.httpServer = &http.Server{Handler: mux}

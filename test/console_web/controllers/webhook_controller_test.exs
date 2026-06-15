@@ -1447,6 +1447,52 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert issue.workbench_webhook_id == wh.id
     end
 
+    test "it can handle a valid GitLab work item webhook and creates the issue", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :gitlab)
+      wh = insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "plural fix this"}
+      )
+      gitlab_payload = %{
+        "object_kind" => "work_item",
+        "event_type" => "work_item",
+        "project" => %{
+          "path_with_namespace" => "mygroup/myproject"
+        },
+        "object_attributes" => %{
+          "id" => 301,
+          "iid" => 101,
+          "title" => "Provision demo database",
+          "description" => "plural fix this by wiring the database bootstrap",
+          "type" => "Task",
+          "url" => "https://gitlab.com/mygroup/myproject/-/work_items/101",
+          "state" => "opened",
+          "action" => "open"
+        }
+      }
+      payload = Jason.encode!(gitlab_payload)
+
+      result =
+        conn
+        |> put_req_header("x-gitlab-token", hook.secret)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/gitlab/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+      refute result["ignored"]
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :gitlab
+      assert issue.external_id == "mygroup/myproject:work_item:101"
+      assert issue.title == "Provision demo database"
+      assert issue.url == "https://gitlab.com/mygroup/myproject/-/work_items/101"
+      assert issue.body == "plural fix this by wiring the database bootstrap"
+      assert issue.status == :open
+      assert issue.payload == gitlab_payload
+      assert issue.workbench_webhook_id == wh.id
+    end
+
     test "it matches workbench webhook using title and body format", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :gitlab)
       wh = insert(:workbench_webhook,
