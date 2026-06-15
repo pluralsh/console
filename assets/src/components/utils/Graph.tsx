@@ -41,10 +41,12 @@ export function Graph({
   data,
   yFormat,
   tickRotation,
+  wrapLegend,
 }: {
   data: any
   yFormat: any
   tickRotation?: number
+  wrapLegend?: boolean
 }) {
   const graphTheme = useGraphTheme()
   const { colors } = useTheme()
@@ -60,8 +62,14 @@ export function Graph({
   if (graph.length === 0) return <CaptionP>no data</CaptionP>
 
   const hasData = !!graph[0].data[0]
-
-  return (
+  const timeRange = hasData
+    ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(
+        /* @ts-expect-error */
+        last(data?.[0]?.data).x
+      )}`
+    : null
+  const toggleSelected = (id: Key) => setSelected(selected ? null : id)
+  const line = (
     <ResponsiveLine
       data={graph}
       margin={{
@@ -101,43 +109,123 @@ export function Graph({
         tickPadding: 10,
         tickRotation: tickRotation || 45,
         tickSize: 0,
-        legend: hasData
-          ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(
-              /* @ts-expect-error */
-              last(data?.[0]?.data).x
-            )}`
-          : null,
+        legend: wrapLegend ? null : timeRange,
         legendOffset: 70,
         legendPosition: 'middle',
       }}
       pointLabel="y"
       pointLabelYOffset={-15}
-      legends={[
-        {
-          anchor: 'bottom',
-          onClick: ({ id }) => (selected ? setSelected(null) : setSelected(id)),
-          direction: 'row',
-          justify: false,
-          translateY: 56,
-          itemsSpacing: 10,
-          itemDirection: 'left-to-right',
-          itemWidth: 100,
-          itemHeight: 20,
-          symbolSize: 12,
-          symbolShape: 'circle',
-          itemTextColor: colors['text-xlight'],
-          effects: [
-            {
-              on: 'hover',
-              style: {
-                itemBackground: 'rgba(0, 0, 0, .03)',
-                itemTextColor: colors['text-light'],
+      legends={
+        wrapLegend
+          ? []
+          : [
+              {
+                anchor: 'bottom',
+                onClick: ({ id }) => toggleSelected(id),
+                direction: 'row',
+                justify: false,
+                translateY: 56,
+                itemsSpacing: 10,
+                itemDirection: 'left-to-right',
+                itemWidth: 100,
+                itemHeight: 20,
+                symbolSize: 12,
+                symbolShape: 'circle',
+                itemTextColor: colors['text-xlight'],
+                effects: [
+                  {
+                    on: 'hover',
+                    style: {
+                      itemBackground: 'rgba(0, 0, 0, .03)',
+                      itemTextColor: colors['text-light'],
+                    },
+                  },
+                ],
               },
-            },
-          ],
-        },
-      ]}
+            ]
+      }
       theme={graphTheme}
     />
+  )
+
+  if (!wrapLegend) return line
+
+  return (
+    <div css={{ height: '100%', position: 'relative', width: '100%' }}>
+      {line}
+      {timeRange && (
+        <div
+          css={{
+            bottom: 46,
+            color: colors['text-light'],
+            fontSize: 11,
+            left: 50,
+            lineHeight: '16px',
+            pointerEvents: 'none',
+            position: 'absolute',
+            right: 20,
+            textAlign: 'center',
+          }}
+        >
+          {timeRange}
+        </div>
+      )}
+      <div
+        css={{
+          bottom: 0,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4px 10px',
+          left: 50,
+          maxHeight: 42,
+          overflowY: 'auto',
+          position: 'absolute',
+          right: 20,
+        }}
+      >
+        {data.map(({ id }, index) => {
+          const isSelected = selected === id
+
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => toggleSelected(id)}
+              css={{
+                all: 'unset',
+                alignItems: 'center',
+                borderRadius: 4,
+                color: colors['text-xlight'],
+                cursor: 'pointer',
+                display: 'flex',
+                gap: 6,
+                lineHeight: '16px',
+                maxWidth: '100%',
+                minWidth: 0,
+                opacity: selected && !isSelected ? 0.45 : 1,
+                padding: '2px 4px',
+                '&:hover': {
+                  background: 'rgba(0, 0, 0, .03)',
+                  color: colors['text-light'],
+                },
+              }}
+            >
+              <span
+                css={{
+                  background: isSelected
+                    ? COLORS[0]
+                    : COLORS[index % COLORS.length],
+                  borderRadius: '50%',
+                  flex: '0 0 12px',
+                  height: 12,
+                  width: 12,
+                }}
+              />
+              <span css={{ minWidth: 0, overflowWrap: 'anywhere' }}>{id}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
