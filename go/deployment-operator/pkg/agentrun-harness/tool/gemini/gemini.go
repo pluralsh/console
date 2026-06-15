@@ -15,6 +15,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini/events"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -236,6 +237,8 @@ func (in *Gemini) Configure(_, _ string) error {
 		InactivityTimeout: int64(in.Config.Run.Runtime.Config.Gemini.InactivityTimeout.Seconds()),
 		Model:             in.model,
 		GitAccessToken:    os.Getenv("GIT_ACCESS_TOKEN"),
+		BrowserEnabled:    in.Config.Run.BrowserEnabled,
+		BrowserMCPURL:     common.BrowserUseMCPServerURL,
 	}
 
 	_, content, err := settings(input)

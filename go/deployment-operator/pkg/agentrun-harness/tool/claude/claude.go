@@ -272,6 +272,9 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"WebFetch",
 		PluralMCPToolsWildcard,
 	)
+	if in.Config.Run.BrowserEnabled {
+		settings.AllowTools(BrowserMCPToolsWildcard)
+	}
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())
 	maxTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashMaxTimeout.Milliseconds())
 	settings.WithEnv("BASH_DEFAULT_TIMEOUT_MS", defaultTimeout)
@@ -287,9 +290,10 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	}
 
 	mcp := NewMCPConfigBuilder()
-	mcp.
-		AddURLServer("plural", common.AgentMCPServerURL).
-		Done()
+	mcp.AddURLServer("plural", common.AgentMCPServerURL).Done()
+	if in.Config.Run.BrowserEnabled {
+		mcp.AddURLServer("browser", common.BrowserUseMCPServerURL).Done()
+	}
 
 	if err := mcp.WriteToFile(filepath.Join(in.Config.WorkDir, ".mcp.json")); err != nil {
 		return err
@@ -330,6 +334,9 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"WebFetch",
 			PluralMCPToolsWildcard,
 		)
+	}
+	if in.Config.Run.BrowserEnabled {
+		settings.AllowTools(BrowserMCPToolsWildcard)
 	}
 
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())

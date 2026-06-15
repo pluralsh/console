@@ -29,6 +29,47 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert hd(runtime["createBindings"])["user"]["id"] == user.id
     end
 
+    test "a cluster can upsert an agent runtime with the browser sidecar enabled" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"upsertAgentRuntime" => runtime}}} = run_query("""
+        mutation Upsert($attrs: AgentRuntimeAttributes!) {
+          upsertAgentRuntime(attributes: $attrs) {
+            id
+            name
+            browserEnabled
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "browser-runtime",
+        "type" => "CLAUDE",
+        "browserEnabled" => true
+      }}, %{cluster: cluster})
+
+      assert runtime["name"] == "browser-runtime"
+      assert runtime["browserEnabled"] == true
+      assert refetch(%AgentRuntime{id: runtime["id"]}).browser_enabled
+    end
+
+    test "browserEnabled defaults to false when not provided" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"upsertAgentRuntime" => runtime}}} = run_query("""
+        mutation Upsert($attrs: AgentRuntimeAttributes!) {
+          upsertAgentRuntime(attributes: $attrs) {
+            id
+            browserEnabled
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "no-browser",
+        "type" => "CLAUDE"
+      }}, %{cluster: cluster})
+
+      assert runtime["browserEnabled"] == false
+      refute refetch(%AgentRuntime{id: runtime["id"]}).browser_enabled
+    end
+
     test "a cluster can upsert an agent runtime with an scm connection" do
       cluster = insert(:cluster)
       conn = insert(:scm_connection, name: "github")

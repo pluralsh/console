@@ -208,3 +208,52 @@ func TestConfigTemplate_AgentTools(t *testing.T) {
 		}
 	})
 }
+
+func TestConfigTemplate_BrowserMcp(t *testing.T) {
+	const browserURL = "http://127.0.0.1:8082/mcp"
+
+	t.Run("disabled by default", func(t *testing.T) {
+		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+		mcp := out["mcp"].(map[string]any)
+		if _, ok := mcp["browser"]; ok {
+			t.Fatalf("did not expect browser MCP entry when BrowserEnabled=false, got %v", mcp["browser"])
+		}
+
+		agent := out["agent"].(map[string]any)
+		for _, name := range []string{"analysis", "autonomous"} {
+			tools := agent[name].(map[string]any)["tools"].(map[string]any)
+			if _, ok := tools["browser*"]; ok {
+				t.Errorf("agent.%s.tools should not contain browser* when BrowserEnabled=false", name)
+			}
+		}
+	})
+
+	t.Run("registered when enabled", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.BrowserEnabled = true
+		input.BrowserMCPURL = browserURL
+
+		out := renderJSON(t, input)
+
+		mcp := out["mcp"].(map[string]any)
+		browser, ok := mcp["browser"].(map[string]any)
+		if !ok {
+			t.Fatalf("expected browser MCP entry, mcp=%v", mcp)
+		}
+		if browser["type"] != "remote" {
+			t.Errorf("expected browser MCP type=remote, got %v", browser["type"])
+		}
+		if browser["url"] != browserURL {
+			t.Errorf("expected browser MCP url=%s, got %v", browserURL, browser["url"])
+		}
+
+		agent := out["agent"].(map[string]any)
+		for _, name := range []string{"analysis", "autonomous"} {
+			tools := agent[name].(map[string]any)["tools"].(map[string]any)
+			if _, ok := tools["browser*"]; !ok {
+				t.Errorf("agent.%s.tools should contain browser* when BrowserEnabled=true, got %v", name, tools)
+			}
+		}
+	})
+}

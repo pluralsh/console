@@ -42,6 +42,7 @@ fragment AgentRuntime on AgentRuntime {
   name
   type
   aiProxy
+  browserEnabled
   cluster {
     ...ClusterTiny
   }

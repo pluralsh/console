@@ -15,6 +15,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -39,6 +40,8 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		Token:            in.Config.Run.Runtime.Config.OpenCode.Token,
 		Mode:             in.Config.Run.Mode,
 		DindEnabled:      in.Config.Run.DindEnabled,
+		BrowserEnabled:   in.Config.Run.BrowserEnabled,
+		BrowserMCPURL:    common.BrowserUseMCPServerURL,
 	}
 
 	_, content, err := configTemplate(input)

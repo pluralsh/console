@@ -493,6 +493,8 @@ type AgentRuntime struct {
 	Type AgentRuntimeType `json:"type"`
 	// whether this runtime uses the built-in Plural AI proxy
 	AiProxy *bool `json:"aiProxy,omitempty"`
+	// whether this runtime provisions a headless browser sidecar (and the browser-use MCP tools) for runs
+	BrowserEnabled *bool `json:"browserEnabled,omitempty"`
 	// whether this is the default runtime for coding agents
 	Default *bool `json:"default,omitempty"`
 	// the git repositories allowed to be used with this runtime
@@ -517,6 +519,8 @@ type AgentRuntimeAttributes struct {
 	CreateBindings []*AgentBindingAttributes `json:"createBindings,omitempty"`
 	// whether this runtime uses the built-in Plural AI proxy
 	AiProxy *bool `json:"aiProxy,omitempty"`
+	// whether this runtime provisions a headless browser sidecar (and the browser-use MCP tools) for runs
+	BrowserEnabled *bool `json:"browserEnabled,omitempty"`
 	// whether this is the default runtime for coding agents
 	Default *bool `json:"default,omitempty"`
 	// the git repositories allowed to be used with this runtime

@@ -24,6 +24,7 @@ defmodule Console.OpenAPI.AI.AgentRuntime do
       name: string(description: "Human-readable name of this runtime"),
       type: ecto_enum(Console.Schema.AgentRuntime.Type, description: "Type of agent runtime (claude, opencode, gemini, custom)"),
       ai_proxy: boolean(description: "Whether this runtime uses the built-in Plural AI proxy for LLM requests"),
+      browser_enabled: boolean(description: "Whether this runtime provisions a headless browser sidecar (and the browser-use MCP tools) for runs"),
       default: boolean(description: "Whether this is the default runtime for coding agents"),
       cluster_id: string(description: "ID of the cluster this runtime is deployed on"),
       allowed_repositories: array_of(string(), description: "The git repositories allowed to be used with this runtime"),

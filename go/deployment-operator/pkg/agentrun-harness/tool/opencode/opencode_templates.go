@@ -43,6 +43,15 @@ type ConfigTemplateInput struct {
 
 	// DindEnabled is true when the agent run pod has Docker-in-Docker available.
 	DindEnabled bool
+
+	// BrowserEnabled is true when the agent run pod has the browser-use MCP
+	// sidecar available alongside the headless browser. When true, the
+	// rendered config additionally registers the `browser` MCP server.
+	BrowserEnabled bool
+
+	// BrowserMCPURL is the in-pod URL of the browser-use MCP server
+	// (typically http://127.0.0.1:8082/mcp).
+	BrowserMCPURL string
 }
 
 func configTemplate(input *ConfigTemplateInput) (fileName, content string, err error) {

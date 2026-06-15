@@ -95,4 +95,44 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Error("ANALYZE mode coreTools should not include WriteFileTool or EditTool")
 		}
 	})
+
+	t.Run("browser MCP server is gated on BrowserEnabled", func(t *testing.T) {
+		const browserURL = "http://127.0.0.1:8082/mcp"
+
+		render := func(input ConfigTemplateInput) map[string]any {
+			input.AgentRunMode = console.AgentRunModeWrite
+			_, content, err := settings(&input)
+			if err != nil {
+				t.Fatalf("settings() failed: %v", err)
+			}
+			var out map[string]any
+			if err := json.Unmarshal([]byte(content), &out); err != nil {
+				t.Fatalf("not valid JSON: %v\n%s", err, content)
+			}
+			return out
+		}
+
+		off := render(*baseInput)
+		offMcp := off["mcpServers"].(map[string]any)
+		if _, ok := offMcp["browser"]; ok {
+			t.Errorf("did not expect browser MCP entry when BrowserEnabled=false, got %v", offMcp["browser"])
+		}
+
+		on := *baseInput
+		on.BrowserEnabled = true
+		on.BrowserMCPURL = browserURL
+
+		onOut := render(on)
+		onMcp := onOut["mcpServers"].(map[string]any)
+		browser, ok := onMcp["browser"].(map[string]any)
+		if !ok {
+			t.Fatalf("expected browser MCP entry when BrowserEnabled=true, mcpServers=%v", onMcp)
+		}
+		if browser["url"] != browserURL {
+			t.Errorf("expected mcpServers.browser.url=%s, got %v", browserURL, browser["url"])
+		}
+		if trust, _ := browser["trust"].(bool); !trust {
+			t.Error("expected mcpServers.browser.trust=true")
+		}
+	})
 }

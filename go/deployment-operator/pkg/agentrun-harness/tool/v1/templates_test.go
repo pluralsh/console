@@ -67,3 +67,40 @@ func TestSystemPromptTemplate_TemplateFilesExist(t *testing.T) {
 		}
 	}
 }
+
+func TestSystemPromptTemplate_BrowserBlockIsGated(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+	templates := []string{"write.md.tmpl", "babysit.md.tmpl", "analyze.md.tmpl"}
+
+	for _, name := range templates {
+		t.Run(name+"/disabled", func(t *testing.T) {
+			content, err := systemPromptTemplate(filepath.Join(templateDir, name), &SystemPromptTemplateInput{
+				Mode:           console.AgentRunModeWrite,
+				WorkDir:        "/work",
+				RepositoryDir:  "/work/repo",
+				BrowserEnabled: false,
+			})
+			if err != nil {
+				t.Fatalf("systemPromptTemplate() failed: %v", err)
+			}
+			if strings.Contains(content, "mcp__browser__") {
+				t.Errorf("did not expect browser MCP instructions when BrowserEnabled=false, in %s", name)
+			}
+		})
+
+		t.Run(name+"/enabled", func(t *testing.T) {
+			content, err := systemPromptTemplate(filepath.Join(templateDir, name), &SystemPromptTemplateInput{
+				Mode:           console.AgentRunModeWrite,
+				WorkDir:        "/work",
+				RepositoryDir:  "/work/repo",
+				BrowserEnabled: true,
+			})
+			if err != nil {
+				t.Fatalf("systemPromptTemplate() failed: %v", err)
+			}
+			if !strings.Contains(content, "mcp__browser__") {
+				t.Errorf("expected browser MCP instructions when BrowserEnabled=true, in %s", name)
+			}
+		})
+	}
+}
