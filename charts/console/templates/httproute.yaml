@@ -1,0 +1,144 @@
+{{- if .Values.gatewayApi.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: console
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- with .Values.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+{{- include "console.gatewayApi.parentRefs" . | nindent 4 }}
+  hostnames:
+  - {{ .Values.ingress.console_dns | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ .Values.kas.agent.path }}
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: {{ .Values.kas.service.agentProxyPort }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ .Values.kas.api.path }}
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: {{ .Values.kas.api.port }}
+  {{- if .Values.aiProxy.enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ .Values.aiProxy.config.server.path }}
+    backendRefs:
+    - name: console-nexus
+      port: 8080
+  {{- end }}
+  {{- if .Values.observabilityProxy.enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ext/v1/ingest
+    backendRefs:
+    - name: console-observability-proxy
+      port: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ext/v1/query
+    backendRefs:
+    - name: console-observability-proxy
+      port: 8080
+  {{- end }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: console
+      port: {{ .Values.service.port }}
+{{- if .Values.ingress.rewrite.enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: console-kas-rewrite
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- with .Values.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+{{- include "console.gatewayApi.parentRefs" . | nindent 4 }}
+  hostnames:
+  - {{ .Values.ingress.console_dns | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /kas
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: 8154
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ext/kas
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: 8150
+{{- end }}
+{{- if .Values.externalIngress.hostname }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: console-external
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- $externalAnnotations := .Values.gatewayApi.external.annotations | default .Values.gatewayApi.annotations }}
+  {{- with $externalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+{{- $externalParentRefs := .Values.gatewayApi.external.parentRefs | default .Values.gatewayApi.parentRefs }}
+{{- include "console.gatewayApi.parentRefs" (dict "Values" .Values "parentRefs" $externalParentRefs) | nindent 4 }}
+  hostnames:
+  - {{ .Values.externalIngress.hostname | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ext/kas
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: 8180
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ext
+    backendRefs:
+    - name: console
+      port: {{ .Values.service.port }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,39 @@
+{{- if and .Values.gatewayApi.enabled .Values.kas.ingress.kas_dns }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "kas.fullname" . }}
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+  {{- with .Values.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+{{- include "console.gatewayApi.parentRefs" . | nindent 4 }}
+  hostnames:
+  - {{ .Values.kas.ingress.kas_dns | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ .Values.kas.ingress.kubernetesApiPath }}
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: {{ .Values.kas.service.kubernetesApiPort }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ .Values.kas.agent.path }}
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: {{ .Values.kas.service.agentProxyPort }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: {{ .Values.kas.service.agentProxyPort }}
+{{- end }}

@@ -336,7 +336,7 @@ ingress:
   # tls is used to determine if tls should be enabled. If enabled, then tls.host is set to ingress.console_dns and tls.secretName is set to console-tls
   tls:
     enabled: true
-  console-dns: ~
+  console_dns: ~
 
   # rewrite is used to configure console-kas-rewrite ingress controller
   rewrite:
@@ -359,6 +359,19 @@ ingress:
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
   # kas-dns is used in secrets.yaml to set data.KAS_HOST
   kas-dns: ~
+
+# gatewayApi is used to configure Gateway API HTTPRoute resources (see templates/httproute.yaml)
+gatewayApi:
+  enabled: false
+  # parentRefs is the list of Gateway resources this HTTPRoute attaches to
+  parentRefs: []
+  # annotations is used to set metadata.annotations for HTTPRoute resources
+  annotations: {}
+  external:
+    # parentRefs overrides gatewayApi.parentRefs for the console-external HTTPRoute
+    parentRefs: []
+    # annotations overrides gatewayApi.annotations for the console-external HTTPRoute
+    annotations: {}
 
 # externalIngress is used to configure console-external ingress controller in ingress.yaml
 externalIngress:
