@@ -1,4 +1,4 @@
-{{- if .Values.gatewayApi.enabled }}
+{{- if and .Values.gatewayApi.enabled .Values.ingress.console_dns }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -12,8 +12,7 @@ metadata:
 spec:
   parentRefs:
 {{- include "console.gatewayApi.parentRefs" . | nindent 4 }}
-  hostnames:
-  - {{ .Values.ingress.console_dns | quote }}
+{{- include "console.gatewayApi.hostnames" .Values.ingress.console_dns | nindent 2 }}
   rules:
   - matches:
     - path:
@@ -76,8 +75,7 @@ metadata:
 spec:
   parentRefs:
 {{- include "console.gatewayApi.parentRefs" . | nindent 4 }}
-  hostnames:
-  - {{ .Values.ingress.console_dns | quote }}
+{{- include "console.gatewayApi.hostnames" .Values.ingress.console_dns | nindent 2 }}
   rules:
   - matches:
     - path:
@@ -106,7 +104,8 @@ spec:
     - name: {{ include "kas.serviceName" . }}
       port: 8150
 {{- end }}
-{{- if .Values.externalIngress.hostname }}
+{{- end }}
+{{- if and .Values.gatewayApi.enabled .Values.externalIngress.hostname }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -123,8 +122,7 @@ spec:
   parentRefs:
 {{- $externalParentRefs := .Values.gatewayApi.external.parentRefs | default .Values.gatewayApi.parentRefs }}
 {{- include "console.gatewayApi.parentRefs" (dict "Values" .Values "parentRefs" $externalParentRefs) | nindent 4 }}
-  hostnames:
-  - {{ .Values.externalIngress.hostname | quote }}
+{{- include "console.gatewayApi.hostnames" .Values.externalIngress.hostname | nindent 2 }}
   rules:
   - matches:
     - path:
@@ -140,5 +138,4 @@ spec:
     backendRefs:
     - name: console
       port: {{ .Values.service.port }}
-{{- end }}
 {{- end }}

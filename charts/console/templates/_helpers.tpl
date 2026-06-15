@@ -96,6 +96,13 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
       optional: true
 {{- end -}}
 
+{{- define "console.gatewayApi.hostnames" -}}
+{{- if . }}
+hostnames:
+- {{ . | quote }}
+{{- end }}
+{{- end }}
+
 {{- define "console.gatewayApi.parentRefs" }}
 {{- $parentRefs := .parentRefs | default .Values.gatewayApi.parentRefs }}
 {{- range $parentRefs }}

@@ -336,6 +336,7 @@ ingress:
   # tls is used to determine if tls should be enabled. If enabled, then tls.host is set to ingress.console_dns and tls.secretName is set to console-tls
   tls:
     enabled: true
+  # console_dns is required when gatewayApi.enabled is true
   console_dns: ~
 
   # rewrite is used to configure console-kas-rewrite ingress controller

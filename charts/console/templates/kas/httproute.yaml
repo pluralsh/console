@@ -12,8 +12,7 @@ metadata:
 spec:
   parentRefs:
 {{- include "console.gatewayApi.parentRefs" . | nindent 4 }}
-  hostnames:
-  - {{ .Values.kas.ingress.kas_dns | quote }}
+{{- include "console.gatewayApi.hostnames" .Values.kas.ingress.kas_dns | nindent 2 }}
   rules:
   - matches:
     - path:
