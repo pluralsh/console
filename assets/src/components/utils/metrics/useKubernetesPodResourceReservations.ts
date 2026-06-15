@@ -13,6 +13,8 @@ import {
   getPodResourceReservationsFromList,
 } from 'components/utils/metrics/podResourceReservations.ts'
 
+const PODS_PAGE_SIZE = 100
+
 export function useKubernetesPodResourceReservations({
   clusterId,
   enabled,
@@ -31,6 +33,7 @@ export function useKubernetesPodResourceReservations({
   const isDeployment = normalizedKind === 'deployment'
   const isDaemonSet = normalizedKind === 'daemonset'
   const isStatefulSet = normalizedKind === 'statefulset'
+  const isSupportedKind = isDeployment || isDaemonSet || isStatefulSet
 
   const newReplicaSetQuery = useQuery({
     queryKey: ['deploymentNewReplicaSet', clusterId, namespace, name] as const,
@@ -62,49 +65,71 @@ export function useKubernetesPodResourceReservations({
       replicaSetNamespace,
     ] as const,
     queryFn: async ({ signal }) => {
-      const options = {
-        client,
-        query: { itemsPerPage: '500' },
-        signal,
-        throwOnError: true,
-      } as const
+      const getPodsPage = async (page: number) => {
+        const options = {
+          client,
+          query: { itemsPerPage: `${PODS_PAGE_SIZE}`, page: `${page}` },
+          signal,
+          throwOnError: true,
+        } as const
 
-      if (isDeployment) {
-        const { data } = await getReplicaSetPods({
-          ...options,
-          path: {
-            replicaSet: replicaSetName ?? '',
-            namespace: replicaSetNamespace,
-          },
-        })
+        if (isDeployment) {
+          const { data } = await getReplicaSetPods({
+            ...options,
+            path: {
+              replicaSet: replicaSetName ?? '',
+              namespace: replicaSetNamespace,
+            },
+          })
 
-        return data
+          return data
+        }
+
+        if (isDaemonSet) {
+          const { data } = await getDaemonSetPods({
+            ...options,
+            path: { daemonSet: name, namespace },
+          })
+
+          return data
+        }
+
+        if (isStatefulSet) {
+          const { data } = await getStatefulSetPods({
+            ...options,
+            path: { statefulset: name, namespace },
+          })
+
+          return data
+        }
+
+        throw new Error(`Unsupported workload kind: ${kind}`)
       }
 
-      if (isDaemonSet) {
-        const { data } = await getDaemonSetPods({
-          ...options,
-          path: { daemonSet: name, namespace },
-        })
+      let page = 1
+      let response = await getPodsPage(page)
+      const pods = [...response.pods]
+      const totalItems = response.listMeta.totalItems
 
-        return data
+      while (pods.length < totalItems && response.pods.length > 0) {
+        page += 1
+        response = await getPodsPage(page)
+        pods.push(...response.pods)
       }
 
-      const { data } = await getStatefulSetPods({
-        ...options,
-        path: { statefulset: name, namespace },
-      })
-
-      return data
+      return {
+        ...response,
+        listMeta: { ...response.listMeta, totalItems },
+        pods,
+      }
     },
     enabled:
       enabled &&
       !!clusterId &&
       !!name &&
       !!namespace &&
-      ((isDeployment && !!replicaSetName && !!replicaSetNamespace) ||
-        isDaemonSet ||
-        isStatefulSet),
+      isSupportedKind &&
+      (!isDeployment || (!!replicaSetName && !!replicaSetNamespace)),
     refetchInterval: 30_000,
   })
 
