@@ -1,6 +1,9 @@
 package agent
 
 import (
+	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 )
 
@@ -25,5 +28,22 @@ func WithTool(tool tool.Tool) Option {
 func WithVersion(version string) Option {
 	return func(s *Server) {
 		s.version = version
+	}
+}
+
+// WithOpenAIProxy registers a local OpenAI chat completion endpoint that converts
+// streaming client requests into non-streaming upstream calls.
+func WithOpenAIProxy(upstreamURL string) Option {
+	return func(s *Server) {
+		if upstreamURL == "" {
+			return
+		}
+
+		handler, err := openaiproxy.NewHandler(openaiproxy.Config{UpstreamURL: upstreamURL})
+		if err != nil {
+			klog.Fatalf("could not configure openai proxy: %v", err)
+		}
+
+		s.openaiProxy = handler
 	}
 }

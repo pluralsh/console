@@ -12,6 +12,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -29,16 +30,18 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 	}
 
 	input := &ConfigTemplateInput{
-		ConsoleURL:       consoleURL,
-		ConsoleToken:     consoleToken,
-		AgentRunID:       in.Config.Run.ID,
-		Provider:         in.provider,
-		OpenAICompatible: in.openaiCompatible,
-		Endpoint:         in.Config.Run.Runtime.Config.OpenCode.Endpoint,
-		Model:            in.model,
-		Token:            in.Config.Run.Runtime.Config.OpenCode.Token,
-		Mode:             in.Config.Run.Mode,
-		DindEnabled:      in.Config.Run.DindEnabled,
+		ConsoleURL:            consoleURL,
+		ConsoleToken:          consoleToken,
+		AgentRunID:            in.Config.Run.ID,
+		Provider:              in.provider,
+		OpenAICompatible:      in.openaiCompatible,
+		Endpoint:              in.Config.Run.Runtime.Config.OpenCode.Endpoint,
+		Model:                 in.model,
+		Token:                 in.Config.Run.Runtime.Config.OpenCode.Token,
+		Mode:                  in.Config.Run.Mode,
+		DindEnabled:           in.Config.Run.DindEnabled,
+		StreamingProxy:        in.Config.Run.IsStreamingProxyEnabled(),
+		StreamingProxyBaseURL: common.AgentOpenAIBaseURL,
 	}
 
 	_, content, err := configTemplate(input)

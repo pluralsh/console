@@ -1,0 +1,32 @@
+---
+description: Run go fmt after every Go code change
+globs: **/*.go
+alwaysApply: false
+---
+
+# Go Formatting
+
+After creating or editing any Go file, run `gofmt` on every changed file before finishing the task. CI linters will reject unformatted code.
+
+## Required workflow
+
+1. Make the Go code change.
+2. Format all changed `.go` files:
+
+```bash
+gofmt -w path/to/changed/file.go
+```
+
+For multiple files:
+
+```bash
+gofmt -w path/to/file1.go path/to/file2.go
+```
+
+3. Verify formatting was applied (re-read the file or run `gofmt -l` and confirm no output).
+
+## Notes
+
+- `gofmt -w` is preferred over `go fmt ./...` when only specific files changed — it is explicit and avoids formatting unrelated packages.
+- `go fmt` and `gofmt` produce the same output; either is acceptable as long as every changed file is formatted.
+- Go code lives under `go/` in a workspace (`go/go.work`). Run commands from the containing module directory when needed.

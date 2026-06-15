@@ -71,6 +71,7 @@ const (
 
 	EnvExaConnection   = "PLRL_EXA_CONNECTION"
 	EnvMcpExcludeTools = "PLRL_EXCLUDE_TOOLS"
+	EnvStreamingProxy  = "PLRL_STREAMING_PROXY"
 )
 
 var (

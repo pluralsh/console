@@ -121,9 +121,13 @@ func (in *Codex) writeCodexConfig() error {
 	switch {
 	case in.proxy:
 		modelProvider = "plural"
+		baseURL := fmt.Sprintf("%s/ext/ai/v1", in.consoleURL)
+		if in.Config.Run.IsStreamingProxyEnabled() {
+			baseURL = common.AgentOpenAIBaseURL
+		}
 		providers = []ModelProviderInput{{
 			Name:    "plural",
-			BaseURL: fmt.Sprintf("%s/ext/ai/v1", in.consoleURL),
+			BaseURL: baseURL,
 			EnvKey:  consoleTokenEnv,
 			WireAPI: wireAPI,
 		}}
