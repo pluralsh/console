@@ -121,3 +121,13 @@ hostnames:
   {{- end }}
 {{- end }}
 {{- end }}
+
+{{- define "console.gatewayApi.annotations" -}}
+{{- $base := default dict .base -}}
+{{- $extra := default dict .extra -}}
+{{- $merged := mergeOverwrite (deepCopy $base) $extra -}}
+{{- if $merged }}
+annotations:
+{{ toYaml $merged | indent 2 }}
+{{- end }}
+{{- end }}

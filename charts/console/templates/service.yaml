@@ -16,6 +16,9 @@ spec:
     targetPort: http
     protocol: TCP
     name: http
+    {{- if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
+    appProtocol: {{ .Values.gatewayApi.appProtocol | quote }}
+    {{- end }}
   - port: 50051
     targetPort: grpc
     protocol: TCP

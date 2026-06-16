@@ -5,10 +5,7 @@ metadata:
   name: {{ include "kas.fullname" . }}
   labels:
     {{- include "kas.labels" . | nindent 4 }}
-  {{- with .Values.gatewayApi.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "console.gatewayApi.annotations" (dict "base" .Values.gatewayApi.annotations "extra" (.Values.gatewayApi.kas.annotations | default dict)) | nindent 2 }}
 spec:
   parentRefs:
 {{- include "console.gatewayApi.parentRefs" . | nindent 4 }}

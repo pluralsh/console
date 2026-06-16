@@ -366,13 +366,42 @@ gatewayApi:
   enabled: false
   # parentRefs is the list of Gateway resources this HTTPRoute attaches to
   parentRefs: []
-  # annotations is used to set metadata.annotations for HTTPRoute resources
+  # annotations is merged into every HTTPRoute; route-specific annotations are layered on top
   annotations: {}
+  # appProtocol is set on backend Service ports when gateway API is enabled (kubernetes.io/ws for websocket)
+  appProtocol: kubernetes.io/ws
+  # console configures the main console HTTPRoute (metadata.annotations merge with gatewayApi.annotations)
+  console:
+    annotations: {}
+    # rule is applied to the catch-all / rule serving /socket and other console traffic
+    rule:
+      timeouts:
+        request: 3600s
+      sessionPersistence:
+        sessionName: console
+        type: Cookie
+        cookieConfig:
+          path: /socket
+  rewrite:
+    # annotations is merged with gatewayApi.annotations for the console-kas-rewrite HTTPRoute
+    annotations: {}
+  kas:
+    # annotations is merged with gatewayApi.annotations for the kas HTTPRoute
+    annotations: {}
   external:
     # parentRefs overrides gatewayApi.parentRefs for the console-external HTTPRoute
     parentRefs: []
-    # annotations overrides gatewayApi.annotations for the console-external HTTPRoute
+    # annotations is merged with gatewayApi.annotations for the console-external HTTPRoute
     annotations: {}
+    # rule is applied to the /ext rule serving /ext/socket and other external traffic
+    rule:
+      timeouts:
+        request: 3600s
+      sessionPersistence:
+        sessionName: console-external
+        type: Cookie
+        cookieConfig:
+          path: /ext/socket
 
 # externalIngress is used to configure console-external ingress controller in ingress.yaml
 externalIngress:
