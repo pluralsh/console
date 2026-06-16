@@ -26,12 +26,20 @@ message GcpCredentials {
   string project = 2;
 }
 
+message VSphereCredentials {
+  string server = 1;
+  string user = 2;
+  string password = 3;
+  optional string allow_unverified_ssl = 4;
+}
+
 message Connection {
   string provider = 1;
   oneof credentials {
     AwsCredentials aws = 2;
     AzureCredentials azure = 3;
     GcpCredentials gcp = 4;
+    VSphereCredentials vsphere = 5;
   }
 }
 
