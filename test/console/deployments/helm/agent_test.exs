@@ -143,3 +143,25 @@ defmodule Console.Deployments.Helm.AgentTest do
   defp handle({:ok, pid}), do: {:ok, pid}
   defp handle(err), do: err
 end
+
+
+defmodule Console.Deployments.Helm.SupervisorTest do
+  use Console.DataCase, async: false
+  alias Console.Deployments.Helm.Supervisor
+
+  describe "start_child/1" do
+    test "it starts the supervisor on demand before starting the agent" do
+      pid = Process.whereis(Supervisor)
+      if is_pid(pid), do: Process.exit(pid, :kill)
+      Process.sleep(50)
+
+      assert Process.whereis(Supervisor) == nil
+
+      assert {:ok, agent} = Supervisor.start_child("https://example.com/charts")
+      assert is_pid(agent)
+      assert Process.whereis(Supervisor)
+
+      Process.exit(agent, :kill)
+    end
+  end
+end
