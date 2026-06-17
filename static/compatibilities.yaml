@@ -147,6 +147,24 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.62.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not include any v1.62.0 change entries
+          beyond a link to the full CHANGELOG; no specific new features can be extracted
+          from the text shared.]
+      breaking_changes: [No breaking changes are mentioned in the provided release
+          notes; full upstream CHANGELOG must be reviewed to confirm.]
+    chart_version: 2.62.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.2',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.1', 'public.ecr.aws/csi-components/csi-resizer:v2.2.0-eksbuild.2',
+      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.62.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260615-b4199512ce-master']
   - version: 1.61.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -11884,6 +11902,40 @@ addons:
   helm_values: debug.verbose=flow
   eolApiSlug: cilium
   versions:
+  - version: 1.19.5
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **Helm value removed:** `loadBalancer.standalone` was removed.
+        If your values file sets it, delete it and rely on the remaining `loadBalancer.*`
+        settings.
+
+        - **Helm value removed (L2 announcements):** `l2podAnnouncements.interface`
+        was removed because it could render an agent config key that is no longer
+        recognized and may cause agent crash-loops when L2 pod announcements are enabled.
+        **Use `l2podAnnouncements.interfacePattern` instead.**
+
+        - **Helm chart improvement:** charts now allow overriding a `registry_prefix`
+        (useful for private registries/mirrors). (No action needed unless you want
+        to adopt it.)
+
+        '
+      chart_updates: [Removed deprecated/unused Helm options related to Service LB
+          and L2 pod announcements to prevent misconfiguration and crash-loops., Helm
+          chart now supports overriding `registry_prefix` for image registry customization.,
+        Helm packaging updated to ignore `tmpl` files via `.helmignore` (no user action).]
+      features: ['Troubleshoot commands for kvstore and clustermesh report more information,
+          which can help during incident response and upgrade validation.', Internal
+          load-balancer backend representation was refactored to scale better when
+          many Services share the same backend (helps large clusters with shared backends).]
+      breaking_changes: ['`loadBalancer.standalone` Helm option was removed; upgrades
+          will fail or behave unexpectedly if your values still reference it.', '`l2podAnnouncements.interface`
+          Helm value was removed; if you used it (especially with L2 pod announcements
+          enabled), switch to `l2podAnnouncements.interfacePattern` to avoid agent
+          crash-loops.']
+    chart_version: 1.19.5
+    images: []
   - version: 1.19.4
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -21763,25 +21815,36 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.4
+  - version: 3.7.5
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['v3.7.0 introduced many enhancements across Kubernetes providers
-          (especially ingress-nginx and Gateway API), new middleware capabilities
-          (e.g., encodedCharacters, expanded retry conditions), ACME improvements,
-          observability/logging additions, and various dashboard/UI improvements.',
-        'v3.7.4 is a patch release focused on bug fixes, including Redis write timeout
-          option handling, Gateway API BackendTLSPolicy status updates, TLS SNI checking
-          with keepalive, HTTP/3 dependency bump, and Web UI dependency updates.']
-      breaking_changes: [v3.7.0 release notes explicitly require reading the v3.7.0
-          migration guide; treat this as the key source of any breaking changes when
-          moving into the 3.7 line., 'ForwardAuth.TrustForwardHeader was deprecated
-          in the 3.7.0 notes, so plan to migrate away from it to avoid future breakage.']
-    chart_version: 40.3.0
+      features: ['Ingress-NGINX provider gained many new supported annotations and
+          a metamodel-based config generator, including rate/connection limiting,
+          auth options, buffering/canary redirects, rewrites, custom headers, and
+          entrypoint selection.', Gateway API improvements include support for multiple
+          certificateRefs on listeners and secret-based caCertificateRefs for BackendTLSPolicy.,
+        'New routing/config capabilities: provider routing precedence setting, wildcard
+          Host/HostSNI matchers, service-level middleware/HTTP backend filters, TraefikService
+          failover enhancements, and ServersTransport cipher suite configuration.',
+        'Security/operational enhancements include stricter encoded-character handling
+          (opt-in controls), better access logging for rejected requests, additional
+          forwardAuth options, and retries based on status codes/timeouts/non-idempotent
+          methods.', 'UI/observability updates: dashboard improvements (certificates
+          view, naming), extra Kubernetes ingress log fields, and OTel/access log
+          enhancements.']
+      breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated in v3.7.0;
+          plan to migrate configurations away from it before a future removal., Security
+          behavior around encoded/suspicious characters was tightened and made opt-in
+          via settings; this can change request acceptance/normalization compared
+          to previous behavior., Ingress-NGINX provider behavior changed significantly
+          (metamodel refactor + stricter validation options like strictValidatePathType);
+          some ingresses may be skipped or routed differently when referenced secrets/config
+          cannot be resolved.]
+    chart_version: 41.0.0
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -24264,9 +24327,9 @@ addons:
       breaking_changes: [No breaking changes are described in the provided notes;
           both releases instruct readers to consult the upgrading guide and main changelog
           for breaking/known issues.]
-    chart_version: 1.0.15
+    chart_version: 1.0.16
     images: ['quay.io/argoproj/argocli:v4.0.6', 'quay.io/argoproj/workflow-controller:v4.0.6',
-      'registry.k8s.io/kubectl:v1.36.1']
+      'registry.k8s.io/kubectl:v1.36.2']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']
     requirements: []
