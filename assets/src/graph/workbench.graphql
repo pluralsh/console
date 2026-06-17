@@ -577,6 +577,18 @@ fragment WorkbenchJobTiny on WorkbenchJob {
       type
     }
   }
+  activities(first: 10) {
+    edges {
+      node {
+        agentRun {
+          status
+        }
+        agentRuns {
+          status
+        }
+      }
+    }
+  }
 }
 
 fragment WorkbenchJob on WorkbenchJob {
