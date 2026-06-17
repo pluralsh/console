@@ -2,6 +2,7 @@ import {
   AnimatedDiv,
   Card,
   CheckRoundedIcon,
+  ContainerRuntimeIcon,
   DiscoverIcon,
   Flex,
   ListIcon,
@@ -10,6 +11,7 @@ import {
   Popover,
   PopoverWrapper,
   useFloatingDropdown,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
@@ -46,6 +48,7 @@ const PROMPT_MODES: (WorkbenchPromptModeConfig & {
   {
     mode: 'agent',
     label: 'Coding agent',
+    triggerLabel: 'Coding',
     Icon: DiscoverIcon,
     description: 'Tune coding agent functionality for this job.',
     supervisionOptions: true,
@@ -100,6 +103,9 @@ export function WorkbenchPromptModeSelector({
 
   const previewMode = hoveredMode ?? selectedMode ?? 'agent'
   const previewConfig = PROMPT_MODES.find((m) => m.mode === previewMode)!
+  const selectedModeConfig = selectedMode
+    ? PROMPT_MODES.find((m) => m.mode === selectedMode)
+    : null
 
   const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
     onChange(
@@ -111,13 +117,47 @@ export function WorkbenchPromptModeSelector({
       )
     )
 
+  const selectedIconColor = selectedModeConfig
+    ? workbenchPromptModeIconColor(selectedModeConfig, theme)
+    : undefined
+
   const trigger = (
     <ChatOptionPill
       isOpen={isOpen}
       css={{ height: '100%' }}
     >
-      <LogsIcon size={12} />
-      <span>Modes</span>
+      {selectedModeConfig ? (
+        <>
+          <selectedModeConfig.Icon
+            size={12}
+            color={selectedIconColor!}
+          />
+          <span
+            css={
+              selectedMode === 'plan' ? { color: selectedIconColor } : undefined
+            }
+          >
+            {selectedModeConfig.triggerLabel ?? selectedModeConfig.label}
+          </span>
+          {selectedMode === 'agent' && value?.coding?.approval && (
+            <WarningShieldIcon
+              size={12}
+              color="icon-light"
+            />
+          )}
+          {selectedMode === 'agent' && value?.coding?.babysit && (
+            <ContainerRuntimeIcon
+              size={12}
+              color="icon-light"
+            />
+          )}
+        </>
+      ) : (
+        <>
+          <LogsIcon size={12} />
+          <span>Modes</span>
+        </>
+      )}
     </ChatOptionPill>
   )
 
