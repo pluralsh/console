@@ -6,7 +6,7 @@ import {
   IconFrame,
   Markdown,
   prettifyRepoUrl,
-  PrOpenIcon,
+  PrIcon,
 } from '@pluralsh/design-system'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
@@ -99,7 +99,7 @@ export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
           <IconFrame
             circle
             type="secondary"
-            icon={<PrOpenIcon />}
+            icon={<PrIcon />}
           />
         }
         first={<Body2BoldP>Generated pull requests</Body2BoldP>}

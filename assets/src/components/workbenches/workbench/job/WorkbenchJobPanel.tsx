@@ -5,7 +5,7 @@ import {
   GraphIcon,
   IconFrame,
   PaperCheckIcon,
-  PrOpenIcon,
+  PrIcon,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
@@ -203,7 +203,7 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
     },
     !isEmpty(job?.pullRequests) && {
       label: 'PRs',
-      icon: <PrOpenIcon size={12} />,
+      icon: <PrIcon size={12} />,
     },
     job?.evalResult && {
       label: 'Eval',
