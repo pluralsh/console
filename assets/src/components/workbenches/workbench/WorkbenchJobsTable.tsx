@@ -20,6 +20,7 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
+import { getWorkbenchJobDisplayStatus } from 'components/workbenches/common/workbenchJobStatus'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import {
@@ -327,7 +328,7 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
       <WorkbenchJobActionsRow job={job} />
       <RunStatusIcon
         fullColor
-        status={job.status}
+        status={getWorkbenchJobDisplayStatus(job)}
       />
       <CaretRightIcon color="icon-xlight" />
     </div>
