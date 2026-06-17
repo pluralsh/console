@@ -31,7 +31,7 @@ import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { RunStatusChip } from '../infra-research/details/InfraResearch'
+import { RunStatusIcon } from './AgentRunInfoDisplays'
 
 const columnHelper = createColumnHelper<AgentRunTinyFragment>()
 
@@ -97,10 +97,9 @@ export const agentRunsCols = [
     enableSorting: true,
     cell: function Cell({ getValue }) {
       return (
-        <RunStatusChip
-          fillLevel={2}
+        <RunStatusIcon
+          fullColor
           status={getValue()}
-          css={{ alignSelf: 'flex-end' }}
         />
       )
     },
