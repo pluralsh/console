@@ -42,6 +42,9 @@ type Tool interface {
 	// Returns true if changes are detected, false for no-op plans.
 	// This allows the harness to skip unnecessary apply steps and not wait for approvals to free up resources.
 	HasChanges() (bool, error)
+	// Infracost runs infracost breakdown on the plan and returns cost estimates
+	// for each resource. Returns nil if infracost is not available or fails.
+	Infracost() ([]*console.StackInfracostResourceAttributes, error)
 }
 
 // DefaultTool implements [Tool] interface.

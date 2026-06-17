@@ -41,6 +41,12 @@ func (in *DefaultTool) HasChanges() (bool, error) {
 	return true, nil
 }
 
+// Infracost implements [Tool] interface.
+// The default implementation returns nil (no infracost support).
+func (in *DefaultTool) Infracost() ([]*console.StackInfracostResourceAttributes, error) {
+	return nil, nil
+}
+
 func New() Tool {
 	return &DefaultTool{}
 }

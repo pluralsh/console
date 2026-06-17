@@ -232,10 +232,17 @@ func (in *stackRunController) afterPlan() error {
 		klog.ErrorS(err, "could not run security scan")
 	}
 
+	// Run infracost to get cost estimates
+	infracostResources, err := in.tool.Infracost()
+	if err != nil {
+		klog.ErrorS(err, "could not run infracost")
+	}
+
 	if err = in.consoleClient.UpdateStackRun(in.stackRunID, gqlclient.StackRunAttributes{
-		State:      state,
-		Violations: violations,
-		Status:     gqlclient.StackStatusRunning,
+		State:              state,
+		Violations:         violations,
+		InfracostResources: infracostResources,
+		Status:             gqlclient.StackStatusRunning,
 	}); err != nil {
 		if clienterrors.IsUnauthenticated(err) {
 			return harnesserrors.WrapUnauthenticated("could not update stack run after plan", err)
