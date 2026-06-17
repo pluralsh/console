@@ -18,9 +18,9 @@ versions:
     breaking_changes: [No breaking changes are described in the provided notes; both
         releases instruct readers to consult the upgrading guide and main changelog
         for breaking/known issues.]
-  chart_version: 1.0.15
+  chart_version: 1.0.16
   images: ['quay.io/argoproj/argocli:v4.0.6', 'quay.io/argoproj/workflow-controller:v4.0.6',
-    'registry.k8s.io/kubectl:v1.36.1']
+    'registry.k8s.io/kubectl:v1.36.2']
 - version: 4.0.2
   kube: ['1.33', '1.32', '1.31']
   requirements: []
