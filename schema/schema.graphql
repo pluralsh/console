@@ -2214,6 +2214,9 @@ type AgentRun {
   "the flow this agent is associated with"
   flow: Flow
 
+  "the workbench job this agent run was spawned from, if any"
+  workbenchJob: WorkbenchJob
+
   "the pull requests this agent run has created"
   pullRequests: [PullRequest]
 

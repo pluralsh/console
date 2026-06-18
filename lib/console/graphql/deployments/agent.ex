@@ -189,6 +189,10 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :user,     :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
     field :flow,     :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
 
+    field :workbench_job, :workbench_job,
+      resolve: dataloader(Deployments),
+      description: "the workbench job this agent run was spawned from, if any"
+
     field :pull_requests, list_of(:pull_request),
       resolve: dataloader(Deployments),
       description: "the pull requests this agent run has created"
