@@ -1,18 +1,12 @@
 import {
-  Accordion,
-  AccordionItem,
   ArrowTopRightIcon,
   Button,
   Card,
-  CheckOutlineIcon,
   Chip,
-  CircleDashIcon,
   Flex,
   IconFrame,
   prettifyRepoUrl,
   PrIcon,
-  Sidecar,
-  SidecarItem,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
@@ -21,7 +15,6 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
-import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
@@ -33,7 +26,7 @@ import {
   useAgentRunDeltaSubscription,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { capitalize, isEmpty, uniqBy } from 'lodash'
+import { capitalize, uniqBy } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -126,54 +119,6 @@ export function useAgentRunTodos(run: Nullable<AgentRunFragment>) {
   )
 }
 
-export function AgentRunActivitiesSummary({
-  todos,
-}: {
-  todos: AgentTodoFragment[]
-}) {
-  const { spacing } = useTheme()
-
-  if (isEmpty(todos)) return null
-
-  return (
-    <TodoAccordionSC type="multiple">
-      {todos.map((todo) => (
-        <AccordionItem
-          key={todo.title}
-          trigger={
-            <Flex
-              align="center"
-              gap="xsmall"
-              minWidth={0}
-            >
-              {todo.done ? (
-                <CheckOutlineIcon color="icon-light" />
-              ) : (
-                <CircleDashIcon color="icon-light" />
-              )}
-              <CaptionP
-                $color="text-light"
-                css={{ fontWeight: 700, ...TRUNCATE }}
-              >
-                {todo.title}
-              </CaptionP>
-            </Flex>
-          }
-          padding="none"
-          caret="right-quarter"
-        >
-          <CaptionP
-            $color="text-light"
-            css={{ lineHeight: '24px', paddingLeft: spacing.large }}
-          >
-            {todo.description}
-          </CaptionP>
-        </AccordionItem>
-      ))}
-    </TodoAccordionSC>
-  )
-}
-
 export function AgentRunSidecar({
   run,
   loading,
@@ -243,15 +188,6 @@ function PullRequestCard({
     </PRCardSC>
   )
 }
-
-const TodoAccordionSC = styled(Accordion)(({ theme }) => ({
-  background: 'none',
-  border: 'none',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  marginTop: theme.spacing.small,
-}))
 
 const ContainerSC = styled(ResponsiveLayoutSidecarContainer)(({ theme }) => ({
   display: 'flex',

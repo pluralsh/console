@@ -29,13 +29,11 @@ import {
 } from 'routes/aiRoutesConsts'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import {
-  AgentRunActivitiesSummary,
-  useAgentRunTodos,
-} from './AIAgentRunSidecar.tsx'
+import { AgentRunTodos } from './AgentRunTodos.tsx'
+import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
-type AgentRunPanelTab = 'Analysis' | 'Activities'
+type AgentRunPanelTab = 'Analysis' | 'Agent todos'
 
 export function AgentRunPanelContent() {
   const { spacing } = useTheme()
@@ -64,19 +62,19 @@ export function AgentRunPanelContent() {
     !!run?.analysis &&
     (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
   const todos = useAgentRunTodos(run)
-  const showActivitiesTab = !isEmpty(todos)
+  const showAgentTodosTab = !isEmpty(todos)
 
   return (
     <SidePanelContent>
       <PanelHeaderSC>
-        {(showAnalysisTab || showActivitiesTab || run?.podReference) && (
+        {(showAnalysisTab || showAgentTodosTab || run?.podReference) && (
           <TabListWrapperSC>
             <Flex
               align="center"
               gap="small"
               css={{ width: '100%' }}
             >
-              {(showAnalysisTab || showActivitiesTab) && (
+              {(showAnalysisTab || showAgentTodosTab) && (
                 <TabList
                   scrollable
                   stateRef={tabStateRef}
@@ -96,12 +94,12 @@ export function AgentRunPanelContent() {
                       Analysis
                     </PanelSubTabSC>
                   )}
-                  {showActivitiesTab && (
+                  {showAgentTodosTab && (
                     <PanelSubTabSC
-                      key="Activities"
-                      textValue="Activities"
+                      key="Agent todos"
+                      textValue="Agent todos"
                     >
-                      Activities
+                      Agent todos
                     </PanelSubTabSC>
                   )}
                 </TabList>
@@ -151,10 +149,10 @@ export function AgentRunPanelContent() {
           </ContentInnerSC>
         </ContentWrapperSC>
       )}
-      {showActivitiesTab && selectedTab === 'Activities' && run && (
+      {showAgentTodosTab && selectedTab === 'Agent todos' && run && (
         <ContentWrapperSC>
           <ContentInnerSC>
-            <AgentRunActivitiesSummary todos={todos} />
+            <AgentRunTodos todos={todos} />
           </ContentInnerSC>
         </ContentWrapperSC>
       )}
