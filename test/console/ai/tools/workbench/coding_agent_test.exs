@@ -106,5 +106,30 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
       assert run.prompt == "update the readme"
       assert run.repository == "https://github.com/pluralsh/console.git"
     end
+
+    test "persists skills passed in the name to skill map form" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      Tool.context(user: user, runtime: runtime)
+
+      assert {:ok, %AgentRun{id: run_id}} =
+               CodingAgent.implement(%CodingAgent{
+                 mode: :write,
+                 repository: "https://github.com/pluralsh/console.git",
+                 prompt: "update the readme",
+                 approval: false,
+                 skills: %{
+                   "readme-helper" => %{
+                     name: "readme-helper",
+                     description: "Helps update README files",
+                     contents: "Always keep examples runnable.",
+                     subagents: [:coding]
+                   }
+                 }
+               })
+
+      run = Repo.get!(AgentRun, run_id)
+      assert [%{name: "readme-helper", description: "Helps update README files", contents: "Always keep examples runnable."}] = run.skills
+    end
   end
 end

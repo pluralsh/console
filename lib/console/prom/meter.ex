@@ -27,13 +27,13 @@ defmodule Console.Prom.Meter do
 
   def incr(ref \\ __MODULE__, inc), do: GenServer.cast(ref, {:incr, inc})
 
-  def incr_tokens(ref \\ __MODULE__, tokens), do: GenServer.cast(ref, {:tokens, tokens})
+  def incr_tokens(ref \\ __MODULE__, %ReqLLM.Response{} = result), do: GenServer.cast(ref, {:tokens, ReqLLM.Response.usage(result)})
 
   def fetch(ref \\ __MODULE__), do: GenServer.call(ref, :fetch)
 
   def handle_cast({:incr, inc}, %State{ingest: ingest} = state), do: {:noreply, %{state | ingest: ingest + inc}}
-
-  def handle_cast({:tokens, tokens}, %State{tokens: total} = state), do: {:noreply, %{state | tokens: total + tokens}}
+  def handle_cast({:tokens, %{total_tokens: tokens}}, %State{tokens: total} = state) when is_integer(tokens), do: {:noreply, %{state | tokens: total + tokens}}
+  def handle_cast(_, state), do: {:noreply, state}
 
   def handle_call(:fetch, _from, %State{ingest: ingest, tokens: tokens} = state),
     do: {:reply, %{bytes_ingested: floor(ingest / @gb), tokens: tokens}, %{state | ingest: Integer.mod(ingest, @gb), tokens: 0}} # reset counter after extraction

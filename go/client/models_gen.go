@@ -378,6 +378,8 @@ type AgentRun struct {
 	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the analysis of the agent run
 	Analysis *AgentAnalysis `json:"analysis,omitempty"`
+	// the skills available to this agent run
+	Skills []*AgentSkill `json:"skills,omitempty"`
 	// the todos of the agent run
 	Todos       []*AgentTodo `json:"todos,omitempty"`
 	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
@@ -482,6 +484,8 @@ type AgentRunStatusAttributes struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// the skills available to this agent run
+	Skills []*AgentSkillAttributes `json:"skills,omitempty"`
 }
 
 type AgentRunUpload struct {
@@ -613,6 +617,24 @@ type AgentSessionConnection struct {
 type AgentSessionEdge struct {
 	Node   *AgentSession `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type AgentSkill struct {
+	// the name of the skill
+	Name string `json:"name"`
+	// the description of the skill
+	Description *string `json:"description,omitempty"`
+	// the contents of the skill
+	Contents string `json:"contents"`
+}
+
+type AgentSkillAttributes struct {
+	// the name of the skill
+	Name string `json:"name"`
+	// the description of the skill
+	Description *string `json:"description,omitempty"`
+	// the contents of the skill
+	Contents string `json:"contents"`
 }
 
 type AgentTodo struct {

@@ -1,6 +1,7 @@
 defmodule Console.AI.Provider.Base do
   alias ReqLLM.{Context, Response, ToolCall, StreamResponse}
   alias Console.AI.{Tool, Stream}
+  alias Console.Prom.Meter
 
   def select_model(_, model, _) when is_binary(model), do: model
   def select_model(prov, _, type), do: select_model(prov, type)
@@ -70,10 +71,12 @@ defmodule Console.AI.Provider.Base do
   end
 
   defp usage_callback(result, callback) when is_function(callback, 1) do
+    Meter.incr_tokens(result)
+
     ReqLLM.Response.usage(result)
     |> callback.()
   end
-  defp usage_callback(_, _), do: :ok
+  defp usage_callback(result, _), do: Meter.incr_tokens(result)
 
   defp tid(id) when is_binary(id), do: id
   defp tid(_id), do: Ecto.UUID.generate()

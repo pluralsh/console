@@ -1966,6 +1966,9 @@ input AgentRunStatusAttributes {
 
   "the agent run this run consumed"
   consumed: ID
+
+  "the skills available to this agent run"
+  skills: [AgentSkillAttributes]
 }
 
 input AgentPullRequestAttributes {
@@ -2013,6 +2016,17 @@ input AgentAnalysisAttributes {
 
   "the bullets of the analysis"
   bullets: [String]
+}
+
+input AgentSkillAttributes {
+  "the name of the skill"
+  name: String!
+
+  "the description of the skill"
+  description: String
+
+  "the contents of the skill"
+  contents: String!
 }
 
 input AgentRunUploadAttributes {
@@ -2195,6 +2209,9 @@ type AgentRun {
   "the analysis of the agent run"
   analysis: AgentAnalysis
 
+  "the skills available to this agent run"
+  skills: [AgentSkill]
+
   "the todos of the agent run"
   todos: [AgentTodo]
 
@@ -2260,6 +2277,17 @@ type AgentAnalysis {
 
   "quick bullet points to summarize the analysis"
   bullets: [String]
+}
+
+type AgentSkill {
+  "the name of the skill"
+  name: String!
+
+  "the description of the skill"
+  description: String
+
+  "the contents of the skill"
+  contents: String!
 }
 
 type AgentTodo {

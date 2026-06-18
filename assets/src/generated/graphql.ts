@@ -463,6 +463,8 @@ export type AgentRun = {
   scmCreds?: Maybe<ScmCreds>;
   /** whether this agent run is shared */
   shared?: Maybe<Scalars['Boolean']['output']>;
+  /** the skills available to this agent run */
+  skills?: Maybe<Array<Maybe<AgentSkill>>>;
   /** the status of this agent run */
   status: AgentRunStatus;
   /** the todos of the agent run */
@@ -585,6 +587,8 @@ export type AgentRunStatusAttributes = {
   messages?: InputMaybe<Array<InputMaybe<AgentMessageAttributes>>>;
   /** the kubernetes pod this agent is running on */
   podReference?: InputMaybe<NamespacedName>;
+  /** the skills available to this agent run */
+  skills?: InputMaybe<Array<InputMaybe<AgentSkillAttributes>>>;
   /** the status of this agent run */
   status: AgentRunStatus;
 };
@@ -795,6 +799,25 @@ export enum AgentSessionType {
   Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
+
+export type AgentSkill = {
+  __typename?: 'AgentSkill';
+  /** the contents of the skill */
+  contents: Scalars['String']['output'];
+  /** the description of the skill */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the name of the skill */
+  name: Scalars['String']['output'];
+};
+
+export type AgentSkillAttributes = {
+  /** the contents of the skill */
+  contents: Scalars['String']['input'];
+  /** the description of the skill */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the skill */
+  name: Scalars['String']['input'];
+};
 
 export type AgentTodo = {
   __typename?: 'AgentTodo';
