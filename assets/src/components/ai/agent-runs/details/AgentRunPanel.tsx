@@ -1,5 +1,7 @@
 import {
+  ArrowTopRightIcon,
   CloseIcon,
+  Flex,
   IconFrame,
   Markdown,
   SubTab,
@@ -20,11 +22,12 @@ import {
 } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { matchPath, useLocation } from 'react-router-dom'
+import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
   AI_AGENT_RUN_ABS_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
 } from 'routes/aiRoutesConsts'
+import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
@@ -60,34 +63,54 @@ export function AgentRunPanelContent() {
   return (
     <SidePanelContent>
       <PanelHeaderSC>
-        {showAnalysisTab && (
+        {(showAnalysisTab || run?.podReference) && (
           <TabListWrapperSC>
-            <TabList
-              scrollable
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: selectedTab,
-                onSelectionChange: (key) =>
-                  setSelectedTab(String(key) as AgentRunPanelTab),
-              }}
-              css={{ gap: spacing.small, width: '100%' }}
+            <Flex
+              align="center"
+              gap="small"
+              css={{ width: '100%' }}
             >
-              <PanelSubTabSC
-                key="Analysis"
-                textValue="Analysis"
-              >
-                Analysis
-              </PanelSubTabSC>
-            </TabList>
+              {showAnalysisTab && (
+                <TabList
+                  scrollable
+                  stateRef={tabStateRef}
+                  stateProps={{
+                    orientation: 'horizontal',
+                    selectedKey: selectedTab,
+                    onSelectionChange: (key) =>
+                      setSelectedTab(String(key) as AgentRunPanelTab),
+                  }}
+                  css={{ gap: spacing.small }}
+                >
+                  <PanelSubTabSC
+                    key="Analysis"
+                    textValue="Analysis"
+                  >
+                    Analysis
+                  </PanelSubTabSC>
+                </TabList>
+              )}
+              {run?.podReference && (
+                <PanelLinkTabSC
+                  to={getPodDetailsPath({
+                    type: 'agent-run',
+                    agentRunId: run.id,
+                    name: run.podReference.name,
+                    namespace: run.podReference.namespace,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Pod details
+                  <ArrowTopRightIcon size={12} />
+                </PanelLinkTabSC>
+              )}
+            </Flex>
           </TabListWrapperSC>
         )}
         <IconFrame
           clickable
-          css={{
-            flexShrink: 0,
-            marginLeft: showAnalysisTab ? undefined : 'auto',
-          }}
+          css={{ flexShrink: 0 }}
           icon={<CloseIcon />}
           onClick={() => setOpen(false)}
           tooltip="Close panel"
@@ -153,7 +176,13 @@ const TabListWrapperSC = styled.div({
   overflow: 'hidden',
 })
 
-const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
+const panelTabStyles = ({
+  theme,
+  active,
+}: {
+  theme: any
+  active?: boolean
+}) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
   flexShrink: 0,
@@ -168,4 +197,11 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
   gap: theme.spacing.small,
   '&:hover': { background: active ? undefined : theme.colors['fill-zero'] },
   '&:focus-visible': { outline: theme.borders['outline-focused'] },
+})
+
+const PanelSubTabSC = styled(SubTab)(panelTabStyles)
+
+const PanelLinkTabSC = styled(Link)(({ theme }) => ({
+  ...panelTabStyles({ theme }),
+  textDecoration: 'none',
 }))

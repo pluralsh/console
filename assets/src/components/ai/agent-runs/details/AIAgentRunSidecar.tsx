@@ -36,7 +36,6 @@ import { produce } from 'immer'
 import { capitalize, isEmpty, uniqBy } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -198,21 +197,6 @@ export function AgentRunSidecar({
                 </TodoAccordionSC>
               </SidecarItem>
             </Sidecar>
-          )}
-          {run.podReference && (
-            <Button
-              secondary
-              as={Link}
-              to={getPodDetailsPath({
-                type: 'agent-run',
-                agentRunId: run.id,
-                name: run.podReference.name,
-                namespace: run.podReference.namespace,
-              })}
-              endIcon={<ArrowTopRightIcon />}
-            >
-              View pod details
-            </Button>
           )}
         </>
       )}
