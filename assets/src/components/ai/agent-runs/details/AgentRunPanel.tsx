@@ -3,7 +3,10 @@ import {
   CloseIcon,
   Flex,
   IconFrame,
+  ListIcon,
   Markdown,
+  PrIcon,
+  PrOpenIcon,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
@@ -29,11 +32,13 @@ import {
 } from 'routes/aiRoutesConsts'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+import { AgentRunPullRequests } from './AgentRunPullRequests.tsx'
 import { AgentRunTodos } from './AgentRunTodos.tsx'
 import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
-type AgentRunPanelTab = 'Analysis' | 'Agent todos'
+type AgentRunPanelTab = 'Analysis' | 'Agent todos' | 'Pull requests'
 
 export function AgentRunPanelContent() {
   const { spacing } = useTheme()
@@ -53,7 +58,15 @@ export function AgentRunPanelContent() {
   })
   const run = data?.agentRun
 
-  const hasPullRequests = Boolean(run?.pullRequests?.some(Boolean))
+  const pullRequests = useMemo(
+    () =>
+      (run?.pullRequests ?? []).filter(
+        (pr): pr is NonNullable<typeof pr> =>
+          isNonNullable(pr) && Boolean(pr.id && pr.url)
+      ),
+    [run?.pullRequests]
+  )
+  const hasPullRequests = !isEmpty(pullRequests)
   const isTerminalStatus =
     run?.status === AgentRunStatus.Successful ||
     run?.status === AgentRunStatus.Failed ||
@@ -63,32 +76,38 @@ export function AgentRunPanelContent() {
     (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
   const todos = useAgentRunTodos(run)
   const showAgentTodosTab = !isEmpty(todos)
+  const showPrsTab = hasPullRequests
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
     if (showAnalysisTab) return 'Analysis'
     if (showAgentTodosTab) return 'Agent todos'
+    if (showPrsTab) return 'Pull requests'
     return null
-  }, [showAnalysisTab, showAgentTodosTab])
+  }, [showAnalysisTab, showAgentTodosTab, showPrsTab])
 
   useEffect(() => {
     if (!defaultTab) return
     setSelectedTab((tab) => {
       if (tab === 'Analysis' && showAnalysisTab) return tab
       if (tab === 'Agent todos' && showAgentTodosTab) return tab
+      if (tab === 'Pull requests' && showPrsTab) return tab
       return defaultTab
     })
-  }, [defaultTab, showAnalysisTab, showAgentTodosTab])
+  }, [defaultTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
 
   return (
     <SidePanelContent>
       <PanelHeaderSC>
-        {(showAnalysisTab || showAgentTodosTab || run?.podReference) && (
+        {(showAnalysisTab ||
+          showAgentTodosTab ||
+          showPrsTab ||
+          run?.podReference) && (
           <TabListWrapperSC>
             <Flex
               align="center"
               gap="small"
               css={{ width: '100%' }}
             >
-              {(showAnalysisTab || showAgentTodosTab) && (
+              {(showAnalysisTab || showAgentTodosTab || showPrsTab) && (
                 <TabList
                   scrollable
                   stateRef={tabStateRef}
@@ -113,7 +132,17 @@ export function AgentRunPanelContent() {
                       key="Agent todos"
                       textValue="Agent todos"
                     >
+                      <ListIcon size={12} />
                       Agent todos
+                    </PanelSubTabSC>
+                  )}
+                  {showPrsTab && (
+                    <PanelSubTabSC
+                      key="Pull requests"
+                      textValue="Pull requests"
+                    >
+                      <PrIcon size={12} />
+                      Pull requests
                     </PanelSubTabSC>
                   )}
                 </TabList>
@@ -167,6 +196,13 @@ export function AgentRunPanelContent() {
         <ContentWrapperSC>
           <ContentInnerSC>
             <AgentRunTodos todos={todos} />
+          </ContentInnerSC>
+        </ContentWrapperSC>
+      )}
+      {showPrsTab && selectedTab === 'Pull requests' && run && (
+        <ContentWrapperSC>
+          <ContentInnerSC>
+            <AgentRunPullRequests pullRequests={pullRequests} />
           </ContentInnerSC>
         </ContentWrapperSC>
       )}

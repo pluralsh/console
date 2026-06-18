@@ -32,7 +32,7 @@ import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
-import { AgentRunMetadata, AgentRunSidecar } from './AIAgentRunSidecar.tsx'
+import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
 import { useAgentRunPanel } from './AgentRunPanel.tsx'
 
 export const getAgentRunBreadcrumbs = (
@@ -101,7 +101,6 @@ export function AIAgentRun() {
             flex={1}
             minWidth={0}
             height="100%"
-            paddingRight={spacing.medium}
             overflow="auto"
           >
             <StretchedFlex
@@ -171,10 +170,6 @@ export function AIAgentRun() {
               />
             ) : null}
           </Flex>
-          <AgentRunSidecar
-            run={run}
-            loading={loading}
-          />
         </WrapperSC>
         {!isOpen && (
           <PanelOpenBtnSC
@@ -206,6 +201,7 @@ const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flexDirection: 'column',
   padding: theme.spacing.large,
   maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
