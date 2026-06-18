@@ -9,8 +9,8 @@ import {
   CircleDashIcon,
   Flex,
   IconFrame,
-  PrIcon,
   prettifyRepoUrl,
+  PrIcon,
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
@@ -40,6 +40,64 @@ import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 
+export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
+  const { colors } = useTheme()
+  const isRunning = isJobRunning(run.status)
+  const RuntimeIcon =
+    runtimeToIcon[run.runtime?.type ?? AgentRuntimeType.Custom]
+
+  return (
+    <Flex
+      align="center"
+      gap="small"
+    >
+      <CaptionP $color="text-xlight">
+        {prettifyRepoUrl(run?.repository ?? '')}
+      </CaptionP>
+      {run.runtime?.name && (
+        <Flex gap="xxsmall">
+          <RuntimeIcon fullColor />
+          <CaptionP $color="text-xlight">
+            {capitalize(run.runtime.name)}
+          </CaptionP>
+        </Flex>
+      )}
+      {run.mode && (
+        <Chip
+          size="small"
+          severity="info"
+        >
+          {capitalize(run.mode)}
+        </Chip>
+      )}
+      <RunStatusChip
+        status={run.status}
+        showSpinner={false}
+        size="small"
+      />
+      <CaptionP $color="text-input-disabled">
+        Start{' '}
+        <span css={{ color: colors['text-xlight'] }}>
+          {formatDateTime(run.insertedAt)}
+        </span>
+      </CaptionP>
+      <CaptionP $color="text-input-disabled">
+        End{' '}
+        <span css={{ color: colors['text-xlight'] }}>
+          {isRunning ? '---' : formatDateTime(run.updatedAt)}
+        </span>
+      </CaptionP>
+
+      <Chip
+        size="small"
+        severity={run.babysit ? 'success' : 'neutral'}
+      >
+        {run.babysit ? 'On' : 'Off'}
+      </Chip>
+    </Flex>
+  )
+}
+
 export function AgentRunSidecar({
   run,
   loading,
@@ -47,13 +105,10 @@ export function AgentRunSidecar({
   run: Nullable<AgentRunFragment>
   loading: boolean
 }) {
-  const { spacing, colors } = useTheme()
+  const { spacing } = useTheme()
   const [subscribedTodos, setSubscribedTodos] = useState<AgentTodoFragment[]>(
     []
   )
-  const isRunning = isJobRunning(run?.status)
-  const RuntimeIcon =
-    runtimeToIcon[run?.runtime?.type ?? AgentRuntimeType.Custom]
 
   useAgentRunDeltaSubscription({
     skip: !run?.id || run?.status !== AgentRunStatus.Running,
@@ -91,72 +146,6 @@ export function AgentRunSidecar({
               pullRequest={pr}
             />
           ))}
-          <Sidecar>
-            {run.runtime?.name && (
-              <SidecarItem heading="Runtime">
-                <Flex
-                  align="center"
-                  gap="xsmall"
-                >
-                  <RuntimeIcon fullColor />
-                  {capitalize(run.runtime.name)}
-                </Flex>
-              </SidecarItem>
-            )}
-            {run.repository && (
-              <SidecarItem heading="Repository">
-                <Body2P
-                  $color="text"
-                  css={TRUNCATE}
-                >
-                  {prettifyRepoUrl(run.repository)}
-                </Body2P>
-              </SidecarItem>
-            )}
-            <SidecarItem heading="Status">
-              <RunStatusChip
-                status={run.status}
-                showSpinner={false}
-              />
-            </SidecarItem>
-            {run.mode && (
-              <SidecarItem heading="Mode">
-                <Chip
-                  size="small"
-                  severity="info"
-                >
-                  {capitalize(run.mode)}
-                </Chip>
-              </SidecarItem>
-            )}
-            <SidecarItem heading="Babysit">
-              <Chip
-                size="small"
-                severity={run.babysit ? 'success' : 'neutral'}
-              >
-                {run.babysit ? 'On' : 'Off'}
-              </Chip>
-            </SidecarItem>
-            <SidecarItem>
-              <Flex
-                direction="column"
-                gap="small"
-              >
-                <CaptionP $color="text-xlight">
-                  Start time{' '}
-                  <span css={{ color: colors['text-light'] }}>
-                    {formatDateTime(run.insertedAt)}
-                  </span>
-                </CaptionP>
-                <CaptionP $color="text-xlight">
-                  End time{' '}
-                  <span css={{ color: colors['text-light'] }}>
-                    {isRunning ? '---' : formatDateTime(run.updatedAt)}
-                  </span>
-                </CaptionP>
-              </Flex>
-            </SidecarItem>
-          </Sidecar>
           {!isEmpty(todos) && (
             <Sidecar>
               <SidecarItem heading="Summary of agent activities">

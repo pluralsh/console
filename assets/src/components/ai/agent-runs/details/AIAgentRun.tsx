@@ -34,7 +34,7 @@ import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
-import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
+import { AgentRunMetadata, AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 import { useAgentRunPanel } from './AgentRunPanel.tsx'
 
 export const getAgentRunBreadcrumbs = (
@@ -112,17 +112,22 @@ export function AIAgentRun() {
               alignItems="start"
               css={{ paddingBottom: spacing.large }}
             >
-              <StackedText
-                truncate
-                loading={runLoading}
-                first={run?.prompt}
-                firstPartialType="subtitle1"
-                firstColor="text"
-                second={prettifyRepoUrl(run?.repository ?? '')}
-                secondPartialType="body2"
-                secondColor="text-xlight"
-                css={{ flex: 1 }}
-              />
+              <Flex
+                direction="column"
+                flex={1}
+                minWidth={0}
+                gap="small"
+              >
+                <StackedText
+                  truncate
+                  loading={runLoading}
+                  first={run?.prompt}
+                  firstPartialType="subtitle2"
+                  firstColor="text"
+                  second={run && <AgentRunMetadata run={run} />}
+                  gap="xsmall"
+                />
+              </Flex>
               <Flex gap="small">
                 {isCancellable && (
                   <Button
