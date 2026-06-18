@@ -17,6 +17,8 @@ import {
   SidePanel,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
   AgentRunMode,
   AgentRunStatus,
@@ -50,12 +52,13 @@ export function AgentRunPanelContent() {
   const tabStateRef = useRef<any>(null)
   const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>('Analysis')
 
-  const { data } = useAgentRunQuery({
+  const { data, loading } = useAgentRunQuery({
     skip: !runId,
     variables: { id: runId },
     fetchPolicy: 'cache-and-network',
   })
   const run = data?.agentRun
+  const isLoading = loading && !run
 
   const pullRequests = useMemo(
     () =>
@@ -76,6 +79,28 @@ export function AgentRunPanelContent() {
   const todos = useAgentRunTodos(run)
   const showAgentTodosTab = !isEmpty(todos)
   const showPrsTab = hasPullRequests
+  const hasContentTabs = showAnalysisTab || showAgentTodosTab || showPrsTab
+  const isWriteMode = run?.mode === AgentRunMode.Write
+  const isActiveRun =
+    isJobRunning(run?.status) ||
+    run?.status === AgentRunStatus.Babysitting ||
+    run?.status === AgentRunStatus.PendingApproval
+  const expectsTodos = (isLoading || isActiveRun) && !showAgentTodosTab
+  const expectsPullRequests =
+    (isLoading || (isActiveRun && isWriteMode)) && !showPrsTab
+  const expectsAnalysis =
+    !showAnalysisTab &&
+    (isLoading ||
+      isActiveRun ||
+      (run?.status === AgentRunStatus.Successful &&
+        !(isWriteMode && hasPullRequests)))
+  const showTabSkeleton =
+    !hasContentTabs && (expectsTodos || expectsPullRequests || expectsAnalysis)
+  const showingTabContent =
+    (showAnalysisTab && selectedTab === 'Analysis' && !!run?.analysis) ||
+    (showAgentTodosTab && selectedTab === 'Agent todos' && !!run) ||
+    (showPrsTab && selectedTab === 'Pull requests' && !!run)
+  const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
     if (showAnalysisTab) return 'Analysis'
     if (showAgentTodosTab) return 'Agent todos'
@@ -96,17 +121,14 @@ export function AgentRunPanelContent() {
   return (
     <SidePanelContent>
       <PanelHeaderSC>
-        {(showAnalysisTab ||
-          showAgentTodosTab ||
-          showPrsTab ||
-          run?.podReference) && (
+        {(hasContentTabs || run?.podReference || showTabSkeleton) && (
           <TabListWrapperSC>
             <Flex
               align="center"
               gap="small"
               css={{ width: '100%' }}
             >
-              {(showAnalysisTab || showAgentTodosTab || showPrsTab) && (
+              {hasContentTabs ? (
                 <TabList
                   scrollable
                   stateRef={tabStateRef}
@@ -145,6 +167,17 @@ export function AgentRunPanelContent() {
                     </PanelSubTabSC>
                   )}
                 </TabList>
+              ) : (
+                showTabSkeleton && (
+                  <Flex
+                    align="center"
+                    gap="small"
+                  >
+                    {expectsAnalysis && <TabSkeletonSC $width={72} />}
+                    {expectsTodos && <TabSkeletonSC $width={96} />}
+                    {expectsPullRequests && <TabSkeletonSC $width={108} />}
+                  </Flex>
+                )
               )}
               {run?.podReference && (
                 <PanelLinkTabSC
@@ -203,6 +236,46 @@ export function AgentRunPanelContent() {
           </ContentInnerSC>
         </ContentWrapperSC>
       )}
+      {showContentPlaceholder && (
+        <ContentWrapperSC>
+          <ContentInnerSC>
+            {expectsAnalysis && (
+              <>
+                <RectangleSkeleton
+                  $height={24}
+                  $width="55%"
+                />
+                <RectangleSkeleton
+                  $height={120}
+                  $width="100%"
+                />
+                <RectangleSkeleton
+                  $height={80}
+                  $width="100%"
+                />
+              </>
+            )}
+            {expectsTodos && (
+              <RectangleSkeleton
+                $height="180px"
+                $width="100%"
+              />
+            )}
+            {expectsPullRequests && !expectsAnalysis && (
+              <>
+                <RectangleSkeleton
+                  $height={20}
+                  $width="45%"
+                />
+                <RectangleSkeleton
+                  $height={72}
+                  $width="100%"
+                />
+              </>
+            )}
+          </ContentInnerSC>
+        </ContentWrapperSC>
+      )}
     </SidePanelContent>
   )
 }
@@ -242,7 +315,20 @@ const TabListWrapperSC = styled.div({
   flex: 1,
   minWidth: 0,
   overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
 })
+
+const TabSkeletonSC = styled(RectangleSkeleton).attrs({ $height: 16 })(
+  ({ theme }) => ({
+    borderRadius: 20,
+    flexShrink: 0,
+    padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+    display: 'inline-flex',
+    alignItems: 'center',
+    boxSizing: 'border-box',
+  })
+)
 
 const panelTabStyles = ({
   theme,
