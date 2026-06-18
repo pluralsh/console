@@ -3,14 +3,12 @@ import {
   Button,
   Divider,
   Flex,
-  prettifyRepoUrl,
   SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
@@ -71,7 +69,6 @@ export function AIAgentRun() {
   const runLoading = !data && loading
   const run = data?.agentRun
   const { isOpen, setOpen } = useAgentRunPanel(!!run?.id)
-  useSidePanelWidth({ minWidth: 304 })
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
