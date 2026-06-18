@@ -1,6 +1,5 @@
 import {
   ArrowTopRightIcon,
-  ArrowUpIcon,
   Button,
   Divider,
   Flex,
@@ -8,7 +7,6 @@ import {
   SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
-  usePrevious,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -18,13 +16,12 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
-  AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
   useCancelAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AI_AGENT_RUNS_ABS_PATH,
@@ -34,14 +31,11 @@ import {
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI.tsx'
-import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 import { useAgentRunPanel } from './AgentRunPanel.tsx'
-import { SimpleToastChip } from 'components/utils/SimpleToastChip.tsx'
-import { useIntersectionObserver } from '@react-hooks-library/core'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -61,10 +55,6 @@ export const getAgentRunBreadcrumbs = (
 export function AIAgentRun() {
   const { spacing } = useTheme()
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
-  const [showAnalysisToast, setShowAnalysisToast] = useState(false)
-
-  const analysisRef = useRef<HTMLDivElement>(null)
-  const { inView: isAnalysisInView } = useIntersectionObserver(analysisRef)
 
   const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
     useCancelAgentRunMutation({
@@ -86,25 +76,6 @@ export function AIAgentRun() {
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
   const isCancellable = isRunning || run?.status == AgentRunStatus.Babysitting
-  const prevIsRunning = usePrevious(isRunning)
-
-  const hasPullRequests = Boolean(run?.pullRequests?.some(Boolean))
-  const isTerminalStatus =
-    run?.status === AgentRunStatus.Successful ||
-    run?.status === AgentRunStatus.Failed ||
-    run?.status === AgentRunStatus.Cancelled
-  const showAnalysisSection =
-    !!run?.analysis &&
-    (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
-
-  if (
-    prevIsRunning &&
-    !isRunning &&
-    showAnalysisSection &&
-    !showAnalysisToast &&
-    !isAnalysisInView
-  )
-    setShowAnalysisToast(true)
 
   useSetBreadcrumbs(
     useMemo(
@@ -189,12 +160,6 @@ export function AIAgentRun() {
                 }
               />
             )}
-            {showAnalysisSection && run?.analysis ? (
-              <AgentRunAnalysis
-                ref={analysisRef}
-                analysis={run.analysis}
-              />
-            ) : null}
             {!!run ? (
               <AIAgentRunMessages run={run} />
             ) : runLoading ? (
@@ -228,24 +193,6 @@ export function AIAgentRun() {
       >
         {cancellingError?.message}
       </Toast>
-      <SimpleToastChip
-        clickable
-        show={showAnalysisToast && !isAnalysisInView && showAnalysisSection}
-        onClose={() => setShowAnalysisToast(false)}
-        onClick={() => {
-          analysisRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          })
-          setShowAnalysisToast(false)
-        }}
-        delayTimeout="none"
-      >
-        <Flex gap="xsmall">
-          <span>Scroll up to view analysis</span>
-          <ArrowUpIcon />
-        </Flex>
-      </SimpleToastChip>
     </>
   )
 }
