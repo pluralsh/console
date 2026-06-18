@@ -1,6 +1,7 @@
 import json
 import re
 from collections import OrderedDict
+from functools import lru_cache
 
 import requests
 import yaml
@@ -64,6 +65,7 @@ def _latest_release_versions():
     return version, str(chart.get("version", ""))
 
 
+@lru_cache(maxsize=None)
 def _fetch_yaml(url):
     try:
         response = requests.get(url, timeout=10)

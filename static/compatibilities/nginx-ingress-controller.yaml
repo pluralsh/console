@@ -1,4 +1,4 @@
-icon: https://raw.githubusercontent.com/nginx/kubernetes-ingress/v5.5.0/charts/nginx-ingress/chart-icon.png
+icon: https://raw.githubusercontent.com/nginx/kubernetes-ingress/main/charts/nginx-ingress/chart-icon.png
 git_url: https://github.com/nginx/kubernetes-ingress
 release_url: https://github.com/nginx/kubernetes-ingress/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/nginx/charts/nginx-ingress
