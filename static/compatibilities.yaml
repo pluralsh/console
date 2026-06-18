@@ -20862,6 +20862,13 @@ addons:
   helm_repository_url: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
   chart_name: nginx-gateway-fabric
   versions:
+  - version: 2.6.5
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.6.5
+    images: ['ghcr.io/nginx/nginx-gateway-fabric:2.6.5', 'ghcr.io/nginx/nginx-gateway-fabric/nginx:2.6.5']
   - version: 2.6.3
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []

@@ -128,11 +128,18 @@ def extract_table_data(content):
             continue
 
         ver = str(version)
+        kube_versions = _parse_kube_versions(columns[2])
+        if not kube_versions:
+            print_error(
+                f"Could not parse Kubernetes versions for NGINX Gateway Fabric {ver}: {columns[2]}"
+            )
+            continue
+
         rows.append(
             OrderedDict(
                 [
                     ("version", ver),
-                    ("kube", _parse_kube_versions(columns[2])),
+                    ("kube", kube_versions),
                     ("chart_version", ver),
                     ("images", _default_images(ver)),
                     ("requirements", []),
