@@ -5,7 +5,7 @@ defmodule Console.Deployments.PubSub.CacheableTest do
   alias Console.PubSub.Consumers.Cache
 
   describe "WorkbenchWebhookCreated" do
-    test "calls Console.Cache.put with {:wb_webhooks, webhook_id} and the hook" do
+    test "calls Console.Cache.delete with {:wb_webhooks, webhook_id} and the hook" do
       %{id: id} = obs_webhook = insert(:observability_webhook, type: :grafana)
       workbench = insert(:workbench)
       hook =
@@ -20,10 +20,26 @@ defmodule Console.Deployments.PubSub.CacheableTest do
       event = %PubSub.WorkbenchWebhookCreated{item: hook}
       Cache.handle_event(event)
     end
+
+    test "calls Console.Cache.delete with {:wb_webhooks_for_issue, issue_webhook_id} and the hook" do
+      %{id: id} = issue_webhook = insert(:issue_webhook, provider: :gitlab)
+      workbench = insert(:workbench)
+      hook =
+        insert(:workbench_webhook,
+          workbench: workbench,
+          issue_webhook: issue_webhook,
+          name: "gitlab-issues"
+        )
+
+      expect(Console.Cache, :delete, fn {:wb_webhooks_for_issue, ^id} -> :ok end)
+
+      event = %PubSub.WorkbenchWebhookCreated{item: hook}
+      Cache.handle_event(event)
+    end
   end
 
   describe "WorkbenchWebhookUpdated" do
-    test "calls Console.Cache.put with {:wb_webhooks, webhook_id} and the hook" do
+    test "calls Console.Cache.delete with {:wb_webhooks, webhook_id} and the hook" do
       %{id: id} = obs_webhook = insert(:observability_webhook, type: :grafana)
       workbench = insert(:workbench)
       hook =
@@ -38,10 +54,26 @@ defmodule Console.Deployments.PubSub.CacheableTest do
       event = %PubSub.WorkbenchWebhookUpdated{item: hook}
       Cache.handle_event(event)
     end
+
+    test "calls Console.Cache.delete with {:wb_webhooks_for_issue, issue_webhook_id} and the hook" do
+      %{id: id} = issue_webhook = insert(:issue_webhook, provider: :gitlab)
+      workbench = insert(:workbench)
+      hook =
+        insert(:workbench_webhook,
+          workbench: workbench,
+          issue_webhook: issue_webhook,
+          name: "updated-gitlab-issues"
+        )
+
+      expect(Console.Cache, :delete, fn {:wb_webhooks_for_issue, ^id} -> :ok end)
+
+      event = %PubSub.WorkbenchWebhookUpdated{item: hook}
+      Cache.handle_event(event)
+    end
   end
 
   describe "WorkbenchWebhookDeleted" do
-    test "calls Console.Cache.put with {:wb_webhooks, webhook_id} and the hook" do
+    test "calls Console.Cache.delete with {:wb_webhooks, webhook_id} and the hook" do
       %{id: id} = obs_webhook = insert(:observability_webhook, type: :grafana)
       workbench = insert(:workbench)
       hook =
@@ -52,6 +84,22 @@ defmodule Console.Deployments.PubSub.CacheableTest do
         )
 
       expect(Console.Cache, :delete, fn {:wb_webhooks, ^id} -> :ok end)
+
+      event = %PubSub.WorkbenchWebhookDeleted{item: hook}
+      Cache.handle_event(event)
+    end
+
+    test "calls Console.Cache.delete with {:wb_webhooks_for_issue, issue_webhook_id} and the hook" do
+      %{id: id} = issue_webhook = insert(:issue_webhook, provider: :gitlab)
+      workbench = insert(:workbench)
+      hook =
+        insert(:workbench_webhook,
+          workbench: workbench,
+          issue_webhook: issue_webhook,
+          name: "deleted-gitlab-issues"
+        )
+
+      expect(Console.Cache, :delete, fn {:wb_webhooks_for_issue, ^id} -> :ok end)
 
       event = %PubSub.WorkbenchWebhookDeleted{item: hook}
       Cache.handle_event(event)

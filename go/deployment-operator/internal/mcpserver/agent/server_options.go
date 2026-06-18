@@ -31,19 +31,24 @@ func WithVersion(version string) Option {
 	}
 }
 
-// WithOpenAIProxy registers a local OpenAI chat completion endpoint that converts
-// streaming client requests into non-streaming upstream calls.
-func WithOpenAIProxy(upstreamURL string) Option {
+// WithOpenAIProxy registers local OpenAI chat completion and responses endpoints
+// that convert streaming client requests into non-streaming upstream calls.
+func WithOpenAIProxy(chatCompletionsURL, responsesURL string) Option {
 	return func(s *Server) {
-		if upstreamURL == "" {
-			return
+		if chatCompletionsURL != "" {
+			handler, err := openaiproxy.NewHandler(openaiproxy.Config{UpstreamURL: chatCompletionsURL})
+			if err != nil {
+				klog.Fatalf("could not configure openai chat completion proxy: %v", err)
+			}
+			s.openaiProxy = handler
 		}
 
-		handler, err := openaiproxy.NewHandler(openaiproxy.Config{UpstreamURL: upstreamURL})
-		if err != nil {
-			klog.Fatalf("could not configure openai proxy: %v", err)
+		if responsesURL != "" {
+			handler, err := openaiproxy.NewResponsesHandler(openaiproxy.ResponsesConfig{UpstreamURL: responsesURL})
+			if err != nil {
+				klog.Fatalf("could not configure openai responses proxy: %v", err)
+			}
+			s.openaiResponsesProxy = handler
 		}
-
-		s.openaiProxy = handler
 	}
 }

@@ -151,10 +151,26 @@ func TestConfigTemplate_Provider(t *testing.T) {
 
 		providers := out["provider"].(map[string]any)
 		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai" {
+			t.Fatalf("expected npm=@ai-sdk/openai for streaming proxy, got %v", plural["npm"])
+		}
 		options := plural["options"].(map[string]any)
 
 		if options["baseURL"] != common.AgentOpenAIBaseURL {
 			t.Errorf("expected mcpserver baseURL %s, got %v", common.AgentOpenAIBaseURL, options["baseURL"])
+		}
+	})
+
+	t.Run("plural provider without streaming proxy uses responses sdk", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai" {
+			t.Fatalf("expected npm=@ai-sdk/openai, got %v", plural["npm"])
 		}
 	})
 

@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/packages/param"
 )
 
 func TestHandlerNonStreamingPassthrough(t *testing.T) {
@@ -69,15 +68,11 @@ func TestHandlerStreamingConvertsToNonStreamingUpstream(t *testing.T) {
 			t.Fatalf("read upstream body: %v", err)
 		}
 
-		var req openai.ChatCompletionNewParams
-		if err := json.Unmarshal(body, &req); err != nil {
-			t.Fatalf("unmarshal upstream body: %v", err)
-		}
-		if !param.IsOmitted(req.StreamOptions) {
-			t.Fatal("expected stream_options to be removed")
-		}
 		if strings.Contains(string(body), `"stream"`) {
 			t.Fatalf("expected stream to be removed, got %s", body)
+		}
+		if !strings.Contains(string(body), `"input_audio"`) {
+			t.Fatalf("expected message content object to be preserved, got %s", body)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -100,7 +95,18 @@ func TestHandlerStreamingConvertsToNonStreamingUpstream(t *testing.T) {
 		t.Fatalf("NewHandler() failed: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"gpt-4","messages":[{"role":"user","content":"hi"}],"stream":true,"stream_options":{"include_usage":true}}`))
+	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{
+		"model":"gpt-4",
+		"messages":[{
+			"role":"user",
+			"content":[
+				{"type":"text","text":"transcribe this"},
+				{"type":"input_audio","input_audio":{"data":"abc","format":"wav"}}
+			]
+		}],
+		"stream":true,
+		"stream_options":{"include_usage":true}
+	}`))
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
@@ -272,23 +278,44 @@ func TestStreamChunksFromCompletionToolCalls(t *testing.T) {
 func TestForceNonStreaming(t *testing.T) {
 	t.Parallel()
 
-	body, err := forceNonStreaming([]byte(`{"model":"gpt-4","stream":true,"stream_options":{"include_usage":true},"max_tokens":100}`))
+	body, err := forceNonStreaming([]byte(`{
+		"model":"gpt-4",
+		"stream":true,
+		"stream_options":{"include_usage":true},
+		"max_tokens":100,
+		"messages":[{
+			"role":"user",
+			"content":[{"type":"text","text":"hi"}]
+		}]
+	}`))
 	if err != nil {
 		t.Fatalf("forceNonStreaming() failed: %v", err)
 	}
 
-	var params openai.ChatCompletionNewParams
-	if err := json.Unmarshal(body, &params); err != nil {
-		t.Fatalf("unmarshal payload: %v", err)
-	}
-	if !param.IsOmitted(params.StreamOptions) {
-		t.Fatal("expected stream_options to be removed")
-	}
-	if params.MaxTokens.Value != 100 {
-		t.Fatalf("max_tokens = %d, want 100", params.MaxTokens.Value)
-	}
 	if strings.Contains(string(body), `"stream"`) {
 		t.Fatalf("expected stream to be removed, got %s", body)
+	}
+
+	var payload struct {
+		MaxTokens int64 `json:"max_tokens"`
+		Messages  []struct {
+			Content json.RawMessage `json:"content"`
+		} `json:"messages"`
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if payload.MaxTokens != 100 {
+		t.Fatalf("max_tokens = %d, want 100", payload.MaxTokens)
+	}
+	if len(payload.Messages) != 1 {
+		t.Fatalf("message count = %d, want 1", len(payload.Messages))
+	}
+	if string(payload.Messages[0].Content) == "null" || len(payload.Messages[0].Content) == 0 {
+		t.Fatalf("expected message content to be preserved, got %s", payload.Messages[0].Content)
+	}
+	if !strings.Contains(string(payload.Messages[0].Content), `"type":"text"`) {
+		t.Fatalf("expected message content array to be preserved, got %s", payload.Messages[0].Content)
 	}
 }
 

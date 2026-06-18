@@ -7,6 +7,8 @@ const (
 
 	AgentOpenAIChatCompletionsPath = "/v1/chat/completions"
 	AgentOpenAIChatCompletionsURL  = "http://127.0.0.1:8080/v1/chat/completions"
+	AgentOpenAIResponsesPath       = "/v1/responses"
+	AgentOpenAIResponsesURL        = "http://127.0.0.1:8080/v1/responses"
 	AgentOpenAIBaseURL             = "http://127.0.0.1:8080/v1"
 
 	AgentMCPGRPCPort          = 8081

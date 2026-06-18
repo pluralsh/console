@@ -136,14 +136,7 @@ func WriteSSE(w io.Writer, chunks []openai.ChatCompletionChunk) error {
 }
 
 func forceNonStreaming(body []byte) ([]byte, error) {
-	var params openai.ChatCompletionNewParams
-	if err := json.Unmarshal(body, &params); err != nil {
-		return nil, err
-	}
-
-	params.StreamOptions = openai.ChatCompletionStreamOptionsParam{}
-
-	return json.Marshal(params)
+	return removeTopLevelJSONFields(body, "stream", "stream_options")
 }
 
 func streamingRequested(body []byte) (bool, error) {
