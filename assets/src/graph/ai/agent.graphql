@@ -21,6 +21,13 @@ fragment AgentRunTiny on AgentRun {
     name
     namespace
   }
+  workbenchJob {
+    id
+    workbench {
+      id
+      name
+    }
+  }
   upload {
     id
     session

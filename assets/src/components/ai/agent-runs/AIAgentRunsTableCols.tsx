@@ -9,6 +9,7 @@ import {
   PrOpenIcon,
   SmallPodIcon,
   Table,
+  WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
@@ -29,6 +30,7 @@ import { capitalize, isEmpty, toLower } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { RunStatusChip } from '../infra-research/details/InfraResearch'
@@ -48,6 +50,34 @@ export const agentRunsCols = [
         <div css={{ overflow: 'hidden', width: '100%' }}>
           <Body2P css={TRUNCATE}>{getValue()}</Body2P>
         </div>
+      )
+    },
+  }),
+  columnHelper.accessor((run) => run.workbenchJob, {
+    id: 'workbench',
+    cell: function Cell({ getValue }) {
+      const workbenchJob = getValue()
+      const workbench = workbenchJob?.workbench
+      if (!workbenchJob?.id || !workbench?.id || !workbench.name) return null
+
+      return (
+        <Chip
+          size="small"
+          severity="neutral"
+          fillLevel={1}
+          clickable
+          as={Link}
+          to={getWorkbenchJobAbsPath({
+            workbenchId: workbench.id,
+            jobId: workbenchJob.id,
+          })}
+          onClick={(e) => e.stopPropagation()}
+          icon={<WorkbenchIcon size={12} />}
+          truncateWidth={80}
+          tooltip="View workbench job"
+        >
+          {workbench.name}
+        </Chip>
       )
     },
   }),
