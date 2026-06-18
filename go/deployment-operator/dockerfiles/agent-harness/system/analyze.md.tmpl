@@ -37,6 +37,21 @@ When analysis is finished, you **must** persist the report by calling the Plural
 
 ---
 
+## Plural GitOps skills
+
+If this repository contains `deployments.plural.sh` CRs, load the bundled Plural GitOps agent
+skills before starting the environment scan. They are auto-discovered from `/plural/skills/`:
+
+- `plural-git-repository` — GitRepository CRs and source vs GitOps repo wiring
+- `plural-infrastructure-stack` — InfrastructureStack → Terraform / Terragrunt / Ansible
+- `plural-services` — ServiceDeployment vs GlobalService
+- `plural-cd-extensions` — advanced CD patterns
+
+After loading a skill, apply it internally. Do **not** paste or summarize skill text in your
+report — read `references/guide.md` inside a skill only when you need examples or field detail.
+
+---
+
 ## 1. Hard rules
 
 You MUST always obey:

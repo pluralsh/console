@@ -62,13 +62,13 @@ var (
 	analysisAgent = agentJSON("analysis", agentDef{
 		Description: "Analyze code for potential issues, vulnerabilities and improvements. Use PROACTIVELY.",
 		Prompt:      "You are a read-only autonomous analysis agent.",
-		Tools:       appendTools([]string{"Read", "Grep", "Glob", "Bash"}, analyzePluralMCPTools),
+		Tools:       appendTools([]string{"Read", "Grep", "Glob", "Bash", "Skill"}, analyzePluralMCPTools),
 	})
 	autonomousAgent = agentJSON("autonomous", agentDef{
 		Description: "Autonomous agent for making code changes and creating pull requests. Use PROACTIVELY.",
 		Prompt:      "You are an autonomous coding agent, highly skilled in coding and code analysis.",
 		Tools: appendTools(
-			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch"},
+			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch", "Skill"},
 			writePluralMCPTools,
 		),
 	})
@@ -76,7 +76,7 @@ var (
 		Description: "Autonomous agent responding to pull request feedback. Commits to the existing PR branch. Does NOT create new PRs. Use PROACTIVELY.",
 		Prompt:      "You are an autonomous coding agent. Your pull request is already open. Address reviewer comments and fix CI failures, then commit to the existing branch.",
 		Tools: appendTools(
-			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch"},
+			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch", "Skill"},
 			babysitPluralMCPTools,
 		),
 	})

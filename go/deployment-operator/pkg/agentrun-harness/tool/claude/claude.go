@@ -60,15 +60,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := babysitAgent
 
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", bCtx.Prompt,
-		"--output-format", "stream-json",
-		"--verbose",
-	}
+	args := in.baseArgs(promptFile, agent, bCtx.Prompt)
 
 	var envOpt exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -134,15 +126,7 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		agent = autonomousAgent
 	}
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", followUpPrompt,
-		"--output-format", "stream-json",
-		"--verbose",
-	}
+	args := in.baseArgs(promptFile, agent, followUpPrompt)
 
 	var opts []exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -195,14 +179,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		agent = autonomousAgent
 	}
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", in.Config.Run.Prompt,
-		"--output-format", "stream-json",
-		"--verbose"}
+	args := in.baseArgs(promptFile, agent, in.Config.Run.Prompt)
 
 	if in.Config.Run.IsProxyEnabled() {
 		options = append(options,
@@ -273,6 +250,7 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"MultiEdit",
 		"Bash",
 		"WebFetch",
+		"Skill",
 		PluralMCPToolsWildcard,
 	)
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())
@@ -321,6 +299,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"Bash(rg:*)",
 			"Bash(find:*)",
 			"WebFetch",
+			"Skill",
 			PluralMCPToolsWildcard,
 		).DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
 	} else {
@@ -331,6 +310,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"MultiEdit",
 			"Bash",
 			"WebFetch",
+			"Skill",
 			PluralMCPToolsWildcard,
 		)
 	}
@@ -346,6 +326,22 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 
 func (in *Claude) configPath() string {
 	return path.Join(in.Config.WorkDir, ".claude")
+}
+
+func (in *Claude) baseArgs(promptFile, agentsJSON, userPrompt string) []string {
+	args := []string{
+		"--add-dir", in.Config.WorkDir,
+		"--add-dir", in.Config.RepositoryDir,
+		"--agents", agentsJSON,
+		"--system-prompt-file", promptFile,
+		"--model", string(in.model),
+		"--output-format", "stream-json",
+		"--verbose",
+	}
+	if userPrompt != "" {
+		args = append(args, "-p", userPrompt)
+	}
+	return args
 }
 
 func (in *Claude) withConfigEnv(env []string) []string {

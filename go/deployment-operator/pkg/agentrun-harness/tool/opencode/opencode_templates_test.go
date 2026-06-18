@@ -235,6 +235,21 @@ func TestConfigTemplate_Provider(t *testing.T) {
 	})
 }
 
+func TestConfigTemplate_SkillPermissions(t *testing.T) {
+	t.Run("analysis and autonomous agents allow all skills", func(t *testing.T) {
+		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+		agent := out["agent"].(map[string]any)
+		for _, name := range []string{"analysis", "autonomous"} {
+			permission := agent[name].(map[string]any)["permission"].(map[string]any)
+			skill := permission["skill"].(map[string]any)
+			if skill["*"] != "allow" {
+				t.Fatalf("agent.%s permission.skill.* = %v, want allow", name, skill["*"])
+			}
+		}
+	})
+}
+
 func TestConfigTemplate_AgentTools(t *testing.T) {
 	t.Run("analysis agent has plural* tool only", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))

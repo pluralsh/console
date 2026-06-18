@@ -190,6 +190,15 @@ func (in *Codex) writeCodexConfig() error {
 	if err != nil {
 		return err
 	}
+	cfg.Features = &CodexGlobalFeatures{Skills: true}
+
+	skillConfigs, err := bundledSkillConfigs(bundledSkillsDir(in.Config.WorkDir))
+	if err != nil {
+		return err
+	}
+	if len(skillConfigs) > 0 {
+		cfg.Skills = &SkillsSettings{Config: skillConfigs}
+	}
 
 	config, err := WriteCodexConfig(path.Join(in.Config.WorkDir, ".codex"), cfg)
 	if err != nil {
