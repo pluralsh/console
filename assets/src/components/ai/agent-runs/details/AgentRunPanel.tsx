@@ -21,7 +21,7 @@ import {
   useAgentRunQuery,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
   AI_AGENT_RUN_ABS_PATH,
@@ -63,6 +63,20 @@ export function AgentRunPanelContent() {
     (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
   const todos = useAgentRunTodos(run)
   const showAgentTodosTab = !isEmpty(todos)
+  const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
+    if (showAnalysisTab) return 'Analysis'
+    if (showAgentTodosTab) return 'Agent todos'
+    return null
+  }, [showAnalysisTab, showAgentTodosTab])
+
+  useEffect(() => {
+    if (!defaultTab) return
+    setSelectedTab((tab) => {
+      if (tab === 'Analysis' && showAnalysisTab) return tab
+      if (tab === 'Agent todos' && showAgentTodosTab) return tab
+      return defaultTab
+    })
+  }, [defaultTab, showAnalysisTab, showAgentTodosTab])
 
   return (
     <SidePanelContent>
