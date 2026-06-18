@@ -698,11 +698,11 @@ defmodule Console.Deployments.Workbenches do
   Marks a workbench job as paused, and cancels its activities so they can be restarted later.
   """
   @spec pause_job(WorkbenchJob.t()) :: job_resp
-  def pause_job(%WorkbenchJob{} = job) do
+  def pause_job(%WorkbenchJob{} = job, usage \\ %{}) do
     start_transaction()
     |> add_operation(:job, fn _ ->
       job
-      |> WorkbenchJob.changeset(%{status: :paused})
+      |> WorkbenchJob.changeset(%{status: :paused, usage: usage})
       |> Repo.update()
     end)
     |> add_operation(:activities, fn _ ->
@@ -907,14 +907,26 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Saves usage records for a workbench job.
+  """
+  @spec save_usage(WorkbenchJob.t(), map) :: job_resp
+  def save_usage(%WorkbenchJob{} = job, usage) do
+    job
+    |> WorkbenchJob.changeset(%{usage: usage})
+    |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
   Fails a job with an error message.
   """
   @spec fail_job(binary, WorkbenchJob.t()) :: job_resp
-  def fail_job(error, %WorkbenchJob{} = job) when is_binary(error) do
+  def fail_job(error, %WorkbenchJob{} = job, usage \\ %{}) when is_binary(error) do
     WorkbenchJob.changeset(job, %{
       status: :failed,
       completed_at: DateTime.utc_now(),
-      error: error
+      error: error,
+      usage: usage
     })
     |> Repo.update()
     |> notify(:update)

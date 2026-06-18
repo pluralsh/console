@@ -10094,6 +10094,8 @@ type WorkbenchJob struct {
 	Error *string `json:"error,omitempty"`
 	// mode-specific options for this job
 	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+	// token and cost usage for this job
+	Usage *WorkbenchJobUsage `json:"usage,omitempty"`
 	// chatbot integration metadata for this job, when present
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
@@ -10379,6 +10381,25 @@ type WorkbenchJobThoughtDelta struct {
 type WorkbenchJobUpdateAttributes struct {
 	// the result for this job
 	Result *WorkbenchResultAttributes `json:"result,omitempty"`
+}
+
+type WorkbenchJobUsage struct {
+	// input tokens consumed by this job
+	InputTokens *int64 `json:"inputTokens,omitempty"`
+	// output tokens produced by this job
+	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total tokens consumed by this job
+	TotalTokens *int64 `json:"totalTokens,omitempty"`
+	// cached input tokens used by this job
+	CachedTokens *int64 `json:"cachedTokens,omitempty"`
+	// reasoning tokens produced by this job
+	ReasoningTokens *int64 `json:"reasoningTokens,omitempty"`
+	// input token cost for this job
+	InputCost *float64 `json:"inputCost,omitempty"`
+	// output token cost for this job
+	OutputCost *float64 `json:"outputCost,omitempty"`
+	// total token cost for this job
+	TotalCost *float64 `json:"totalCost,omitempty"`
 }
 
 type WorkbenchMessageAttributes struct {
@@ -11130,6 +11151,19 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchUsageTimeseries struct {
+	// UTC timestamp for this data point
+	Timestamp *string `json:"timestamp,omitempty"`
+	// the workbench this usage data is associated with
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// number of input tokens consumed during this interval
+	InputTokens *int64 `json:"inputTokens,omitempty"`
+	// number of output tokens produced during this interval
+	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total cost for this interval, in USD
+	TotalCost *float64 `json:"totalCost,omitempty"`
 }
 
 type WorkbenchWebhook struct {

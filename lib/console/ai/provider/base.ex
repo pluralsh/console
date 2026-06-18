@@ -33,13 +33,17 @@ defmodule Console.AI.Provider.Base do
          {:ok, stream} <- stream_retrier(model, messages, opts),
          {:ok, result} <- StreamResponse.process_stream(stream, Stream.stream_options(s)) do
       Stream.offset(1)
+      usage_callback(result, opts)
       {:ok, result}
     end
   end
 
   def generate_text(messages, model, _, opts) do
     with {:ok, model} <- model(model),
-      do: ReqLLM.generate_text(model, messages, opts)
+         {:ok, result} <- ReqLLM.generate_text(model, messages, opts) do
+      usage_callback(result, opts)
+      {:ok, result}
+    end
   end
 
   def reqllm_messages(messages) do
@@ -56,6 +60,13 @@ defmodule Console.AI.Provider.Base do
       {:tool, content} -> [Context.tool_result("unknown", content)]
     end)
     |> Context.new()
+  end
+
+  defp usage_callback(result, opts) do
+    case Keyword.get(opts, :usage_callback) do
+      fun when is_function(fun, 1) -> ReqLLM.Response.usage(result) |> fun.()
+      _ -> nil
+    end
   end
 
   defp tid(id) when is_binary(id), do: id

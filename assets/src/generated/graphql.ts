@@ -10856,6 +10856,7 @@ export type RootQueryType = {
   workbenchPullRequests: Scalars['Int']['output'];
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
+  workbenchUsage?: Maybe<Array<Maybe<WorkbenchUsageTimeseries>>>;
   workbenches?: Maybe<WorkbenchConnection>;
 };
 
@@ -12301,6 +12302,13 @@ export type RootQueryTypeWorkbenchToolsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchUsageArgs = {
+  period?: InputMaybe<EvalResultsPeriod>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -15724,6 +15732,8 @@ export type WorkbenchJob = {
   status: WorkbenchJobStatus;
   tracesTool?: Maybe<Array<Maybe<WorkbenchJobActivityTrace>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** token and cost usage for this job */
+  usage?: Maybe<WorkbenchJobUsage>;
   /** the user who created this run */
   user?: Maybe<User>;
   /** whimsically describes current progress for you */
@@ -16071,6 +16081,26 @@ export type WorkbenchJobThoughtDelta = {
 export type WorkbenchJobUpdateAttributes = {
   /** the result for this job */
   result?: InputMaybe<WorkbenchResultAttributes>;
+};
+
+export type WorkbenchJobUsage = {
+  __typename?: 'WorkbenchJobUsage';
+  /** cached input tokens used by this job */
+  cachedTokens?: Maybe<Scalars['Int']['output']>;
+  /** input token cost for this job */
+  inputCost?: Maybe<Scalars['Float']['output']>;
+  /** input tokens consumed by this job */
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  /** output token cost for this job */
+  outputCost?: Maybe<Scalars['Float']['output']>;
+  /** output tokens produced by this job */
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  /** reasoning tokens produced by this job */
+  reasoningTokens?: Maybe<Scalars['Int']['output']>;
+  /** total token cost for this job */
+  totalCost?: Maybe<Scalars['Float']['output']>;
+  /** total tokens consumed by this job */
+  totalTokens?: Maybe<Scalars['Int']['output']>;
 };
 
 export type WorkbenchMessageAttributes = {
@@ -16926,6 +16956,20 @@ export enum WorkbenchToolType {
   Teams = 'TEAMS',
   Tempo = 'TEMPO'
 }
+
+export type WorkbenchUsageTimeseries = {
+  __typename?: 'WorkbenchUsageTimeseries';
+  /** number of input tokens consumed during this interval */
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  /** number of output tokens produced during this interval */
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  /** UTC timestamp for this data point */
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  /** total cost for this interval, in USD */
+  totalCost?: Maybe<Scalars['Float']['output']>;
+  /** the workbench this usage data is associated with */
+  workbench?: Maybe<Workbench>;
+};
 
 export type WorkbenchWebhook = {
   __typename?: 'WorkbenchWebhook';
