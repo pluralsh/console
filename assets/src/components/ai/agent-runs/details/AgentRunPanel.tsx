@@ -6,7 +6,6 @@ import {
   ListIcon,
   Markdown,
   PrIcon,
-  PrOpenIcon,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'

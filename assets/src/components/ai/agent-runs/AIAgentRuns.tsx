@@ -1,4 +1,4 @@
-import { DiscoverIcon, Flex, IconFrame, Table } from '@pluralsh/design-system'
+import { Flex, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
