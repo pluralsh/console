@@ -152,7 +152,7 @@ function AgentRunTypeSelector({
       triggerButton={
         <ChatOptionPill isOpen={isOpen}>
           <LogsIcon size={12} />
-          {capitalize(selectedMode) ?? 'Select mode'}
+          {selectedMode ? capitalize(selectedMode) : 'Select mode'}
         </ChatOptionPill>
       }
     >
