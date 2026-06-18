@@ -121,7 +121,6 @@ export function AIAgentRun() {
                   firstPartialType="subtitle2"
                   firstColor="text"
                   second={run && <AgentRunMetadata run={run} />}
-                  gap="xsmall"
                 />
               </Flex>
               <Flex gap="small">
