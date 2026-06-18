@@ -5,12 +5,14 @@ import {
   Divider,
   Flex,
   prettifyRepoUrl,
+  SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
   usePrevious,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
@@ -37,6 +39,7 @@ import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
+import { useAgentRunPanel } from './AgentRunPanel.tsx'
 import { SimpleToastChip } from 'components/utils/SimpleToastChip.tsx'
 import { useIntersectionObserver } from '@react-hooks-library/core'
 
@@ -77,6 +80,8 @@ export function AIAgentRun() {
 
   const runLoading = !data && loading
   const run = data?.agentRun
+  const { isOpen, setOpen } = useAgentRunPanel(!!run?.id)
+  useSidePanelWidth({ minWidth: 304 })
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
@@ -117,87 +122,102 @@ export function AIAgentRun() {
     )
 
   return (
-    <WrapperSC>
-      <Flex
-        direction="column"
-        flex={1}
-        minWidth={0}
+    <>
+      <StretchedFlex
+        gap="small"
         height="100%"
-        paddingRight={spacing.medium}
-        overflow="auto"
       >
-        <StretchedFlex
-          gap="xxxxlarge"
-          alignItems="start"
-          css={{ paddingBottom: spacing.large }}
-        >
-          <StackedText
-            truncate
-            loading={runLoading}
-            first={run?.prompt}
-            firstPartialType="subtitle1"
-            firstColor="text"
-            second={prettifyRepoUrl(run?.repository ?? '')}
-            secondPartialType="body2"
-            secondColor="text-xlight"
-            css={{ flex: 1 }}
-          />
-          <Flex gap="small">
-            {isCancellable && (
-              <Button
-                small
-                secondary
-                onClick={() => cancelAgentRun()}
-                startIcon={<SpinnerAlt />}
-                loading={cancelling}
-              >
-                Cancel agent run
-              </Button>
-            )}
-            {run?.upload?.session && (
-              <AIAgentRunLocalButton
-                runId={run.id}
-                repository={run.repository}
+        <WrapperSC>
+          <Flex
+            direction="column"
+            flex={1}
+            minWidth={0}
+            height="100%"
+            paddingRight={spacing.medium}
+            overflow="auto"
+          >
+            <StretchedFlex
+              gap="xxxxlarge"
+              alignItems="start"
+              css={{ paddingBottom: spacing.large }}
+            >
+              <StackedText
+                truncate
+                loading={runLoading}
+                first={run?.prompt}
+                firstPartialType="subtitle1"
+                firstColor="text"
+                second={prettifyRepoUrl(run?.repository ?? '')}
+                secondPartialType="body2"
+                secondColor="text-xlight"
+                css={{ flex: 1 }}
+              />
+              <Flex gap="small">
+                {isCancellable && (
+                  <Button
+                    small
+                    secondary
+                    onClick={() => cancelAgentRun()}
+                    startIcon={<SpinnerAlt />}
+                    loading={cancelling}
+                  >
+                    Cancel agent run
+                  </Button>
+                )}
+                {run?.upload?.session && (
+                  <AIAgentRunLocalButton
+                    runId={run.id}
+                    repository={run.repository}
+                  />
+                )}
+                {run && <AIAgentRunShareButton runId={run?.id} />}
+              </Flex>
+            </StretchedFlex>
+            <Divider backgroundColor="border" />
+            {run?.error && (
+              <GqlError
+                header="There was an error during this run."
+                error={run.error}
+                action={
+                  <Button
+                    as={Link}
+                    to={AI_AGENT_RUNS_ABS_PATH}
+                    endIcon={<ArrowTopRightIcon />}
+                  >
+                    Return to agent runs
+                  </Button>
+                }
               />
             )}
-            {run && <AIAgentRunShareButton runId={run?.id} />}
+            {showAnalysisSection && run?.analysis ? (
+              <AgentRunAnalysis
+                ref={analysisRef}
+                analysis={run.analysis}
+              />
+            ) : null}
+            {!!run ? (
+              <AIAgentRunMessages run={run} />
+            ) : runLoading ? (
+              <RectangleSkeleton
+                $width="100%"
+                $height={400}
+              />
+            ) : null}
           </Flex>
-        </StretchedFlex>
-        <Divider backgroundColor="border" />
-        {run?.error && (
-          <GqlError
-            header="There was an error during this run."
-            error={run.error}
-            action={
-              <Button
-                as={Link}
-                to={AI_AGENT_RUNS_ABS_PATH}
-                endIcon={<ArrowTopRightIcon />}
-              >
-                Return to agent runs
-              </Button>
-            }
+          <AgentRunSidecar
+            run={run}
+            loading={loading}
           />
+        </WrapperSC>
+        {!isOpen && (
+          <PanelOpenBtnSC
+            tertiary
+            onClick={() => setOpen(true)}
+          >
+            <SidePanelOpenIcon />
+          </PanelOpenBtnSC>
         )}
-        {showAnalysisSection && run?.analysis ? (
-          <AgentRunAnalysis
-            ref={analysisRef}
-            analysis={run.analysis}
-          />
-        ) : null}
-        {!!run ? (
-          <AIAgentRunMessages run={run} />
-        ) : runLoading ? (
-          <RectangleSkeleton
-            $width="100%"
-            $height={400}
-          />
-        ) : null}
-      </Flex>
-      <AgentRunSidecar
-        run={run}
-        loading={loading}
-      />
+      </StretchedFlex>
       <Toast
         error={'Cancelling agent run failed'}
         show={!!cancellingError}
@@ -226,9 +246,14 @@ export function AIAgentRun() {
           <ArrowUpIcon />
         </Flex>
       </SimpleToastChip>
-    </WrapperSC>
+    </>
   )
 }
+
+const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
+  height: '100%',
+  borderLeft: theme.borders.default,
+}))
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -238,4 +263,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   width: '100%',
   height: '100%',
   minHeight: 0,
+  minWidth: 0,
+  flex: 1,
 }))

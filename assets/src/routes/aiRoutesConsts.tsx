@@ -55,6 +55,10 @@ export const getAgentRunAbsPath = ({
   agentRunId: Nullable<string>
 }) => `${AI_AGENT_RUNS_ABS_PATH}/${agentRunId ?? ''}`
 
+export const AI_AGENT_RUN_ABS_PATH = `${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`
+
+export const AI_AGENT_RUNS_PATH_MATCHER_ABS = AI_AGENT_RUN_ABS_PATH
+
 export const getInfraResearchAbsPath = ({
   infraResearchId,
 }: {
