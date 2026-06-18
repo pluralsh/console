@@ -28,7 +28,7 @@ import {
 } from 'generated/graphql'
 import { capitalize, isEmpty, toLower } from 'lodash'
 import { useMemo, useState } from 'react'
-import { Link, LinkProps } from 'react-router-dom'
+import { Link, LinkProps, useNavigate } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -56,6 +56,7 @@ export const agentRunsCols = [
   columnHelper.accessor((run) => run.workbenchJob, {
     id: 'workbench',
     cell: function Cell({ getValue }) {
+      const navigate = useNavigate()
       const workbenchJob = getValue()
       const workbench = workbenchJob?.workbench
       if (!workbenchJob?.id || !workbench?.id || !workbench.name) return null
@@ -66,12 +67,15 @@ export const agentRunsCols = [
           severity="neutral"
           fillLevel={1}
           clickable
-          as={Link}
-          to={getWorkbenchJobAbsPath({
-            workbenchId: workbench.id,
-            jobId: workbenchJob.id,
-          })}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            navigate(
+              getWorkbenchJobAbsPath({
+                workbenchId: workbench.id,
+                jobId: workbenchJob.id,
+              })
+            )
+          }}
           icon={<WorkbenchIcon size={12} />}
           truncateWidth={80}
           tooltip="View workbench job"
