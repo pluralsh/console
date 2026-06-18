@@ -3,6 +3,7 @@ fragment AgentRunTiny on AgentRun {
   status
   mode
   babysit
+  approval
   prompt
   shared
   error

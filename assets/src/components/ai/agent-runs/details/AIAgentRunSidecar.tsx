@@ -1,4 +1,12 @@
-import { Chip, Flex, prettifyRepoUrl } from '@pluralsh/design-system'
+import {
+  Chip,
+  ContainerRuntimeMonitorIcon,
+  Flex,
+  prettifyRepoUrl,
+  ShieldOutlineIcon,
+  Tooltip,
+  WarningShieldIcon,
+} from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -39,6 +47,16 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
           </CaptionP>
         </Flex>
       )}
+      {run.babysit && (
+        <Tooltip label="Babysit">
+          <ContainerRuntimeMonitorIcon size={12} />
+        </Tooltip>
+      )}
+      {run.approval && (
+        <Tooltip label="Approval required">
+          <WarningShieldIcon size={12} />
+        </Tooltip>
+      )}
       {run.mode && (
         <Chip
           size="small"
@@ -64,13 +82,6 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
           {isRunning ? '---' : formatDateTime(run.updatedAt)}
         </span>
       </CaptionP>
-
-      <Chip
-        size="small"
-        severity={run.babysit ? 'success' : 'neutral'}
-      >
-        {run.babysit ? 'On' : 'Off'}
-      </Chip>
     </Flex>
   )
 }
