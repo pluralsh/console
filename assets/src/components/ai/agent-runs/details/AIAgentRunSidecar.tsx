@@ -98,14 +98,7 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
   )
 }
 
-export function AgentRunSidecar({
-  run,
-  loading,
-}: {
-  run: Nullable<AgentRunFragment>
-  loading: boolean
-}) {
-  const { spacing } = useTheme()
+export function useAgentRunTodos(run: Nullable<AgentRunFragment>) {
   const [subscribedTodos, setSubscribedTodos] = useState<AgentTodoFragment[]>(
     []
   )
@@ -123,7 +116,7 @@ export function AgentRunSidecar({
       ),
   })
 
-  const todos = useMemo(
+  return useMemo(
     () =>
       uniqBy(
         (run?.todos ?? []).concat(subscribedTodos).filter(isNonNullable),
@@ -131,7 +124,63 @@ export function AgentRunSidecar({
       ),
     [subscribedTodos, run?.todos]
   )
+}
 
+export function AgentRunActivitiesSummary({
+  todos,
+}: {
+  todos: AgentTodoFragment[]
+}) {
+  const { spacing } = useTheme()
+
+  if (isEmpty(todos)) return null
+
+  return (
+    <TodoAccordionSC type="multiple">
+      {todos.map((todo) => (
+        <AccordionItem
+          key={todo.title}
+          trigger={
+            <Flex
+              align="center"
+              gap="xsmall"
+              minWidth={0}
+            >
+              {todo.done ? (
+                <CheckOutlineIcon color="icon-light" />
+              ) : (
+                <CircleDashIcon color="icon-light" />
+              )}
+              <CaptionP
+                $color="text-light"
+                css={{ fontWeight: 700, ...TRUNCATE }}
+              >
+                {todo.title}
+              </CaptionP>
+            </Flex>
+          }
+          padding="none"
+          caret="right-quarter"
+        >
+          <CaptionP
+            $color="text-light"
+            css={{ lineHeight: '24px', paddingLeft: spacing.large }}
+          >
+            {todo.description}
+          </CaptionP>
+        </AccordionItem>
+      ))}
+    </TodoAccordionSC>
+  )
+}
+
+export function AgentRunSidecar({
+  run,
+  loading,
+}: {
+  run: Nullable<AgentRunFragment>
+  loading: boolean
+}) {
   return (
     <ContainerSC $breakpointWidth={768}>
       {!run ? (
@@ -146,47 +195,6 @@ export function AgentRunSidecar({
               pullRequest={pr}
             />
           ))}
-          {!isEmpty(todos) && (
-            <Sidecar>
-              <SidecarItem heading="Summary of agent activities">
-                <TodoAccordionSC type="multiple">
-                  {todos.map((todo) => (
-                    <AccordionItem
-                      key={todo.title}
-                      trigger={
-                        <Flex
-                          align="center"
-                          gap="xsmall"
-                          minWidth={0}
-                        >
-                          {todo.done ? (
-                            <CheckOutlineIcon color="icon-light" />
-                          ) : (
-                            <CircleDashIcon color="icon-light" />
-                          )}
-                          <CaptionP
-                            $color="text-light"
-                            css={{ fontWeight: 700, ...TRUNCATE }}
-                          >
-                            {todo.title}
-                          </CaptionP>
-                        </Flex>
-                      }
-                      padding="none"
-                      caret="right-quarter"
-                    >
-                      <CaptionP
-                        $color="text-light"
-                        css={{ lineHeight: '24px', paddingLeft: spacing.large }}
-                      >
-                        {todo.description}
-                      </CaptionP>
-                    </AccordionItem>
-                  ))}
-                </TodoAccordionSC>
-              </SidecarItem>
-            </Sidecar>
-          )}
         </>
       )}
     </ContainerSC>

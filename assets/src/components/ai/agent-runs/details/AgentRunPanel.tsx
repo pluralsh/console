@@ -20,7 +20,7 @@ import {
   AgentRunStatus,
   useAgentRunQuery,
 } from 'generated/graphql'
-import { isNil } from 'lodash'
+import { isEmpty, isNil } from 'lodash'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
@@ -29,9 +29,13 @@ import {
 } from 'routes/aiRoutesConsts'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import {
+  AgentRunActivitiesSummary,
+  useAgentRunTodos,
+} from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
-type AgentRunPanelTab = 'Analysis'
+type AgentRunPanelTab = 'Analysis' | 'Activities'
 
 export function AgentRunPanelContent() {
   const { spacing } = useTheme()
@@ -59,18 +63,20 @@ export function AgentRunPanelContent() {
   const showAnalysisTab =
     !!run?.analysis &&
     (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
+  const todos = useAgentRunTodos(run)
+  const showActivitiesTab = !isEmpty(todos)
 
   return (
     <SidePanelContent>
       <PanelHeaderSC>
-        {(showAnalysisTab || run?.podReference) && (
+        {(showAnalysisTab || showActivitiesTab || run?.podReference) && (
           <TabListWrapperSC>
             <Flex
               align="center"
               gap="small"
               css={{ width: '100%' }}
             >
-              {showAnalysisTab && (
+              {(showAnalysisTab || showActivitiesTab) && (
                 <TabList
                   scrollable
                   stateRef={tabStateRef}
@@ -82,12 +88,22 @@ export function AgentRunPanelContent() {
                   }}
                   css={{ gap: spacing.small }}
                 >
-                  <PanelSubTabSC
-                    key="Analysis"
-                    textValue="Analysis"
-                  >
-                    Analysis
-                  </PanelSubTabSC>
+                  {showAnalysisTab && (
+                    <PanelSubTabSC
+                      key="Analysis"
+                      textValue="Analysis"
+                    >
+                      Analysis
+                    </PanelSubTabSC>
+                  )}
+                  {showActivitiesTab && (
+                    <PanelSubTabSC
+                      key="Activities"
+                      textValue="Activities"
+                    >
+                      Activities
+                    </PanelSubTabSC>
+                  )}
                 </TabList>
               )}
               {run?.podReference && (
@@ -132,6 +148,13 @@ export function AgentRunPanelContent() {
             {run.analysis.analysis && (
               <Markdown text={`# Full analysis\n\n${run.analysis.analysis}`} />
             )}
+          </ContentInnerSC>
+        </ContentWrapperSC>
+      )}
+      {showActivitiesTab && selectedTab === 'Activities' && run && (
+        <ContentWrapperSC>
+          <ContentInnerSC>
+            <AgentRunActivitiesSummary todos={todos} />
           </ContentInnerSC>
         </ContentWrapperSC>
       )}
