@@ -3,11 +3,9 @@ import {
   Card,
   IconFrame,
   prettifyRepoUrl,
-  PrOpenIcon,
 } from '@pluralsh/design-system'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Body2BoldP } from 'components/utils/typography/Text'
 import { PullRequestBasicFragment } from 'generated/graphql'
 import styled from 'styled-components'
 
@@ -18,16 +16,6 @@ export function AgentRunPullRequests({
 }) {
   return (
     <>
-      <StackedText
-        icon={
-          <IconFrame
-            circle
-            type="secondary"
-            icon={<PrOpenIcon />}
-          />
-        }
-        first={<Body2BoldP>Generated pull requests</Body2BoldP>}
-      />
       {pullRequests.map((pr) => (
         <WrapperCardSC
           key={pr.id}
