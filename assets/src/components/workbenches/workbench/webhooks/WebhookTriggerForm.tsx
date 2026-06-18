@@ -132,6 +132,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
         }`
       : 'create'
 
+  const routeDraftState = routeState?.draftState
+
   // Source form state: defaults from the loaded webhook (or empty create state), then any
   // in-progress draft from router state merged on top so older drafts without new fields
   // still pick up defaults instead of replacing the whole shape.
@@ -140,8 +142,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
       webhook,
       mode === 'create' ? me?.id : undefined
     )
-    const base = routeState?.draftState
-      ? { ...defaults, ...routeState.draftState }
+    const base = routeDraftState
+      ? { ...defaults, ...routeDraftState }
       : defaults
 
     return {
@@ -150,7 +152,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
       prompt: base.prompt ?? '',
       userId: base.userId ?? webhook?.userId ?? me?.id ?? '',
     }
-  }, [routeState?.draftState, webhookKeyParam, webhook, me?.id, mode])
+  }, [routeDraftState, webhookKeyParam, webhook, me?.id, mode])
 
   // Local form draft state that can be modified as the user interacts with the form.
   const [formDraft, setFormDraft] =
