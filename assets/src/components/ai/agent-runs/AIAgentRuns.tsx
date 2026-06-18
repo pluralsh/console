@@ -43,25 +43,13 @@ export function AIAgentRuns() {
     >
       <PromptSectionSC>
         <StackedText
-          first={
-            <Flex
-              align="center"
-              height={40}
-              gap="xxsmall"
-            >
-              <IconFrame
-                size="small"
-                icon={<DiscoverIcon />}
-              />
-              <span>Agent Runs</span>
-            </Flex>
-          }
+          first="Agent Runs"
           firstPartialType="body2Bold"
           firstColor="text"
           second="Create a background agent for managing infrastructure changes. It works directly on your active Infrastructure as Code in Plural, making clear and incremental updates."
           secondPartialType="body2"
           secondColor="text-light"
-          gap="xsmall"
+          gap="xxsmall"
         />
         <AIAgentRunInput />
         <Flex
@@ -91,6 +79,7 @@ export function AIAgentRuns() {
               second="Current and previous agent runs"
               secondPartialType="body2"
               secondColor="text-light"
+              gap="xxsmall"
               loading={isLoading}
             />
             <AIAgentRuntimesSelector
