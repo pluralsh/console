@@ -6,7 +6,7 @@
   extended_from: '2026-11-30'
 - version: '1.33'
   extended: false
-  extended_from: '2026-06-30'
+  extended_from: '2026-07-31'
 - version: '1.32'
   extended: true
   extended_from: '2026-03-31'
