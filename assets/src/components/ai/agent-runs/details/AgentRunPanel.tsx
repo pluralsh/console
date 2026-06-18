@@ -218,7 +218,7 @@ export function AgentRunPanelContent() {
                 text={`# Summary\n\n${`- ${run.analysis.bullets.join('\n- ')}`.trim()}`}
               />
             )}
-            <Markdown text={run.analysis?.analysis} />
+            <Markdown text={run.analysis.analysis} />
           </ContentInnerSC>
         </ContentWrapperSC>
       )}
