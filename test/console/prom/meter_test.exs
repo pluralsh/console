@@ -8,11 +8,14 @@ defmodule Console.Prom.MeterTest do
     test "the meter can collect metrics and fetch them" do
       Meter.incr(10 * @gb)
       Meter.incr(20 * @gb)
-      assert Meter.fetch() == 30
+      Meter.incr_tokens(100)
+      Meter.incr_tokens(200)
+      assert Meter.fetch() == %{bytes_ingested: 30, tokens: 300}
 
       Meter.incr(5 * @gb)
       Meter.incr(10 * @gb)
-      assert Meter.fetch() == 15
+      Meter.incr_tokens(150)
+      assert Meter.fetch() == %{bytes_ingested: 15, tokens: 150}
     end
   end
 end
