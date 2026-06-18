@@ -43,6 +43,7 @@ names:
 - elastic-agent
 - rabbitmq-cluster-operator
 - kserve
+- redpanda
 - kubescape-operator
 - dynatrace-operator
 - wiz-sensor
