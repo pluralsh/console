@@ -85,7 +85,7 @@ export function AIAgentRuns() {
         >
           <StretchedFlex>
             <StackedText
-              first="Agent Runs"
+              first="Agent Run Sessions"
               firstPartialType="body2Bold"
               firstColor="text"
               second="Current and previous agent runs"
