@@ -118,7 +118,7 @@ function RecentJobsSection() {
 }
 
 function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
-  const { id, prompt, insertedAt, workbench } = job
+  const { id, prompt, status, insertedAt, workbench } = job
   if (!workbench) return null
 
   return (
@@ -130,7 +130,7 @@ function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
       <StretchedFlex>
         <RunStatusIcon
           fullColor
-          status={job.status}
+          status={status}
         />
         <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
       </StretchedFlex>

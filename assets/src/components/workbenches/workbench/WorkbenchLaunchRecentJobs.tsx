@@ -66,7 +66,7 @@ function WorkbenchLaunchRecentJobCard({
 }: {
   job: WorkbenchJobTinyFragment
 }) {
-  const { id, prompt, insertedAt, user, workbench } = job
+  const { id, prompt, status, insertedAt, user, workbench } = job
   if (!workbench) return null
 
   return (
@@ -78,7 +78,7 @@ function WorkbenchLaunchRecentJobCard({
       <StretchedFlex>
         <RunStatusIcon
           fullColor
-          status={job.status}
+          status={status}
         />
         <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
       </StretchedFlex>
