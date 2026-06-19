@@ -3,7 +3,6 @@ import {
   ContainerRuntimeMonitorIcon,
   Flex,
   prettifyRepoUrl,
-  ShieldOutlineIcon,
   Tooltip,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
