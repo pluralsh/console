@@ -296,6 +296,52 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
+  describe "approve_agent_run/2" do
+    test "users can approve their own pending approval agent runs" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: user,
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:ok, approved} = Agents.approve_agent_run(run.id, user)
+
+      assert approved.id == run.id
+      assert approved.approved_at
+      assert_receive {:event, %PubSub.AgentRunUpdated{item: ^approved}}
+    end
+
+    test "users cannot approve other's agent runs" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: insert(:user),
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:error, _} = Agents.approve_agent_run(run.id, user)
+    end
+
+    test "users cannot approve runs that do not require approval" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: user,
+        approval: false,
+        status: :pending_approval
+      )
+
+      assert {:error, "agent run does not require approval"} =
+               Agents.approve_agent_run(run.id, user)
+    end
+  end
+
   describe "agent_pull_request/3" do
     test "it can create a pull request" do
       user    = insert(:user)

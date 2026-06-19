@@ -90,6 +90,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def cancel_agent_run(%{id: id}, %{context: %{current_user: user}}),
     do: Agents.cancel_agent_run(id, user)
 
+  def approve_agent_run(%{id: id}, %{context: %{current_user: user}}),
+    do: Agents.approve_agent_run(id, user)
+
   def create_agent_run(%{runtime_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.create_agent_run(attrs, id, user)
 

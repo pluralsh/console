@@ -184,6 +184,50 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "approveAgentRun" do
+    test "a user can approve their own pending approval agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: user,
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:ok, %{data: %{"approveAgentRun" => found}}} = run_query("""
+        mutation Approve($id: ID!) {
+          approveAgentRun(id: $id) {
+            id
+            approvedAt
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["id"] == run.id
+      assert found["approvedAt"]
+    end
+
+    test "a user cannot approve another user's agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: insert(:user),
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Approve($id: ID!) {
+          approveAgentRun(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+    end
+  end
+
   describe "agentPullRequest" do
     test "a user can create a pull request" do
       user    = insert(:user)

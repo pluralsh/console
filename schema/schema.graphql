@@ -585,7 +585,20 @@ type RootQueryType {
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
 
-  agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID, status: AgentRunStatus): AgentRunConnection
+  agentRuns(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    runtimeId: ID
+
+    "filter runs by status"
+    status: AgentRunStatus
+  ): AgentRunConnection
 
   agentRunRepositories(after: String, first: Int, before: String, last: Int, q: String): AgentRunRepositoryConnection
 
@@ -1392,6 +1405,8 @@ type RootMutationType {
   ): WorkbenchJob
 
   cancelAgentRun(id: ID!): AgentRun
+
+  approveAgentRun(id: ID!): AgentRun
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 

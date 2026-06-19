@@ -396,6 +396,8 @@ type AgentRun struct {
 	User *User `json:"user,omitempty"`
 	// the flow this agent is associated with
 	Flow *Flow `json:"flow,omitempty"`
+	// the workbench job this agent run was spawned from, if any
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the pull requests this agent run has created
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	InsertedAt   *string        `json:"insertedAt,omitempty"`

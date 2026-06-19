@@ -293,6 +293,34 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
+  Approves an agent run that is paused pending user approval.
+  """
+  @spec approve_agent_run(binary, User.t) :: agent_run_resp
+  def approve_agent_run(run_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(run_id)
+      |> allow(user, :update)
+    end)
+    |> add_operation(:update, fn
+      %{run: %AgentRun{approval: false}} ->
+        {:error, "agent run does not require approval"}
+
+      %{run: %AgentRun{status: :pending_approval, approved_at: nil} = run} ->
+        AgentRun.changeset(run, %{approved_at: Timex.now()})
+        |> Repo.update()
+
+      %{run: %AgentRun{status: :pending_approval} = run} ->
+        {:ok, run}
+
+      %{run: %AgentRun{}} ->
+        {:error, "agent run is not pending approval"}
+    end)
+    |> execute(extract: :update)
+    |> notify(:update)
+  end
+
+  @doc """
   Creates a new prompt for this agent run
   """
   @spec create_prompt(binary, binary) :: history_resp

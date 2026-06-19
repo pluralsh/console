@@ -4,6 +4,7 @@ fragment AgentRunTiny on AgentRun {
   mode
   babysit
   approval
+  approvedAt
   prompt
   shared
   error
@@ -253,6 +254,12 @@ mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
 
 mutation CancelAgentRun($id: ID!) {
   cancelAgentRun(id: $id) {
+    ...AgentRunTiny
+  }
+}
+
+mutation ApproveAgentRun($id: ID!) {
+  approveAgentRun(id: $id) {
     ...AgentRunTiny
   }
 }

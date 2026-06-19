@@ -453,6 +453,16 @@ defmodule Console.GraphQl.Deployments.Agent do
       resolve &Deployments.cancel_agent_run/2
     end
 
+    field :approve_agent_run, :agent_run do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.approve_agent_run/2
+    end
+
     field :create_agent_run, :agent_run do
       middleware Authenticated
       middleware Scope,

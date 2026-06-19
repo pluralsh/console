@@ -263,6 +263,8 @@ fragment AgentRunFragment on AgentRun {
     }
     babysit
     babysitInterval
+    approval
+    approvedAt
 }
 
 

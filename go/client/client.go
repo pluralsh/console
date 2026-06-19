@@ -633,6 +633,8 @@ type AgentRunFragment struct {
 	Upload          *AgentRunUploadFragment    "json:\"upload,omitempty\" graphql:\"upload\""
 	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
 	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
+	Approval        *bool                      "json:\"approval,omitempty\" graphql:\"approval\""
+	ApprovedAt      *string                    "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -766,6 +768,18 @@ func (t *AgentRunFragment) GetBabysitInterval() *int64 {
 		t = &AgentRunFragment{}
 	}
 	return t.BabysitInterval
+}
+func (t *AgentRunFragment) GetApproval() *bool {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Approval
+}
+func (t *AgentRunFragment) GetApprovedAt() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ApprovedAt
 }
 
 type AgentRunMinimalFragment struct {
@@ -40379,6 +40393,8 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -40587,6 +40603,8 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -40818,6 +40836,8 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -41036,6 +41056,8 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -41192,6 +41214,8 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description

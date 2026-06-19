@@ -29,6 +29,7 @@ fragment AwaitingReviewStack on InfrastructureStack {
 fragment AwaitingReviewAgentRun on AgentRun {
   id
   status
+  approvedAt
   prompt
   repository
   runtime {
