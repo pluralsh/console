@@ -7,7 +7,7 @@ import {
   useSetBreadcrumbs,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { WorkbenchJobCardStatus } from 'components/workbenches/common/WorkbenchJobCardStatus'
+import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useLogin } from 'components/contexts'
 import usePersistedState from 'components/hooks/usePersistedState'
@@ -128,7 +128,10 @@ function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
       to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
     >
       <StretchedFlex>
-        <WorkbenchJobCardStatus job={job} />
+        <RunStatusIcon
+          fullColor
+          status={job.status}
+        />
         <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
       </StretchedFlex>
       <WorkbenchStoredPromptMarkdown
