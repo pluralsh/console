@@ -26,6 +26,57 @@ fragment AwaitingReviewStack on InfrastructureStack {
   }
 }
 
+fragment AwaitingReviewAgentRunMessage on AgentMessage {
+  id
+  metadata {
+    tool {
+      name
+      input
+      output
+    }
+  }
+}
+
+fragment AwaitingReviewAgentRun on AgentRun {
+  id
+  status
+  prompt
+  repository
+  runtime {
+    id
+    name
+    type
+  }
+  analysis {
+    summary
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  messages {
+    ...AwaitingReviewAgentRunMessage
+  }
+}
+
+fragment AwaitingReviewWorkbenchJobLink on WorkbenchJob {
+  id
+  workbench {
+    id
+  }
+  activities(first: 10) {
+    edges {
+      node {
+        agentRun {
+          id
+        }
+        agentRuns {
+          id
+        }
+      }
+    }
+  }
+}
+
 query PendingApprovalStacks($first: Int = 50) {
   infrastructureStacks(first: $first, status: PENDING_APPROVAL) {
     edges {
@@ -33,5 +84,21 @@ query PendingApprovalStacks($first: Int = 50) {
         ...AwaitingReviewStack
       }
     }
+  }
+}
+
+query PendingApprovalAgentRuns($first: Int = 100) {
+  agentRuns(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewAgentRun
+      }
+    }
+  }
+}
+
+query AwaitingReviewWorkbenchJobLinks($count: Int = 20) {
+  recentWorkbenchJobs(count: $count) {
+    ...AwaitingReviewWorkbenchJobLink
   }
 }
