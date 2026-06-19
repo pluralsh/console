@@ -229,6 +229,11 @@ fragment AgentRunFragment on AgentRun {
     todos {
         ...AgentTodoFragment
     }
+    prompts {
+        id
+        prompt
+        seq
+    }
     status
     podReference {
         ...AgentPodReferenceFragment

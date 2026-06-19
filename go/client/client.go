@@ -611,30 +611,31 @@ func (t *AgentRunUploadFragment) GetPatch() *string {
 }
 
 type AgentRunFragment struct {
-	ID              string                     "json:\"id\" graphql:\"id\""
-	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
-	Repository      string                     "json:\"repository\" graphql:\"repository\""
-	Branch          *string                    "json:\"branch,omitempty\" graphql:\"branch\""
-	HeadBranch      *string                    "json:\"headBranch,omitempty\" graphql:\"headBranch\""
-	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
-	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
-	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
-	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
-	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
-	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
-	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
-	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
-	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
-	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
-	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
-	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
-	Upload          *AgentRunUploadFragment    "json:\"upload,omitempty\" graphql:\"upload\""
-	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
-	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
-	Approval        *bool                      "json:\"approval,omitempty\" graphql:\"approval\""
-	ApprovedAt      *string                    "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
+	ID              string                      "json:\"id\" graphql:\"id\""
+	Prompt          string                      "json:\"prompt\" graphql:\"prompt\""
+	Repository      string                      "json:\"repository\" graphql:\"repository\""
+	Branch          *string                     "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadBranch      *string                     "json:\"headBranch,omitempty\" graphql:\"headBranch\""
+	Mode            AgentRunMode                "json:\"mode\" graphql:\"mode\""
+	Language        *AgentRunLanguage           "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string                     "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	Todos           []*AgentTodoFragment        "json:\"todos,omitempty\" graphql:\"todos\""
+	Prompts         []*AgentRunFragment_Prompts "json:\"prompts,omitempty\" graphql:\"prompts\""
+	Status          AgentRunStatus              "json:\"status\" graphql:\"status\""
+	PodReference    *AgentPodReferenceFragment  "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error           *string                     "json:\"error,omitempty\" graphql:\"error\""
+	Analysis        *AgentAnalysisFragment      "json:\"analysis,omitempty\" graphql:\"analysis\""
+	ScmCreds        *ScmCredentialFragment      "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds     *PluralCredsFragment        "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime         *AgentRuntimeFragment       "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User            *AgentRunFragment_User      "json:\"user,omitempty\" graphql:\"user\""
+	Flow            *AgentRunFragment_Flow      "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests    []*PullRequestFragment      "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Upload          *AgentRunUploadFragment     "json:\"upload,omitempty\" graphql:\"upload\""
+	Babysit         *bool                       "json:\"babysit,omitempty\" graphql:\"babysit\""
+	BabysitInterval *int64                      "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
+	Approval        *bool                       "json:\"approval,omitempty\" graphql:\"approval\""
+	ApprovedAt      *string                     "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -690,6 +691,12 @@ func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Todos
+}
+func (t *AgentRunFragment) GetPrompts() []*AgentRunFragment_Prompts {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Prompts
 }
 func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
 	if t == nil {
@@ -7118,6 +7125,31 @@ func (t *TinyAgentRuntimeFragment_Cluster) GetName() string {
 		t = &TinyAgentRuntimeFragment_Cluster{}
 	}
 	return t.Name
+}
+
+type AgentRunFragment_Prompts struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *AgentRunFragment_Prompts) GetID() string {
+	if t == nil {
+		t = &AgentRunFragment_Prompts{}
+	}
+	return t.ID
+}
+func (t *AgentRunFragment_Prompts) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunFragment_Prompts{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunFragment_Prompts) GetSeq() int64 {
+	if t == nil {
+		t = &AgentRunFragment_Prompts{}
+	}
+	return t.Seq
 }
 
 type AgentRunFragment_User struct {
@@ -14651,6 +14683,31 @@ func (t *ListAgentRuntimes_AgentRuntimes) GetPageInfo() *PageInfoFragment {
 	return &t.PageInfo
 }
 
+type GetAgentRun_AgentRun_AgentRunFragment_Prompts struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Prompts) GetID() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.ID
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Prompts) GetPrompt() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.Prompt
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Prompts) GetSeq() int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.Seq
+}
+
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14767,6 +14824,31 @@ func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetSession(
 		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
 	}
 	return t.Session
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts) GetID() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts) GetPrompt() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts{}
+	}
+	return t.Prompt
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts) GetSeq() int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Prompts{}
+	}
+	return t.Seq
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -14945,6 +15027,31 @@ func (t *ListAgentRunsMinimal_AgentRuns) GetPageInfo() *PageInfoFragment {
 	return &t.PageInfo
 }
 
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts{}
+	}
+	return t.ID
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts) GetPrompt() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts{}
+	}
+	return t.Prompt
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts) GetSeq() int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Prompts{}
+	}
+	return t.Seq
+}
+
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15050,6 +15157,31 @@ func (t *CancelAgentRun_CancelAgentRun) GetID() string {
 	return t.ID
 }
 
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts) GetID() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.ID
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts) GetPrompt() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.Prompt
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts) GetSeq() int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.Seq
+}
+
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15091,6 +15223,31 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
 		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts) GetID() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts) GetPrompt() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.Prompt
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts) GetSeq() int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Prompts{}
+	}
+	return t.Seq
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -40359,6 +40516,11 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		id
+		prompt
+		seq
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -40568,6 +40730,11 @@ fragment AgentRunFragment on AgentRun {
 	languageVersion
 	todos {
 		... AgentTodoFragment
+	}
+	prompts {
+		id
+		prompt
+		seq
 	}
 	status
 	podReference {
@@ -40802,6 +40969,11 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		id
+		prompt
+		seq
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -41022,6 +41194,11 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		id
+		prompt
+		seq
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -41179,6 +41356,11 @@ fragment AgentRunFragment on AgentRun {
 	languageVersion
 	todos {
 		... AgentTodoFragment
+	}
+	prompts {
+		id
+		prompt
+		seq
 	}
 	status
 	podReference {

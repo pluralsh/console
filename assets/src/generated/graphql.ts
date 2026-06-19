@@ -8836,6 +8836,7 @@ export type RootMutationType = {
   createAgentMessage?: Maybe<AgentMessage>;
   createAgentMigration?: Maybe<AgentMigration>;
   createAgentRun?: Maybe<AgentRun>;
+  createAgentRunPrompt?: Maybe<AgentRun>;
   createAgentRunUpload?: Maybe<AgentRunUpload>;
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
   createAgentSession?: Maybe<ChatThread>;
@@ -9277,6 +9278,12 @@ export type RootMutationTypeCreateAgentMigrationArgs = {
 export type RootMutationTypeCreateAgentRunArgs = {
   attributes: AgentRunAttributes;
   runtimeId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateAgentRunPromptArgs = {
+  id: Scalars['ID']['input'];
+  prompt: Scalars['String']['input'];
 };
 
 
