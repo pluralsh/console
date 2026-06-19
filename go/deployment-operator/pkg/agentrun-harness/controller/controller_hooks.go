@@ -21,9 +21,9 @@ import (
 const bootstrapScriptPath = "/bootstrap/bootstrap.sh"
 
 // preStart function is executed before agent run steps
-func (in *agentRunController) preStart() {
-	if in.agentRun.Status != gqlclient.AgentRunStatusPending && !environment.IsDev() {
-		klog.Fatalf("could not start stack run: invalid status: %s", in.agentRun.Status)
+func (in *agentRunController) preStart(ctx context.Context) error {
+	if !in.canStartStatus() && !environment.IsDev() {
+		klog.Fatalf("could not start agent run: invalid status: %s", in.agentRun.Status)
 	}
 
 	// When in dev mode, restart agent run and clear all messages and errors.
@@ -41,6 +41,8 @@ func (in *agentRunController) preStart() {
 	if err := agentrun.StartAgentRun(in.consoleClient, in.agentRunID); err != nil {
 		klog.ErrorS(err, "could not update agent run status to running")
 	}
+
+	return nil
 }
 
 // postStart function is executed after all agent run steps
@@ -118,8 +120,13 @@ func (in *agentRunController) runBootstrapScript() error {
 
 // validateAgentRunStatus checks if agent run can be started
 func (in *agentRunController) validateAgentRunStatus() error {
-	if in.agentRun.Status != gqlclient.AgentRunStatusPending && !environment.IsDev() {
+	if !in.canStartStatus() && !environment.IsDev() {
 		return fmt.Errorf("could not start agent run: invalid status: %s", in.agentRun.Status)
 	}
 	return nil
+}
+
+func (in *agentRunController) canStartStatus() bool {
+	return in.agentRun.Status == gqlclient.AgentRunStatusPending ||
+		in.agentRun.Status == gqlclient.AgentRunStatusPendingApproval
 }

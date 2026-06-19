@@ -187,6 +187,12 @@ fragment AgentTodoFragment on AgentTodo {
     title
 }
 
+fragment AgentPromptFragment on AgentPrompt {
+    id
+    prompt
+    seq
+}
+
 fragment ScmCredentialFragment on ScmCreds {
     token
     username
@@ -230,9 +236,7 @@ fragment AgentRunFragment on AgentRun {
         ...AgentTodoFragment
     }
     prompts {
-        id
-        prompt
-        seq
+        ...AgentPromptFragment
     }
     status
     podReference {

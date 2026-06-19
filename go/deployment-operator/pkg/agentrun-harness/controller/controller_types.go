@@ -56,6 +56,13 @@ type agentRunController struct {
 	// lastPRCheckAt is the time the agent was last reprompted about PR status.
 	// Passed to the AI so it knows which comments are new since the last check.
 	lastPRCheckAt time.Time
+
+	// lastPromptSeq is the latest follow-up prompt sequence the controller sent
+	// back to the agent after the initial run.
+	lastPromptSeq int64
+
+	// approvalPromptSent ensures the approval-unblocked prompt is only sent once.
+	approvalPromptSent bool
 }
 
 type Option func(*agentRunController)

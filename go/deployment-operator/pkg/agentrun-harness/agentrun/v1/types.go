@@ -42,12 +42,15 @@ type AgentRun struct {
 
 	// Runtime information
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
+	Prompts []*console.AgentPromptFragment
 
 	DindEnabled    bool
 	BrowserEnabled bool
 
 	Babysit         bool
 	BabysitInterval int64
+	Approval        bool
+	ApprovedAt      *string
 }
 
 type AgentRuntime struct {
@@ -115,6 +118,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		ScmCreds:    fragment.ScmCreds,
 		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
+		Prompts:     fragment.Prompts,
 	}
 
 	if fragment.Flow != nil {
@@ -138,6 +142,10 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 	if fragment.BabysitInterval != nil {
 		run.BabysitInterval = *fragment.BabysitInterval
 	}
+	if fragment.Approval != nil {
+		run.Approval = *fragment.Approval
+	}
+	run.ApprovedAt = fragment.ApprovedAt
 
 	return run
 }

@@ -73,7 +73,7 @@ func (t *recordingTool) Configure(_, _ string) error { return nil }
 
 func (t *recordingTool) OnMessage(func(*gqlclient.AgentMessageAttributes)) {}
 
-func (t *recordingTool) AnalysisFollowUpRun(context.Context, string) error {
+func (t *recordingTool) FollowUpRun(context.Context, string) error {
 	t.analysisFollowUps++
 	return t.followErr
 }

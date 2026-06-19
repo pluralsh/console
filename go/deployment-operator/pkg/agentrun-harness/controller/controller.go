@@ -46,7 +46,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 		return retErr
 	}
 
-	in.preStart()
+	if retErr = in.preStart(ctx); retErr != nil {
+		return retErr
+	}
 
 	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes) {
 		if message == nil {
@@ -141,6 +143,7 @@ func (in *agentRunController) init() (Controller, error) {
 
 	// Convert console fragment to harness type
 	in.agentRun = (&agentrunv1.AgentRun{}).FromAgentRunFragment(agentRunFragment)
+	in.initializePromptCursor()
 
 	klog.V(log.LogLevelInfo).InfoS("found agent run",
 		"id", in.agentRun.ID,
@@ -167,6 +170,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.runDone:
 		klog.Info("initial agent run completed, starting babysit loop")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
+		in.waitForApprovalFollowUps(ctx)
 		if !in.agentRun.Babysit {
 			return
 		}
