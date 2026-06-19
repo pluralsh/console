@@ -474,6 +474,17 @@ defmodule Console.GraphQl.Deployments.Agent do
       resolve &Deployments.create_agent_run/2
     end
 
+    field :create_agent_run_prompt, :agent_run do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
+      arg :id,     non_null(:id)
+      arg :prompt, non_null(:string)
+
+      resolve &Deployments.create_agent_run_prompt/2
+    end
+
     field :share_agent_run, :agent_run do
       middleware Authenticated
       middleware Scope,

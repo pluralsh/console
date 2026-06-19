@@ -96,6 +96,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def create_agent_run(%{runtime_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.create_agent_run(attrs, id, user)
 
+  def create_agent_run_prompt(%{id: id, prompt: prompt}, %{context: %{current_user: user}}) do
+    with {:ok, _} <- agent_run(%{id: id}, %{context: %{current_user: user}}),
+         {:ok, _} <- Agents.create_prompt(prompt, id),
+      do: Agents.get_agent_run!(id) |> allow(user, :read)
+  end
+
   def agent_pull_request(%{run_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.agent_pull_request(attrs, id, user)
 

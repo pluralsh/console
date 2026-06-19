@@ -372,6 +372,61 @@ defmodule Console.Deployments.AgentsTest do
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
+    test "it blocks pull requests until runs requiring approval are approved" do
+      user    = insert(:user)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run     = insert(:agent_run,
+        runtime: runtime,
+        flow: insert(:flow),
+        user: user,
+        approval: true,
+        approved_at: nil
+      )
+      insert(:scm_connection, default: true)
+
+      assert {:error, "agent run must be approved before creating a pull request"} =
+               Agents.agent_pull_request(%{
+                 title: "a pr",
+                 body: "a body",
+                 repository: "https://github.com/pluralsh/console.git",
+                 base: "main",
+                 head: "plrl/ai/pr-test"
+               }, run.id, user)
+
+      updated = refetch(run)
+      assert updated.status == :pending_approval
+      assert updated.branch == "main"
+      assert updated.head_branch == "plrl/ai/pr-test"
+    end
+
+    test "it allows pull requests for approved runs" do
+      user    = insert(:user)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run     = insert(:agent_run,
+        runtime: runtime,
+        flow: insert(:flow),
+        user: user,
+        approval: true,
+        approved_at: Timex.now()
+      )
+      insert(:scm_connection, default: true)
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "plrl/ai/pr-test" ->
+        {:ok, %{url: "https://github.com/pr/url", title: "a pr"}}
+      end)
+
+      {:ok, pr} = Agents.agent_pull_request(%{
+        title: "a pr",
+        body: "a body",
+        repository: "https://github.com/pluralsh/console.git",
+        base: "main",
+        head: "plrl/ai/pr-test"
+      }, run.id, user)
+
+      assert pr.status == :open
+      assert pr.agent_run_id == run.id
+    end
+
     test "it can create a pull request associated with a runs agent session" do
       user    = insert(:user)
       session = insert(:agent_session)

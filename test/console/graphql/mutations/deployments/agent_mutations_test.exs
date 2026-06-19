@@ -120,6 +120,28 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "createAgentRunPrompt" do
+    test "a user can add a prompt to their own agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: user)
+
+      {:ok, %{data: %{"createAgentRunPrompt" => found}}} = run_query("""
+        mutation Prompt($id: ID!, $prompt: String!) {
+          createAgentRunPrompt(id: $id, prompt: $prompt) {
+            id
+            prompts {
+              prompt
+            }
+          }
+        }
+      """, %{"id" => run.id, "prompt" => "please adjust this"}, %{current_user: user})
+
+      assert found["id"] == run.id
+      assert [%{"prompt" => "please adjust this"}] = found["prompts"]
+    end
+  end
+
   describe "updateAgentRun" do
     test "a cluster can update an agent run" do
       cluster = insert(:cluster)

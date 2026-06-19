@@ -11,7 +11,7 @@ defmodule Console.Deployments.Agents do
   alias Console.Schema.{
     AgentRuntime,
     AgentRun,
-    AgentPromptHistory,
+    AgentPrompt,
     Cluster,
     User,
     Group,
@@ -29,7 +29,7 @@ defmodule Console.Deployments.Agents do
   @type agent_run_upload_resp :: {:ok, AgentRunUpload.t} | error
   @type agent_runtime_resp :: {:ok, AgentRuntime.t} | error
   @type agent_msg_resp :: {:ok, AgentMessage.t} | error
-  @type history_resp :: {:ok, AgentPromptHistory.t} | error
+  @type prompt_resp :: {:ok, AgentPrompt.t} | error
 
   def default_runtime(), do: Repo.get_by(AgentRuntime, default: true)
 
@@ -323,10 +323,10 @@ defmodule Console.Deployments.Agents do
   @doc """
   Creates a new prompt for this agent run
   """
-  @spec create_prompt(binary, binary) :: history_resp
+  @spec create_prompt(binary, binary) :: prompt_resp
   def create_prompt(prompt, run_id) do
-    %AgentPromptHistory{}
-    |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
+    %AgentPrompt{}
+    |> AgentPrompt.changeset(%{prompt: prompt, agent_run_id: run_id})
     |> Repo.insert()
   end
 
@@ -343,6 +343,7 @@ defmodule Console.Deployments.Agents do
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
          {:ok, run} <- persist_pr_branches(run, ba, he),
+         {:ok, run} <- ensure_pr_approved(run),
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
       %PullRequest{fresh: true}
       |> PullRequest.changeset(
@@ -357,6 +358,16 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
+
+  defp ensure_pr_approved(%AgentRun{approval: true, approved_at: nil} = run) do
+    case AgentRun.changeset(run, %{status: :pending_approval})
+         |> Repo.update()
+         |> notify(:update) do
+      {:ok, _} -> {:error, "agent run must be approved before creating a pull request"}
+      err -> err
+    end
+  end
+  defp ensure_pr_approved(%AgentRun{} = run), do: {:ok, run}
 
   defp persist_pr_branches(%AgentRun{} = run, base, head) when is_binary(head) do
     Console.drop_nils(%{

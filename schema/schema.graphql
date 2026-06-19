@@ -1410,6 +1410,8 @@ type RootMutationType {
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 
+  createAgentRunPrompt(id: ID!, prompt: String!): AgentRun
+
   shareAgentRun(id: ID!, shared: Boolean!): AgentRun
 
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
