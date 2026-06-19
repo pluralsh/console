@@ -1,10 +1,10 @@
 import { StackIcon } from '@pluralsh/design-system'
-import { usePendingApprovalStacks } from 'components/contexts/PendingApprovalStacksContext'
+import { useAwaitingReview } from 'components/contexts/AwaitingReviewContext'
 import { useTheme } from 'styled-components'
 
 export function StacksNavIcon() {
   const theme = useTheme()
-  const { count } = usePendingApprovalStacks()
+  const { count } = useAwaitingReview()
 
   return (
     <div

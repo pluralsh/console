@@ -1,6 +1,6 @@
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { useTransition, animated } from '@react-spring/web'
-import { usePendingApprovalStacks } from 'components/contexts/PendingApprovalStacksContext'
+import { useAwaitingReview } from 'components/contexts/AwaitingReviewContext'
 import { useCallback, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { AwaitingReviewLauncherButton } from './AwaitingReviewLauncherButton'
@@ -22,8 +22,7 @@ export default function AwaitingReviewLauncher() {
   useKeyDown(['Escape'], () => setOpen(false))
   useClickOutside(ref, () => setOpen(false))
 
-  const { stacks, agentRuns, count, loading, error } =
-    usePendingApprovalStacks()
+  const { stacks, agentRuns, count, loading, error } = useAwaitingReview()
 
   return (
     <div

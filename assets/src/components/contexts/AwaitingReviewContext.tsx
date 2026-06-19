@@ -10,7 +10,7 @@ import { mapExistingNodes } from 'utils/graphql'
 
 const POLL_INTERVAL = 60 * 1000
 
-type PendingApprovalStacksContextValue = {
+type AwaitingReviewContextValue = {
   stacks: AwaitingReviewStackFragment[]
   agentRuns: AwaitingReviewAgentRunFragment[]
   count: number
@@ -18,23 +18,18 @@ type PendingApprovalStacksContextValue = {
   error?: ApolloError
 }
 
-const PendingApprovalStacksContext =
-  createContext<PendingApprovalStacksContextValue>({
-    stacks: [],
-    agentRuns: [],
-    count: 0,
-    loading: false,
-  })
+const AwaitingReviewContext = createContext<AwaitingReviewContextValue>({
+  stacks: [],
+  agentRuns: [],
+  count: 0,
+  loading: false,
+})
 
-export function usePendingApprovalStacks() {
-  return use(PendingApprovalStacksContext)
+export function useAwaitingReview() {
+  return use(AwaitingReviewContext)
 }
 
-export function PendingApprovalStacksProvider({
-  children,
-}: {
-  children: ReactNode
-}) {
+export function AwaitingReviewProvider({ children }: { children: ReactNode }) {
   const {
     data: stacksData,
     loading: stacksLoading,
@@ -81,9 +76,5 @@ export function PendingApprovalStacksProvider({
     ]
   )
 
-  return (
-    <PendingApprovalStacksContext value={value}>
-      {children}
-    </PendingApprovalStacksContext>
-  )
+  return <AwaitingReviewContext value={value}>{children}</AwaitingReviewContext>
 }
