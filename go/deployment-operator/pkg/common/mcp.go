@@ -5,6 +5,10 @@ const (
 	AgentMCPServerAddress = ":8080"
 	AgentMCPServerURL     = "http://127.0.0.1:8080/mcp"
 
+	AgentOpenAIChatCompletionsPath = "/v1/chat/completions"
+	AgentOpenAIChatCompletionsURL  = "http://127.0.0.1:8080/v1/chat/completions"
+	AgentOpenAIBaseURL             = "http://127.0.0.1:8080/v1"
+
 	AgentMCPGRPCPort          = 8081
 	AgentMCPGRPCServerAddress = ":8081"
 	AgentMCPGRPCAddress       = "127.0.0.1:8081"

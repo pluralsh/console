@@ -377,6 +377,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :git,       :observer_git_attributes
     field :addon,     :observer_addon_attributes
     field :eks_addon, :observer_addon_attributes
+    field :renovate,  :observer_renovate_attributes
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -409,6 +410,12 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a spec for filtering a git repository tags in an observer"
   input_object :observer_git_filter_attributes do
     field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
+  end
+
+  @desc "Renovate regex versioning options for observer target ordering"
+  input_object :observer_renovate_attributes do
+    field :ignore_unstable, :boolean,
+      description: "whether prerelease matches captured by the renovate regex should be ignored"
   end
 
   @desc "configuration for an observer action"
@@ -853,6 +860,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :helm,   :observer_helm_repo
     field :oci,    :observer_oci_repo
     field :git,    :observer_git_repo
+    field :renovate, :observer_renovate
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -885,6 +893,12 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a spec for filtering a git repository tags in an observer"
   object :observer_git_filter do
     field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
+  end
+
+  @desc "Renovate regex versioning options for observer target ordering"
+  object :observer_renovate do
+    field :ignore_unstable, :boolean,
+      description: "whether prerelease matches captured by the renovate regex should be ignored"
   end
 
   @desc "configuration for an observer action"

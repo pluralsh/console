@@ -32,15 +32,25 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def json_schema(%{tool: %{tool: :azure}}), do: @azure_schema
   def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_logs_#{n}"
-  def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather logs from the #{n} observability connection. #{Metrics.provider_hint(t)}")
+  def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather logs from the #{n} observability connection. #{Metrics.provider_hint(t)}#{facet_hint(t)}")
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> cast_embed(:options)
+    |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_required([:query])
+  end
+
+  defp options_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:azure, with: &azure_options_changeset/2)
+  end
+
+  defp azure_options_changeset(model, attrs) do
+    cast(model, attrs, [:resource_id])
   end
 
   defp facet_changeset(model, attrs) do
@@ -52,7 +62,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
-         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input),
+         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: content, logs: Enum.map(output.logs, &to_log/1)}}
     end
@@ -61,7 +71,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
-         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input) do
+         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()) do
       {:ok, Enum.map(output.logs, &to_log/1)}
     end
   end
@@ -96,6 +106,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     %LogsOptions{azure: %AzureLogsOptions{resource_id: resource_id || ""}}
   end
   defp logs_options(_, _), do: nil
+
+  defp facet_hint(%{tool: :cloudwatch}), do: " This tool supports facets for filtering logs, which will be transformed into an attribute filter like \"| filter {facet-name} = \"{facet-value}\"\"."
+  defp facet_hint(%{tool: :datadog}), do: " This tool supports facets for filtering logs, which will be appended to the query as \"{facet-name}:{facet-value}\" (space-separated AND conditions)."
+  defp facet_hint(%{tool: :splunk}), do: " This tool supports facets for filtering logs, which will be appended to the first search stage as \"{facet-name}=\"{facet-value}\"\"."
+  defp facet_hint(%{tool: :loki}), do: " This tool supports facets for filtering logs, which will be merged into the LogQL label selector as \"{facet-name}=\"{facet-value}\"\"."
+  defp facet_hint(%{tool: :elastic}), do: " This tool supports facets for filtering logs, which will be applied as exact-match term filters on the \"{facet-name}\" field."
+  defp facet_hint(_), do: " Facets are not supported for this tool."
 
   defp blank_to_nil(v) do
     case String.trim(to_string(v || "")) do

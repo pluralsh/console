@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Agent.Query do
     with {:session, %AgentSession{connection: %CloudConnection{} = connection}} <- session(),
          {:ok, client} <- Client.connect(),
          input = %QueryInput{query: query, connection: to_pb(connection)},
-         {:ok, %QueryResult{result: result}} <- Stub.query(client, input) do
+         {:ok, %QueryResult{result: result}} <- Stub.query(client, input, Client.cloud_query_rpc_opts()) do
       {:ok, result}
     else
       {:session, _} -> {:ok, "No cloud connection tied to this session, cannot query"}

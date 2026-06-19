@@ -166,6 +166,23 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert found["workbenchJob"]["workbench"]["id"] == workbench.id
       assert found["workbenchJob"]["workbench"]["name"] == "infra-debugger"
     end
+
+    test "it returns null workbenchJob when the run is not linked to a workbench activity" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+
+      {:ok, %{data: %{"agentRun" => found}}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) {
+            id
+            workbenchJob { id }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["id"] == run.id
+      refute found["workbenchJob"]
+    end
   end
 
   describe "agentRuntime" do

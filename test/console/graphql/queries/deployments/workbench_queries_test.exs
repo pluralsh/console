@@ -890,7 +890,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
       expect(Client, :connect, fn -> {:ok, :mock_conn} end)
-      expect(Stub, :metrics, fn :mock_conn, input ->
+      expect(Stub, :metrics, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total[5m]))"
         assert input.step == "30s"
 
@@ -967,7 +968,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       ten_seconds_later = DateTime.add(now, 10, :second)
 
       expect(Client, :connect, fn -> {:ok, :mock_conn} end)
-      expect(Stub, :traces, fn :mock_conn, input ->
+      expect(Stub, :traces, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.minutes(1)
         assert input.query == "{ service.name = \"checkout\" }"
         assert input.limit == 50
 

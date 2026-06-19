@@ -221,6 +221,11 @@ if is_set("CONSOLE_ADMIN_EMAILS") do
     admin_emails: String.split(get_env("CONSOLE_ADMIN_EMAILS"), ~r/\s*,\s*/, trim: true)
 end
 
+if is_set("CONSOLE_GROUPS_WHITELIST") do
+  config :console,
+    groups_whitelist: String.split(get_env("CONSOLE_GROUPS_WHITELIST"), ~r/\s*,\s*/, trim: true)
+end
+
 config :console,
   org_email_suffix: get_env("ORG_EMAIL_SUFFIX", "")
 

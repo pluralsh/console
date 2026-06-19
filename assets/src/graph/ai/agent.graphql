@@ -3,6 +3,7 @@ fragment AgentRunTiny on AgentRun {
   status
   mode
   babysit
+  approval
   prompt
   shared
   error
@@ -20,6 +21,13 @@ fragment AgentRunTiny on AgentRun {
   podReference {
     name
     namespace
+  }
+  workbenchJob {
+    id
+    workbench {
+      id
+      name
+    }
   }
   upload {
     id

@@ -21,19 +21,22 @@ const (
 	EnvAddress     = "PLRL_MCP_ADDRESS"
 	EnvGRPCAddress = "PLRL_MCP_GRPC_ADDRESS"
 
-	EnvDeployToken  = "PLRL_DEPLOY_TOKEN"
-	EnvExcludeTools = "PLRL_EXCLUDE_TOOLS"
-	EnvWorkingDir   = "PLRL_WORKING_DIR"
+	EnvDeployToken       = "PLRL_DEPLOY_TOKEN"
+	EnvExcludeTools      = "PLRL_EXCLUDE_TOOLS"
+	EnvWorkingDir        = "PLRL_WORKING_DIR"
+	EnvOpenAIUpstreamURL = "PLRL_OPENAI_UPSTREAM_URL"
+	EnvConsoleURL        = "PLRL_CONSOLE_URL"
 )
 
 var (
-	argAddress      = pflag.String("address", helpers.GetEnv(EnvAddress, common.AgentMCPServerAddress), "Address to listen on")
-	argGRPCAddress  = pflag.String("grpc-address", helpers.GetEnv(EnvGRPCAddress, common.AgentMCPGRPCServerAddress), "Address for internal babysit gRPC API listener")
-	argConsoleUrl   = pflag.String("console-url", helpers.GetEnv(controller.EnvConsoleURL, ""), "URL to the Console, i.e. https://console.onplural.sh")
-	argDeployToken  = pflag.String("deploy-token", helpers.GetEnv(EnvDeployToken, ""), "Deploy token to the Console API")
-	argAgentRunID   = pflag.String("agent-run-id", helpers.GetEnv(controller.EnvAgentRunID, ""), "ID of the Agent Run being executed")
-	argExcludeTools = pflag.String("exclude-tools", helpers.GetEnv(EnvExcludeTools, ""), "Comma-separated list of tools to exclude from the default set. Available tools: createBranch, agentPullRequest, fetchAgentRunTodos, updateAgentRunAnalysis, updateAgentRunTodos, downloadServiceManifests, web_search_exa, web_fetch_exa")
-	argWorkingDir   = pflag.String("working-dir", helpers.GetEnv(EnvWorkingDir, common.AgentRunSharedWorkDir), "Working directory used to prepare repository for shared pod workspace")
+	argAddress           = pflag.String("address", helpers.GetEnv(EnvAddress, common.AgentMCPServerAddress), "Address to listen on")
+	argGRPCAddress       = pflag.String("grpc-address", helpers.GetEnv(EnvGRPCAddress, common.AgentMCPGRPCServerAddress), "Address for internal babysit gRPC API listener")
+	argConsoleUrl        = pflag.String("console-url", helpers.GetEnv(controller.EnvConsoleURL, ""), "URL to the Console, i.e. https://console.onplural.sh")
+	argDeployToken       = pflag.String("deploy-token", helpers.GetEnv(EnvDeployToken, ""), "Deploy token to the Console API")
+	argAgentRunID        = pflag.String("agent-run-id", helpers.GetEnv(controller.EnvAgentRunID, ""), "ID of the Agent Run being executed")
+	argExcludeTools      = pflag.String("exclude-tools", helpers.GetEnv(EnvExcludeTools, ""), "Comma-separated list of tools to exclude from the default set. Available tools: createBranch, agentPullRequest, fetchAgentRunTodos, updateAgentRunAnalysis, updateAgentRunTodos, downloadServiceManifests, web_search_exa, web_fetch_exa")
+	argWorkingDir        = pflag.String("working-dir", helpers.GetEnv(EnvWorkingDir, common.AgentRunSharedWorkDir), "Working directory used to prepare repository for shared pod workspace")
+	argOpenAIUpstreamURL = pflag.String("openai-upstream-url", helpers.GetEnv(EnvOpenAIUpstreamURL, ""), "Upstream OpenAI chat completions URL for the local streaming proxy")
 )
 
 func init() {
@@ -140,6 +143,34 @@ func WorkingDir() string {
 	}
 
 	return *argWorkingDir
+}
+
+func OpenAIUpstreamURL() string {
+	explicit := ""
+	if argOpenAIUpstreamURL != nil {
+		explicit = *argOpenAIUpstreamURL
+	}
+	if strings.TrimSpace(explicit) == "" {
+		explicit = helpers.GetEnv(EnvOpenAIUpstreamURL, "")
+	}
+
+	return resolveOpenAIUpstreamURL(explicit, helpers.GetEnv(EnvConsoleURL, ""))
+}
+
+func resolveOpenAIUpstreamURL(explicit, consoleURL string) string {
+	if strings.TrimSpace(explicit) != "" {
+		return strings.TrimSpace(explicit)
+	}
+
+	consoleURL = strings.TrimSpace(consoleURL)
+	consoleURL = strings.TrimSuffix(consoleURL, "/ext/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/")
+	if consoleURL == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s/ext/ai/v1/chat/completions", consoleURL)
 }
 
 func ensureOrDie(argName string, arg *string) {

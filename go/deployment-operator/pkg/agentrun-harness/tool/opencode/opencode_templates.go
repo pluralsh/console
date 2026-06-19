@@ -43,6 +43,12 @@ type ConfigTemplateInput struct {
 
 	// DindEnabled is true when the agent run pod has Docker-in-Docker available.
 	DindEnabled bool
+
+	// StreamingProxy routes plural provider requests through the in-pod mcpserver proxy.
+	StreamingProxy bool
+
+	// StreamingProxyBaseURL is the OpenAI-compatible base URL for the in-pod streaming proxy.
+	StreamingProxyBaseURL string
 }
 
 func configTemplate(input *ConfigTemplateInput) (fileName, content string, err error) {

@@ -474,7 +474,7 @@ versions:
   chart_version: 0.23.0
   images: ['timberio/vector:0.31.0-distroless-libc']
 - version: 0.30.0
-  kube: ['1.27', '1.26', '1.25']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:

@@ -3,6 +3,7 @@ import { AIContextProvider } from 'components/ai/AIContext'
 import { ChatbotPanelContent } from 'components/ai/chatbot/Chatbot'
 import { DragHandleSC } from 'components/ai/chatbot/SidePanelShared'
 import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
+import { AgentRunPanelContent } from 'components/ai/agent-runs/details/AgentRunPanel'
 import { WorkbenchJobPanelContent } from 'components/workbenches/workbench/job/WorkbenchJobPanel'
 import {
   WebhookSetupGuidePanelContent,
@@ -23,6 +24,7 @@ import {
   WEBHOOKS_SETTINGS_CREATE_ABS_PATH,
   WEBHOOKS_SETTINGS_EDIT_PATH_MATCHER_ABS,
 } from 'routes/settingsRoutesConst'
+import { AI_AGENT_RUNS_PATH_MATCHER_ABS } from 'routes/aiRoutesConsts'
 import {
   WORKBENCH_CHATBOTS_PATH_MATCHER_ABS,
   WORKBENCH_JOBS_PATH_MATCHER_ABS,
@@ -31,7 +33,11 @@ import {
   WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
 } from 'routes/workbenchesRoutesConsts'
 
-export type SidePanel = 'ai-chat' | 'webhook-setup-guide' | 'workbench-job'
+export type SidePanel =
+  | 'agent-run'
+  | 'ai-chat'
+  | 'webhook-setup-guide'
+  | 'workbench-job'
 
 type SidePanelWidthOverride = {
   minWidth?: number
@@ -55,6 +61,7 @@ const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
     `${CHATBOTS_SETTINGS_EDIT_PATH_MATCHER_ABS}/*`,
   ],
   'workbench-job': [WORKBENCH_JOBS_PATH_MATCHER_ABS],
+  'agent-run': [AI_AGENT_RUNS_PATH_MATCHER_ABS],
 }
 
 const TopLevelSidePanelContext = createContext<{
@@ -138,6 +145,8 @@ function TopLevelSidePanelContent({
       return <WebhookSetupGuidePanelContent />
     case 'workbench-job':
       return <WorkbenchJobPanelContent />
+    case 'agent-run':
+      return <AgentRunPanelContent />
     case 'ai-chat':
     default:
       return <ChatbotPanelContent />

@@ -43,7 +43,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
 
   def build_tool_connection() do
     case Settings.fetch() do
-      %DeploymentSettings{prometheus_connection: %{url: url, user: user, password: pass}}
+      %DeploymentSettings{prometheus_connection: %{host: url, user: user, password: pass}}
           when is_binary(url) and is_binary(user) and is_binary(pass) ->
         {:ok, %ToolConnection{connection: {:prometheus, %PrometheusConnection{url: url, username: user, password: pass}}}}
       _ ->

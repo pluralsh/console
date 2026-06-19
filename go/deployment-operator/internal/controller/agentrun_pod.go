@@ -304,6 +304,8 @@ func getDefaultEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 		envVars = append(envVars, corev1.EnvVar{Name: EnvGitProxy, Value: *runtime.Spec.Git.Proxy})
 	}
 
+	envVars = append(envVars, streamingProxyEnvVars(runtime)...)
+
 	return envVars
 }
 
@@ -471,7 +473,7 @@ func getMCPServerStartupProbe() *corev1.Probe {
 }
 
 func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
-	result := make([]corev1.EnvVar, 0, 2)
+	result := make([]corev1.EnvVar, 0, 3)
 
 	if run.Spec.Mode == console.AgentRunModeAnalyze {
 		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: analyzeModeExcludedTools})
@@ -481,7 +483,17 @@ func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime)
 		result = append(result, corev1.EnvVar{Name: EnvGitProxy, Value: *runtime.Spec.Git.Proxy})
 	}
 
+	result = append(result, streamingProxyEnvVars(runtime)...)
+
 	return result
+}
+
+func streamingProxyEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	if !runtime.IsStreamingProxyEnabled() {
+		return nil
+	}
+
+	return []corev1.EnvVar{{Name: EnvStreamingProxy, Value: "true"}}
 }
 
 func ensureMCPServerEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {

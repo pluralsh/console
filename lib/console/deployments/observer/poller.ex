@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Observer.Poller do
   import Console.Helm.Utils
   alias Console.Deployments.Git
+  alias Console.Deployments.Observer.Poller.Renovate
   alias Console.Schema.{Observer, HelmRepository}
   alias Console.Deployments.Compatibilities.{Utils, Table, CloudAddOns, CloudAddOn, Version}
   alias Console.{Helm, OCI}
@@ -43,8 +44,8 @@ defmodule Console.Deployments.Observer.Poller do
   defp poll_oci(%{oci: %{url: url} = oci} = target, last) do
     client = OCI.Client.new(url)
     with {:ok, oci} <- OCI.Auth.authenticate(client, oci.provider, oci.auth),
-         {:ok, %OCI.Tags{tags: [_ | _] = tags}} <- OCI.Client.tags(oci, &is_semver?/1),
-         {:tag, [vsn | _]} <- {:tag, sorted(tags, target)},
+         {:ok, %OCI.Tags{tags: [_ | _] = tags}} <- OCI.Client.tags(oci, oci_filter(target)),
+         {:tag, [vsn | _]} <- {:tag, sorted(tags, target, last)},
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
       {:ok, vsn, %{}}
     else
@@ -58,7 +59,7 @@ defmodule Console.Deployments.Observer.Poller do
     with %Console.Schema.GitRepository{} = git <- Git.get_repository(id),
          {:tags, [_ | _] = tags} <- {:tags, Git.Discovery.tags(git)},
          tags <- maybe_filter_tags(tags, git_target),
-         [vsn | _] <- sorted(tags, target),
+         [vsn | _] <- sorted(tags, target, last),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
       {:ok, vsn, %{}}
     else
@@ -72,7 +73,7 @@ defmodule Console.Deployments.Observer.Poller do
     with %{versions: versions} <- Table.fetch(name),
          filtered = Enum.filter(versions, &supports_version?(&1, addon)),
          versions = Enum.map(filtered, & &1.chart_version) |> Enum.filter(& &1),
-         [vsn | _] <- sorted(versions, target),
+         [vsn | _] <- sorted(versions, target, last),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
       {:ok, vsn, Enum.find(filtered, & &1.chart_version == vsn) || %{}}
     else
@@ -86,7 +87,7 @@ defmodule Console.Deployments.Observer.Poller do
     with %{versions: versions} <- CloudAddOns.fetch("eks", name),
          filtered = Enum.filter(versions, &supports_version?(&1, addon)),
          versions = Enum.map(filtered, & &1.version),
-         [vsn | _] <- sorted(versions, target),
+         [vsn | _] <- sorted(versions, target, last),
          {:vsn, :gt} <- {:vsn, compare(vsn, last, target)} do
       {:ok, vsn, Enum.find(filtered, & &1.version == vsn) || %{}}
     else
@@ -116,13 +117,21 @@ defmodule Console.Deployments.Observer.Poller do
   end
   defp formatted(val, _), do: val
 
-  defp sorted(vsns, %Observer.Target{order: :semver} = target) do
+  defp sorted(vsns, target, last)
+
+  defp sorted(vsns, %Observer.Target{order: :renovate} = target, last),
+    do: Renovate.sort(vsns, target, last)
+
+  defp sorted(vsns, %Observer.Target{order: :semver} = target, _) do
     Enum.map(vsns, & {&1, formatted(&1, target)})
     |> Enum.filter(fn {_, v} -> is_semver?(v) end)
     |> Enum.sort(&compare_versions(elem(&1, 1), elem(&2, 1)) == :gt)
     |> Enum.map(&elem(&1, 0))
   end
-  defp sorted(vsns, _), do: vsns
+  defp sorted(vsns, _, _), do: vsns
+
+  defp oci_filter(%Observer.Target{order: :renovate}), do: fn _ -> true end
+  defp oci_filter(_), do: &is_semver?/1
 
   defp maybe_filter_tags(tags, %Observer.Target.GitTarget{filter: %{regex: regex}}) when is_binary(regex) do
     case Regex.compile(regex) do
@@ -140,4 +149,6 @@ defmodule Console.Deployments.Observer.Poller do
   defp compare(_, _, %Observer.Target{order: :latest}), do: :gt
   defp compare(next, last, %Observer.Target{order: :semver} = target),
     do: compare_versions(formatted(next, target), formatted(last, target))
+  defp compare(next, last, %Observer.Target{order: :renovate} = target),
+    do: Renovate.compare(next, last, target)
 end

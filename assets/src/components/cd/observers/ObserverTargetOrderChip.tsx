@@ -6,6 +6,7 @@ import { ObserverTargetOrder } from '../../../generated/graphql'
 const orderDisplayName = {
   [ObserverTargetOrder.Latest]: 'Latest',
   [ObserverTargetOrder.Semver]: 'SemVer',
+  [ObserverTargetOrder.Renovate]: 'Renovate',
 } as const satisfies Record<ObserverTargetOrder, string>
 
 export default function ObserverTargetOrderChip({

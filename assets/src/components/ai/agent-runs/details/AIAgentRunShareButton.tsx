@@ -44,7 +44,6 @@ export function AIAgentRunShareButton({ runId }: { runId: string }) {
       <IconFrame
         clickable
         ref={menuBtnRef}
-        type="secondary"
         icon={<ShareIcon color="icon-light" />}
         onClick={() => setDropdownOpen((prev) => !prev)}
       />

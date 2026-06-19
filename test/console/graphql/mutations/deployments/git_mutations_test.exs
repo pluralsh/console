@@ -360,6 +360,10 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
           upsertObserver(attributes: $attrs) {
             id
             name
+            target {
+              order
+              renovate { ignoreUnstable }
+            }
           }
         }
       """, %{
@@ -368,7 +372,9 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
           "crontab" => "*/5 * * * *",
           "target" => %{
             "target" => "HELM",
-            "order" => "SEMVER",
+            "order" => "RENOVATE",
+            "format" => "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+            "renovate" => %{"ignoreUnstable" => true},
             "helm" => %{"url" => "https://pluralsh.github.io/console", "chart" => "console"}
           },
           "actions" => [
@@ -380,6 +386,8 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       }, %{current_user: admin_user()})
 
       assert obs["name"] == "observer"
+      assert obs["target"]["order"] == "RENOVATE"
+      assert obs["target"]["renovate"]["ignoreUnstable"]
     end
   end
 

@@ -51,12 +51,13 @@ type AgentRun struct {
 }
 
 type AgentRuntime struct {
-	ID            string                   `json:"id"`
-	Name          string                   `json:"name"`
-	Type          console.AgentRuntimeType `json:"type"`
-	AiProxy       bool                     `json:"aiProxy"`
-	Config        *AgentRuntimeConfig      `json:"config,omitempty"`
-	ExaConnection bool                     `json:"exaConnection,omitempty"`
+	ID             string                   `json:"id"`
+	Name           string                   `json:"name"`
+	Type           console.AgentRuntimeType `json:"type"`
+	AiProxy        bool                     `json:"aiProxy"`
+	StreamingProxy bool                     `json:"streamingProxy"`
+	Config         *AgentRuntimeConfig      `json:"config,omitempty"`
+	ExaConnection  bool                     `json:"exaConnection,omitempty"`
 }
 
 type AgentRuntimeConfig struct {
@@ -152,6 +153,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 	result.Name = runtime.Name
 	result.Type = runtime.Type
 	result.AiProxy = runtime.AiProxy != nil && *runtime.AiProxy
+	result.StreamingProxy = helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false)
 	result.ExaConnection = helpers.GetPluralEnv(controller.EnvExaConnection, "") != ""
 
 	config := &AgentRuntimeConfig{}
@@ -205,6 +207,10 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 
 func (ar *AgentRun) IsProxyEnabled() bool {
 	return ar.Runtime != nil && ar.Runtime.AiProxy
+}
+
+func (ar *AgentRun) IsStreamingProxyEnabled() bool {
+	return ar.IsProxyEnabled() && ar.Runtime != nil && ar.Runtime.StreamingProxy
 }
 
 func (ar *AgentRun) ExaConnectionEnabled() bool {

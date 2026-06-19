@@ -3,6 +3,112 @@ icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
 git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
+- version: 3.26.0
+  kube: ['1.35']
+  requirements:
+  - name: Alloy
+    version: 4.0.1-bb.0
+  - name: Anchore Enterprise
+    version: 3.25.0-bb.0
+  - name: Argocd
+    version: 9.5.15-bb.0
+  - name: Authservice
+    version: 1.1.5-bb.3
+  - name: Backstage
+    version: 2.6.3-bb.3
+  - name: Bbctl
+    version: 3.0.1-bb.3
+  - name: Eck Operator
+    version: 3.4.0-bb.1
+  - name: Elasticsearch Kibana
+    version: 1.37.0-bb.0
+  - name: External Secrets Operator
+    version: 1.3.1-bb.1
+  - name: Fluentbit
+    version: 0.57.3-bb.0
+  - name: Fortify
+    version: 25.4.1-bb.0
+  - name: Gatekeeper
+    version: 3.22.2-bb.1
+  - name: Gateway Api
+    version: 1.5.1-bb.1
+  - name: Gitlab
+    version: 9.11.1-bb.2
+  - name: Gitlab Runner
+    version: 0.88.1-bb.0
+  - name: Grafana
+    version: 10.5.15-bb.3
+  - name: Harbor
+    version: 1.19.0-bb.0
+  - name: Headlamp
+    version: 0.40.0-bb.1
+  - name: Istio Cni
+    version: 1.29.2-bb.0
+  - name: Istio Crds
+    version: 1.29.2-bb.0
+  - name: Istio Gateway
+    version: 1.29.2-bb.0
+  - name: Istiod
+    version: 1.29.2-bb.0
+  - name: Keycloak
+    version: 7.2.0-bb.1
+  - name: Kiali
+    version: 2.27.0-bb.0
+  - name: Kyverno
+    version: 3.8.1-bb.2
+  - name: Kyverno Policies
+    version: 3.3.4-bb.65
+  - name: Kyverno Reporter
+    version: 3.7.4-bb.1
+  - name: Loki
+    version: 6.55.0-bb.2
+  - name: Mattermost
+    version: 11.7.2-bb.0
+  - name: Mattermost Operator
+    version: 1.25.6-bb.0
+  - name: Metrics Server
+    version: 3.13.0-bb.6
+  - name: Mimir
+    version: 6.0.6-bb.0
+  - name: Minio
+    version: 7.1.1-bb.18
+  - name: Minio Operator
+    version: 7.1.1-bb.6
+  - name: Monitoring
+    version: 85.3.3-bb.0
+  - name: Neuvector
+    version: 2.10.2-bb.0
+  - name: Prometheus Operator Crds
+    version: 28.0.1-bb.0
+  - name: Renovate
+    version: 46.31.6-bb.5
+  - name: Sonarqube
+    version: 2026.2.1-bb.0
+  - name: Tempo
+    version: 2.1.0-bb.1
+  - name: Thanos
+    version: 17.4.0-bb.2
+  - name: Twistlock
+    version: 0.26.0-bb.0
+  - name: Vault
+    version: 0.32.0-bb.1
+  - name: Velero
+    version: 12.0.1-bb.0
+  - name: Wrapper
+    version: 0.4.15
+  - name: Ztunnel
+    version: 1.29.1-bb.2
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Component bundle updates in this release (Anchore Enterprise, Argo
+        CD, Elastic/Kibana, GitLab, Harbor, Keycloak, Kiali, Kyverno, Kyverno Reporter,
+        Loki, Mattermost, Monitoring, NeuVector, Thanos, Twistlock, Velero) to the
+        versions listed in the notes.']
+    breaking_changes: []
+  chart_version: 3.26.0
+  images: []
 - version: 3.25.0
   kube: ['1.35']
   requirements:

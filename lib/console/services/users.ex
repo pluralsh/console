@@ -421,6 +421,7 @@ defmodule Console.Services.Users do
     end)
     |> Enum.filter(& &1)
     |> Enum.uniq()
+    |> maybe_whitelist(Console.conf(:groups_whitelist))
     |> Enum.reduce(transaction, fn group, xaction ->
       xaction
       |> add_operation({:group, group}, fn _ ->
@@ -440,6 +441,12 @@ defmodule Console.Services.Users do
     |> maybe_remove_members(groups)
   end
   defp hydrate_groups(transaction, _), do: transaction
+
+  defp maybe_whitelist(groups, [_ | _] = whitelist) do
+    set = MapSet.new(whitelist)
+    Enum.filter(groups, &MapSet.member?(set, &1))
+  end
+  defp maybe_whitelist(groups, _), do: groups
 
   defp maybe_remove_members(transaction, [_ | _] = groups) do
     case Console.conf(:oidc_sync) do
