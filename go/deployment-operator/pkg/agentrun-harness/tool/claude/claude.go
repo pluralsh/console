@@ -116,11 +116,11 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	return false
 }
 
-// AnalysisFollowUpRun re-runs the Claude CLI with the same analyze agent and
-// system prompt as the initial run, swapping only the -p user prompt.
-// Errors are returned to the caller and must not be sent on ErrorChan.
-func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
+// FollowUpRun re-runs the Claude CLI with the same agent and system prompt as
+// the initial run, swapping only the -p user prompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
 
 	if in.onMessage != nil {
 		in.onMessage(&console.AgentMessageAttributes{
@@ -171,7 +171,7 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 	err := in.executable.RunStream(ctx, func(line []byte) {
 		event := &StreamEvent{}
 		if err := json.Unmarshal(line, event); err != nil {
-			klog.ErrorS(err, "failed to unmarshal claude stream event (analysis follow-up)", "line", string(line))
+			klog.ErrorS(err, "failed to unmarshal claude stream event (follow-up)", "line", string(line))
 			return
 		}
 		in.recordSessionID(event.SessionID)
@@ -183,9 +183,9 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("claude analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("claude follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("claude analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("claude follow-up execution finished")
 	return nil
 }
 

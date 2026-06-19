@@ -360,14 +360,14 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 	return false
 }
 
-// AnalysisFollowUpRun re-runs OpenCode with followUpPrompt. Errors are
-// returned to the caller and must not be sent on ErrorChan.
-func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting opencode", "prompt_len", len(followUpPrompt))
+// FollowUpRun re-runs OpenCode with followUpPrompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Opencode) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting opencode", "prompt_len", len(followUpPrompt))
 
 	configFilePath, err := filepath.Abs(in.configFilePath())
 	if err != nil {
-		return fmt.Errorf("opencode analysis follow-up: %w", err)
+		return fmt.Errorf("opencode follow-up: %w", err)
 	}
 
 	runCtx, cancel := context.WithCancelCause(ctx)
@@ -391,12 +391,12 @@ func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt stri
 
 	err = in.executable.RunStream(runCtx, in.streamLineHandler(state, cancel))
 	if ctxErr := context.Cause(runCtx); ctxErr != nil {
-		return fmt.Errorf("opencode analysis follow-up execution failed: %w", ctxErr)
+		return fmt.Errorf("opencode follow-up execution failed: %w", ctxErr)
 	}
 	if err != nil {
-		return fmt.Errorf("opencode analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("opencode follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("opencode analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("opencode follow-up execution finished")
 	return nil
 }
 

@@ -97,11 +97,11 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	return false
 }
 
-// AnalysisFollowUpRun re-runs the Gemini CLI with the same settings as the
-// initial run, using followUpPrompt as the user prompt. Errors are returned
-// to the caller and must not be sent on ErrorChan.
-func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
+// FollowUpRun re-runs the Gemini CLI with the same settings as the initial
+// run, using followUpPrompt as the user prompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Gemini) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
 
 	if in.onMessage != nil {
 		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
@@ -121,7 +121,7 @@ func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 	)
 
 	err := in.executable.RunStream(ctx, func(line []byte) {
-		klog.V(log.LogLevelTrace).InfoS("Gemini stream event (analysis follow-up)", "line", string(line))
+		klog.V(log.LogLevelTrace).InfoS("Gemini stream event (follow-up)", "line", string(line))
 
 		trimmed := strings.TrimSpace(string(line))
 		if !strings.HasPrefix(trimmed, "{") {
@@ -131,19 +131,19 @@ func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 
 		event := &events.EventBase{}
 		if err := json.Unmarshal(line, event); err != nil {
-			klog.ErrorS(err, "failed to unmarshal Gemini stream event (analysis follow-up)", "line", line)
+			klog.ErrorS(err, "failed to unmarshal Gemini stream event (follow-up)", "line", line)
 			return
 		}
 		in.recordSessionID(line, event.Type)
 
 		if err := event.OnMessage(line, in.onMessage); err != nil {
-			klog.ErrorS(err, "failed to process Gemini stream event (analysis follow-up)", "line", string(line))
+			klog.ErrorS(err, "failed to process Gemini stream event (follow-up)", "line", string(line))
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("gemini analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("gemini follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("Gemini analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("Gemini follow-up execution finished")
 	return nil
 }
 

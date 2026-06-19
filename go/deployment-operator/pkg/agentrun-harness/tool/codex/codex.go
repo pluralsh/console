@@ -236,11 +236,10 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 	return false
 }
 
-// AnalysisFollowUpRun re-runs Codex with the analysis profile and
-// followUpPrompt. Errors are returned to the caller and must not be sent on
-// ErrorChan.
-func (in *Codex) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting codex", "prompt_len", len(followUpPrompt))
+// FollowUpRun re-runs Codex with followUpPrompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Codex) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting codex", "prompt_len", len(followUpPrompt))
 
 	if in.onMessage != nil {
 		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
@@ -260,9 +259,9 @@ func (in *Codex) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string)
 	in.resetToolItems()
 	err := in.executable.RunStream(ctx, in.handleStreamLine)
 	if err != nil {
-		return fmt.Errorf("codex analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("codex follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("codex analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("codex follow-up execution finished")
 	return nil
 }
 
